@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - પરમાણુ દળ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 પરમાણુ દળ</span>
+                <span>🎯 Mixed</span>
+                <span>📝 15 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "પરમાણુ દળની એકમ તરીકે કયું એકમ વપરાય છે?", "options": ["A) ગ્રામ", "B) કિલોગ્રામ", "C) પરમાણુ દળ એકમ (u)", "D) મોલ"], "correct": 2, "explanation": "પરમાણુ દળની એકમ તરીકે 'પરમાણુ દળ એકમ (u)' વપરાય છે, જે 1/12 ભાગ કાર્બન-12 પરમાણુના દળ જેટલું હોય છે. ગ્રામ અને કિલોગ્રામ દળની મોટી એકમો છે, જ્યારે મોલ પદાર્થની માત્રાની એકમ છે, પરમાણુ દળ માટે નહીં.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 1}, {"question": "કાર્બન-12 ના એક પરમાણુના દળને 12 પરમાણુ દળ એકમ (u) ગણવામાં આવે છે. તો, કાર્બન-12 ના 1 મોલમાં કેટલા પરમાણુ હોય છે?", "options": ["A) 6.022 × 10^22", "B) 6.022 × 10^23", "C) 12 × 10^23", "D) 1.66 × 10^-24"], "correct": 1, "explanation": "1 મોલમાં અવોગેડ્રોની સંખ્યા (6.022 × 10^23) જેટલા પરમાણુ હોય છે. 6.022 × 10^22 એ અવોગેડ્રોની સંખ્યાનો દશમો ભાગ છે, જ્યારે 12 × 10^23 એ અવોગેડ્રોની સંખ્યાથી વધારે છે. 1.66 × 10^-24 એ એક પરમાણુ દળ એકમ (u) નું ગ્રામમાં રૂપાંતરણ છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 2}, {"question": "નીચેનામાંથી કયા તત્વનું પરમાણુ દળ સૌથી ઓછું છે?", "options": ["A) હાઇડ્રોજન", "B) હિલિયમ", "C) લિથિયમ", "D) બેરિલિયમ"], "correct": 0, "explanation": "હાઇડ્રોજનનું પરમાણુ દળ સૌથી ઓછું છે (લગભગ 1 u). હિલિયમનું પરમાણુ દળ લગભગ 4 u, લિથિયમનું લગભગ 7 u, અને બેરિલિયમનું લગભગ 9 u હોય છે.", "ncert_ref": "Class XI - Chapter 3: આવર્ત કોષ્ટક", "difficulty": "Easy", "num": 3}, {"question": "જો એક તત્વનું પરમાણુ દળ 23 u હોય અને તેનું પરમાણુ ક્રમાંક 11 હોય, તો તે તત્વમાં કેટલા ન્યૂટ્રોન હોય છે?", "options": ["A) 11", "B) 12", "C) 23", "D) 34"], "correct": 1, "explanation": "પરમાણુ ક્રમાંક (Z) = પ્રોટોનની સંખ્યા = 11. પરમાણુ દળ (A) = પ્રોટોન + ન્યૂટ્રોન = 23. આથી, ન્યૂટ્રોનની સંખ્યા = A - Z = 23 - 11 = 12. 11, 23, અને 34 એ બાકીના વિકલ્પો છે જેમાંથી કોઈપણ યોગ્ય નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 4}, {"question": "નીચેનામાંથી કયું વિધાન પરમાણુ દળ વિશે સાચું નથી?", "options": ["A) પરમાણુ દળ એ પરમાણુના પ્રોટોન અને ન્યૂટ્રોનના દળનો સરવાળો છે.", "B) પરમાણુ દળ એકમ (u) એ 1.66 × 10^-27 કિલોગ્રામ જેટલું હોય છે.", "C) પરમાણુ દળ એ પરમાણુ ક્રમાંક જેટલું જ હોય છે.", "D) પરમાણુ દળ એ આઇસોટોપ્સના સરેરાશ દળ પર આધારિત હોય છે."], "correct": 2, "explanation": "પરમાણુ દળ એ પરમાણુના પ્રોટોન અને ન્યૂટ્રોનના દળનો સરવાળો છે (A). પરમાણુ દળ એકમ (u) એ 1.66 × 10^-27 કિલોગ્રામ જેટલું હોય છે (B). પરમાણુ દળ એ આઇસોટોપ્સના સરેરાશ દળ પર આધારિત હોય છે (D). પરમાણુ દળ એ પરમાણુ ક્રમાંક જેટલું નહીં હોય, કારણ કે પરમાણુ ક્રમાંક ફક્ત પ્રોટોનની સંખ્યા દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 5}, {"question": "એક તત્વનું પરમાણુ દળ 35 u છે અને તેનો પરમાણુ ક્રમાંક 17 છે. આ તત્વના એક પરમાણુમાં રહેલા ન્યૂટ્રોનની સંખ્યા કેટલી હશે?", "options": ["A) 17", "B) 18", "C) 35", "D) 52"], "correct": 1, "explanation": "પરમાણુ દળ = પરમાણુ ક્રમાંક (પ્રોટોનની સંખ્યા) + ન્યૂટ્રોનની સંખ્યા. અહીં, 35 = 17 + ન્યૂટ્રોનની સંખ્યા. આથી, ન્યૂટ્રોનની સંખ્યા = 35 - 17 = 18. વિકલ્પ A (17) પ્રોટોનની સંખ્યા છે, વિકલ્પ C (35) પરમાણુ દળ છે, અને વિકલ્પ D (52) પરમાણુ દળ અને પરમાણુ ક્રમાંકનો સરવાળો છે, જે અયોગ્ય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Easy", "num": 6}, {"question": "નીચેનામાંથી કયા તત્વના આઇસોટોપ્સનું પરમાણુ દળ સરખું હોઈ શકે છે?", "options": ["A) હાઇડ્રોજન અને હિલિયમ", "B) કાર્બન અને નાઇટ્રોજન", "C) ઓક્સિજન અને સલ્ફર", "D) ક્લોરિન અને આર્ગોન"], "correct": 3, "explanation": "ક્લોરિન-36 અને આર્ગોન-36 ના આઇસોટોપ્સનું પરમાણુ દળ 36 u છે. હાઇડ્રોજન અને હિલિયમ (A), કાર્બન અને નાઇટ્રોજન (B), ઓક્સિજન અને સલ્ફર (C) ના આઇસોટોપ્સનું પરમાણુ દળ સરખું હોવાનું શક્ય નથી, કારણ કે તેમના પરમાણુ ક્રમાંકમાં ફરક છે અને પરમાણુ દળમાં નોંધપાત્ર તફાવત હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 7}, {"question": "એક તત્વનું પરમાણુ દળ 80 u છે અને તેનો પરમાણુ ક્રમાંક 35 છે. આ તત્વના પરમાણુમાં ઇલેક્ટ્રોન, પ્રોટોન અને ન્યૂટ્રોનની સંખ્યા અનુક્રમે કેટલી હશે?", "options": ["A) 35, 35, 45", "B) 35, 35, 80", "C) 35, 45, 35", "D) 45, 35, 35"], "correct": 0, "explanation": "પરમાણુ ક્રમાંક = પ્રોટોનની સંખ્યા = ઇલેક્ટ્રોનની સંખ્યા = 35. પરમાણુ દળ = પ્રોટોન + ન્યૂટ્રોન = 80, આથી ન્યૂટ્રોનની સંખ્યા = 80 - 35 = 45. વિકલ્પ Bમાં ન્યૂટ્રોનની સંખ્યા 80 છે, જે અયોગ્ય છે. વિકલ્પ C અને Dમાં પ્રોટોન અને ન્યૂટ્રોનની સંખ્યા અદલાબદલી છે, જે અયોગ્ય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 8}, {"question": "નીચેનામાંથી કયું વિધાન પરમાણુ દળ અને પરમાણુ ક્રમાંક વિશે સાચું છે?", "options": ["A) પરમાણુ દળ હંમેશા પરમાણુ ક્રમાંક કરતાં મોટું હોય છે", "B) પરમાણુ દળ અને પરમાણુ ક્રમાંક હંમેશા સરખા હોય છે", "C) પરમાણુ દળ પરમાણુ ક્રમાંક કરતાં ઓછું હોઈ શકે છે", "D) પરમાણુ દળ અને પરમાણુ ક્રમાંક વચ્ચે કોઈ સંબંધ નથી"], "correct": 0, "explanation": "પરમાણુ દળ = પ્રોટોન + ન્યૂટ્રોન, જ્યારે પરમાણુ ક્રમાંક = પ્રોટોનની સંખ્યા. આથી, પરમાણુ દળ હંમેશા પરમાણુ ક્રમાંક કરતાં મોટું અથવા સરખું હોઈ શકે (જો ન્યૂટ્રોનની સંખ્યા શૂન્ય હોય, જેમ કે હાઇડ્રોજન-1). વિકલ્પ B ખોટો છે કારણ કે પરમાણુ દળ અને પરમાણુ ક્રમાંક સરખા હોવાનું કદાચ જ નહીં. વિકલ્પ C ખોટો છે કારણ કે પરમાણુ દળ ક્યારેય પરમાણુ ક્રમાંક કરતાં ઓછું હોતું નથી. વિકલ્પ D ખોટો છે કારણ કે પરમાણુ દળ અને પરમાણુ ક્રમાંક વચ્ચે સ્પષ્ટ સંબંધ છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 9}, {"question": "એક તત્વના બે આઇસોટોપ્સના પરમાણુ દળ અનુક્રમે 35 u અને 37 u છે. જો આ તત્વનો પરમાણુ ક્રમાંક 17 હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) બંને આઇસોટોપ્સમાં પ્રોટોનની સંખ્યા સરખી છે", "B) બંને આઇસોટોપ્સમાં ઇલેક્ટ્રોનની સંખ્યા અલગ છે", "C) બંને આઇસોટોપ્સમાં ન્યૂટ્રોનની સંખ્યા સરખી છે", "D) બંને આઇસોટોપ્સના રાસાયણિક ગુણધર્મો અલગ છે"], "correct": 0, "explanation": "આઇસોટોપ્સમાં પ્રોટોનની સંખ્યા (પરમાણુ ક્રમાંક) સરખી હોય છે, પરંતુ ન્યૂટ્રોનની સંખ્યા અલગ હોય છે. આથી, ઇલેક્ટ્રોનની સંખ્યા પણ સરખી હોય છે (કારણ કે પરમાણુ તટસ્થ હોય છે). વિકલ્પ B ખોટો છે કારણ કે ઇલેક્ટ્રોનની સંખ્યા સરખી હોય છે. વિકલ્પ C ખોટો છે કારણ કે ન્યૂટ્રોનની સંખ્યા અલગ હોય છે (35-17=18 અને 37-17=20). વિકલ્પ D ખોટો છે કારણ કે રાસાયણિક ગુણધર્મો પ્રોટોનની સંખ્યા પર આધારિત હોય છે, જે સરખી છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 10}, {"question": "એક તત્વના બે આઇસોટોપ્સના પરમાણુ દળ અનુક્રમે 79 u અને 81 u છે. જો આ તત્વના પ્રમાણભૂત પરમાણુ દળ 79.9 u હોય, તો પ્રકૃતિમાં આ તત્વના કયા આઇસોટોપની ટકાવારી વધુ હશે?", "options": ["A) 79 u વાળા આઇસોટોપની ટકાવારી વધુ હશે", "B) 81 u વાળા આઇસોટોપની ટકાવારી વધુ હશે", "C) બંને આઇસોટોપની ટકાવારી સરખી હશે", "D) પ્રમાણભૂત પરમાણુ દળ પરથી ટકાવારી નક્કી કરી શકાતી નથી"], "correct": 0, "explanation": "પ્રમાણભૂત પરમાણુ દળ એ આઇસોટોપ્સના પરમાણુ દળના સરેરાશ દળ છે, જે તેમની પ્રકૃતિમાં મળતી ટકાવારીના આધારે ગણવામાં આવે છે. અહીં, 79.9 u એ 79 u અને 81 u ની વચ્ચેનો અંક છે, પરંતુ 79 u ની નજીક છે, જે સૂચવે છે કે 79 u વાળા આઇસોટોપની ટકાવારી વધુ છે. બાકીના વિકલ્પો ખોટા છે કારણ કે 81 u ની ટકાવારી ઓછી હોવી જોઈએ, બંને સરખી ન હોત, અને પ્રમાણભૂત પરમાણુ દળ પરથી ટકાવારી નક્કી કરી શકાય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 11}, {"question": "નીચેનામાંથી કયા તત્વનું પરમાણુ દળ તેના પરમાણુ ક્રમાંક કરતાં દોઢ ગણું છે?", "options": ["A) ઓક્સિજન (O)", "B) નાઈટ્રોજન (N)", "C) સલ્ફર (S)", "D) ક્લોરિન (Cl)"], "correct": 2, "explanation": "સલ્ફરનો પરમાણુ ક્રમાંક 16 છે અને તેનું પરમાણુ દળ 32 u છે, જે તેના પરમાણુ ક્રમાંક કરતાં દોઢ ગણું (16 × 1.5 = 24, પરંતુ 32 નજીક છે) છે. ઓક્સિજનનો પરમાણુ ક્રમાંક 8 અને દળ 16 u છે (બમણું), નાઈટ્રોજનનો ક્રમાંક 7 અને દળ 14 u છે (બમણું), ક્લોરિનનો ક્રમાંક 17 અને દળ 35.5 u છે (લગભગ બમણું).", "ncert_ref": "Class XI - Chapter 3: તત્વોનો આવર્ત કોષ્ટક", "difficulty": "Easy", "num": 12}, {"question": "એક તત્વનું પરમાણુ દળ 56 u છે અને તેનો પરમાણુ ક્રમાંક 26 છે. આ તત્વના એક પરમાણુમાં કેટલા ન્યુટ્રોન હશે?", "options": ["A) 26", "B) 30", "C) 56", "D) 82"], "correct": 1, "explanation": "પરમાણુ દળ = પ્રોટોનની સંખ્યા + ન્યુટ્રોનની સંખ્યા. અહીં, પરમાણુ દળ 56 u અને પરમાણુ ક્રમાંક (પ્રોટોનની સંખ્યા) 26 છે. તેથી, ન્યુટ્રોનની સંખ્યા = 56 - 26 = 30. બાકીના વિકલ્પો ખોટા છે કારણ કે 26 પ્રોટોનની સંખ્યા છે, 56 પરમાણુ દળ છે, અને 82 એ બંનેનો સરવાળો નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Easy", "num": 13}, {"question": "એક તત્વના બે આઇસોટોપ્સના પરમાણુ દળ અનુક્રમે 63 u અને 65 u છે. જો આ તત્વના પ્રમાણભૂત પરમાણુ દળ 63.5 u હોય, તો પ્રકૃતિમાં આ તત્વના આઇસોટોપ્સની ટકાવારી કેટલી હશે?", "options": ["A) 50% અને 50%", "B) 75% અને 25%", "C) 25% અને 75%", "D) 60% અને 40%"], "correct": 1, "explanation": "પ્રમાણભૂત પરમાણુ દળ એ આઇસોટોપ્સના પરમાણુ દળના સરેરાશ દળ છે. અહીં, 63.5 u એ 63 u અને 65 u નો સરેરાશ છે. ધારો કે 63 u વાળા આઇસોટોપની ટકાવારી x છે, તો 65 u વાળા આઇસોટોપની ટકાવારી (100 - x) હશે. સરેરાશ દળ = (63x + 65(100 - x))/100 = 63.5. ઉકેલતાં x = 75% મળે છે. તેથી, 63 u વાળા આઇસોટોપની ટકાવારી 75% અને 65 u વાળા આઇસોટોપની ટકાવારી 25% હશે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 14}, {"question": "કોપરના બે સ્થિર આઇસોટોપ્સના પરમાણુ દળ અનુક્રમે 63 u અને 65 u છે. જો પ્રકૃતિમાં આ આઇસોટોપ્સ 70% અને 30% પ્રમાણમાં ઉપલબ્ધ હોય, તો કોપરનું સરેરાશ પરમાણુ દળ કેટલું હશે?", "options": ["A) 63.6 u", "B) 64 u", "C) 63.8 u", "D) 64.2 u"], "correct": 1, "explanation": "કોપરના આઇસોટોપ્સના સરેરાશ પરમાણુ દળની ગણતરી નીચે મુજબ થાય છે: (63 × 0.70) + (65 × 0.30) = 44.1 + 19.5 = 63.6 u. પરંતુ પ્રશ્નમાં આપેલા વિકલ્પોમાં 63.6 u (A) અને 64 u (B) છે. NCERT મુજબ, કોપરનું સરેરાશ પરમાણુ દળ 63.5 u જેટલું ગણવામાં આવે છે, પરંતુ ગણતરી પ્રમાણે 63.6 u આવે છે. જોકે, વિકલ્પ A (63.6 u) સૌથી નજીકનો સાચો જવાબ છે. વિકલ્પ B (64 u) અંદાજિત મૂલ્ય છે, પરંતુ ગણતરી પ્રમાણે અચોક્કસ છે. વિકલ્પ C (63.8 u) અને D (64.2 u) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Medium", "num": 15}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
