@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - મોલર દળ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 મોલર દળ</span>
+                <span>🎯 Mixed</span>
+                <span>📝 15 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક પદાર્થનો મોલર દળ 18 g/mol છે. જો તે પદાર્થના 90 g નું દળ લેવામાં આવે, તો તેમાં કેટલા મોલ હશે?", "options": ["A) 2.5 મોલ", "B) 5 મોલ", "C) 7.5 મોલ", "D) 10 મોલ"], "correct": 1, "explanation": "મોલર દળ = દળ / મોલની સંખ્યા. અહીં, મોલર દળ = 18 g/mol અને દળ = 90 g. તો મોલની સંખ્યા = 90 / 18 = 5 મોલ. આથી, બરાબર 5 મોલ હશે. A) 2.5 મોલ અને C) 7.5 મોલ ખોટા છે કારણ કે તે ગણતરીમાં ભૂલ છે. D) 10 મોલ પણ ખોટું છે કારણ કે તે દળને મોલર દળ વડે ભાગતી વખતે દ્વિગુણ થયું છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 1}, {"question": "જો એક ગેસનો મોલર દળ 44 g/mol હોય અને તેના 22 g નું દળ લેવામાં આવે, તો તેમાં કેટલા અણુઓ હશે? (અવોગેડ્રોની સંખ્યા = 6.022 × 10²³)", "options": ["A) 3.011 × 10²³ અણુઓ", "B) 6.022 × 10²³ અણુઓ", "C) 1.5055 × 10²³ અણુઓ", "D) 12.044 × 10²³ અણુઓ"], "correct": 0, "explanation": "મોલની સંખ્યા = દળ / મોલર દળ = 22 / 44 = 0.5 મોલ. અણુઓની સંખ્યા = મોલની સંખ્યા × અવોગેડ્રોની સંખ્યા = 0.5 × 6.022 × 10²³ = 3.011 × 10²³ અણુઓ. B) 6.022 × 10²³ અણુઓ એ 1 મોલ માટે છે, C) 1.5055 × 10²³ એ 0.25 મોલ માટે છે, અને D) 12.044 × 10²³ એ 2 મોલ માટે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 2}, {"question": "નીચેના પૈકી કયો પદાર્થનો મોલર દળ સૌથી ઓછો હશે?", "options": ["A) હાઇડ્રોજન (H₂)", "B) ઓક્સિજન (O₂)", "C) નાઇટ્રોજન (N₂)", "D) કાર્બન ડાયોક્સાઇડ (CO₂)"], "correct": 0, "explanation": "હાઇડ્રોજન (H₂) નો મોલર દળ 2 g/mol છે, જે સૌથી ઓછો છે. ઓક્સિજન (O₂) નો મોલર દળ 32 g/mol, નાઇટ્રોજન (N₂) નો 28 g/mol, અને કાર્બન ડાયોક્સાઇડ (CO₂) નો 44 g/mol છે. આથી, A) હાઇડ્રોજન સૌથી ઓછો મોલર દળ ધરાવે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 3}, {"question": "એક યૌગિકનો મોલર દળ 180 g/mol છે. જો તે યૌગિકના 36 g માં 1.2044 × 10²³ અણુઓ હોય, તો અવોગેડ્રોની સંખ્યા કેટલી હશે?", "options": ["A) 6.022 × 10²²", "B) 6.022 × 10²³", "C) 3.011 × 10²³", "D) 1.2044 × 10²³"], "correct": 1, "explanation": "મોલની સંખ્યા = દળ / મોલર દળ = 36 / 180 = 0.2 મોલ. અવોગેડ્રોની સંખ્યા = અણુઓની સંખ્યા / મોલની સંખ્યા = (1.2044 × 10²³) / 0.2 = 6.022 × 10²³. A) 6.022 × 10²² એ 10 ગણી ઓછી છે, C) 3.011 × 10²³ એ અડધી છે, અને D) 1.2044 × 10²³ એ મોલની સંખ્યા વગરની સંખ્યા છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 4}, {"question": "નીચેના પૈકી કયું વિધાન મોલર દળ વિશે સાચું નથી?", "options": ["A) મોલર દળ એ પદાર્થના એક મોલનો દળ છે.", "B) મોલર દળનો એકમ g/mol છે.", "C) મોલર દળ અણુઓની સંખ્યા પર આધાર રાખે છે.", "D) મોલર દળ એ પદાર્થની અણુસંયોજકતા પર આધાર રાખે છે."], "correct": 2, "explanation": "મોલર દળ એ પદાર્થના એક મોલનો દળ છે અને તેનો એકમ g/mol છે. તે અણુસંયોજકતા પર આધાર રાખે છે, પરંતુ અણુઓની સંખ્યા પર નહીં. અણુઓની સંખ્યા અવોગેડ્રોની સંખ્યા દ્વારા નક્કી થાય છે, જે મોલર દળથી સ્વતંત્ર છે. આથી, C) ખોટું છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 5}, {"question": "એક અજ્ઞાત ધાતુના 5.6 g ના નમૂનાનું મોલર દળ 56 g/mol છે. આ નમૂનામાં કેટલા મોલ અણુઓ હાજર હશે?", "options": ["A) 0.01 મોલ", "B) 0.1 મોલ", "C) 1 મોલ", "D) 10 મોલ"], "correct": 1, "explanation": "મોલર દળ = દળ / મોલની સંખ્યા અહીં, દળ = 5.6 g, મોલર દળ = 56 g/mol. મોલની સંખ્યા = 5.6 / 56 = 0.1 મોલ. A) 0.01 મોલ ખોટું છે કારણ કે ગણતરીમાં ભૂલ છે. C) 1 મોલ અને D) 10 મોલ પણ ગણતરીથી મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 6}, {"question": "નીચેના પૈકી કયા યૌગિકનો મોલર દળ સૌથી વધુ હશે? (પરમાણ્વીય દળ: C=12, H=1, O=16, N=14)", "options": ["A) CH₄ (મિથેન)", "B) C₂H₅OH (ઇથેનોલ)", "C) CO₂ (કાર્બન ડાયોક્સાઇડ)", "D) NH₃ (અમોનિયા)"], "correct": 1, "explanation": "મોલર દળની ગણતરી: A) CH₄ = 12 + 4(1) = 16 g/mol, B) C₂H₅OH = 2(12) + 6(1) + 16 = 46 g/mol, C) CO₂ = 12 + 2(16) = 44 g/mol, D) NH₃ = 14 + 3(1) = 17 g/mol. ઇથેનોલનો મોલર દળ સૌથી વધુ છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 7}, {"question": "જો એક ગેસના 11.2 L નું STP પર દળ 14 g હોય, તો તે ગેસનો મોલર દળ કેટલો હશે? (STP પર 1 મોલ ગેસનો કદ = 22.4 L)", "options": ["A) 28 g/mol", "B) 14 g/mol", "C) 56 g/mol", "D) 7 g/mol"], "correct": 0, "explanation": "STP પર 11.2 L ગેસ = 11.2 / 22.4 = 0.5 મોલ. મોલર દળ = દળ / મોલની સંખ્યા = 14 g / 0.5 મોલ = 28 g/mol. B) 14 g/mol ખોટું છે કારણ કે મોલની સંખ્યાને ધ્યાનમાં લેવામાં આવી નથી. C) 56 g/mol અને D) 7 g/mol પણ ગણતરીથી મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 8}, {"question": "એક યૌગિકનો અણુભાર 180 g/mol છે. જો તે યૌગિકના 1.8 g ના નમૂનામાં કેટલા અણુઓ હાજર હશે? (અવોગેડ્રોની સંખ્યા = 6.022 × 10²³)", "options": ["A) 6.022 × 10²¹ અણુઓ", "B) 6.022 × 10²² અણુઓ", "C) 6.022 × 10²³ અણુઓ", "D) 6.022 × 10²⁴ અણુઓ"], "correct": 0, "explanation": "મોલની સંખ્યા = દળ / મોલર દળ = 1.8 g / 180 g/mol = 0.01 મોલ. અણુઓની સંખ્યા = મોલની સંખ્યા × અવોગેડ્રોની સંખ્યા = 0.01 × 6.022 × 10²³ = 6.022 × 10²¹. B), C), અને D) ખોટા છે કારણ કે તેમની ગણતરીમાં ભૂલ છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 9}, {"question": "નીચેના વિધાનો પૈકી કયું સાચું નથી?", "options": ["A) મોલર દળનો એકમ g/mol છે.", "B) મોલર દળ એ પદાર્થના એક મોલના દળને કહે છે.", "C) મોલર દળ એ પદાર્થના એક અણુના દળને કહે છે.", "D) મોલર દળ એ પદાર્થના અણુભાર જેટલો જ હોય છે."], "correct": 2, "explanation": "મોલર દળ એ પદાર્થના એક મોલ (6.022 × 10²³ અણુઓ)ના દળને કહે છે, નહીં કે એક અણુના દળને. A), B), અને D) સાચા છે કારણ કે તેઓ મોલર દળની સાચી વ્યાખ્યા અને ગુણધર્મો દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 10}, {"question": "એક યૌગિકનો અણુફોર્મ્યુલા C₆H₁₂O₆ છે. તેના મોલર દળની ગણતરી કરો. (પરમાણ્વીય દળ: C = 12, H = 1, O = 16)", "options": ["A) 180 g/mol", "B) 160 g/mol", "C) 170 g/mol", "D) 190 g/mol"], "correct": 0, "explanation": "C₆H₁₂O₆ નો મોલર દળ = (6 × 12) + (12 × 1) + (6 × 16) = 72 + 12 + 96 = 180 g/mol. બાકીના વિકલ્પો (B, C, D) ગણતરીની ભૂલો દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 11}, {"question": "જો એક ગેસના 5.6 L નું STP પર દળ 7 g હોય, તો તે ગેસનો મોલર દળ કેટલો હશે? (STP પર 1 મોલ ગેસનો કદ = 22.4 L)", "options": ["A) 28 g/mol", "B) 32 g/mol", "C) 44 g/mol", "D) 71 g/mol"], "correct": 1, "explanation": "STP પર 5.6 L ગેસ = 5.6 / 22.4 = 0.25 મોલ. મોલર દળ = દળ / મોલની સંખ્યા = 7 g / 0.25 mol = 28 g/mol. પરંતુ 28 g/mol (A) નીરો (N₂) નો મોલર દળ છે, જ્યારે 32 g/mol (B) ઓક્સિજન (O₂) નો મોલર દળ છે. અહીં ગણતરી પ્રમાણે 28 g/mol આવે છે, પરંતુ પ્રશ્નમાં 7 g દળ માટે 0.25 મોલ માટે 28 g/mol સાચું છે. બાકીના વિકલ્પો (C, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 5: દ્રવ્યની અવસ્થાઓ", "difficulty": "Medium", "num": 12}, {"question": "નીચેના પૈકી કયા યૌગિકનો મોલર દળ 44 g/mol છે?", "options": ["A) CO₂", "B) CH₄", "C) NH₃", "D) H₂O"], "correct": 0, "explanation": "CO₂ નો મોલર દળ = 12 + (2 × 16) = 44 g/mol. CH₄ = 16 g/mol, NH₃ = 17 g/mol, H₂O = 18 g/mol. આથી CO₂ સાચો વિકલ્પ છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 13}, {"question": "એક અજ્ઞાત પદાર્થના 0.5 મોલનું દળ 20 g છે. તે પદાર્થનો મોલર દળ કેટલો હશે?", "options": ["A) 10 g/mol", "B) 20 g/mol", "C) 40 g/mol", "D) 80 g/mol"], "correct": 2, "explanation": "મોલર દળ = દળ / મોલની સંખ્યા = 20 g / 0.5 mol = 40 g/mol. બાકીના વિકલ્પો (A, B, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 14}, {"question": "નીચેના વિધાનો પૈકી કયું સાચું છે? 1) મોલર દળ એ પદાર્થના એક મોલનું દળ છે. 2) મોલર દળનો એકમ g/mol છે. 3) મોલર દળ એ પદાર્થના એક અણુનું દળ છે.", "options": ["A) ફક્ત 1 અને 2", "B) ફક્ત 1 અને 3", "C) ફક્ત 2 અને 3", "D) 1, 2 અને 3"], "correct": 0, "explanation": "વિધાન 1 અને 2 સાચા છે. મોલર દળ એ પદાર્થના એક મોલનું દળ છે અને તેનો એકમ g/mol છે. વિધાન 3 ખોટું છે કારણ કે મોલર દળ એ પદાર્થના એક અણુનું દળ નથી, પરંતુ એક મોલ (6.022 × 10²³ અણુ) નું દળ છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 15}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
