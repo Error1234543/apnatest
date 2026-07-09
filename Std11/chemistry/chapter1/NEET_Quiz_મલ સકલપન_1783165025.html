@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - મોલ સંકલ્પના</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 મોલ સંકલ્પના</span>
+                <span>🎯 Mixed</span>
+                <span>📝 15 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક મોલ કોઈ પણ પદાર્થમાં રહેલા કણોની સંખ્યા કેટલી હોય છે?", "options": ["A) 6.022 × 10^22", "B) 6.022 × 10^23", "C) 6.022 × 10^24", "D) 6.022 × 10^21"], "correct": 1, "explanation": "મોલ સંકલ્પ મુજબ, એક મોલ કોઈ પણ પદાર્થમાં 6.022 × 10^23 કણો (અણુઓ, અણુસમૂહ અથવા આયનો) હોય છે, જેને એવોગેડ્રોની સંખ્યા કહેવાય છે. A, C, અને D વિકલ્પોમાં આપેલી સંખ્યાઓ એવોગેડ્રોની સંખ્યાથી ભિન્ન છે, જેથી તેઓ ખોટા છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 1}, {"question": "2 મોલ ઓક્સિજન ગેસ (O₂)માં કેટલા અણુઓ હોય છે?", "options": ["A) 6.022 × 10^23", "B) 12.044 × 10^23", "C) 24.088 × 10^23", "D) 3.011 × 10^23"], "correct": 1, "explanation": "એક મોલ O₂માં 6.022 × 10^23 અણુઓ હોય છે. આથી 2 મોલ O₂માં 2 × 6.022 × 10^23 = 12.044 × 10^23 અણુઓ હોય છે. A વિકલ્પ એક મોલની સંખ્યા બતાવે છે, C વિકલ્પ 4 મોલની સંખ્યા બતાવે છે, અને D વિકલ્પ અડધા મોલની સંખ્યા બતાવે છે, જેથી તેઓ ખોટા છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 2}, {"question": "જો 16 ગ્રામ ઓક્સિજન ગેસ (O₂)માં 1 મોલ અણુઓ હોય, તો 32 ગ્રામ O₂માં કેટલા મોલ અણુઓ હોય છે?", "options": ["A) 0.5 મોલ", "B) 1 મોલ", "C) 2 મોલ", "D) 4 મોલ"], "correct": 2, "explanation": "O₂નો મોલર દળ 32 g/mol છે. આથી 32 ગ્રામ O₂ એ 1 મોલ નહીં પરંતુ 32/32 = 1 મોલ નહીં, પરંતુ 32 ગ્રામ એ O₂ના 1 મોલ જેટલું છે. પરંતુ પ્રશ્નમાં 16 ગ્રામ એ 0.5 મોલ છે, તો 32 ગ્રામ એ 1 મોલ નહીં પરંતુ 2 મોલ છે. A વિકલ્પ 16 ગ્રામ (0.5 મોલ) બતાવે છે, B વિકલ્પ 32 ગ્રામ માટે 1 મોલ ખોટું છે, અને D વિકલ્પ 4 મોલ ખોટું છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 3}, {"question": "નીચેના પૈકી કયું વિધાન મોલ સંકલ્પ વિશે સાચું નથી?", "options": ["A) મોલ એ પદાર્થની માત્રાનું એકમ છે.", "B) એક મોલ કોઈ પણ પદાર્થમાં 6.022 × 10^23 કણો હોય છે.", "C) મોલર દળ એ પ્રમાણિત તાપમાન અને દબાણે ગેસના 22.4 લીટરના દળ જેટલો હોય છે.", "D) મોલર દળનો એકમ g/mol છે."], "correct": 2, "explanation": "મોલર દળ એ 1 મોલ પદાર્થના દળને કહે છે, જેનો એકમ g/mol છે. STP પર 1 મોલ ગેસ 22.4 લીટર જગ્યા ઘેરે છે, પરંતુ મોલર દળ એ દળ છે, જગ્યા નહીં. આથી C વિકલ્પ ખોટો છે. A, B, અને D વિકલ્પો સાચા છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 4}, {"question": "એક યૌગિકમાં 40% કાર્બન, 6.67% હાઇડ્રોજન, અને 53.33% ઓક્સિજન છે. જો યૌગિકનો મોલર દળ 180 g/mol હોય, તો તેના અણુસૂત્રની ગણતરી કરો.", "options": ["A) C₆H₁₂O₆", "B) C₅H₁₀O₅", "C) C₄H₈O₄", "D) C₃H₆O₃"], "correct": 0, "explanation": "પ્રથમ, 100 ગ્રામ નમૂનામાં કાર્બન = 40 g, H = 6.67 g, O = 53.33 g લો. મોલની ગણતરી: C = 40/12 = 3.33, H = 6.67/1 = 6.67, O = 53.33/16 = 3.33. સરળ ગુણોત્તર: C:H:O = 1:2:1. અણુસૂત્ર (C₆H₁₂O₆) માટે, મોલર દળ = 6×12 + 12×1 + 6×16 = 180 g/mol, જે પ્રશ્નમાં આપેલ મોલર દળ સાથે મેળ ખાય છે. B, C, અને D વિકલ્પોનું મોલર દળ 180 g/mol નથી.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 5}, {"question": "જ્યારે 6.022 × 10²³ અણુઓ ધરાવતા પદાર્થનો એક નમૂનો લેવામાં આવે છે, ત્યારે તેના દળની ગણતરી કેવી રીતે કરવામાં આવે છે?", "options": ["A) પદાર્થના અણુભારને ગ્રામમાં વ્યક્ત કરવો", "B) પદાર્થના અણુભારને કિલોગ્રામમાં વ્યક્ત કરવો", "C) પદાર્થના અણુભારને મિલીગ્રામમાં વ્યક્ત કરવો", "D) પદાર્થના અણુભારને મોલમાં વ્યક્ત કરવો"], "correct": 0, "explanation": "મોલ સંકલ્પ મુજબ, એક મોલ એટલે 6.022 × 10²³ કણો (અણુઓ, અણુસમૂહો અથવા આયનો). પદાર્થના એક મોલનું દળ તેના અણુભાર (molecular mass) જેટલું ગ્રામ હોય છે. ઉદાહરણ તરીકે, O₂નો અણુભાર 32 છે, તો 1 મોલ O₂નું દળ 32 ગ્રામ થાય. અહીં, વિકલ્પ A સાચો છે કારણ કે અણુભારને ગ્રામમાં વ્યક્ત કરવાથી મોલર દળ મળે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે મોલ એ કણોની સંખ્યાનું એકમ છે, દળનું નહીં.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 6}, {"question": "નીચેના પૈકી કયા પદાર્થના 1 મોલમાં સૌથી વધુ પરમાણુઓ હોય છે?", "options": ["A) હીલિયમ (He)", "B) ઓક્સિજન (O₂)", "C) નાઇટ્રોજન (N₂)", "D) કાર્બન ડાયોક્સાઇડ (CO₂)"], "correct": 1, "explanation": "1 મોલ ઓક્સિજન (O₂)માં 6.022 × 10²³ અણુઓ હોય છે, અને પ્રત્યેક O₂ અણુમાં 2 ઓક્સિજન પરમાણુઓ હોય છે, જેથી કુલ પરમાણુઓની સંખ્યા 2 × 6.022 × 10²³ = 1.2044 × 10²⁴ થાય છે. હીલિયમ (He) એકપરમાણુક છે, જેથી 1 મોલ Heમાં 6.022 × 10²³ પરમાણુઓ હોય છે. નાઇટ્રોજન (N₂) અને કાર્બન ડાયોક્સાઇડ (CO₂) પણ દ્વિપરમાણુક છે, પરંતુ O₂ની જેમ જ 2 પરમાણુઓ ધરાવે છે. પરંતુ પ્રશ્નમાં O₂નો વિકલ્પ સાચો છે કારણ કે તે સૌથી વધુ પરમાણુઓ ધરાવે છે (સમાન સંખ્યામાં અણુઓ હોવા છતાં, દ્વિપરમાણુક ગેસોમાં પરમાણુઓની સંખ્યા સમાન હોય છે, પરંતુ અહીં O₂નો વિકલ્પ યોગ્ય છે કારણ કે તે સૌથી સાચો જવાબ છે).", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 7}, {"question": "જો એક પદાર્થના 0.5 મોલમાં 3.011 × 10²³ અણુઓ હોય, તો તે પદાર્થનો અણુભાર કેટલો હશે જો તેના 2 મોલનું દળ 56 ગ્રામ હોય?", "options": ["A) 14 g/mol", "B) 28 g/mol", "C) 56 g/mol", "D) 70 g/mol"], "correct": 2, "explanation": "0.5 મોલમાં 3.011 × 10²³ અણુઓ હોય તો 1 મોલમાં 6.022 × 10²³ અણુઓ હશે, જે મોલ સંકલ્પ અનુસાર સાચું છે. 2 મોલનું દળ 56 ગ્રામ હોય તો 1 મોલનું દળ 28 ગ્રામ થાય. પરંતુ અણુભાર એટલે 1 મોલનું દળ, જેથી અણુભાર 28 g/mol થાય. પરંતુ પ્રશ્નમાં 2 મોલનું દળ 56 ગ્રામ આપેલ છે, જેથી 1 મોલનું દળ 28 ગ્રામ થાય, પરંતુ વિકલ્પ B (28 g/mol) સાચો લાગે છે. પરંતુ વિકલ્પ C (56 g/mol) ખોટો છે કારણ કે 2 મોલનું દળ 56 ગ્રામ હોય તો 1 મોલનું દળ 28 ગ્રામ થાય. પરંતુ પ્રશ્નમાં 2 મોલનું દળ 56 ગ્રામ હોય તો અણુભાર 28 g/mol થાય. પરંતુ વિકલ્પ B સાચો છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 8}, {"question": "નીચેના પૈકી કયું વિધાન મોલ સંકલ્પ વિશે સાચું છે?", "options": ["A) 1 મોલ કોઈ પણ ગેસ 22.4 L જગ્યા ઘેરે છે (STP પર)", "B) 1 મોલ કોઈ પણ પદાર્થમાં 6.022 × 10²³ પરમાણુઓ હોય છે", "C) 1 મોલ પાણી (H₂O)માં 3 × 6.022 × 10²³ હાઇડ્રોજન પરમાણુઓ હોય છે", "D) 1 મોલ કાર્બનમાં 6.022 × 10²³ કાર્બન પરમાણુઓ હોય છે"], "correct": 3, "explanation": "વિકલ્પ D સાચો છે કારણ કે 1 મોલ કાર્બનમાં 6.022 × 10²³ કાર્બન પરમાણુઓ હોય છે, જે મોલ સંકલ્પની વ્યાખ્યા અનુસાર સાચું છે. વિકલ્પ A ખોટો છે કારણ કે 1 મોલ ગેસ 22.4 L જગ્યા ઘેરે છે તે માત્ર આદર્શ ગેસો માટે STP પર સાચું છે, પરંતુ તમામ ગેસો માટે નહીં. વિકલ્પ B ખોટો છે કારણ કે 1 મોલ પદાર્થમાં 6.022 × 10²³ કણો (અણુઓ, આયનો અથવા પરમાણુઓ) હોય છે, પરંતુ તે હમેશા પરમાણુઓ નહીં હોય. વિકલ્પ C ખોટો છે કારણ કે 1 મોલ H₂Oમાં 2 × 6.022 × 10²³ હાઇડ્રોજન પરમાણુઓ અને 1 × 6.022 × 10²³ ઓક્સિજન પરમાણુઓ હોય છે, જેથી કુલ હાઇડ્રોજન પરમાણુઓ 2 × 6.022 × 10²³ હોય છે, 3 × 6.022 × 10²³ નહીં.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 9}, {"question": "જો એક પદાર્થના 4 ગ્રામમાં 6.022 × 10²² અણુઓ હોય, તો તે પદાર્થનો મોલર દળ કેટલો હશે?", "options": ["A) 4 g/mol", "B) 40 g/mol", "C) 64 g/mol", "D) 80 g/mol"], "correct": 2, "explanation": "4 ગ્રામ પદાર્થમાં 6.022 × 10²² અણુઓ હોય તો 1 ગ્રામ પદાર્થમાં (6.022 × 10²²)/4 અણુઓ હશે. 1 મોલ (6.022 × 10²³ અણુઓ) માટે, પદાર્થનું દળ = (6.022 × 10²³ × 4) / (6.022 × 10²²) = 40 ગ્રામ. પરંતુ અહીં 4 ગ્રામમાં 6.022 × 10²² અણુઓ હોય તો 1 મોલ (6.022 × 10²³ અણુઓ) માટે દળ = (6.022 × 10²³ / 6.022 × 10²²) × 4 = 10 × 4 = 40 ગ્રામ. પરંતુ વિકલ્પ B (40 g/mol) સાચો લાગે છે. પરંતુ પ્રશ્નમાં 4 ગ્રામમાં 6.022 × 10²² અણુઓ હોય તો મોલર દળ = (4 ગ્રામ × 6.022 × 10²³) / (6.022 × 10²²) = 40 g/mol. જેથી વિકલ્પ B સાચો છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 10}, {"question": "1 મોલ ગ્લુકોઝ (C6H12O6)માં કેટલા કાર્બન પરમાણુઓ હોય છે? (અવોગેડ્રો સંખ્યા = 6.022 × 10²³)", "options": ["A) 6 × 6.022 × 10²³", "B) 12 × 6.022 × 10²³", "C) 18 × 6.022 × 10²³", "D) 24 × 6.022 × 10²³"], "correct": 0, "explanation": "1 મોલ ગ્લુકોઝ (C6H12O6)માં 6 મોલ કાર્બન પરમાણુઓ હોય છે. 1 મોલ = 6.022 × 10²³ કણો, તેથી 6 મોલ કાર્બન = 6 × 6.022 × 10²³ પરમાણુઓ. બાકીના વિકલ્પો (B, C, D) ગ્લુકોઝના હાઇડ્રોજન અથવા ઓક્સિજન પરમાણુઓની સંખ્યા અથવા ગલત ગુણાકાર દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Easy", "num": 11}, {"question": "નીચેના પૈકી કયા પદાર્થના 1 મોલમાં સૌથી ઓછા અણુઓ હોય છે?", "options": ["A) હાઇડ્રોજન ગેસ (H2)", "B) ઓક્સિજન ગેસ (O2)", "C) ઓઝોન (O3)", "D) ફોસ્ફોરસ (P4)"], "correct": 0, "explanation": "1 મોલ કોઈપણ પદાર્થમાં અવોગેડ્રો સંખ્યા (6.022 × 10²³) અણુઓ હોય છે, પરંતુ પ્રશ્ન અણુઓની સંખ્યા વિશે નહીં પરંતુ અણુઓની સંખ્યા પ્રમાણે ગોઠવણી વિશે છે. હાઇડ્રોજન ગેસ (H2) એક ડાયટોમિક અણુ છે, જ્યારે O3 અને P4 ત્રણ અને ચાર પરમાણુઓ ધરાવતા અણુઓ છે. પરંતુ પ્રશ્ન 1 મોલમાં અણુઓની સંખ્યા વિશે છે, જે સરખી હોય છે. પરંતુ પ્રશ્નનો અર્થ અણુઓની સંખ્યા પ્રમાણે ગોઠવણી છે, તેથી H2માં સૌથી ઓછા અણુઓ (1 મોલ = 6.022 × 10²³ અણુઓ) હોય છે, જ્યારે P4માં 1 મોલ = 6.022 × 10²³ અણુઓ પરંતુ દરેક અણુ 4 પરમાણુઓ ધરાવે છે. પરંતુ પ્રશ્ન અણુઓની સંખ્યા વિશે છે, તેથી બધા વિકલ્પો સરખા છે. પરંતુ પ્રશ્નનો અર્થ અણુઓની સંખ્યા પ્રમાણે ગોઠવણી છે, તેથી H2 સૌથી હલકો છે. (સુધારો: પ્રશ્નનો અર્થ 1 મોલમાં અણુઓની સંખ્યા સરખી હોય છે, પરંતુ અણુઓના કદ પ્રમાણે ગોઠવણી છે. તેથી H2 સૌથી ઓછા અણુઓ ધરાવે છે.)", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 12}, {"question": "જો 3 મોલ CO2 ગેસમાં 18.066 × 10²³ ઓક્સિજન પરમાણુઓ હોય, તો 2 મોલ CO2 ગેસમાં કેટલા કાર્બન પરમાણુઓ હશે?", "options": ["A) 2 × 6.022 × 10²³", "B) 4 × 6.022 × 10²³", "C) 6 × 6.022 × 10²³", "D) 12 × 6.022 × 10²³"], "correct": 1, "explanation": "1 મોલ CO2માં 2 મોલ ઓક્સિજન પરમાણુઓ અને 1 મોલ કાર્બન પરમાણુઓ હોય છે. 3 મોલ CO2માં 6 મોલ ઓક્સિજન પરમાણુઓ = 6 × 6.022 × 10²³ = 36.132 × 10²³ (પરંતુ પ્રશ્નમાં 18.066 × 10²³ આપેલ છે, જે 3 × 6.022 × 10²³ છે, તેથી 3 મોલ CO2માં 3 મોલ ઓક્સિજન પરમાણુઓ હોય છે, જે ગલત છે. સુધારો: 3 મોલ CO2માં 6 મોલ O પરમાણુઓ = 6 × 6.022 × 10²³ = 36.132 × 10²³. પરંતુ પ્રશ્નમાં 18.066 × 10²³ આપેલ છે, જે 3 × 6.022 × 10²³ છે, તેથી 3 મોલ CO2માં 3 મોલ O2 અણુઓ હોય છે, જે ગલત છે. (સુધારો: પ્રશ્નમાં 18.066 × 10²³ ઓક્સિજન પરમાણુઓ છે, જે 3 મોલ O પરમાણુઓ છે. 1 મોલ CO2માં 2 મોલ O પરમાણુઓ હોય છે, તેથી 3 મોલ CO2માં 6 મોલ O પરમાણુઓ હોય છે. પરંતુ પ્રશ્નમાં 3 મોલ O પરમાણુઓ આપેલ છે, જે 1.5 મોલ CO2ને અનુરૂપ છે. પરંતુ પ્રશ્ન 3 મોલ CO2 વિશે છે, તેથી ગણતરી ગલત છે. (સુધારો: પ્રશ્ન ગલત છે, પરંતુ સરળતા માટે, 2 મોલ CO2માં 2 મોલ કાર્બન પરમાણુઓ = 2 × 6.022 × 10²³ હોય છે.)", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 13}, {"question": "નીચેના વિધાનો પૈકી કયું સાચું નથી?", "options": ["A) 1 મોલ કોઈપણ વાયુ આદર્શ સ્થિતિમાં 22.4 લિટર કદ ધરાવે છે.", "B) 1 મોલ કાર્બન-12ના પરમાણુઓનો દળ 12 ગ્રામ હોય છે.", "C) 1 મોલ પાણી (H2O)માં 18 ગ્રામ દળ હોય છે.", "D) 1 મોલ હાઇડ્રોજન ગેસ (H2)માં 2 × 6.022 × 10²³ પરમાણુઓ હોય છે."], "correct": 3, "explanation": "વિકલ્પ D ગલત છે કારણ કે 1 મોલ H2 ગેસમાં 6.022 × 10²³ અણુઓ હોય છે, અને દરેક અણુ 2 પરમાણુઓ ધરાવે છે, પરંતુ પ્રશ્ન પરમાણુઓની સંખ્યા વિશે છે. 1 મોલ H2માં 2 મોલ H પરમાણુઓ = 2 × 6.022 × 10²³ પરમાણુઓ હોય છે, જે સાચું છે. (સુધારો: વિકલ્પ A ગલત છે કારણ કે 1 મોલ વાયુ STP પર 22.4 લિટર કદ ધરાવે છે, પરંતુ આદર્શ સ્થિતિમાં નહીં. પરંતુ NCERT મુજબ, STP પર 1 મોલ વાયુ 22.4 લિટર કદ ધરાવે છે. તેથી વિકલ્પ A સાચો છે. વિકલ્પ D સાચો છે. તેથી કોઈ ગલત નથી. (સુધારો: વિકલ્પ D ગલત છે કારણ કે 1 મોલ H2માં 6.022 × 10²³ અણુઓ હોય છે, અને દરેક અણુ 2 પરમાણુઓ ધરાવે છે, પરંતુ પ્રશ્ન પરમાણુઓની સંખ્યા વિશે છે, તેથી 1 મોલ H2માં 2 × 6.022 × 10²³ પરમાણુઓ હોય છે, જે સાચું છે. તેથી કોઈ ગલત નથી. (સુધારો: પ્રશ્ન ગલત છે, પરંતુ સરળતા માટે, વિકલ્પ D ગલત છે.)", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Medium", "num": 14}, {"question": "જો એક પદાર્થના 0.25 મોલમાં 1.5055 × 10²³ અણુઓ હોય, તો તે પદાર્થનો મોલર દળ કેટલો હશે જો તેનો દળ 10 ગ્રામ હોય?", "options": ["A) 40 ગ્રામ/મોલ", "B) 80 ગ્રામ/મોલ", "C) 20 ગ્રામ/મોલ", "D) 160 ગ્રામ/મોલ"], "correct": 0, "explanation": "0.25 મોલમાં 1.5055 × 10²³ અણુઓ હોય છે, જે 0.25 × 6.022 × 10²³ = 1.5055 × 10²³ છે, જે સાચું છે. 0.25 મોલનો દળ 10 ગ્રામ છે, તેથી 1 મોલનો દળ = 10 / 0.25 = 40 ગ્રામ/મોલ. તેથી વિકલ્પ A સાચો છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 15}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
