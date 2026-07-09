@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - અનિશ્ચિતતા અને ચોકસાઈ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 અનિશ્ચિતતા અને ચોકસાઈ</span>
+                <span>🎯 Hard</span>
+                <span>📝 20 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષમાં DNAની નકલ થાય છે ત્યારે અનિશ્ચિતતા ઉત્પન્ન થવાનું મુખ્ય કારણ કયું છે?", "options": ["A) DNA પોલિમરેઝ ઉત્સેચકની અચોકસાઈ", "B) વર્ણસૂત્રોની અસમાન વિતરણ", "C) RNA પ્રાઇમરની અસ્થિરતા", "D) ટેલોમિયરની લંબાઈમાં ઘટાડો"], "correct": 0, "explanation": "DNA પોલિમરેઝ ઉત્સેચકની અચોકસાઈને કારણે નકલ દરમિયાન ન્યુક્લિયોટાઇડની ચૂક થઈ શકે છે, જે અનિશ્ચિતતા ઉત્પન્ન કરે છે. વર્ણસૂત્રોની અસમાન વિતરણ મિટોસિસ દરમિયાન થાય છે, પરંતુ તે DNA નકલ સાથે સીધો સંબંધ ધરાવતું નથી. RNA પ્રાઇમર અસ્થિર હોવા છતાં, તે DNA નકલની શરૂઆતમાં જ મદદ કરે છે, પરંતુ અનિશ્ચિતતાનું મુખ્ય કારણ નથી. ટેલોમિયરની લંબાઈમાં ઘટાડો કોષના વૃદ્ધત્વ સાથે સંબંધિત છે, પરંતુ તે DNA નકલની અચોકસાઈનું કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 1}, {"question": "પ્રયોગશાળામાં, જીવવિજ્ઞાનના વિદ્યાર્થીએ જોયું કે એક જનીનમાં થયેલી ઉત્ક્રાંતિ એ પ્રોટીનની રચનામાં ફેરફાર કરે છે. આ ફેરફારનું મુખ્ય કારણ કયું હોઈ શકે?", "options": ["A) જનીનમાં સિંગલ ન્યુક્લિયોટાઇડ પોલિમોર્ફિઝમ (SNP)", "B) વર્ણસૂત્રીય સ્થળાંતર", "C) જનીનની ડુપ્લિકેશન", "D) ટ્રાન્સપોઝોનની હાજરી"], "correct": 0, "explanation": "સિંગલ ન્યુક્લિયોટાઇડ પોલિમોર્ફિઝમ (SNP) એ જનીનમાં થયેલી સૌથી સામાન્ય પ્રકારની ઉત્ક્રાંતિ છે, જે પ્રોટીનની રચનામાં ફેરફાર કરી શકે છે. વર્ણસૂત્રીય સ્થળાંતર, જનીનની ડુપ્લિકેશન, અને ટ્રાન્સપોઝોનની હાજરી પણ જનીનમાં ફેરફાર કરી શકે છે, પરંતુ તે સીધા પ્રોટીનની રચનામાં ફેરફાર કરતી નથી.", "ncert_ref": "Class XII - Chapter 7: ઉત્ક્રાંતિ", "difficulty": "Hard", "num": 2}, {"question": "કોષમાં RNAની નકલ દરમિયાન અનિશ્ચિતતા ઉત્પન્ન થવાનું કારણ કયું છે?", "options": ["A) RNA પોલિમરેઝની અચોકસાઈ", "B) DNA ટેમ્પલેટની અસ્થિરતા", "C) રાઇબોઝોમલ RNAની હાજરી", "D) ટ્રાન્સક્રિપ્શન ફેક્ટરની ઉણપ"], "correct": 0, "explanation": "RNA પોલિમરેઝની અચોકસાઈને કારણે RNAની નકલ દરમિયાન ન્યુક્લિયોટાઇડની ચૂક થઈ શકે છે, જે અનિશ્ચિતતા ઉત્પન્ન કરે છે. DNA ટેમ્પલેટની અસ્થિરતા, રાઇબોઝોમલ RNAની હાજરી, અને ટ્રાન્સક્રિપ્શન ફેક્ટરની ઉણપ પણ RNA નકલને અસર કરી શકે છે, પરંતુ તે મુખ્ય કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 3}, {"question": "એક જીવમાં, જનીનની અભિવ્યક્તિ દરમિયાન અનિશ્ચિતતા ઉત્પન્ન થાય છે. આ અનિશ્ચિતતાનું મુખ્ય કારણ કયું હોઈ શકે?", "options": ["A) ટ્રાન્સલેશન દરમિયાન tRNAની અચોકસાઈ", "B) ટ્રાન્સક્રિપ્શન દરમિયાન RNA પોલિમરેઝની અચોકસાઈ", "C) mRNAની અસ્થિરતા", "D) રાઇબોઝોમની ઉણપ"], "correct": 0, "explanation": "ટ્રાન્સલેશન દરમિયાન tRNAની અચોકસાઈને કારણે અમિનો એસિડની ચૂક થઈ શકે છે, જે પ્રોટીનની રચનામાં અનિશ્ચિતતા ઉત્પન્ન કરે છે. ટ્રાન્સક્રિપ્શન દરમિયાન RNA પોલિમરેઝની અચોકસાઈ, mRNAની અસ્થિરતા, અને રાઇબોઝોમની ઉણપ પણ અભિવ્યક્તિને અસર કરી શકે છે, પરંતુ તે મુખ્ય કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 4}, {"question": "કોષમાં, DNAની મરામત પ્રક્રિયા દરમિયાન અનિશ્ચિતતા ઉત્પન્ન થવાનું કારણ કયું છે?", "options": ["A) મરામત ઉત્સેચકોની અચોકસાઈ", "B) DNAની ડબલ હેલિક્સ રચનાની અસ્થિરતા", "C) હિસ્ટોન પ્રોટીનની ઉણપ", "D) કોષકેન્દ્રીય ઝરિયાની અસમાનતા"], "correct": 0, "explanation": "મરામત ઉત્સેચકોની અચોકસાઈને કારણે DNAની મરામત દરમિયાન ન્યુક્લિયોટાઇડની ચૂક થઈ શકે છે, જે અનિશ્ચિતતા ઉત્પન્ન કરે છે. DNAની ડબલ હેલિક્સ રચનાની અસ્થિરતા, હિસ્ટોન પ્રોટીનની ઉણપ, અને કોષકેન્દ્રીય ઝરિયાની અસમાનતા પણ મરામત પ્રક્રિયાને અસર કરી શકે છે, પરંતુ તે મુખ્ય કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 5}, {"question": "પ્રયોગશાળામાં, એક વિદ્યાર્થીએ જોયું કે એક જીવમાં, જનીનની અભિવ્યક્તિ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ ટ્રાન્સક્રિપ્શન અને ટ્રાન્સલેશન દરમિયાન થતી ભૂલોને કારણે નથી. તો આ અનિશ્ચિતતાનું સૌથી સંભવિત કારણ કયું હશે?", "options": ["A) DNA પોલિમરેઝની કામગીરી દરમિયાન થતી ભૂલો", "B) RNA પોલિમરેઝની કામગીરી દરમિયાન થતી ભૂલો", "C) એપિજેનેટિક નિયંત્રણ તંત્રમાં થતી પરિવર્તનશીલતા", "D) રાઇબોઝોમની કામગીરી દરમિયાન થતી ભૂલો"], "correct": 2, "explanation": "જનીનની અભિવ્યક્તિ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ એપિજેનેટિક નિયંત્રણ તંત્રમાં થતી પરિવર્તનશીલતાને કારણે થાય છે. DNA અને RNA પોલિમરેઝની ભૂલો તથા રાઇબોઝોમની ભૂલો એ ટ્રાન્સક્રિપ્શન અને ટ્રાન્સલેશન દરમિયાન થતી ભૂલો છે, જ્યારે એપિજેનેટિક નિયંત્રણ તંત્રમાં થતી પરિવર્તનશીલતા એ જનીનની અભિવ્યક્તિને અસર કરે છે. આમ, સૌથી યોગ્ય ઉત્તર એપિજેનેટિક નિયંત્રણ તંત્ર છે.", "ncert_ref": "Class XII - Chapter 6: જનીન અને જનીન અભિવ્યક્તિ", "difficulty": "Hard", "num": 6}, {"question": "એક જીવમાં, પ્રોટીન સંશ્લેષણ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ ટ્રાન્સલેશન દરમિયાન થતી ભૂલોને કારણે નથી. તો આ અનિશ્ચિતતાનું મુખ્ય કારણ કયું હશે?", "options": ["A) mRNAની અસ્થિરતા", "B) tRNAની ભૂલભરેલી જોડણી", "C) રાઇબોઝોમની ગતિની અસમાનતા", "D) પોસ્ટ-ટ્રાન્સલેશનલ સંશોધનમાં થતી ભૂલો"], "correct": 3, "explanation": "પ્રોટીન સંશ્લેષણ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ પોસ્ટ-ટ્રાન્સલેશનલ સંશોધનમાં થતી ભૂલોને કારણે થાય છે. mRNAની અસ્થિરતા, tRNAની ભૂલભરેલી જોડણી, અને રાઇબોઝોમની ગતિની અસમાનતા એ ટ્રાન્સલેશન દરમિયાન થતી ભૂલો છે, જ્યારે પોસ્ટ-ટ્રાન્સલેશનલ સંશોધન એ પ્રોટીનની અંતિમ રચના અને ક્રિયાશીલતા નક્કી કરે છે. આમ, સૌથી યોગ્ય ઉત્તર પોસ્ટ-ટ્રાન્સલેશનલ સંશોધન છે.", "ncert_ref": "Class XII - Chapter 6: જનીન અને જનીન અભિવ્યક્તિ", "difficulty": "Hard", "num": 7}, {"question": "એક કોષમાં, DNAની નકલ દરમિયાન અનિશ્ચિતતા ઉત્પન્ન થાય છે, પરંતુ તે DNA પોલિમરેઝની ભૂલને કારણે નથી. તો આ અનિશ્ચિતતાનું કારણ કયું હશે?", "options": ["A) DNAની ડેમેથિલેશન", "B) ટેલોમિયરની લંબાઈમાં ઘટાડો", "C) હિસ્ટોન પ્રોટીનની સંરચનાત્મક ભૂલો", "D) DNAની ડબલ સ્ટ્રેન્ડ બ્રેક"], "correct": 1, "explanation": "DNAની નકલ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ ટેલોમિયરની લંબાઈમાં ઘટાડાને કારણે થાય છે. DNA પોલિમરેઝની ભૂલો સિવાય, ટેલોમિયરની લંબાઈમાં ઘટાડો એ કોષની વૃદ્ધિ અને મૃત્યુ સાથે સંકળાયેલ છે. DNAની ડેમેથિલેશન, હિસ્ટોન પ્રોટીનની સંરચનાત્મક ભૂલો, અને DNAની ડબલ સ્ટ્રેન્ડ બ્રેક એ અન્ય કારણો હોવાં છતાં, ટેલોમિયરની લંબાઈમાં ઘટાડો એ સૌથી સંભવિત કારણ છે.", "ncert_ref": "Class XII - Chapter 5: વંશપરંપરા અને પરિવર્તનશીલતાનાં સિદ્ધાંતો", "difficulty": "Hard", "num": 8}, {"question": "એક જીવમાં, જનીનની અભિવ્યક્તિ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ ટ્રાન્સક્રિપ્શન ફેક્ટરની ભૂલને કારણે નથી. તો આ અનિશ્ચિતતાનું કારણ કયું હશે?", "options": ["A) પ્રમોટર પ્રદેશમાં થતી મ્યુટેશન", "B) એનહેન્સર પ્રદેશમાં થતી મ્યુટેશન", "C) ઇન્ટ્રોન અને એક્ઝોનની ભૂલભરેલી કાપકૂપ", "D) mRNAની સ્થિરતામાં ઘટાડો"], "correct": 2, "explanation": "જનીનની અભિવ્યક્તિ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ ઇન્ટ્રોન અને એક્ઝોનની ભૂલભરેલી કાપકૂપને કારણે થાય છે. પ્રમોટર અને એનહેન્સર પ્રદેશમાં થતી મ્યુટેશન તથા mRNAની સ્થિરતા એ ટ્રાન્સક્રિપ્શન ફેક્ટરની ભૂલો સાથે સંકળાયેલ છે, જ્યારે ઇન્ટ્રોન અને એક્ઝોનની કાપકૂપ એ mRNAની પ્રોસેસિંગ દરમિયાન થતી પ્રક્રિયા છે. આમ, સૌથી યોગ્ય ઉત્તર ઇન્ટ્રોન અને એક્ઝોનની ભૂલભરેલી કાપકૂપ છે.", "ncert_ref": "Class XII - Chapter 6: જનીન અને જનીન અભિવ્યક્તિ", "difficulty": "Hard", "num": 9}, {"question": "એક કોષમાં, પ્રોટીન સંશ્લેષણ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ રાઇબોઝોમની ભૂલને કારણે નથી. તો આ અનિશ્ચિતતાનું કારણ કયું હશે?", "options": ["A) tRNAની અભાવ", "B) mRNAની અસ્થિરતા", "C) એમિનો એસિડની અછત", "D) પોસ્ટ-ટ્રાન્સલેશનલ ફોલ્ડિંગમાં થતી ભૂલો"], "correct": 3, "explanation": "પ્રોટીન સંશ્લેષણ દરમિયાન ઉત્પન્ન થતી અનિશ્ચિતતા એ પોસ્ટ-ટ્રાન્સલેશનલ ફોલ્ડિંગમાં થતી ભૂલોને કારણે થાય છે. tRNAની અભાવ, mRNAની અસ્થિરતા, અને એમિનો એસિડની અછત એ રાઇબોઝોમની ભૂલો સાથે સંકળાયેલ છે, જ્યારે પોસ્ટ-ટ્રાન્સલેશનલ ફોલ્ડિંગ એ પ્રોટીનની અંતિમ રચના અને ક્રિયાશીલતા નક્કી કરે છે. આમ, સૌથી યોગ્ય ઉત્તર પોસ્ટ-ટ્રાન્સલેશનલ ફોલ્ડિંગ છે.", "ncert_ref": "Class XII - Chapter 6: જનીન અને જનીન અભિવ્યક્તિ", "difficulty": "Hard", "num": 10}, {"question": "ટ્રાન્સક્રિપ્શન દરમિયાન, RNA પોલિમરેઝ એ પ્રમોટર પ્રદેશને ઓળખી શકતું નથી, જ્યારે DNA પર અસાધારણ મિથાઇલેશન હોય છે. આ પરિસ્થિતિમાં અનિશ્ચિતતા ઉત્પન્ન થવાનું મુખ્ય કારણ કયું છે?", "options": ["A) DNA પર મિથાઇલેશન એ જીનની અભિવ્યક્તિને અવરોધે છે, પરંતુ RNA પોલિમરેઝની ક્રિયા પર સીધો પ્રભાવ પાડતું નથી", "B) મિથાઇલેશન એ પ્રમોટર પ્રદેશની રચનામાં ફેરફાર કરે છે, જેથી RNA પોલિમરેઝ તેને ઓળખી શકતું નથી", "B) RNA પોલિમરેઝની સક્રિયતા મિથાઇલેશન દ્વારા વધે છે, પરંતુ પ્રમોટર પ્રદેશ અસ્પષ્ટ બને છે", "D) મિથાઇલેશન એ DNAની દિશામાં ફેરફાર કરે છે, જેથી RNA પોલિમરેઝ તેની ક્રિયા શરૂ કરવા માટે અસમર્થ બને છે"], "correct": 1, "explanation": "મિથાઇલેશન એ પ્રમોટર પ્રદેશની રચનામાં ફેરફાર કરે છે, જેથી RNA પોલિમરેઝ તેને ઓળખી શકતું નથી. આથી, ટ્રાન્સક્રિપ્શન પ્રક્રિયા શરૂ થઈ શકતી નથી, જેથી અનિશ્ચિતતા ઉત્પન્ન થાય છે. A) ખોટું છે કારણ કે મિથાઇલેશન સીધો જ પ્રભાવ પાડે છે. B) ખોટું છે કારણ કે મિથાઇલેશન RNA પોલિમરેઝની સક્રિયતા વધારતું નથી. D) ખોટું છે કારણ કે મિથાઇલેશન DNAની દિશામાં ફેરફાર કરતું નથી, પરંતુ રચનામાં ફેરફાર કરે છે.", "ncert_ref": "Class XII - Chapter 6: અનુવંશિકતા અને પરિવર્તન", "difficulty": "Hard", "num": 11}, {"question": "એક જીવમાં, ટ્રાન્સલેશન દરમિયાન, tRNA એ અયોગ્ય એમિનો એસિડ લાવે છે, જ્યારે mRNA પર કોડોન યોગ્ય રીતે વાંચવામાં આવે છે. આ અનિશ્ચિતતાનું મુખ્ય કારણ કયું હોઈ શકે?", "options": ["A) tRNA પર એન્ટિકોડોનની ભૂલભરેલી નકલ", "B) એમિનો એસિડને tRNA સાથે જોડવાની એમિનોએસિલ-tRNA સિંથેટેઝની ભૂલ", "C) રાઇબોઝોમની રચનામાં ત્રુટિ", "D) mRNAની અસ્થિરતા"], "correct": 1, "explanation": "એમિનો એસિડને tRNA સાથે જોડવાની એમિનોએસિલ-tRNA સિંથેટેઝની ભૂલને કારણે અયોગ્ય એમિનો એસિડ લાવવામાં આવે છે. A) ખોટું છે કારણ કે એન્ટિકોડોનની ભૂલભરેલી નકલ એ mRNA કોડોનને અયોગ્ય રીતે ઓળખવાનું કારણ બને, પરંતુ અહીં કોડોન યોગ્ય રીતે વાંચવામાં આવે છે. C) ખોટું છે કારણ કે રાઇબોઝોમની રચનામાં ત્રુટિ એ ટ્રાન્સલેશન પ્રક્રિયાને અસર કરે, પરંતુ અયોગ્ય એમિનો એસિડ લાવવાનું કારણ ન બને. D) ખોટું છે કારણ કે mRNAની અસ્થિરતા એ ટ્રાન્સલેશનને અવરોધે, પરંતુ અયોગ્ય એમિનો એસિડ લાવવાનું કારણ ન બને.", "ncert_ref": "Class XII - Chapter 6: અનુવંશિકતા અને પરિવર્તન", "difficulty": "Hard", "num": 12}, {"question": "એક કોષમાં, DNA મરામત પ્રક્રિયા દરમિયાન, થાયલી ડાયમરની મરામત ન થાય ત્યારે કયા પ્રકારની અનિશ્ચિતતા ઉત્પન્ન થાય છે?", "options": ["A) પોઇન્ટ મ્યુટેશન", "B) ફ્રેમશિફ્ટ મ્યુટેશન", "C) ડિલીશન મ્યુટેશન", "D) ક્રોસિંગ ઓવર"], "correct": 0, "explanation": "થાયલી ડાયમરની મરામત ન થાય ત્યારે, DNA પોલિમરેઝ એ ભૂલભરેલી નકલ કરે છે, જેથી પોઇન્ટ મ્યુટેશન ઉત્પન્ન થાય છે. B) ખોટું છે કારણ કે ફ્રેમશિફ્ટ મ્યુટેશન એ ઇન્સર્શન અથવા ડિલીશનને કારણે થાય છે. C) ખોટું છે કારણ કે ડિલીશન મ્યુટેશન એ ન્યુક્લિયોટાઇડના ગુમાવવાને કારણે થાય છે. D) ખોટું છે કારણ કે ક્રોસિંગ ઓવર એ મિયોસિસ દરમિયાન થતી ઘટના છે.", "ncert_ref": "Class XII - Chapter 6: અનુવંશિકતા અને પરિવર્તન", "difficulty": "Hard", "num": 13}, {"question": "એક જીવમાં, જનીનની અભિવ્યક્તિ દરમિયાન, ટ્રાન્સક્રિપ્શન ફેક્ટર એ પ્રમોટર પ્રદેશને યોગ્ય રીતે ઓળખી શકતું નથી. આ અનિશ્ચિતતાનું મુખ્ય કારણ કયું હોઈ શકે?", "options": ["A) ટ્રાન્સક્રિપ્શન ફેક્ટરની રચનામાં ત્રુટિ", "B) પ્રમોટર પ્રદેશમાં મ્યુટેશન", "C) DNAની મિથાઇલેશન", "D) RNA પોલિમરેઝની અભાવ"], "correct": 1, "explanation": "પ્રમોટર પ્રદેશમાં મ્યુટેશનને કારણે ટ્રાન્સક્રિપ્શન ફેક્ટર એ પ્રમોટર પ્રદેશને ઓળખી શકતું નથી. A) ખોટું છે કારણ કે ટ્રાન્સક્રિપ્શન ફેક્ટરની રચનામાં ત્રુટિ એ તેની ક્રિયા પર અસર કરે, પરંતુ પ્રમોટર પ્રદેશને ઓળખવાનું કારણ ન બને. C) ખોટું છે કારણ કે DNAની મિથાઇલેશન એ જીનની અભિવ્યક્તિને અવરોધે, પરંતુ પ્રમોટર પ્રદેશને ઓળખવાનું કારણ ન બને. D) ખોટું છે કારણ કે RNA પોલિમરેઝની અભાવ એ ટ્રાન્સક્રિપ્શન પ્રક્રિયાને અવરોધે, પરંતુ પ્રમોટર પ્રદેશને ઓળખવાનું કારણ ન બને.", "ncert_ref": "Class XII - Chapter 6: અનુવંશિકતા અને પરિવર્તન", "difficulty": "Hard", "num": 14}, {"question": "એક કોષમાં, પ્રોટીન સંશ્લેષણ દરમિયાન, રાઇબોઝોમ એ mRNA પરના સ્ટોપ કોડોનને ઓળખી શકતું નથી. આ અનિશ્ચિતતાનું મુખ્ય કારણ કયું હોઈ શકે?", "options": ["A) mRNA પર સ્ટોપ કોડોનની અભાવ", "B) રાઇબોઝોમની રચનામાં ત્રુટિ", "C) રિલીઝ ફેક્ટરની અભાવ", "D) tRNAની અભાવ"], "correct": 2, "explanation": "રિલીઝ ફેક્ટરની અભાવને કારણે રાઇબોઝોમ એ સ્ટોપ કોડોનને ઓળખી શકતું નથી, જેથી પ્રોટીન સંશ્લેષણ ચાલુ રહે છે. A) ખોટું છે કારણ કે mRNA પર સ્ટોપ કોડોન હાજર હોય છે, પરંતુ રાઇબોઝોમ તેને ઓળખી શકતું નથી. B) ખોટું છે કારણ કે રાઇબોઝોમની રચનામાં ત્રુટિ એ ટ્રાન્સલેશન પ્રક્રિયાને અસર કરે, પરંતુ સ્ટોપ કોડોનને ઓળખવાનું કારણ ન બને. D) ખોટું છે કારણ કે tRNAની અભાવ એ એમિનો એસિડ લાવવાને અસર કરે, પરંતુ સ્ટોપ કોડોનને ઓળખવાનું કારણ ન બને.", "ncert_ref": "Class XII - Chapter 6: અનુવંશિકતા અને પરિવર્તન", "difficulty": "Hard", "num": 15}, {"question": "ટ્રાન્સલેશન દરમિયાન, રાઇબોઝોમ દ્વારા mRNAની વાંચન દરમિયાન અનિશ્ચિતતા ઉત્પન્ન થાય છે. આ અનિશ્ચિતતાનું સૌથી વધુ સંભવિત કારણ કયું હશે?", "options": ["A) mRNA પર અસ્પષ્ટ કોડોનની હાજરી", "B) tRNAની અછત અથવા તેની ભૂલભરેલી જોડણી", "C) રાઇબોઝોમલ સબયુનિટની અપૂર્ણ અસેમ્બલી", "D) એમિનો એસિડની અછત"], "correct": 1, "explanation": "ટ્રાન્સલેશન દરમિયાન, tRNAની ભૂલભરેલી જોડણી અથવા અછતને કારણે રાઇબોઝોમ દ્વારા mRNAની વાંચનમાં અનિશ્ચિતતા ઉત્પન્ન થાય છે. tRNA એ એમિનો એસિડને mRNA પરના કોડોન સાથે જોડે છે, અને જો tRNA યોગ્ય રીતે કામ ન કરે તો ભૂલ થાય છે. A) mRNA પર અસ્પષ્ટ કોડોન હોવું શક્ય નથી, કારણ કે જેનેટિક કોડ યુનિવર્સલ અને અસ્પષ્ટ છે. C) રાઇબોઝોમલ સબયુનિટની અપૂર્ણ અસેમ્બલી ટ્રાન્સલેશનને અટકાવી શકે, પરંતુ તે અનિશ્ચિતતા ઉત્પન્ન કરતું નથી. D) એમિનો એસિડની અછત ટ્રાન્સલેશનને ધીમું પાડી શકે, પરંતુ અનિશ્ચિતતા ઉત્પન્ન કરતી નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 16}, {"question": "DNA પુનરાવર્તન (રેપ્લિકેશન) દરમિયાન, DNA પોલિમરેઝ દ્વારા ભૂલ થવાનું મુખ્ય કારણ કયું છે?", "options": ["A) DNA પોલિમરેઝની ઉત્સેચકીય ક્રિયામાં તાપમાનનો પ્રભાવ", "B) DNA પોલિમરેઝ પાસે 3' → 5' એક્સોન્યુક્લિયેઝ ક્રિયા ન હોવી", "C) DNA ટેમ્પલેટ પર અસાધારણ ન્યુક્લિયોટાઇડની હાજરી", "D) DNA પોલિમરેઝની ઉત્સેચકીય ક્રિયામાં pHનો પ્રભાવ"], "correct": 1, "explanation": "DNA પોલિમરેઝ પાસે 3' → 5' એક્સોન્યુક્લિયેઝ ક્રિયા હોવી જરૂરી છે, જેથી તે ભૂલ થાય ત્યારે તરત જ તેને દૂર કરી શકે. જો આ ક્રિયા ન હોય તો ભૂલો સુધારાઈ નહીં અને અનિશ્ચિતતા ઉત્પન્ન થાય. A) અને D) તાપમાન અને pHનો પ્રભાવ DNA પોલિમરેઝની ક્રિયા પર થાય છે, પરંતુ તે મુખ્ય કારણ નથી. C) અસાધારણ ન્યુક્લિયોટાઇડની હાજરી ભૂલનું કારણ બની શકે, પરંતુ તે મુખ્ય કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 17}, {"question": "ટ્રાન્સક્રિપ્શન દરમિયાન, RNA પોલિમરેઝ દ્વારા પ્રમોટર પ્રદેશની ઓળખમાં ભૂલ થવાનું કારણ કયું હશે?", "options": ["A) પ્રમોટર પ્રદેશમાં મ્યુટેશન હોવું", "B) RNA પોલિમરેઝની ઉત્સેચકીય ક્રિયામાં તાપમાનનો પ્રભાવ", "C) DNA ટેમ્પલેટ પર અસાધારણ ન્યુક્લિયોટાઇડની હાજરી", "D) સિગ્મા ફેક્ટરની અછત"], "correct": 3, "explanation": "સિગ્મા ફેક્ટર RNA પોલિમરેઝને પ્રમોટર પ્રદેશની ઓળખ કરવામાં મદદ કરે છે. જો સિગ્મા ફેક્ટરની અછત હોય તો RNA પોલિમરેઝ પ્રમોટર પ્રદેશને ઓળખી શકતું નથી, જેથી ટ્રાન્સક્રિપ્શનમાં અનિશ્ચિતતા ઉત્પન્ન થાય. A) પ્રમોટર પ્રદેશમાં મ્યુટેશન હોવું પણ ભૂલનું કારણ બની શકે, પરંતુ તે સિગ્મા ફેક્ટરની અછત જેટલું મહત્વનું નથી. B) અને C) તાપમાન અને અસાધારણ ન્યુક્લિયોટાઇડનો પ્રભાવ ટ્રાન્સક્રિપ્શન પર થાય છે, પરંતુ તે મુખ્ય કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 18}, {"question": "પ્રોટીન સંશ્લેષણ દરમિયાન, રાઇબોઝોમ દ્વારા mRNAની વાંચનમાં ભૂલ થવાનું કારણ કયું હશે જ્યારે tRNA યોગ્ય એમિનો એસિડ લાવે છે?", "options": ["A) mRNA પર અયોગ્ય સ્ટોપ કોડોનની હાજરી", "B) રાઇબોઝોમલ RNA (rRNA)માં મ્યુટેશન હોવું", "C) એમિનો એસિડની અછત", "D) tRNAની અછત"], "correct": 1, "explanation": "rRNA રાઇબોઝોમનું મહત્વનું ઘટક છે અને તે mRNAની વાંચનમાં મહત્વની ભૂમિકા ભજવે છે. જો rRNAમાં મ્યુટેશન હોય તો રાઇબોઝોમ mRNAની વાંચનમાં ભૂલ કરી શકે, જ્યારે tRNA યોગ્ય એમિનો એસિડ લાવે છે. A) અયોગ્ય સ્ટોપ કોડોનની હાજરી ટ્રાન્સલેશનને અટકાવી શકે, પરંતુ તે ભૂલનું કારણ નથી. C) અને D) એમિનો એસિડ અથવા tRNAની અછત ટ્રાન્સલેશનને અટકાવી શકે, પરંતુ ભૂલનું કારણ નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 19}, {"question": "DNA મરામત પ્રક્રિયા દરમિયાન, થાયમીન ડાયમરની મરામત ન થવાનું કારણ કયું હશે?", "options": ["A) ફોટોલિયેઝ ઉત્સેચકની અછત", "B) DNA પોલિમરેઝની ઉત્સેચકીય ક્રિયામાં તાપમાનનો પ્રભાવ", "C) DNA ટેમ્પલેટ પર અસાધારણ ન્યુક્લિયોટાઇડની હાજરી", "D) એક્સોન્યુક્લિયેઝ ઉત્સેચકની અછત"], "correct": 0, "explanation": "થાયમીન ડાયમરની મરામત માટે ફોટોલિયેઝ ઉત્સેચક જરૂરી છે. જો ફોટોલિયેઝની અછત હોય તો થાયમીન ડાયમરની મરામત ન થાય અને અનિશ્ચિતતા ઉત્પન્ન થાય. B) DNA પોલિમરેઝની ક્રિયા પર તાપમાનનો પ્રભાવ પડે છે, પરંતુ તે થાયમીન ડાયમરની મરામત સાથે સંબંધિત નથી. C) અસાધારણ ન્યુક્લિયોટાઇડની હાજરી ભૂલનું કારણ બની શકે, પરંતુ તે થાયમીન ડાયમરની મરામત સાથે સંબંધિત નથી. D) એક્સોન્યુક્લિયેઝ ઉત્સેચક DNA પુનરાવર્તન દરમિયાન ભૂલો દૂર કરે છે, પરંતુ થાયમીન ડાયમરની મરામત માટે નથી.", "ncert_ref": "Class XII - Chapter 6: આણ્વિક આનુવંશિકતા", "difficulty": "Hard", "num": 20}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
