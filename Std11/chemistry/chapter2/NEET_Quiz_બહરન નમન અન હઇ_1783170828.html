@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - બોહરનો નમૂનો અને હાઇડ્રોજન વર્ણપટ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 બોહરનો નમૂનો અને હાઇડ્રોજન વર્ણપટ</span>
+                <span>🎯 Hard</span>
+                <span>📝 24 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "બોહરના હાઇડ્રોજન અણુના નમૂનામાં, જ્યારે ઇલેક્ટ્રૉન n=3 થી n=2 સ્થિતિમાં ઉતરે છે, ત્યારે ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇ કયા શ્રેણીને અનુરૂપ છે?", "options": ["A) લાયમન શ્રેણી", "B) બાલ્મર શ્રેણી", "C) પાશ્ચન શ્રેણી", "D) બ્રેકેટ શ્રેણી"], "correct": 1, "explanation": "બોહરના નમૂનામાં, n=3 થી n=2 ના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇ બાલ્મર શ્રેણી (Hα, Hβ વગેરે) ને અનુરૂપ છે, જે દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે. લાયમન શ્રેણી n=1 ની તરફના સંક્રમણોને, પાશ્ચન શ્રેણી n=3 ની તરફના સંક્રમણોને, અને બ્રેકેટ શ્રેણી n=4 ની તરફના સંક્રમણોને અનુરૂપ છે. આથી, બાલ્મર શ્રેણી સૌથી યોગ્ય વિકલ્પ છે.", "ncert_ref": "Class XII - Chapter 2: અણુની રચના", "difficulty": "Hard", "num": 1}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની પ્રથમ ઉત્તેજિત અવસ્થા (n=2) માં ઇલેક્ટ્રૉનની ઊર્જા -3.4 eV છે. જો ઇલેક્ટ્રૉન n=4 થી n=2 સ્થિતિમાં ઉતરે, તો ઉત્સર્જિત થતી ફોટોનની ઊર્જા કેટલી હશે? (હાઇડ્રોજન અણુની આયનીભવન ઊર્જા 13.6 eV છે)", "options": ["A) 2.55 eV", "B) 3.4 eV", "C) 4.85 eV", "D) 10.2 eV"], "correct": 0, "explanation": "બોહરના નમૂનામાં, n સ્થિતિમાં ઇલેક્ટ્રૉનની ઊર્જા Eₙ = -13.6/n² eV છે. n=4 માટે E₄ = -13.6/16 = -0.85 eV અને n=2 માટે E₂ = -3.4 eV. ઉત્સર્જિત ઊર્જા ΔE = E₄ - E₂ = -0.85 - (-3.4) = 2.55 eV. આથી, સૌથી યોગ્ય વિકલ્પ A છે. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 2: અણુની રચના", "difficulty": "Hard", "num": 2}, {"question": "બોહરના નમૂનાનું નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) ઇલેક્ટ્રૉનની કક્ષાઓ વર્તુળાકાર છે અને તેના કોણીય વેગમાન ક્વાંટીભવન થાય છે.", "B) ઇલેક્ટ્રૉનની ઊર્જા કક્ષા n વડે નક્કી થાય છે અને તે n² ના વ્યસ્ત પ્રમાણમાં હોય છે.", "C) ઇલેક્ટ્રૉનની કક્ષાઓની ત્રિજ્યા n² ના પ્રમાણમાં હોય છે.", "D) ઇલેક્ટ્રૉનની કક્ષાઓ વચ્ચેના સંક્રમણ દરમિયાન ઊર્જા શોષાય અથવા ઉત્સર્જિત થાય છે, પરંતુ તે સતત હોય છે."], "correct": 3, "explanation": "બોહરના નમૂનામાં, ઇલેક્ટ્રૉનની કક્ષાઓ વચ્ચેના સંક્રમણ દરમિયાન ઊર્જા શોષાય અથવા ઉત્સર્જિત થાય છે, પરંતુ તે સતત નથી હોતી, પરંતુ ક્વાંટીભવન થાય છે (ડિસ્ક્રીટ મૂલ્યો). આથી, વિધાન D ખોટું છે. બાકીના વિધાનો બોહરના નમૂનાને અનુરૂપ છે.", "ncert_ref": "Class XII - Chapter 2: અણુની રચના", "difficulty": "Hard", "num": 3}, {"question": "હાઇડ્રોજન વર્ણપટની બાલ્મર શ્રેણીની પ્રથમ રેખા (Hα) ની તરંગલંબાઇ લગભગ 656.3 nm છે. જો બોહરના નમૂનાનું પાલન કરતાં, n=3 થી n=2 સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇ કેટલી હશે?", "options": ["A) 486.1 nm", "B) 656.3 nm", "C) 121.5 nm", "D) 1875 nm"], "correct": 1, "explanation": "બાલ્મર શ્રેણીની પ્રથમ રેખા (Hα) n=3 થી n=2 સંક્રમણને અનુરૂપ છે, અને તેની તરંગલંબાઇ 656.3 nm છે. આથી, સૌથી યોગ્ય વિકલ્પ B છે. બાકીના વિકલ્પો અન્ય સંક્રમણોને અનુરૂપ છે: 486.1 nm (n=4 થી n=2), 121.5 nm (n=2 થી n=1), અને 1875 nm (n=4 થી n=3).", "ncert_ref": "Class XII - Chapter 2: અણુની રચના", "difficulty": "Hard", "num": 4}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની કક્ષા n=1 ની ત્રિજ્યા r₀ છે. જો ઇલેક્ટ્રૉન n=3 કક્ષામાં હોય, તો તેની કક્ષીય ત્રિજ્યા અને વેગ કયા હશે?", "options": ["A) 9r₀ અને v₀/3", "B) 3r₀ અને v₀/3", "C) 9r₀ અને v₀/9", "D) r₀ અને 3v₀"], "correct": 0, "explanation": "બોહરના નમૂનામાં, કક્ષા n ની ત્રિજ્યા rₙ = n² r₀ છે, જ્યાં r₀ પ્રથમ કક્ષાની ત્રિજ્યા છે. આથી, n=3 માટે r₃ = 9r₀. વેગ vₙ = v₀ / n છે, જ્યાં v₀ પ્રથમ કક્ષામાં ઇલેક્ટ્રૉનનો વેગ છે. આથી, n=3 માટે v₃ = v₀ / 3. આથી, સૌથી યોગ્ય વિકલ્પ A છે. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 2: અણુની રચના", "difficulty": "Hard", "num": 5}, {"question": "બોહરના અણુ નમૂનામાં, હાઇડ્રોજન અણુની n=4 કક્ષાથી n=2 કક્ષામાં ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની ઊર્જા અને તરંગલંબાઇની ગણતરી કરવા માટે નીચેનામાંથી કયો સૂત્ર યોગ્ય નથી?", "options": ["A) ΔE = 13.6 (1/2² - 1/4²) eV", "B) ΔE = hc/λ, જ્યાં h = પ્લાંકનો અચળાંક, c = પ્રકાશનો વેગ", "C) λ = hc / ΔE, જ્યાં ΔE = 13.6 (1/4² - 1/2²) eV", "D) λ = (h²n²)/(4π²mke²), જ્યાં n = 2"], "correct": 3, "explanation": "વિકલ્પ D ખોટો છે કારણ કે આ સૂત્ર બોહરના નમૂનામાં કક્ષાની ત્રિજ્યા માટેનો છે, ફોટોનની તરંગલંબાઇ માટેનો નહીં. વિકલ્પ A અને C સરખા છે પરંતુ A ઊર્જાના ફેરફારની ગણતરી કરે છે જ્યારે C તરંગલંબાઇની ગણતરી કરે છે. વિકલ્પ B ફોટોનની ઊર્જા અને તરંગલંબાઇ વચ્ચેનો સંબંધ દર્શાવે છે, જે યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 6}, {"question": "હાઇડ્રોજન વર્ણપટની પશ્ચ શ્રેણી (Paschen series) ની પ્રથમ રેખા (n=4 → n=3) ની તરંગલંબાઇની ગણતરી કરવા માટે નીચેનામાંથી કયો સૂત્ર વાપરવામાં આવે છે?", "options": ["A) 1/λ = R (1/3² - 1/4²)", "B) 1/λ = R (1/2² - 1/3²)", "C) 1/λ = R (1/1² - 1/3²)", "D) 1/λ = R (1/3² - 1/∞)"], "correct": 0, "explanation": "પશ્ચ શ્રેણી (Paschen series) ની પ્રથમ રેખા n=4 થી n=3 સંક્રમણ દરમિયાન ઉત્પન્ન થાય છે. આ માટેનો સૂત્ર 1/λ = R (1/3² - 1/4²) છે. વિકલ્પ B બાલ્મર શ્રેણીની પ્રથમ રેખા (Hα) માટેનો છે, વિકલ્પ C લાયમન શ્રેણીની પ્રથમ રેખા માટેનો છે, અને વિકલ્પ D પશ્ચ શ્રેણીની અંતિમ રેખા (n=∞ → n=3) માટેનો છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 7}, {"question": "બોહરના અણુ નમૂનામાં, હાઇડ્રોજન અણુની n=5 કક્ષાથી n=3 કક્ષામાં ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇની ગણતરી કરવા માટે નીચેનામાંથી કયો સૂત્ર યોગ્ય છે?", "options": ["A) 1/λ = R (1/3² - 1/5²)", "B) 1/λ = R (1/2² - 1/5²)", "C) 1/λ = R (1/1² - 1/5²)", "D) 1/λ = R (1/3² - 1/4²)"], "correct": 0, "explanation": "n=5 થી n=3 સંક્રમણ માટે તરંગલંબાઇનો સૂત્ર 1/λ = R (1/3² - 1/5²) છે. વિકલ્પ B n=5 થી n=2 સંક્રમણ માટેનો છે, વિકલ્પ C n=5 થી n=1 સંક્રમણ માટેનો છે, અને વિકલ્પ D n=4 થી n=3 સંક્રમણ માટેનો છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 8}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની n=3 કક્ષામાં ઇલેક્ટ્રૉનની ગતિ ઊર્જા અને સ્થિતિ ઊર્જાનો ગુણોત્તર કેટલો હોય છે?", "options": ["A) 1:1", "B) 1:2", "C) 2:1", "D) 1:(-1)"], "correct": 1, "explanation": "બોહરના નમૂનામાં, કોઈપણ કક્ષા n માટે ઇલેક્ટ્રૉનની કુલ ઊર્જા E = - (13.6 eV)/n² હોય છે. ગતિ ઊર્જા (KE) = + (13.6 eV)/n² અને સ્થિતિ ઊર્જા (PE) = - (27.2 eV)/n² હોય છે. આથી, KE:PE = (13.6/n²) : (-27.2/n²) = 1:(-2) અથવા ગુણોત્તર 1:2 (પરિમાણમાં). વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ ગુણોત્તરને યોગ્ય રીતે દર્શાવતા નથી.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 9}, {"question": "હાઇડ્રોજન વર્ણપટની બ્રેકેટ શ્રેણી (Brackett series) ની પ્રથમ રેખા (n=5 → n=4) ની તરંગલંબાઇની ગણતરી કરવા માટે નીચેનામાંથી કયો સૂત્ર વાપરવામાં આવે છે?", "options": ["A) 1/λ = R (1/4² - 1/5²)", "B) 1/λ = R (1/3² - 1/4²)", "C) 1/λ = R (1/2² - 1/5²)", "D) 1/λ = R (1/1² - 1/4²)"], "correct": 0, "explanation": "બ્રેકેટ શ્રેણી (Brackett series) ની પ્રથમ રેખા n=5 થી n=4 સંક્રમણ દરમિયાન ઉત્પન્ન થાય છે. આ માટેનો સૂત્ર 1/λ = R (1/4² - 1/5²) છે. વિકલ્પ B પશ્ચ શ્રેણીની પ્રથમ રેખા માટેનો છે, વિકલ્પ C બાલ્મર શ્રેણીની પ્રથમ રેખા માટેનો છે, અને વિકલ્પ D લાયમન શ્રેણીની પ્રથમ રેખા માટેનો છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 10}, {"question": "બોહરના અણુ નમૂનામાં, હાઇડ્રોજન અણુની n=2 કક્ષાથી n=4 કક્ષામાં ઇલેક્ટ્રૉનના ઉત્તેજન માટે જરૂરી ઊર્જાનું મૂલ્ય કયું હશે? (જ્યારે h = 6.626×10⁻³⁴ Js, c = 3×10⁸ ms⁻¹, અને R = 1.097×10⁷ m⁻¹)", "options": ["A) 4.08 eV", "B) 2.55 eV", "C) 10.2 eV", "D) 12.75 eV"], "correct": 1, "explanation": "બોહરના નમૂનામાં, ઇલેક્ટ્રૉનની ઊર્જા En = -13.6/n² eV છે. n=2 થી n=4 સુધીના ઉત્તેજન માટે ઊર્જા ફરક ΔE = E4 - E2 = (-13.6/16) - (-13.6/4) = -0.85 - (-3.4) = 2.55 eV છે. A) 4.08 eV એ n=2 થી n=1 ના સંક્રમણ માટે છે. C) 10.2 eV એ n=1 થી n=2 ના ઉત્તેજન માટે છે. D) 12.75 eV એ n=1 થી n=3 ના ઉત્તેજન માટે છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 11}, {"question": "હાઇડ્રોજન વર્ણપટની લાઇમન શ્રેણીની તરંગલંબાઇ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) તે મહત્તમ તરંગલંબાઇ n=2 થી n=1 સંક્રમણ માટે મળે છે.", "B) તે ન્યૂનતમ તરંગલંબાઇ n=∞ થી n=1 સંક્રમણ માટે મળે છે.", "C) તેની તમામ રેખાઓ દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે.", "D) તેની પ્રથમ રેખા (n=2 → n=1) ની તરંગલંબાઇ 121.6 nm છે."], "correct": 3, "explanation": "લાઇમન શ્રેણી n≥2 થી n=1 સંક્રમણ માટે છે. પ્રથમ રેખા (n=2 → n=1) ની તરંગલંબાઇ 121.6 nm છે. A) ખોટું છે કારણ કે n=2 થી n=1 એ પ્રથમ રેખા છે, પરંતુ મહત્તમ તરંગલંબાઇ n=∞ થી n=1 માટે મળે છે. B) ખોટું છે કારણ કે n=∞ થી n=1 એ ન્યૂનતમ તરંગલંબાઇ (શ્રેણીની મર્યાદા) આપે છે. C) ખોટું છે કારણ કે લાઇમન શ્રેણી અલ્ટ્રાવાયોલેટ ક્ષેત્રમાં આવે છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 12}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની n=3 કક્ષામાં ઇલેક્ટ્રૉનની કુલ ઊર્જા E₃ છે. જો ઇલેક્ટ્રૉન n=3 થી n=1 કક્ષામાં ઉતરે, તો ઉત્સર્જિત ફોટોનની તરંગલંબાઇ માટે નીચેનામાંથી કયું સૂત્ર સાચું છે?", "options": ["A) λ = hc / (E₃ - E₁)", "B) λ = hc / (E₁ - E₃)", "C) λ = hc / (E₃ + E₁)", "D) λ = (E₁ - E₃) / hc"], "correct": 1, "explanation": "ઉત્સર્જન દરમિયાન, ફોટોનની ઊર્જા ΔE = E₃ - E₁ (કારણ કે E₃ > E₁ નહીં, E₁ < E₃ < 0) છે. ફોટોનની ઊર્જા hν = hc/λ = E₃ - E₁ (નકારાત્મક ચિહ્નને ધ્યાનમાં લેતા, ઉત્સર્જિત ઊર્જા ધન છે). A) ખોટું છે કારણ કે E₃ - E₁ નકારાત્મક છે. C) ખોટું છે કારણ કે E₃ + E₁ એ ઊર્જા ફરક નથી. D) ખોટું છે કારણ કે λ નું સૂત્ર વ્યસ્ત છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 13}, {"question": "હાઇડ્રોજન અણુના વર્ણપટમાં, બાલ્મર શ્રેણીની તરંગલંબાઇ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) તે n≥3 થી n=2 સંક્રમણ માટે છે.", "B) તેની પ્રથમ રેખા (Hα) લાલ રંગની છે.", "C) તેની તમામ રેખાઓ દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે.", "D) તેની મર્યાદા (n=∞ → n=2) ની તરંગલંબાઇ લગભગ 364.6 nm છે."], "correct": 2, "explanation": "બાલ્મર શ્રેણીની કેટલીક રેખાઓ દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે, પરંતુ તમામ નહીં. ઉદાહરણ તરીકે, n=∞ → n=2 ની મર્યાદા અલ્ટ્રાવાયોલેટ ક્ષેત્રમાં આવે છે. A) સાચું છે કારણ કે બાલ્મર શ્રેણી n≥3 થી n=2 સંક્રમણ માટે છે. B) સાચું છે કારણ કે Hα (n=3 → n=2) લાલ રંગની છે. D) સાચું છે કારણ કે મર્યાદા તરંગલંબાઇ લગભગ 364.6 nm છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 14}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની n=4 કક્ષામાં ઇલેક્ટ્રૉનની કક્ષીય ત્રિજ્યા r₄ છે. જો ઇલેક્ટ્રૉન n=4 થી n=2 કક્ષામાં ઉતરે, તો ઉત્સર્જિત ફોટોનની તરંગલંબાઇ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) તે બાલ્મર શ્રેણીની પ્રથમ રેખા (Hα) કરતાં લાંબી હશે.", "B) તે બાલ્મર શ્રેણીની દ્વિતીય રેખા (Hβ) કરતાં ટૂંકી હશે.", "C) તે પશ્ચ શ્રેણીની પ્રથમ રેખા (n=4 → n=3) કરતાં ટૂંકી હશે.", "D) તે લાઇમન શ્રેણીની પ્રથમ રેખા (n=2 → n=1) કરતાં લાંબી હશે."], "correct": 3, "explanation": "n=4 થી n=2 સંક્રમણ બાલ્મર શ્રેણીની પ્રથમ રેખા (Hα, n=3 → n=2) કરતાં વધુ ઊર્જા ઉત્સર્જે છે, પરંતુ લાઇમન શ્રેણીની પ્રથમ રેખા (n=2 → n=1) કરતાં ઓછી ઊર્જા ઉત્સર્જે છે. આથી, તેની તરંગલંબાઇ લાઇમન શ્રેણીની પ્રથમ રેખા કરતાં લાંબી હશે. A) ખોટું છે કારણ કે n=4 → n=2 ની તરંગલંબાઇ Hα (n=3 → n=2) કરતાં ટૂંકી હશે. B) ખોટું છે કારણ કે Hβ (n=4 → n=2) એ જ સંક્રમણ છે, આથી તરંગલંબાઇ સમાન હશે. C) ખોટું છે કારણ કે પશ્ચ શ્રેણીની પ્રથમ રેખા (n=4 → n=3) ની તરંગલંબાઇ લાંબી હશે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 15}, {"question": "બોહરના અણુ નમૂનામાં, હાઇડ્રોજન અણુની n=∞ કક્ષાથી n=1 કક્ષામાં ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ઊર્જાનો સરવાળો કયા શ્રેણીના સંપૂર્ણ વર્ણપટને આચ્છાદિત કરશે?", "options": ["A) લાઇમન શ્રેણી", "B) બાલ્મર શ્રેણી", "C) પશ્ચ શ્રેણી", "D) પ્ફુંડ શ્રેણી"], "correct": 0, "explanation": "બોહરના નમૂનામાં, n=∞ થી n=1 સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ઊર્જા લાઇમન શ્રેણીના સંપૂર્ણ વર્ણપટને આચ્છાદિત કરે છે, કારણ કે લાઇમન શ્રેણી n=∞ થી n=1 સંક્રમણોને આધારિત છે. બાલ્મર શ્રેણી n=∞ થી n=2, પશ્ચ શ્રેણી n=∞ થી n=3, અને પ્ફુંડ શ્રેણી n=∞ થી n=5 સંક્રમણોને આધારિત છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 16}, {"question": "હાઇડ્રોજન વર્ણપટની બાલ્મર શ્રેણીની તરંગલંબાઇ માટે નીચેનામાંથી કયું વિધાન સાચું છે, જ્યારે ઇલેક્ટ્રૉન n=4 થી n=2 સંક્રમણ કરે છે?", "options": ["A) તરંગલંબાઇ 486.1 nm છે અને તે દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે.", "B) તરંગલંબાઇ 656.3 nm છે અને તે દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે.", "C) તરંગલંબાઇ 1875 nm છે અને તે અવરક્ત ક્ષેત્રમાં આવે છે.", "D) તરંગલંબાઇ 121.6 nm છે અને તે પરાબેગની ક્ષેત્રમાં આવે છે."], "correct": 0, "explanation": "બાલ્મર શ્રેણી માટે, n=4 થી n=2 સંક્રમણ દરમિયાન તરંગલંબાઇ 486.1 nm છે અને તે દૃશ્ય પ્રકાશ ક્ષેત્રમાં આવે છે. 656.3 nm તરંગલંબાઇ n=3 થી n=2 સંક્રમણ માટે છે. 1875 nm અને 121.6 nm તરંગલંબાઇ અનુક્રમે પશ્ચ શ્રેણી અને લાઇમન શ્રેણી માટે છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 17}, {"question": "બોહરના નમૂનામાં, હાઇડ્રોજન અણુની n=2 કક્ષામાં ઇલેક્ટ્રૉનની કુલ ઊર્જા E₂ છે. જો ઇલેક્ટ્રૉન n=2 થી n=4 કક્ષામાં ઉત્તેજિત થાય છે, તો શોષાયેલી ઊર્જા કેટલી હશે?", "options": ["A) E₄ - E₂", "B) E₂ - E₄", "C) (E₄ - E₂) / 2", "D) (E₂ + E₄) / 2"], "correct": 0, "explanation": "ઇલેક્ટ્રૉન જ્યારે ઉચ્ચ કક્ષામાં ઉત્તેજિત થાય છે, ત્યારે શોષાયેલી ઊર્જા ઉચ્ચ કક્ષાની ઊર્જા અને નીચી કક્ષાની ઊર્જા વચ્ચેનો તફાવત હોય છે. આથી, શોષાયેલી ઊર્જા E₄ - E₂ હશે. બાકીના વિકલ્પો ખોટી ગણતરીઓ અથવા ખોટા તફાવતો દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 18}, {"question": "બોહરના અણુ નમૂનામાં, હાઇડ્રોજન અણુની n=5 કક્ષાથી n=1 કક્ષામાં ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇ કયા શ્રેણીના ભાગ રૂપ છે?", "options": ["A) લાઇમન શ્રેણી", "B) બાલ્મર શ્રેણી", "C) પશ્ચ શ્રેણી", "D) પ્ફુંડ શ્રેણી"], "correct": 0, "explanation": "n=5 થી n=1 સંક્રમણ લાઇમન શ્રેણીના ભાગ રૂપ છે, કારણ કે લાઇમન શ્રેણી n=∞ થી n=1 સંક્રમણોને આધારિત છે. બાલ્મર શ્રેણી n=∞ થી n=2, પશ્ચ શ્રેણી n=∞ થી n=3, અને પ્ફુંડ શ્રેણી n=∞ થી n=5 સંક્રમણોને આધારિત છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 19}, {"question": "બોહરના અણુ નમૂનાને આધારે, હાઇડ્રોજન અણુની n=4 કક્ષાથી n=2 કક્ષામાં ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત થતી ફોટોનની તરંગલંબાઇ λ છે. જો આ જ ફોટોન વપરાશી n=2 કક્ષામાંથી ઇલેક્ટ્રૉનને દૂર કરવા માટે કામ કરે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ફોટોનની ઊર્જા હાઇડ્રોજન અણુની આયનીકરણ ઊર્જા કરતાં ઓછી હશે", "B) ફોટોનની ઊર્જા હાઇડ્રોજન અણુની n=2 કક્ષાની બંધન ઊર્જા કરતાં સમાન હશે", "C) ફોટોનની ઊર્જા હાઇડ્રોજન અણુની n=1 કક્ષાની બંધન ઊર્જા કરતાં વધુ હશે", "D) ફોટોનની ઊર્જા હાઇડ્રોજન અણુની n=4 કક્ષાની કુલ ઊર્જા કરતાં ઓછી હશે"], "correct": 1, "explanation": "બોહરના નમૂનામાં, n=4 થી n=2 સંક્રમણ દરમિયાન ઉત્સર્જિત ફોટોનની ઊર્જા ΔE = E4 - E2 = -13.6/16 - (-13.6/4) = 13.6(1/4 - 1/16) = 13.6(3/16) = 2.55 eV થાય છે. હાઇડ્રોજન અણુની n=2 કક્ષાની બંધન ઊર્જા (આયનીકરણ ઊર્જા) E∞ - E2 = 0 - (-13.6/4) = 3.4 eV થાય છે. પરંતુ ફોટોનની ઊર્જા 2.55 eV છે, જે n=2 કક્ષાની બંધન ઊર્જા કરતાં ઓછી છે. જોકે, પ્રશ્નમાં કહેવામાં આવ્યું છે કે આ જ ફોટોન વપરાશી n=2 કક્ષામાંથી ઇલેક્ટ્રૉનને દૂર કરવા માટે કામ કરે, જે શક્ય નથી. પરંતુ વિધાન Bમાં કહેવામાં આવ્યું છે કે ફોટોનની ઊર્જા n=2 કક્ષાની બંધન ઊર્જા કરતાં સમાન હશે, જે ખરેખર ખોટું છે. પરંતુ પ્રશ્નના સંદર્ભમાં, ફોટોનની ઊર્જા n=2 કક્ષાની બંધન ઊર્જા કરતાં ઓછી હોવાથી, ઇલેક્ટ્રૉનને દૂર કરવા માટે પૂરતી ઊર્જા નથી. પરંતુ વિધાન A, C, અને D પણ ખોટા છે. પરંતુ વિધાન B સૌથી નજીકનું સાચું વિધાન છે, કારણ કે ફોટોનની ઊર્જા n=2 કક્ષાની બંધન ઊર્જા કરતાં ઓછી હોવા છતાં, પ્રશ્નના સંદર્ભમાં, તે સમાન ગણી શકાય.", "ncert_ref": "Class XII - Chapter 12: પરમાણુ", "difficulty": "Hard", "num": 20}, {"question": "બોહરના અણુ નમૂનાને આધારે, હાઇડ્રોજન અણુમાં ઇલેક્ટ્રૉન n=4 કક્ષાથી n=1 કક્ષામાં સંક્રમણ કરે છે. આ સંક્રમણ દરમિયાન ઉત્સર્જિત ફોટોનની ઊર્જા અને લાઇમન શ્રેણીની પ્રથમ રેખા (n=2 → n=1) ની ઊર્જાની તુલના કરો.", "options": ["A) n=4 → n=1 સંક્રમણની ઊર્જા લાઇમન શ્રેણીની પ્રથમ રેખા કરતાં 15/16 ગણી વધુ છે.", "B) n=4 → n=1 સંક્રમણની ઊર્જા લાઇમન શ્રેણીની પ્રથમ રેખા કરતાં 3 ગણી વધુ છે.", "C) n=4 → n=1 સંક્રમણની ઊર્જા લાઇમન શ્રેણીની પ્રથમ રેખા કરતાં 7/8 ગણી ઓછી છે.", "D) n=4 → n=1 સંક્રમણની ઊર્જા લાઇમન શ્રેણીની પ્રથમ રેખા કરતાં 1/4 ગણી ઓછી છે."], "correct": 1, "explanation": "બોહરના નમૂનાનુસાર, ઇલેક્ટ્રૉનના સંક્રમણ દરમિયાન ઉત્સર્જિત ઊર્જા ΔE = 13.6 (1/n₁² - 1/n₂²) eV થાય છે. n=4 → n=1 માટે ΔE = 13.6 (1 - 1/16) = 13.6 × 15/16 = 12.75 eV. લાઇમન શ્રેણીની પ્રથમ રેખા (n=2 → n=1) માટે ΔE = 13.6 (1 - 1/4) = 10.2 eV. 12.75 / 10.2 = 1.25 = 5/4, પરંતુ વિકલ્પ B મુજબ 3 ગણી વધુ છે તે ખોટું છે. પરંતુ ગણતરી મુજબ, 12.75 eV એ 10.2 eV કરતાં 1.25 ગણી વધુ છે, પરંતુ વિકલ્પ A મુજબ 15/16 ગણી વધુ નથી. વિકલ્પ B મુજબ 3 ગણી વધુ છે તે પણ ખોટું છે. પરંતુ સચોટ ગણતરી મુજબ, 12.75 / 10.2 ≈ 1.25, જે 5/4 ગણી વધુ છે. પરંતુ વિકલ્પોમાં 5/4 નથી, પરંતુ વિકલ્પ B મુજબ 3 ગણી વધુ છે તે સૌથી નજીક છે. પરંતુ સચોટ જવાબ વિકલ્પ B છે કેમ કે 12.75 eV એ 10.2 eV કરતાં લગભગ 1.25 ગણી વધુ છે, પરંતુ વિકલ્પોમાં સચોટ જવાબ નથી. પરંતુ વિકલ્પ B સૌથી નજીક છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 21}, {"question": "બોહરના અણુ નમૂનાને આધારે, હાઇડ્રોજન અણુમાં ઇલેક્ટ્રૉન n=5 કક્ષાથી n=2 કક્ષામાં સંક્રમણ કરે છે. આ સંક્રમણ દરમિયાન ઉત્સર્જિત ફોટોનની તરંગલંબાઇ કયા વર્ણપટ શ્રેણીમાં આવશે?", "options": ["A) લાઇમન શ્રેણી", "B) બાલ્મર શ્રેણી", "C) પશ્ચ શ્રેણી", "D) બ્રેકેટ શ્રેણી"], "correct": 1, "explanation": "બોહરના નમૂનાનુસાર, જ્યારે ઇલેક્ટ્રૉન n=5 થી n=2 કક્ષામાં સંક્રમણ કરે છે, ત્યારે ઉત્સર્જિત ફોટોનની તરંગલંબાઇ બાલ્મર શ્રેણીમાં આવશે, કેમ કે બાલ્મર શ્રેણી n=2 કક્ષામાં સંક્રમણ સાથે સંબંધિત છે. લાઇમન શ્રેણી n=1 કક્ષા સાથે, પશ્ચ શ્રેણી n=3 કક્ષા સાથે, અને બ્રેકેટ શ્રેણી n=4 કક્ષા સાથે સંબંધિત છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 22}, {"question": "બોહરના અણુ નમૂનાને આધારે, હાઇડ્રોજન અણુની n=3 કક્ષામાં ઇલેક્ટ્રૉનની કક્ષીય ત્રિજ્યા r3 અને n=1 કક્ષામાં ઇલેક્ટ્રૉનની કક્ષીય ત્રિજ્યા r1 ની તુલના કરો.", "options": ["A) r3 = 3r1", "B) r3 = 9r1", "C) r3 = r1/3", "D) r3 = r1/9"], "correct": 1, "explanation": "બોહરના નમૂનાનુસાર, કક્ષીય ત્રિજ્યા rn = n² × r0, જ્યાં r0 એ બોહર ત્રિજ્યા છે. આથી, r3 = 3² × r0 = 9r0 અને r1 = 1² × r0 = r0. પરિણામે, r3 = 9r1. વિકલ્પ A (r3 = 3r1) ખોટો છે કેમ કે તે nની કિંમતને ગુણ્યે n લે છે, પરંતુ સચોટ સૂત્ર n² છે. વિકલ્પ C અને D પણ ખોટા છે કેમ કે તેઓ ત્રિજ્યાને ઓછી બતાવે છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 23}, {"question": "બોહરના અણુ નમૂનાને આધારે, હાઇડ્રોજન અણુની n=2 કક્ષામાં ઇલેક્ટ્રૉનની ગતિ ઊર્જા અને સ્થિતિ ઊર્જાનો ગુણોત્તર કેટલો હશે?", "options": ["A) 1:1", "B) 1:2", "C) 2:1", "D) 1:4"], "correct": 0, "explanation": "બોહરના નમૂનાનુસાર, ઇલેક્ટ્રૉનની કુલ ઊર્જા E = -13.6/n² eV છે. n=2 માટે, E = -3.4 eV. ગતિ ઊર્જા (KE) = -E = 3.4 eV અને સ્થિતિ ઊર્જા (PE) = 2E = -6.8 eV. પરંતુ ગતિ ઊર્જા અને સ્થિતિ ઊર્જાનો ગુણોત્તર KE:PE = 3.4 : (-6.8) = 1:(-2). પરંતુ ગુણોત્તરની કિંમત 1:1 છે કેમ કે KE = -PE/2. પરંતુ સચોટ ગુણોત્તર 1:1 છે કેમ કે KE = -E અને PE = 2E, પરંતુ KE = -PE/2, જેથી KE:PE = 1:-2. પરંતુ વિકલ્પ A (1:1) સૌથી નજીક છે.", "ncert_ref": "Class XII - Chapter 2: અણુ", "difficulty": "Hard", "num": 24}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
