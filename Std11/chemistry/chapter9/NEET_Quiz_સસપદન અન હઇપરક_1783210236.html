@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન</span>
+                <span>🎯 Hard</span>
+                <span>📝 18 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "નીચેના પૈકી કયા અણુમાં હાઇપરકોન્જ્યુગેશનની ઘટના સૌથી વધુ સ્પષ્ટપણે જોવા મળે છે?", "options": ["A) એથીન (C₂H₄)", "B) એથેન (C₂H₆)", "C) એસિટિલીન (C₂H₂)", "D) બેન્ઝીન (C₆H₆)"], "correct": 1, "explanation": "હાઇપરકોન્જ્યુગેશન એ સિગ્મા બંધન ઇલેક્ટ્રોન અને પી-બંધન વચ્ચેની પરસ્પર ક્રિયા છે, જે એલ્કેનમાં (જેમ કે એથેન) સૌથી સ્પષ્ટ જોવા મળે છે. એથીન અને એસિટિલીનમાં પી-બંધનની હાજરી હોવા છતાં, હાઇપરકોન્જ્યુગેશન માટે સિગ્મા ઇલેક્ટ્રોનની ગતિશીલતા એથેન જેવા સંતૃપ્ત હાઇડ્રોકાર્બનમાં વધુ અસરકારક હોય છે. બેન્ઝીનમાં રેઝોનન્સ હાજર હોય છે, પરંતુ હાઇપરકોન્જ્યુગેશન એટલું પ્રબળ નથી.", "ncert_ref": "Class XI - રસાયણવિજ્ઞાન: કાર્બનિક રસાયણવિજ્ઞાનના મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 1}, {"question": "જ્યારે એલ્કીનમાં સંસ્પંદન થાય છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) બંધ લંબાઈમાં ફેરફાર થતો નથી", "B) અણુની સ્થિરતા ઘટે છે", "C) પી-બંધનની સાંદ્રતા સમગ્ર અણુમાં ફેલાય છે", "D) હાઇપરકોન્જ્યુગેશનની અસર વધુ પ્રબળ બને છે"], "correct": 2, "explanation": "સંસ્પંદનમાં, પી-બંધનની સાંદ્રતા સમગ્ર અણુમાં ફેલાઈ જાય છે, જેના કારણે બંધ લંબાઈ સરેરાશ થાય છે અને અણુની સ્થિરતા વધે છે. વિકલ્પ A ખોટો છે કારણ કે બંધ લંબાઈમાં ફેરફાર થાય છે. વિકલ્પ B ખોટો છે કારણ કે સ્થિરતા વધે છે. વિકલ્પ D ખોટો છે કારણ કે હાઇપરકોન્જ્યુગેશન એલ્કીન કરતાં એલ્કેનમાં વધુ પ્રબળ હોય છે.", "ncert_ref": "Class XI - રસાયણવિજ્ઞાન: કાર્બનિક રસાયણવિજ્ઞાનના મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 2}, {"question": "નીચેના પૈકી કયા અણુમાં હાઇપરકોન્જ્યુગેશનની અસર સૌથી ઓછી હશે?", "options": ["A) (CH₃)₃C⁺", "B) (CH₃)₂CH⁺", "C) CH₃CH₂⁺", "D) CH₃⁺"], "correct": 3, "explanation": "હાઇપરકોન્જ્યુગેશન માટે અલ્ફા-હાઇડ્રોજનની હાજરી જરૂરી છે. CH₃⁺માં કોઈ અલ્ફા-હાઇડ્રોજન નથી, તેથી હાઇપરકોન્જ્યુગેશનની અસર સૌથી ઓછી હશે. બાકીના વિકલ્પોમાં અલ્ફા-હાઇડ્રોજન હાજર છે, જે હાઇપરકોન્જ્યુગેશનને સક્રિય કરે છે.", "ncert_ref": "Class XI - રસાયણવિજ્ઞાન: કાર્બનિક રસાયણવિજ્ઞાનના મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 3}, {"question": "એક અણુમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેની હાજરી હોવાનું કયું ઉદાહરણ છે?", "options": ["A) બ્યુટા-1,3-ડાયીન", "B) એથીન", "C) બેન્ઝીન", "D) ટોલ્યુઈન"], "correct": 3, "explanation": "ટોલ્યુઈનમાં બેન્ઝીન રિંગમાં સંસ્પંદન અને મિથાઇલ સમૂહમાં હાઇપરકોન્જ્યુગેશન બંને હાજર છે. બ્યુટા-1,3-ડાયીનમાં ફક્ત સંસ્પંદન હોય છે, એથીનમાં ફક્ત હાઇપરકોન્જ્યુગેશનની શક્યતા ઓછી હોય છે, અને બેન્ઝીનમાં ફક્ત સંસ્પંદન હોય છે.", "ncert_ref": "Class XI - રસાયણવિજ્ઞાન: કાર્બનિક રસાયણવિજ્ઞાનના મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 4}, {"question": "નીચેના પૈકી કયું વિધાન સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન વચ્ચેનો ફરક સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) સંસ્પંદનમાં પી-બંધનની ક્રિયા હોય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં સિગ્મા બંધનની ક્રિયા હોય છે", "B) સંસ્પંદન ફક્ત એરોમેટિક અણુઓમાં જોવા મળે છે, જ્યારે હાઇપરકોન્જ્યુગેશન ફક્ત એલિફેટિક અણુઓમાં જોવા મળે છે", "C) સંસ્પંદન અણુની સ્થિરતા ઘટાડે છે, જ્યારે હાઇપરકોન્જ્યુગેશન સ્થિરતા વધારે છે", "D) સંસ્પંદનમાં ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં ઇલેક્ટ્રોનની લોકલાઇઝેશન થાય છે"], "correct": 0, "explanation": "સંસ્પંદનમાં પી-બંધનની ક્રિયા હોય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં સિગ્મા બંધનની ક્રિયા હોય છે. વિકલ્પ B ખોટો છે કારણ કે સંસ્પંદન એરોમેટિક અને એલિફેટિક બંને અણુઓમાં જોવા મળે છે. વિકલ્પ C ખોટો છે કારણ કે બંને ઘટનાઓ અણુની સ્થિરતા વધારે છે. વિકલ્પ D ખોટો છે કારણ કે બંને ઘટનાઓમાં ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે.", "ncert_ref": "Class XI - રસાયણવિજ્ઞાન: કાર્બનિક રસાયણવિજ્ઞાનના મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 5}, {"question": "નીચેના અણુઓમાંથી કયા અણુમાં સંસ્પંદનના કારણે બંધ લંબાઈ સમાન થાય છે અને હાઇપરકોન્જ્યુગેશનના કારણે સ્થિરતા વધે છે?", "options": ["A) બ્યુટા-1,3-ડાયીન", "B) પ્રોપીન", "C) એથિલીન", "D) બેઝીન"], "correct": 0, "explanation": "બ્યુટા-1,3-ડાયીનમાં સંસ્પંદનના કારણે C2-C3 બંધની લંબાઈ સિંગલ અને ડબલ બંધની વચ્ચેની હોય છે, જ્યારે હાઇપરકોન્જ્યુગેશનના કારણે અણુની સ્થિરતા વધે છે. પ્રોપીનમાં હાઇપરકોન્જ્યુગેશન હોય છે પરંતુ સંસ્પંદન નથી. એથિલીનમાં ફક્ત સંસ્પંદન હોય છે. બેઝીનમાં સંસ્પંદન હોય છે પરંતુ હાઇપરકોન્જ્યુગેશન નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 6}, {"question": "નીચેના પૈકી કયું વિધાન સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંને માટે સાચું છે?", "options": ["A) બંનેમાં π-ઇલેક્ટ્રોનની હાજરી જરૂરી છે", "B) બંનેમાં σ-બંધની ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે", "C) બંનેથી અણુની ઊર્જા ઘટે છે", "D) બંનેમાં સ્પી હાઇબ્રિડાઇઝેશન જરૂરી છે"], "correct": 2, "explanation": "સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેથી અણુની ઊર્જા ઘટે છે, જેથી સ્થિરતા વધે છે. સંસ્પંદનમાં π-ઇલેક્ટ્રોનની હાજરી જરૂરી છે, પરંતુ હાઇપરકોન્જ્યુગેશનમાં σ-બંધની ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે. સ્પી હાઇબ્રિડાઇઝેશન ફક્ત હાઇપરકોન્જ્યુગેશનમાં જરૂરી નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 7}, {"question": "નીચેના અણુઓમાંથી કયા અણુમાં હાઇપરકોન્જ્યુગેશનની અસર સંસ્પંદન કરતાં વધુ પ્રબળ હોય છે?", "options": ["A) એથિલીન", "B) પ્રોપીન", "C) બ્યુટા-1,3-ડાયીન", "D) બેઝીન"], "correct": 1, "explanation": "પ્રોપીનમાં હાઇપરકોન્જ્યુગેશનની અસર સંસ્પંદન કરતાં વધુ પ્રબળ હોય છે કારણ કે તે એલ્કીન છે અને તેની સ્થિરતા હાઇપરકોન્જ્યુગેશન દ્વારા વધે છે. એથિલીન, બ્યુટા-1,3-ડાયીન અને બેઝીનમાં સંસ્પંદનની અસર હાઇપરકોન્જ્યુગેશન કરતાં વધુ પ્રબળ હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 8}, {"question": "નીચેના અણુઓમાંથી કયા અણુમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેની હાજરી હોવા છતાં અણુની સ્થિરતા ઓછી હોય છે?", "options": ["A) બ્યુટા-1,3-ડાયીન", "B) પ્રોપીન", "C) એથિલીન", "D) પેન્ટા-1,3-ડાયીન"], "correct": 3, "explanation": "પેન્ટા-1,3-ડાયીનમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેની હાજરી હોવા છતાં, અણુની સ્થિરતા ઓછી હોય છે કારણ કે તે લાંબી કાર્બન શૃંખલા ધરાવે છે, જેથી સ્થિરતા ઘટે છે. બ્યુટા-1,3-ડાયીન, પ્રોપીન અને એથિલીનમાં સ્થિરતા વધુ હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 9}, {"question": "નીચેના અણુઓમાંથી કયા અણુમાં હાઇપરકોન્જ્યુગેશનના કારણે એલ્કીનની સ્થિરતા વધે છે, પરંતુ સંસ્પંદનના કારણે બંધ લંબાઈમાં ફેરફાર થતો નથી?", "options": ["A) 1,3-બ્યુટાડાઇન", "B) પ્રોપીન", "C) 1-બ્યુટીન", "D) એથિલીન"], "correct": 2, "explanation": "સી) 1-બ્યુટીનમાં હાઇપરકોન્જ્યુગેશન થાય છે કારણ કે તેની પાસે એલ્કીન બંધ સાથે જોડાયેલા આલ્ફા-હાઇડ્રોજન અણુઓ છે, જે અણુની સ્થિરતા વધારે છે. પરંતુ, 1-બ્યુટીનમાં સંસ્પંદન થતું નથી કારણ કે તે એકલા ડબલ બંધ ધરાવે છે, જેથી બંધ લંબાઈમાં કોઈ ફેરફાર થતો નથી. A) 1,3-બ્યુટાડાઇનમાં સંસ્પંદન થાય છે અને બંધ લંબાઈ સમાન થાય છે. B) પ્રોપીનમાં હાઇપરકોન્જ્યુગેશન થાય છે, પરંતુ તેની સ્થિરતા 1-બ્યુટીન જેટલી નથી. D) એથિલીનમાં સંસ્પંદન થતું નથી અને હાઇપરકોન્જ્યુગેશન પણ થતું નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 10}, {"question": "નીચેના પૈકી કયા અણુમાં હાઇપરકોન્જ્યુગેશનના કારણે એલ્કીનની સ્થિરતા સૌથી વધુ વધે છે, પરંતુ સંસ્પંદનના કારણે બંધ લંબાઈમાં કોઈ ફેરફાર થતો નથી?", "options": ["A) 1,3-બ્યુટાડાયન", "B) પ્રોપીન", "C) 2-મિથાઇલ-1,3-બ્યુટાડાયન", "D) 1-પેન્ટીન"], "correct": 2, "explanation": "2-મિથાઇલ-1,3-બ્યુટાડાયનમાં હાઇપરકોન્જ્યુગેશનના કારણે એલ્કીનની સ્થિરતા વધે છે, પરંતુ સંસ્પંદનના કારણે બંધ લંબાઈમાં કોઈ ફેરફાર થતો નથી. 1,3-બ્યુટાડાયનમાં સંસ્પંદનના કારણે બંધ લંબાઈ સમાન થાય છે. પ્રોપીન અને 1-પેન્ટીનમાં હાઇપરકોન્જ્યુગેશનની અસર ઓછી હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 11}, {"question": "નીચેના પૈકી કયા વિધાનમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન વચ્ચેનો ફરક સૌથી યોગ્ય રીતે વર્ણવવામાં આવ્યો છે?", "options": ["A) સંસ્પંદનમાં પી-ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં સિગ્મા-બંધના ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે.", "B) સંસ્પંદનમાં સિગ્મા-બંધના ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં પી-ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે.", "C) સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેમાં પી-ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે.", "D) સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેમાં સિગ્મા-બંધના ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે."], "correct": 0, "explanation": "સંસ્પંદનમાં પી-ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં સિગ્મા-બંધના ઇલેક્ટ્રોનની ડીલોકલાઇઝેશન થાય છે. આમ, વિધાન A સૌથી યોગ્ય રીતે ફરક વર્ણવે છે. બાકીના વિધાનો ખોટા છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 12}, {"question": "નીચેના પૈકી કયા અણુમાં હાઇપરકોન્જ્યુગેશનની અસર સંસ્પંદન કરતાં વધુ પ્રબળ હોય છે, પરંતુ અણુની સ્થિરતા ઓછી હોય છે?", "options": ["A) 1,3-પેન્ટાડાયન", "B) 2-મિથાઇલ-2-બ્યુટીન", "C) 1,4-પેન્ટાડાયન", "D) 1-બ્યુટીન"], "correct": 1, "explanation": "2-મિથાઇલ-2-બ્યુટીનમાં હાઇપરકોન્જ્યુગેશનની અસર સંસ્પંદન કરતાં વધુ પ્રબળ હોય છે, પરંતુ અણુની સ્થિરતા ઓછી હોય છે. 1,3-પેન્ટાડાયન અને 1,4-પેન્ટાડાયનમાં સંસ્પંદનની અસર વધુ પ્રબળ હોય છે. 1-બ્યુટીનમાં હાઇપરકોન્જ્યુગેશનની અસર ઓછી હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયા અણુમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેની હાજરી હોવા છતાં અણુની સ્થિરતા સૌથી ઓછી હોય છે?", "options": ["A) 1,3-બ્યુટાડાયન", "B) 2-મિથાઇલ-1,3-બ્યુટાડાયન", "C) 1,2-પેન્ટાડાયન", "D) 1,4-પેન્ટાડાયન"], "correct": 2, "explanation": "1,2-પેન્ટાડાયનમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેની હાજરી હોવા છતાં અણુની સ્થિરતા સૌથી ઓછી હોય છે. 1,3-બ્યુટાડાયન અને 1,4-પેન્ટાડાયનમાં સંસ્પંદનના કારણે સ્થિરતા વધે છે. 2-મિથાઇલ-1,3-બ્યુટાડાયનમાં હાઇપરકોન્જ્યુગેશનના કારણે સ્થિરતા વધે છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંતો અને તકનીકો", "difficulty": "Hard", "num": 14}, {"question": "નીચેના અણુઓમાંથી કયા અણુમાં સંસ્પંદનના કારણે બંધની લંબાઈ સમાન થાય છે અને હાઇપરકોન્જ્યુગેશનના કારણે સ્થિરતા વધે છે, પરંતુ અણુની જ્યોમેટ્રી રેખીય રહે છે?", "options": ["A) 1,3-બ્યુટાડાયન", "B) બેન્ઝીન", "C) એથિલીન", "D) પ્રોપીન"], "correct": 0, "explanation": "1,3-બ્યુટાડાયનમાં સંસ્પંદનના કારણે C-C અને C=C બંધની લંબાઈ સમાન થાય છે. હાઇપરકોન્જ્યુગેશનના કારણે CH2 ગ્રુપના H-અણુઓ સાથે π-ઇલેક્ટ્રોનની અંતરક્રિયા થવાથી સ્થિરતા વધે છે, પરંતુ અણુની જ્યોમેટ્રી રેખીય રહે છે. બેન્ઝીનમાં સંસ્પંદન હાજર છે, પરંતુ તે ચક્રીય હોય છે અને હાઇપરકોન્જ્યુગેશનની અસર ઓછી હોય છે. એથિલીન અને પ્રોપીનમાં હાઇપરકોન્જ્યુગેશન હાજર છે, પરંતુ સંસ્પંદન નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 15}, {"question": "જ્યારે એક અણુમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંને હાજર હોય ત્યારે નીચેના પૈકી કયું વિધાન ખોટું છે?", "options": ["A) અણુની સ્થિરતા વધે છે", "B) બંધ લંબાઈ સમાન થાય છે", "C) અણુની ઊર્જા ઘટે છે", "D) અણુની પ્રતિક્રિયાશીલતા વધે છે"], "correct": 3, "explanation": "સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંને અણુની સ્થિરતા વધારે છે, બંધ લંબાઈ સમાન કરે છે, અને અણુની ઊર્જા ઘટાડે છે. પરંતુ અણુની પ્રતિક્રિયાશીલતા ઘટે છે, વધતી નથી. તેથી વિધાન D ખોટું છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 16}, {"question": "નીચેના પૈકી કયા અણુમાં સંસ્પંદનના કારણે બંધ લંબાઈ સમાન થાય છે અને હાઇપરકોન્જ્યુગેશનના કારણે અણુની સ્થિરતા વધે છે, પરંતુ અણુની પ્રતિક્રિયાશીલતા ઘટતી નથી?", "options": ["A) 1,3-બ્યુટાડાઇન", "B) બેન્ઝીન", "C) પ્રોપીન", "D) એથિલીન"], "correct": 0, "explanation": "1,3-બ્યુટાડાઇનમાં સંસ્પંદનના કારણે બંધ લંબાઈ સમાન થાય છે અને હાઇપરકોન્જ્યુગેશનના કારણે અણુની સ્થિરતા વધે છે, પરંતુ અણુની પ્રતિક્રિયાશીલતા ઘટતી નથી. બેન્ઝીનમાં સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંને પ્રબળ હોય છે, પરંતુ પ્રતિક્રિયાશીલતા ઘટે છે. પ્રોપીન અને એથિલીનમાં હાઇપરકોન્જ્યુગેશનની અસર ઓછી હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 17}, {"question": "નીચેના વિધાનો પૈકી કયું સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંને માટે સાચું નથી?", "options": ["A) બંને ઘટનાઓ અણુની સ્થિરતા વધારે છે.", "B) બંને ઘટનાઓમાં ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે.", "C) બંને ઘટનાઓમાં બંધ લંબાઈ સમાન થાય છે.", "D) બંને ઘટનાઓમાં σ-બંધ અને π-બંધની આંતરક્રિયા થાય છે."], "correct": 2, "explanation": "સંસ્પંદન અને હાઇપરકોન્જ્યુગેશન બંનેમાં ઇલેક્ટ્રોનની ડિલોકલાઇઝેશન થાય છે અને અણુની સ્થિરતા વધે છે. હાઇપરકોન્જ્યુગેશનમાં σ-બંધ અને π-બંધની આંતરક્રિયા થાય છે, પરંતુ સંસ્પંદનમાં બંધ લંબાઈ સમાન થાય છે, જ્યારે હાઇપરકોન્જ્યુગેશનમાં બંધ લંબાઈ પર અસર થતી નથી. તેથી, વિધાન C સંસ્પંદન માટે સાચું છે પરંતુ હાઇપરકોન્જ્યુગેશન માટે ખોટું છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર – કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 18}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
