@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - તત્વોનું વર્ગીકરણ અને આવર્તિતા
+આવર્ત કોષ્ટકનો વિકાસ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 તત્વોનું વર્ગીકરણ અને આવર્તિતા
+આવર્ત કોષ્ટકનો વિકાસ</span>
+                <span>🎯 Hard</span>
+                <span>📝 25 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, કયા તત્વને તેના ગુણધર્મોના આધારે સ્થાન આપવામાં આવ્યું ન હતું, પરંતુ પાછળથી તેની શોધ થઈ અને કોષ્ટકમાં સમાવવામાં આવ્યું?", "options": ["A) ગેલિયમ (Ga)", "B) જર્મેનિયમ (Ge)", "C) સ્કેન્ડિયમ (Sc)", "D) ટેક્નિશિયમ (Tc)"], "correct": 0, "explanation": "મેન્ડેલીવે તેમના આવર્ત કોષ્ટકમાં ગેલિયમ (Ga) માટે એક ખાલી જગ્યા છોડી હતી, જેને તે 'એકા-એલ્યુમિનિયમ' તરીકે ઓળખાવતો હતો. પાછળથી ગેલિયમની શોધ થઈ અને તેના ગુણધર્મો મેન્ડેલીવની ભવિષ્યવાણી સાથે મેળ ખાતા હતા. સ્કેન્ડિયમ (Sc) અને જર્મેનિયમ (Ge) પણ મેન્ડેલીવની ભવિષ્યવાણી અનુસાર શોધાયા હતા, પરંતુ ગેલિયમ પ્રથમ હતું. ટેક્નિશિયમ (Tc) કૃત્રિમ તત્વ છે અને મેન્ડેલીવના સમયે અસ્તિત્વમાં ન હતું, તેથી તે કોષ્ટકમાં સમાવવામાં આવ્યું ન હતું.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 1}, {"question": "આવર્ત કોષ્ટકના કયા વર્ગમાં તત્વોના પરમાણુ કદમાં વર્ગમાં ઉપરથી નીચે તરફ જતાં વૃદ્ધિ થાય છે, પરંતુ ઇલેક્ટ્રોન ગ્રહણ ક્ષમતા (electron gain enthalpy) ઋણાત્મક થી ઓછી ઋણાત્મક બને છે?", "options": ["A) વર્ગ 1 (ks-ધાતુઓ)", "B) વર્ગ 14 (કાર્બન પરિવાર)", "C) વર્ગ 15 (નાઇટ્રોજન પરિવાર)", "D) વર્ગ 17 (હેલોજન પરિવાર)"], "correct": 3, "explanation": "વર્ગ 17 (હેલોજન પરિવાર)માં, પરમાણુ કદ વર્ગમાં ઉપરથી નીચે તરફ વૃદ્ધિ પામે છે, પરંતુ ઇલેક્ટ્રોન ગ્રહણ ક્ષમતા (electron gain enthalpy) ફ્લોરિન (F) થી આયોડિન (I) તરફ જતાં ઓછી ઋણાત્મક બને છે. આ કારણ કે પરમાણુ કદ વૃદ્ધિ સાથે ઇલેક્ટ્રોન ગ્રહણ માટેની આકર્ષણ શક્તિ ઘટે છે. વર્ગ 1, 14, અને 15માં આ પ્રવૃત્તિ જોવા મળતી નથી.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 2}, {"question": "નીચેના પૈકી કયા તત્વને તેના આવર્ત કોષ્ટકના સ્થાનના આધારે 'અપવાદ' ગણવામાં આવે છે, કારણ કે તે ધાતુ અને અધાતુ બંનેમાં વર્તે છે?", "options": ["A) બોરોન (B)", "B) સિલિકોન (Si)", "C) આર્સેનિક (As)", "D) એન્ટિમોની (Sb)"], "correct": 1, "explanation": "સિલિકોન (Si) એ અર્ધધાતુ છે, જે ધાતુ અને અધાતુ બંનેમાં વર્તે છે. તે આવર્ત કોષ્ટકમાં વર્ગ 14માં આવે છે અને તેના ગુણધર્મો ધાતુ અને અધાતુ વચ્ચેના હોય છે. બોરોન (B) પણ અર્ધધાતુ છે, પરંતુ તેનો વર્ગીકરણ વધુ સ્પષ્ટ છે. આર્સેનિક (As) અને એન્ટિમોની (Sb) પણ અર્ધધાતુ છે, પરંતુ સિલિકોનનો અપવાદ તરીકે વધુ ઉલ્લેખ થાય છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 3}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટક અને આધુનિક આવર્ત કોષ્ટક વચ્ચેનો મુખ્ય તફાવત કયો છે?", "options": ["A) મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ ક્રમાંક અનુસાર ગોઠવવામાં આવ્યા હતા", "B) મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ વજન અનુસાર ગોઠવવામાં આવ્યા હતા", "C) આધુનિક કોષ્ટકમાં તત્વોને ઇલેક્ટ્રોનિક રચના અનુસાર ગોઠવવામાં આવ્યા છે", "D) મેન્ડેલીવના કોષ્ટકમાં લંબાવવાના તત્વો સમાવવામાં આવ્યા ન હતા"], "correct": 1, "explanation": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં તત્વોને પરમાણુ વજન અનુસાર ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક આવર્ત કોષ્ટકમાં તત્વોને પરમાણુ ક્રમાંક અનુસાર ગોઠવવામાં આવ્યા છે. આધુનિક કોષ્ટકમાં ઇલેક્ટ્રોનિક રચના પણ મહત્વની ભૂમિકા ભજવે છે, પરંતુ મુખ્ય તફાવત પરમાણુ ક્રમાંક અને પરમાણુ વજન છે. લંબાવવાના તત્વો મેન્ડેલીવના કોષ્ટકમાં પણ સમાવવામાં આવ્યા હતા.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 4}, {"question": "નીચેના પૈકી કયા તત્વને આવર્ત કોષ્ટકમાં તેના સ્થાનના આધારે 'લેથેનાઇડ કોન્ટ્રેક્શન'ના કારણે અપવાદ ગણવામાં આવે છે?", "options": ["A) લેથેનમ (La)", "B) હાફનિયમ (Hf)", "C) ટેંગસ્ટન (W)", "D) ગોલ્ડ (Au)"], "correct": 1, "explanation": "હાફનિયમ (Hf) એ લેથેનાઇડ કોન્ટ્રેક્શનના કારણે અપવાદ ગણવામાં આવે છે. લેથેનાઇડ કોન્ટ્રેક્શનના કારણે, હાફનિયમ (Hf) અને જિર્કોનિયમ (Zr)ના પરમાણુ કદ લગભગ સમાન હોય છે, જે આવર્ત કોષ્ટકમાં તેમના સ્થાનને અસર કરે છે. લેથેનમ (La), ટેંગસ્ટન (W), અને ગોલ્ડ (Au) આ પ્રવૃત્તિ સાથે સંકળાયેલા નથી.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 5}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, હાઇડ્રોજનને ક્યાં સ્થાને મૂકવામાં આવ્યું હતું અને તેના પાછળનું કારણ શું હતું?", "options": ["A) પ્રથમ વર્ગ અને પ્રથમ આવર્તમાં, કારણ કે તેની પરમાણુ ક્રમાંક 1 છે અને તે અલ્કલી ધાતુ જેવા ગુણધર્મો ધરાવે છે", "B) કોઈપણ વર્ગમાં નહીં, કારણ કે તેના ગુણધર્મો અન્ય તત્વો સાથે મેળ ખાતા ન હતા", "C) પ્રથમ વર્ગમાં, પરંતુ કોઈ આવર્તમાં નહીં, કારણ કે તે વાયુ સ્વરૂપે હોય છે", "D) પ્રથમ આવર્તમાં, પરંતુ કોઈ વર્ગમાં નહીં, કારણ કે તેના ગુણધર્મો અલગ પડતા હતા"], "correct": 0, "explanation": "મેન્ડેલીવે હાઇડ્રોજનને પ્રથમ વર્ગ અને પ્રથમ આવર્તમાં મૂક્યું હતું, કારણ કે તેની પરમાણુ ક્રમાંક 1 છે અને તે અલ્કલી ધાતુ જેવા ગુણધર્મો (જેવા કે +1 ઓક્સિડેશન અવસ્થા) ધરાવે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે મેન્ડેલીવે હાઇડ્રોજનને વર્ગ અને આવર્તમાં સ્થાન આપ્યું હતું, અને તેના ગુણધર્મો અલ્કલી ધાતુઓ સાથે સરખાવી શકાય છે.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 6}, {"question": "નીચેના પૈકી કયા તત્વને મેન્ડેલીવના આવર્ત કોષ્ટકમાં 'એકા-બોરોન' તરીકે ઓળખવામાં આવ્યું હતું અને તે પછી શોધાયેલું તત્વ કયું છે?", "options": ["A) એલ્યુમિનિયમ, ગેલિયમ", "B) સિલિકોન, જર્મેનિયમ", "C) બોરોન, સ્કેન્ડિયમ", "D) મેગ્નેશિયમ, કેલ્શિયમ"], "correct": 1, "explanation": "મેન્ડેલીવે તેના આવર્ત કોષ્ટકમાં સિલિકોન નીચે એક ખાલી જગ્યા છોડી હતી, જેને 'એકા-સિલિકોન' તરીકે ઓળખવામાં આવી હતી. પછી શોધાયેલું તત્વ જર્મેનિયમ હતું, જેના ગુણધર્મો એકા-સિલિકોન સાથે મેળ ખાતા હતા. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ મેન્ડેલીવના અંદાજ સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 7}, {"question": "આધુનિક આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને તેના ઇલેક્ટ્રોનિક રચનાના આધારે 'અપવાદ' ગણવામાં આવે છે?", "options": ["A) ક્રોમિયમ અને કોપર", "B) આયરન અને નિકલ", "C) ઝિંક અને કેડમિયમ", "D) મેંગેનીઝ અને ટેક્નેશિયમ"], "correct": 0, "explanation": "ક્રોમિયમ (Cr) અને કોપર (Cu) તેના ઇલેક્ટ્રોનિક રચનાના આધારે અપવાદ ગણવામાં આવે છે. ક્રોમિયમની ઇલેક્ટ્રોનિક રચના [Ar] 3d5 4s1 છે (આશા રહેતી 3d4 4s2 નહીં), અને કોપરની ઇલેક્ટ્રોનિક રચના [Ar] 3d10 4s1 છે (આશા રહેતી 3d9 4s2 નહીં). વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ ઇલેક્ટ્રોનિક રચનાના અપવાદ નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 8}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા જોડીના તત્વોને ગુણધર્મોના આધારે એકબીજા સાથે બદલવામાં આવ્યા હતા?", "options": ["A) ટેલ્યુરિયમ અને આયોડિન", "B) કોબાલ્ટ અને નિકલ", "C) આર્ગોન અને પોટેશિયમ", "D) સીલેનિયમ અને બ્રોમિન"], "correct": 0, "explanation": "મેન્ડેલીવે ટેલ્યુરિયમ (Te) અને આયોડિન (I) ના ગુણધર્મોના આધારે એકબીજા સાથે બદલ્યા હતા, કારણ કે ટેલ્યુરિયમનું પરમાણુ કદ આયોડિન કરતાં મોટું છે, પરંતુ તેના રાસાયણિક ગુણધર્મો આયોડિન કરતાં વધુ હેલોજન જેવા હતા. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ મેન્ડેલીવના આવર્ત કોષ્ટકમાં બદલાયા ન હતા.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 9}, {"question": "નીચેના પૈકી કયા તત્વને આવર્ત કોષ્ટકમાં 'લેથેનાઇડ કોન્ટ્રેક્શન'ના કારણે તેના ગુણધર્મો અન્ય તત્વો સાથે મેળ ખાતા નથી?", "options": ["A) લેથેનમ", "B) હાફનિયમ", "C) ઝિર્કોનિયમ", "D) ટાઇટેનિયમ"], "correct": 2, "explanation": "લેથેનાઇડ કોન્ટ્રેક્શનના કારણે, ઝિર્કોનિયમ (Zr) અને હાફનિયમ (Hf) ના પરમાણુ કદમાં ખૂબ જ ઓછો તફાવત હોય છે, પરંતુ ઝિર્કોનિયમના ગુણધર્મો હાફનિયમ કરતાં અલગ પડતા હોય છે. વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ લેથેનાઇડ કોન્ટ્રેક્શનના કારણે અલગ પડતા ગુણધર્મો ધરાવતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 10}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, કયા તત્વને તેના પરમાણુ દળના ક્રમમાં સ્થાન આપવામાં આવ્યું હતું, પરંતુ તેના ગુણધર્મો તેના પડોશી તત્વો સાથે મેળ ખાતા ન હતા, જેથી તેને અલગ સ્થાને મૂકવું પડ્યું?", "options": ["A) ટેલ્યુરિયમ (Te)", "B) આયોડિન (I)", "C) સીલેનિયમ (Se)", "D) બ્રોમિન (Br)"], "correct": 0, "explanation": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, ટેલ્યુરિયમ (Te)ને તેના પરમાણુ દળ (127.6)ના ક્રમમાં આયોડિન (I, 126.9) પહેલા મૂકવું જોઈતું હતું, પરંતુ તેના ગુણધર્મો સલ્ફર અને સીલેનિયમ જેવા વર્ગ-16ના તત્વો સાથે મેળ ખાતા હતા. આથી મેન્ડેલીવે ટેલ્યુરિયમને આયોડિન પહેલા મૂક્યું, જેથી ગુણધર્મોની સમાનતા જળવાય. આયોડિન (B) હેલોજન વર્ગનું તત્વ છે અને તેના ગુણધર્મો ટેલ્યુરિયમ સાથે મેળ ખાતા નથી. સીલેનિયમ (C) અને બ્રોમિન (D) પણ આ કિસ્સામાં લાગુ પડતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 11}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને 'એકા-અલ્યુમિનિયમ' તરીકે ઓળખવામાં આવ્યું હતું, અને તેના ગુણધર્મોની આગાહી પછી શોધાયું હતું?", "options": ["A) ગેલિયમ (Ga)", "B) ઇન્ડિયમ (In)", "C) થેલિયમ (Tl)", "D) સિલિકોન (Si)"], "correct": 0, "explanation": "મેન્ડેલીવે 'એકા-અલ્યુમિનિયમ' તરીકે ગેલિયમ (Ga)ની આગાહી કરી હતી, અને પછી તે શોધાયું હતું. ઇન્ડિયમ (B) અને થેલિયમ (C) પણ અલ્યુમિનિયમ વર્ગના તત્વો છે, પરંતુ તેઓ 'એકા-અલ્યુમિનિયમ' તરીકે ઓળખાયા ન હતા. સિલિકોન (D) કાર્બન વર્ગનું તત્વ છે, જેથી તે આ કિસ્સામાં લાગુ પડતું નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 12}, {"question": "નીચેના પૈકી કયા તત્વને આવર્ત કોષ્ટકમાં તેના સ્થાનના આધારે 'અપવાદ' ગણવામાં આવે છે, કારણ કે તેના પરમાણુમાં અસ્થાયી ઇલેક્ટ્રોનિક રચના હોય છે?", "options": ["A) ક્રોમિયમ (Cr)", "B) મેંગેનીઝ (Mn)", "C) કોપર (Cu)", "D) ઝિંક (Zn)"], "correct": 2, "explanation": "કોપર (Cu)નું ઇલેક્ટ્રોનિક રચના [Ar] 3d¹⁰ 4s¹ છે, જ્યારે અપેક્ષિત રચના [Ar] 3d⁹ 4s² હોવી જોઈએ. આ અસ્થાયી રચના કારણે તેને 'અપવાદ' ગણવામાં આવે છે. ક્રોમિયમ (A) અને મેંગેનીઝ (B) પણ અપવાદો છે, પરંતુ તેઓ અહીં આપેલા વિકલ્પોમાં સૌથી યોગ્ય નથી. ઝિંક (D)નું ઇલેક્ટ્રોનિક રચના સ્થાયી છે, જેથી તે આ કિસ્સામાં લાગુ પડતું નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 13}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને 'એકા-સિલિકોન' તરીકે ઓળખવામાં આવ્યું હતું અને તેના ગુણધર્મોના આધારે આધુનિક આવર્ત કોષ્ટકમાં કયા સ્થાને મૂકવામાં આવ્યું છે?", "options": ["A) ગેલિયમ (Ga), વર્ગ 13, આવર્ત 4", "B) જર્મેનિયમ (Ge), વર્ગ 14, આવર્ત 4", "C) આર્સેનિક (As), વર્ગ 15, આવર્ત 4", "D) સેલેનિયમ (Se), વર્ગ 16, આવર્ત 4"], "correct": 1, "explanation": "મેન્ડેલીવે 'એકા-સિલિકોન' તરીકે જર્મેનિયમ (Ge) ની ભવિષ્યવાણી કરી હતી, જેના ગુણધર્મો સિલિકોન (Si) ના ગુણધર્મો સાથે મળતા આવે છે. આધુનિક આવર્ત કોષ્ટકમાં જર્મેનિયમ વર્ગ 14 અને આવર્ત 4 માં મૂકવામાં આવ્યું છે. ગેલિયમ (Ga) 'એકા-અલ્યુમિનિયમ' તરીકે ઓળખાય છે, આર્સેનિક (As) 'એકા-ફોસ્ફરસ' તરીકે, અને સેલેનિયમ (Se) 'એકા-સલ્ફર' તરીકે ઓળખાય છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 14}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, 'એકા-મેંગેનીઝ' તરીકે ઓળખાતા તત્વના ગુણધર્મોની આગાહી કરવામાં આવી હતી. આ તત્વને આધુનિક આવર્ત કોષ્ટકમાં ક્યાં સ્થાને મૂકવામાં આવ્યું છે અને તેના પરમાણુ ક્રમાંક અને ઇલેક્ટ્રોનિક રચના કયા છે?", "options": ["A) વર્ગ 7, આવર્ત 4; પરમાણુ ક્રમાંક 25; [Ar] 3d⁵ 4s²", "B) વર્ગ 6, આવર્ત 4; પરમાણુ ક્રમાંક 24; [Ar] 3d⁴ 4s²", "C) વર્ગ 8, આવર્ત 4; પરમાણુ ક્રમાંક 26; [Ar] 3d⁶ 4s²", "D) વર્ગ 7, આવર્ત 5; પરમાણુ ક્રમાંક 42; [Kr] 4d⁵ 5s¹"], "correct": 0, "explanation": "મેન્ડેલીવે 'એકા-મેંગેનીઝ' તરીકે ટેક્નિશિયમ (Tc) ની આગાહી કરી હતી, પરંતુ આધુનિક આવર્ત કોષ્ટકમાં આ સ્થાન મેંગેનીઝ (Mn) દ્વારા લેવામાં આવ્યું છે. મેંગેનીઝનો પરમાણુ ક્રમાંક 25 છે અને તેની ઇલેક્ટ્રોનિક રચના [Ar] 3d⁵ 4s² છે. તે વર્ગ 7 અને આવર્ત 4માં સ્થાન પામે છે. વિકલ્પ B (Cr, ક્રોમિયમ) વર્ગ 6માં છે, વિકલ્પ C (Fe, લોખંડ) વર્ગ 8માં છે, અને વિકલ્પ D (Mo, મોલિબ્ડેનમ) આવર્ત 5માં છે, જે બધા આ આગાહી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 15}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, 'એકા-સિલિકોન' તરીકે ઓળખાતા તત્વની આગાહી કરવામાં આવી હતી. આ તત્વના ગુણધર્મો અને તેના આધુનિક નામ સાથે નીચેના પૈકી કયો વિકલ્પ સાચો છે?", "options": ["A) તે જર્મેનિયમ છે અને તેની ઓક્સિડેશન અવસ્થા +2 અને +4 હોય છે", "B) તે ગેલિયમ છે અને તેની ઓક્સિડેશન અવસ્થા +1 અને +3 હોય છે", "C) તે સિલિકોન છે અને તેની ઓક્સિડેશન અવસ્થા +4 હોય છે", "D) તે આર્સેનિક છે અને તેની ઓક્સિડેશન અવસ્થા -3, +3, અને +5 હોય છે"], "correct": 0, "explanation": "મેન્ડેલીવે 'એકા-સિલિકોન' તરીકે જર્મેનિયમ (Ge)ની આગાહી કરી હતી. જર્મેનિયમની ઓક્સિડેશન અવસ્થા +2 અને +4 હોય છે. ગેલિયમ (B) એ 'એકા-અલ્યુમિનિયમ' તરીકે ઓળખાય છે, સિલિકોન (C) એ મૂળ તત્વ છે, અને આર્સેનિક (D) એ 'એકા-ફોસ્ફરસ' તરીકે ઓળખાય છે. આમ, સાચો વિકલ્પ A છે.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 16}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને તેના પરમાણુ દળના ક્રમમાં સ્થાન આપવામાં આવ્યું હતું, પરંતુ તેના ગુણધર્મોના આધારે તેને અન્ય સ્થાને મૂકવું જોઈએ?", "options": ["A) આર્ગોન અને પોટેશિયમ", "B) ક્લોરિન અને આર્ગોન", "C) કેલ્શિયમ અને આર્ગોન", "D) ટાઇટેનિયમ અને વેનેડિયમ"], "correct": 0, "explanation": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, આર્ગોન (Ar) અને પોટેશિયમ (K)ને પરમાણુ દળના ક્રમમાં સ્થાન આપવામાં આવ્યું હતું, પરંતુ આર્ગોન એ નિષ્ક્રિય વાયુ છે અને તેના ગુણધર્મોના આધારે તેને હેલોજન વર્ગમાં ન મૂકી શકાય. ક્લોરિન અને આર્ગોન (B), કેલ્શિયમ અને આર્ગોન (C), અને ટાઇટેનિયમ અને વેનેડિયમ (D) એવા તત્વો નથી જેને પરમાણુ દળના ક્રમમાં સ્થાન આપવામાં આવ્યું હતું.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 17}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને 'એકા-મેંગેનીઝ' તરીકે ઓળખવામાં આવ્યું હતું અને તેના ગુણધર્મોની આગાહી કરવામાં આવી હતી?", "options": ["A) ટેક્નિશિયમ", "B) રેનિયમ", "C) મેંગેનીઝ", "D) ટંગસ્ટન"], "correct": 0, "explanation": "મેન્ડેલીવે 'એકા-મેંગેનીઝ' તરીકે ટેક્નિશિયમ (Tc)ની આગાહી કરી હતી. ટેક્નિશિયમ એ કૃત્રિમ તત્વ છે અને તેના ગુણધર્મો મેંગેનીઝ જેવા જ હોય છે. રેનિયમ (B), મેંગેનીઝ (C), અને ટંગસ્ટન (D) એવા તત્વો નથી જેને 'એકા-મેંગેનીઝ' તરીકે ઓળખવામાં આવ્યા હતા.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 18}, {"question": "નીચેના પૈકી કયું વિધાન મેન્ડેલીવના આવર્ત કોષ્ટક અને આધુનિક આવર્ત કોષ્ટક વચ્ચેના તફાવતને સૌથી સચોટ રીતે વર્ણવે છે, જ્યારે તત્વોના વર્ગીકરણના આધારને ધ્યાનમાં લેવામાં આવે?", "options": ["A) મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ ક્રમાંકના આધારે ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં પરમાણુ દળના આધારે ગોઠવવામાં આવ્યા છે.", "B) મેન્ડેલીવના કોષ્ટકમાં તત્વોને ગુણધર્મોના આધારે ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં પરમાણુ ક્રમાંકના આધારે ગોઠવવામાં આવ્યા છે.", "C) મેન્ડેલીવના કોષ્ટકમાં તત્વોને ઇલેક્ટ્રોનિક રચનાના આધારે ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં પરમાણુ દળના આધારે ગોઠવવામાં આવ્યા છે.", "D) મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ દળ અને ગુણધર્મોના આધારે ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં ફક્ત પરમાણુ દળના આધારે ગોઠવવામાં આવ્યા છે."], "correct": 1, "explanation": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં તત્વોને મુખ્યત્વે તેમના ગુણધર્મોના આધારે ગોઠવવામાં આવ્યા હતા, અને તેમણે પરમાણુ દળના ક્રમમાં થતી ખામીઓને દૂર કરવા ગુણધર્મોને પ્રાધાન્ય આપ્યું હતું. આધુનિક આવર્ત કોષ્ટકમાં તત્વોને પરમાણુ ક્રમાંકના આધારે ગોઠવવામાં આવ્યા છે, જે મેન્ડેલીવના કોષ્ટક કરતાં વધુ સચોટ અને વૈજ્ઞાનિક આધાર છે. વિકલ્પ A, C, અને D અસત્ય છે કારણ કે મેન્ડેલીવના કોષ્ટકમાં પરમાણુ ક્રમાંકનો ઉપયોગ થતો નહોતો, અને આધુનિક કોષ્ટકમાં ઇલેક્ટ્રોનિક રચના પરમાણુ ક્રમાંક સાથે સંકળાયેલી છે.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 19}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, 'એકા-અલ્યુમિનિયમ' તરીકે ઓળખાતા તત્વની આગાહી કરવામાં આવી હતી. આ તત્વના ગુણધર્મો અને તેની ખોજ બાબતે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) આ તત્વ ગેલિયમ છે, જેના ગુણધર્મો મેન્ડેલીવે આગાહી કર્યા હતા અને તેની ખોજ 1875માં લેકોક ડી બોઇસબોદ્રાન દ્વારા કરવામાં આવી હતી.", "B) આ તત્વ જર્મેનિયમ છે, જેના ગુણધર્મો મેન્ડેલીવે આગાહી કર્યા ન હતા અને તેની ખોજ 1886માં વિંકલર દ્વારા કરવામાં આવી હતી.", "C) આ તત્વ સ્કેન્ડિયમ છે, જેના ગુણધર્મો મેન્ડેલીવે આગાહી કર્યા હતા અને તેની ખોજ 1879માં નિલ્સન દ્વારા કરવામાં આવી હતી.", "D) આ તત્વ ટેક્નીશિયમ છે, જેના ગુણધર્મો મેન્ડેલીવે આગાહી કર્યા ન હતા અને તેની ખોજ 1937માં પેરિયર અને સેગ્રે દ્વારા કરવામાં આવી હતી."], "correct": 0, "explanation": "મેન્ડેલીવે 'એકા-અલ્યુમિનિયમ' તરીકે ગેલિયમ (Ga)ની આગાહી કરી હતી. ગેલિયમના ગુણધર્મો જેવા કે પરમાણુ દળ, ઘનતા અને રાસાયણિક વર્તણૂક મેન્ડેલીવે આગાહી કર્યા હતા. ગેલિયમની ખોજ 1875માં લેકોક ડી બોઇસબોદ્રાન દ્વારા કરવામાં આવી હતી, જે મેન્ડેલીવની આગાહીને પુષ્ટિ આપે છે. જ્યારે જર્મેનિયમ (Ge) 'એકા-સિલિકોન' તરીકે ઓળખાય છે, સ્કેન્ડિયમ (Sc) 'એકા-બોરોન' તરીકે ઓળખાય છે, અને ટેક્નીશિયમ (Tc) મેન્ડેલીવના સમયમાં અજ્ઞાત હતું.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 20}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, 'એકા-કેલ્શિયમ' તરીકે ઓળખાતા તત્વની આગાહી કરવામાં આવી હતી. આ તત્વ આધુનિક આવર્ત કોષ્ટકમાં કયા સ્થાને મળે છે?", "options": ["A) વર્ગ 2, આવર્ત 5", "B) વર્ગ 2, આવર્ત 6", "C) વર્ગ 1, આવર્ત 7", "D) વર્ગ 13, આવર્ત 5"], "correct": 1, "explanation": "મેન્ડેલીવે 'એકા-કેલ્શિયમ' તરીકે સ્કેન્ડિયમ (Sc)ની આગાહી કરી હતી, પરંતુ સ્કેન્ડિયમ વર્ગ 3માં છે. ખરેખર, 'એકા-કેલ્શિયમ' બેરિયમ (Ba) નથી, પરંતુ મેન્ડેલીવની આગાહી અનુસાર, આ તત્વ વર્ગ 2, આવર્ત 6માં રેડિયમ (Ra) નથી, પરંતુ બેરિયમ (Ba) છે. બેરિયમ વર્ગ 2, આવર્ત 6માં આવે છે. A) વર્ગ 2, આવર્ત 5 સ્ટ્રોન્ટિયમ (Sr) છે. C) વર્ગ 1, આવર્ત 7 પોટેશિયમ (K) છે. D) વર્ગ 13, આવર્ત 5 બોરોન (B) છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 21}, {"question": "આધુનિક આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વની ઇલેક્ટ્રોનિક રચના [Xe]4f¹⁴5d¹06s² છે અને તે લેથેનાઇડ કોન્ટ્રેક્શનના કારણે તેના વર્ગના અન્ય તત્વો કરતાં અલગ ગુણધર્મો ધરાવે છે?", "options": ["A) હાફનિયમ (Hf)", "B) ટેંટેલમ (Ta)", "C) મર્ક્યુરી (Hg)", "D) લેડ (Pb)"], "correct": 0, "explanation": "હાફનિયમ (Hf)ની ઇલેક્ટ્રોનિક રચના [Xe]4f¹⁴5d²6s² છે, પરંતુ લેથેનાઇડ કોન્ટ્રેક્શનના કારણે તેના 5d ઇલેક્ટ્રોનની શીલ્ડિંગ અસર ઓછી થતાં તેના ગુણધર્મો તેના વર્ગના અન્ય તત્વો (જેમ કે Zr) કરતાં અલગ હોય છે. ટેંટેલમ (Ta)ની રચના [Xe]4f¹⁴5d³6s² છે, મર્ક્યુરી (Hg)ની [Xe]4f¹⁴5d¹⁰6s² છે, અને લેડ (Pb)ની [Xe]4f¹⁴5d¹⁰6s²6p² છે. હાફનિયમ જ લેથેનાઇડ કોન્ટ્રેક્શનના કારણે તેના વર્ગમાં અપવાદરૂપ ગણાય છે.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 22}, {"question": "નીચેના વિધાનો પૈકી કયું વિધાન મેન્ડેલીવના આવર્ત કોષ્ટક અને આધુનિક આવર્ત કોષ્ટક વચ્ચેના તફાવતને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ દળના વધતા ક્રમમાં ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં પરમાણુ ક્રમાંકના વધતા ક્રમમાં ગોઠવવામાં આવ્યા છે.", "B) મેન્ડેલીવના કોષ્ટકમાં 8 વર્ગો હતા, જ્યારે આધુનિક કોષ્ટકમાં 18 વર્ગો છે.", "C) મેન્ડેલીવના કોષ્ટકમાં લેથેનાઇડ અને એક્ટિનાઇડ તત્વો સામેલ નહોતા, જ્યારે આધુનિક કોષ્ટકમાં તે સામેલ છે.", "D) ઉપરોક્ત તમામ"], "correct": 3, "explanation": "મેન્ડેલીવના આવર્ત કોષ્ટક અને આધુનિક આવર્ત કોષ્ટક વચ્ચેના તમામ તફાવતો વિકલ્પ A, B અને Cમાં વર્ણવવામાં આવ્યા છે. મેન્ડેલીવના કોષ્ટકમાં તત્વોને પરમાણુ દળના ક્રમમાં ગોઠવવામાં આવ્યા હતા, જ્યારે આધુનિક કોષ્ટકમાં પરમાણુ ક્રમાંકના ક્રમમાં ગોઠવવામાં આવ્યા છે. મેન્ડેલીવના કોષ્ટકમાં 8 વર્ગો હતા, જ્યારે આધુનિક કોષ્ટકમાં 18 વર્ગો છે. એટલું જ નહીં, મેન્ડેલીવના કોષ્ટકમાં લેથેનાઇડ અને એક્ટિનાઇડ તત્વો સામેલ નહોતા, જ્યારે આધુનિક કોષ્ટકમાં તે સામેલ છે. આથી, વિકલ્પ D (ઉપરોક્ત તમામ) સૌથી યોગ્ય છે.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 23}, {"question": "મેન્ડેલીવના આવર્ત કોષ્ટકમાં, 'એકા-સીલિકોન' તરીકે ઓળખાતા તત્વની આગાહી કરવામાં આવી હતી. આ તત્વના ગુણધર્મો અંગે નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) તેનો પરમાણુ દળ અંદાજે 72 હશે", "B) તે ઓક્સિજન સાથે સંયોજન બનાવશે અને તેનો સૂત્ર SiO2 હશે", "C) તેનું ઘનતા અને કઠિનતા સિલિકોન કરતાં ઓછું હશે", "D) તે ક્લોરિન સાથે સંયોજન બનાવશે અને તેનો સૂત્ર SiCl4 હશે"], "correct": 2, "explanation": "મેન્ડેલીવે 'એકા-સીલિકોન' (જર્મેનિયમ)ની આગાહી કરી હતી, જેના પરમાણુ દળ અંદાજે 72 (A સત્ય), ઓક્સિજન સાથે SiO2 (B સત્ય), અને ક્લોરિન સાથે SiCl4 (D સત્ય) બનાવશે. પરંતુ જર્મેનિયમનું ઘનતા અને કઠિનતા સિલિકોન કરતાં વધારે હોય છે, નહીં કે ઓછું (C ખોટું).", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 24}, {"question": "આધુનિક આવર્ત કોષ્ટકમાં, નીચેના પૈકી કયા તત્વને લેથેનાઇડ કોન્ટ્રેક્શનના કારણે તેના ગુણધર્મો અન્ય લેથેનાઇડ્સ કરતાં અલગ પડે છે?", "options": ["A) લેથેનમ (La)", "B) સીરિયમ (Ce)", "C) ગેડોલિનિયમ (Gd)", "D) લ્યુટેટિયમ (Lu)"], "correct": 3, "explanation": "લ્યુટેટિયમ (Lu) લેથેનાઇડ કોન્ટ્રેક્શનના કારણે તેના ગુણધર્મો અન્ય લેથેનાઇડ્સ કરતાં અલગ પડે છે, કારણ કે તેની 4f કક્ષા પૂર્ણપણે ભરાયેલી હોય છે અને તેના પરમાણુ કદમાં નોંધપાત્ર ઘટાડો થાય છે. લેથેનમ (A), સીરિયમ (B), અને ગેડોલિનિયમ (C)માં આ પ્રકારનો અપવાદ જોવા મળતો નથી.", "ncert_ref": "Class XI - પ્રકરણ 3: તત્વોનું વર્ગીકરણ અને આવર્તિતા", "difficulty": "Hard", "num": 25}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
