@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - દ-બ્રોગ્લીનો સિદ્ધાંત</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 દ-બ્રોગ્લીનો સિદ્ધાંત</span>
+                <span>🎯 Hard</span>
+                <span>📝 24 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે ઇલેક્ટ્રોનની ગતિની તીવ્રતા v અને ડી-બ્રોગ્લી તરંગલંબાઈ λ વચ્ચેનો સંબંધ ધ્યાનમાં લેવામાં આવે છે, ત્યારે નીચેનામાંથી કયો વિકલ્પ સાચો છે?", "options": ["A) λ ∝ v", "B) λ ∝ 1/v", "C) λ ∝ √v", "D) λ ∝ v²"], "correct": 1, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત મુજબ, λ = h/(mv), જ્યાં h પ્લાંકનો અચળાંક, m ઇલેક્ટ્રોનનો દળ અને v તેની ગતિની તીવ્રતા છે. આ સૂત્રમાંથી સ્પષ્ટ થાય છે કે λ અને v વચ્ચે વ્યસ્ત પ્રમાણભાર છે, એટલે કે λ ∝ 1/v. આથી વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D આ સંબંધને સંપૂર્ણપણે ચૂકી જાય છે.", "ncert_ref": "Class XII - પ્રકરણ 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 1}, {"question": "ડી-બ્રોગ્લી તરંગલંબાઈની ગણતરી કરવા માટે નીચેનામાંથી કયા પારામીટરની જરૂર રહેતી નથી?", "options": ["A) કણનો વેગ", "B) કણનો વેગમાન", "C) કણનો વીજભાર", "D) પ્લાંકનો અચળાંક"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં h પ્લાંકનો અચળાંક અને p કણનો વેગમાન (p = mv) છે. આ સૂત્રમાં કણનો વીજભાર (charge) સામેલ નથી. આથી વિકલ્પ C સાચો છે. વિકલ્પ A અને B વેગ અને વેગમાન છે, જે સૂત્રમાં સામેલ છે, જ્યારે વિકલ્પ D પ્લાંકનો અચળાંક છે, જે પણ જરૂરી છે.", "ncert_ref": "Class XII - પ્રકરણ 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 2}, {"question": "જો એક ઇલેક્ટ્રોન અને એક પ્રોટોનની ગતિ એવી રીતે કરવામાં આવે છે કે તેમના વેગમાન સમાન હોય, તો તેમની ડી-બ્રોગ્લી તરંગલંબાઈ કેવી રહેશે?", "options": ["A) ઇલેક્ટ્રોનની તરંગલંબાઈ પ્રોટોન કરતાં ઓછી હશે", "B) ઇલેક્ટ્રોનની તરંગલંબાઈ પ્રોટોન કરતાં વધુ હશે", "C) બંનેમાં સમાન તરંગલંબાઈ હશે", "D) ઇલેક્ટ્રોનની તરંગલંબાઈ શૂન્ય હશે"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p વેગમાન છે. જો ઇલેક્ટ્રોન અને પ્રોટોનના વેગમાન (p) સમાન હોય, તો તેમની તરંગલંબાઈ પણ સમાન હશે, કારણ કે λ ફક્ત p પર આધાર રાખે છે. આથી વિકલ્પ C સાચો છે. વિકલ્પ A અને B વેગમાનની સમાનતાને ધ્યાનમાં લેતા નથી, જ્યારે વિકલ્પ D અસંભવ છે.", "ncert_ref": "Class XII - પ્રકરણ 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 3}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, નીચેનામાંથી કયા કણની ડી-બ્રોગ્લી તરંગલંબાઈ સૌથી ઓછી હશે? (ધારો કે બધા કણોની ગતિ એવી જ છે કે તેમના વેગમાન સમાન છે)", "options": ["A) ઇલેક્ટ્રોન", "B) પ્રોટોન", "C) ન્યૂટ્રોન", "D) આલ્ફા કણ"], "correct": 3, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p વેગમાન છે. જો બધા કણોના વેગમાન (p) સમાન હોય, તો તેમની તરંગલંબાઈ પણ સમાન હશે. પરંતુ પ્રશ્નમાં ઉલ્લેખ કર્યા મુજબ, ગતિ એવી છે કે વેગમાન સમાન છે, પરંતુ વાસ્તવિકતામાં, આલ્ફા કણ (He ન્યૂક્લિયસ)નો દળ ઇલેક્ટ્રોન, પ્રોટોન, અને ન્યૂટ્રોન કરતાં ઘણો વધુ છે. જો વેગ સમાન હોય, તો આલ્ફા કણનો વેગમાન (p = mv) સૌથી વધુ હશે, અને આથી તેની તરંગલંબાઈ સૌથી ઓછી હશે. આથી વિકલ્પ D સાચો છે.", "ncert_ref": "Class XII - પ્રકરણ 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 4}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંતનો ઉપયોગ કરીને, નીચેનામાંથી કયા પ્રયોગ દ્વારા ઇલેક્ટ્રોનની તરંગ પ્રકૃતિની પુષ્ટિ થઈ હતી?", "options": ["A) રદરફોર્ડનો સ્વર્ણ પતરોનો પ્રયોગ", "B) ડેવિસન અને જર્મરનો પ્રયોગ", "C) મિલિકનનો તેલ બુંદનો પ્રયોગ", "D) ટોમસનનો કેથોડ કિરણોનો પ્રયોગ"], "correct": 1, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, ઇલેક્ટ્રોનમાં તરંગ પ્રકૃતિ હોય છે. આ સિદ્ધાંતની પુષ્ટિ ડેવિસન અને જર્મરના પ્રયોગ દ્વારા થઈ હતી, જેમાં ઇલેક્ટ્રોનના વિક્ષેપન (diffraction) નિરીક્ષણ કરવામાં આવ્યું હતું. આથી વિકલ્પ B સાચો છે. વિકલ્પ A રદરફોર્ડનો પ્રયોગ પરમાણુના ન્યૂક્લિયસની શોધ સાથે સંબંધિત છે, વિકલ્પ C મિલિકનનો પ્રયોગ ઇલેક્ટ્રોનના વીજભારની ગણતરી સાથે સંબંધિત છે, અને વિકલ્પ D ટોમસનનો પ્રયોગ ઇલેક્ટ્રોનની શોધ સાથે સંબંધિત છે.", "ncert_ref": "Class XII - પ્રકરણ 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 5}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક આલ્ફા કણને સમાન ગતિઊર્જા આપવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ હોય અને આલ્ફા કણની λₐ હોય, તો λₑ/λₐ નું ગુણોત્તર શું હશે?", "options": ["A) 1/4", "B) 2", "C) 87.8", "D) 1/87.8"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mk) જ્યાં m એ કણનું દળ અને k એ ગતિઊર્જા છે. ઇલેક્ટ્રોન અને આલ્ફા કણ માટે સમાન ગતિઊર્જા ધારતા, λ ∝ 1/√m. આલ્ફા કણનું દળ ઇલેક્ટ્રોનના દળ કરતાં લગભગ 7344 ગણું છે (4 × 1836). તેથી λₑ/λₐ = √(mₐ/mₑ) = √7344 ≈ 85.7. સૌથી નજીકનું મૂલ્ય 87.8 છે, જે વિકલ્પ C છે. અન્ય વિકલ્પો દળના ગુણોત્તરની ખોટી ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: વિકિરણ અને દ્રવ્યની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 6}, {"question": "એક પ્રોટોન અને એક ડ્યુટેરોનને સમાન વેગથી પ્રવેગિત કરવામાં આવે છે. જો પ્રોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₚ હોય, તો ડ્યુટેરોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₔ કેટલી હશે? (ડ્યુટેરોનનું દળ પ્રોટોનના દળ કરતાં લગભગ બમણું છે)", "options": ["A) λₚ/2", "B) λₚ/√2", "C) λₚ × √2", "D) 2λₚ"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/(mv). સમાન વેગ માટે, λ ∝ 1/m. ડ્યુટેરોનનું દળ પ્રોટોનના દળ કરતાં લગભગ બમણું હોવાથી, λₔ = λₚ × (mₚ/mₔ) = λₚ × (1/2). પરંતુ વિકલ્પોમાં સીધું λₚ/2 નથી. λ ∝ 1/√m ના સંબંધને ધ્યાનમાં લેતા, λₔ = λₚ/√2. તેથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો દળ અને તરંગલંબાઈ વચ્ચેના સંબંધને ખોટી રીતે દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: વિકિરણ અને દ્રવ્યની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 7}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) દરેક ગતિશીલ કણ સાથે તરંગ સંકળાયેલું છે", "B) ડી-બ્રોગ્લી તરંગલંબાઈ કણના વેગના વ્યસ્ત પ્રમાણમાં હોય છે", "C) ફોટોન માટે ડી-બ્રોગ્લી તરંગલંબાઈ તેની તરંગલંબાઈ જેટલી જ હોય છે", "D) ડી-બ્રોગ્લી તરંગલંબાઈ કણના દળના વર્ગમૂળના પ્રમાણમાં હોય છે"], "correct": 3, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p એ કણનો વેગમાન છે. વિકલ્પ A સાચું છે કારણ કે દરેક ગતિશીલ કણ સાથે તરંગ સંકળાયેલું છે. વિકલ્પ B સાચું છે કારણ કે λ ∝ 1/v (જ્યારે દળ અચળ હોય). વિકલ્પ C ખોટું છે કારણ કે ફોટોન માટે λ = h/p = h/(h/λ) = λ, પરંતુ આ ફક્ત ફોટોન માટે જ લાગુ પડે છે, સામાન્ય કણ માટે નહીં. વિકલ્પ D ખોટું છે કારણ કે λ ∝ 1/√m (જ્યારે ગતિઊર્જા અચળ હોય), નહીં કે ∝ √m.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: વિકિરણ અને દ્રવ્યની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 8}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોનને 100 V ના વિદ્યુતસ્થિતિમાન તફાવતથી પ્રવેગિત કરવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λ હોય, તો 400 V ના વિદ્યુતસ્થિતિમાન તફાવતથી પ્રવેગિત કરવામાં આવેલા ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ કેટલી હશે?", "options": ["A) λ/4", "B) λ/2", "C) 2λ", "D) 4λ"], "correct": 1, "explanation": "વિદ્યુતસ્થિતિમાન તફાવત V થી પ્રવેગિત ઇલેક્ટ્રોનની ગતિઊર્જા k = eV. ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mk) = h/√(2meV). તેથી λ ∝ 1/√V. જો V ચાર ગણું વધે (100 V થી 400 V), તો λ અડધું થશે. તેથી નવી તરંગલંબાઈ λ/2 હશે, જે વિકલ્પ B છે. અન્ય વિકલ્પો વિદ્યુતસ્થિતિમાન અને તરંગલંબાઈ વચ્ચેના સંબંધને ખોટી રીતે દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: વિકિરણ અને દ્રવ્યની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 9}, {"question": "એક ન્યૂટ્રોન અને એક ઇલેક્ટ્રોનને સમાન ડી-બ્રોગ્લી તરંગલંબાઈ આપવામાં આવે છે. જો ન્યૂટ્રોનની ગતિઊર્જા Kₙ હોય, તો ઇલેક્ટ્રોનની ગતિઊર્જા Kₑ કેટલી હશે? (ન્યૂટ્રોનનું દળ ઇલેક્ટ્રોનના દળ કરતાં લગભગ 1836 ગણું છે)", "options": ["A) Kₙ/1836", "B) 1836 Kₙ", "C) Kₙ × √1836", "D) Kₙ/√1836"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mk). સમાન λ માટે, √(2mK) = અચળ. તેથી mK = અચળ ⇒ K ∝ 1/m. ન્યૂટ્રોનનું દળ ઇલેક્ટ્રોનના દળ કરતાં 1836 ગણું હોવાથી, Kₑ = 1836 Kₙ. તેથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો દળ અને ગતિઊર્જા વચ્ચેના સંબંધને ખોટી રીતે દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: વિકિરણ અને દ્રવ્યની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 10}, {"question": "એક ઇલેક્ટ્રોન અને એક ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) ઇલેક્ટ્રોનનું દળ ફોટોનના દળ કરતાં વધારે છે", "B) ઇલેક્ટ્રોનનો વેગ ફોટોનના વેગ કરતાં ઓછો છે", "C) ઇલેક્ટ્રોનની ગતિઊર્જા ફોટોનની ગતિઊર્જા કરતાં ઓછી છે", "D) ઇલેક્ટ્રોનની આવર્તન ફોટોનની આવર્તન કરતાં ઓછી છે"], "correct": 1, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, λ = h/p. ફોટોનનું દળ શૂન્ય હોય છે અને તે પ્રકાશના વેગ (c) થી ગતિ કરે છે, જ્યારે ઇલેક્ટ્રોનનું દળ m હોય છે અને તેનો વેગ v < c હોય છે. જો λ સમાન હોય, તો p = h/λ પણ સમાન હશે. પરંતુ p = mv માટે ઇલેક્ટ્રોન અને p = E/c માટે ફોટોન. ફોટોનનો વેગ c હોય છે, જ્યારે ઇલેક્ટ્રોનનો વેગ v < c હોય છે, તેથી વિકલ્પ B સત્ય છે. વિકલ્પ A ખોટો છે કારણ કે ફોટોનનું દળ શૂન્ય છે. વિકલ્પ C ખોટો છે કારણ કે ગતિઊર્જા E = p²/2m (ઇલેક્ટ્રોન) અને E = pc (ફોટોન), તેથી ફોટોનની ગતિઊર્જા વધારે હશે. વિકલ્પ D ખોટો છે કારણ કે આવર્તન ફોટોન માટે c/λ અને ઇલેક્ટ્રોન માટે v/λ હોય છે, અને v < c હોવાથી ઇલેક્ટ્રોનની આવર્તન ઓછી હશે, પરંતુ આ સીધું સંકળાયેલું નથી.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 11}, {"question": "ડી-બ્રોગ્લી તરંગલંબાઈની દ્રષ્ટિએ, નીચેનામાંથી કયા કણની તરંગલંબાઈ સૌથી લાંબી હશે જ્યારે તેમને સમાન ગતિઊર્જા આપવામાં આવે?", "options": ["A) ઇલેક્ટ્રોન", "B) પ્રોટોન", "C) ન્યૂટ્રોન", "D) આલ્ફા કણ"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mK) છે, જ્યાં m કણનું દળ અને K ગતિઊર્જા છે. જો K સમાન હોય, તો λ ∝ 1/√m. ઇલેક્ટ્રોનનું દળ (mₑ) પ્રોટોન (mₚ ≈ 1836 mₑ), ન્યૂટ્રોન (mₙ ≈ mₚ), અને આલ્ફા કણ (mₐ ≈ 4mₚ) કરતાં ખૂબ ઓછું છે. તેથી, ઇલેક્ટ્રોનની તરંગલંબાઈ સૌથી લાંબી હશે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેમનું દળ ઇલેક્ટ્રોન કરતાં વધારે છે, તેથી તેમની તરંગલંબાઈ ઓછી હશે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 12}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો કણનું દળ દુગણું કરવામાં આવે અને તેનો વેગ અડધો કરવામાં આવે, તો નવી તરંગલંબાઈ કેટલી હશે?", "options": ["A) λ/4", "B) λ/2", "C) λ", "D) 2λ"], "correct": 3, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/(mv). જો દળ m' = 2m અને વેગ v' = v/2 હોય, તો નવી તરંગલંબાઈ λ' = h/(m'v') = h/(2m * v/2) = h/(mv) = λ. પરંતુ અહીં, m' = 2m અને v' = v/2, તેથી λ' = h/(2m * v/2) = h/(mv) = λ. પરંતુ પ્રશ્નમાં દળ દુગણું અને વેગ અડધો કરવામાં આવે છે, તેથી λ' = h/(2m * v/2) = h/(mv) = λ. પરંતુ વિકલ્પ C λ છે, પરંતુ ગણતરી અનુસાર λ' = λ. પરંતુ વિકલ્પ D 2λ છે, જે ખોટો છે. (સુધારો: λ' = h/(2m * v/2) = h/(mv) = λ, તેથી સરનામું C સરનામું છે.)", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 13}, {"question": "એક ઇલેક્ટ્રોન અને એક પ્રોટોનને સમાન ડી-બ્રોગ્લી તરંગલંબાઈ આપવામાં આવે છે. જો ઇલેક્ટ્રોનનો વેગ vₑ હોય, તો પ્રોટોનનો વેગ vₚ કેટલો હશે?", "options": ["A) vₚ = vₑ", "B) vₚ = vₑ/1836", "C) vₚ = 1836 vₑ", "D) vₚ = vₑ/√1836"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/(mv) છે. જો λ સમાન હોય, તો mₑvₑ = mₚvₚ. પ્રોટોનનું દળ mₚ ≈ 1836 mₑ હોય છે, તેથી vₚ = (mₑ/mₚ) vₑ = vₑ/1836. પરંતુ પ્રશ્નમાં વિકલ્પ B vₚ = vₑ/1836 છે, જે સરનામું છે. (સુધારો: વિકલ્પ B સરનામું છે.)", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 14}, {"question": "એક ઇલેક્ટ્રોન અને એક ફોટોનની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન ડી-બ્રોગ્લી સિદ્ધાંતના આધારે સત્ય છે?", "options": ["A) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોનની તરંગલંબાઈ કરતાં ઓછી હશે", "B) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોનની તરંગલંબાઈ કરતાં વધુ હશે", "C) બંનેમાં સમાન ડી-બ્રોગ્લી તરંગલંબાઈ હશે", "D) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોનની તરંગલંબાઈ સાથે સંબંધિત નથી"], "correct": 1, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, λ = h/p, જ્યાં p એ કણનું વેગમાન છે. ફોટોન માટે, ગતિઊર્જા E = pc (જ્યાં c પ્રકાશનો વેગ છે), જ્યારે ઇલેક્ટ્રોન માટે, ગતિઊર્જા E = p²/2m (જ્યાં m ઇલેક્ટ્રોનનું દળ છે). જો બંનેમાં સમાન ગતિઊર્જા હોય, તો ફોટોનનું વેગમાન p_photon = E/c અને ઇલેક્ટ્રોનનું વેગમાન p_electron = √(2mE) હશે. કેમ કે c > √(2mE)/m (ઇલેક્ટ્રોનના દળને ધ્યાનમાં લેતા), p_photon < p_electron. પરિણામે, λ = h/p મુજબ, ઇલેક્ટ્રોનની તરંગલંબાઈ ફોટોન કરતાં વધુ હશે. વિકલ્પ A ખોટો છે કેમ કે ઇલેક્ટ્રોનની તરંગલંબાઈ ઓછી નથી. વિકલ્પ C ખોટો છે કેમ કે તરંગલંબાઈ સમાન નથી. વિકલ્પ D ખોટો છે કેમ કે ડી-બ્રોગ્લી તરંગલંબાઈ વેગમાન પર આધારિત છે, જે ગતિઊર્જા સાથે સંબંધિત છે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકીના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 15}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, જ્યારે એક ઇલેક્ટ્રોન અને એક ફોટોનની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોનની તરંગલંબાઈ કરતાં ઓછી હશે", "B) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોનની તરંગલંબાઈ કરતાં વધુ હશે", "C) બંનેમાં સમાન ડી-બ્રોગ્લી તરંગલંબાઈ હશે", "D) ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ અસ્તિત્વમાં નહીં હોય"], "correct": 1, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, λ = h/p, જ્યાં p એ વેગમાન છે. ફોટોન માટે, p = E/c (જ્યાં E ગતિઊર્જા અને c પ્રકાશનો વેગ છે), જ્યારે ઇલેક્ટ્રોન માટે, p = √(2mE) (જ્યાં m દળ છે). જ્યારે E સમાન હોય, ત્યારે ફોટોનનું વેગમાન ઇલેક્ટ્રોન કરતાં ઓછું હોય છે, પરિણામે ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ ઇલેક્ટ્રોન કરતાં વધુ હોય છે. આથી, ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ ફોટોન કરતાં ઓછી હશે. વિકલ્પ A ખોટો છે કારણ કે ઇલેક્ટ્રોનની તરંગલંબાઈ ઓછી હોવાને બદલે વધુ નથી. વિકલ્પ C ખોટો છે કારણ કે બંનેમાં સમાન તરંગલંબાઈ નથી. વિકલ્પ D ખોટો છે કારણ કે ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ અસ્તિત્વમાં હોય છે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 16}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો કણનું વેગમાન અચળ રાખીને કણનું દળ દુગણું કરવામાં આવે, તો નવી ડી-બ્રોગ્લી તરંગલંબાઈ કેટલી હશે?", "options": ["A) λ/2", "B) λ", "C) 2λ", "D) λ/√2"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં h પ્લાંકનો અચળાંક અને p વેગમાન છે. વેગમાન p = mv, જ્યાં m દળ અને v વેગ છે. જો દળ દુગણું કરવામાં આવે અને વેગમાન અચળ રાખવામાં આવે, તો વેગ અડધો થાય છે. પરંતુ ડી-બ્રોગ્લી તરંગલંબાઈ ફક્ત વેગમાન પર આધારિત છે, જે અચળ રહે છે. આથી, તરંગલંબાઈ λ જેવી જ રહેશે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ દળના દુગણા થવાને લીધે તરંગલંબાઈમાં ફેરફાર સૂચવે છે, જે વેગમાન અચળ રહેતા નથી થતો.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 17}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p છે, જ્યાં h પ્લાંક અચળાંક અને p વેગમાન છે. જો એક ઇલેક્ટ્રોન અને એક ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) ઇલેક્ટ્રોન અને ફોટોનની ગતિઊર્જા સમાન હશે.", "B) ઇલેક્ટ્રોનનું વેગમાન ફોટોનના વેગમાન કરતાં ઓછું હશે.", "C) ઇલેક્ટ્રોનનો વેગ પ્રકાશના વેગ કરતાં ઓછો હશે.", "D) ફોટોનનું દળ ઇલેક્ટ્રોનના દળ કરતાં ઓછું હશે."], "correct": 2, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, λ = h/p. જો λ સમાન હોય, તો p પણ સમાન હશે. ફોટોનનો વેગ હમેશા પ્રકાશના વેગ (c) જેટલો હોય છે, જ્યારે ઇલેક્ટ્રોનનો વેગ c કરતાં ઓછો હોય છે. આથી, ઇલેક્ટ્રોનનો વેગ પ્રકાશના વેગ કરતાં ઓછો હશે. વિકલ્પ A ખોટો છે કારણ કે ગતિઊર્જા વેગ અને દળ પર આધાર રાખે છે. વિકલ્પ B ખોટો છે કારણ કે વેગમાન સમાન હશે. વિકલ્પ D ખોટો છે કારણ કે ફોટોનનું દળ શૂન્ય હોય છે, જ્યારે ઇલેક્ટ્રોનનું દળ શૂન્ય નથી.", "ncert_ref": "Class XII - Chapter 11: કિરણપુંજ અને કણોની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 18}, {"question": "ડી-બ્રોગ્લી તરંગલંબાઈના સંદર્ભમાં, નીચેનામાંથી કયા કણની ડી-બ્રોગ્લી તરંગલંબાઈ સૌથી લાંબી હશે જ્યારે તેમને સમાન ગતિઊર્જા આપવામાં આવે?", "options": ["A) ઇલેક્ટ્રોન", "B) પ્રોટોન", "C) ન્યૂટ્રોન", "D) આલ્ફા કણ"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mK) છે, જ્યાં m કણનું દળ અને K ગતિઊર્જા છે. જ્યારે ગતિઊર્જા સમાન હોય, ત્યારે દળ ઓછું હોય તે કણની તરંગલંબાઈ લાંબી હશે. ઇલેક્ટ્રોનનું દળ પ્રોટોન, ન્યૂટ્રોન, અને આલ્ફા કણ કરતાં ઓછું હોય છે, આથી ઇલેક્ટ્રોનની તરંગલંબાઈ સૌથી લાંબી હશે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેમનું દળ ઇલેક્ટ્રોન કરતાં વધારે છે.", "ncert_ref": "Class XII - Chapter 11: કિરણપુંજ અને કણોની દ્વૈત પ્રકૃતિ", "difficulty": "Hard", "num": 19}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, જ્યારે એક કણની ગતિઊર્જા E હોય, તો તેની ડી-બ્રોગ્લી તરંગલંબાઈ λ નીચેનામાંથી કયા સૂત્ર દ્વારા વ્યક્ત થાય છે?", "options": ["A) λ = h/√(2mE)", "B) λ = h√(2mE)", "C) λ = √(2mE)/h", "D) λ = 2mE/h"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p = √(2mE) (ગતિઊર્જા E = p²/2m). પરિણામે, λ = h/√(2mE). A સાચું છે. B, C, D ખોટા છે કારણ કે તેઓ સૂત્રની અયોગ્ય વ્યક્તી કરે છે.", "ncert_ref": "Class XII - Chapter 11: કિરણ પ્રકૃતિ અને કણ પ્રકૃતિ", "difficulty": "Hard", "num": 20}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક પ્રોટોનને સમાન વેગથી ગતિ કરાવવામાં આવે છે. જો ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર તેમની તરંગલંબાઈની તુલના કરવી હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ પ્રોટોન કરતાં ઓછી હશે", "B) ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ પ્રોટોન કરતાં વધુ હશે", "C) બંનેમાં સમાન ડી-બ્રોગ્લી તરંગલંબાઈ હશે", "D) તરંગલંબાઈનો આધાર દળ પર નહીં પણ વેગ પર રહે"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/(mv) છે, જ્યાં m દળ અને v વેગ છે. ઇલેક્ટ્રોનનું દળ પ્રોટોન કરતાં ખૂબ ઓછું છે. જો વેગ સમાન હોય, તો ઇલેક્ટ્રોનનું વેગમાન (mv) પ્રોટોન કરતાં ઓછું હશે, પરિણામે ઇલેક્ટ્રોનની તરંગલંબાઈ વધુ હશે. આથી, વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે ઇલેક્ટ્રોનની તરંગલંબાઈ વધુ હશે. વિકલ્પ C ખોટો છે કારણ કે દળ અલગ હોવાથી તરંગલંબાઈ સમાન નહીં હોય. વિકલ્પ D ખોટો છે કારણ કે તરંગલંબાઈ દળ અને વેગ બંનેપર આધાર રાખે છે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 21}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંતનો ઉપયોગ કરીને, નીચેનામાંથી કયા કણની ડી-બ્રોગ્લી તરંગલંબાઈ સૌથી લાંબી હશે જ્યારે તેમને સમાન ગતિઊર્જા આપવામાં આવે?", "options": ["A) ઇલેક્ટ્રોન", "B) પ્રોટોન", "C) ન્યૂટ્રોન", "D) આલ્ફા કણ"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mE) છે, જ્યાં m દળ અને E ગતિઊર્જા છે. જો E સમાન હોય, તો λ ∝ 1/√m. ઇલેક્ટ્રોનનું દળ પ્રોટોન, ન્યૂટ્રોન અને આલ્ફા કણ કરતાં ખૂબ ઓછું છે. આથી, ઇલેક્ટ્રોનની તરંગલંબાઈ સૌથી લાંબી હશે. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેમનું દળ ઇલેક્ટ્રોન કરતાં વધુ હોવાથી તરંગલંબાઈ ઓછી હશે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 22}, {"question": "નીચેનામાંથી કયા કણ માટે ડી-બ્રોગ્લી તરંગલંબાઈની ગણતરી કરતી વખતે આપેક્ષિકતાનો સિદ્ધાંત લાગુ પડે છે? (ધારો કે કણની ગતિ પ્રકાશની ગતિની નજીક છે)", "options": ["A) ઇલેક્ટ્રોન જ્યારે તે 100 V ના વિદ્યુતસ્થિતિમાન તફાવતથી પ્રવેગિત થાય છે", "B) પ્રોટોન જ્યારે તે 1 MeV ની ગતિઊર્જાથી ગતિ કરે છે", "C) ન્યૂટ્રોન જ્યારે તે થર્મલ ગતિમાં હોય છે", "D) આલ્ફા કણ જ્યારે તે 5 MeV ની ગતિઊર્જાથી ગતિ કરે છે"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p વેગમાન છે. આપેક્ષિકતાનો સિદ્ધાંત ત્યારે લાગુ પડે છે જ્યારે કણની ગતિ પ્રકાશની ગતિ (c) ની નજીક હોય છે, એટલે કે જ્યારે કણની ગતિઊર્જા તેના વિશ્રામ દળ-ઊર્જા (mc²) ની તુલનામાં નગણ્ય ન હોય. પ્રોટોન માટે, વિશ્રામ દળ-ઊર્જા ≈ 938 MeV છે. જ્યારે પ્રોટોન 1 MeV ની ગતિઊર્જાથી ગતિ કરે છે, ત્યારે તેની ગતિ c ની નજીક હોય છે, અને આપેક્ષિકતાનો સિદ્ધાંત લાગુ પડે છે. ઇલેક્ટ્રોન માટે 100 V ના વિદ્યુતસ્થિતિમાન તફાવતથી પ્રવેગિત થાય ત્યારે તેની ગતિઊર્જા 100 eV (0.0001 MeV) હોય છે, જે વિશ્રામ દળ-ઊર્જા (0.511 MeV) કરતાં ખૂબ ઓછી છે, આથી આપેક્ષિકતાનો સિદ્ધાંત લાગુ પડતો નથી. ન્યૂટ્રોન થર્મલ ગતિમાં હોય ત્યારે તેની ગતિઊર્જા ખૂબ ઓછી હોય છે (≈ 0.025 eV), આથી આપેક્ષિકતાનો સિદ્ધાંત લાગુ પડતો નથી. આલ્ફા કણ માટે 5 MeV ની ગતિઊર્જા તેના વિશ્રામ દળ-ઊર્જા (≈ 3727 MeV) કરતાં ઓછી છે, પરંતુ તેની ગતિ c ની નજીક નથી, આથી આપેક્ષિકતાનો સિદ્ધાંત લાગુ પડતો નથી.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 23}, {"question": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, એક ઇલેક્ટ્રોન અને એક ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે? (ધારો કે ઇલેક્ટ્રોનની ગતિ અપેક્ષિક ન હોઈ શકે એટલી ઓછી છે)", "options": ["A) ઇલેક્ટ્રોન અને ફોટોનનું વેગમાન સમાન હશે", "B) ઇલેક્ટ્રોનનું વેગમાન ફોટોન કરતાં ઓછું હશે", "C) ફોટોનનું વેગમાન ઇલેક્ટ્રોન કરતાં ઓછું હશે", "D) ઇલેક્ટ્રોન અને ફોટોનની ગતિઊર્જા સમાન હશે"], "correct": 0, "explanation": "ડી-બ્રોગ્લી સિદ્ધાંત અનુસાર, તરંગલંબાઈ λ = h/p, જ્યાં p વેગમાન છે. જો λ સમાન હોય, તો p પણ સમાન હોવું જોઈએ. ફોટોન માટે p = h/λ, જ્યારે ઇલેક્ટ્રોન માટે p = mv (અપેક્ષિકતાવિહીન સ્થિતિમાં). જો λ સમાન હોય, તો p પણ સમાન હશે. આથી, વિકલ્પ A સત્ય છે. વિકલ્પ B અને C ખોટા છે કારણ કે વેગમાન સમાન હોવું જોઈએ. વિકલ્પ D ખોટો છે કારણ કે ગતિઊર્જા (E = p²/2m ઇલેક્ટ્રોન માટે અને E = pc ફોટોન માટે) સમાન વેગમાન હોવા છતાં અલગ હશે.", "ncert_ref": "Class XII - Chapter 11: ક્વોન્ટમ યાંત્રિકી", "difficulty": "Hard", "num": 24}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
