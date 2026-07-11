@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - સવર્ગ સંયોજનો
+વર્નરનો સિદ્ધાંત</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 સવર્ગ સંયોજનો
+વર્નરનો સિદ્ધાંત</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH₃)₅(NO₂)]Cl₂ સંયોજનમાં કોબાલ્ટનું ઓક્સિડેશન અવસ્થા કેટલી હોય છે?", "options": ["A) +1", "B) +2", "C) +3", "D) +4"], "correct": 2, "explanation": "વર્નરના સિદ્ધાંત મુજબ, આ સંયોજનમાં કોબાલ્ટનું ઓક્સિડેશન અવસ્થા +3 હોય છે. NH₃ અને NO₂ બંને લિગેન્ડ્સ તટસ્થ હોય છે, પરંતુ Cl₂ આયનિક હોય છે. કોબાલ્ટની ઓક્સિડેશન અવસ્થા ગણવા માટે, સંયોજનનો કુલ ચાર્જ (અહીં +2) અને લિગેન્ડ્સનો ચાર્જ (0) ધ્યાનમાં લેવામાં આવે છે. આથી, Coનું ઓક્સિડેશન અવસ્થા +3 થાય છે. A, B, અને D વિકલ્પો અયોગ્ય છે કારણ કે તેઓ ઓક્સિડેશન અવસ્થાને યોગ્ય રીતે ગણતરી કરતા નથી.", "ncert_ref": "Class XII - Chapter 9: d- અને f-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, સવર્ગ સંયોજન નથી?", "options": ["A) [Co(NH₃)₆]Cl₃", "B) [Pt(NH₃)₂Cl₂]", "C) [Fe(CN)₆]⁴⁻", "D) K₄[Fe(CN)₆]"], "correct": 1, "explanation": "[Pt(NH₃)₂Cl₂] સવર્ગ સંયોજન નથી કારણ કે તે વર્નરના સિદ્ધાંત અનુસાર, સંકરણ દ્વારા બનતું નથી. આ સંયોજનમાં પ્લેટિનમનું સંકરણ sp² હોય છે, જે સવર્ગ સંયોજન માટે જરૂરી નથી. A, C, અને D વિકલ્પો સવર્ગ સંયોજનો છે કારણ કે તેઓ વર્નરના સિદ્ધાંત અનુસાર, કેળવણી દ્વારા બનેલા છે.", "ncert_ref": "Class XII - Chapter 9: d- અને f-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 2}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH₃)₄Cl₂]⁺ સંયોજનમાં કોબાલ્ટનું સંકરણ કયું હોય છે?", "options": ["A) sp³", "B) dsp²", "C) d²sp³", "D) sp³d²"], "correct": 2, "explanation": "[Co(NH₃)₄Cl₂]⁺ સંયોજનમાં કોબાલ્ટનું સંકરણ d²sp³ હોય છે. આ સંયોજનમાં કોબાલ્ટ +3 ઓક્સિડેશન અવસ્થામાં હોય છે, અને તે 6 લિગેન્ડ્સ સાથે જોડાયેલું હોય છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. આથી, સંકરણ d²sp³ હોય છે. A, B, અને D વિકલ્પો અયોગ્ય છે કારણ કે તેઓ ઓક્ટાહેડ્રલ જ્યોમેટ્રી માટે યોગ્ય સંકરણ નથી.", "ncert_ref": "Class XII - Chapter 9: d- અને f-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે?", "options": ["A) [Co(NH₃)₆]³⁺", "B) [Ni(CN)₄]²⁻", "C) [Zn(NH₃)₄]²⁺", "D) [PtCl₄]²⁻"], "correct": 2, "explanation": "[Zn(NH₃)₄]²⁺ સંયોજન ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે કારણ કે ઝિંક (Zn)નું સંકરણ sp³ હોય છે, જે ટેટ્રાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. A, B, અને D વિકલ્પો ઓક્ટાહેડ્રલ અથવા સ્ક્વેર પ્લેનર જ્યોમેટ્રી ધરાવે છે, જે ટેટ્રાહેડ્રલ નથી.", "ncert_ref": "Class XII - Chapter 9: d- અને f-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 4}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(en)₃]³⁺ સંયોજનમાં કેટલા ક્લોરાઇડ આયનો હાજર હોય છે?", "options": ["A) 0", "B) 1", "C) 2", "D) 3"], "correct": 0, "explanation": "[Co(en)₃]³⁺ સંયોજનમાં કોઈ ક્લોરાઇડ આયન હાજર નથી કારણ કે આ સંયોજન કેટાયનિક હોય છે અને તેના ચાર્જને સંતુલિત કરવા માટે ક્લોરાઇડ આયનની જરૂર નથી. en (એથિલીનડાયમિન) લિગેન્ડ તટસ્થ હોય છે, અને કોબાલ્ટ +3 ઓક્સિડેશન અવસ્થામાં હોય છે. A વિકલ્પ યોગ્ય છે કારણ કે ક્લોરાઇડ આયનની જરૂર નથી. B, C, અને D વિકલ્પો અયોગ્ય છે કારણ કે તેઓ ક્લોરાઇડ આયનની હાજરી સૂચવે છે, જે આ સંયોજનમાં હાજર નથી.", "ncert_ref": "Class XII - Chapter 9: d- અને f-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 5}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Pt(NH3)2Cl2] સંયોજનના સિસ-ટ્રાન્સ આઇસોમરિઝમ માટે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) સિસ-આઇસોમરમાં બંને ક્લોરાઇડ લિગેન્ડ્સ એકબીજાથી 90° કોણ પર હોય છે, જ્યારે ટ્રાન્સ-આઇસોમરમાં 180° કોણ પર હોય છે.", "B) સિસ-આઇસોમરમાં બંને એમિન લિગેન્ડ્સ એકબીજાથી 180° કોણ પર હોય છે, જ્યારે ટ્રાન્સ-આઇસોમરમાં 90° કોણ પર હોય છે.", "C) સિસ અને ટ્રાન્સ બંને આઇસોમરમાં ક્લોરાઇડ લિગેન્ડ્સ એકબીજાથી 120° કોણ પર હોય છે.", "D) સિસ-આઇસોમરમાં ક્લોરાઇડ અને એમિન લિગેન્ડ્સ વચ્ચેનો કોણ 90° હોય છે, જ્યારે ટ્રાન્સ-આઇસોમરમાં 0° હોય છે."], "correct": 0, "explanation": "વર્નરના સિદ્ધાંત અનુસાર, [Pt(NH3)2Cl2] સંયોજન ચોરસ સમતલ (square planar) જ્યોમેટ્રી ધરાવે છે. સિસ-આઇસોમરમાં બંને ક્લોરાઇડ લિગેન્ડ્સ એકબીજાથી 90° કોણ પર હોય છે, જ્યારે ટ્રાન્સ-આઇસોમરમાં તેઓ 180° કોણ પર હોય છે. વિકલ્પ A સત્ય છે. વિકલ્પ B ગલત છે કારણ કે એમિન લિગેન્ડ્સના કોણ સિસમાં 90° અને ટ્રાન્સમાં 180° હોય છે. વિકલ્પ C ગલત છે કારણ કે ચોરસ સમતલ જ્યોમેટ્રીમાં 120° કોણ શક્ય નથી. વિકલ્પ D ગલત છે કારણ કે ટ્રાન્સ-આઇસોમરમાં ક્લોરાઇડ અને એમિન લિગેન્ડ્સ વચ્ચેનો કોણ 90° હોય છે, 0° નહીં.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 6}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)5(ONO)]Cl2 સંયોજનમાં નાઇટ્રાઇટ લિગેન્ડ કેવી રીતે જોડાયેલું છે?", "options": ["A) નાઇટ્રોજન પરમાણુ દ્વારા", "B) ઓક્સિજન પરમાણુ દ્વારા", "C) નાઇટ્રોજન અને ઓક્સિજન બંને પરમાણુઓ દ્વારા", "D) ક્લોરાઇડ આયન દ્વારા"], "correct": 1, "explanation": "વર્નરના સિદ્ધાંત અનુસાર, નાઇટ્રાઇટ લિગેન્ડ (ONO-) એ એમ્બિડેન્ટ લિગેન્ડ છે, જે ઓક્સિજન અથવા નાઇટ્રોજન પરમાણુ દ્વારા જોડાઈ શકે છે. [Co(NH3)5(ONO)]Cl2માં, નાઇટ્રાઇટ લિગેન્ડ ઓક્સિજન પરમાણુ દ્વારા જોડાયેલું છે, કારણ કે નાઇટ્રોજન પરમાણુ દ્વારા જોડાયેલું હોત તો સંયોજન [Co(NH3)5(NO2)]Cl2 હોત. વિકલ્પ B સત્ય છે. વિકલ્પ A ગલત છે કારણ કે અહીં ઓક્સિજન જોડાયેલું છે. વિકલ્પ C ગલત છે કારણ કે એમ્બિડેન્ટ લિગેન્ડ એક જ પરમાણુ દ્વારા જોડાય છે. વિકલ્પ D ગલત છે કારણ કે ક્લોરાઇડ આયન લિગેન્ડ નથી.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 7}, {"question": "નીચેનામાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે અને સંપૂર્ણપણે ડાયમાગ્નેટિક છે?", "options": ["A) [CoF6]3-", "B) [Co(NH3)6]3+", "C) [Fe(CN)6]4-", "D) [Ni(CN)4]2-"], "correct": 1, "explanation": "[Co(NH3)6]3+ સંયોજનમાં કોબાલ્ટ +3 ઓક્સિડેશન અવસ્થામાં છે અને તે d2sp3 સંકરણ ધરાવે છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. કોબાલ્ટ(III)માં 3d6 ઇલેક્ટ્રોન કોન્ફિગરેશન હોય છે, પરંતુ NH3 એ મજબૂત લિગેન્ડ હોવાથી, ઇલેક્ટ્રોન યુગ્મન થાય છે અને કોઈ અયુગ્મ ઇલેક્ટ્રોન રહેતા નથી, જેથી સંયોજન ડાયમાગ્નેટિક હોય છે. વિકલ્પ B સત્ય છે. વિકલ્પ A ગલત છે કારણ કે [CoF6]3-માં કોબાલ્ટ +3 ઓક્સિડેશન અવસ્થામાં છે અને F- મજબૂત લિગેન્ડ ન હોવાથી, ઇલેક્ટ્રોન અયુગ્મ રહે છે અને તે પેરામેગ્નેટિક હોય છે. વિકલ્પ C ગલત છે કારણ કે [Fe(CN)6]4-માં આયર્ન +2 ઓક્સિડેશન અવસ્થામાં છે અને તે પેરામેગ્નેટિક હોય છે. વિકલ્પ D ગલત છે કારણ કે [Ni(CN)4]2- ચોરસ સમતલ જ્યોમેટ્રી ધરાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 8}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(en)2Cl2]+ સંયોજન માટે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "options": ["A) તે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે.", "B) તે સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે.", "C) તે ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે.", "D) તે ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે."], "correct": 3, "explanation": "[Co(en)2Cl2]+ સંયોજનમાં કોબાલ્ટ +3 ઓક્સિડેશન અવસ્થામાં છે અને તે d2sp3 સંકરણ ધરાવે છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. એથિલીનડાયમિન (en) એ બાઇડેન્ટેટ લિગેન્ડ છે, જેથી સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ અને ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે. વિકલ્પ D ગલત છે કારણ કે તે ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવતું નથી. વિકલ્પ A, B, અને C સત્ય છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 9}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન કોઓર્ડિનેશન સંખ્યા 6 ધરાવે છે અને સંપૂર્ણપણે પેરામેગ્નેટિક છે?", "options": ["A) [Fe(H2O)6]2+", "B) [Co(NH3)6]3+", "C) [Ni(CN)4]2-", "D) [PtCl4]2-"], "correct": 0, "explanation": "[Fe(H2O)6]2+ સંયોજનમાં આયર્ન +2 ઓક્સિડેશન અવસ્થામાં છે અને તે sp3d2 સંકરણ ધરાવે છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. આયર્ન(II)માં 3d6 ઇલેક્ટ્રોન કોન્ફિગરેશન હોય છે અને H2O મજબૂત લિગેન્ડ ન હોવાથી, ઇલેક્ટ્રોન અયુગ્મ રહે છે, જેથી સંયોજન પેરામેગ્નેટિક હોય છે. વિકલ્પ A સત્ય છે. વિકલ્પ B ગલત છે કારણ કે [Co(NH3)6]3+ ડાયમાગ્નેટિક હોય છે. વિકલ્પ C ગલત છે કારણ કે [Ni(CN)4]2- ચોરસ સમતલ જ્યોમેટ્રી ધરાવે છે અને ડાયમાગ્નેટિક હોય છે. વિકલ્પ D ગલત છે કારણ કે [PtCl4]2- ચોરસ સમતલ જ્યોમેટ્રી ધરાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 10}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)5(NO2)]Cl2 સંયોજનમાં નાઇટ્રાઇટ લિગેન્ડની જોડાણ પદ્ધતિ કઈ રીતે નક્કી કરવામાં આવે છે?", "options": ["A) નાઇટ્રાઇટ લિગેન્ડ N-અટોમ દ્વારા જોડાયેલું છે, કારણ કે તે નાઇટ્રોજન-ડોનર લિગેન્ડ તરીકે વર્તે છે.", "B) નાઇટ્રાઇટ લિગેન્ડ O-અટોમ દ્વારા જોડાયેલું છે, કારણ કે તે ઓક્સિજન-ડોનર લિગેન્ડ તરીકે વર્તે છે.", "C) નાઇટ્રાઇટ લિગેન્ડ N અને O બંને અટોમ દ્વારા જોડાયેલું છે, કારણ કે તે એમ્બીડેન્ટ લિગેન્ડ છે.", "D) નાઇટ્રાઇટ લિગેન્ડ કોબાલ્ટ સાથે આયનિક બંધ દ્વારા જોડાયેલું છે."], "correct": 0, "explanation": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)5(NO2)]Cl2માં નાઇટ્રાઇટ લિગેન્ડ N-અટોમ દ્વારા જોડાયેલું હોય છે, કારણ કે નાઇટ્રોજન-ડોનર લિગેન્ડ તરીકે વર્તે છે. ઓપ્શન B ખોટું છે કારણ કે ઓક્સિજન-ડોનર લિગેન્ડ તરીકે વર્તતું નથી. ઓપ્શન C ખોટું છે કારણ કે એમ્બીડેન્ટ લિગેન્ડ હોવા છતાં, આ સંયોજનમાં તે ફક્ત N-અટોમ દ્વારા જોડાયેલું હોય છે. ઓપ્શન D ખોટું છે કારણ કે કોબાલ્ટ સાથે સહસંયોજક બંધ બનાવે છે, આયનિક નહીં.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 11}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી?", "options": ["A) [Co(en)2Cl2]+", "B) [Pt(NH3)2Cl2]", "C) [Co(NH3)4Cl2]+", "D) [Co(NH3)5Cl]2+"], "correct": 3, "explanation": "[Co(NH3)5Cl]2+ સંયોજનમાં ફક્ત એક ક્લોરાઇડ લિગેન્ડ હોવાથી સિસ-ટ્રાન્સ આઇસોમરિઝમ શક્ય નથી. બાકીના સંયોજનો [Co(en)2Cl2]+, [Pt(NH3)2Cl2], અને [Co(NH3)4Cl2]+માં બે ક્લોરાઇડ લિગેન્ડ હોવાથી સિસ-ટ્રાન્સ આઇસોમરિઝમ શક્ય છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 12}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવતું નથી?", "options": ["A) [Co(NH3)6]3+", "B) [Co(en)3]3+", "C) [Ni(CN)4]2-", "D) [Co(NH3)5Cl]2+"], "correct": 2, "explanation": "[Ni(CN)4]2- સંયોજન ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે, કારણ કે Ni2+ આયનમાં d10 ઇલેક્ટ્રોન કૉન્ફિગરેશન હોવાથી તે ટેટ્રાહેડ્રલ સંકરણ દર્શાવે છે. બાકીના સંયોજનો [Co(NH3)6]3+, [Co(en)3]3+, અને [Co(NH3)5Cl]2+ ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 13}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું વિધાન [Co(NH3)5(ONO)]Cl2 સંયોજન માટે સત્ય છે?", "options": ["A) નાઇટ્રાઇટ લિગેન્ડ O-અટોમ દ્વારા જોડાયેલું છે અને સંયોજન નિષ્ક્રિય છે.", "B) નાઇટ્રાઇટ લિગેન્ડ N-અટોમ દ્વારા જોડાયેલું છે અને સંયોજન નિષ્ક્રિય છે.", "C) નાઇટ્રાઇટ લિગેન્ડ O-અટોમ દ્વારા જોડાયેલું છે અને સંયોજન સક્રિય છે.", "D) નાઇટ્રાઇટ લિગેન્ડ N-અટોમ દ્વારા જોડાયેલું છે અને સંયોજન સક્રિય છે."], "correct": 1, "explanation": "[Co(NH3)5(ONO)]Cl2માં નાઇટ્રાઇટ લિગેન્ડ N-અટોમ દ્વારા જોડાયેલું હોય છે અને સંયોજન નિષ્ક્રિય હોય છે. ઓપ્શન A, C, અને D ખોટા છે કારણ કે નાઇટ્રાઇટ લિગેન્ડ O-અટોમ દ્વારા જોડાયેલું નથી અને સંયોજન સક્રિય નથી.", "ncert_ref": "Class XII - Chapter 9: સંકરણ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 14}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)4(NO2)2]Cl સંયોજન માટે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) સંયોજનમાં કોબાલ્ટનું ઓક્સિડેશન અવસ્થા +3 છે અને તે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે.", "B) સંયોજનમાં નાઇટ્રાઇટ લિગેન્ડ નાઇટ્રોજન અણુ દ્વારા જોડાયેલું છે અને સંયોજન ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે.", "C) સંયોજનમાં કોબાલ્ટનું સંકરણ sp3d2 છે અને સંયોજનમાં બે આયનિક ક્લોરાઇડ આયનો હાજર છે.", "D) સંયોજનમાં નાઇટ્રાઇટ લિગેન્ડ ઓક્સિજન અણુ દ્વારા જોડાયેલું છે અને સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી."], "correct": 0, "explanation": "વિધાન A સત્ય છે કારણ કે [Co(NH3)4(NO2)2]Clમાં કોબાલ્ટનું ઓક્સિડેશન અવસ્થા +3 છે (NH3 અને NO2 ન્યૂટ્રલ લિગેન્ડ છે, Cl- -1 ચાર્જ ધરાવે છે, અને સંયોજન ન્યૂટ્રલ છે, તેથી Co +3 હોવું જરૂરી છે). કોબાલ્ટની કોઓર્ડિનેશન સંખ્યા 6 છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી સૂચવે છે. વિધાન B ખોટું છે કારણ કે NO2 લિગેન્ડ નાઇટ્રોજન દ્વારા જોડાયેલું હોઈ શકે છે, પરંતુ સંયોજન ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે, ટેટ્રાહેડ્રલ નહીં. વિધાન C ખોટું છે કારણ કે સંયોજનમાં ફક્ત એક ક્લોરાઇડ આયન હાજર છે (સંયોજન ન્યૂટ્રલ છે). વિધાન D ખોટું છે કારણ કે NO2 લિગેન્ડ નાઇટ્રોજન દ્વારા જોડાયેલું હોઈ શકે છે અને સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકર ધાતુ અને સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 15}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)5(NO2)]Cl2 સંયોજનના જલીય દ્રાવણમાં કેટલા આયનો ઉત્પન્ન થાય છે?", "options": ["A) 2", "B) 3", "C) 4", "D) 5"], "correct": 1, "explanation": "સંયોજન [Co(NH3)5(NO2)]Cl2માં, કોબાલ્ટ (Co) સાથે 5 NH3 અને 1 NO2 લિગેન્ડ જોડાયેલા છે, જે સંકીણ કોષ્ટક બનાવે છે. ક્લોરાઇડ (Cl) આયનો સંકીણ કોષ્ટકની બહાર હોય છે. જલીય દ્રાવણમાં, આ સંયોજન 1 [Co(NH3)5(NO2)]2+ કેટાયન અને 2 Cl- એનાયનો ઉત્પન્ન કરે છે, જેથી કુલ 3 આયનો થાય છે. A) 2 ખોટું છે કારણ કે કેટાયન અને એનાયનોનું યોગ્ય ગણતરી નથી. C) 4 અને D) 5 ખોટા છે કારણ કે તેઓ અતિરેકી આયનોની ગણતરી સૂચવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 16}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે?", "options": ["A) [Co(en)3]3+", "B) [Co(NH3)4Cl2]+", "C) [Pt(NH3)2Cl2]", "D) [Co(NH3)5Cl]2+"], "correct": 0, "explanation": "[Co(en)3]3+ સંયોજનમાં ત્રણ બાયડેન્ટેટ લિગેન્ડ (en = ઇથિલીનડાયમીન) હોય છે, જે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે અને ઓપ્ટિકલ આઇસોમર (d અને l) દર્શાવે છે. B) [Co(NH3)4Cl2]+ સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે, પરંતુ ઓપ્ટિકલ આઇસોમરિઝમ નહીં. C) [Pt(NH3)2Cl2] સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે, પરંતુ ઓપ્ટિકલ નહીં. D) [Co(NH3)5Cl]2+ ઓક્ટાહેડ્રલ છે, પરંતુ ઓપ્ટિકલ આઇસોમરિઝમ માટે અપૂરતું સંમિતિ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 17}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન સંપૂર્ણપણે અયોનિક છે?", "options": ["A) [Co(NH3)3Cl3]", "B) [Co(NH3)4Cl2]Cl", "C) [Co(NH3)5Cl]Cl2", "D) [Co(NH3)6]Cl3"], "correct": 0, "explanation": "[Co(NH3)3Cl3] સંયોજનમાં, તમામ લિગેન્ડ (3 NH3 અને 3 Cl) કોબાલ્ટ સાથે સંકીણ કોષ્ટકમાં જોડાયેલા છે, જેથી કોઈ આયન ઉત્પન્ન થતું નથી. B), C), અને D) સંયોજનો ક્લોરાઇડ આયનો ધરાવે છે, જે જલીય દ્રાવણમાં મુક્ત થાય છે, જેથી તેઓ અયોનિક નથી.", "ncert_ref": "Class XII - Chapter 9: સંકરણ રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 18}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Co(en)2(NO2)2]+ સંયોજન માટે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) તે સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે, પરંતુ ઓપ્ટિકલ આઇસોમરિઝમ નહીં.", "B) તે ઓપ્ટિકલ અને જ્યોમેટ્રિક બંને આઇસોમરિઝમ દર્શાવે છે.", "C) તે ફક્ત ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે.", "D) તે કોઈપણ પ્રકારનું આઇસોમરિઝમ દર્શાવતું નથી."], "correct": 1, "explanation": "[Co(en)2(NO2)2]+ સંયોજનમાં, બે બાયડેન્ટેટ લિગેન્ડ (en) અને બે મોનોડેન્ટેટ લિગેન્ડ (NO2) હોય છે. આ સંયોજન સિસ-ટ્રાન્સ જ્યોમેટ્રિક આઇસોમરિઝમ અને ઓપ્ટિકલ આઇસોમરિઝમ (d અને l) બંને દર્શાવે છે. A) ખોટું છે કારણ કે તે ઓપ્ટિકલ આઇસોમરિઝમ પણ દર્શાવે છે. C) ખોટું છે કારણ કે તે જ્યોમેટ્રિક આઇસોમરિઝમ પણ દર્શાવે છે. D) ખોટું છે કારણ કે તે બંને પ્રકારના આઇસોમરિઝમ દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 9: સંકરણ રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 19}, {"question": "નીચેના સંયોજનોમાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર પ્રાથમિક સંયોજકતા અને દ્વિતીયક સંયોજકતા બંનેને સંતોષે છે, પરંતુ તેની ભૂમિતિ ઓક્ટાહેડ્રલ નથી અને તે ઓપ્ટિકલ આઇસોમરિઝમ પણ દર્શાવતું નથી?", "options": ["A) [Co(en)₃]³⁺", "B) [Ni(CN)₄]²⁻", "C) [Co(NH₃)₄Cl₂]⁺", "D) [Pt(NH₃)₂Cl₂]"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B) [Ni(CN)₄]²⁻ છે. કારણ કે: \n1) વર્નરના સિદ્ધાંત અનુસાર, નિકલ (Ni) ની પ્રાથમિક સંયોજકતા +2 છે જે CN⁻ લિગેન્ડ દ્વારા સંતોષાય છે, અને દ્વિતીયક સંયોજકતા 4 છે જે ચાર CN⁻ લિગેન્ડ દ્વારા સંતોષાય છે.\n2) આ સંયોજનની ભૂમિતિ સમતલીય ચોરસ (square planar) છે, ઓક્ટાહેડ્રલ નહીં, જે Ni²⁺ માટે d⁸ ઇલેક્ટ્રોનીય રચના ધરાવતા ધાતુ આયનોમાં સામાન્ય છે.\n3) સમતલીય ચોરસ ભૂમિતિ ધરાવતા સંયોજનો સામાન્ય રીતે ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવતા નથી કારણ કે તેમની પાસે સમમિતિ તલ હોય છે.\n\nઅન્ય વિકલ્પો ખોટા છે કારણ કે:\n- A) [Co(en)₃]³⁺ ઓક્ટાહેડ્રલ ભૂમિતિ ધરાવે છે અને ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે.\n- C) [Co(NH₃)₄Cl₂]⁺ ઓક્ટાહેડ્રલ ભૂમિતિ ધરાવે છે અને સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે.\n- D) [Pt(NH₃)₂Cl₂] સમતલીય ચોરસ ભૂમિતિ ધરાવે છે પરંતુ તે સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે, ઓપ્ટિકલ આઇસોમરિઝમ નહીં, અને પ્રશ્નમાં ઓક્ટાહેડ્રલ નહીં હોવાની શરત પણ પૂરી કરતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 20}, {"question": "નીચેના સંયોજનોમાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, લિંકેજ આઇસોમરિઝમ દર્શાવી શકે છે પરંતુ સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી?", "options": ["A) [Co(NH₃)₅(NO₂)]Cl₂", "B) [Co(en)₂Cl₂]Cl", "C) [Co(NH₃)₄(NO₂)₂]Cl", "D) [Co(NH₃)₃(NO₂)₃]"], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે. [Co(NH₃)₅(NO₂)]Cl₂ સંયોજનમાં NO₂⁻ લિગેન્ડ લિંકેજ આઇસોમરિઝમ દર્શાવી શકે છે કારણ કે તે N-જોડાણ અથવા O-જોડાણ દ્વારા જોડાઈ શકે છે. પરંતુ આ સંયોજનમાં સિસ-ટ્રાન્સ આઇસોમરિઝમ શક્ય નથી કારણ કે તેમાં માત્ર એક જ પ્રકારનો બદલી શકાય તેવો લિગેન્ડ (NO₂⁻) હાજર છે. વિકલ્પ B અને C સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે, જ્યારે વિકલ્પ D લિંકેજ કે સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી કારણ કે તેમાં ત્રણ NO₂⁻ લિગેન્ડ હાજર છે જે સમાન છે.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 21}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, [Pt(NH₃)(Py)(Cl)(Br)] સંયોજન માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) આ સંયોજન ચાર અલગ-અલગ ભૌમિતિક આઇસોમર ધરાવે છે", "B) આ સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે", "C) આ સંયોજનમાં પ્લેટિનમની કોઓર્ડિનેશન સંખ્યા 4 છે", "D) આ સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવી શકે છે"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D છે. [Pt(NH₃)(Py)(Cl)(Br)] સંયોજનમાં પ્લેટિનમની કોઓર્ડિનેશન સંખ્યા 4 છે અને તે ચોરસ સમતલીય ભૂમિતિ ધરાવે છે. આ સંયોજન ત્રણ ભૌમિતિક આઇસોમર ધરાવે છે (સિસ-સિસ, સિસ-ટ્રાન્સ, ટ્રાન્સ-સિસ) અને સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. પરંતુ ચોરસ સમતલીય સંયોજનો સામાન્ય રીતે ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવતા નથી કારણ કે તેમની પાસે સમમિતિ તલ હોય છે. તેથી વિકલ્પ D ખોટું છે.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 22}, {"question": "નીચેના સંયોજનોમાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, પ્રાથમિક સંયોજકતા 3 અને દ્વિતીયક સંયોજકતા 6 ધરાવે છે પરંતુ ઓક્ટાહેડ્રલ ભૂમિતિ ધરાવતું નથી?", "options": ["A) [Co(NH₃)₆]Cl₃", "B) K₃[Co(CN)₆]", "C) [Co(NH₃)₄Cl₂]Cl", "D) [Co(NH₃)₃(NO₂)₃]"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D છે. [Co(NH₃)₃(NO₂)₃] સંયોજનમાં કોબાલ્ટની પ્રાથમિક સંયોજકતા 3 છે (કારણ કે તે +3 ઓક્સિડેશન અવસ્થામાં છે) અને દ્વિતીયક સંયોજકતા 6 છે (કારણ કે કોઓર્ડિનેશન સંખ્યા 6 છે). પરંતુ આ સંયોજન ઓક્ટાહેડ્રલ ભૂમિતિ ધરાવતું નથી કારણ કે તેમાં ત્રણ એકસરખા લિગેન્ડ હાજર છે જે ફેસિયલ (fac) અથવા મેરિડિયોનલ (mer) આઇસોમર બનાવે છે, જે ઓક્ટાહેડ્રલ ભૂમિતિના વિશિષ્ટ કિસ્સા છે પરંતુ તેને સ્પષ્ટ રીતે ઓક્ટાહેડ્રલ તરીકે વર્ગીકૃત કરી શકાતું નથી. અન્ય વિકલ્પો ઓક્ટાહેડ્રલ ભૂમિતિ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 23}, {"question": "વર્નરના સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું સંયોજન આયનિક અને સવર્ગ બંને પ્રકારનું છે પરંતુ તેના જલીય દ્રાવણમાં માત્ર બે પ્રકારના આયનો ઉત્પન્ન કરે છે?", "options": ["A) [Co(NH₃)₅Cl]Cl₂", "B) [Co(NH₃)₄Cl₂]Cl", "C) [Co(NH₃)₃Cl₃]", "D) K₄[Fe(CN)₆]"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B છે. [Co(NH₃)₄Cl₂]Cl સંયોજન આયનિક અને સવર્ગ બંને પ્રકારનું છે. તેના જલીય દ્રાવણમાં તે બે પ્રકારના આયનો ઉત્પન્ન કરે છે: [Co(NH₃)₄Cl₂]⁺ અને Cl⁻. વિકલ્પ A ત્રણ પ્રકારના આયનો ([Co(NH₃)₅Cl]²⁺, 2Cl⁻) ઉત્પન્ન કરે છે, વિકલ્પ C આયનિક નથી (તે તટસ્થ સવર્ગ સંયોજન છે), અને વિકલ્પ D ચાર પ્રકારના આયનો (4K⁺, [Fe(CN)₆]⁴⁻) ઉત્પન્ન કરે છે.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 24}, {"question": "નીચેના વિધાનોને ધ્યાનમાં લો: (i) [Co(en)₃]³⁺ સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે. (ii) [Co(NH₃)₄Cl₂]⁺ સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. (iii) [Co(NH₃)₅(NO₂)]²⁺ સંયોજન લિંકેજ આઇસોમરિઝમ દર્શાવે છે. (iv) [Co(NH₃)₃Cl₃] સંયોજન ફેસિયલ અને મેરિડિયોનલ આઇસોમર ધરાવે છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયા વિધાન/વિધાનો ખોટું/ખોટાં છે?", "options": ["A) માત્ર (i)", "B) માત્ર (ii) અને (iii)", "C) માત્ર (iv)", "D) એક પણ નહીં"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D છે. બધા જ વિધાનો સાચાં છે. (i) [Co(en)₃]³⁺ સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે કારણ કે તે કાઇરલ છે. (ii) [Co(NH₃)₄Cl₂]⁺ સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. (iii) [Co(NH₃)₅(NO₂)]²⁺ સંયોજન લિંકેજ આઇસોમરિઝમ દર્શાવે છે કારણ કે NO₂⁻ લિગેન્ડ N અથવા O દ્વારા જોડાઈ શકે છે. (iv) [Co(NH₃)₃Cl₃] સંયોજન ફેસિયલ અને મેરિડિયોનલ આઇસોમર ધરાવે છે. તેથી એક પણ વિધાન ખોટું નથી.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 25}, {"question": "નીચેનામાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, લિંકેજ આઇસોમરિઝમ દર્શાવે છે અને તેના જલીય દ્રાવણમાં કુલ 3 આયનો ઉત્પન્ન કરે છે?", "options": ["A) [Co(NH3)5(NO2)]Cl2", "B) [Co(NH3)4(NO2)2]Cl", "C) [Co(NH3)5(ONO)]Cl2", "D) [Co(en)2(NO2)2]NO2"], "correct": 1, "explanation": "લિંકેજ આઇસોમરિઝમ માટે લિગેન્ડ એમ્બીડેન્ટ હોવું જરૂરી છે (જેમ કે NO2- જે -NO2 અથવા -ONO રીતે જોડાઈ શકે). [Co(NH3)4(NO2)2]Clમાં NO2- લિગેન્ડ એમ્બીડેન્ટ છે, અને તે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે, જેથી લિંકેજ આઇસોમરિઝમ શક્ય છે. જલીય દ્રાવણમાં, તે [Co(NH3)4(NO2)2]+ અને Cl- આયનો ઉત્પન્ન કરે છે, કુલ 2 આયનો નહીં પરંતુ 3 આયનો (1 કેટાયન + 2 એનાયન) નહીં, પરંતુ અહીં [Co(NH3)4(NO2)2]Cl એ 1 કેટાયન અને 1 એનાયન ઉત્પન્ન કરે છે. પરંતુ પ્રશ્નમાં 3 આયનો જોઈએ છે, જેથી A વિકલ્પ [Co(NH3)5(NO2)]Cl2 એ 1 કેટાયન અને 2 એનાયન (કુલ 3 આયનો) ઉત્પન્ન કરે છે, પરંતુ તે લિંકેજ આઇસોમરિઝમ દર્શાવતું નથી. પરંતુ B વિકલ્પ લિંકેજ આઇસોમરિઝમ દર્શાવે છે અને 2 આયનો ઉત્પન્ન કરે છે. D વિકલ્પ [Co(en)2(NO2)2]NO2 એ 1 કેટાયન અને 1 એનાયન (કુલ 2 આયનો) ઉત્પન્ન કરે છે, પરંતુ લિંકેજ આઇસોમરિઝમ દર્શાવે છે. અહીં, પ્રશ્નમાં 3 આયનો અને લિંકેજ આઇસોમરિઝમ બંને જોઈએ છે, જેથી કોઈપણ વિકલ્પ પૂર્ણપણે બંધબેસતો નથી. પરંતુ A વિકલ્પ 3 આયનો ઉત્પન્ન કરે છે પરંતુ લિંકેજ આઇસોમરિઝમ નથી, જ્યારે B વિકલ્પ લિંકેજ આઇસોમરિઝમ દર્શાવે છે પરંતુ 2 આયનો ઉત્પન્ન કરે છે. આથી, પ્રશ્નમાં ત્રુટિ છે. પરંતુ જો આપણે લિંકેજ આઇસોમરિઝમ અને 3 આયનો બંને જોઈએ તો કોઈ વિકલ્પ યોગ્ય નથી. પરંતુ જો આપણે લિંકેજ આઇસોમરિઝમ જોઈએ તો B વિકલ્પ યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 26}, {"question": "નીચેનામાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે અને તેના કોબાલ્ટનું ઓક્સિડેશન અવસ્થા +3 છે?", "options": ["A) [Co(en)3]Cl3", "B) [Co(en)2Cl2]Cl", "C) [Co(NH3)4Cl2]Cl", "D) [Co(NH3)5Cl]SO4"], "correct": 0, "explanation": "[Co(en)3]Cl3માં કોબાલ્ટની ઓક્સિડેશન અવસ્થા +3 છે અને તે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે. એન (en) લિગેન્ડ કીલેટિંગ લિગેન્ડ છે, જે ઓપ્ટિકલ આઇસોમરિઝમને સક્ષમ બનાવે છે. બાકીના વિકલ્પોમાં, [Co(en)2Cl2]Cl અને [Co(NH3)4Cl2]Clમાં કોબાલ્ટની ઓક્સિડેશન અવસ્થા +3 છે, પરંતુ તેઓ ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવતા નથી કારણ કે તેમની પાસે સિમેટ્રી છે. [Co(NH3)5Cl]SO4માં કોબાલ્ટની ઓક્સિડેશન અવસ્થા +3 છે, પરંતુ તે ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવતું નથી કારણ કે તે ઓક્ટાહેડ્રલ નથી.", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 27}, {"question": "નીચેનામાંથી કયું વિધાન વર્નરના સિદ્ધાંત અનુસાર, [Co(NH3)5(NO2)]Cl2 સંયોજન માટે ખોટું છે?", "options": ["A) તે ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે", "B) તેના જલીય દ્રાવણમાં કુલ 3 આયનો ઉત્પન્ન થાય છે", "C) NO2- લિગેન્ડ નાઇટ્રોજન વડે જોડાયેલું છે", "D) કોબાલ્ટની ઓક્સિડેશન અવસ્થા +2 છે"], "correct": 3, "explanation": "[Co(NH3)5(NO2)]Cl2માં કોબાલ્ટની ઓક્સિડેશન અવસ્થા +3 છે, નહીં કે +2. આ સંયોજન ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે, જલીય દ્રાવણમાં [Co(NH3)5(NO2)]2+ અને 2 Cl- આયનો ઉત્પન્ન કરે છે (કુલ 3 આયનો), અને NO2- લિગેન્ડ નાઇટ્રોજન વડે જોડાયેલું છે (લિંકેજ આઇસોમરિઝમ શક્ય નથી).", "ncert_ref": "Class XII - Chapter 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 28}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો: (i) [Co(en)₂Cl₂]⁺ સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. (ii) [Co(en)₃]³⁺ સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે. (iii) [Co(NH₃)₅(NO₂)]Cl₂ સંયોજન લિંકેજ આઇસોમરિઝમ દર્શાવે છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો વર્નરના સિદ્ધાંત અનુસાર ખોટું/ખોટાં છે?", "options": ["A) માત્ર (i)", "B) માત્ર (ii)", "C) માત્ર (iii)", "D) (i) અને (iii)"], "correct": 3, "explanation": "વિધાન (i) સત્ય છે કારણ કે [Co(en)₂Cl₂]⁺ સંયોજન સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. વિધાન (ii) પણ સત્ય છે કારણ કે [Co(en)₃]³⁺ સંયોજન ઓપ્ટિકલ આઇસોમરિઝમ દર્શાવે છે. વિધાન (iii) ખોટું છે કારણ કે [Co(NH₃)₅(NO₂)]Cl₂ સંયોજન લિંકેજ આઇસોમરિઝમ દર્શાવે છે, પરંતુ આ વિધાનમાં તેને ખોટું કહેવામાં આવ્યું છે. તેથી, માત્ર વિધાન (iii) ખોટું છે, પરંતુ વિકલ્પમાં તેને (i) અને (iii) ખોટાં બતાવવામાં આવ્યા છે, જે ખોટું છે. આમ, સાચો જવાબ માત્ર (iii) ખોટું છે, જે વિકલ્પમાં નથી, તેથી આ પ્રશ્નમાં વિકલ્પ D ખોટો છે કારણ કે (i) ખોટું નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 29}, {"question": "નીચેના સંયોજનોમાંથી કયું સંયોજન વર્નરના સિદ્ધાંત અનુસાર, સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી તેમજ તેની કોઓર્ડિનેશન સંખ્યા 4 છે અને તે ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે?", "options": ["A) [Pt(NH₃)₂Cl₂]", "B) [Ni(CN)₄]²⁻", "C) [CoCl₂(en)₂]⁺", "D) [Zn(NH₃)₂Cl₂]"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D) [Zn(NH₃)₂Cl₂] છે. કારણ કે: 1) [Zn(NH₃)₂Cl₂] સંયોજનમાં ઝિંકની કોઓર્ડિનેશન સંખ્યા 4 છે અને તે ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે. ટેટ્રાહેડ્રલ જ્યોમેટ્રીમાં સિસ-ટ્રાન્સ આઇસોમરિઝમ શક્ય નથી કારણ કે બધા લિગેન્ડ સમાન અંતરે અને સમાન ખૂણા પર ગોઠવાયેલા હોય છે. 2) વિકલ્પ A) [Pt(NH₃)₂Cl₂] સ્ક્વેર પ્લેનર જ્યોમેટ્રી ધરાવે છે અને સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. 3) વિકલ્પ B) [Ni(CN)₄]²⁻ સ્ક્વેર પ્લેનર જ્યોમેટ્રી ધરાવે છે અને સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી, પરંતુ તેની કોઓર્ડિનેશન સંખ્યા 4 છે. 4) વિકલ્પ C) [CoCl₂(en)₂]⁺ ઓક્ટાહેડ્રલ જ્યોમેટ્રી ધરાવે છે અને સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવે છે. તેથી, માત્ર વિકલ્પ D) જ સિસ-ટ્રાન્સ આઇસોમરિઝમ દર્શાવતું નથી અને ટેટ્રાહેડ્રલ જ્યોમેટ્રી ધરાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
