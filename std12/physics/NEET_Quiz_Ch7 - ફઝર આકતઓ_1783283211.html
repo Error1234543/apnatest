@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch7 - ફેઝર આકૃતિઓ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch7 - ફેઝર આકૃતિઓ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા કોષવિભાજનના ટપ્પામાં, કયા ટપ્પામાં વર્ણસૂત્રોનો સંપૂર્ણ વિખંડન થાય છે અને કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે?", "options": ["A) પ્રોફેઝ - I", "B) મેટાફેઝ - I", "C) એનાફેઝ - I", "D) ટેલોફેઝ - I"], "correct": 3, "explanation": "ટેલોફેઝ - Iમાં વર્ણસૂત્રોનો સંપૂર્ણ વિખંડન થાય છે અને કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે. પ્રોફેઝ - Iમાં વર્ણસૂત્રો જોડાણ પામે છે, મેટાફેઝ - Iમાં વર્ણસૂત્રો મધ્યરેખા પર ગોઠવાય છે, અને એનાફેઝ - Iમાં બહેન વર્ણસૂત્રો વિપરીત ધ્રુવો તરફ ખેંચાય છે.", "ncert_ref": "Class XII - પ્રકરણ 7: ફેઝર આકૃતિઓ (કોષવિભાજન)", "difficulty": "Hard", "num": 1}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા કોષવિભાજન દરમિયાન, કયા ટપ્પામાં ક્રોમેટિડ બહેનોનું વિભાજન થાય છે?", "options": ["A) પ્રોફેઝ - II", "B) મેટાફેઝ - II", "C) એનાફેઝ - II", "D) ટેલોફેઝ - II"], "correct": 2, "explanation": "એનાફેઝ - IIમાં ક્રોમેટિડ બહેનોનું વિભાજન થાય છે. પ્રોફેઝ - IIમાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થાય છે, મેટાફેઝ - IIમાં વર્ણસૂત્રો મધ્યરેખા પર ગોઠવાય છે, અને ટેલોફેઝ - IIમાં કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે.", "ncert_ref": "Class XII - પ્રકરણ 7: ફેઝર આકૃતિઓ (કોષવિભાજન)", "difficulty": "Hard", "num": 2}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ દરમિયાન, કયા ટપ્પામાં હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) થાય છે?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેકીટીન", "D) ડાયપ્લોટીન"], "correct": 1, "explanation": "ઝાયગોટીન ટપ્પામાં હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) થાય છે. લેપ્ટોટીનમાં વર્ણસૂત્રો ઘટ્ટ અને દૃશ્યમાન બને છે, પેકીટીનમાં ક્રોસિંગ ઓવર થાય છે, અને ડાયપ્લોટીનમાં હોમોલોગસ વર્ણસૂત્રો વિખેડાય છે.", "ncert_ref": "Class XII - પ્રકરણ 7: ફેઝર આકૃતિઓ (કોષવિભાજન)", "difficulty": "Hard", "num": 3}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા કોષવિભાજન દરમિયાન, કયા ટપ્પામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થાય છે?", "options": ["A) પ્રોફેઝ - I અને પ્રોફેઝ - II", "B) મેટાફેઝ - I અને મેટાફેઝ - II", "C) એનાફેઝ - I અને એનાફેઝ - II", "D) ટેલોફેઝ - I અને ટેલોફેઝ - II"], "correct": 0, "explanation": "પ્રોફેઝ - I અને પ્રોફેઝ - IIમાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થાય છે. મેટાફેઝમાં વર્ણસૂત્રો મધ્યરેખા પર ગોઠવાય છે, એનાફેઝમાં વર્ણસૂત્રો વિપરીત ધ્રુવો તરફ ખેંચાય છે, અને ટેલોફેઝમાં કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે.", "ncert_ref": "Class XII - પ્રકરણ 7: ફેઝર આકૃતિઓ (કોષવિભાજન)", "difficulty": "Hard", "num": 4}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ દરમિયાન, કયા ટપ્પામાં ક્રોસિંગ ઓવર થાય છે?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેકીટીન", "D) ડાયકાઇનેસિસ"], "correct": 2, "explanation": "પેકીટીન ટપ્પામાં ક્રોસિંગ ઓવર થાય છે, જ્યાં હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનના વિનિમય થાય છે. લેપ્ટોટીનમાં વર્ણસૂત્રો ઘટ્ટ બને છે, ઝાયગોટીનમાં સિનેપ્સિસ થાય છે, અને ડાયકાઇનેસિસમાં હોમોલોગસ વર્ણસૂત્રો વિખેડાય છે.", "ncert_ref": "Class XII - પ્રકરણ 7: ફેઝર આકૃતિઓ (કોષવિભાજન)", "difficulty": "Hard", "num": 5}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના મેટાફેઝ-I ટપ્પામાં, વર્ણસૂત્રોની વ્યવસ્થા કેવી રીતે જોવા મળે છે?", "options": ["A) વર્ણસૂત્રો એકલા અને અસંગઠિત રીતે મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે", "B) હોમોલોગસ વર્ણસૂત્રો જોડી બનાવીને મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે", "C) વર્ણસૂત્રોના ક્રોમેટિડ બહેનો એકબીજાથી અલગ થઈને ગોઠવાયેલા હોય છે", "D) વર્ણસૂત્રો કોષકેન્દ્રના મધ્યભાગે અસ્તવ્યસ્ત રીતે વિતરિત હોય છે"], "correct": 1, "explanation": "મિયોસિસ-Iના મેટાફેઝ-I ટપ્પામાં, હોમોલોગસ વર્ણસૂત્રો જોડી બનાવીને (ટેટ્રાડ રચના) મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે. આ ટપ્પામાં ક્રોસિંગ ઓવર પહેલાં જ થઈ ચૂક્યું હોય છે. વિકલ્પ A ખોટો છે કારણ કે વર્ણસૂત્રો એકલા નહીં પણ જોડીમાં હોય છે. વિકલ્પ C ખોટો છે કારણ કે ક્રોમેટિડ બહેનો મિયોસિસ-IIમાં અલગ થાય છે. વિકલ્પ D ખોટો છે કારણ કે વર્ણસૂત્રો મેટાફેઝ પ્લેટ પર વ્યવસ્થિત હોય છે.", "ncert_ref": "Class XII - Chapter 2: જનન અને વિકાસ", "difficulty": "Hard", "num": 6}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-IIના એનાફેઝ-II ટપ્પામાં, કયું પગલું સૌથી નિર્ણાયક છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રોનું વિભાજન", "B) ક્રોમેટિડ બહેનોનું વિભાજન", "C) કોષકેન્દ્રીય પડદોનું પુનર્નિર્માણ", "D) સેન્ટ્રોમિયરનું વિભાજન"], "correct": 1, "explanation": "મિયોસિસ-IIના એનાફેઝ-II ટપ્પામાં, ક્રોમેટિડ બહેનોનું વિભાજન થાય છે, જે મિયોસિસ-IIનું નિર્ણાયક પગલું છે. વિકલ્પ A ખોટો છે કારણ કે હોમોલોગસ વર્ણસૂત્રોનું વિભાજન મિયોસિસ-Iમાં થાય છે. વિકલ્પ C ખોટો છે કારણ કે કોષકેન્દ્રીય પડદોનું પુનર્નિર્માણ ટેલોફેઝમાં થાય છે. વિકલ્પ D ખોટો છે કારણ કે સેન્ટ્રોમિયરનું વિભાજન એનાફેઝ-IIમાં થાય છે, પરંતુ તે ક્રોમેટિડ બહેનોના વિભાજન જેટલું નિર્ણાયક નથી.", "ncert_ref": "Class XII - Chapter 2: જનન અને વિકાસ", "difficulty": "Hard", "num": 7}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ દરમિયાન, કયા ટપ્પામાં કોષમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે?", "options": ["A) મિયોસિસ-Iના એનાફેઝ-I", "B) મિયોસિસ-Iના ટેલોફેઝ-I", "C) મિયોસિસ-IIના એનાફેઝ-II", "D) મિયોસિસ-IIના ટેલોફેઝ-II"], "correct": 1, "explanation": "મિયોસિસ-Iના ટેલોફેઝ-I ટપ્પામાં, હોમોલોગસ વર્ણસૂત્રોના વિભાજન પછી કોષમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે. વિકલ્પ A ખોટો છે કારણ કે એનાફેઝ-Iમાં વિભાજન થાય છે, પરંતુ કોષની સંખ્યા અર્ધી થતી નથી. વિકલ્પ C અને D ખોટા છે કારણ કે મિયોસિસ-IIમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થતી નથી, પરંતુ ક્રોમેટિડ બહેનોનું વિભાજન થાય છે.", "ncert_ref": "Class XII - Chapter 2: જનન અને વિકાસ", "difficulty": "Hard", "num": 8}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા કોષવિભાજન દરમિયાન, કયા ટપ્પામાં સેન્ટ્રોમિયરનું વિભાજન થાય છે?", "options": ["A) મિયોસિસ-Iના મેટાફેઝ-I", "B) મિયોસિસ-Iના એનાફેઝ-I", "C) મિયોસિસ-IIના મેટાફેઝ-II", "D) મિયોસિસ-IIના એનાફેઝ-II"], "correct": 3, "explanation": "સેન્ટ્રોમિયરનું વિભાજન મિયોસિસ-IIના એનાફેઝ-II ટપ્પામાં થાય છે, જ્યારે ક્રોમેટિડ બહેનો એકબીજાથી અલગ થાય છે. વિકલ્પ A અને B ખોટા છે કારણ કે મિયોસિસ-Iમાં સેન્ટ્રોમિયરનું વિભાજન થતું નથી. વિકલ્પ C ખોટો છે કારણ કે મેટાફેઝ-IIમાં સેન્ટ્રોમિયરનું વિભાજન થતું નથી.", "ncert_ref": "Class XII - Chapter 2: જનન અને વિકાસ", "difficulty": "Hard", "num": 9}, {"question": "એક સંશોધકે મિયોસિસ-Iના ડાયાકાઇનેસિસ ટપ્પાની ફેઝર આકૃતિનું અવલોકન કર્યું જેમાં નીચેના લક્ષણો જોવા મળ્યાં: (i) ટેટ્રાડનું નિર્માણ, (ii) કાયઝમેટાનું અંતિમ તબક્કામાં સ્થાનાંતરણ, (iii) કોષકેન્દ્રીય પડદો અદૃશ્ય થતો જોવા મળે છે. આ આકૃતિમાં નીચેનામાંથી કયું લક્ષણ ખોટું દર્શાવવામાં આવ્યું હશે?", "options": ["A) ટેટ્રાડનું નિર્માણ ડાયાકાઇનેસિસમાં થતું નથી, પરંતુ પેકિટેનમાં થાય છે", "B) કાયઝમેટાનું સ્થાનાંતરણ ડાયાકાઇનેસિસમાં થતું નથી, પરંતુ ડિપ્લોટીનમાં થાય છે", "C) કોષકેન્દ્રીય પડદો ડાયાકાઇનેસિસમાં અદૃશ્ય થતો નથી, પરંતુ લેપ્ટોટીનમાં અદૃશ્ય થાય છે", "D) ટેટ્રાડ અને કાયઝમેટા બંને ડાયાકાઇનેસિસમાં હાજર હોય છે, પરંતુ કોષકેન્દ્રીય પડદો અદૃશ્ય થતો નથી"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D છે. ડાયાકાઇનેસિસ એ પ્રોફેઝ-Iનો અંતિમ તબક્કો છે જેમાં ટેટ્રાડ (હોમોલોગસ વર્ણસૂત્રોનું જોડાણ) અને કાયઝમેટા (ક્રોસિંગ ઓવરના સ્થાન) હાજર હોય છે. આ તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થવા લાગે છે, જે મેટાફેઝ-I માટે તૈયારી દર્શાવે છે. વિકલ્પ A ખોટો છે કારણ કે ટેટ્રાડનું નિર્માણ પેકિટેનમાં થાય છે, પરંતુ ડાયાકાઇનેસિસમાં પણ તે હાજર હોય છે. વિકલ્પ B ખોટો છે કારણ કે કાયઝમેટાનું સ્થાનાંતરણ ડિપ્લોટીનમાં શરૂ થાય છે અને ડાયાકાઇનેસિસમાં તે અંતિમ તબક્કામાં પહોંચે છે. વિકલ્પ C ખોટો છે કારણ કે કોષકેન્દ્રીય પડદો ડાયાકાઇનેસિસમાં અદૃશ્ય થવા લાગે છે, લેપ્ટોટીનમાં નહીં.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 10: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 10}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના પ્રોફેઝ-Iના લેપ્ટોટીન ટપ્પામાં, કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળે છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે ક્રોસિંગ ઓવર થાય છે", "B) વર્ણસૂત્રોનો કોન્ડેન્સેશન શરૂ થાય છે અને તે સ્પષ્ટ દેખાય છે", "C) સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું નિર્માણ થાય છે", "D) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થાય છે"], "correct": 1, "explanation": "લેપ્ટોટીન ટપ્પામાં વર્ણસૂત્રોનો કોન્ડેન્સેશન શરૂ થાય છે અને તે સ્પષ્ટ દેખાય છે. ક્રોસિંગ ઓવર પેચીન ટપ્પામાં થાય છે, સિનેપ્ટોનેમલ કોમ્પ્લેક્સ ઝાયગોટીન ટપ્પામાં બને છે, અને કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા પ્રોમેટાફેઝમાં અદૃશ્ય થાય છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 11}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-IIના મેટાફેઝ-II ટપ્પામાં, વર્ણસૂત્રોની વ્યવસ્થા કેવી હોય છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો જોડાયેલા હોય છે", "B) વર્ણસૂત્રો એકલા હોય છે અને મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે", "C) વર્ણસૂત્રોના જોડા મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે", "D) વર્ણસૂત્રો અસ્તવ્યસ્ત રીતે વિતરિત હોય છે"], "correct": 1, "explanation": "મિયોસિસ-IIના મેટાફેઝ-II ટપ્પામાં, વર્ણસૂત્રો એકલા હોય છે અને મેટાફેઝ પ્લેટ પર ગોઠવાયેલા હોય છે. હોમોલોગસ વર્ણસૂત્રો મિયોસિસ-Iમાં અલગ થઈ ગયા હોય છે, અને વર્ણસૂત્રોના જોડા મિયોસિસ-Iના મેટાફેઝ-Iમાં જોવા મળે છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 12}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના ડાયાકાઇનેસિસ ટપ્પામાં, કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળે છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે ક્રોસિંગ ઓવર થાય છે", "B) વર્ણસૂત્રોનો કોન્ડેન્સેશન પૂર્ણ થાય છે અને તે સ્પષ્ટ દેખાય છે", "C) સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું વિઘટન થાય છે", "D) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા અદૃશ્ય થાય છે"], "correct": 2, "explanation": "ડાયાકાઇનેસિસ ટપ્પામાં સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું વિઘટન થાય છે. ક્રોસિંગ ઓવર પેચીન ટપ્પામાં થાય છે, વર્ણસૂત્રોનો કોન્ડેન્સેશન લેપ્ટોટીન ટપ્પામાં શરૂ થાય છે, અને કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા પ્રોમેટાફેઝમાં અદૃશ્ય થાય છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 13}, {"question": "એક સંશોધકે મિયોસિસ-Iના પ્રોફેઝ-Iના પેકિટેન ટપ્પાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ આકૃતિમાં નીચેનામાંથી કયું લક્ષણ સૌથી વધુ અપેક્ષિત નથી?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું નિર્માણ", "B) ક્રોસિંગ ઓવર માટે ચિઆઝમાનું નિર્માણ", "C) વર્ણસૂત્રોનું સંપૂર્ણ સંકોચન અને જાડું થવું", "D) બહેન ક્રોમેટિડ્સ વચ્ચે આનુવંશિક દ્રવ્યનો વિનિમય"], "correct": 2, "explanation": "પેકિટેન ટપ્પામાં હોમોલોગસ વર્ણસૂત્રો વચ્ચે સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું નિર્માણ થાય છે અને ક્રોસિંગ ઓવરની પ્રક્રિયા શરૂ થાય છે, જેમાં ચિઆઝમાનું નિર્માણ થાય છે. આ ટપ્પામાં બહેન ક્રોમેટિડ્સ વચ્ચે આનુવંશિક દ્રવ્યનો વિનિમય પણ થાય છે. જોકે, વર્ણસૂત્રોનું સંપૂર્ણ સંકોચન અને જાડું થવું ડાયાકાઇનેસિસ ટપ્પામાં વધુ સ્પષ્ટ જોવા મળે છે, પેકિટેનમાં નહીં. તેથી વિકલ્પ C અપેક્ષિત નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 10: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 14}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-IIના ટેલોફેઝ-II ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સાચું નથી?", "options": ["A) કોષકેન્દ્રીય પડદાનું પુનઃનિર્માણ થાય છે", "B) કોષકેન્દ્રીકા ફરીથી દેખાવા લાગે છે", "C) દરેક નવા કોષમાં વર્ણસૂત્રોની સંખ્યા મૂળ કોષ કરતાં અડધી હોય છે", "D) સેન્ટ્રોમિયરનું વિભાજન થઈને બહેન ક્રોમેટિડ્સ છૂટાં પડે છે"], "correct": 3, "explanation": "ટેલોફેઝ-II ટપ્પામાં કોષકેન્દ્રીય પડદાનું પુનઃનિર્માણ થાય છે અને કોષકેન્દ્રીકા ફરીથી દેખાવા લાગે છે. આ ટપ્પામાં વર્ણસૂત્રોની સંખ્યા મૂળ કોષ કરતાં અડધી થઈ ચૂકી હોય છે, પરંતુ આ લક્ષણ ટેલોફેઝ-IIમાં નહીં, પરંતુ મિયોસિસ-Iના અંતે જોવા મળે છે. સેન્ટ્રોમિયરનું વિભાજન એનાફેઝ-IIમાં થાય છે, ટેલોફેઝ-IIમાં નહીં. તેથી વિકલ્પ D સાચું નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 10: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 15}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના પ્રોમેટાફેઝ-I ટપ્પામાં, નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળશે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે કાયરિયોકાઇનેસિસ નામનું પ્રોટીન જાળવી રાખે છે", "B) કોષકેન્દ્રીય પડદો પૂર્ણપણે વિઘટિત થઈ જાય છે અને સ્પિન્ડલ તંતુઓનું નિર્માણ શરૂ થાય છે", "C) ક્રોસિંગ ઓવર પૂર્ણ થઈ જાય છે અને રિકોમ્બિનેશન નોડ્સ દેખાય છે", "D) સેન્ટ્રોમિયર પર કાઇનેટોકોરની રચના થાય છે અને વર્ણસૂત્રો કોષના વિષુવવૃત્ત તરફ ગતિ કરે છે"], "correct": 1, "explanation": "પ્રોમેટાફેઝ-I દરમિયાન કોષકેન્દ્રીય પડદો વિઘટિત થાય છે અને સ્પિન્ડલ તંતુઓનું નિર્માણ શરૂ થાય છે. કાયરિયોકાઇનેસિસ પ્રોફેઝ-Iના ડાયાકાઇનેસિસ ટપ્પામાં જોવા મળે છે (A ખોટું). ક્રોસિંગ ઓવર પેકિટેન ટપ્પામાં પૂર્ણ થાય છે, રિકોમ્બિનેશન નોડ્સ ડાયાકાઇનેસિસમાં જોવા મળે છે (C ખોટું). કાઇનેટોકોરની રચના મેટાફેઝ-Iમાં થાય છે, અને વર્ણસૂત્રોની ગતિ મેટાફેઝ-Iમાં જોવા મળે છે (D ખોટું).", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 16}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-IIના એનાફેઝ-II ટપ્પામાં, નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) સિસ્ટર ક્રોમેટિડ્સ અલગ થાય છે અને વિરુદ્ધ ધ્રુવો તરફ ખેંચાય છે", "B) કોષમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે", "C) સેન્ટ્રોમિયરનું વિભાજન થાય છે", "D) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા પુનઃરચના પામે છે"], "correct": 3, "explanation": "એનાફેઝ-II દરમિયાન સિસ્ટર ક્રોમેટિડ્સ અલગ થાય છે (A સાચું), કોષમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે (B સાચું), અને સેન્ટ્રોમિયરનું વિભાજન થાય છે (C સાચું). કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા પુનઃરચના ટેલોફેઝ-IIમાં થાય છે, એનાફેઝ-IIમાં નહીં (D ખોટું).", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 17}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના મેટાફેઝ-I ટપ્પામાં, નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળશે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો કોષના વિષુવવૃત્ત પર એકબીજાથી અલગ ગોઠવાયેલા હોય છે", "B) હોમોલોગસ વર્ણસૂત્રો જોડાયેલા હોય છે અને કોષના વિષુવવૃત્ત પર ગોઠવાયેલા હોય છે", "C) વર્ણસૂત્રો કોષના ધ્રુવો તરફ ગતિ કરે છે", "D) કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે"], "correct": 1, "explanation": "મેટાફેઝ-I દરમિયાન હોમોલોગસ વર્ણસૂત્રો જોડાયેલા હોય છે અને કોષના વિષુવવૃત્ત પર ગોઠવાયેલા હોય છે (B સાચું). હોમોલોગસ વર્ણસૂત્રો એકબીજાથી અલગ ગોઠવાયેલા નથી (A ખોટું). વર્ણસૂત્રોની ગતિ એનાફેઝ-Iમાં થાય છે (C ખોટું). કોષકેન્દ્રીય પડદો પુનઃરચના ટેલોફેઝ-Iમાં થાય છે (D ખોટું).", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 18}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ દરમિયાન, નીચેનામાંથી કયા ટપ્પામાં કોષમાં ડીએનએની માત્રા સૌથી ઓછી હોય છે?", "options": ["A) પ્રોફેઝ-I", "B) મેટાફેઝ-II", "C) ટેલોફેઝ-II", "D) એનાફેઝ-I"], "correct": 2, "explanation": "ટેલોફેઝ-II દરમિયાન કોષમાં ડીએનએની માત્રા સૌથી ઓછી હોય છે, કારણ કે કોષવિભાજન પૂર્ણ થતાં ચાર હેપ્લોઈડ કોષો બને છે (C સાચું). પ્રોફેઝ-I, મેટાફેઝ-II, અને એનાફેઝ-I દરમિયાન ડીએનએની માત્રા વધુ હોય છે (A, B, D ખોટા).", "ncert_ref": "Class XI - પ્રકરણ ૧૦: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 19}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના એનાફેઝ-I ટપ્પામાં, કયું વિધાન સૌથી યોગ્ય રીતે લાગુ પડે છે જ્યારે હોમોલોગસ વર્ણસૂત્રોનું વિભાજન થાય છે?", "options": ["A) સેન્ટ્રોમિયરનું વિભાજન થાય છે અને બહેનો ક્રોમેટિડ્સ અલગ થાય છે", "B) હોમોલોગસ વર્ણસૂત્રોના જોડા અલગ થાય છે પરંતુ સેન્ટ્રોમિયરનું વિભાજન થતું નથી", "C) કોષકેન્દ્રીય પડદો પુનઃરચના પામે છે અને કોષકેન્દ્રીકા દેખાય છે", "D) ડીએનએની માત્રા કોષમાં બમણી થાય છે"], "correct": 1, "explanation": "એનાફેઝ-I દરમિયાન, હોમોલોગસ વર્ણસૂત્રોના જોડા (ટેટ્રાડ) અલગ થાય છે, પરંતુ સેન્ટ્રોમિયરનું વિભાજન થતું નથી, કારણ કે ક્રોમેટિડ બહેનો એકસાથે જોડાયેલા રહે છે. વિકલ્પ A ખોટો છે કારણ કે સેન્ટ્રોમિયરનું વિભાજન એનાફેઝ-IIમાં થાય છે. વિકલ્પ C ખોટો છે કારણ કે કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા ટેલોફેઝ-Iમાં પુનઃરચના પામે છે. વિકલ્પ D ખોટો છે કારણ કે ડીએનએની માત્રા મિયોસિસ-I પૂર્વે જ બમણી થઈ ચૂકી હોય છે.", "ncert_ref": "Class XI - Chapter 10: કોષ ચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 20}, {"question": "એક સંશોધકે મિયોસિસ-IIના પ્રોફેઝ-II ટપ્પાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળતું નથી?", "options": ["A) કોષકેન્દ્રીય પડદો અદૃશ્ય થઈ ગયો હોય છે", "B) સ્પિન્ડલ તંતુઓનું નિર્માણ શરૂ થયું હોય છે", "C) વર્ણસૂત્રો સંકોચાઈને જાડા અને ટૂંકા થયા હોય છે", "D) હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) થતું હોય છે"], "correct": 3, "explanation": "મિયોસિસ-IIના પ્રોફેઝ-II ટપ્પામાં કોષકેન્દ્રીય પડદો અદૃશ્ય થાય છે, સ્પિન્ડલ તંતુઓ બને છે અને વર્ણસૂત્રો સંકોચાય છે, પરંતુ હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) મિયોસિસ-Iના પ્રોફેઝ-Iના ઝાયગોટીન ટપ્પામાં થાય છે, મિયોસિસ-IIમાં નહીં. તેથી વિકલ્પ D ખોટો છે.", "ncert_ref": "ક્લાસ XI - અધ્યાય 7: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 21}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના ટેલોફેઝ-I ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સાચું નથી?", "options": ["A) કોષકેન્દ્રીય પડદો ફરીથી રચાય છે", "B) કોષકેન્દ્રીકા ફરીથી દેખાય છે", "C) સ્પિન્ડલ તંતુઓ સંપૂર્ણપણે અદૃશ્ય થઈ જાય છે", "D) વર્ણસૂત્રોનું વિભાજન થઈને બે ક્રોમેટિડ બને છે"], "correct": 3, "explanation": "મિયોસિસ-Iના ટેલોફેઝ-I ટપ્પામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા ફરીથી દેખાય છે, પરંતુ વર્ણસૂત્રોનું વિભાજન થતું નથી. વર્ણસૂત્રોના બે ક્રોમેટિડનું વિભાજન મિયોસિસ-IIના એનાફેઝ-IIમાં થાય છે. તેથી વિકલ્પ D ખોટો છે.", "ncert_ref": "ક્લાસ XI - અધ્યાય 7: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 22}, {"question": "એક સંશોધકે મિયોસિસ-Iના ઝાયગોટીન ટપ્પાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળે છે?", "options": ["A) વર્ણસૂત્રો સૌથી વધુ સંકોચાયેલા અને જાડા હોય છે", "B) હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) શરૂ થાય છે", "C) ક્રોસિંગ ઓવરની પ્રક્રિયા પૂર્ણ થાય છે", "D) સ્પિન્ડલ તંતુઓનું નિર્માણ પૂર્ણ થયું હોય છે"], "correct": 1, "explanation": "મિયોસિસ-Iના ઝાયગોટીન ટપ્પામાં હોમોલોગસ વર્ણસૂત્રોનું જોડાણ (સિનેપ્સિસ) શરૂ થાય છે. વર્ણસૂત્રો સૌથી વધુ સંકોચાયેલા ડાયાકાઇનેસિસમાં હોય છે, ક્રોસિંગ ઓવર પેકિટેનમાં થાય છે અને સ્પિન્ડલ તંતુઓ પ્રોમેટાફેઝમાં બને છે. તેથી વિકલ્પ B સાચો છે.", "ncert_ref": "ક્લાસ XI - અધ્યાય 7: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 23}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-IIના પ્રોમેટાફેઝ-II ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળતું નથી?", "options": ["A) કોષકેન્દ્રીય પડદો સંપૂર્ણપણે અદૃશ્ય થઈ ગયો હોય છે", "B) સ્પિન્ડલ તંતુઓનું નિર્માણ પૂર્ણ થયું હોય છે", "C) વર્ણસૂત્રો સ્પિન્ડલના વિષુવવૃત્ત પર ગોઠવાય છે", "D) સેન્ટ્રોમિયરનું વિભાજન થાય છે"], "correct": 3, "explanation": "મિયોસિસ-IIના પ્રોમેટાફેઝ-IIમાં કોષકેન્દ્રીય પડદો અદૃશ્ય થાય છે અને સ્પિન્ડલ તંતુઓ બને છે, પરંતુ વર્ણસૂત્રો સ્પિન્ડલના વિષુવવૃત્ત પર મેટાફેઝ-IIમાં ગોઠવાય છે. સેન્ટ્રોમિયરનું વિભાજન એનાફેઝ-IIમાં થાય છે. તેથી વિકલ્પ C ખોટો છે.", "ncert_ref": "ક્લાસ XI - અધ્યાય 7: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 24}, {"question": "ફેઝર આકૃતિઓમાં દર્શાવેલા મિયોસિસ-Iના પેકિટેન ટપ્પામાં નીચેનામાંથી કયું લક્ષણ સૌથી યોગ્ય રીતે જોવા મળે છે, જે અન્ય કોઈ ટપ્પામાં જોવા મળતું નથી?", "options": ["A) વર્ણસૂત્રો સૌથી વધુ સંકોચાયેલા હોય છે", "B) ક્રોસિંગ ઓવરની પ્રક્રિયા થાય છે", "C) હોમોલોગસ વર્ણસૂત્રોનું જોડાણ પૂર્ણ થાય છે", "D) સ્પિન્ડલ તંતુઓનું નિર્માણ શરૂ થાય છે"], "correct": 1, "explanation": "મિયોસિસ-Iના પેકિટેન ટપ્પામાં ક્રોસિંગ ઓવરની પ્રક્રિયા થાય છે, જે અન્ય કોઈ ટપ્પામાં જોવા મળતી નથી. વર્ણસૂત્રો સૌથી વધુ સંકોચાયેલા ડાયાકાઇનેસિસમાં હોય છે, હોમોલોગસ વર્ણસૂત્રોનું જોડાણ ઝાયગોટીનમાં પૂર્ણ થાય છે અને સ્પિન્ડલ તંતુઓ પ્રોમેટાફેઝમાં બને છે. તેથી વિકલ્પ B સાચો છે.", "ncert_ref": "ક્લાસ XI - અધ્યાય 7: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 25}, {"question": "એક સંશોધકે મિયોસિસ-Iના પ્રોફેઝ-Iના ડિપ્લોટીન તબક્કાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ તબક્કામાં નીચેનામાંથી કયું લક્ષણ ફેઝર આકૃતિમાં જોવા મળે તેવી શક્યતા સૌથી ઓછી છે?", "options": ["A) કાયઝમેટા (chiasmata) ની હાજરી", "B) હોમોલોગસ વર્ણસૂત્રોનું અલગીકરણ શરૂ થવું", "C) સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું સંપૂર્ણ વિઘટન", "D) ક્રોસિંગ ઓવર માટે નવું DNA વિનિમય થતું હોવું"], "correct": 3, "explanation": "સાચો જવાબ D છે કારણ કે ડિપ્લોટીન તબક્કામાં ક્રોસિંગ ઓવર પહેલેથી જ પૂર્ણ થઈ ગયું હોય છે અને નવું DNA વિનિમય થતું નથી. A વિકલ્પ ખોટો છે કારણ કે કાયઝમેટા ડિપ્લોટીનમાં સ્પષ્ટ જોવા મળે છે. B વિકલ્પ ખોટો છે કારણ કે હોમોલોગસ વર્ણસૂત્રોનું અલગીકરણ ડિપ્લોટીનમાં શરૂ થાય છે. C વિકલ્પ ખોટો છે કારણ કે સિનેપ્ટોનેમલ કોમ્પ્લેક્સ ડિપ્લોટીનમાં સંપૂર્ણ વિઘટિત થઈ જાય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: વંશાનુક્રમ અને ભિન્નતા", "difficulty": "Hard", "num": 26}, {"question": "ફેઝર આકૃતિમાં દર્શાવેલ મિયોસિસ-IIના ટેલોફેઝ-II તબક્કામાં, નીચેનામાંથી કયું લક્ષણ સાચું નથી?", "options": ["A) કોષકેન્દ્રીય પડદો ફરીથી રચાય છે", "B) કોષકેન્દ્રીકા ફરીથી દેખાય છે", "C) વર્ણસૂત્રો સંકોચાઈને ક્રોમેટિન તરીકે રૂપાંતરિત થાય છે", "D) સેન્ટ્રોમિયરનું વિભાજન થાય છે"], "correct": 3, "explanation": "સાચો જવાબ D છે કારણ કે સેન્ટ્રોમિયરનું વિભાજન એનાફેઝ-IIમાં થાય છે, ટેલોફેઝ-IIમાં નહીં. A, B અને C વિકલ્પો સાચા છે કારણ કે ટેલોફેઝ-IIમાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીકા ફરીથી રચાય છે, અને વર્ણસૂત્રો ક્રોમેટિનમાં રૂપાંતરિત થાય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: વંશાનુક્રમ અને ભિન્નતા", "difficulty": "Hard", "num": 27}, {"question": "એક સંશોધકે મિયોસિસ-Iના પ્રોફેઝ-Iના ડાયાકાઇનેસિસ તબક્કાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ તબક્કામાં નીચેનામાંથી કયું લક્ષણ ફેઝર આકૃતિમાં જોવા મળે તેવી શક્યતા સૌથી વધુ છે?", "options": ["A) સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું નિર્માણ પૂર્ણ થયું હોય", "B) કાયઝમેટા સ્પષ્ટ રીતે દેખાતા હોય", "C) હોમોલોગસ વર્ણસૂત્રો સંપૂર્ણ રીતે અલગ થઈ ગયા હોય", "D) ક્રોસિંગ ઓવરની પ્રક્રિયા શરૂ થઈ હોય"], "correct": 1, "explanation": "સાચો જવાબ B છે કારણ કે ડાયાકાઇનેસિસ તબક્કામાં કાયઝમેટા સ્પષ્ટ રીતે દેખાય છે. A વિકલ્પ ખોટો છે કારણ કે સિનેપ્ટોનેમલ કોમ્પ્લેક્સ પેકિટેન તબક્કામાં પૂર્ણ થાય છે. C વિકલ્પ ખોટો છે કારણ કે હોમોલોગસ વર્ણસૂત્રોનું અલગીકરણ એનાફેઝ-Iમાં થાય છે. D વિકલ્પ ખોટો છે કારણ કે ક્રોસિંગ ઓવર પેકિટેન તબક્કામાં પૂર્ણ થાય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: વંશાનુક્રમ અને ભિન્નતા", "difficulty": "Hard", "num": 28}, {"question": "ફેઝર આકૃતિમાં દર્શાવેલ મિયોસિસ-Iના એનાફેઝ-I તબક્કામાં, નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય રીતે લાગુ પડતું નથી?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વિરુદ્ધ ધ્રુવો તરફ ખેંચાય છે", "B) સેન્ટ્રોમિયરનું વિભાજન થાય છે", "C) કોષમાં વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે", "D) સ્પિન્ડલ તંતુઓ સંકોચાય છે"], "correct": 1, "explanation": "સાચો જવાબ B છે કારણ કે એનાફેઝ-Iમાં સેન્ટ્રોમિયરનું વિભાજન થતું નથી, તે એનાફેઝ-IIમાં થાય છે. A, C અને D વિકલ્પો સાચા છે કારણ કે એનાફેઝ-Iમાં હોમોલોગસ વર્ણસૂત્રો વિરુદ્ધ ધ્રુવો તરફ ખેંચાય છે, વર્ણસૂત્રોની સંખ્યા અર્ધી થાય છે, અને સ્પિન્ડલ તંતુઓ સંકોચાય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: વંશાનુક્રમ અને ભિન્નતા", "difficulty": "Hard", "num": 29}, {"question": "એક સંશોધકે મિયોસિસ-IIના પ્રોફેઝ-II તબક્કાની ફેઝર આકૃતિનું અવલોકન કર્યું. આ તબક્કામાં નીચેનામાંથી કયું લક્ષણ ફેઝર આકૃતિમાં જોવા મળે તેવી શક્યતા સૌથી વધુ છે, પરંતુ મિયોસિસ-Iના પ્રોફેઝ-Iમાં જોવા મળતું નથી?", "options": ["A) કોષકેન્દ્રીય પડદાનું વિઘટન", "B) સ્પિન્ડલ તંતુઓનું નિર્માણ", "C) વર્ણસૂત્રોનું સંકોચન", "D) ક્રોમેટિડ બહેનોનું અલગીકરણ શરૂ થવું"], "correct": 3, "explanation": "સાચો જવાબ D છે કારણ કે પ્રોફેઝ-IIમાં ક્રોમેટિડ બહેનોનું અલગીકરણ શરૂ થતું નથી, પરંતુ મિયોસિસ-Iના પ્રોફેઝ-Iમાં ક્રોસિંગ ઓવર અને હોમોલોગસ વર્ણસૂત્રોનું જોડાણ થાય છે જે પ્રોફેઝ-IIમાં જોવા મળતું નથી. A, B અને C વિકલ્પો ખોટા છે કારણ કે આ લક્ષણો બંને તબક્કામાં જોવા મળે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: વંશાનુક્રમ અને ભિન્નતા", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
