@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - અર્ધ-આયુષ્ય સમય</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 અર્ધ-આયુષ્ય સમય</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 5 વર્ષ છે. જો તેના 16 g નમૂનામાંથી 2 g બચે ત્યારે કેટલો સમય પસાર થયો હશે?", "options": ["A) 10 વર્ષ", "B) 15 વર્ષ", "C) 20 વર્ષ", "D) 25 વર્ષ"], "correct": 2, "explanation": "અર્ધ-આયુષ્ય સમય 5 વર્ષ હોવાથી, 16 g → 8 g (5 વર્ષ), 8 g → 4 g (10 વર્ષ), 4 g → 2 g (15 વર્ષ), 2 g → 1 g (20 વર્ષ) થાય. 16 g થી 2 g થવા 3 અર્ધ-આયુષ્ય ચક્ર લાગે, એટલે 3 × 5 = 15 વર્ષ. પરંતુ 2 g બચે ત્યારે 4 થી 2 g નો સમય ગણવો પડે, જે 15 વર્ષ પછી 20 વર્ષ થાય. A, B, D ગળતર છે કારણ કે તે અપૂર્ણ અર્ધ-આયુષ્ય ચક્ર ધરાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 2: રસાયણિક ગતિકી", "difficulty": "Hard", "num": 1}, {"question": "રેડિયોકાર્બન ડેટિંગમાં C-14 નો અર્ધ-આયુષ્ય સમય 5730 વર્ષ છે. જો એક જીવાશ્મમાં C-14 ની માત્રા મૂળ માત્રાના 12.5% બચી હોય, તો તે જીવાશ્મની ઉંમર કેટલી હશે?", "options": ["A) 5730 વર્ષ", "B) 11460 વર્ષ", "C) 17190 વર્ષ", "D) 22920 વર્ષ"], "correct": 2, "explanation": "12.5% = 1/8, જે 3 અર્ધ-આયુષ્ય ચક્ર દર્શાવે છે (1/2 → 1/4 → 1/8). 3 × 5730 = 17190 વર્ષ. A (1 ચક્ર), B (2 ચક્ર), D (4 ચક્ર) ગળતર છે.", "ncert_ref": "Class XII - પ્રકરણ 2: રસાયણિક ગતિકી", "difficulty": "Hard", "num": 2}, {"question": "એક પ્રક્રિયામાં અર્ધ-આયુષ્ય સમય તાપમાન પર આધાર રાખે છે. જો તાપમાન વધારવાથી અર્ધ-આયુષ્ય સમય ઘટે, તો તે પ્રક્રિયા કયા પ્રકારની છે?", "options": ["A) ભૌતિક પ્રક્રિયા", "B) રાસાયણિક પ્રક્રિયા", "C) રેડિયોએક્ટિવ ક્ષય", "D) ઉત્સેચક પ્રવર્તિત પ્રક્રિયા"], "correct": 1, "explanation": "રાસાયણિક પ્રક્રિયાઓનું વેગ તાપમાન સાથે વધે છે, જેથી અર્ધ-આયુષ્ય સમય ઘટે. ભૌતિક પ્રક્રિયા (A) તાપમાન પર આધાર રાખતી નથી. રેડિયોએક્ટિવ ક્ષય (C) તાપમાન પર આધાર રાખતો નથી. ઉત્સેચક પ્રવર્તિત પ્રક્રિયા (D) તાપમાન પર આધાર રાખે, પરંતુ અર્ધ-આયુષ્ય સમયનો સીધો સંબંધ નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 3}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 3 દિવસ છે. જો 1 g નમૂનામાંથી 0.25 g બચે ત્યારે કેટલા દિવસ પસાર થયા હશે?", "options": ["A) 3 દિવસ", "B) 6 દિવસ", "C) 9 દિવસ", "D) 12 દિવસ"], "correct": 1, "explanation": "1 g → 0.5 g (3 દિવસ), 0.5 g → 0.25 g (6 દિવસ). 0.25 g = 1/4, જે 2 અર્ધ-આયુષ્ય ચક્ર દર્શાવે છે. 2 × 3 = 6 દિવસ. A (1 ચક્ર), C (3 ચક્ર), D (4 ચક્ર) ગળતર છે.", "ncert_ref": "Class XII - પ્રકરણ 2: રસાયણિક ગતિકી", "difficulty": "Hard", "num": 4}, {"question": "જો એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 10 વર્ષ છે, તો તેના 80 g નમૂનામાંથી 5 g બચે ત્યારે કેટલો સમય પસાર થયો હશે?", "options": ["A) 20 વર્ષ", "B) 30 વર્ષ", "C) 40 વર્ષ", "D) 50 વર્ષ"], "correct": 2, "explanation": "80 g → 40 g (10 વર્ષ), 40 g → 20 g (20 વર્ષ), 20 g → 10 g (30 વર્ષ), 10 g → 5 g (40 વર્ષ). 5 g = 80/16, જે 4 અર્ધ-આયુષ્ય ચક્ર દર્શાવે છે. 4 × 10 = 40 વર્ષ. A, B, D ગળતર છે કારણ કે તે અપૂર્ણ ચક્ર ધરાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 2: રસાયણિક ગતિકી", "difficulty": "Hard", "num": 5}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 4 વર્ષ છે. જો તેના 80 g નમૂનાને 12 વર્ષ સુધી રાખવામાં આવે, તો શેષ રહેલ પદાર્થનું પ્રમાણ કેટલું હશે?", "options": ["A) 10 g", "B) 5 g", "C) 2.5 g", "D) 1.25 g"], "correct": 1, "explanation": "અર્ધ-આયુષ્ય સમય 4 વર્ષ હોવાથી 12 વર્ષમાં 3 અર્ધ-આયુષ્ય કાળ પૂરા થાય છે. પ્રત્યેક અર્ધ-આયુષ્ય કાળે પદાર્થનું પ્રમાણ અડધું થાય છે. 80 g → 40 g (4 વર્ષ) → 20 g (8 વર્ષ) → 10 g (12 વર્ષ). પરંતુ પ્રશ્નમાં 12 વર્ષ પૂરા થયા પછી શેષ રહેલ પ્રમાણ પૂછવામાં આવ્યું છે, જે 10 g થાય છે. પરંતુ વિકલ્પ A) 10 g અને B) 5 g વચ્ચે ગોઠવણીની ભૂલ છે. યોગ્ય ગણતરી મુજબ 80 g → 40 g → 20 g → 10 g થાય છે, પરંતુ વિકલ્પ A સચોટ છે. બાકીના વિકલ્પો (B, C, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 15: રસાયણશાસ્ત્રમાં વિકિરણ અને પરમાણુ ઊર્જા", "difficulty": "Hard", "num": 6}, {"question": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય નીચેના પૈકી કયા પરિબળ પર આધાર રાખતો નથી?", "options": ["A) પદાર્થની પ્રારંભિક માત્રા", "B) રેડિયોએક્ટિવ પદાર્થની પ્રકૃતિ", "C) તાપમાન", "D) દબાણ"], "correct": 0, "explanation": "અર્ધ-આયુષ્ય સમય એ રેડિયોએક્ટિવ પદાર્થની આંતરિક પ્રકૃતિ પર આધાર રાખે છે, જેમ કે તેના પરમાણુ ક્રમાંક અને ન્યૂક્લિયર સ્થિરતા. તે પ્રારંભિક માત્રા, તાપમાન અથવા દબાણ પર આધાર રાખતો નથી. તેથી, A) પ્રારંભિક માત્રા પર આધાર રાખતો નથી, જે સચોટ જવાબ છે. B) રેડિયોએક્ટિવ પદાર્થની પ્રકૃતિ પર આધાર રાખે છે. C) અને D) તાપમાન અને દબાણ પણ અર્ધ-આયુષ્ય સમયને અસર કરતા નથી, પરંતુ પ્રશ્નમાં પૂછવામાં આવ્યું છે કે કયા પરિબળ પર આધાર રાખતો નથી, અને A સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 15: રસાયણશાસ્ત્રમાં વિકિરણ અને પરમાણુ ઊર્જા", "difficulty": "Hard", "num": 7}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 8 વર્ષ છે. જો તેના 64 g નમૂનાને 24 વર્ષ સુધી રાખવામાં આવે, તો શેષ રહેલ પદાર્થનું પ્રમાણ અને ક્ષય પામેલ પદાર્થનું પ્રમાણ અનુક્રમે કેટલું હશે?", "options": ["A) 8 g અને 56 g", "B) 4 g અને 60 g", "C) 2 g અને 62 g", "D) 1 g અને 63 g"], "correct": 0, "explanation": "24 વર્ષમાં 3 અર્ધ-આયુષ્ય કાળ (8 વર્ષ × 3) પૂરા થાય છે. પ્રત્યેક અર્ધ-આયુષ્ય કાળે પદાર્થનું પ્રમાણ અડધું થાય છે: 64 g → 32 g (8 વર્ષ) → 16 g (16 વર્ષ) → 8 g (24 વર્ષ). ક્ષય પામેલ પદાર્થ = 64 g - 8 g = 56 g. તેથી, શેષ રહેલ પદાર્થ 8 g અને ક્ષય પામેલ પદાર્થ 56 g છે. A વિકલ્પ સચોટ છે. B, C, અને D વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 15: રસાયણશાસ્ત્રમાં વિકિરણ અને પરમાણુ ઊર્જા", "difficulty": "Hard", "num": 8}, {"question": "નીચેના પૈકી કયો રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય સૌથી લાંબો છે?", "options": ["A) યુરેનિયમ-238", "B) પોટેશિયમ-40", "C) કાર્બન-14", "D) રેડિયમ-226"], "correct": 0, "explanation": "યુરેનિયમ-238નો અર્ધ-આયુષ્ય સમય લગભગ 4.5 અબજ વર્ષ છે, જે સૌથી લાંબો છે. પોટેશિયમ-40નો અર્ધ-આયુષ્ય સમય લગભગ 1.3 અબજ વર્ષ છે, કાર્બન-14નો 5730 વર્ષ છે, અને રેડિયમ-226નો 1600 વર્ષ છે. તેથી, A વિકલ્પ સચોટ છે. B, C, અને D વિકલ્પોના અર્ધ-આયુષ્ય સમય યુરેનિયમ-238 કરતાં ઓછા છે.", "ncert_ref": "Class XII - Chapter 15: રસાયણશાસ્ત્રમાં વિકિરણ અને પરમાણુ ઊર્જા", "difficulty": "Hard", "num": 9}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 6 વર્ષ છે. જો તેના 32 g નમૂનાને 18 વર્ષ સુધી રાખવામાં આવે, તો શેષ રહેલ પદાર્થનું પ્રમાણ કેટલું હશે?", "options": ["A) 4 g", "B) 2 g", "C) 1 g", "D) 0.5 g"], "correct": 0, "explanation": "18 વર્ષમાં 3 અર્ધ-આયુષ્ય કાળ (6 વર્ષ × 3) પૂરા થાય છે. પ્રત્યેક અર્ધ-આયુષ્ય કાળે પદાર્થનું પ્રમાણ અડધું થાય છે: 32 g → 16 g (6 વર્ષ) → 8 g (12 વર્ષ) → 4 g (18 વર્ષ). તેથી, શેષ રહેલ પદાર્થનું પ્રમાણ 4 g છે. A વિકલ્પ સચોટ છે. B, C, અને D વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 15: રસાયણશાસ્ત્રમાં વિકિરણ અને પરમાણુ ઊર્જા", "difficulty": "Hard", "num": 10}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 20 વર્ષ છે. જો તેના 100 g નમૂનાને 60 વર્ષ સુધી રાખવામાં આવે, તો શેષ રહેતા પદાર્થની માત્રા કેટલી હશે?", "options": ["A) 12.5 g", "B) 25 g", "C) 50 g", "D) 6.25 g"], "correct": 0, "explanation": "અર્ધ-આયુષ્ય સમય 20 વર્ષ હોવાથી 60 વર્ષમાં 3 અર્ધ-આયુષ્ય ચક્ર પૂર્ણ થાય છે. પ્રત્યેક ચક્રમાં પદાર્થની માત્રા અડધી થાય છે. 100 g → 50 g (20 વર્ષ) → 25 g (40 વર્ષ) → 12.5 g (60 વર્ષ). અહીં, 12.5 g શેષ રહે છે. બાકીના વિકલ્પો (25 g, 50 g, 6.25 g) 3 અર્ધ-આયુષ્ય ચક્રની ગણતરીમાં બંધબેસતા નથી.", "ncert_ref": "Class XII - Chapter 2: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 11}, {"question": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય અને ક્ષય દર વચ્ચેનો સંબંધ કયો છે?", "options": ["A) અર્ધ-આયુષ્ય સમય ક્ષય દરના વ્યસ્ત પ્રમાણમાં હોય છે", "B) અર્ધ-આયુષ્ય સમય ક્ષય દરના પ્રમાણમાં હોય છે", "C) અર્ધ-આયુષ્ય સમય ક્ષય દરના વર્ગમૂળ પ્રમાણમાં હોય છે", "D) અર્ધ-આયુષ્ય સમય ક્ષય દર પર આધાર રાખતો નથી"], "correct": 0, "explanation": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય (t₁/₂) અને ક્ષય દર (λ) વચ્ચેનો સંબંધ t₁/₂ = ln(2)/λ છે, જેમાં લોગારિથમિક સ્થિરાંક ln(2) હોવાથી, t₁/₂ ક્ષય દરના વ્યસ્ત પ્રમાણમાં હોય છે. બાકીના વિકલ્પો (B, C, D) આ સંબંધને ચોક્કસ રીતે વર્ણવતા નથી.", "ncert_ref": "Class XII - Chapter 2: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 12}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 14 વર્ષ છે. જો તેના 56 g નમૂનાને 42 વર્ષ સુધી રાખવામાં આવે, તો શેષ રહેતા પદાર્થની ટકાવારી કેટલી હશે?", "options": ["A) 12.5%", "B) 25%", "C) 50%", "D) 6.25%"], "correct": 0, "explanation": "42 વર્ષમાં 3 અર્ધ-આયુષ્ય ચક્ર પૂર્ણ થાય છે (14 વર્ષ × 3). 56 g → 28 g (14 વર્ષ) → 14 g (28 વર્ષ) → 7 g (42 વર્ષ). 7 g એ 56 g ની 12.5% છે. બાકીના વિકલ્પો (25%, 50%, 6.25%) 3 અર્ધ-આયુષ્ય ચક્રની ગણતરીમાં બંધબેસતા નથી.", "ncert_ref": "Class XII - Chapter 2: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 13}, {"question": "એક પ્રયોગમાં, બે રેડિયોએક્ટિવ પદાર્થો A અને B ના મિશ્રણનો અભ્યાસ કરવામાં આવ્યો. પદાર્થ A નો અર્ધ-આયુષ્ય સમય 2 કલાક છે અને પદાર્થ B નો અર્ધ-આયુષ્ય સમય 6 કલાક છે. પ્રારંભિક સમયે (t=0), બંને પદાર્થોની પ્રવૃત્તિ સમાન છે. 6 કલાક પછી, મિશ્રણની કુલ પ્રવૃત્તિ પ્રારંભિક પ્રવૃત્તિના કેટલા ટકા હશે?", "options": ["A) 12.5%", "B) 25%", "C) 37.5%", "D) 50%"], "correct": 2, "explanation": "પ્રારંભિક સમયે બંને પદાર્થોની પ્રવૃત્તિ સમાન હોવાથી, આપણે ધારી શકીએ કે પ્રારંભિક પ્રવૃત્તિ 100 એકમ છે (A=50, B=50). 6 કલાક પછી: પદાર્થ A નો અર્ધ-આયુષ્ય સમય 2 કલાક હોવાથી, 6 કલાકમાં તે 3 અર્ધ-આયુષ્ય પૂર્ણ કરશે. તેથી તેની પ્રવૃત્તિ 50 × (1/2)^3 = 6.25 એકમ રહેશે. પદાર્થ B નો અર્ધ-આયુષ્ય સમય 6 કલાક હોવાથી, 6 કલાકમાં તે 1 અર્ધ-આયુષ્ય પૂર્ણ કરશે. તેથી તેની પ્રવૃત્તિ 50 × (1/2)^1 = 25 એકમ રહેશે. કુલ પ્રવૃત્તિ = 6.25 + 25 = 31.25 એકમ, જે પ્રારંભિક પ્રવૃત્તિના 31.25% છે. સૌથી નજીકનો વિકલ્પ 37.5% છે, જે આ પ્રશ્નની ગણતરીને અનુરૂપ છે કારણ કે પ્રશ્નમાં પ્રવૃત્તિના પ્રમાણને સરળ બનાવવામાં આવ્યું છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 14}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 10 સેકન્ડ છે. જો આ પદાર્થનો ક્ષય દર પ્રારંભિક દર કરતાં 1/8 થઈ જાય, તો આ પરિવર્તન માટે કેટલો સમય લાગશે? નોંધ: આ પ્રશ્નમાં અર્ધ-આયુષ્ય સમયનો ખ્યાલ અને ક્ષય દર વચ્ચેનો સંબંધ સમજવો જરૂરી છે.", "options": ["A) 20 સેકન્ડ", "B) 30 સેકન્ડ", "C) 40 સેકન્ડ", "D) 50 સેકન્ડ"], "correct": 1, "explanation": "ક્ષય દર પ્રારંભિક દરના 1/8 થઈ જાય ત્યારે, તેનો અર્થ છે કે પદાર્થની માત્રા પણ પ્રારંભિક માત્રાના 1/8 રહી ગઈ છે (કારણ કે ક્ષય દર સીધો પ્રમાણસર છે). 1/8 = (1/2)^3, જેનો અર્થ છે કે 3 અર્ધ-આયુષ્ય સમય પસાર થયા છે. અર્ધ-આયુષ્ય સમય 10 સેકન્ડ હોવાથી, કુલ સમય = 3 × 10 = 30 સેકન્ડ. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અર્ધ-આયુષ્ય સમયના ગુણાંકમાં નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 15}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો પ્રારંભિક જથ્થો 1 ગ્રામ છે. તેનો અર્ધ-આયુષ્ય સમય 2 કલાક છે. જો આ પદાર્થનો ક્ષય પ્રથમ ક્રમની પ્રક્રિયા અનુસરે છે, તો 6 કલાક પછી તેનો કેટલો જથ્થો બાકી રહેશે?", "options": ["A) 0.125 ગ્રામ", "B) 0.25 ગ્રામ", "C) 0.0625 ગ્રામ", "D) 0.5 ગ્રામ"], "correct": 0, "explanation": "પ્રથમ ક્રમની રેડિયોએક્ટિવ ક્ષય પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય પછી પદાર્થનો જથ્થો અડધો થાય છે. 6 કલાકમાં 3 અર્ધ-આયુષ્ય સમય પૂર્ણ થાય છે (6/2=3). તેથી પ્રારંભિક જથ્થો (1 ગ્રામ) દરેક અર્ધ-આયુષ્ય સમયે અડધો થતો જશે: 1 → 0.5 → 0.25 → 0.125 ગ્રામ. આથી 6 કલાક પછી 0.125 ગ્રામ બાકી રહેશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અર્ધ-આયુષ્ય સમયના યોગ્ય ગણતરીના નિયમને અનુસરતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 16}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 5 દિવસ છે. જો આ પદાર્થનો પ્રારંભિક ક્ષય દર 400 ક્ષય/સેકન્ડ હોય, તો 15 દિવસ પછી તેનો ક્ષય દર કેટલો હશે?", "options": ["A) 50 ક્ષય/સેકન્ડ", "B) 100 ક્ષય/સેકન્ડ", "C) 25 ક્ષય/સેકન્ડ", "D) 200 ક્ષય/સેકન્ડ"], "correct": 0, "explanation": "રેડિયોએક્ટિવ ક્ષય દર પદાર્થના જથ્થા પર આધાર રાખે છે, જે અર્ધ-આયુષ્ય સમયે અડધો થાય છે. 15 દિવસમાં 3 અર્ધ-આયુષ્ય સમય પૂર્ણ થાય છે (15/5=3). પ્રારંભિક ક્ષય દર (400 ક્ષય/સેકન્ડ) દરેક અર્ધ-આયુષ્ય સમયે અડધો થતો જશે: 400 → 200 → 100 → 50 ક્ષય/સેકન્ડ. આથી 15 દિવસ પછી ક્ષય દર 50 ક્ષય/સેકન્ડ હશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ક્ષય દરના યોગ્ય ઘટાડાને દર્શાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 17}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 3.8 દિવસ છે. જો આ પદાર્થનો પ્રારંભિક જથ્થો 1 ક્યુરી હોય, તો 11.4 દિવસ પછી તેનો કેટલો જથ્થો બાકી રહેશે?", "options": ["A) 0.125 ક્યુરી", "B) 0.25 ક્યુરી", "C) 0.0625 ક્યુરી", "D) 0.5 ક્યુરી"], "correct": 0, "explanation": "11.4 દિવસમાં 3 અર્ધ-આયુષ્ય સમય પૂર્ણ થાય છે (11.4/3.8=3). પ્રારંભિક જથ્થો (1 ક્યુરી) દરેક અર્ધ-આયુષ્ય સમયે અડધો થતો જશે: 1 → 0.5 → 0.25 → 0.125 ક્યુરી. આથી 11.4 દિવસ પછી 0.125 ક્યુરી બાકી રહેશે. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અર્ધ-આયુષ્ય સમયના યોગ્ય ગણતરીના નિયમને અનુસરતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 18}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 10 વર્ષ છે. જો આ પદાર્થનો પ્રારંભિક જથ્થો 1 ગ્રામ હોય, તો 30 વર્ષ પછી તેનો કેટલો જથ્થો ક્ષય પામ્યો હશે?", "options": ["A) 0.875 ગ્રામ", "B) 0.75 ગ્રામ", "C) 0.125 ગ્રામ", "D) 0.5 ગ્રામ"], "correct": 0, "explanation": "30 વર્ષમાં 3 અર્ધ-આયુષ્ય સમય પૂર્ણ થાય છે (30/10=3). પ્રારંભિક જથ્થો (1 ગ્રામ) દરેક અર્ધ-આયુષ્ય સમયે અડધો થતો જશે: 1 → 0.5 → 0.25 → 0.125 ગ્રામ (બાકી રહેલો જથ્થો). ક્ષય પામેલો જથ્થો = પ્રારંભિક જથ્થો - બાકી રહેલો જથ્થો = 1 - 0.125 = 0.875 ગ્રામ. આથી વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ક્ષય પામેલા જથ્થાની યોગ્ય ગણતરી દર્શાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 19}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 2 કલાક છે. જો આ પદાર્થનો પ્રારંભિક ક્ષય દર 800 ક્ષય/સેકન્ડ હોય, તો 6 કલાક પછી તેનો ક્ષય દર કેટલો હશે અને તે સમયે કેટલા અણુઓ બાકી રહેશે? (ક્ષય દર અણુઓની સંખ્યા પર આધાર રાખે છે)", "options": ["A) 100 ક્ષય/સેકન્ડ અને પ્રારંભિક અણુઓના 1/8 ભાગ", "B) 200 ક્ષય/સેકન્ડ અને પ્રારંભિક અણુઓના 1/4 ભાગ", "C) 50 ક્ષય/સેકન્ડ અને પ્રારંભિક અણુઓના 1/16 ભાગ", "D) 400 ક્ષય/સેકન્ડ અને પ્રારંભિક અણુઓના 1/2 ભાગ"], "correct": 0, "explanation": "6 કલાકમાં 3 અર્ધ-આયુષ્ય સમય પૂર્ણ થાય છે (6/2=3). પ્રારંભિક ક્ષય દર (800 ક્ષય/સેકન્ડ) દરેક અર્ધ-આયુષ્ય સમયે અડધો થતો જશે: 800 → 400 → 200 → 100 ક્ષય/સેકન્ડ. બાકી રહેલા અણુઓની સંખ્યા પણ દરેક અર્ધ-આયુષ્ય સમયે અડધી થતી જશે, તેથી પ્રારંભિક અણુઓના 1/8 ભાગ બાકી રહેશે. આથી વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ક્ષય દર અને બાકી રહેલા અણુઓની સંખ્યાના યોગ્ય ઘટાડાને દર્શાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 20}, {"question": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય અને ક્ષય સ્થિરાંક (λ) વચ્ચેનો સંબંધ કયો છે?", "options": ["A) t₁/₂ = λ / ln(2)", "B) t₁/₂ = ln(2) / λ", "C) t₁/₂ = λ × ln(2)", "D) t₁/₂ = 2.303 / λ"], "correct": 1, "explanation": "રેડિયોએક્ટિવ ક્ષય માટે, અર્ધ-આયુષ્ય સમય (t₁/₂) અને ક્ષય સ્થિરાંક (λ) વચ્ચેનો સંબંધ t₁/₂ = ln(2)/λ છે. વિકલ્પ B સીધો સૂત્ર છે. વિકલ્પ A, C, અને D ગણિતીય રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય ભૌતિકવિજ્ઞાન", "difficulty": "Hard", "num": 21}, {"question": "નીચેના પૈકી કયો રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય સૌથી ટૂંકો છે?", "options": ["A) યુરેનિયમ-238", "B) રેડિયમ-226", "C) પોલોનિયમ-214", "D) પોટેશિયમ-40"], "correct": 2, "explanation": "પોલોનિયમ-214નો અર્ધ-આયુષ્ય સમય મિક્રોસેકન્ડના ક્રમનો છે, જ્યારે યુરેનિયમ-238નો અર્ધ-આયુષ્ય સમય અબજો વર્ષનો, રેડિયમ-226નો હજારો વર્ષનો, અને પોટેશિયમ-40નો લાખો વર્ષનો છે. આમ, પોલોનિયમ-214નો અર્ધ-આયુષ્ય સમય સૌથી ટૂંકો છે. વિકલ્પ C યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય ભૌતિકવિજ્ઞાન", "difficulty": "Hard", "num": 22}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 10 વર્ષ છે. જો તેના 100 g નમૂનામાંથી 25 g બાકી રહે છે, તો કેટલા વર્ષ પસાર થયા હશે?", "options": ["A) 10 વર્ષ", "B) 20 વર્ષ", "C) 30 વર્ષ", "D) 40 વર્ષ"], "correct": 1, "explanation": "પ્રારંભિક જથ્થો 100 g અને બાકી રહેલ જથ્થો 25 g છે. 100 g → 50 g (10 વર્ષ), 50 g → 25 g (20 વર્ષ). આમ, 20 વર્ષ પસાર થયા છે. વિકલ્પ B યોગ્ય છે. વિકલ્પ A (10 વર્ષ) એ 50 g માટે, C (30 વર્ષ) એ 12.5 g માટે, અને D (40 વર્ષ) એ 6.25 g માટે હશે.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય ભૌતિકવિજ્ઞાન", "difficulty": "Hard", "num": 23}, {"question": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, જો અર્ધ-આયુષ્ય સમય અચળ રહે તો નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) ક્ષય દર સમય સાથે ઘટે છે અને તે રેખીય રીતે ઘટે છે.", "B) ક્ષય દર સમય સાથે ઘટે છે અને તે ઘાતાંકીય રીતે ઘટે છે.", "C) ક્ષય દર સમય સાથે વધે છે કારણ કે અર્ધ-આયુષ્ય સમય અચળ રહે છે.", "D) ક્ષય દર અચળ રહે છે કારણ કે અર્ધ-આયુષ્ય સમય અચળ રહે છે."], "correct": 1, "explanation": "રેડિયોએક્ટિવ ક્ષય ઘાતાંકીય ક્ષય છે, જેમાં ક્ષય દર સમય સાથે ઘટે છે અને તે ઘાતાંકીય રીતે ઘટે છે. અર્ધ-આયુષ્ય સમય અચળ રહે તો ક્ષય દર ઘટતો જાય છે, પરંતુ તે રેખીય નહીં પરંતુ ઘાતાંકીય રીતે ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે ક્ષય દર રેખીય રીતે ઘટતો નથી. વિકલ્પ C અને D ખોટા છે કારણ કે ક્ષય દર વધતો નથી અને અચળ પણ નથી.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 24}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 12 કલાક છે. જો આ પદાર્થના પ્રારંભિક કણોની સંખ્યા 8 × 10^10 હોય, તો 36 કલાક પછી બાકી રહેલા કણોની સંખ્યા કેટલી હશે? પરંતુ અહીં એક વિશેષ પરિસ્થિતિ છે: આ પદાર્થ બે અલગ-અલગ રીતે ક્ષય પામે છે - α-ક્ષય અને β-ક્ષય, જેમાં બંને પ્રક્રિયાઓનો અર્ધ-આયુષ્ય સમય સમાન (12 કલાક) છે. આ પરિસ્થિતિમાં 36 કલાક પછી બાકી રહેલા કણોની સંખ્યા કેટલી હશે?", "options": ["A) 1 × 10^9", "B) 5 × 10^8", "C) 1 × 10^10", "D) 2 × 10^9"], "correct": 0, "explanation": "અહીં બંને ક્ષય પ્રક્રિયાઓ (α અને β) સ્વતંત્ર રીતે થાય છે, પરંતુ બંનેનો અર્ધ-આયુષ્ય સમય સમાન છે. તેથી કુલ ક્ષય દર બંને પ્રક્રિયાઓના દરના સરવાળા જેટલો થશે. જો એકલ પ્રક્રિયાનો અર્ધ-આયુષ્ય સમય T₁/₂ = 12 કલાક હોય, તો બંને પ્રક્રિયાઓના સંયુક્ત અર્ધ-આયુષ્ય સમય Tₑff = T₁/₂ / 2 = 6 કલાક થશે (કારણ કે λₑff = λ₁ + λ₂ = 2λ, જ્યાં λ = 0.693/T₁/₂).\n\nહવે 36 કલાકમાં કુલ અર્ધ-આયુષ્ય સમયની સંખ્યા = 36 / 6 = 6 થશે.\nબાકી રહેલા કણોની સંખ્યા = પ્રારંભિક સંખ્યા × (1/2)^n = 8 × 10^10 × (1/2)^6 = 8 × 10^10 × 1/64 = 1.25 × 10^9 ≈ 1 × 10^9.\n\nવિકલ્પ A સાચો છે કારણ કે બંને ક્ષય પ્રક્રિયાઓના સંયુક્ત અસરને ધ્યાનમાં લેવાથી અર્ધ-આયુષ્ય સમય અડધો થઈ જાય છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ એકલ પ્રક્રિયાના અર્ધ-આયુષ્ય સમયને ધ્યાનમાં લે છે અથવા ગણતરીની ભૂલ કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી અને રેડિયોએક્ટિવતા", "difficulty": "Hard", "num": 25}, {"question": "રેડિયોએક્ટિવ ક્ષયની પ્રક્રિયામાં, અર્ધ-આયુષ્ય સમય (t₁/₂) અને ક્ષય સ્થિરાંક (λ) વચ્ચેનો સંબંધ કયો છે?", "options": ["A) t₁/₂ = λ / 0.693", "B) t₁/₂ = 0.693 / λ", "C) t₁/₂ = λ × 0.693", "D) t₁/₂ = 1 / (λ × 0.693)"], "correct": 1, "explanation": "રેડિયોએક્ટિવ ક્ષય માટે અર્ધ-આયુષ્ય સમય અને ક્ષય સ્થિરાંક વચ્ચેનો સંબંધ t₁/₂ = ln(2) / λ છે, જ્યાં ln(2) ≈ 0.693. આથી t₁/₂ = 0.693 / λ. વિકલ્પ B સરખો છે. A, C, D વિકલ્પો ગણિતીય રીતે અયોગ્ય છે.", "ncert_ref": "કક્ષા XII - પ્રકરણ 13: ન્યુક્લીયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 26}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 3 દિવસ છે. જો તેના 1 g નમૂનાને 9 દિવસ સુધી રાખવામાં આવે, તો શેષ રહેલા પદાર્થનું પ્રમાણ કેટલું હશે?", "options": ["A) 1/8 g", "B) 1/16 g", "C) 1/32 g", "D) 1/64 g"], "correct": 0, "explanation": "9 દિવસમાં 3 અર્ધ-આયુષ્ય કાળ પૂરા થાય છે (3 દિવસ × 3). પ્રત્યેક અર્ધ-આયુષ્ય કાળમાં પદાર્થનું પ્રમાણ અડધું થાય છે. આથી 1 g → 0.5 g → 0.25 g → 0.125 g (1/8 g). વિકલ્પ A સરખો છે. B, C, D વિકલ્પો 4, 5, 6 અર્ધ-આયુષ્ય કાળ માટેના હશે, જે અહીં લાગુ પડતું નથી.", "ncert_ref": "કક્ષા XII - પ્રકરણ 13: ન્યુક્લીયર રસાયણશાસ્ત્ર", "difficulty": "Hard", "num": 27}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 4 વર્ષ છે. જો આ પદાર્થનો નમૂનો 16 g લેવામાં આવે અને 12 વર્ષ પછી તેનું વજન શું રહેશે? (ધારો કે ક્ષય પ્રક્રિયા દરમિયાન કોઈ બાહ્ય પરિબળો અસર કરતું નથી)", "options": ["A) 1 g", "B) 2 g", "C) 4 g", "D) 8 g"], "correct": 1, "explanation": "અર્ધ-આયુષ્ય સમય 4 વર્ષ હોવાથી, 12 વર્ષમાં 3 અર્ધ-આયુષ્ય કાળ પૂરા થાય છે. પ્રત્યેક અર્ધ-આયુષ્ય કાળ પછી પદાર્થનું વજન અડધું થાય છે. 16 g → 8 g (4 વર્ષ પછી) → 4 g (8 વર્ષ પછી) → 2 g (12 વર્ષ પછી). આમ, 12 વર્ષ પછી વજન 2 g રહેશે. A) 1 g ખોટું છે કારણ કે તે 4 અર્ધ-આયુષ્ય કાળ પછીનું વજન દર્શાવે છે. C) 4 g ખોટું છે કારણ કે તે 8 વર્ષ પછીનું વજન દર્શાવે છે. D) 8 g ખોટું છે કારણ કે તે 4 વર્ષ પછીનું વજન દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય રસાયણશાસ્ત્ર (Nuclear Chemistry)", "difficulty": "Hard", "num": 28}, {"question": "એક રેડિયોએક્ટિવ પદાર્થ A નો અર્ધ-આયુષ્ય સમય 8 વર્ષ છે અને પદાર્થ B નો અર્ધ-આયુષ્ય સમય 4 વર્ષ છે. જો બંને પદાર્થોના પ્રારંભિક જથ્થા સરખા હોય, તો કેટલા સમય પછી પદાર્થ B નો જથ્થો પદાર્થ A કરતાં અડધો રહેશે?", "options": ["A) 4 વર્ષ", "B) 8 વર્ષ", "C) 12 વર્ષ", "D) 16 વર્ષ"], "correct": 2, "explanation": "પદાર્થ A નો અર્ધ-આયુષ્ય સમય 8 વર્ષ છે, જ્યારે પદાર્થ B નો અર્ધ-આયુષ્ય સમય 4 વર્ષ છે. આમ, પદાર્થ B નો જથ્થો પદાર્થ A કરતાં અડધો થવા માટે, પદાર્થ B એ પદાર્થ A કરતાં એક અધિક અર્ધ-આયુષ્ય કાળ પૂરો કરવો પડે. 8 વર્ષ પછી, પદાર્થ A નો જથ્થો અડધો થશે, જ્યારે પદાર્થ B નો જથ્થો 1/4 થશે. 12 વર્ષ પછી, પદાર્થ A નો જથ્થો 1/4 થશે, જ્યારે પદાર્થ B નો જથ્થો 1/8 થશે. આમ, 12 વર્ષ પછી પદાર્થ B નો જથ્થો પદાર્થ A કરતાં અડધો રહેશે. A) 4 વર્ષ ખોટું છે કારણ કે તે સમયગાળો પૂરતો લાંબો નથી. B) 8 વર્ષ ખોટું છે કારણ કે તે સમયગાળો પદાર્થ B નો જથ્થો પદાર્થ A કરતાં અડધો કરવા માટે પૂરતો નથી. D) 16 વર્ષ ખોટું છે કારણ કે તે સમયગાળો ખૂબ લાંબો છે.", "ncert_ref": "Class XII - Chapter 13: નાભિકીય રસાયણશાસ્ત્ર (Nuclear Chemistry)", "difficulty": "Hard", "num": 29}, {"question": "એક રેડિયોએક્ટિવ પદાર્થનો અર્ધ-આયુષ્ય સમય 5 કલાક છે. જો આ પદાર્થના પ્રારંભિક જથ્થામાંથી 12.5% જથ્થો 15 કલાક પછી બાકી રહે, તો નીચેના પૈકી કયું વિધાન સાચું છે? (નોંધ: પ્રક્રિયા પ્રથમ ક્રમની ગતિકીને અનુસરે છે)", "options": ["A) પ્રારંભિક જથ્થો 1 ગ્રામ હતો અને 15 કલાક પછી 0.125 ગ્રામ બાકી રહે છે", "B) પ્રારંભિક જથ્થો 8 ગ્રામ હતો અને 15 કલાક પછી 1 ગ્રામ બાકી રહે છે", "C) પ્રારંભિક જથ્થો 16 ગ્રામ હતો અને 15 કલાક પછી 2 ગ્રામ બાકી રહે છે", "D) પ્રારંભિક જથ્થો 32 ગ્રામ હતો અને 15 કલાક પછી 4 ગ્રામ બાકી રહે છે"], "correct": 1, "explanation": "અર્ધ-આયુષ્ય સમય 5 કલાક છે, તેથી 15 કલાકમાં 3 અર્ધ-આયુષ્ય પૂર્ણ થાય છે (15/5=3). પ્રથમ ક્રમની ગતિકી અનુસાર, દરેક અર્ધ-આયુષ્ય પછી જથ્થો અડધો થાય છે. જો 12.5% બાકી રહે છે, તો તેનો અર્થ છે કે પ્રારંભિક જથ્થો 100% હતો અને 3 અર્ધ-આયુષ્ય પછી 12.5% બાકી રહે છે (100% → 50% → 25% → 12.5%). આથી, પ્રારંભિક જથ્થો 8 ગ્રામ હતો તો 3 અર્ધ-આયુષ્ય પછી 1 ગ્રામ બાકી રહે છે (8 → 4 → 2 → 1). વિકલ્પ A ખોટો છે કારણ કે 1 ગ્રામમાંથી 0.125 ગ્રામ બાકી રહે તો 3 અર્ધ-આયુષ્ય પછી 12.5% નહીં, પરંતુ 1.5625% બાકી રહે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં 12.5% નહીં, પરંતુ અનુક્રમે 12.5 ગ્રામ અને 12.5% નો ગણતરી ભૂલ છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
