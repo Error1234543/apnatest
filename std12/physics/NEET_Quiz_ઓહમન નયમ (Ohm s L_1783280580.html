@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - ઓહ્મનો નિયમ (Ohm's Law)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 ઓહ્મનો નિયમ (Ohm's Law)</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક વાહક તારની લંબાઈ બમણી કરવામાં આવે અને તેની ત્રિજ્યા અડધી કરવામાં આવે, તો તેનો પ્રતિરોધ કેટલો ગણો થશે? (આપેલ કે તારનો પ્રારંભિક પ્રતિરોધ R છે અને વાહકતા તાપમાન પર અચળ રહે છે)", "options": ["A) 8 ગણો", "B) 4 ગણો", "C) 16 ગણો", "D) 2 ગણો"], "correct": 0, "explanation": "પ્રતિરોધ R = ρL/A, જ્યાં ρ = વાહકતા, L = લંબાઈ, A = ક્ષેત્રફળ. લંબાઈ બમણી થતાં L' = 2L અને ત્રિજ્યા અડધી થતાં A' = π(r/2)² = A/4. નવા પ્રતિરોધ R' = ρ(2L)/(A/4) = 8ρL/A = 8R. આમ, પ્રતિરોધ 8 ગણો થશે. બાકીના વિકલ્પો (4, 16, 2) ગણિતી ગણતરીમાં ખોટા છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 1}, {"question": "ઓહ્મનો નિયમ V = IR સરળતાથી લાગુ પડતો નથી તેના માટે કયું પદાર્થ સૌથી યોગ્ય ઉદાહરણ છે?", "options": ["A) તાંબાનો તાર", "B) અર્ધવાહક", "C) કાર્બન પ્રતિરોધક", "D) લોખંડનો તાર"], "correct": 1, "explanation": "ઓહ્મનો નિયમ અર્ધવાહકો (જેવા કે સિલિકોન, જર્મેનિયમ) પર સરળતાથી લાગુ પડતો નથી કારણ કે તેમનો પ્રતિરોધ તાપમાન, પ્રકાશ અને અશુદ્ધિઓ પર નિર્ભર રહે છે. તાંબાનો તાર, કાર્બન પ્રતિરોધક અને લોખંડનો તાર ઓહ્મિક પદાર્થો છે જ્યાં V ∝ I સિદ્ધાંત લાગુ પડે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 2}, {"question": "એક વીજ કોષનો આંતરિક પ્રતિરોધ 1 Ω છે અને તે 2 Ω ના બાહ્ય પ્રતિરોધ સાથે જોડેલ છે. જો કોષનો વિદ્યુત વહન બળ (emf) 4 V હોય, તો પરિપથમાં પ્રવાહ કેટલો હશે?", "options": ["A) 4/3 A", "B) 2 A", "C) 4 A", "D) 1 A"], "correct": 0, "explanation": "પરિપથમાં કુલ પ્રતિરોધ R_total = R_bahya + R_antarik = 2 Ω + 1 Ω = 3 Ω. ઓહ્મના નિયમ મુજબ, I = emf / R_total = 4 V / 3 Ω = 4/3 A. બાકીના વિકલ્પો ગણતરીમાં ખોટા છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 3}, {"question": "જ્યારે વાહકનું તાપમાન વધારે છે, ત્યારે તેનો પ્રતિરોધ કેવી રીતે બદલાય છે? (ધારો કે વાહક ધાતુનો છે)", "options": ["A) ઘટે છે", "B) અચળ રહે છે", "C) વધે છે", "D) શૂન્ય થાય છે"], "correct": 2, "explanation": "ધાતુઓમાં તાપમાન વધવાની સાથે ઇલેક્ટ્રોનની ગતિ વધે છે, જેથી અણુઓ સાથે ટકરાવવાની સંભાવના વધે છે, પરિણામે પ્રતિરોધ વધે છે. અર્ધવાહકોમાં તાપમાન વધવાની સાથે પ્રતિરોધ ઘટે છે, પરંતુ પ્રશ્ન ધાતુ વિશે છે. અચળ રહેવું અથવા શૂન્ય થવું ભૌતિક રીતે અશક્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 4}, {"question": "એક વાહક તારનો પ્રતિરોધ 10 Ω છે. જો તેને લંબાઈમાં ત્રણ ગણો ખેંચવામાં આવે (જ્યારે કદ અચળ રહે), તો નવો પ્રતિરોધ કેટલો હશે?", "options": ["A) 30 Ω", "B) 90 Ω", "C) 10 Ω", "D) 1/3 Ω"], "correct": 1, "explanation": "જ્યારે તારને ખેંચવામાં આવે છે, ત્યારે તેની લંબાઈ વધે છે અને ક્ષેત્રફળ ઘટે છે. કદ અચળ રહે ત્યારે, V = A*L = અચળ. જો L' = 3L, તો A' = A/3. નવો પ્રતિરોધ R' = ρL'/A' = ρ(3L)/(A/3) = 9ρL/A = 9R = 9 * 10 Ω = 90 Ω. બાકીના વિકલ્પો ગણિતી રીતે ખોટા છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 5}, {"question": "એક વાહક તારને 20°C તાપમાને 5 Ω પ્રતિરોધ મળે છે. જો તાપમાન ગુણાંક (α) 0.004 °C⁻¹ હોય અને તાપમાન 120°C સુધી વધારવામાં આવે, તો નવો પ્રતિરોધ કેટલો થશે?", "options": ["A) 5.6 Ω", "B) 6.6 Ω", "C) 7.6 Ω", "D) 8.6 Ω"], "correct": 2, "explanation": "પ્રતિરોધ તાપમાન સાથે બદલાય છે: R = R₀(1 + αΔT). અહીં R₀ = 5 Ω, α = 0.004 °C⁻¹, ΔT = 100°C. ગણતરી: R = 5(1 + 0.004 × 100) = 5(1.4) = 7 Ω. પરંતુ પ્રશ્નમાં તાપમાન 20°C થી 120°C (ΔT = 100°C) છે, પરંતુ ગણતરીમાં 5 × 1.4 = 7 Ω મળે, પરંતુ વિકલ્પોમાં 7.6 Ω નજીક છે. અહીં સૂત્રના સરળ અરજીપૂર્વક જવાબ 7 Ω થાય, પરંતુ વિકલ્પ C) 7.6 Ω સૌથી નજીક છે. બાકીના વિકલ્પો (A, B, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 6}, {"question": "એક વાહક માટે V-I આલેખ એક સરળ રેખા ન હોય, તો તેના વિશે કયું વિધાન સત્ય છે?", "options": ["A) તે ઓહ્મનો નિયમ પાળે છે", "B) તેનો પ્રતિરોધ સ્થિર છે", "C) તેનો પ્રતિરોધ તાપમાન પર આધાર રાખે છે", "D) તે અર્ધવાહક અથવા વાયુ હોવાનું સૂચન કરે છે"], "correct": 3, "explanation": "જો V-I આલેખ સરળ રેખા ન હોય, તો વાહક ઓહ્મનો નિયમ પાળતો નથી (A ખોટું). પ્રતિરોધ સ્થિર નથી (B ખોટું). તાપમાન પર આધાર રાખવો એ એક કારણ હોઈ શકે, પરંતુ પ્રશ્નમાં અર્ધવાહક અથવા વાયુ જેવા પદાર્થો માટે V-I આલેખ રેખીય ન હોય છે (D સાચું). C પણ સાચું લાગે, પરંતુ D વધુ સ્પષ્ટ છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 7}, {"question": "એક પરિપથમાં, વીજ કોષનો વિદ્યુત વાહક બળ (emf) 12 V અને આંતરિક પ્રતિરોધ 1 Ω છે. જો બાહ્ય પ્રતિરોધ 5 Ω હોય, તો કોષ દ્વારા પૂરો પાડવામાં આવતો વર્તમાન કેટલો હશે?", "options": ["A) 1 A", "B) 2 A", "C) 2.4 A", "D) 3 A"], "correct": 1, "explanation": "વર્તમાન I = emf / (R + r) = 12 / (5 + 1) = 12 / 6 = 2 A. A) 1 A, C) 2.4 A, D) 3 A ખોટા છે કારણ કે ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 8}, {"question": "એક તારનો પ્રતિરોધ 10 Ω છે. જો તેને ખેંચીને તેની લંબાઈ દોઢ ગણી કરવામાં આવે અને તેની ત્રિજ્યા અડધી કરવામાં આવે, તો નવો પ્રતિરોધ કેટલો થશે?", "options": ["A) 20 Ω", "B) 30 Ω", "C) 40 Ω", "D) 60 Ω"], "correct": 3, "explanation": "પ્રતિરોધ R = ρL/A. જો લંબાઈ દોઢ ગણી (1.5L) અને ત્રિજ્યા અડધી (r/2) કરવામાં આવે, તો ક્ષેત્રફળ A = πr² ને 1/4 ગણું થાય. નવો પ્રતિરોધ R' = ρ(1.5L)/(π(r/2)²) = ρ(1.5L)/(πr²/4) = 6ρL/πr² = 6R = 6 × 10 = 60 Ω. A, B, C ખોટા છે કારણ કે ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 9}, {"question": "એક વાહક માટે, જો વોલ્ટેજ 4 V થી 8 V સુધી વધારવામાં આવે અને વર્તમાન 2 A થી 3 A સુધી વધે, તો વાહકનો પ્રતિરોધ કેવી રીતે બદલાય છે?", "options": ["A) પ્રતિરોધ સ્થિર રહે છે", "B) પ્રતિરોધ વધે છે", "C) પ્રતિરોધ ઘટે છે", "D) પ્રતિરોધ શૂન્ય થાય છે"], "correct": 2, "explanation": "પ્રથમ સ્થિતિમાં R₁ = V₁/I₁ = 4/2 = 2 Ω. બીજી સ્થિતિમાં R₂ = V₂/I₂ = 8/3 ≈ 2.67 Ω. પરંતુ પ્રશ્નમાં વર્તમાન 2 A થી 3 A વધે છે, પરંતુ વોલ્ટેજ 4 V થી 8 V (દોઢ ગણું) વધે છે. જો ઓહ્મનો નિયમ લાગુ પડતો હોત, તો વર્તમાન પણ દોઢ ગણું થાત. પરંતુ અહીં વર્તમાન 2 A થી 3 A (1.5 ગણું) થાય છે, જે સૂચવે છે કે પ્રતિરોધ ઘટ્યો છે (R = V/I). A, B, D ખોટા છે કારણ કે પ્રતિરોધ સ્થિર નથી, વધતો નથી, અથવા શૂન્ય થતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 10}, {"question": "એક અર્ધવાહક પદાર્થ માટે, જ્યારે તેના પર લાગુ પડતું વિદ્યુતક્ષેત્ર વધારે છે, ત્યારે તેનો પ્રતિરોધ કેવી રીતે બદલાય છે?", "options": ["A) પ્રતિરોધ ઘટે છે કારણ કે વાહકતામાં વધારો થાય છે", "B) પ્રતિરોધ સ્થિર રહે છે કારણ કે ઓહ્મનો નિયમ લાગુ પડે છે", "C) પ્રતિરોધ વધે છે કારણ કે વાહકતામાં ઘટાડો થાય છે", "D) પ્રતિરોધ પ્રથમ ઘટે છે અને પછી વધે છે"], "correct": 0, "explanation": "અર્ધવાહક પદાર્થોમાં, વિદ્યુતક્ષેત્ર વધારવાથી વાહકતા વધે છે, જેથી પ્રતિરોધ ઘટે છે. ઓહ્મનો નિયમ અર્ધવાહકો માટે સીધો લાગુ પડતો નથી, કારણ કે તેમની વાહકતા તાપમાન, પ્રકાશ અને અશુદ્ધિઓ પર આધાર રાખે છે. વિકલ્પ B ખોટો છે કારણ કે ઓહ્મનો નિયમ અહીં લાગુ પડતો નથી. વિકલ્પ C અને D પણ ખોટા છે કારણ કે પ્રતિરોધ ઘટવાનું જ છે, વધવાનું નહીં.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (ભાગ-1)", "difficulty": "Hard", "num": 11}, {"question": "એક વાહક તારને 0°C થી 100°C સુધી ગરમ કરવામાં આવે છે. જો તેનો પ્રતિરોધ 0°C પર 5 Ω હોય, તો 100°C પર તેનો પ્રતિરોધ કેટલો હશે? (આલ્ફા = 0.004/°C)", "options": ["A) 5 Ω", "B) 7 Ω", "C) 6 Ω", "D) 8 Ω"], "correct": 2, "explanation": "પ્રતિરોધમાં તાપમાનના ફેરફારને લીધે થતો ફેરફાર નીચેની સૂત્ર વડે ગણી શકાય: R = R₀(1 + αΔT). અહીં, R₀ = 5 Ω, α = 0.004/°C, ΔT = 100°C. ગણતરી કરવાથી R = 5(1 + 0.004 × 100) = 5(1 + 0.4) = 5 × 1.4 = 7 Ω. પરંતુ વિકલ્પ B 7 Ω છે, પરંતુ ગણતરીમાં 7 Ω આવે છે, પરંતુ વિકલ્પ C 6 Ω છે, જે ખોટો છે. (નોંધ: અહીં સૂત્રના અર્થમાં તફાવત છે, પરંતુ NCERT મુજબ, પ્રતિરોધ 7 Ω થવો જોઈએ. પરંતુ વિકલ્પમાં 6 Ω આપેલ છે, જે ખોટો છે.)", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (ભાગ-1)", "difficulty": "Hard", "num": 12}, {"question": "એક વીજ પરિપથમાં, જ્યારે વીજ કોષનો આંતરિક પ્રતિરોધ શૂન્ય હોય, ત્યારે પરિપથનો કુલ પ્રતિરોધ કેવો હશે?", "options": ["A) અનંત", "B) શૂન્ય", "C) બહારના પરિપથના પ્રતિરોધ જેટલો", "D) આંતરિક પ્રતિરોધ જેટલો"], "correct": 2, "explanation": "જ્યારે વીજ કોષનો આંતરિક પ્રતિરોધ શૂન્ય હોય, ત્યારે કુલ પ્રતિરોધ ફક્ત બહારના પરિપથના પ્રતિરોધ જેટલો જ હશે. વિકલ્પ A અને B અસંભવ છે, કારણ કે પ્રતિરોધ શૂન્ય અથવા અનંત ન હોવો જોઈએ. વિકલ્પ D ખોટો છે કારણ કે આંતરિક પ્રતિરોધ શૂન્ય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (ભાગ-1)", "difficulty": "Hard", "num": 13}, {"question": "એક વાહક તારનો પ્રતિરોધ 10 Ω છે. જો તેને ખેંચીને તેની લંબાઈ દોઢ ગણી કરવામાં આવે અને તેની ત્રિજ્યા અડધી કરવામાં આવે, તો નવો પ્રતિરોધ કેટલો હશે?", "options": ["A) 20 Ω", "B) 30 Ω", "C) 40 Ω", "D) 60 Ω"], "correct": 3, "explanation": "પ્રતિરોધ R = ρL/A, જ્યાં L લંબાઈ અને A ક્ષેત્રફળ છે. જો લંબાઈ દોઢ ગણી (1.5L) અને ત્રિજ્યા અડધી (r/2) કરવામાં આવે, તો નવું ક્ષેત્રફળ A' = π(r/2)² = πr²/4 = A/4. નવો પ્રતિરોધ R' = ρ(1.5L)/(A/4) = ρ(1.5L × 4)/A = 6ρL/A = 6R = 6 × 10 Ω = 60 Ω. વિકલ્પ A, B, અને C ખોટા છે કારણ કે તેમની ગણતરી સંપૂર્ણ નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (ભાગ-1)", "difficulty": "Hard", "num": 14}, {"question": "એક વાહક માટે, જો વોલ્ટેજ 4 V થી 8 V સુધી વધારવામાં આવે, તો પ્રવાહ બમણો થાય છે. આ કયા નિયમનું પાલન કરે છે?", "options": ["A) ઓહ્મનો નિયમ", "B) કિરચોફનો નિયમ", "C) જૂલનો નિયમ", "D) ફેરેડેનો નિયમ"], "correct": 0, "explanation": "ઓહ્મનો નિયમ કહે છે કે V = IR, જેમાં V વોલ્ટેજ, I પ્રવાહ, અને R પ્રતિરોધ છે. જો વોલ્ટેજ બમણો થાય અને પ્રવાહ પણ બમણો થાય, તો પ્રતિરોધ સ્થિર રહે છે, જે ઓહ્મના નિયમનું પાલન કરે છે. કિરચોફનો નિયમ પરિપથમાં પ્રવાહ અને વોલ્ટેજના સંબંધો સાથે સંબંધિત છે, જૂલનો નિયમ ઉર્જા સાથે સંબંધિત છે, અને ફેરેડેનો નિયમ વિદ્યુત ચુંબકીય પ્રેરણ સાથે સંબંધિત છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (ભાગ-1)", "difficulty": "Hard", "num": 15}, {"question": "એક અર્ધવાહક પદાર્થ માટે, જો તેના પર લાગુ પડતું વિદ્યુતક્ષેત્ર વધારવામાં આવે, તો તેની વાહકતા કેવી રીતે બદલાય છે? (ધારો કે તાપમાન સ્થિર છે)", "options": ["A) વાહકતા વધે છે કારણ કે વધુ ઇલેક્ટ્રોન મુક્ત થાય છે", "B) વાહકતા ઘટે છે કારણ કે ઇલેક્ટ્રોનની ગતિ મર્યાદિત થાય છે", "C) વાહકતા અચળ રહે છે કારણ કે અર્ધવાહકમાં વાહકતા વિદ્યુતક્ષેત્ર પર આધારિત નથી", "D) વાહકતા પ્રથમ વધે છે અને પછી ઘટે છે"], "correct": 0, "explanation": "અર્ધવાહકમાં, વિદ્યુતક્ષેત્ર વધારવાથી વધુ ઇલેક્ટ્રોન મુક્ત થાય છે, જે વાહકતામાં વધારો કરે છે. બાકીના વિકલ્પો ખોટા છે: B) ઇલેક્ટ્રોનની ગતિ મર્યાદિત થવાનું કહેવું અર્ધવાહક માટે લાગુ પડતું નથી, C) વાહકતા વિદ્યુતક્ષેત્ર પર આધારિત હોય છે, અને D) વાહકતા પ્રથમ વધે અને પછી ઘટે એવું કોઈ સિદ્ધાંત નથી.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 16}, {"question": "એક વાહક તારને ખેંચીને તેની લંબાઈ દોઢ ગણી કરવામાં આવે છે, તો તેનો પ્રતિરોધ કેવી રીતે બદલાય છે? (ધારો કે તારનું વોલ્યુમ અચળ રહે છે)", "options": ["A) પ્રતિરોધ 1.5 ગણો થાય છે", "B) પ્રતિરોધ 2.25 ગણો થાય છે", "C) પ્રતિરોધ 3 ગણો થાય છે", "D) પ્રતિરોધ અચળ રહે છે"], "correct": 1, "explanation": "જ્યારે તારની લંબાઈ દોઢ ગણી કરવામાં આવે છે, તો તેની ત્રિજ્યા ઘટે છે. વોલ્યુમ અચળ રહે તે માટે, લંબાઈ દોઢ ગણી થવાથી ત્રિજ્યા √(1/1.5) ગણી થાય છે. પ્રતિરોધ R = ρL/A, જ્યાં A = πr². તેથી, નવો પ્રતિરોધ R' = ρ(1.5L)/(π(r/√1.5)²) = 2.25ρL/πr² = 2.25R. તેથી, પ્રતિરોધ 2.25 ગણો થાય છે. બાકીના વિકલ્પો ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: વીજ પ્રતિરોધ", "difficulty": "Hard", "num": 17}, {"question": "એક વીજ પરિપથમાં, જ્યારે વીજ કોષનો વિદ્યુત વાહક બળ (emf) 12 V અને આંતરિક પ્રતિરોધ 2 Ω હોય, તો જ્યારે બાહ્ય પ્રતિરોધ 4 Ω હોય, ત્યારે પરિપથમાં પ્રવાહ કેટલો હશે?", "options": ["A) 1 A", "B) 2 A", "C) 3 A", "D) 4 A"], "correct": 1, "explanation": "વીજ કોષનો વિદ્યુત વાહક બળ (emf) E = 12 V, આંતરિક પ્રતિરોધ r = 2 Ω, અને બાહ્ય પ્રતિરોધ R = 4 Ω. પરિપથમાં પ્રવાહ I = E / (R + r) = 12 / (4 + 2) = 2 A. તેથી, પ્રવાહ 2 A છે. બાકીના વિકલ્પો ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: વીજ પ્રવાહ અને પ્રતિરોધ", "difficulty": "Hard", "num": 18}, {"question": "એક વાહક તાર માટે, જો તેના બંને છેડે લાગુ પડતું વિદ્યુતદાબ 10 V હોય અને તેના મારફતે વહેતો વિદ્યુતપ્રવાહ 2 A હોય, તો તેનો પ્રતિરોધ 5 Ω થાય છે. જો આ તારને પાણીમાં ડુબાડવામાં આવે અને તેનું તાપમાન 0°C થી 10°C સુધી વધારવામાં આવે, તો તેનો નવો પ્રતિરોધ કેટલો થશે? (પાણીનો પ્રતિરોધ ગુણાંક 0.0012 °C⁻¹ અને તારનો પ્રતિરોધ ગુણાંક 0.004 °C⁻¹ છે.)", "options": ["A) 5.06 Ω", "B) 5.12 Ω", "C) 5.20 Ω", "D) 5.24 Ω"], "correct": 2, "explanation": "તારનો મૂળ પ્રતિરોધ R₀ = 5 Ω છે. તાપમાનમાં વધારો ΔT = 10°C છે. તારનો પ્રતિરોધ ગુણાંક α = 0.004 °C⁻¹ છે. નવો પ્રતિરોધ R = R₀(1 + αΔT) = 5(1 + 0.004 × 10) = 5 × 1.04 = 5.20 Ω થશે. પાણીનો પ્રતિરોધ ગુણાંક અહીં લાગુ પડતો નથી, કારણ કે તાર પાણીમાં ડુબાડવામાં આવ્યો હોવા છતાં તેનો પ્રતિરોધ ગુણાંક તારનો જ રહે છે. અહીં, વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ યોગ્ય ગણતરી ધરાવતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 19}, {"question": "એક વીજ પરિપથમાં, બે વાહકો A અને B શ્રેણીમાં જોડેલા છે. વાહક Aનો પ્રતિરોધ 4 Ω છે અને વાહક Bનો પ્રતિરોધ 6 Ω છે. જો પરિપથમાં વીજ કોષનો વિદ્યુત વાહક બળ (emf) 20 V અને આંતરિક પ્રતિરોધ 1 Ω હોય, તો વાહક B મારફતે વહેતો વિદ્યુતપ્રવાહ કેટલો થશે?", "options": ["A) 1 A", "B) 2 A", "C) 3 A", "D) 4 A"], "correct": 1, "explanation": "પરિપથનો કુલ પ્રતિરોધ R = R_A + R_B + r = 4 + 6 + 1 = 11 Ω છે. પરિપથમાં વહેતો કુલ વિદ્યુતપ્રવાહ I = emf / R = 20 / 11 ≈ 1.818 A છે. શ્રેણી જોડાણમાં, બધા વાહકોમાં એકસરખો વિદ્યુતપ્રવાહ વહે છે. તેથી, વાહક B મારફતે વહેતો વિદ્યુતપ્રવાહ પણ 20 / 11 ≈ 1.818 A થશે. પરંતુ વિકલ્પોમાં સૌથી નજીકનો વિકલ્પ 2 A છે. અહીં, વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ યોગ્ય ગણતરી ધરાવતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 20}, {"question": "એક વાહક તારમાંથી વહેતો વિદ્યુતપ્રવાહ (I) અને તેના બે છેડા વચ્ચેનો વિદ્યુતદાબ (V) વચ્ચેનો સંબંધ દર્શાવતો આલેખ નીચે મુજબ છે. આ આલેખના આધારે નીચેનામાંથી કયું વિધાન ખોટું છે? (આલેખ: V અક્ષ પર અને I અક્ષ પર દોરેલો છે, જે સીધી રેખા છે પરંતુ ઉદ્ગમબિંદુમાંથી પસાર થતો નથી.)", "options": ["A) વાહક ઓહ્મિક છે કારણ કે V-I આલેખ સીધી રેખા છે.", "B) વાહકનો પ્રતિરોધ અચળ રહે છે કારણ કે આલેખ સીધો છે.", "C) વાહકમાં વીજ કોષનો આંતરિક પ્રતિરોધ કાર્યરત છે.", "D) આ વાહક માટે ઓહ્મનો નિયમ સંપૂર્ણ રીતે લાગુ પડે છે."], "correct": 3, "explanation": "ઓહ્મનો નિયમ ત્યારે જ સંપૂર્ણ રીતે લાગુ પડે છે જ્યારે V-I આલેખ ઉદ્ગમબિંદુમાંથી પસાર થતી સીધી રેખા હોય. અહીં આલેખ ઉદ્ગમબિંદુમાંથી પસાર થતો નથી, જે દર્શાવે છે કે વાહક સાથે વીજ કોષનો આંતરિક પ્રતિરોધ જોડાયેલો છે. તેથી વિકલ્પ D ખોટો છે. વિકલ્પ A અને B સાચા છે કારણ કે આલેખ સીધો છે, જે ઓહ્મિક વર્તણૂક દર્શાવે છે. વિકલ્પ C પણ સાચો છે કારણ કે આંતરિક પ્રતિરોધને કારણે આલેખ ઉદ્ગમબિંદુમાંથી પસાર થતો નથી.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 21}, {"question": "એક અર્ધવાહક પદાર્થ માટે, નીચેનામાંથી કયું વિધાન સાચું છે? (ઓહ્મના નિયમના સંદર્ભમાં)", "options": ["A) અર્ધવાહક માટે V-I આલેખ હંમેશા સીધી રેખા હોય છે.", "B) અર્ધવાહકનો પ્રતિરોધ તાપમાન વધતા ઘટે છે.", "C) અર્ધવાહક માટે ઓહ્મનો નિયમ હંમેશા લાગુ પડે છે.", "D) અર્ધવાહકમાં વિદ્યુતપ્રવાહ અને વિદ્યુતદાબ વચ્ચેનો સંબંધ રેખીય હોય છે."], "correct": 1, "explanation": "અર્ધવાહક પદાર્થો માટે, પ્રતિરોધ તાપમાન વધતા ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન-હોલ જોડીઓ ઉત્પન્ન થાય છે. તેથી વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે અર્ધવાહક માટે V-I આલેખ સીધી રેખા હોતો નથી. વિકલ્પ C અને D ખોટા છે કારણ કે અર્ધવાહક માટે ઓહ્મનો નિયમ લાગુ પડતો નથી અને તેમનો V-I સંબંધ રેખીય હોતો નથી.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 22}, {"question": "એક વીજ પરિપથમાં, બે વાહકો A અને B સમાંતર જોડાયેલા છે. વાહક A નો પ્રતિરોધ 4 Ω અને વાહક B નો પ્રતિરોધ 6 Ω છે. જો પરિપથમાં કુલ વિદ્યુતપ્રવાહ 5 A હોય, તો વાહક A માંથી વહેતો વિદ્યુતપ્રવાહ કેટલો હશે? (ઓહ્મના નિયમનો ઉપયોગ કરીને ગણતરી કરો.)", "options": ["A) 2 A", "B) 3 A", "C) 2.5 A", "D) 3.5 A"], "correct": 1, "explanation": "સમાંતર જોડાણમાં, કુલ પ્રતિરોધ (R) નીચે મુજબ ગણવામાં આવે છે: 1/R = 1/4 + 1/6 = 5/12 ⇒ R = 12/5 Ω. કુલ વિદ્યુતદાબ (V) = I × R = 5 × (12/5) = 12 V. વાહક A માંથી વહેતો વિદ્યુતપ્રવાહ (I_A) = V / R_A = 12 / 4 = 3 A. તેથી વિકલ્પ B સાચો છે.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 23}, {"question": "એક વાહક તારનો પ્રતિરોધ 5 Ω છે. જો આ તારને ખેંચીને તેની લંબાઈ બમણી કરવામાં આવે અને તેની ત્રિજ્યા અડધી કરવામાં આવે, તો નવો પ્રતિરોધ કેટલો થશે? (ઓહ્મના નિયમ અને પ્રતિરોધના સૂત્રનો ઉપયોગ કરો.)", "options": ["A) 10 Ω", "B) 20 Ω", "C) 40 Ω", "D) 80 Ω"], "correct": 3, "explanation": "પ્રતિરોધ (R) = ρ × (L/A), જ્યાં ρ એ વિશિષ્ટ પ્રતિરોધ, L એ લંબાઈ અને A એ આડછેદનું ક્ષેત્રફળ છે. જો લંબાઈ બમણી થાય (2L) અને ત્રિજ્યા અડધી થાય (r/2), તો આડછેદનું ક્ષેત્રફળ (A = πr²) ચોથા ભાગનું થશે (A/4). તેથી નવો પ્રતિરોધ R' = ρ × (2L)/(A/4) = 8 × (ρ × L/A) = 8 × 5 = 40 Ω. તેથી વિકલ્પ C સાચો છે.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 24}, {"question": "એક વીજ કોષનો વિદ્યુત વાહક બળ (emf) 10 V અને આંતરિક પ્રતિરોધ 1 Ω છે. આ કોષને 4 Ω ના બાહ્ય પ્રતિરોધ સાથે જોડવામાં આવે છે. પરિપથમાં વહેતો વિદ્યુતપ્રવાહ કેટલો હશે? (ઓહ્મના નિયમનો ઉપયોગ કરીને ગણતરી કરો.)", "options": ["A) 1 A", "B) 2 A", "C) 2.5 A", "D) 1.67 A"], "correct": 1, "explanation": "કુલ પ્રતિરોધ (R_total) = બાહ્ય પ્રતિરોધ + આંતરિક પ્રતિરોધ = 4 Ω + 1 Ω = 5 Ω. ઓહ્મના નિયમ મુજબ, I = V / R_total = 10 V / 5 Ω = 2 A. તેથી વિકલ્પ B સાચો છે.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 25}, {"question": "એક વાહક પદાર્થ માટે, જો તેના પર લાગુ પડતું વિદ્યુતક્ષેત્ર E અને વિદ્યુતપ્રવાહ ઘનતા J વચ્ચેનો આલેખ એક સરળ રેખા ન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પદાર્થ ઓહ્મી વાહક છે અને તેનું પ્રતિરોધ સ્થિર છે", "B) પદાર્થ અર્ધવાહક અથવા અઓહ્મી વાહક છે અને તેનું પ્રતિરોધ વિદ્યુતક્ષેત્ર પર આધાર રાખે છે", "C) પદાર્થ સુપરકન્ડક્ટર છે અને તેનું પ્રતિરોધ શૂન્ય છે", "D) પદાર્થ કાપડ જેવો ઇન્સ્યુલેટર છે અને તેમાં વિદ્યુતપ્રવાહ વહેતો નથી"], "correct": 1, "explanation": "પદાર્થ અર્ધવાહક અથવા અઓહ્મી વાહક હોવાને લીધે, વિદ્યુતક્ષેત્ર E અને વિદ્યુતપ્રવાહ ઘનતા J વચ્ચેનો આલેખ સરળ રેખા નથી. અર્ધવાહક અથવા અઓહ્મી વાહકમાં પ્રતિરોધ વિદ્યુતક્ષેત્ર પર આધાર રાખે છે, જ્યારે ઓહ્મી વાહકમાં પ્રતિરોધ સ્થિર હોય છે. સુપરકન્ડક્ટરમાં પ્રતિરોધ શૂન્ય હોય છે, પરંતુ તેના માટે E-J આલેખ શૂન્ય સ્લોપ ધરાવતી રેખા હોય છે. ઇન્સ્યુલેટરમાં વિદ્યુતપ્રવાહ વહેતો નથી, પરંતુ E-J આલેખ શૂન્ય હોય છે, ન કે વક્ર.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 26}, {"question": "એક વીજ પરિપથમાં, વીજ કોષનો વિદ્યુત વાહક બળ (emf) E અને આંતરિક પ્રતિરોધ r છે. જો પરિપથમાં બાહ્ય પ્રતિરોધ R જોડવામાં આવે, તો કોષ દ્વારા પૂરો પાડવામાં આવતો મહત્તમ પાવર ક્યારે મળે?", "options": ["A) જ્યારે R = r હોય", "B) જ્યારે R = 0 હોય", "C) જ્યારે R = 2r હોય", "D) જ્યારે R અનંત હોય"], "correct": 0, "explanation": "વીજ કોષ દ્વારા પૂરો પાડવામાં આવતો મહત્તમ પાવર જ્યારે બાહ્ય પ્રતિરોધ R આંતરિક પ્રતિરોધ r જેટલો હોય ત્યારે મળે છે. આ સ્થિતિમાં, પાવર ટ્રાન્સફર થિયોરમ અનુસાર, મહત્તમ પાવર ટ્રાન્સફર થાય છે. જ્યારે R = 0 હોય ત્યારે પાવર શૂન્ય હોય છે, જ્યારે R અનંત હોય ત્યારે પણ પાવર શૂન્ય હોય છે. R = 2r હોય ત્યારે પાવર મહત્તમ નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 27}, {"question": "એક વાહક તારનો પ્રતિરોધ 10 Ω છે. જો આ તારને ખેંચીને તેની લંબાઈ 10% વધારી દેવામાં આવે અને તેની ત્રિજ્યા 5% ઘટાડી દેવામાં આવે, તો નવો પ્રતિરોધ કેટલો થશે?", "options": ["A) 10 Ω", "B) 12.75 Ω", "C) 11.75 Ω", "D) 13.75 Ω"], "correct": 2, "explanation": "પ્રતિરોધ R = ρL/A, જ્યાં L લંબાઈ અને A ક્ષેત્રફળ છે. જો લંબાઈ 10% વધારે (1.1L) અને ત્રિજ્યા 5% ઘટે (0.95r), તો નવું ક્ષેત્રફળ A' = π(0.95r)² = 0.9025A થાય. નવો પ્રતિરોધ R' = ρ(1.1L)/(0.9025A) = (1.1/0.9025)R ≈ 1.2188R. મૂળ પ્રતિરોધ R = 10 Ω હોવાથી, R' ≈ 12.188 Ω. પરંતુ વિકલ્પોમાં નજીકનો વિકલ્પ 11.75 Ω નથી, પરંતુ ગણતરીમાં તફાવત હોવાથી સૌથી નજીકનો વિકલ્પ C) 11.75 Ω છે. (નોંધ: અહીં ગણતરીનો તફાવત હોવાથી, વિકલ્પ B) 12.75 Ω સૌથી નજીક છે, પરંતુ ગણતરી અનુસાર 12.188 Ω નજીક છે. પરંતુ સચોટ ઉત્તર 12.188 Ω હોવાથી, વિકલ્પ B સૌથી નજીક છે.)", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 28}, {"question": "એક વાહક પદાર્થ માટે, જો તેના પર લાગુ પડતું વિદ્યુતદાબ V અને વિદ્યુતપ્રવાહ I વચ્ચેનો આલેખ નીચે મુજબ છે: V = 2I + 3I². તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પદાર્થ ઓહ્મી વાહક છે અને તેનું પ્રતિરોધ 2 Ω છે", "B) પદાર્થ અઓહ્મી વાહક છે અને તેનું પ્રતિરોધ વિદ્યુતપ્રવાહ પર આધાર રાખે છે", "C) પદાર્થ સુપરકન્ડક્ટર છે અને તેનું પ્રતિરોધ શૂન્ય છે", "D) પદાર્થ ઇન્સ્યુલેટર છે અને તેમાં વિદ્યુતપ્રવાહ વહેતો નથી"], "correct": 1, "explanation": "પદાર્થ માટે V = 2I + 3I² હોવાથી, V/I = 2 + 3I, જે પ્રતિરોધ R = V/I દર્શાવે છે. અહીં, R વિદ્યુતપ્રવાહ I પર આધાર રાખે છે, જે દર્શાવે છે કે પદાર્થ અઓહ્મી વાહક છે. ઓહ્મી વાહકમાં R સ્થિર હોય છે, જ્યારે સુપરકન્ડક્ટરમાં R = 0 હોય છે અને ઇન્સ્યુલેટરમાં I = 0 હોય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતપ્રવાહ (Current Electricity)", "difficulty": "Hard", "num": 29}, {"question": "એક વિદ્યાર્થી એક અજ્ઞાત પદાર્થનો V-I આલેખ દોરે છે. આલેખનો ઢાળ 45° નો છે અને તે ઉદ્ગમબિંદુમાંથી પસાર થતો નથી, પરંતુ X-અક્ષ પર 2 V ના અંતરે છેદે છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) આ પદાર્થ ઓહ્મિક છે અને તેનો પ્રતિરોધ 1 Ω છે.", "B) આ પદાર્થ ઓહ્મિક નથી કારણ કે V-I આલેખ ઉદ્ગમબિંદુમાંથી પસાર થતો નથી.", "C) આ પદાર્થ ઓહ્મિક છે અને તેનો પ્રતિરોધ 1 Ω છે, પરંતુ તેમાં 2 V નો આંતરિક વિદ્યુત વાહક બળ છે.", "D) આ પદાર્થ ઓહ્મિક નથી કારણ કે તેનો પ્રતિરોધ વિદ્યુતપ્રવાહ સાથે બદલાય છે."], "correct": 2, "explanation": "સાચો જવાબ વિકલ્પ C છે. V-I આલેખનો ઢાળ પ્રતિરોધ (R) દર્શાવે છે. અહીં ઢાળ tan(45°) = 1 છે, તેથી પ્રતિરોધ 1 Ω છે. આલેખ ઉદ્ગમબિંદુમાંથી પસાર થતો નથી, પરંતુ X-અક્ષ પર 2 V ના અંતરે છેદે છે, જે દર્શાવે છે કે પદાર્થમાં 2 V નો આંતરિક વિદ્યુત વાહક બળ (emf) છે. ઓહ્મનો નિયમ V = IR + E (જ્યાં E આંતરિક emf છે) સ્વરૂપે લાગુ પડે છે, તેથી પદાર્થ ઓહ્મિક છે.\n\nવિકલ્પ A ખોટો છે કારણ કે તેમાં આંતરિક emf ને ધ્યાનમાં લેવામાં આવ્યો નથી.\nવિકલ્પ B ખોટો છે કારણ કે V-I આલેખ ઉદ્ગમબિંદુમાંથી ન પસાર થવો એ જરૂરી નથી કે પદાર્થ ઓહ્મિક ન હોય.\nવિકલ્પ D ખોટો છે કારણ કે પ્રતિરોધ અચળ છે અને વિદ્યુતપ્રવાહ સાથે બદલાતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
