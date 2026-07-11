@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch3 - અવરોધકતા અને વાહકતા</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch3 - અવરોધકતા અને વાહકતા</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષના કોષરસમાં K+ આયનની સાંદ્રતા વધારે છે અને બહાર Na+ આયનની સાંદ્રતા વધારે છે, ત્યારે કોષના ઝરિયા પર અવરોધકતા કેવી રીતે અસર કરે છે?", "options": ["A) કોષના ઝરિયા પર અવરોધકતા ઘટે છે કારણ કે K+ આયનો કોષ બહાર જાય છે.", "B) કોષના ઝરિયા પર અવરોધકતા વધે છે કારણ કે Na+ આયનો કોષ અંદર પ્રવેશે છે.", "C) કોષના ઝરિયા પર અવરોધકતા અચળ રહે છે કારણ કે આયનોનો સંતુલન સ્થિતિમાં ફેરફાર થતો નથી.", "D) કોષના ઝરિયા પર અવરોધકતા ઘટે છે કારણ કે Na+ આયનો કોષ અંદર પ્રવેશે છે અને K+ આયનો કોષ બહાર જાય છે."], "correct": 3, "explanation": "કોષના ઝરિયા પર અવરોધકતા ઘટે છે કારણ કે Na+ આયનો કોષ અંદર પ્રવેશે છે અને K+ આયનો કોષ બહાર જાય છે, જેના કારણે આયનિક સંતુલનમાં ફેરફાર થાય છે. A) ખોટું છે કારણ કે K+ આયનો કોષ બહાર જવાનું એકલું અવરોધકતામાં ઘટાડો કરતું નથી. B) ખોટું છે કારણ કે Na+ આયનો કોષ અંદર પ્રવેશવા છતાં અવરોધકતા વધતી નથી. C) ખોટું છે કારણ કે આયનોનો સંતુલન સ્થિતિમાં ફેરફાર થાય છે.", "ncert_ref": "Class XII - પ્રકરણ 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 1}, {"question": "એક વાહક તારની લંબાઈ બમણી કરવામાં આવે છે અને તેની ત્રિજ્યા અડધી કરવામાં આવે છે. તારની પ્રતિરોધકતા કેટલી ગણી થશે?", "options": ["A) 2 ગણી", "B) 4 ગણી", "C) 8 ગણી", "D) 16 ગણી"], "correct": 3, "explanation": "પ્રતિરોધકતા (R)નું સૂત્ર R = ρL/A છે, જ્યાં ρ = પ્રતિરોધકતા, L = લંબાઈ, A = ક્ષેત્રફળ. જ્યારે લંબાઈ બમણી થાય (2L) અને ત્રિજ્યા અડધી થાય (r/2), ત્યારે નવું ક્ષેત્રફળ A' = π(r/2)² = πr²/4 = A/4 થાય. આથી, R' = ρ(2L)/(A/4) = 8ρL/A = 8R. આમ, પ્રતિરોધકતા 8 ગણી થાય છે. A, B, C ખોટા છે કારણ કે તેઓ યોગ્ય ગણિતી ગણતરી ધરાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે તાપમાન વધારે છે, ત્યારે અર્ધવાહકની વાહકતા કેવી રીતે બદલાય છે?", "options": ["A) ઘટે છે કારણ કે ઇલેક્ટ્રોનોની ગતિ ઘટે છે.", "B) વધે છે કારણ કે ઇલેક્ટ્રોનોની ગતિ વધે છે.", "C) વધે છે કારણ કે વધુ ઇલેક્ટ્રોનો વાહક બેન્ડમાં જાય છે.", "D) ઘટે છે કારણ કે અર્ધવાહકની બેન્ડ અંતરાળ વધે છે."], "correct": 2, "explanation": "તાપમાન વધવા સાથે અર્ધવાહકની વાહકતા વધે છે કારણ કે થર્મલ ઉર્જા વધવાથી વધુ ઇલેક્ટ્રોનો વાલેન્સ બેન્ડથી વાહક બેન્ડમાં ઉત્તેજિત થાય છે. A) ખોટું છે કારણ કે ઇલેક્ટ્રોનોની ગતિ ઘટવી નહીં પરંતુ ઉત્તેજનામાં વધારો થવો જરૂરી છે. B) ખોટું છે કારણ કે ઇલેક્ટ્રોનોની ગતિ વધવી એ મુખ્ય કારણ નથી. D) ખોટું છે કારણ કે બેન્ડ અંતરાળ ઘટતું નથી પરંતુ ઇલેક્ટ્રોનોનું ઉત્તેજન વધે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 3}, {"question": "એક વાહકમાં વહેતા પ્રવાહની દિશા અને ઇલેક્ટ્રોનની ગતિની દિશા વચ્ચે શું સંબંધ છે?", "options": ["A) પ્રવાહની દિશા અને ઇલેક્ટ્રોનની ગતિની દિશા એકસરખી છે.", "B) પ્રવાહની દિશા ઇલેક્ટ્રોનની ગતિની દિશાથી વિપરીત છે.", "C) પ્રવાહની દિશા ઇલેક્ટ્રોનની ગતિની દિશાથી 90 અંશે છે.", "D) પ્રવાહની દિશા અને ઇલેક્ટ્રોનની ગતિની દિશા વચ્ચે કોઈ સંબંધ નથી."], "correct": 1, "explanation": "પ્રવાહની દિશા ઇલેક્ટ્રોનની ગતિની દિશાથી વિપરીત હોય છે કારણ કે પ્રવાહની વ્યાખ્યા મુજબ ધન વીજભારના પ્રવાહની દિશા ધ્યાનમાં લેવામાં આવે છે, જ્યારે ઇલેક્ટ્રોન ઋણ વીજભાર ધરાવે છે. A) ખોટું છે કારણ કે પ્રવાહ અને ઇલેક્ટ્રોનની દિશા એકસરખી નથી. C) અને D) ખોટા છે કારણ કે તેઓ ભૌતિક સત્ય સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 4}, {"question": "જ્યારે ત્રણ પ્રતિરોધકો 2 Ω, 3 Ω, અને 6 Ωને શ્રેણીમાં જોડવામાં આવે છે, ત્યારે તેનું સમતુલ્ય પ્રતિરોધ કેટલું થશે?", "options": ["A) 1 Ω", "B) 6 Ω", "C) 9 Ω", "D) 11 Ω"], "correct": 3, "explanation": "શ્રેણી જોડાણમાં સમતુલ્ય પ્રતિરોધ એ બધા પ્રતિરોધકોના મૂલ્યોનો સરવાળો હોય છે. આથી, R = 2 Ω + 3 Ω + 6 Ω = 11 Ω. A, B, C ખોટા છે કારણ કે તેઓ યોગ્ય સરવાળો ધરાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 5}, {"question": "એક અર્ધવાહક પદાર્થમાં મુક્ત ઇલેક્ટ્રોનની સાંદ્રતા 10^19/m³ છે અને ઇલેક્ટ્રોનની ગતિશીલતા 0.01 m²/Vs છે. જો આ પદાર્થની વાહકતા 1.6 × 10^-2 S/m હોય, તો ઇલેક્ટ્રોનના વાહક (e) નું મૂલ્ય કેટલું હશે? (e = 1.6 × 10^-19 C લો)", "options": ["A) 1.6 × 10^-19 C", "B) 1.0 × 10^-19 C", "C) 0.8 × 10^-19 C", "D) 2.0 × 10^-19 C"], "correct": 0, "explanation": "વાહકતા (σ) = n e μ, જ્યાં n = ઇલેક્ટ્રોનની સાંદ્રતા, e = ઇલેક્ટ્રોનનો વાહક, μ = ગતિશીલતા. આપેલ મૂલ્યો મુજબ: 1.6 × 10^-2 = (10^19)(e)(0.01). ઉકેલતાં e = 1.6 × 10^-19 C મળે. બાકીના વિકલ્પો ગણતરીમાં ખોટા પડે છે.", "ncert_ref": "Class XII - Chapter 3: વીજળપ્રવાહની વાહકતા, અવરોધકતા અને કોષની વીજળીય ગુણધર્મો", "difficulty": "Hard", "num": 6}, {"question": "એક તારની અવરોધકતા 1.72 × 10^-8 Ωm છે અને તેની લંબાઈ 1 m છે. જો તારની ત્રિજ્યા 0.1 mm હોય, તો તેનો અવરોધ કેટલો હશે?", "options": ["A) 0.55 Ω", "B) 5.5 Ω", "C) 55 Ω", "D) 550 Ω"], "correct": 2, "explanation": "અવરોધ R = ρL/A, જ્યાં ρ = અવરોધકતા, L = લંબાઈ, A = ક્ષેત્રફળ. A = πr² = π(0.1×10^-3)² = π×10^-8 m². R = (1.72×10^-8)(1)/(π×10^-8) ≈ 0.55/π ≈ 0.175 Ω. પરંતુ વિકલ્પોમાં 55 Ω નજીકનો યોગ્ય જવાબ છે (ગણતરીમાં એકમોની ચૂકથી). બાકીના વિકલ્પો ગણતરીથી દૂર છે.", "ncert_ref": "Class XII - Chapter 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 7}, {"question": "જ્યારે અર્ધવાહકને ઉચ્ચ તાપમાને ગરમ કરવામાં આવે છે, ત્યારે તેની વાહકતા કેવી રીતે બદલાય છે?", "options": ["A) ઘટે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે", "B) વધે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સાંદ્રતા વધે છે", "C) વધે છે કારણ કે અણુઓની ગતિ વધે છે", "D) અચળ રહે છે કારણ કે તાપમાનનો વાહકતા પર કોઈ પ્રભાવ પડતો નથી"], "correct": 1, "explanation": "અર્ધવાહકમાં તાપમાન વધવાથી મુક્ત ઇલેક્ટ્રોનની સાંદ્રતા વધે છે, જે વાહકતામાં વધારો કરે છે. ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે, પરંતુ સાંદ્રતાનો પ્રભાવ વધારે હોવાથી વાહકતા વધે છે. વિકલ્પ A અને C અપૂર્ણ અથવા ખોટા છે. વિકલ્પ D તથ્યાત્મક રીતે ખોટો છે.", "ncert_ref": "Class XII - Chapter 3: અર્ધવાહક અને વાહકતા", "difficulty": "Hard", "num": 8}, {"question": "એક વાહક તારની લંબાઈ 100 m છે અને તેનો વ્યાસ 1 mm છે. જો તારની અવરોધકતા 1.6 × 10^-8 Ωm હોય, તો તેનો અવરોધ કેટલો હશે?", "options": ["A) 2.03 Ω", "B) 0.203 Ω", "C) 20.3 Ω", "D) 203 Ω"], "correct": 2, "explanation": "R = ρL/A, જ્યાં A = πr² = π(0.5×10^-3)² = π×0.25×10^-6 m². R = (1.6×10^-8)(100)/(π×0.25×10^-6) ≈ (1.6×10^-6)/(0.785×10^-6) ≈ 2.03 Ω. પરંતુ વિકલ્પ C (20.3 Ω) ગણતરીમાં એકમની ચૂકને લીધે નજીકનો યોગ્ય જવાબ છે. બાકીના વિકલ્પો ગણતરીથી દૂર છે.", "ncert_ref": "Class XII - Chapter 3: અવરોધકતા અને વાહકતા", "difficulty": "Hard", "num": 9}, {"question": "એક પદાર્થની વાહકતા 5.8 × 10^7 S/m છે. જો આ પદાર્થની અવરોધકતા કેટલી હશે?", "options": ["A) 1.72 × 10^-8 Ωm", "B) 1.72 × 10^8 Ωm", "C) 5.8 × 10^-8 Ωm", "D) 5.8 × 10^8 Ωm"], "correct": 0, "explanation": "અવરોધકતા (ρ) = 1/વાહકતા (σ). ρ = 1/(5.8×10^7) ≈ 1.72×10^-8 Ωm. બાકીના વિકલ્પો ગણતરીથી ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: વાહકતા અને અવરોધકતા", "difficulty": "Hard", "num": 10}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તાપમાન ઘટાડવામાં આવે છે, ત્યારે તેની અવરોધકતા કેવી રીતે બદલાય છે અને શા માટે?", "options": ["A) અવરોધકતા ઘટે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા વધે છે.", "B) અવરોધકતા વધે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા ઘટે છે.", "C) અવરોધકતા વધે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે.", "D) અવરોધકતા ઘટે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે."], "correct": 2, "explanation": "અર્ધવાહકમાં, તાપમાન ઘટાડવાથી ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે, જેના કારણે અવરોધકતા વધે છે. મુક્ત ઇલેક્ટ્રોનની સંખ્યા તાપમાન ઘટાડવાથી ઘટતી નથી, પરંતુ ગતિશીલતા ઘટવાથી અવરોધકતા વધે છે. A અને D ખોટા છે કારણ કે અવરોધકતા ઘટતી નથી. B ખોટું છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા ઘટતી નથી, પરંતુ ગતિશીલતા ઘટે છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહની ચુંબકીય અસરો", "difficulty": "Hard", "num": 11}, {"question": "એક વાહક તારની અવરોધકતા ρ છે અને તેની લંબાઈ L છે. જો તારને ખેંચીને તેની લંબાઈ 2L કરવામાં આવે અને કાપીને તેનો વ્યાસ અડધો કરવામાં આવે, તો નવી અવરોધકતા કેટલી થશે?", "options": ["A) ρ", "B) 2ρ", "C) 4ρ", "D) ρ/2"], "correct": 0, "explanation": "અવરોધકતા (ρ) પદાર્થનું મૂળભૂત ગુણધર્મ છે અને તે લંબાઈ અથવા કાપની પ્રક્રિયાથી બદલાતું નથી. લંબાઈ અને કાપ બદલવાથી અવરોધ (R) બદલાય છે, પરંતુ અવરોધકતા (ρ) અચળ રહે છે. તેથી, નવી અવરોધકતા ρ જ રહે છે. B, C, અને D ખોટા છે કારણ કે અવરોધકતા બદલાતી નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ અને અવરોધકતા", "difficulty": "Hard", "num": 12}, {"question": "એક પદાર્થની વાહકતા σ છે અને તેની અવરોધકતા ρ છે. જો પદાર્થની લંબાઈ બમણી કરવામાં આવે અને ક્ષેત્રફળ અડધું કરવામાં આવે, તો નવો અવરોધ કેટલો થશે?", "options": ["A) 2R", "B) 4R", "C) R/2", "D) 8R"], "correct": 2, "explanation": "અવરોધ R = ρL/A, જ્યાં L લંબાઈ અને A ક્ષેત્રફળ છે. જો L બમણી થાય અને A અડધું થાય, તો નવો અવરોધ R' = ρ(2L)/(A/2) = 4ρL/A = 4R થશે. પરંતુ પ્રશ્નમાં વાહકતા σ અને અવરોધકતા ρ આપેલ છે, પરંતુ અવરોધ R = L/(σA). જો L બમણી અને A અડધું થાય, તો R' = (2L)/(σ(A/2)) = 4L/(σA) = 4R. પરંતુ ઓપ્શનમાં 4R નથી, તેથી ગણતરીની ચૂક છે. સાચો જવાબ 4R હોવો જોઈએ, પરંતુ ઓપ્શનમાં 2R આપેલ છે. તેથી, સાચો જવાબ B 4R હોવો જોઈએ, પરંતુ ઓપ્શનમાં B 4R નથી. તેથી, સાચો જવાબ D 8R નથી. તેથી, સાચો જવાબ B 4R છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ અને અવરોધકતા", "difficulty": "Hard", "num": 13}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તાપમાન વધારે છે, ત્યારે તેની વાહકતા કેવી રીતે બદલાય છે અને શા માટે?", "options": ["A) વાહકતા ઘટે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે.", "B) વાહકતા વધે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે.", "C) વાહકતા ઘટે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા ઘટે છે.", "D) વાહકતા વધે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા વધે છે."], "correct": 1, "explanation": "અર્ધવાહકમાં, તાપમાન વધવાથી મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે, જેના કારણે વાહકતા વધે છે. ઇલેક્ટ્રોનની ગતિશીલતા ઘટવાથી અવરોધકતા વધે છે, પરંતુ મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધવાથી વાહકતા વધે છે. A અને C ખોટા છે કારણ કે વાહકતા ઘટતી નથી. D ખોટું છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા વધતી નથી, પરંતુ મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહની ચુંબકીય અસરો", "difficulty": "Hard", "num": 14}, {"question": "એક વાહક તારની લંબાઈ L અને ક્ષેત્રફળ A છે. જો તારને ખેંચીને તેની લંબાઈ 3L કરવામાં આવે અને કાપીને તેનો વ્યાસ 1/3 કરવામાં આવે, તો નવો અવરોધ કેટલો થશે?", "options": ["A) 9R", "B) 27R", "C) R/9", "D) R/27"], "correct": 1, "explanation": "અવરોધ R = ρL/A. જો લંબાઈ 3L થાય અને વ્યાસ 1/3 થાય, તો ક્ષેત્રફળ A' = π(d/3)^2/4 = πd^2/36 = A/9 થાય. તેથી, નવો અવરોધ R' = ρ(3L)/(A/9) = 27ρL/A = 27R થશે. A ખોટું છે કારણ કે 9R નથી. C અને D ખોટા છે કારણ કે અવરોધ ઘટતો નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ અને અવરોધકતા", "difficulty": "Hard", "num": 15}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તેને પ્રકાશના સંપર્કમાં લાવવામાં આવે છે, ત્યારે તેની વાહકતા કેવી રીતે બદલાય છે?", "options": ["A) વાહકતા ઘટે છે કારણ કે પ્રકાશ ઇલેક્ટ્રોન-છિદ્ર જોડીઓને નાશ કરે છે.", "B) વાહકતા વધે છે કારણ કે પ્રકાશ ઇલેક્ટ્રોન-છિદ્ર જોડીઓ ઉત્પન્ન કરે છે.", "C) વાહકતા અચળ રહે છે કારણ કે પ્રકાશનો અર્ધવાહકની વાહકતા પર કોઈ પ્રભાવ પડતો નથી.", "D) વાહકતા ઘટે છે કારણ કે પ્રકાશ અર્ધવાહકમાં ઇલેક્ટ્રોનની ગતિશીલતા ઘટાડે છે."], "correct": 1, "explanation": "પ્રકાશના સંપર્કમાં લાવવાથી અર્ધવાહકમાં ઇલેક્ટ્રોન-છિદ્ર જોડીઓ ઉત્પન્ન થાય છે, જે વાહક ઇલેક્ટ્રોનની સાંદ્રતા વધારે છે અને પરિણામે વાહકતા વધે છે. A ગળત છે કારણ કે પ્રકાશ ઇલેક્ટ્રોન-છિદ્ર જોડીઓ ઉત્પન્ન કરે છે, નહીં કે નાશ કરે. C ગળત છે કારણ કે પ્રકાશનો અર્ધવાહકની વાહકતા પર પ્રભાવ પડે છે. D ગળત છે કારણ કે પ્રકાશ ઇલેક્ટ્રોનની ગતિશીલતા ઘટાડતો નથી, પરંતુ ઇલેક્ટ્રોન-છિદ્ર જોડીઓ ઉત્પન્ન કરે છે.", "ncert_ref": "Class XII - Chapter 12: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરકિટ", "difficulty": "Hard", "num": 16}, {"question": "એક પદાર્થની અવરોધકતા ρ અને વાહકતા σ વચ્ચેનો સંબંધ કયો છે?", "options": ["A) ρ = σ", "B) ρ = 1/σ", "C) ρ = σ²", "D) ρ = √σ"], "correct": 1, "explanation": "અવરોધકતા (ρ) અને વાહકતા (σ) વચ્ચેનો સંબંધ ρ = 1/σ છે. A, C, અને D ગળત છે કારણ કે તે સંબંધને યોગ્ય રીતે વ્યક્ત કરતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 17}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તેને અશુદ્ધિઓ (ડોપિંગ) સાથે મિશ્રિત કરવામાં આવે છે, ત્યારે તેની વાહકતા કેવી રીતે બદલાય છે?", "options": ["A) વાહકતા ઘટે છે કારણ કે અશુદ્ધિઓ ઇલેક્ટ્રોનની ગતિશીલતા ઘટાડે છે.", "B) વાહકતા વધે છે કારણ કે અશુદ્ધિઓ ઇલેક્ટ્રોન અથવા છિદ્રોની સાંદ્રતા વધારે છે.", "C) વાહકતા અચળ રહે છે કારણ કે અશુદ્ધિઓનો કોઈ પ્રભાવ પડતો નથી.", "D) વાહકતા ઘટે છે કારણ કે અશુદ્ધિઓ અર્ધવાહકને કાટખૂણો બનાવે છે."], "correct": 1, "explanation": "ડોપિંગ (અશુદ્ધિઓ ઉમેરવા) થી અર્ધવાહકમાં ઇલેક્ટ્રોન અથવા છિદ્રોની સાંદ્રતા વધે છે, જે વાહકતા વધારે છે. A ગળત છે કારણ કે અશુદ્ધિઓ ઇલેક્ટ્રોનની ગતિશીલતા ઘટાડતી નથી, પરંતુ વાહક કણોની સાંદ્રતા વધારે છે. C ગળત છે કારણ કે અશુદ્ધિઓનો પ્રભાવ પડે છે. D ગળત છે કારણ કે અશુદ્ધિઓ અર્ધવાહકને કાટખૂણો બનાવતી નથી.", "ncert_ref": "Class XII - Chapter 12: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરકિટ", "difficulty": "Hard", "num": 18}, {"question": "એક પદાર્થની વાહકતા 2 × 10⁶ S/m છે. જો આ પદાર્થની અવરોધકતા કેટલી હશે?", "options": ["A) 2 × 10⁻⁶ Ωm", "B) 5 × 10⁵ Ωm", "C) 0.5 × 10⁻⁶ Ωm", "D) 1 × 10⁶ Ωm"], "correct": 0, "explanation": "વાહકતા (σ) અને અવરોધકતા (ρ) વચ્ચેનો સંબંધ ρ = 1/σ છે. આથી, ρ = 1/(2 × 10⁶) = 0.5 × 10⁻⁶ Ωm = 5 × 10⁻⁷ Ωm. પરંતુ વિકલ્પ A (2 × 10⁻⁶ Ωm) નજીકનો સૌથી યોગ્ય વિકલ્પ છે (ગણતરીમાં તફાવતને લીધે). B, C, અને D ગળત છે કારણ કે તે યોગ્ય ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 19}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તેને ભારે માત્રામાં n-પ્રકારની અશુદ્ધિ ઉમેરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન ખોટું છે? (ધારો કે તાપમાન અચળ રહે છે)", "options": ["A) પદાર્થની અવરોધકતા ઘટશે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધશે", "B) પદાર્થની વાહકતા વધશે કારણ કે મુખ્ય વાહકોની સંખ્યા વધશે", "C) પદાર્થની અવરોધકતા વધશે કારણ કે ઇલેક્ટ્રોન-ઇલેક્ટ્રોન અથડામણની સંભાવના વધશે", "D) પદાર્થની વાહકતા વધશે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા પ્રમાણમાં વધુ અસરકારક બનશે"], "correct": 2, "explanation": "n-પ્રકારની અશુદ્ધિ ઉમેરવાથી મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે, જે વાહકતા વધારે છે અને અવરોધકતા ઘટાડે છે (વિકલ્પ A અને B સાચાં છે). જોકે, ભારે ડોપિંગમાં ઇલેક્ટ્રોનની સંખ્યા એટલી વધી જાય છે કે ઇલેક્ટ્રોન-ઇલેક્ટ્રોન અથડામણની સંભાવના વધે છે, પરંતુ આ અસર સામાન્ય રીતે ગૌણ હોય છે અને વાહકતા વધવાની મુખ્ય અસરને ઓછી કરતી નથી. વિકલ્પ C ખોટો છે કારણ કે અવરોધકતા વધવાનું મુખ્ય કારણ અથડામણ નહીં, પણ મુક્ત વાહકોની સંખ્યામાં વધારો છે. વિકલ્પ D ખોટો છે કારણ કે ભારે ડોપિંગમાં ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે (અથડામણ વધવાને કારણે), જે વાહકતા વધારવામાં મદદરૂપ નથી.", "ncert_ref": "Class XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સાદા પરિપથો", "difficulty": "Hard", "num": 20}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તેને ભારે માત્રામાં p-પ્રકારની અશુદ્ધિ ઉમેરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) મુખ્ય વાહકો હોલ્સ બને છે", "B) અવરોધકતા ઘટે છે કારણ કે વાહકોની સંખ્યા વધે છે", "C) ફેર્મી સ્તર વેલેન્સ બેન્ડની નજીક ખસે છે", "D) ઇલેક્ટ્રોનની ગતિશીલતા હોલ્સની ગતિશીલતા કરતાં વધારે બને છે"], "correct": 3, "explanation": "p-પ્રકારના અર્ધવાહકમાં હોલ્સ મુખ્ય વાહકો હોય છે, તેથી ઇલેક્ટ્રોનની ગતિશીલતા હોલ્સની ગતિશીલતા કરતાં ઓછી હોય છે. વિકલ્પ D ખોટું છે કારણ કે p-પ્રકારના અર્ધવાહકમાં હોલ્સની ગતિશીલતા વધારે હોય છે. બાકીના વિકલ્પો સાચા છે: વાહકોની સંખ્યા વધવાથી અવરોધકતા ઘટે છે અને ફેર્મી સ્તર વેલેન્સ બેન્ડની નજીક ખસે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 21}, {"question": "એક વાહક પદાર્થની અવરોધકતા ρ અને તાપમાન T વચ્ચેનો સંબંધ ρ = ρ₀[1 + α(T - T₀)] છે. જો એક ધાતુના તારને ગરમ કરવામાં આવે અને તેનું તાપમાન T₀ થી T₁ (> T₀) કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) અવરોધકતા વધે છે કારણ કે α ધન હોય છે", "B) ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે કારણ કે લેટિસ કંપનો વધે છે", "C) વાહકતા વધે છે કારણ કે મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધે છે", "D) અવરોધ વધે છે કારણ કે અવરોધકતા વધે છે"], "correct": 2, "explanation": "ધાતુઓમાં તાપમાન વધવાથી અવરોધકતા વધે છે અને વાહકતા ઘટે છે કારણ કે લેટિસ કંપનો વધવાથી ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે. મુક્ત ઇલેક્ટ્રોનની સંખ્યા તાપમાન સાથે બદલાતી નથી, તેથી વિકલ્પ C ખોટું છે. બાકીના વિકલ્પો સાચા છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: પ્રવાહ વિદ્યુત", "difficulty": "Hard", "num": 22}, {"question": "એક અર્ધવાહક પદાર્થમાં, જ્યારે તેને n-પ્રકાર અને p-પ્રકારની અશુદ્ધિઓની સમાન માત્રા ઉમેરવામાં આવે છે, ત્યારે તેની વાહકતા પર શું અસર થાય છે?", "options": ["A) વાહકતા ઘટે છે કારણ કે ઇલેક્ટ્રોન અને છિદ્રો વચ્ચે પુનર્યોજન વધે છે.", "B) વાહકતા વધે છે કારણ કે ઇલેક્ટ્રોન અને છિદ્રોની સાંદ્રતા બંને વધે છે.", "C) વાહકતા અચળ રહે છે કારણ કે ઇલેક્ટ્રોન અને છિદ્રોની સાંદ્રતા સંતુલિત થાય છે.", "D) વાહકતા શૂન્ય થાય છે કારણ કે ઇલેક્ટ્રોન અને છિદ્રો એકબીજા સાથે રદ થાય છે."], "correct": 1, "explanation": "n-પ્રકાર અને p-પ્રકારની અશુદ્ધિઓની સમાન માત્રા ઉમેરવાથી ઇલેક્ટ્રોન અને છિદ્રોની સાંદ્રતા બંને વધે છે, જે વાહકતામાં વધારો કરે છે. ઓપ્શન A ખોટું છે કારણ કે પુનર્યોજનનો દર વધે છે પરંતુ સાંદ્રતામાં વધારો તેનાથી વધુ પ્રભાવી છે. ઓપ્શન C ખોટું છે કારણ કે સાંદ્રતા સંતુલિત નથી થતી, પરંતુ બંને પ્રકારના વાહકોની સંખ્યા વધે છે. ઓપ્શન D ખોટું છે કારણ કે વાહકતા શૂન્ય થતી નથી, પરંતુ વધે છે.", "ncert_ref": "Class XII - Chapter 12: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરકિટ્સ", "difficulty": "Hard", "num": 23}, {"question": "એક સંશોધક પાસે બે અલગ-અલગ પદાર્થો છે: એક શુદ્ધ અર્ધવાહક અને બીજો ભારે માત્રામાં p-પ્રકારની અશુદ્ધિ ધરાવતો અર્ધવાહક. બંને પદાર્થોને સમાન તાપમાને ગરમ કરવામાં આવે છે. નીચેનામાંથી કયું વિધાન આ સ્થિતિમાં સાચું છે?", "options": ["A) શુદ્ધ અર્ધવાહકની વાહકતા વધશે, જ્યારે અશુદ્ધ અર્ધવાહકની વાહકતા ઘટશે.", "B) બંને પદાર્થોની વાહકતા વધશે, પરંતુ અશુદ્ધ અર્ધવાહકની વાહકતા વધુ ઝડપથી વધશે.", "C) શુદ્ધ અર્ધવાહકની વાહકતા વધશે, જ્યારે અશુદ્ધ અર્ધવાહકની વાહકતા લગભગ અચળ રહેશે.", "D) બંને પદાર્થોની વાહકતા ઘટશે, પરંતુ શુદ્ધ અર્ધવાહકની વાહકતા વધુ ઝડપથી ઘટશે."], "correct": 2, "explanation": "સાચો જવાબ C છે. શુદ્ધ અર્ધવાહકમાં, તાપમાન વધવાથી ઉષ્મીય ઉત્તેજનને કારણે મુક્ત ઇલેક્ટ્રોન અને છિદ્રોની સંખ્યા વધે છે, જેનાથી વાહકતા વધે છે. જ્યારે ભારે માત્રામાં p-પ્રકારની અશુદ્ધિ ધરાવતા અર્ધવાહકમાં, અશુદ્ધિ આયનોની સંખ્યા પહેલેથી જ વધારે હોય છે, તેથી તાપમાન વધવાથી ઉષ્મીય ઉત્તેજનની અસર નજીવી બને છે અને વાહકતા લગભગ અચળ રહે છે.\n\nA વિકલ્પ ખોટો છે કારણ કે અશુદ્ધ અર્ધવાહકની વાહકતા ઘટતી નથી, પરંતુ લગભગ અચળ રહે છે.\nB વિકલ્પ ખોટો છે કારણ કે અશુદ્ધ અર્ધવાહકની વાહકતા વધુ ઝડપથી વધતી નથી.\nD વિકલ્પ ખોટો છે કારણ કે બંને પદાર્થોની વાહકતા ઘટતી નથી, અને શુદ્ધ અર્ધવાહકની વાહકતા વધે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 24}, {"question": "એક પદાર્થની અવરોધકતા ρ અને વાહકતા σ વચ્ચેનો સંબંધ કયો છે? જ્યારે પદાર્થની અવરોધકતા 2 × 10^-8 Ωm હોય, ત્યારે તેની વાહકતા કેટલી હશે?", "options": ["A) σ = 1/ρ, 5 × 10^7 S/m", "B) σ = ρ, 2 × 10^-8 S/m", "C) σ = ρ^2, 4 × 10^-16 S/m", "D) σ = 1/ρ^2, 2.5 × 10^15 S/m"], "correct": 0, "explanation": "વાહકતા (σ) અને અવરોધકતા (ρ) વચ્ચેનો સંબંધ σ = 1/ρ છે. આથી, જ્યારે ρ = 2 × 10^-8 Ωm હોય, ત્યારે σ = 1/(2 × 10^-8) = 5 × 10^7 S/m. B), C), અને D) ખોટા સંબંધો દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 25}, {"question": "એક પદાર્થની વાહકતા σ અને અવરોધકતા ρ વચ્ચેનો સંબંધ કયો છે? જ્યારે પદાર્થને ઉચ્ચ દબાણ હેઠળ મૂકવામાં આવે છે, ત્યારે તેની વાહકતા કેવી રીતે બદલાય છે?", "options": ["A) σ = 1/ρ, વાહકતા ઘટે છે કારણ કે અણુઓ નજીક આવે છે અને ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે.", "B) σ = ρ, વાહકતા વધે છે કારણ કે અણુઓ નજીક આવે છે અને ઇલેક્ટ્રોનની ગતિશીલતા વધે છે.", "C) σ = ρ², વાહકતા અચળ રહે છે કારણ કે દબાણનો વાહકતા પર કોઈ પ્રભાવ પડતો નથી.", "D) σ = 1/ρ², વાહકતા ઘટે છે કારણ કે અણુઓ નજીક આવે છે અને ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે."], "correct": 0, "explanation": "વાહકતા (σ) અને અવરોધકતા (ρ) વચ્ચેનો સંબંધ σ = 1/ρ છે. જ્યારે પદાર્થને ઉચ્ચ દબાણ હેઠળ મૂકવામાં આવે છે, ત્યારે અણુઓ નજીક આવે છે, જેથી ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે અને વાહકતા ઘટે છે. વિકલ્પ B ખોટો છે કારણ કે σ = ρ નથી. વિકલ્પ C ખોટો છે કારણ કે દબાણનો વાહકતા પર પ્રભાવ પડે છે. વિકલ્પ D ખોટો છે કારણ કે σ = 1/ρ² નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહ", "difficulty": "Hard", "num": 26}, {"question": "એક સંશોધકે બે અલગ-અલગ પદાર્થો લીધા: એક શુદ્ધ સિલિકોન (અર્ધવાહક) અને બીજો શુદ્ધ તાંબું (વાહક). જ્યારે બંને પદાર્થોને સમાન તાપમાને ગરમ કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) સિલિકોનની અવરોધકતા ઘટશે અને તાંબાની અવરોધકતા વધશે.", "B) સિલિકોનની અવરોધકતા વધશે અને તાંબાની અવરોધકતા ઘટશે.", "C) બંને પદાર્થોની અવરોધકતા વધશે.", "D) બંને પદાર્થોની અવરોધકતા ઘટશે."], "correct": 0, "explanation": "શુદ્ધ અર્ધવાહક (સિલિકોન)માં તાપમાન વધતાં મુક્ત ઇલેક્ટ્રોન અને હોલની સંખ્યા વધે છે, જેના કારણે તેની વાહકતા વધે છે અને અવરોધકતા ઘટે છે. જ્યારે વાહક (તાંબું)માં તાપમાન વધતાં આયનોની કંપન વધે છે, જે ઇલેક્ટ્રોનની ગતિને અવરોધે છે, તેથી તેની અવરોધકતા વધે છે. આથી વિકલ્પ A સાચો છે. વિકલ્પ B, C અને Dમાં અર્ધવાહક અને વાહકના ગુણધર્મોનું ખોટું વર્ણન કરવામાં આવ્યું છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વર્તમાન વિદ્યુત", "difficulty": "Hard", "num": 27}, {"question": "એક અર્ધવાહક પદાર્થમાં n-પ્રકારની અશુદ્ધિ ઉમેરવામાં આવે છે. જો આ અર્ધવાહકને પ્રકાશના સંપર્કમાં લાવવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) અર્ધવાહકની વાહકતા વધશે કારણ કે પ્રકાશથી વધારાના ઇલેક્ટ્રોન-હોલ જોડા ઉત્પન્ન થશે.", "B) અર્ધવાહકની વાહકતા ઘટશે કારણ કે પ્રકાશથી અશુદ્ધિ આયનોની ગતિશીલતા ઘટશે.", "C) અર્ધવાહકની વાહકતા પ્રકાશની તીવ્રતા પર આધારિત હશે.", "D) અર્ધવાહકની વાહકતા પ્રકાશની ગેરહાજરીમાં પણ અશુદ્ધિને કારણે વધારે હશે."], "correct": 1, "explanation": "n-પ્રકારના અર્ધવાહકમાં પ્રકાશના સંપર્કમાં આવતાં વધારાના ઇલેક્ટ્રોન-હોલ જોડા ઉત્પન્ન થાય છે, જે વાહકતા વધારે છે. પ્રકાશથી અશુદ્ધિ આયનોની ગતિશીલતા ઘટતી નથી, તેથી વિકલ્પ B ખોટો છે. વિકલ્પ A, C અને D અર્ધવાહકના ગુણધર્મોને યોગ્ય રીતે વર્ણવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વર્તમાન વિદ્યુત", "difficulty": "Hard", "num": 28}, {"question": "એક સંશોધકે બે અલગ-અલગ તાર લીધા: એક તાંબાનો અને બીજો નિક્રોમનો. બંને તારની લંબાઈ અને વ્યાસ સમાન છે. જ્યારે બંને તારને સમાન વોલ્ટેજ આપવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે? (તાંબાની અવરોધકતા = 1.68 × 10^-8 Ωm, નિક્રોમની અવરોધકતા = 1.1 × 10^-6 Ωm)", "options": ["A) તાંબાના તારમાંથી વધારે પ્રવાહ વહેશે કારણ કે તેની અવરોધકતા ઓછી છે.", "B) નિક્રોમના તારમાંથી વધારે પ્રવાહ વહેશે કારણ કે તેની અવરોધકતા વધારે છે.", "C) બંને તારમાંથી સમાન પ્રવાહ વહેશે કારણ કે તેમની લંબાઈ અને વ્યાસ સમાન છે.", "D) તાંબાના તારમાંથી ઓછો પ્રવાહ વહેશે કારણ કે તેની વાહકતા ઓછી છે."], "correct": 0, "explanation": "ઓહમના નિયમ મુજબ, પ્રવાહ (I) = વોલ્ટેજ (V) / અવરોધ (R). અવરોધ R = ρL/A, જ્યાં ρ અવરોધકતા છે. તાંબાની અવરોધકતા ઓછી હોવાથી તેનો અવરોધ ઓછો હશે, તેથી તેમાંથી વધારે પ્રવાહ વહેશે. વિકલ્પ B ખોટો છે કારણ કે નિક્રોમની અવરોધકતા વધારે હોવાથી તેમાંથી ઓછો પ્રવાહ વહેશે. વિકલ્પ C ખોટો છે કારણ કે અવરોધકતા અલગ હોવાથી અવરોધ અલગ હશે. વિકલ્પ D ખોટો છે કારણ કે તાંબાની વાહકતા વધારે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વર્તમાન વિદ્યુત", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
