@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - C-X બંધનો સ્વભાવ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 C-X બંધનો સ્વભાવ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "હાઇડ્રોકાર્બનમાં C-X બંધનો ધ્રુવીય સ્વભાવ નક્કી કરવા માટે નીચેનામાંથી કયો પરિબળ સૌથી મહત્વપૂર્ણ છે?", "options": ["A) X પરમાણુની વિદ્યુત ઋણતા અને કાર્બનની વિદ્યુત ઋણતા વચ્ચેનો તફાવત", "B) C-X બંધની લંબાઈ", "C) હાઇડ્રોકાર્બનની સાંદ્રતા", "D) X પરમાણુનો પરમાણુ કદ"], "correct": 0, "explanation": "C-X બંધનો ધ્રુવીય સ્વભાવ મુખ્યત્વે C અને X પરમાણુઓની વિદ્યુત ઋણતામાંના તફાવત પર આધારિત છે. જેમ વિદ્યુત ઋણતાનો તફાવત વધુ, તેમ બંધ વધુ ધ્રુવીય બને છે. બંધ લંબાઈ, સાંદ્રતા અથવા પરમાણુ કદ એ ધ્રુવીયતાને નિર્ણાયક રીતે અસર કરતા નથી.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-Cl બંધ સૌથી વધુ ધ્રુવીય હશે?", "options": ["A) CH3Cl", "B) CH2Cl2", "C) CHCl3", "D) CCl4"], "correct": 2, "explanation": "CHCl3માં, ત્રણ Cl પરમાણુઓ એક જ કાર્બન સાથે જોડાયેલા હોવાથી, કુલ વિદ્યુત ઋણતા તફાવત સૌથી વધુ હોય છે, જેના કારણે C-Cl બંધ સૌથી વધુ ધ્રુવીય બને છે. CH3Cl અને CH2Cl2માં Cl પરમાણુઓની સંખ્યા ઓછી હોવાથી ધ્રુવીયતા ઓછી હોય છે, જ્યારે CCl4 સંપૂર્ણપણે અધ્રુવીય હોય છે કારણ કે તે સમમિતી ધરાવે છે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે C-X બંધમાં X એ હેલોજન હોય, ત્યારે નીચેનામાંથી કયો ક્રમ C-X બંધની ધ્રુવીયતાનો સરળ ક્રમ દર્શાવે છે?", "options": ["A) C-I < C-Br < C-Cl < C-F", "B) C-F < C-Cl < C-Br < C-I", "C) C-Br < C-I < C-F < C-Cl", "D) C-Cl < C-F < C-Br < C-I"], "correct": 0, "explanation": "હેલોજનના કિસ્સામાં, વિદ્યુત ઋણતા નીચેના ક્રમમાં હોય છે: F > Cl > Br > I. આથી, C-X બંધની ધ્રુવીયતા પણ આ જ ક્રમમાં હશે: C-I < C-Br < C-Cl < C-F. આમ, વિકલ્પ A સરળ ક્રમ દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-O બંધ સૌથી ઓછો ધ્રુવીય હશે?", "options": ["A) CH3OH", "B) CH3OCH3", "C) CH3COOH", "D) C6H5OH"], "correct": 1, "explanation": "CH3OCH3 (ડાયમિથાઇલ ઇથર)માં, O પરમાણુ બે કાર્બન પરમાણુઓ સાથે જોડાયેલું હોય છે, જેના કારણે O પરમાણુ પરનો વિદ્યુત ઋણ ભાર વહેંચાયેલો હોય છે, પરિણામે C-O બંધ ઓછો ધ્રુવીય બને છે. અન્ય વિકલ્પોમાં, O પરમાણુ H અથવા અન્ય પરમાણુઓ સાથે જોડાયેલું હોય છે, જેના કારણે C-O બંધ વધુ ધ્રુવીય બને છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર – મૂળભૂત તત્ત્વો", "difficulty": "Hard", "num": 4}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતાને લગતું ખોટું છે?", "options": ["A) C-X બંધની ધ્રુવીયતા X પરમાણુની વિદ્યુત ઋણતાને આધીન છે.", "B) C-X બંધની ધ્રુવીયતા બંધ લંબાઈ પર આધારિત છે.", "C) C-F બંધ C-Cl બંધ કરતાં વધુ ધ્રુવીય હોય છે.", "D) C-I બંધ C-Br બંધ કરતાં ઓછો ધ્રુવીય હોય છે."], "correct": 1, "explanation": "C-X બંધની ધ્રુવીયતા મુખ્યત્વે X પરમાણુની વિદ્યુત ઋણતા પર આધારિત છે, બંધ લંબાઈ પર નહીં. આથી, વિધાન B ખોટું છે. અન્ય વિધાનો સચોટ છે: C-F બંધ C-Cl કરતાં વધુ ધ્રુવીય હોય છે (Fની વિદ્યુત ઋણતા Cl કરતાં વધુ છે), અને C-I બંધ C-Br કરતાં ઓછો ધ્રુવીય હોય છે (Iની વિદ્યુત ઋણતા Br કરતાં ઓછી છે).", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 5}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-F બંધની ધ્રુવીયતા સૌથી ઓછી હશે?", "options": ["A) CH3F", "B) CH3CH2F", "C) (CH3)3CF", "D) CF4"], "correct": 2, "explanation": "C-F બંધની ધ્રુવીયતા C અને F વચ્ચેના વિદ્યુતઋણતામાં તફાવત પર આધારિત છે. (CH3)3CFમાં, ત્રણ મિથાઇલ સમૂહો (CH3) કર્બન પર ઇલેક્ટ્રોન-દાતા પ્રભાવ પેદા કરે છે, જે C-F બંધની ધ્રુવીયતા ઘટાડે છે. CH3F અને CH3CH2Fમાં આ પ્રભાવ ઓછો હોવાથી ધ્રુવીયતા વધુ રહે છે. CF4માં ચાર F પરમાણુઓ હોવાથી C-F બંધની ધ્રુવીયતા સરવસર થાય છે, પરંતુ વ્યક્તિગત બંધની ધ્રુવીયતા (CH3)3CF કરતાં વધુ રહે છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણ: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 6}, {"question": "જ્યારે C-X બંધમાં X એ ઓક્સિજન હોય, ત્યારે નીચેનામાંથી કયો પરિબળ C-O બંધની ધ્રુવીયતાને સૌથી વધુ પ્રભાવિત કરે છે?", "options": ["A) કર્બન પરના વિદ્યુતઋણતા પ્રભાવ", "B) ઓક્સિજન પરના ઇલેક્ટ્રોન ઘનતા", "C) C-O બંધ લંબાઈ", "D) કર્બનની સંકરણ અવસ્થા"], "correct": 0, "explanation": "C-O બંધની ધ્રુવીયતા મુખ્યત્વે કર્બન અને ઓક્સિજન વચ્ચેના વિદ્યુતઋણતામાં તફાવત પર આધારિત છે. કર્બન પરના વિદ્યુતઋણતા પ્રભાવ (જેમ કે ઇલેક્ટ્રોન-દાતા અથવા ઇલેક્ટ્રોન-ગ્રાહક સમૂહો) આ તફાવતને બદલી શકે છે, જે બંધની ધ્રુવીયતાને પ્રભાવિત કરે છે. ઓક્સિજન પરના ઇલેક્ટ્રોન ઘનતા, C-O બંધ લંબાઈ, અને કર્બનની સંકરણ અવસ્થા પણ પ્રભાવિત કરે છે, પરંતુ કર્બન પરના વિદ્યુતઋણતા પ્રભાવ સૌથી મહત્વપૂર્ણ છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણ: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 7}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-Cl બંધની ધ્રુવીયતા સૌથી વધુ હશે?", "options": ["A) CH3Cl", "B) CH2Cl2", "C) CHCl3", "D) CCl4"], "correct": 2, "explanation": "C-Cl બંધની ધ્રુવીયતા કર્બન અને ક્લોરિન વચ્ચેના વિદ્યુતઋણતામાં તફાવત પર આધારિત છે. CHCl3માં, ત્રણ ક્લોરિન પરમાણુઓ કર્બન પર ઇલેક્ટ્રોન-ગ્રાહક પ્રભાવ પેદા કરે છે, જે C-Cl બંધની ધ્રુવીયતા વધારે છે. CH3Cl અને CH2Cl2માં આ પ્રભાવ ઓછો હોવાથી ધ્રુવીયતા ઓછી રહે છે. CCl4માં ચાર ક્લોરિન પરમાણુઓ હોવાથી C-Cl બંધની ધ્રુવીયતા સરવસર થાય છે, પરંતુ વ્યક્તિગત બંધની ધ્રુવીયતા CHCl3 કરતાં ઓછી રહે છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણ: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 8}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતાને લગતું સાચું નથી?", "options": ["A) C-F બંધ C-Cl બંધ કરતાં વધુ ધ્રુવીય હોય છે.", "B) C-O બંધ C-N બંધ કરતાં ઓછો ધ્રુવીય હોય છે.", "C) C-Br બંધ C-Cl બંધ કરતાં ઓછો ધ્રુવીય હોય છે.", "D) C-I બંધ C-Br બંધ કરતાં વધુ ધ્રુવીય હોય છે."], "correct": 3, "explanation": "C-F બંધ C-Cl બંધ કરતાં વધુ ધ્રુવીય હોય છે કારણ કે Fની વિદ્યુતઋણતા Cl કરતાં વધુ છે. C-O બંધ C-N બંધ કરતાં વધુ ધ્રુવીય હોય છે કારણ કે Oની વિદ્યુતઋણતા N કરતાં વધુ છે. C-Br બંધ C-Cl બંધ કરતાં ઓછો ધ્રુવીય હોય છે કારણ કે Brની વિદ્યુતઋણતા Cl કરતાં ઓછી છે. C-I બંધ C-Br બંધ કરતાં ઓછો ધ્રુવીય હોય છે કારણ કે Iની વિદ્યુતઋણતા Br કરતાં ઓછી છે, તેથી વિધાન D ખોટું છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણ: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 9}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-N બંધની ધ્રુવીયતા સૌથી ઓછી હશે?", "options": ["A) CH3NH2", "B) (CH3)2NH", "C) (CH3)3N", "D) CH3CN"], "correct": 2, "explanation": "(CH3)3Nમાં, ત્રણ મિથાઇલ સમૂહો (CH3) નાઇટ્રોજન પર ઇલેક્ટ્રોન-દાતા પ્રભાવ પેદા કરે છે, જે C-N બંધની ધ્રુવીયતા ઘટાડે છે. CH3NH2 અને (CH3)2NHમાં આ પ્રભાવ ઓછો હોવાથી ધ્રુવીયતા વધુ રહે છે. CH3CNમાં નાઇટ્રોજન સાયનો સમૂહમાં હોવાથી C-N બંધની ધ્રુવીયતા વધુ રહે છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણ: કેટલાક મૂળભૂત સિદ્ધાંત અને તકનીકો", "difficulty": "Hard", "num": 10}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-I બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે તે અલ્કાઇલ હેલાઇડની શ્રેણીમાં હોય?", "options": ["A) CH3I", "B) C2H5I", "C) (CH3)2CHI", "D) (CH3)3CI"], "correct": 3, "explanation": "C-I બંધની ધ્રુવીયતા અલ્કાઇલ સમૂહના ઇલેક્ટ્રોન-દાતા પ્રભાવ (inductive effect) દ્વારા ઘટે છે. ત્રિપરમાણ્વિક અલ્કાઇલ સમૂહ (CH3)3C- ઈલેક્ટ્રોન-દાતા પ્રભાવ સૌથી મજબૂત હોય છે, જે C-I બંધ પર ઇલેક્ટ્રોન ઘનતા વધારીને ધ્રુવીયતા ઘટાડે છે. CH3I, C2H5I, અને (CH3)2CHIમાં ઇલેક્ટ્રોન-દાતા પ્રભાવ ક્રમશઃ ઓછો હોય છે, જેથી તેમની ધ્રુવીયતા વધુ રહે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 11}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતા અને બંધ લંબાઈ વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) બંધ લંબાઈ વધતી જાય છે, ત્યારે ધ્રુવીયતા ઘટે છે", "B) બંધ લંબાઈ ઘટતી જાય છે, ત્યારે ધ્રુવીયતા વધે છે", "C) બંધ લંબાઈ અને ધ્રુવીયતા વચ્ચે કોઈ સંબંધ નથી", "D) બંધ લંબાઈ વધતી જાય છે, ત્યારે ધ્રુવીયતા વધે છે"], "correct": 1, "explanation": "C-X બંધની લંબાઈ ઘટતી જાય છે, ત્યારે X પરમાણુની વિદ્યુત ઋણતા વધુ હોય છે (ઉદા., F > Cl > Br > I), જેના કારણે C-X બંધની ધ્રુવીયતા વધે છે. ઉદાહરણ તરીકે, C-F બંધ સૌથી ટૂંકો અને સૌથી ધ્રુવીય હોય છે, જ્યારે C-I બંધ સૌથી લાંબો અને સૌથી ઓછો ધ્રુવીય હોય છે. વિકલ્પ A, C, અને D આ સંબંધને યોગ્ય રીતે વર્ણવતાં નથી.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 12}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-O બંધ સૌથી વધુ ધ્રુવીય હશે, જ્યારે તે એલ્કોહોલની શ્રેણીમાં હોય?", "options": ["A) CH3OH", "B) C2H5OH", "C) (CH3)2CHOH", "D) (CH3)3COH"], "correct": 0, "explanation": "C-O બંધની ધ્રુવીયતા અલ્કાઇલ સમૂહના ઇલેક્ટ્રોન-દાતા પ્રભાવ દ્વારા ઘટે છે. CH3OHમાં અલ્કાઇલ સમૂહનો પ્રભાવ સૌથી ઓછો હોય છે, જેથી C-O બંધ પર ઇલેક્ટ્રોન ઘનતા ઓછી રહે છે અને ધ્રુવીયતા વધુ રહે છે. (CH3)3COHમાં ત્રિપરમાણ્વિક અલ્કાઇલ સમૂહનો પ્રભાવ સૌથી મજબૂત હોય છે, જે C-O બંધની ધ્રુવીયતા ઘટાડે છે.", "ncert_ref": "Class XII - Chapter 11: એલ્કોહોલ, ફિનોલ અને ઈથર", "difficulty": "Hard", "num": 13}, {"question": "નીચેનામાંથી કયું વિધાન C-N બંધની ધ્રુવીયતાને લગતું સાચું છે?", "options": ["A) C-N બંધની ધ્રુવીયતા C-O બંધ કરતાં વધુ હોય છે", "B) C-N બંધની ધ્રુવીયતા C-F બંધ કરતાં ઓછી હોય છે", "C) C-N બંધની ધ્રુવીયતા C-Cl બંધ કરતાં વધુ હોય છે", "D) C-N બંધની ધ્રુવીયતા C-Br બંધ કરતાં ઓછી હોય છે"], "correct": 1, "explanation": "C-N બંધની ધ્રુવીયતા નાઇટ્રોજનની વિદ્યુત ઋણતા (3.0) અને કાર્બનની વિદ્યુત ઋણતા (2.5) વચ્ચેના તફાવત પર આધારિત છે. C-F બંધની ધ્રુવીયતા સૌથી વધુ હોય છે (Fની વિદ્યુત ઋણતા 4.0), જ્યારે C-N બંધની ધ્રુવીયતા C-F કરતાં ઓછી હોય છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે C-N બંધની ધ્રુવીયતા C-O, C-Cl, અને C-Br કરતાં ઓછી હોય છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન", "difficulty": "Hard", "num": 14}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-X બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે X એ હેલોજન હોય અને યૌગિક એરોમેટિક હોય?", "options": ["A) ક્લોરોબેન્ઝીન", "B) બ્રોમોબેન્ઝીન", "C) આયોડોબેન્ઝીન", "D) ફ્લુઓરોબેન્ઝીન"], "correct": 2, "explanation": "એરોમેટિક યૌગિકોમાં, C-X બંધની ધ્રુવીયતા હેલોજનની વિદ્યુત ઋણતા પર આધારિત હોય છે. આયોડિનની વિદ્યુત ઋણતા (2.5) સૌથી ઓછી હોય છે, જેથી C-I બંધની ધ્રુવીયતા સૌથી ઓછી હશે. ફ્લુઓરોબેન્ઝીનમાં C-F બંધ સૌથી ધ્રુવીય હશે, જ્યારે ક્લોરોબેન્ઝીન અને બ્રોમોબેન્ઝીનમાં C-Cl અને C-Br બંધની ધ્રુવીયતા ક્રમશઃ ઘટતી જશે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 15}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-O બંધની ધ્રુવીયતા સૌથી વધુ હશે, જ્યારે તે ફિનોલની વ્યુત્પન્નમાં હોય?", "options": ["A) મિથેનોલ", "B) પિક્રિક એસિડ", "C) એનિસોલ", "D) બેનઝાઇલ અલ્કોહોલ"], "correct": 1, "explanation": "પિક્રિક એસિડમાં, O ના ત્રણ નાઇટ્રો સમૂહોની હાજરીથી C-O બંધ પર ઇલેક્ટ્રોન-આકર્ષક પ્રભાવ વધે છે, જેના કારણે ધ્રુવીયતા સૌથી વધુ હોય છે. મિથેનોલમાં સરળ અલ્કાઇલ સમૂહ હોવાથી ધ્રુવીયતા ઓછી હોય છે. એનિસોલમાં મિથોક્સી સમૂહ બેન્ઝીન વલય સાથે જોડાયેલ હોવાથી ધ્રુવીયતા મર્યાદિત હોય છે. બેનઝાઇલ અલ્કોહોલમાં બેન્ઝીલ સમૂહના કારણે ધ્રુવીયતા મિથેનોલ કરતાં થોડી વધુ હોય છે, પરંતુ પિક્રિક એસિડ જેટલી નહીં.", "ncert_ref": "Class XII - Chapter 11: એલ્કોહોલ, ફિનોલ અને ઇથર", "difficulty": "Hard", "num": 16}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-N બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે તે એમાઇનની વ્યુત્પન્નમાં હોય?", "options": ["A) મિથાઇલએમાઇન", "B) એનિલિન", "C) ડાઇમિથાઇલએમાઇન", "D) એસિટામાઇડ"], "correct": 2, "explanation": "ડાઇમિથાઇલએમાઇનમાં, બે મિથાઇલ સમૂહોની હાજરીથી N પર ઇલેક્ટ્રોન-દાતા પ્રભાવ વધે છે, જેના કારણે C-N બંધની ધ્રુવીયતા ઓછી થાય છે. મિથાઇલએમાઇનમાં એક મિથાઇલ સમૂહ હોવાથી ધ્રુવીયતા થોડી વધુ હોય છે. એનિલિનમાં બેન્ઝીન વલયના કારણે N પર ઇલેક્ટ્રોન ઘનતા ઓછી હોવાથી ધ્રુવીયતા વધુ હોય છે. એસિટામાઇડમાં કાર્બોનિલ સમૂહના કારણે C-N બંધની ધ્રુવીયતા સૌથી વધુ હોય છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન", "difficulty": "Hard", "num": 17}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતા અને બંધ એન્થાલ્પી વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) ધ્રુવીયતા વધતાં બંધ એન્થાલ્પી ઘટે છે", "B) ધ્રુવીયતા ઘટતાં બંધ એન્થાલ્પી વધે છે", "C) ધ્રુવીયતા અને બંધ એન્થાલ્પી વચ્ચે કોઈ સંબંધ નથી", "D) ધ્રુવીયતા વધતાં બંધ એન્થાલ્પી વધે છે"], "correct": 0, "explanation": "ધ્રુવીયતા વધતાં બંધ એન્થાલ્પી ઘટે છે કારણ કે ધ્રુવીય બંધમાં ઇલેક્ટ્રોન વિતરણ અસમાન હોવાથી બંધ નબળો બને છે. બંધ એન્થાલ્પી એ બંધની મજબૂતાઈનું માપન છે, અને ધ્રુવીય બંધ ઓછી મજબૂતાઈ ધરાવે છે. આથી, ધ્રુવીયતા વધતાં બંધ એન્થાલ્પી ઘટે છે. બાકીના વિકલ્પો આ સંબંધને યોગ્ય રીતે વર્ણવતા નથી.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 18}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-Cl બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે તે એરોમેટિક વલય સાથે જોડાયેલ હોય?", "options": ["A) ક્લોરોબેન્ઝીન", "B) ઓ-ક્લોરોટોલ્યુઇન", "C) પ-ક્લોરોનાઇટ્રોબેન્ઝીન", "D) બેનઝાઇલ ક્લોરાઇડ"], "correct": 1, "explanation": "ઓ-ક્લોરોટોલ્યુઇનમાં, મિથાઇલ સમૂહના ઇલેક્ટ્રોન-દાતા પ્રભાવના કારણે ક્લોરિન પર ઇલેક્ટ્રોન ઘનતા વધે છે, જેના કારણે C-Cl બંધની ધ્રુવીયતા ઓછી થાય છે. ક્લોરોબેન્ઝીનમાં ક્લોરિન સીધા બેન્ઝીન વલય સાથે જોડાયેલ હોવાથી ધ્રુવીયતા થોડી વધુ હોય છે. પ-ક્લોરોનાઇટ્રોબેન્ઝીનમાં નાઇટ્રો સમૂહના ઇલેક્ટ્રોન-આકર્ષક પ્રભાવના કારણે C-Cl બંધની ધ્રુવીયતા સૌથી વધુ હોય છે. બેનઝાઇલ ક્લોરાઇડમાં ક્લોરિન બેન્ઝીલ સમૂહ સાથે જોડાયેલ હોવાથી ધ્રુવીયતા મર્યાદિત હોય છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 19}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતા અને આણ્વીય ધ્રુવીયતા વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને સીધા પ્રમાણમાં હોય છે", "B) C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને વ્યસ્ત પ્રમાણમાં હોય છે", "C) C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને કોઈ પ્રમાણમાં નહીં હોય", "D) C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને આંશિક પ્રમાણમાં હોય છે"], "correct": 3, "explanation": "C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને આંશિક પ્રમાણમાં હોય છે કારણ કે આણ્વીય ધ્રુવીયતા બંધ ધ્રુવીયતા ઉપરાંત આણ્વીય જ્યોમેટ્રી અને અન્ય બંધોના પ્રભાવ પર પણ આધારિત હોય છે. આથી, C-X બંધની ધ્રુવીયતા આણ્વીય ધ્રુવીયતાને સીધા અથવા વ્યસ્ત પ્રમાણમાં નહીં હોય, પરંતુ આંશિક પ્રમાણમાં હોય છે. બાકીના વિકલ્પો આ સંબંધને યોગ્ય રીતે વર્ણવતા નથી.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 20}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-O બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે તે એસ્ટર સમૂહમાં હોય?", "options": ["A) મિથાઇલ એસિટેટ", "B) ઇથાઇલ બેન્ઝોએટ", "C) ફિનાઇલ એસિટેટ", "D) વિનાઇલ એસિટેટ"], "correct": 2, "explanation": "ફિનાઇલ એસિટેટમાં, ફિનાઇલ સમૂહ (C6H5-) એલેક્ટ્રોન-આકર્ષક હોવાથી C-O બંધ પરનો ઇલેક્ટ્રોન ઘનતાનો વિતરણ સંતુલિત થાય છે, જેથી ધ્રુવીયતા ઘટે છે. મિથાઇલ એસિટેટ અને ઇથાઇલ બેન્ઝોએટમાં એલ્કાઇલ સમૂહ એલેક્ટ્રોન-દાતા હોવાથી C-O બંધની ધ્રુવીયતા વધુ રહે છે. વિનાઇલ એસિટેટમાં વિનાઇલ સમૂહ પણ એલેક્ટ્રોન-આકર્ષક હોવા છતાં ફિનાઇલ જેટલું પ્રભાવી નથી, જેથી ધ્રુવીયતા ફિનાઇલ એસિટેટ કરતાં વધુ રહે છે.", "ncert_ref": "Class XII - Chapter 12: એલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "difficulty": "Hard", "num": 21}, {"question": "નીચેનામાંથી કયા યૌગિકમાં C-N બંધની ધ્રુવીયતા સૌથી વધુ હશે, જ્યારે તે એમાઇડ સમૂહમાં હોય?", "options": ["A) એસિટામાઇડ", "B) બેન્ઝામાઇડ", "C) ફોર્મામાઇડ", "D) પ્રોપિયોનામાઇડ"], "correct": 1, "explanation": "બેન્ઝામાઇડમાં, બેન્ઝીન વલય એલેક્ટ્રોન-આકર્ષક હોવાથી C-N બંધ પરનો ઇલેક્ટ્રોન ઘનતાનો વિતરણ અસંતુલિત થાય છે, જેથી ધ્રુવીયતા વધે છે. એસિટામાઇડ, ફોર્મામાઇડ અને પ્રોપિયોનામાઇડમાં એલ્કાઇલ સમૂહ એલેક્ટ્રોન-દાતા હોવાથી C-N બંધની ધ્રુવીયતા ઓછી રહે છે.", "ncert_ref": "Class XII - Chapter 12: એલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "difficulty": "Hard", "num": 22}, {"question": "નીચેનામાંથી કયા સંયોજનમાં C-X બંધની ધ્રુવીયતા સૌથી વધુ હશે, જ્યારે X એ સલ્ફર (S) હોય અને સંયોજનમાં કાર્બન sp² સંકરણ ધરાવતો હોય?", "options": ["A) થાયોફિન (C₄H₄S)", "B) ડાઇમિથાઇલ સલ્ફાઇડ (CH₃-S-CH₃)", "C) થાયોફિનોલ (C₆H₅SH)", "D) ડાઇમિથાઇલ સલ્ફોક્સાઇડ (CH₃-SO-CH₃)"], "correct": 3, "explanation": "સાચો જવાબ D) ડાઇમિથાઇલ સલ્ફોક્સાઇડ (CH₃-SO-CH₃) છે. કારણ કે આ સંયોજનમાં સલ્ફર પરમાણુ ઓક્સિજન સાથે જોડાયેલો હોવાથી તેની વિદ્યુતઋણતા વધે છે, જે C-S બંધની ધ્રુવીયતા વધારે છે. વધુમાં, કાર્બન sp² સંકરણ ધરાવતો હોવાથી બંધમાં વધુ s-ગુણધર્મ આવે છે, જે ધ્રુવીયતા વધારે છે. A) થાયોફિનમાં સલ્ફર એરોમેટિક રિંગનો ભાગ હોવાથી તેની ધ્રુવીયતા ઓછી હોય છે. B) ડાઇમિથાઇલ સલ્ફાઇડમાં સલ્ફર sp³ કાર્બન સાથે જોડાયેલો હોવાથી ધ્રુવીયતા ઓછી હોય છે. C) થાયોફિનોલમાં સલ્ફર sp² કાર્બન સાથે જોડાયેલો હોવા છતાં ઓક્સિજનની ગેરહાજરીને કારણે ધ્રુવીયતા ઓછી હોય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "difficulty": "Hard", "num": 23}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધની ધ્રુવીયતા અને સંયોજનની પ્રતિક્રિયાત્મકતા વચ્ચેના સંબંધને લગતું ખોટું છે, જ્યારે X એ હેલોજન ન હોય?", "options": ["A) C-O બંધની વધુ ધ્રુવીયતા કાર્બોનિલ સંયોજનોની ન્યુક્લિયોફિલિક પ્રતિક્રિયાત્મકતા વધારે છે.", "B) C-N બંધની ધ્રુવીયતા એમાઇડ સંયોજનોની પ્રતિક્રિયાત્મકતા ઘટાડે છે કારણ કે નાઇટ્રોજન પરનું અબંધકા ઇલેક્ટ્રોન યુગ્મ રેસોનન્સમાં ભાગ લે છે.", "C) C-S બંધની ધ્રુવીયતા થાયોએસ્ટર સંયોજનોની પ્રતિક્રિયાત્મકતા વધારે છે કારણ કે સલ્ફર પરમાણુ મોટો હોવાથી તેની ધ્રુવીયતા વધુ હોય છે.", "D) C-P બંધની ધ્રુવીયતા ફોસ્ફાઇન સંયોજનોની પ્રતિક્રિયાત્મકતા વધારે છે કારણ કે ફોસ્ફરસની વિદ્યુતઋણતા ઓછી હોવાથી કાર્બન પર આંશિક ધનભાર ઉત્પન્ન થાય છે."], "correct": 2, "explanation": "સાચો જવાબ C) છે. કારણ કે C-S બંધની ધ્રુવીયતા થાયોએસ્ટર સંયોજનોની પ્રતિક્રિયાત્મકતા વધારે છે એ વિધાન ખોટું છે. સલ્ફર પરમાણુ મોટો હોવાથી તેની ધ્રુવીયતા ઓછી હોય છે, પરંતુ તેની મોટી કદને કારણે તે વધુ ધ્રુવીભૂત થઈ શકે છે, જે પ્રતિક્રિયાત્મકતા વધારે છે. A) સાચું છે કારણ કે C-O બંધની વધુ ધ્રુવીયતા કાર્બોનિલ કાર્બન પર આંશિક ધનભાર ઉત્પન્ન કરે છે, જે ન્યુક્લિયોફિલિક પ્રતિક્રિયા માટે અનુકૂળ છે. B) સાચું છે કારણ કે એમાઇડમાં નાઇટ્રોજન પરનું અબંધકા ઇલેક્ટ્રોન યુગ્મ રેસોનન્સમાં ભાગ લે છે, જે પ્રતિક્રિયાત્મકતા ઘટાડે છે. D) સાચું છે કારણ કે ફોસ્ફરસની વિદ્યુતઋણતા ઓછી હોવાથી કાર્બન પર આંશિક ધનભાર ઉત્પન્ન થાય છે, જે પ્રતિક્રિયાત્મકતા વધારે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ્સ", "difficulty": "Hard", "num": 24}, {"question": "એક સંયોજનમાં C-X બંધની ધ્રુવીયતા નીચેનામાંથી કયા પરિબળો પર આધાર રાખે છે?\n(i) X ની વિદ્યુતઋણતા\n(ii) કાર્બન પરમાણુનું સંકરણ\n(iii) સંયોજનની ભૌમિતિક રચના\n(iv) X પરમાણુનું કદ\n\nનીચેનામાંથી સાચો વિકલ્પ પસંદ કરો:", "options": ["A) માત્ર (i) અને (ii)", "B) માત્ર (i), (ii) અને (iii)", "C) માત્ર (i), (ii) અને (iv)", "D) (i), (ii), (iii) અને (iv)"], "correct": 3, "explanation": "સાચો જવાબ D) (i), (ii), (iii) અને (iv) છે. કારણ કે C-X બંધની ધ્રુવીયતા નીચેના પરિબળો પર આધાર રાખે છે:\n(i) X ની વિદ્યુતઋણતા: વધુ વિદ્યુતઋણતા ધરાવતા પરમાણુ સાથેનો બંધ વધુ ધ્રુવીય હોય છે.\n(ii) કાર્બન પરમાણુનું સંકરણ: sp સંકરણ ધરાવતા કાર્બન સાથેનો બંધ વધુ ધ્રુવીય હોય છે કારણ કે તેમાં વધુ s-ગુણધર્મ હોય છે.\n(iii) સંયોજનની ભૌમિતિક રચના: રેખીય અથવા સમતલીય રચના ધરાવતા સંયોજનોમાં બંધની ધ્રુવીયતા પર અસર થઈ શકે છે.\n(iv) X પરમાણુનું કદ: મોટા પરમાણુ સાથેનો બંધ વધુ ધ્રુવીભૂત થઈ શકે છે કારણ કે ઇલેક્ટ્રોન વાદળ વધુ સરળતાથી વિકૃત થઈ શકે છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 4: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 25}, {"question": "નીચેનામાંથી કયા સંયોજનમાં C-X બંધનો સ્વભાવ સૌથી વધુ આયનીય (ionic) હશે, જ્યારે X એ હેલોજન હોય અને કાર્બન sp² સંકરણ ધરાવે છે?", "options": ["A) ક્લોરોબેન્ઝીન (C₆H₅Cl)", "B) વિનાઇલ ક્લોરાઇડ (CH₂=CHCl)", "C) ક્લોરોએસિટિલીન (HC≡CCl)", "D) મિથાઇલ ક્લોરાઇડ (CH₃Cl)"], "correct": 2, "explanation": "ક્લોરોએસિટિલીન (HC≡CCl)માં કાર્બન sp સંકરણ ધરાવે છે, જેના કારણે C-Cl બંધમાં s-ચરિત્ર વધુ હોવાથી બંધ વધુ ધ્રુવીય અને આયનીય સ્વભાવ ધરાવે છે. વિનાઇલ ક્લોરાઇડમાં sp² સંકરણ હોવાથી ધ્રુવીયતા ક્લોરોબેન્ઝીન કરતાં વધુ હોય છે, પરંતુ sp સંકરણ કરતાં ઓછી. ક્લોરોબેન્ઝીનમાં રેઝોનન્સના કારણે C-Cl બંધની ધ્રુવીયતા ઘટે છે. મિથાઇલ ક્લોરાઇડમાં sp³ સંકરણ હોવાથી ધ્રુવીયતા સૌથી ઓછી હોય છે.", "ncert_ref": "Class XII - Chapter 10: હેલોઅલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 26}, {"question": "જ્યારે C-X બંધમાં X એ ઓક્સિજન હોય, ત્યારે નીચેનામાંથી કયા સંયોજનમાં C-O બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે કાર્બન sp³ સંકરણ ધરાવે છે અને X પર +I પ્રભાવ હાજર હોય?", "options": ["A) મિથેનોલ (CH₃OH)", "B) ટર્શિયરી બ્યુટાઇલ અલ્કોહોલ ((CH₃)₃COH)", "C) ઇથાઇલ ઇથર (CH₃CH₂OCH₂CH₃)", "D) ફિનોલ (C₆H₅OH)"], "correct": 2, "explanation": "ઇથાઇલ ઇથર (CH₃CH₂OCH₂CH₃)માં C-O બંધમાં ઓક્સિજન બે એલ્કાઇલ સમૂહો સાથે જોડાયેલ છે, જેના કારણે +I પ્રભાવના કારણે ઓક્સિજન પર ઇલેક્ટ્રોન ઘનતા વધે છે, પરિણામે C-O બંધની ધ્રુવીયતા ઘટે છે. મિથેનોલ અને ટર્શિયરી બ્યુટાઇલ અલ્કોહોલમાં OH સમૂહ હાજર હોવાથી ધ્રુવીયતા વધુ હોય છે. ફિનોલમાં રેઝોનન્સના કારણે C-O બંધની ધ્રુવીયતા વધુ હોય છે.", "ncert_ref": "Class XII - Chapter 11: એલ્કોહોલ, ફિનોલ અને ઇથર", "difficulty": "Hard", "num": 27}, {"question": "નીચેનામાંથી કયા સંયોજનમાં C-N બંધની ધ્રુવીયતા સૌથી વધુ હશે, જ્યારે નાઇટ્રોજન પર -I પ્રભાવ હાજર હોય અને કાર્બન sp² સંકરણ ધરાવે?", "options": ["A) એનિલિન (C₆H₅NH₂)", "B) નાઇટ્રોબેન્ઝીન (C₆H₅NO₂)", "C) એસિટામાઇડ (CH₃CONH₂)", "D) મિથાઇલએમાઇન (CH₃NH₂)"], "correct": 2, "explanation": "એસિટામાઇડ (CH₃CONH₂)માં C-N બંધમાં કાર્બન sp² સંકરણ ધરાવે છે અને નાઇટ્રોજન પર કાર્બોનિલ સમૂહ (C=O)ના -I પ્રભાવના કારણે C-N બંધની ધ્રુવીયતા સૌથી વધુ હોય છે. એનિલિન અને મિથાઇલએમાઇનમાં +I પ્રભાવ હાજર હોવાથી ધ્રુવીયતા ઓછી હોય છે. નાઇટ્રોબેન્ઝીનમાં N-O બંધ હાજર છે, C-N બંધ નથી.", "ncert_ref": "Class XII - Chapter 12: એલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "difficulty": "Hard", "num": 28}, {"question": "નીચેનામાંથી કયા સંયોજનમાં C-X બંધનો સ્વભાવ સૌથી વધુ સહસંયોજક (covalent) હશે, જ્યારે X એ હેલોજન હોય અને કાર્બન sp² સંકરણમાં હોય?", "options": ["A) ક્લોરોબેન્ઝીન (C₆H₅Cl)", "B) વિનાઇલ ક્લોરાઇડ (CH₂=CHCl)", "C) ક્લોરોએથીન (CH≡CCl)", "D) મિથાઇલ ક્લોરાઇડ (CH₃Cl)"], "correct": 2, "explanation": "સહસંયોજક સ્વભાવ નક્કી કરવા માટે બંધની ધ્રુવીયતા અને કાર્બનની વિદ્યુતઋણતા સાથે Xની વિદ્યુતઋણતાનો તફાવત મહત્વનો છે. sp² સંકરણ કરતાં sp સંકરણમાં કાર્બનની વિદ્યુતઋણતા વધુ હોય છે, જેથી C-X બંધમાં વિદ્યુતઋણતાનો તફાવત ઓછો થાય છે અને બંધ વધુ સહસંયોજક બને છે. ક્લોરોએથીન (CH≡CCl)માં કાર્બન sp સંકરણમાં છે, જેથી C-Cl બંધ સૌથી વધુ સહસંયોજક હશે. ક્લોરોબેન્ઝીન અને વિનાઇલ ક્લોરાઇડમાં કાર્બન sp² સંકરણમાં છે, જ્યારે મિથાઇલ ક્લોરાઇડમાં કાર્બન sp³ સંકરણમાં છે, જેથી તેમના C-Cl બંધો ક્લોરોએથીન કરતાં ઓછા સહસંયોજક હશે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 29}, {"question": "નીચેનામાંથી કયું વિધાન C-X બંધના આયનીય સ્વભાવ વિશે ખોટું છે, જ્યારે X એ ઓક્સિજન હોય?", "options": ["A) C-O બંધની આયનીયતા C-O બંધ લંબાઈ સાથે સીધો સંબંધ ધરાવે છે.", "B) ફિનોલમાં C-O બંધ એલ્કોહોલ કરતાં વધુ આયનીય સ્વભાવ ધરાવે છે.", "C) C-O બંધની આયનીયતા ઓક્સિજન પરના આંશિક ઋણ ભાર પર આધાર રાખે છે.", "D) કાર્બોક્સિલિક એસિડમાં C=O બંધ કરતાં C-O બંધ ઓછો આયનીય હોય છે."], "correct": 0, "explanation": "C-O બંધની આયનીયતા બંધ લંબાઈ સાથે વ્યસ્ત સંબંધ ધરાવે છે, નહીં કે સીધો. બંધ લંબાઈ વધે ત્યારે આયનીય સ્વભાવ ઘટે છે. ફિનોલમાં ઓક્સિજન સાથે જોડાયેલા કાર્બન sp² સંકરણમાં હોય છે, જેથી C-O બંધ એલ્કોહોલ (sp³) કરતાં વધુ આયનીય સ્વભાવ ધરાવે છે. C-O બંધની આયનીયતા ઓક્સિજન પરના આંશિક ઋણ ભાર પર આધાર રાખે છે, અને કાર્બોક્સિલિક એસિડમાં C=O બંધ કરતાં C-O બંધ ઓછો આયનીય હોય છે કારણ કે C=O બંધમાં ઓક્સિજન પર વધુ ઋણ ભાર હોય છે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
