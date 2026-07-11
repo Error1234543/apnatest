@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - વિદ્યુતવિભાજ્ય કોષ અને વિદ્યુતવિભાજન</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 વિદ્યુતવિભાજ્ય કોષ અને વિદ્યુતવિભાજન</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "વિદ્યુતવિભાજન પ્રક્રિયા દરમિયાન, જ્યારે કોપર સલ્ફેટના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) ઓક્સિજન ગેસ", "B) કોપર ધાતુ", "C) હાઇડ્રોજન ગેસ", "D) સલ્ફર ડાયોક્સાઇડ ગેસ"], "correct": 0, "explanation": "કોપર સલ્ફેટ (CuSO₄)ના જલીય દ્રાવણના વિદ્યુતવિભાજન દરમિયાન, એનોડ પર OH⁻ આયનનું ઓક્સિડેશન થાય છે, જેના પરિણામે ઓક્સિજન ગેસ મુક્ત થાય છે. કોપર ધાતુ કેથોડ પર મુક્ત થાય છે, હાઇડ્રોજન ગેસ કોપર સલ્ફેટના દ્રાવણમાંથી મુક્ત થતો નથી, અને સલ્ફર ડાયોક્સાઇડ ગેસ આ પ્રક્રિયામાં ઉત્પન્ન થતો નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 1}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સિલ્વર નાઇટ્રેટ (AgNO₃)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ જમા થાય છે?", "options": ["A) સિલ્વર ધાતુ", "B) નાઇટ્રોજન ગેસ", "C) હાઇડ્રોજન ગેસ", "D) ઓક્સિજન ગેસ"], "correct": 0, "explanation": "સિલ્વર નાઇટ્રેટના દ્રાવણમાં, Ag⁺ આયન કેથોડ તરફ ગતિ કરે છે અને ત્યાં રિડક્શન પામી સિલ્વર ધાતુ રૂપે જમા થાય છે. નાઇટ્રોજન ગેસ, હાઇડ્રોજન ગેસ અને ઓક્સિજન ગેસ આ પ્રક્રિયામાં કેથોડ પર ઉત્પન્ન થતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 2}, {"question": "વિદ્યુતવિભાજન દરમિયાન, જ્યારે સોડિયમ ક્લોરાઇડ (NaCl)ના ગલિત અવસ્થાનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) સોડિયમ ધાતુ", "B) ક્લોરિન ગેસ", "C) હાઇડ્રોજન ગેસ", "D) ઓક્સિજન ગેસ"], "correct": 1, "explanation": "સોડિયમ ક્લોરાઇડના ગલિત અવસ્થાના વિદ્યુતવિભાજન દરમિયાન, Cl⁻ આયન એનોડ પર ઓક્સિડેશન પામી ક્લોરિન ગેસ મુક્ત થાય છે. સોડિયમ ધાતુ કેથોડ પર મુક્ત થાય છે, જ્યારે હાઇડ્રોજન અને ઓક્સિજન ગેસ આ પ્રક્રિયામાં ઉત્પન્ન થતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 3}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ આયોડાઇડ (KI)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) પોટેશિયમ ધાતુ", "B) આયોડિન", "C) હાઇડ્રોજન ગેસ", "D) ઓક્સિજન ગેસ"], "correct": 1, "explanation": "પોટેશિયમ આયોડાઇડના જલીય દ્રાવણના વિદ્યુતવિભાજન દરમિયાન, I⁻ આયન એનોડ પર ઓક્સિડેશન પામી આયોડિન મુક્ત થાય છે. પોટેશિયમ ધાતુ કેથોડ પર મુક્ત થતો નથી, અને હાઇડ્રોજન ગેસ અને ઓક્સિજન ગેસ આ પ્રક્રિયામાં એનોડ પર ઉત્પન્ન થતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 4}, {"question": "વિદ્યુતવિભાજન પ્રક્રિયા દરમિયાન, જ્યારે મેગ્નેશિયમ સલ્ફેટ (MgSO₄)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) મેગ્નેશિયમ ધાતુ", "B) હાઇડ્રોજન ગેસ", "C) ઓક્સિજન ગેસ", "D) સલ્ફર"], "correct": 1, "explanation": "મેગ્નેશિયમ સલ્ફેટના જલીય દ્રાવણના વિદ્યુતવિભાજન દરમિયાન, H⁺ આયન (પાણીના આયનીકરણથી) કેથોડ પર રિડક્શન પામી હાઇડ્રોજન ગેસ મુક્ત થાય છે. મેગ્નેશિયમ ધાતુ કેથોડ પર મુક્ત થતો નથી કારણ કે પાણીના H⁺ આયનની રિડક્શન પોટેન્શિયલ મેગ્નેશિયમ કરતાં ઓછી હોય છે. ઓક્સિજન ગેસ અને સલ્ફર આ પ્રક્રિયામાં કેથોડ પર ઉત્પન્ન થતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 5}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે કેલ્શિયમ ક્લોરાઇડ (CaCl2)ના ગલિત દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) ક્લોરિન ગેસ (Cl2)", "B) કેલ્શિયમ ધાતુ (Ca)", "C) ઓક્સિજન ગેસ (O2)", "D) હાઇડ્રોજન ગેસ (H2)"], "correct": 0, "explanation": "ગલિત CaCl2ના વિદ્યુતવિભાજન દરમિયાન, Cl- આયન એનોડ પર જાય છે અને ઇલેક્ટ્રોન ગુમાવીને Cl2 ગેસ મુક્ત થાય છે. કેલ્શિયમ ધાતુ કેથોડ પર મુક્ત થાય છે, ઓક્સિજન અને હાઇડ્રોજન ગેસ આ પ્રક્રિયામાં ઉત્પન્ન થતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 6}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) સોડિયમ ધાતુ (Na)", "B) હાઇડ્રોક્સાઇડ આયન (OH-)", "C) હાઇડ્રોજન ગેસ (H2)", "D) ઓક્સિજન ગેસ (O2)"], "correct": 2, "explanation": "NaOHના જલીય દ્રાવણમાં, H2Oના વિભાજનથી કેથોડ પર H+ આયન ઇલેક્ટ્રોન મેળવીને H2 ગેસ મુક્ત થાય છે. સોડિયમ ધાતુ જલીય દ્રાવણમાં મુક્ત થતી નથી, કારણ કે પાણીના વિભાજનની પ્રક્રિયા પ્રબળ હોય છે. ઓક્સિજન ગેસ એનોડ પર મુક્ત થાય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 7}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે એલ્યુમિનિયમ ઓક્સાઇડ (Al2O3)ના ગલિત દ્રાવણમાં ક્રાયોલાઇટ (Na3AlF6) ઉમેરીને વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) એલ્યુમિનિયમ ધાતુ (Al)", "B) સોડિયમ ધાતુ (Na)", "C) ઓક્સિજન ગેસ (O2)", "D) ફ્લોરિન ગેસ (F2)"], "correct": 0, "explanation": "Al2O3ના ગલિત દ્રાવણમાં ક્રાયોલાઇટ ઉમેરવાથી દ્રાવણની વિદ્યુતવાહકતા વધે છે. કેથોડ પર Al3+ આયન ઇલેક્ટ્રોન મેળવીને એલ્યુમિનિયમ ધાતુ મુક્ત થાય છે. સોડિયમ ધાતુ મુક્ત થતી નથી, કારણ કે Al3+ આયનની વિદ્યુતધન ક્રમમાં સોડિયમ કરતાં વધુ પ્રબળતા હોય છે. ઓક્સિજન અને ફ્લોરિન ગેસ એનોડ પર મુક્ત થાય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 8}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ સલ્ફેટ (K2SO4)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) પોટેશિયમ ધાતુ (K)", "B) સલ્ફર ડાયોક્સાઇડ (SO2)", "C) ઓક્સિજન ગેસ (O2)", "D) હાઇડ્રોજન ગેસ (H2)"], "correct": 2, "explanation": "K2SO4ના જલીય દ્રાવણમાં, પાણીના વિભાજનથી એનોડ પર OH- આયન ઇલેક્ટ્રોન ગુમાવીને O2 ગેસ મુક્ત થાય છે. પોટેશિયમ ધાતુ કેથોડ પર મુક્ત થતી નથી, કારણ કે પાણીના વિભાજનની પ્રક્રિયા પ્રબળ હોય છે. સલ્ફર ડાયોક્સાઇડ અને હાઇડ્રોજન ગેસ આ પ્રક્રિયામાં ઉત્પન્ન થતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 9}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે મેગ્નેશિયમ ક્લોરાઇડ (MgCl2)ના ગલિત દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) ક્લોરિન ગેસ (Cl2)", "B) મેગ્નેશિયમ ધાતુ (Mg)", "C) ઓક્સિજન ગેસ (O2)", "D) હાઇડ્રોજન ગેસ (H2)"], "correct": 1, "explanation": "ગલિત MgCl2ના વિદ્યુતવિભાજન દરમિયાન, Mg2+ આયન કેથોડ પર જાય છે અને ઇલેક્ટ્રોન મેળવીને Mg ધાતુ મુક્ત થાય છે. ક્લોરિન ગેસ એનોડ પર મુક્ત થાય છે, ઓક્સિજન અને હાઇડ્રોજન ગેસ આ પ્રક્રિયામાં ઉત્પન્ન થતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 10}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે કોપર (II) ક્લોરાઇડ (CuCl₂)ના ગલિત દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) ક્લોરિન ગેસ (Cl₂)", "B) કોપર ધાતુ (Cu)", "C) ઓક્સિજન ગેસ (O₂)", "D) હાઇડ્રોજન ગેસ (H₂)"], "correct": 0, "explanation": "કોપર (II) ક્લોરાઇડના ગલિત દ્રાવણના વિદ્યુતવિભાજન દરમિયાન, એનોડ પર ક્લોરાઇડ આયન (Cl⁻) ઓક્સિડાઇઝ થઈને ક્લોરિન ગેસ (Cl₂) મુક્ત થાય છે. કોપર ધાતુ (Cu) કેથોડ પર મુક્ત થાય છે, જ્યારે ઓક્સિજન અને હાઇડ્રોજન ગેસ આ દ્રાવણમાં હાજર ન હોવાથી મુક્ત થતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 11}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ એસિટેટ (CH₃COONa)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) સોડિયમ ધાતુ (Na)", "B) હાઇડ્રોજન ગેસ (H₂)", "C) એસિટેટ આયન (CH₃COO⁻)", "D) કાર્બન ડાયોક્સાઇડ (CO₂)"], "correct": 1, "explanation": "સોડિયમ એસિટેટના જલીય દ્રાવણમાં, સોડિયમ આયન (Na⁺) અને એસિટેટ આયન (CH₃COO⁻) હાજર હોય છે. કેથોડ પર, હાઇડ્રોજન આયન (H⁺) (પાણીમાંથી) રિડક્શન પામીને હાઇડ્રોજન ગેસ (H₂) મુક્ત થાય છે. સોડિયમ ધાતુ પાણી સાથે પ્રક્રિયા કરે છે, એસિટેટ આયન કેથોડ પર મુક્ત થતું નથી, અને કાર્બન ડાયોક્સાઇડ એનોડ પર મુક્ત થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 12}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે એમોનિયમ ક્લોરાઇડ (NH₄Cl)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) એમોનિયા ગેસ (NH₃)", "B) નાઇટ્રોજન ગેસ (N₂)", "C) ક્લોરિન ગેસ (Cl₂)", "D) હાઇડ્રોજન ગેસ (H₂)"], "correct": 2, "explanation": "એમોનિયમ ક્લોરાઇડના જલીય દ્રાવણમાં, એમોનિયમ આયન (NH₄⁺) અને ક્લોરાઇડ આયન (Cl⁻) હાજર હોય છે. એનોડ પર, ક્લોરાઇડ આયન (Cl⁻) ઓક્સિડાઇઝ થઈને ક્લોરિન ગેસ (Cl₂) મુક્ત થાય છે. એમોનિયા ગેસ અને નાઇટ્રોજન ગેસ એનોડ પર મુક્ત થતાં નથી, જ્યારે હાઇડ્રોજન ગેસ કેથોડ પર મુક્ત થાય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 13}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ બ્રોમાઇડ (KBr)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) પોટેશિયમ ધાતુ (K)", "B) બ્રોમિન ગેસ (Br₂)", "C) હાઇડ્રોજન ગેસ (H₂)", "D) ઓક્સિજન ગેસ (O₂)"], "correct": 2, "explanation": "પોટેશિયમ બ્રોમાઇડના જલીય દ્રાવણમાં, પોટેશિયમ આયન (K⁺) અને બ્રોમાઇડ આયન (Br⁻) હાજર હોય છે. કેથોડ પર, હાઇડ્રોજન આયન (H⁺) (પાણીમાંથી) રિડક્શન પામીને હાઇડ્રોજન ગેસ (H₂) મુક્ત થાય છે. પોટેશિયમ ધાતુ પાણી સાથે પ્રક્રિયા કરે છે, બ્રોમિન ગેસ એનોડ પર મુક્ત થાય છે, અને ઓક્સિજન ગેસ આ દ્રાવણમાં મુક્ત થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 14}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સિલ્વર સલ્ફેટ (Ag₂SO₄)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થાય છે?", "options": ["A) સિલ્વર ધાતુ (Ag)", "B) સલ્ફર ડાયોક્સાઇડ (SO₂)", "C) હાઇડ્રોજન ગેસ (H₂)", "D) ઓક્સિજન ગેસ (O₂)"], "correct": 0, "explanation": "સિલ્વર સલ્ફેટના જલીય દ્રાવણમાં, સિલ્વર આયન (Ag⁺) અને સલ્ફેટ આયન (SO₄²⁻) હાજર હોય છે. કેથોડ પર, સિલ્વર આયન (Ag⁺) રિડક્શન પામીને સિલ્વર ધાતુ (Ag) મુક્ત થાય છે. સલ્ફર ડાયોક્સાઇડ એનોડ પર મુક્ત થતું નથી, હાઇડ્રોજન ગેસ અને ઓક્સિજન ગેસ આ દ્રાવણમાં મુક્ત થતાં નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 15}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ સલ્ફેટ (Na2SO4) અને કોપર (II) સલ્ફેટ (CuSO4)ના મિશ્રણનું જલીય દ્રાવણ વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થશે?", "options": ["A) ઓક્સિજન ગેસ", "B) કોપર ધાતુ", "C) સલ્ફર ડાયોક્સાઇડ ગેસ", "D) હાઇડ્રોજન ગેસ"], "correct": 0, "explanation": "સોડિયમ સલ્ફેટ અને કોપર (II) સલ્ફેટના મિશ્રણમાં, એનોડ પર સલ્ફેટ આયન (SO4^2-) અને હાઇડ્રોક્સાઇડ આયન (OH^-) હાજર હોય છે. OH^- આયનની ઓક્સિડેશન પોટેન્શિયલ SO4^2- કરતાં ઓછી હોવાથી, એનોડ પર OH^- આયન ઓક્સિડાઇઝ થઈ ઓક્સિજન ગેસ મુક્ત થશે. કોપર ધાતુ કેથોડ પર મુક્ત થશે, સલ્ફર ડાયોક્સાઇડ ગેસ બનવાની પ્રક્રિયા અહીં લાગુ પડતી નથી, અને હાઇડ્રોજન ગેસ કેથોડ પર મુક્ત થઈ શકે પરંતુ એનોડ પર નહીં.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 16}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે કેલ્શિયમ ફ્લોરાઇડ (CaF2) અને એલ્યુમિનિયમ ફ્લોરાઇડ (AlF3)ના મિશ્રણનું ગલિત દ્રાવણ વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થશે?", "options": ["A) કેલ્શિયમ ધાતુ", "B) એલ્યુમિનિયમ ધાતુ", "C) ફ્લોરિન ગેસ", "D) હાઇડ્રોજન ગેસ"], "correct": 1, "explanation": "ગલિત અવસ્થામાં, કેલ્શિયમ અને એલ્યુમિનિયમ આયન હાજર હોય છે. એલ્યુમિનિયમનું રિડક્શન પોટેન્શિયલ કેલ્શિયમ કરતાં વધુ હોવાથી, કેથોડ પર એલ્યુમિનિયમ ધાતુ મુક્ત થશે. ફ્લોરિન ગેસ એનોડ પર મુક્ત થશે, હાઇડ્રોજન ગેસ ગલિત દ્રાવણમાં હાજર ન હોવાથી મુક્ત થશે નહીં, અને કેલ્શિયમ ધાતુ એલ્યુમિનિયમ કરતાં ઓછું રિડક્શન પોટેન્શિયલ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 17}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ ક્લોરાઇડ (KCl) અને પોટેશિયમ આયોડાઇડ (KI)ના મિશ્રણનું જલીય દ્રાવણ વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થશે?", "options": ["A) ક્લોરિન ગેસ", "B) આયોડિન ધાતુ", "C) ઓક્સિજન ગેસ", "D) પોટેશિયમ ધાતુ"], "correct": 2, "explanation": "જલીય દ્રાવણમાં, ક્લોરાઇડ (Cl^-) અને આયોડાઇડ (I^-) આયન હાજર હોય છે, પરંતુ OH^- આયન પણ હાજર હોય છે. OH^- આયનની ઓક્સિડેશન પોટેન્શિયલ Cl^- અને I^- કરતાં ઓછી હોવાથી, એનોડ પર OH^- આયન ઓક્સિડાઇઝ થઈ ઓક્સિજન ગેસ મુક્ત થશે. ક્લોરિન ગેસ અને આયોડિન ધાતુની ઓક્સિડેશન પોટેન્શિયલ OH^- કરતાં વધુ હોવાથી, તેઓ મુક્ત થશે નહીં. પોટેશિયમ ધાતુ કેથોડ પર મુક્ત થશે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 18}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે મેગ્નેશિયમ નાઇટ્રેટ (Mg(NO3)2) અને સિલ્વર નાઇટ્રેટ (AgNO3)ના મિશ્રણનું જલીય દ્રાવણ વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ મુક્ત થશે?", "options": ["A) મેગ્નેશિયમ ધાતુ", "B) સિલ્વર ધાતુ", "C) નાઇટ્રોજન ગેસ", "D) હાઇડ્રોજન ગેસ"], "correct": 1, "explanation": "જલીય દ્રાવણમાં, મેગ્નેશિયમ (Mg^2+) અને સિલ્વર (Ag^+) આયન હાજર હોય છે. સિલ્વરનું રિડક્શન પોટેન્શિયલ મેગ્નેશિયમ કરતાં વધુ હોવાથી, કેથોડ પર સિલ્વર ધાતુ મુક્ત થશે. નાઇટ્રોજન ગેસ એનોડ પર મુક્ત થશે નહીં, કારણ કે નાઇટ્રેટ આયન (NO3^-)ની ઓક્સિડેશન પોટેન્શિયલ OH^- કરતાં વધુ હોવાથી, એનોડ પર ઓક્સિજન ગેસ મુક્ત થશે. હાઇડ્રોજન ગેસ કેથોડ પર મુક્ત થઈ શકે પરંતુ સિલ્વર ધાતુનું રિડક્શન પોટેન્શિયલ વધુ હોવાથી, સિલ્વર ધાતુ મુક્ત થશે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 19}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ ક્લોરાઇડ (NaCl) અને પોટેશિયમ બ્રોમાઇડ (KBr)ના મિશ્રણનું જલીય દ્રાવણ વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ મુક્ત થશે?", "options": ["A) ક્લોરિન ગેસ", "B) બ્રોમિન ગેસ", "C) ઓક્સિજન ગેસ", "D) હાઇડ્રોજન ગેસ"], "correct": 2, "explanation": "જલીય દ્રાવણમાં, ક્લોરાઇડ (Cl^-) અને બ્રોમાઇડ (Br^-) આયન હાજર હોય છે, પરંતુ OH^- આયન પણ હાજર હોય છે. OH^- આયનની ઓક્સિડેશન પોટેન્શિયલ Cl^- અને Br^- કરતાં ઓછી હોવાથી, એનોડ પર OH^- આયન ઓક્સિડાઇઝ થઈ ઓક્સિજન ગેસ મુક્ત થશે. ક્લોરિન ગેસ અને બ્રોમિન ગેસની ઓક્સિડેશન પોટેન્શિયલ OH^- કરતાં વધુ હોવાથી, તેઓ મુક્ત થશે નહીં. હાઇડ્રોજન ગેસ કેથોડ પર મુક્ત થશે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 20}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે કોપર (I) ક્લોરાઇડ (CuCl)ના ગલિત દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયા પદાર્થનું નિર્માણ થાય છે?", "options": ["A) ક્લોરિન ગેસ (Cl₂)", "B) કોપર (Cu)", "C) કોપર (I) ક્લોરાઇડ (CuCl)", "D) કોપર (II) ક્લોરાઇડ (CuCl₂)"], "correct": 0, "explanation": "કોપર (I) ક્લોરાઇડ (CuCl)ના ગલિત દ્રાવણનું વિદ્યુતવિભાજન કરતી વખતે, એનોડ પર ક્લોરાઇડ આયન (Cl⁻) ઓક્સિડાઇઝ થઈને ક્લોરિન ગેસ (Cl₂) બને છે. કોપર (Cu⁺) આયન કેથોડ પર રિડ્યુસ થઈને કોપર ધાતુ બને છે. કોપર (I) ક્લોરાઇડ અથવા કોપર (II) ક્લોરાઇડનું નિર્માણ થતું નથી. આમ, એનોડ પર ક્લોરિન ગેસનું નિર્માણ થાય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 21}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ સલ્ફેટ (Na₂SO₄) અને કેલ્શિયમ ક્લોરાઇડ (CaCl₂)ના મિશ્રણના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયા આયનનું રિડક્શન થાય છે?", "options": ["A) Na⁺", "B) Ca²⁺", "C) H⁺ (જલીય દ્રાવણમાંથી)", "D) SO₄²⁻"], "correct": 2, "explanation": "સોડિયમ (Na⁺) અને કેલ્શિયમ (Ca²⁺) આયનની તુલનામાં, જલીય દ્રાવણમાં હાઇડ્રોજન આયન (H⁺)નું રિડક્શન પોટેન્શિયલ વધુ અનુકૂળ હોય છે. આથી, કેથોડ પર H⁺ આયનનું રિડક્શન થઈને H₂ ગેસ મુક્ત થાય છે. Na⁺ અને Ca²⁺ આયનનું રિડક્શન થતું નથી, કારણ કે તેમનું રિડક્શન પોટેન્શિયલ H⁺ કરતાં ઓછું અનુકૂળ હોય છે. SO₄²⁻ આયન કેથોડ પર રિડ્યુસ થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 22}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે એલ્યુમિનિયમ ક્લોરાઇડ (AlCl₃)ના ગલિત દ્રાવણમાં લિથિયમ ક્લોરાઇડ (LiCl) ઉમેરીને વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયા પદાર્થનું નિર્માણ થાય છે?", "options": ["A) એલ્યુમિનિયમ (Al)", "B) લિથિયમ (Li)", "C) ક્લોરિન ગેસ (Cl₂)", "D) એલ્યુમિનિયમ ક્લોરાઇડ (AlCl₃)"], "correct": 2, "explanation": "એલ્યુમિનિયમ ક્લોરાઇડ (AlCl₃) અને લિથિયમ ક્લોરાઇડ (LiCl)ના મિશ્રણના ગલિત દ્રાવણમાં, ક્લોરાઇડ આયન (Cl⁻) એનોડ પર ઓક્સિડાઇઝ થઈને ક્લોરિન ગેસ (Cl₂) બને છે. એલ્યુમિનિયમ (Al³⁺) અને લિથિયમ (Li⁺) આયન કેથોડ પર રિડ્યુસ થાય છે. એનોડ પર એલ્યુમિનિયમ અથવા લિથિયમ ધાતુનું નિર્માણ થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 23}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ નાઇટ્રેટ (KNO₃) અને સિલ્વર નાઇટ્રેટ (AgNO₃)ના મિશ્રણના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયા પદાર્થનું નિર્માણ થાય છે?", "options": ["A) પોટેશિયમ (K)", "B) સિલ્વર (Ag)", "C) હાઇડ્રોજન ગેસ (H₂)", "D) નાઇટ્રોજન ગેસ (N₂)"], "correct": 1, "explanation": "પોટેશિયમ (K⁺) અને સિલ્વર (Ag⁺) આયનની તુલનામાં, સિલ્વર આયનનું રિડક્શન પોટેન્શિયલ વધુ અનુકૂળ હોય છે. આથી, કેથોડ પર સિલ્વર આયન (Ag⁺) રિડ્યુસ થઈને સિલ્વર ધાતુ (Ag) બને છે. પોટેશિયમ આયન (K⁺) અથવા હાઇડ્રોજન આયન (H⁺)નું રિડક્શન થતું નથી, કારણ કે તેમનું રિડક્શન પોટેન્શિયલ Ag⁺ કરતાં ઓછું અનુકૂળ હોય છે. નાઇટ્રોજન ગેસનું નિર્માણ થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 24}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે મેગ્નેશિયમ બ્રોમાઇડ (MgBr₂) અને સોડિયમ આયોડાઇડ (NaI)ના મિશ્રણના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયા પદાર્થનું નિર્માણ થાય છે?", "options": ["A) બ્રોમિન (Br₂)", "B) આયોડિન (I₂)", "C) ઓક્સિજન ગેસ (O₂)", "D) બ્રોમિન (Br₂) અને આયોડિન (I₂) બંને"], "correct": 1, "explanation": "બ્રોમાઇડ (Br⁻) અને આયોડાઇડ (I⁻) આયનની તુલનામાં, આયોડાઇડ આયનનું ઓક્સિડેશન પોટેન્શિયલ ઓછું હોય છે, જેથી એનોડ પર આયોડાઇડ આયન (I⁻) ઓક્સિડાઇઝ થઈને આયોડિન (I₂) બને છે. બ્રોમાઇડ આયન (Br⁻) ઓક્સિડાઇઝ થતું નથી, કારણ કે તેનું ઓક્સિડેશન પોટેન્શિયલ I⁻ કરતાં વધુ હોય છે. ઓક્સિજન ગેસનું નિર્માણ થતું નથી, કારણ કે OH⁻ આયનની ગેરહાજરીમાં ઓક્સિજન મુક્ત થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 25}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે કેલ્શિયમ હાઇપોક્લોરાઇટ (Ca(OCl)2)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર મુખ્ય ઉત્પન્ન થતું પદાર્થ કયું હશે?", "options": ["A) O2 ગેસ", "B) Cl2 ગેસ", "C) H2 ગેસ", "D) Ca(OH)2"], "correct": 1, "explanation": "કેલ્શિયમ હાઇપોક્લોરાઇટ (Ca(OCl)2)ના જલીય દ્રાવણમાં, OCl- આયન હાજર હોય છે. એનોડ પર ઓક્સિડેશન થાય છે, જ્યાં OCl- આયન Cl2 ગેસમાં ઓક્સિડાઇઝ થાય છે. O2 ગેસ (A) ત્યારે જ ઉત્પન્ન થાય જ્યારે OH- આયન હાજર હોય અને ઓક્સિડેશન થાય, પરંતુ અહીં OCl- આયન પ્રાધાન્ય ધરાવે છે. H2 ગેસ (C) કેથોડ પર ઉત્પન્ન થાય છે, એનોડ પર નહીં. Ca(OH)2 (D) દ્રાવણમાં જ રહે છે, એનોડ પર ઉત્પન્ન થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 26}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ થાયોસલ્ફેટ (Na2S2O3)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ ઉત્પન્ન થશે?", "options": ["A) S", "B) H2", "C) Na", "D) SO2"], "correct": 1, "explanation": "સોડિયમ થાયોસલ્ફેટ (Na2S2O3)ના જલીય દ્રાવણમાં, કેથોડ પર રિડક્શન થાય છે. જલીય દ્રાવણમાં H+ આયન (H2O માંથી) હાજર હોય છે, જે H2 ગેસમાં રિડક્ટ થાય છે. S (A) એનોડ પર ઉત્પન્ન થઈ શકે, પરંતુ કેથોડ પર નહીં. Na (C) સોડિયમ ધાતુ જલીય દ્રાવણમાં ઉત્પન્ન થતું નથી, કારણ કે તે પાણી સાથે પ્રક્રિયા કરે છે. SO2 (D) એનોડ પર ઉત્પન્ન થઈ શકે, પરંતુ કેથોડ પર નહીં.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 27}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે એમોનિયમ સલ્ફેટ ((NH4)2SO4)ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો ગેસ ઉત્પન્ન થશે?", "options": ["A) N2", "B) O2", "C) H2", "D) NH3"], "correct": 1, "explanation": "એમોનિયમ સલ્ફેટ ((NH4)2SO4)ના જલીય દ્રાવણમાં, એનોડ પર ઓક્સિડેશન થાય છે. જલીય દ્રાવણમાં OH- આયન (H2O માંથી) હાજર હોય છે, જે O2 ગેસમાં ઓક્સિડાઇઝ થાય છે. N2 (A) એમોનિયમ આયન (NH4+) નું ઓક્સિડેશન થઈ શકે, પરંતુ OH- આયનનું ઓક્સિડેશન પ્રાધાન્ય ધરાવે છે. H2 (C) કેથોડ પર ઉત્પન્ન થાય છે, એનોડ પર નહીં. NH3 (D) કેથોડ પર ઉત્પન્ન થઈ શકે, પરંતુ એનોડ પર નહીં.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 28}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે પોટેશિયમ ફેરોસાયનાઇડ (K4[Fe(CN)6])ના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે એનોડ પર કયો પદાર્થ ઉત્પન્ન થશે?", "options": ["A) Fe(OH)3", "B) CN2", "C) O2", "D) K"], "correct": 2, "explanation": "પોટેશિયમ ફેરોસાયનાઇડ (K4[Fe(CN)6])ના જલીય દ્રાવણમાં, એનોડ પર ઓક્સિડેશન થાય છે. જલીય દ્રાવણમાં OH- આયન (H2O માંથી) હાજર હોય છે, જે O2 ગેસમાં ઓક્સિડાઇઝ થાય છે. Fe(OH)3 (A) એનોડ પર ઉત્પન્ન થતું નથી, કારણ કે Fe2+ આયન ઓક્સિડાઇઝ થઈ Fe3+માં પરિવર્તિત થાય છે, પરંતુ O2 ગેસ પ્રાધાન્ય ધરાવે છે. CN2 (B) સાયનાઇડ આયનનું ઓક્સિડેશન થઈ શકે, પરંતુ OH- આયનનું ઓક્સિડેશન પ્રાધાન્ય ધરાવે છે. K (D) પોટેશિયમ ધાતુ જલીય દ્રાવણમાં ઉત્પન્ન થતું નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 29}, {"question": "વિદ્યુતવિભાજ્ય કોષમાં, જ્યારે સોડિયમ કાર્બોનેટ (Na2CO3) અને સોડિયમ બાયકાર્બોનેટ (NaHCO3)ના મિશ્રણના જલીય દ્રાવણનું વિદ્યુતવિભાજન કરવામાં આવે છે, ત્યારે કેથોડ પર કયો પદાર્થ ઉત્પન્ન થશે?", "options": ["A) CO2", "B) H2", "C) Na", "D) O2"], "correct": 1, "explanation": "સોડિયમ કાર્બોનેટ (Na2CO3) અને સોડિયમ બાયકાર્બોનેટ (NaHCO3)ના મિશ્રણના જલીય દ્રાવણમાં, કેથોડ પર રિડક્શન થાય છે. જલીય દ્રાવણમાં H+ આયન (H2O માંથી) હાજર હોય છે, જે H2 ગેસમાં રિડક્ટ થાય છે. CO2 (A) એનોડ પર ઉત્પન્ન થઈ શકે, પરંતુ કેથોડ પર નહીં. Na (C) સોડિયમ ધાતુ જલીય દ્રાવણમાં ઉત્પન્ન થતું નથી, કારણ કે તે પાણી સાથે પ્રક્રિયા કરે છે. O2 (D) એનોડ પર ઉત્પન્ન થાય છે, કેથોડ પર નહીં.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુતરસાયણ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
