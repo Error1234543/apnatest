@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - કૃત્રિમ સંકરણ (Artificial Hybridisation)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 કૃત્રિમ સંકરણ (Artificial Hybridisation)</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "કૃત્રિમ સંકરણ પ્રક્રિયામાં, પુનરુત્પાદનને રોકવા માટે પુષ્પના કયા ભાગને કાપી નાખવામાં આવે છે?", "options": ["A) પુંકેસર (Stamen)", "B) સ્ત્રીકેસર (Pistil)", "C) દલપત્ર (Petal)", "D) બીજાંડ (Ovule)"], "correct": 0, "explanation": "કૃત્રિમ સંકરણમાં, પુનરુત્પાદન રોકવા માટે પુંકેસર (Stamen)ને કાપી નાખવામાં આવે છે, કારણ કે તે પરાગરજ ઉત્પન્ન કરે છે. સ્ત્રીકેસર (B) પરાગરજ ગ્રહણ કરે છે, દલપત્ર (C) ફક્ત આકર્ષણ માટે હોય છે, અને બીજાંડ (D) ફલન પછી વિકસે છે. આથી, પુંકેસરને કાપવું જરૂરી છે.", "ncert_ref": "Class XII - પ્રકરણ ૨: જનીન અને જનુકીયતા", "difficulty": "Hard", "num": 1}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, પરાગરજને સ્ત્રીકેસર પર લગાડતી વખતે કયો પગલો સૌથી મહત્વપૂર્ણ છે?", "options": ["A) પરાગરજને સૂકવીને લગાડવી", "B) પરાગરજને તાજી અને સક્રિય અવસ્થામાં લગાડવી", "C) પરાગરજને પાણીમાં ભેળવીને લગાડવી", "D) પરાગરજને ઉચ્ચ તાપમાને ગરમ કરીને લગાડવી"], "correct": 1, "explanation": "પરાગરજને તાજી અને સક્રિય અવસ્થામાં લગાડવી જરૂરી છે, કારણ કે તાજી પરાગરજમાં જીવંત પરાગકણો હોય છે જે ફલન માટે જરૂરી છે. સૂકવીને (A), પાણીમાં ભેળવીને (C), અથવા ગરમ કરીને (D) લગાડવાથી પરાગકણો મરી જાય છે, જે ફલનને અસર કરે છે.", "ncert_ref": "Class XII - પ્રકરણ ૨: જનીન અને જનુકીયતા", "difficulty": "Hard", "num": 2}, {"question": "કૃત્રિમ સંકરણ દ્વારા ઉત્પન્ન થયેલા બીજને કયા નામે ઓળખવામાં આવે છે?", "options": ["A) સ્વ-પરાગી બીજ", "B) સંકર બીજ", "C) ક્લોન બીજ", "D) મ્યુટન્ટ બીજ"], "correct": 1, "explanation": "કૃત્રિમ સંકરણ દ્વારા ઉત્પન્ન થયેલા બીજને 'સંકર બીજ' કહેવામાં આવે છે, કારણ કે તે બે જુદા જુદા વાનસ્પતિક પ્રકારોના સંકરણથી બને છે. સ્વ-પરાગી બીજ (A) એક જ છોડ પરથી ઉત્પન્ન થાય છે, ક્લોન બીજ (C) જનુકીય રીતે સરખા હોય છે, અને મ્યુટન્ટ બીજ (D) મ્યુટેશન દ્વારા ઉત્પન્ન થાય છે.", "ncert_ref": "Class XII - પ્રકરણ ૨: જનીન અને જનુકીયતા", "difficulty": "Hard", "num": 3}, {"question": "કૃત્રિમ સંકરણમાં, પરાગરજને એક પુષ્પથી બીજા પુષ્પ પર લગાડવા માટે કયું સાધન સૌથી યોગ્ય છે?", "options": ["A) પ્લાસ્ટિકની ચમચી", "B) કાચની સળી", "C) બ્રશ અથવા સૂક્ષ્મ પેઇન્ટબ્રશ", "D) લોખંડની સોય"], "correct": 2, "explanation": "પરાગરજને એક પુષ્પથી બીજા પુષ્પ પર લગાડવા માટે બ્રશ અથવા સૂક્ષ્મ પેઇન્ટબ્રશ સૌથી યોગ્ય છે, કારણ કે તે પરાગરજને સરળતાથી અને સચોટ રીતે લગાડવા માટે સક્ષમ છે. પ્લાસ્ટિકની ચમચી (A) અથવા લોખંડની સોય (D) પરાગરજને નુકસાન પહોંચાડી શકે છે, જ્યારે કાચની સળી (B) પરાગરજને યોગ્ય રીતે પકડી શકતી નથી.", "ncert_ref": "Class XII - પ્રકરણ ૨: જનીન અને જનુકીયતા", "difficulty": "Hard", "num": 4}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, ફલનની સફળતા નક્કી કરવા માટે કયો પગલો સૌથી મહત્વપૂર્ણ છે?", "options": ["A) પરાગરજની માત્રા વધારે હોવી", "B) પરાગરજ અને સ્ત્રીકેસરની સુસંગતતા", "C) ઉચ્ચ તાપમાન અને ભેજ", "D) પુષ્પના રંગની પસંદગી"], "correct": 1, "explanation": "ફલનની સફળતા માટે પરાગરજ અને સ્ત્રીકેસરની સુસંગતતા સૌથી મહત્વપૂર્ણ છે, કારણ કે ફલન માટે પરાગરજ અને સ્ત્રીકેસરના જનીન મેળ ખાવા જરૂરી છે. પરાગરજની માત્રા (A) મહત્વપૂર્ણ છે, પરંતુ સુસંગતતા વિના ફલન થતું નથી. ઉચ્ચ તાપમાન અને ભેજ (C) ફલનને અસર કરી શકે છે, પરંતુ તે મૂળભૂત જરૂરિયાત નથી. પુષ્પના રંગ (D) ફલન સાથે સીધો સંબંધ ધરાવતો નથી.", "ncert_ref": "Class XII - પ્રકરણ ૨: જનીન અને જનુકીયતા", "difficulty": "Hard", "num": 5}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો પરાગકોષમાં અપરિપક્વ પરાગરજ હોય તો શું થાય છે?", "options": ["A) પરાગરજ સ્ત્રીકેસર પર ચોંટી જાય છે પરંતુ અંકુરણ થતું નથી", "B) પરાગરજ સ્ત્રીકેસર પર ચોંટી જાય છે અને અંકુરણ થાય છે પરંતુ ફલન થતું નથી", "C) પરાગરજ સ્ત્રીકેસર પર ચોંટી જતી નથી અને અંકુરણ પણ થતું નથી", "D) પરાગરજ સ્ત્રીકેસર પર ચોંટી જાય છે અને ફલન પણ સફળતાપૂર્વક થાય છે"], "correct": 2, "explanation": "અપરિપક્વ પરાગરજમાં અંકુરણ માટે જરૂરી ઉત્સેચકો અને ઊર્જાનો અભાવ હોય છે, જેથી તે સ્ત્રીકેસર પર ચોંટી જતી નથી અને અંકુરણ પણ થતું નથી. વિકલ્પ A અને B ખોટા છે કારણ કે અપરિપક્વ પરાગરજ ચોંટી જ શકતી નથી. વિકલ્પ D ખોટો છે કારણ કે ફલન માટે અંકુરણ જરૂરી છે, જે અપરિપક્વ પરાગરજમાં થતું નથી.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 6}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી, ફલનની સફળતા માટે કયો પગલો સૌથી અગત્યનો છે?", "options": ["A) પરાગરજને સ્ત્રીકેસર પર યોગ્ય રીતે લગાડવી", "B) પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવું", "C) પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી પુષ્પને સૂર્યપ્રકાશમાં રાખવું", "D) પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી પુષ્પને અંધારામાં રાખવું"], "correct": 1, "explanation": "પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી, પુષ્પને પોલીથીન બેગમાં બંધ કરવું જરૂરી છે જેથી બાહ્ય પરાગરજના પ્રવેશને રોકી શકાય અને ફલનની સફળતા સુનિશ્ચિત થાય. વિકલ્પ A અગત્યનો છે પરંતુ સફળતા માટે પૂરતો નથી. વિકલ્પ C અને D ખોટા છે કારણ કે સૂર્યપ્રકાશ અથવા અંધારું ફલન પર અસર કરતું નથી.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 7}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો સ્ત્રીકેસર પર પરાગરજ લગાડ્યા પછી, પુષ્પને પોલીથીન બેગમાં બંધ ન કરવામાં આવે તો શું થાય છે?", "options": ["A) ફલન થતું નથી", "B) બાહ્ય પરાગરજના પ્રવેશને કારણે અપેક્ષિત સંકરણ થતું નથી", "C) પરાગરજ સૂકાઈ જાય છે અને અંકુરણ થતું નથી", "D) પુષ્પમાં રોગલક્ષણો દેખા દે છે"], "correct": 1, "explanation": "પોલીથીન બેગમાં બંધ ન કરવાથી બાહ્ય પરાગરજનો પ્રવેશ થઈ શકે છે, જેથી અપેક્ષિત સંકરણ થતું નથી. વિકલ્પ A ખોટો છે કારણ કે ફલન થઈ શકે છે પરંતુ અપેક્ષિત સંકરણ નહીં. વિકલ્પ C ખોટો છે કારણ કે પરાગરજ સૂકાઈ જવાનું કારણ પોલીથીન બેગ નથી. વિકલ્પ D ખોટો છે કારણ કે રોગલક્ષણો દેખા દેવાનું કારણ બાહ્ય પરાગરજ નથી.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 8}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, પરાગરજને સ્ત્રીકેસર પર લગાડવા માટે કયો સમય સૌથી યોગ્ય છે?", "options": ["A) સવારે જલદી", "B) દિવસ દરમિયાન ગરમી વખતે", "C) સાંજે સૂર્યાસ્ત પહેલા", "D) રાત્રે"], "correct": 0, "explanation": "સવારે જલદી પરાગરજને સ્ત્રીકેસર પર લગાડવું સૌથી યોગ્ય છે કારણ કે તે સમયે તાપમાન ઓછું હોય છે અને પરાગરજની સક્રિયતા સારી હોય છે. વિકલ્પ B ખોટો છે કારણ કે ગરમી વખતે પરાગરજની સક્રિયતા ઘટે છે. વિકલ્પ C અને D ખોટા છે કારણ કે સાંજે અને રાત્રે પરાગરજની સક્રિયતા ઓછી હોય છે.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 9}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી, પુષ્પને પોલીથીન બેગમાં બંધ કરવામાં આવે તો કયો ફાયદો થાય છે?", "options": ["A) પરાગરજની સક્રિયતા વધે છે", "B) બાહ્ય પરાગરજના પ્રવેશને રોકી શકાય છે", "C) પુષ્પની ઉંમર વધે છે", "D) ફલનની ગતિ વધે છે"], "correct": 1, "explanation": "પોલીથીન બેગમાં બંધ કરવાથી બાહ્ય પરાગરજના પ્રવેશને રોકી શકાય છે, જેથી અપેક્ષિત સંકરણ સફળતાપૂર્વક થાય છે. વિકલ્પ A ખોટો છે કારણ કે પરાગરજની સક્રિયતા પોલીથીન બેગને કારણે વધતી નથી. વિકલ્પ C ખોટો છે કારણ કે પુષ્પની ઉંમર પોલીથીન બેગને કારણે વધતી નથી. વિકલ્પ D ખોટો છે કારણ કે ફલનની ગતિ પોલીથીન બેગને કારણે વધતી નથી.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 10}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્સ્કંજ (stamen) ને કાપી નાખ્યા પછી પણ પુષ્પમાં સ્વ-પરાગીકરણ થતું હોય, તો તેનું સૌથી સંભવિત કારણ કયું હશે?", "options": ["A) પુષ્પમાં અંતર્ગત પરાગકોષ (anther) ની હાજરી", "B) પવન દ્વારા પરાગરજનો પ્રસાર", "C) કીટકો દ્વારા પરાગરજનો પ્રસાર", "D) પુષ્પમાં અવશેષી પરાગરજ (residual pollen) ની હાજરી"], "correct": 3, "explanation": "સ્વ-પરાગીકરણ થવાનું મુખ્ય કારણ પુષ્પમાં અવશેષી પરાગરજ (residual pollen) હોય છે, જે પુમ્સ્કંજ કાપ્યા પછી પણ રહી જાય છે. અંતર્ગત પરાગકોષ (A) પુષ્પમાં હાજર નથી, પવન (B) અથવા કીટકો (C) દ્વારા પરાગરજનો પ્રસાર બાહ્ય પરિબળો છે, પરંતુ સ્વ-પરાગીકરણ માટે અવશેષી પરાગરજ જવાબદાર છે.", "ncert_ref": "Class XII - પ્રકરણ 2: સજીવોમાં પ્રજનન", "difficulty": "Hard", "num": 11}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો સ્ત્રીકેસર (pistil) પર પરાગરજ લગાડ્યા પછી, ફલન ન થાય તો તેનું કારણ કયું હોવાનું સૌથી વધુ સંભવિત છે?", "options": ["A) પરાગરજ અપરિપક્વ હતી", "B) સ્ત્રીકેસર પર પરાગરજ લગાડવા માટે યોગ્ય સમય ન હતો", "C) પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુકૂળતા (compatibility) ન હતી", "D) પુષ્પને પોલીથીન બેગમાં ઢાંકી દેવામાં આવ્યું ન હતું"], "correct": 2, "explanation": "ફલન ન થવાનું મુખ્ય કારણ પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુકૂળતા (compatibility) ન હોવી છે. અપરિપક્વ પરાગરજ (A) અથવા અયોગ્ય સમય (B) પણ કારણ હોવા જોઈએ, પરંતુ અનુકૂળતાનો અભાવ સૌથી મહત્વપૂર્ણ છે. પોલીથીન બેગ (D) ફલનને અસર કરતું નથી, પરંતુ તે સ્વ-પરાગીકરણ રોકવા માટે વપરાય છે.", "ncert_ref": "Class XII - પ્રકરણ 2: સજીવોમાં પ્રજનન", "difficulty": "Hard", "num": 12}, {"question": "કૃત્રિમ સંકરણ દ્વારા ઉત્પન્ન થયેલા સંકર બીજમાં, જો માતૃજન્ય (maternal) લક્ષણો પ્રબળ હોય, તો તેનું કારણ કયું હોવાનું સૌથી સંભવિત છે?", "options": ["A) પિતૃજન્ય (paternal) જનીનોની અભાવ", "B) માતૃજન્ય જનીનોની પ્રબળતા (dominance)", "C) સ્ત્રીકેસરમાં પરાગનલિકાની વૃદ્ધિ અવરોધાયેલી હતી", "D) પરાગરજમાં Y-વર્ણસૂત્રની હાજરી"], "correct": 1, "explanation": "માતૃજન્ય લક્ષણોની પ્રબળતા તેના જનીનોની પ્રબળતા (dominance)ને કારણે થાય છે. પિતૃજન્ય જનીનોની અભાવ (A) અથવા પરાગનલિકાની વૃદ્ધિ અવરોધ (C) સંકર બીજના વિકાસને અસર કરે, પરંતુ માતૃજન્ય લક્ષણોની પ્રબળતા જનીનીક રીતે નક્કી થાય છે. Y-વર્ણસૂત્ર (D) ફક્ત પુરુષ લિંગ નક્કી કરે છે, લક્ષણોની પ્રબળતાથી તેનો સીધો સંબંધ નથી.", "ncert_ref": "Class XII - પ્રકરણ 5: વંશાવળી અને વિકાસ", "difficulty": "Hard", "num": 13}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પરાગરજને સ્ત્રીકેસર પર લગાડ્યા પછી, પુષ્પને પોલીથીન બેગમાં ઢાંકી દેવામાં આવે, તો તેનો મુખ્ય હેતુ કયો છે?", "options": ["A) પરાગરજને સૂકવવા માટે", "B) સ્વ-પરાગીકરણ રોકવા માટે", "C) ફલનની ગતિ વધારવા માટે", "D) પરાગરજને સ્ત્રીકેસર સાથે ચોંટાડવા માટે"], "correct": 1, "explanation": "પોલીથીન બેગનો મુખ્ય હેતુ સ્વ-પરાગીકરણ રોકવા માટે છે, જેથી ફક્ત કૃત્રિમ રીતે લગાડેલી પરાગરજ જ ફલન કરે. પરાગરજ સૂકવવા (A), ફલનની ગતિ વધારવા (C), અથવા ચોંટાડવા (D) માટે પોલીથીન બેગ વાપરવામાં આવતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: સજીવોમાં પ્રજનન", "difficulty": "Hard", "num": 14}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્સ્કંજને કાપી નાખ્યા પછી પણ પુષ્પમાં સ્વ-પરાગીકરણ થતું હોય, તો તેનું સૌથી સંભવિત કારણ કયું હોઈ શકે?", "options": ["A) પુષ્પમાં અપરિપક્વ પરાગકોષોની હાજરી", "B) પુષ્પમાં ક્લીસ્ટોગેમી (cleistogamy)ની હાજરી", "C) પુષ્પમાં પરાગરજના વહન માટે હવાના પ્રવાહની હાજરી", "D) પુષ્પમાં સ્ત્રીકેસરની લંબાઈમાં વૃદ્ધિ થવી"], "correct": 1, "explanation": "ક્લીસ્ટોગેમી (cleistogamy) એ એક એવી ઘટના છે જ્યાં પુષ્પ બંધ રહે છે અને સ્વ-પરાગીકરણ થાય છે. પુમ્સ્કંજને કાપી નાખ્યા પછી પણ જો પુષ્પમાં સ્વ-પરાગીકરણ થતું હોય, તો તેનું કારણ ક્લીસ્ટોગેમી હોઈ શકે છે. અપરિપક્વ પરાગકોષો (A) સ્વ-પરાગીકરણ માટે જવાબદાર નથી, હવાના પ્રવાહ (C) પરાગરજના વહન માટે જવાબદાર નથી, અને સ્ત્રીકેસરની લંબાઈમાં વૃદ્ધિ (D) સ્વ-પરાગીકરણને પ્રભાવિત કરતી નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "difficulty": "Hard", "num": 15}, {"question": "કૃત્રિમ સંકરણ દ્વારા ઉત્પન્ન થયેલા સંકર બીજમાં, જો પિતૃજન્ય (paternal) લક્ષણો પ્રબળ હોય, તો તેનું કારણ કયું હોઈ શકે?", "options": ["A) માતૃજન્ય જનીનો કરતાં પિતૃજન્ય જનીનો વધુ પ્રબળ હોય છે", "B) સંકરણ દરમિયાન પિતૃજન્ય પરાગરજની માત્રા વધુ હોય છે", "C) માતૃજન્ય જનીનો સંપૂર્ણપણે નિષ્ક્રિય થઈ ગયા હોય છે", "D) સંકરણ દરમિયાન માતૃજન્ય કોષરસી પ્રભાવ (cytoplasmic influence) નહીંવત્ હોય છે"], "correct": 3, "explanation": "સંકર બીજમાં પિતૃજન્ય લક્ષણો પ્રબળ હોવાનું કારણ માતૃજન્ય કોષરસી પ્રભાવ (cytoplasmic influence) નહીંવત્ હોવું હોઈ શકે. માતૃજન્ય જનીનો કરતાં પિતૃજન્ય જનીનો વધુ પ્રબળ હોવા (A), પિતૃજન્ય પરાગરજની માત્રા વધુ હોવા (B) અથવા માતૃજન્ય જનીનો નિષ્ક્રિય થવા (C) એ સંપૂર્ણપણે શક્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 5: અનુવંશિકતા અને વૈવિધ્યતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 16}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુષ્પના પુમ્સ્કંજને કાપી નાખ્યા પછી પણ સ્વ-પરાગીકરણ થાય છે, તો તેનું સૌથી સંભવિત કારણ કયું હોઈ શકે?", "options": ["A) પુષ્પમાં અંતર્ગત (cleistogamous) પુષ્પો હાજર હોય છે", "B) પરાગરજના કણો હવામાં તરતા રહેતા હોય છે અને સ્ત્રીકેસર પર પહોંચે છે", "C) પુષ્પના આસપાસના વાતાવરણમાં અન્ય પુષ્પોની પરાગરજ હાજર હોય છે", "D) પુમ્સ્કંજ કાપી નાખ્યા પછી પણ પુષ્પમાં અપરિપક્વ પરાગકોષો શેષ રહે છે"], "correct": 0, "explanation": "સ્વ-પરાગીકરણ પુષ્પમાં અંતર્ગત (cleistogamous) પુષ્પો હાજર હોવાને કારણે થાય છે, જેમાં પરાગીકરણ પુષ્પ ખીલે તે પહેલાં જ થઈ જાય છે. બાકીના વિકલ્પો અયોગ્ય છે: B) પરાગરજ હવામાં તરતા રહેતી નથી કારણ કે પુમ્સ્કંજ કાપી નાખ્યા હોય છે, C) અન્ય પુષ્પોની પરાગરજ હાજર હોવી તે કૃત્રિમ સંકરણનું લક્ષ્ય નથી, D) અપરિપક્વ પરાગકોષો ફલન માટે યોગ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: જનનમાં લૈંગિક પ્રજનન", "difficulty": "Hard", "num": 17}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો સ્ત્રીકેસર પર પરાગરજ લગાડ્યા પછી ફલન ન થાય, તો તેનું સૌથી સંભવિત કારણ કયું હોઈ શકે?", "options": ["A) પરાગરજ અપરિપક્વ હતી", "B) સ્ત્રીકેસર પર પરાગરજ લગાડવા માટે યોગ્ય સમય ન હતો", "C) પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુકૂળતા (compatibility) ન હતી", "D) પુષ્પને પોલીથીન બેગમાં ઢાંકી દેવામાં આવ્યું ન હતું"], "correct": 2, "explanation": "ફલન ન થવાનું મુખ્ય કારણ પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુકૂળતા ન હોવી હોઈ શકે. A) અપરિપક્વ પરાગરજ પણ એક કારણ હોઈ શકે, પરંતુ પ્રશ્નમાં સૌથી સંભવિત કારણ પૂછવામાં આવ્યું છે. B) યોગ્ય સમય પણ મહત્વપૂર્ણ છે, પરંતુ અનુકૂળતા વધુ મહત્વપૂર્ણ છે. D) પોલીથીન બેગનો ઉપયોગ પરાગીકરણને રોકવા માટે થાય છે, ફલન માટે નહીં.", "ncert_ref": "Class XII - પ્રકરણ 2: જનનમાં લૈંગિક પ્રજનન", "difficulty": "Hard", "num": 18}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો મધ્યવર્તી (emasculation) પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવામાં આવે અને પછી પરાગરજ લગાડવામાં આવે, તો નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય રીતે સંકરણની સફળતાને પ્રભાવિત કરશે?", "options": ["A) પોલીથીન બેગમાં ઓક્સિજનની ઉણપ થવાથી પરાગકોષનું અંકુરણ રુંધાઈ જશે", "B) પોલીથીન બેગમાં તાપમાન અને આર્દ્રતા નિયંત્રિત રહેતા પરાગરજનું જીવનકાળ વધશે", "C) પોલીથીન બેગમાં કાર્બન ડાયોક્સાઇડનું પ્રમાણ વધવાથી સ્ત્રીકેસરની પ્રતિક્રિયાશીલતા ઘટશે", "D) પોલીથીન બેગમાં સૂક્ષ્મજીવોના પ્રવેશને રોકવાથી સંકરણની સફળતા વધશે"], "correct": 3, "explanation": "પોલીથીન બેગનો મુખ્ય હેતુ સ્વ-પરાગીકરણ અથવા અનિચ્છનીય પરાગરજના પ્રવેશને રોકવાનો છે. સૂક્ષ્મજીવોના પ્રવેશને રોકવાથી સંકરણ પ્રક્રિયા દરમિયાન અશુદ્ધિઓ થતી અટકાવી શકાય છે, જે સંકરણની સફળતાને વધારે છે. ઓક્સિજનની ઉણપ (A) અથવા કાર્બન ડાયોક્સાઇડનું વધુ પ્રમાણ (C) પરાગકોષના અંકુરણને પ્રભાવિત કરે છે, પરંતુ પોલીથીન બેગનો મુખ્ય ઉદ્દેશ્ય સૂક્ષ્મજીવો અને અનિચ્છનીય પરાગરજને રોકવાનો છે. તાપમાન અને આર્દ્રતાનું નિયંત્રણ (B) પોલીથીન બેગના ઉપયોગનો ગૌણ ફાયદો છે, પરંતુ મુખ્ય કારણ સૂક્ષ્મજીવોને રોકવાનું છે.", "ncert_ref": "Class XII - પ્રકરણ 2: જનનમાં મનુષ્ય", "difficulty": "Hard", "num": 19}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો એક જાતિમાંથી લેવાયેલી પરાગરજને બીજી જાતિમાં સ્ત્રીકેસર પર લગાડવામાં આવે, તો નીચેનામાંથી કયું પરિણામ સૌથી અપેક્ષિત છે?", "options": ["A) સંકર બીજનું નિર્માણ થશે, પરંતુ તે બંને માતા-પિતાના લક્ષણો ધરાવશે", "B) ફલન થશે નહીં, કારણ કે પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુકૂળતા નહીં હોય", "C) સંકર બીજનું નિર્માણ થશે, પરંતુ તે માતૃજન્ય લક્ષણો જ ધરાવશે", "D) સંકર બીજનું નિર્માણ થશે, પરંતુ તે પિતૃજન્ય લક્ષણો જ ધરાવશે"], "correct": 1, "explanation": "જ્યારે બે વિવિધ જાતિઓ વચ્ચે કૃત્રિમ સંકરણ કરવામાં આવે છે, ત્યારે પરાગરજ અને સ્ત્રીકેસર વચ્ચે અનુવંશિક અસંગતતા (genetic incompatibility) હોવાની શક્યતા રહે છે, જેના કારણે ફલન થતું નથી. આને 'પ્રજાતિ અવરોધ' (species barrier) કહેવાય છે. સંકર બીજનું નિર્માણ (A, C, D) માત્ર ત્યારે જ શક્ય છે જ્યારે બંને જાતિઓ વચ્ચે અનુવંશિક સંગતતા હોય. જો ફલન થાય તો સંકર બીજ બંને માતા-પિતાના લક્ષણો ધરાવે છે, પરંતુ પ્રશ્નમાં જાતિઓ વચ્ચેના સંકરણની વાત છે, જ્યાં ફલન ન થવાની શક્યતા વધુ છે.", "ncert_ref": "Class XII - પ્રકરણ 2: જનનમાં મનુષ્ય", "difficulty": "Hard", "num": 20}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો મધ્યવર્તી (emasculation) કર્યા પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવામાં આવે, તો તેનો મુખ્ય હેતુ શો છે?", "options": ["A) પરાગરજના પ્રસરણને રોકવા અને સ્વ-પરાગીકરણને અટકાવવા", "B) પુષ્પને કીટકો પાસેથી બચાવવા", "C) પુષ્પના તાપમાનને નિયંત્રિત કરવા", "D) પુષ્પમાં પાણીની ઉણપને રોકવા"], "correct": 0, "explanation": "મધ્યવર્તી પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવાનો મુખ્ય હેતુ પરાગરજના પ્રસરણને રોકવા અને સ્વ-પરાગીકરણને અટકાવવા છે, જેથી કૃત્રિમ સંકરણ સફળ થઈ શકે. બાકીના વિકલ્પો (B, C, D) આ પ્રક્રિયાના મુખ્ય હેતુ સાથે સંકળાયેલા નથી.", "ncert_ref": "Class XII - Chapter 2: જનનમાં માનવીની ભૂમિકા", "difficulty": "Hard", "num": 21}, {"question": "કૃત્રિમ સંકરણ પ્રયોગ દરમિયાન, જો મધ્યવર્તી (emasculation) કર્યા પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવામાં આવે, તો તેનો મુખ્ય હેતુ શું છે?", "options": ["A) પુષ્પને કીટકો પાસેથી બચાવવા", "B) સ્વ-પરાગીકરણ (self-pollination) રોકવા અને પરપરાગીકરણ (cross-pollination) સુનિશ્ચિત કરવા", "C) પુષ્પના તાપમાનને નિયંત્રિત રાખવા", "D) પુષ્પને અતિ પ્રકાશથી બચાવવા"], "correct": 1, "explanation": "મધ્યવર્તી પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવાનો મુખ્ય હેતુ સ્વ-પરાગીકરણ રોકવા અને પરપરાગીકરણ સુનિશ્ચિત કરવાનો હોય છે. આથી, બીજા પરાગરજના સંપર્કમાં આવે ત્યારે જ ફલન થાય. A) કીટકો પાસેથી બચાવવા માટે બેગનો ઉપયોગ થઈ શકે, પરંતુ તે મુખ્ય હેતુ નથી. C) તાપમાન નિયંત્રણ માટે બેગનો ઉપયોગ થતો નથી. D) અતિ પ્રકાશથી બચાવવા માટે બેગનો ઉપયોગ થતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: જનીન અને વંશપરંપરા", "difficulty": "Hard", "num": 22}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો એક પુષ્પની પરાગરજને બીજી જાતિમાં સ્ત્રીકેસર પર લગાડવામાં આવે, તો તેને કયા પ્રકારનું સંકરણ કહેવાય?", "options": ["A) સજાતીય સંકરણ (Intraspecific hybridisation)", "B) વિજાતીય સંકરણ (Interspecific hybridisation)", "C) જાતિય સંકરણ (Intrageneric hybridisation)", "D) અર્ધસંકરણ (Haploid hybridisation)"], "correct": 1, "explanation": "જ્યારે એક જાતિમાંથી લેવાયેલી પરાગરજને બીજી જાતિમાં સ્ત્રીકેસર પર લગાડવામાં આવે, ત્યારે તેને વિજાતીય સંકરણ (Interspecific hybridisation) કહેવાય. સજાતીય સંકરણ એક જ જાતિની વચ્ચે થાય છે, જાતિય સંકરણ એક જ જીનસની વચ્ચે થાય છે, અને અર્ધસંકરણ એ હપ્લોઈડ સંકરણ છે, જે અહીં લાગુ પડતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: વંશવેલા સુધારણા", "difficulty": "Hard", "num": 23}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો મધ્યવર્તી કર્યા પછી પુષ્પને પોલીથીન બેગમાં બંધ કરવામાં આવે, તો પછી કયો પગલો લેવામાં આવે છે?", "options": ["A) પુષ્પને તરત જ ખોલી નાખવા અને પરાગરજ લગાડવા", "B) પુષ્પને 24 કલાક પછી ખોલી, સ્ત્રીકેસરની પરિપક્વતા ચકાસી, અને પછી પરાગરજ લગાડવા", "C) પુષ્પને 48 કલાક પછી ખોલી અને પરાગરજ લગાડવા", "D) પુષ્પને કાયમી રૂપે બંધ રાખવા"], "correct": 1, "explanation": "મધ્યવર્તી કર્યા પછી પુષ્પને પોલીથીન બેગમાં બંધ કર્યા પછી, પુષ્પને 24 કલાક પછી ખોલી, સ્ત્રીકેસરની પરિપક્વતા ચકાસી, અને પછી પરાગરજ લગાડવી જોઈએ. આથી, સ્ત્રીકેસર પરિપક્વ અવસ્થામાં હોય ત્યારે જ પરાગરજ લગાડવામાં આવે છે. વિકલ્પ A, C, અને D એ પ્રક્રિયાના યોગ્ય ક્રમ સાથે સંકળાયેલા નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: સજીવોમાં પ્રજનન", "difficulty": "Hard", "num": 24}, {"question": "એક વનસ્પતિશાસ્ત્રી કૃત્રિમ સંકરણ પ્રયોગમાં બે અલગ-અલગ જાતિઓના પુષ્પોનો ઉપયોગ કરે છે. પ્રથમ જાતિના પુષ્પમાંથી પુમ્સ્કંજને કાપી નાખ્યા પછી, બીજી જાતિના પુષ્પમાંથી પરાગરજ લઈને સ્ત્રીકેસર પર લગાડવામાં આવે છે. જો ફલન સફળ થાય, તો નિર્માણ થયેલા બીજમાં કયું લક્ષણ જોવા મળવાની સંભાવના વધુ હોય છે?", "options": ["A) માત્ર માતૃજન્ય લક્ષણો, કારણ કે સ્ત્રીકેસર માતૃ વનસ્પતિનું હોય છે", "B) માત્ર પિતૃજન્ય લક્ષણો, કારણ કે પરાગરજ પિતૃ વનસ્પતિનું પ્રતિનિધિત્વ કરે છે", "C) માતૃ અને પિતૃ બંનેના લક્ષણોનું મિશ્રણ, કારણ કે બંને જનીનોનું સંયોજન થાય છે", "D) ન તો માતૃ ન તો પિતૃના લક્ષણો, કારણ કે કૃત્રિમ સંકરણમાં જનીનોનું મિશ્રણ થતું નથી"], "correct": 2, "explanation": "કૃત્રિમ સંકરણમાં, માતૃ વનસ્પતિના સ્ત્રીકેસર અને પિતૃ વનસ્પતિની પરાગરજ વચ્ચે ફલન થાય છે. આથી, બંને વનસ્પતિઓના જનીનોનું સંયોજન થાય છે, જેના પરિણામે સંતતિમાં બંનેના લક્ષણોનું મિશ્રણ જોવા મળે છે. વિકલ્પ A ખોટો છે કારણ કે માત્ર માતૃ લક્ષણો જ પ્રબળ હોવાની કોઈ ખાતરી નથી. વિકલ્પ B ખોટો છે કારણ કે માત્ર પિતૃ લક્ષણો જ પ્રબળ હોવાની સંભાવના નથી. વિકલ્પ D ખોટો છે કારણ કે કૃત્રિમ સંકરણમાં જનીનોનું સંયોજન થાય છે.", "ncert_ref": "કक्षा 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "difficulty": "Hard", "num": 25}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો એક સ્વ-અસંગત (self-incompatible) જાતિના પુષ્પમાંથી પરાગરજ લઈને તે જ જાતિના બીજા પુષ્પના સ્ત્રીકેસર પર લગાડવામાં આવે, તો નીચેનામાંથી કયું પરિણામ સંભવિત છે?", "options": ["A) ફલન સફળ થશે, કારણ કે પરાગરજ અને સ્ત્રીકેસર એક જ જાતિના છે", "B) ફલન નિષ્ફળ જશે, કારણ કે સ્વ-અસંગતતા જનીનિક અવરોધ ઉભો કરે છે", "C) ફલન સફળ થશે, પરંતુ ઉત્પન્ન થયેલ બીજ અંકુરણ પામશે નહીં", "D) ફલન નિષ્ફળ જશે, કારણ કે પરાગરજ અપરિપક્વ હશે"], "correct": 1, "explanation": "સ્વ-અસંગત જાતિઓમાં, પોતાની જ પરાગરજ સાથે ફલન થતું નથી કારણ કે જનીનિક અવરોધ ઉભો થાય છે, જે ફલનને અટકાવે છે. આથી, વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે સ્વ-અસંગતતા હોવાથી ફલન નહીં થાય. વિકલ્પ C ખોટો છે કારણ કે ફલન જ નહીં થાય, તેથી બીજ પણ ઉત્પન્ન નહીં થાય. વિકલ્પ D ખોટો છે કારણ કે અહીં પરાગરજની પરિપક્વતા મુદ્દો નથી, પરંતુ જનીનિક અસંગતતા છે.", "ncert_ref": "કक्षा 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "difficulty": "Hard", "num": 26}, {"question": "એક સંશોધક કૃત્રિમ સંકરણ પ્રયોગમાં બે અલગ-અલગ જાતિઓના પુષ્પોનો ઉપયોગ કરે છે. પ્રથમ જાતિના પુષ્પમાંથી પુમ્સ્કંજને કાપી નાખ્યા પછી, બીજી જાતિના પુષ્પમાંથી પરાગરજ લઈને સ્ત્રીકેસર પર લગાડવામાં આવે છે. જો ફલન સફળ થાય, તો નિર્માણ થયેલા ભ્રૂણમાં કયા પ્રકારના કોષકેન્દ્રીય સંયોજનની સંભાવના હોય છે?", "options": ["A) માત્ર માતૃ કોષકેન્દ્ર, કારણ કે સ્ત્રીકેસર માતૃ વનસ્પતિનું હોય છે", "B) માત્ર પિતૃ કોષકેન્દ્ર, કારણ કે પરાગરજ પિતૃ વનસ્પતિનું પ્રતિનિધિત્વ કરે છે", "C) માતૃ અને પિતૃ બંને કોષકેન્દ્રનું સંયોજન, કારણ કે ફલનમાં બંનેનો સમાવેશ થાય છે", "D) ન તો માતૃ ન તો પિતૃ કોષકેન્દ્ર, કારણ કે કૃત્રિમ સંકરણમાં કોષકેન્દ્રનું સંયોજન થતું નથી"], "correct": 2, "explanation": "ફલન પ્રક્રિયામાં, પરાગરજમાંથી પિતૃ કોષકેન્દ્ર અને સ્ત્રીકેસરમાંથી માતૃ કોષકેન્દ્રનું સંયોજન થાય છે, જેના પરિણામે ભ્રૂણમાં બંને કોષકેન્દ્રનું મિશ્રણ થાય છે. આથી, વિકલ્પ C સાચો છે. વિકલ્પ A અને B ખોટા છે કારણ કે બંને કોષકેન્દ્રોનું સંયોજન થાય છે. વિકલ્પ D ખોટો છે કારણ કે કૃત્રિમ સંકરણમાં કોષકેન્દ્રનું સંયોજન થાય છે.", "ncert_ref": "કक्षा 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "difficulty": "Hard", "num": 27}, {"question": "કૃત્રિમ સંકરણ દરમિયાન, જો એક સ્વ-અસંગત (self-incompatible) જાતિના પુષ્પમાંથી પરાગરજ લઈને તે જ જાતિના સ્ત્રીકેસર પર લગાડવામાં આવે, તો શું થશે?", "options": ["A) ફલન સફળતાપૂર્વક થશે", "B) ફલન થશે નહીં, કારણ કે સ્વ-અસંગતતા પ્રતિબંધ લાગુ પડશે", "C) ફલન થશે, પરંતુ બીજ વિકસિત થશે નહીં", "D) ફલન થશે, પરંતુ ફળમાં વિકૃતિઓ જોવા મળશે"], "correct": 1, "explanation": "સ્વ-અસંગત જાતિઓમાં, જ્યારે તે જ જાતિના પરાગરજને સ્ત્રીકેસર પર લગાડવામાં આવે, ત્યારે ફલન થતું નથી, કારણ કે સ્વ-અસંગતતા તંત્ર (self-incompatibility system) આ પ્રક્રિયાને અટકાવે છે. વિકલ્પ A, C, અને D આ જૈવિક યાંત્રિકી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 2: જનન તથા વિકાસ", "difficulty": "Hard", "num": 28}, {"question": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો એક જાતિમાંથી લેવાયેલી પરાગરજને બીજી જાતિમાં સ્ત્રીકેસર પર લગાડવામાં આવે, તો તેને કયા પ્રકારનું સંકરણ કહેવાય?", "options": ["A) અંતરજાતીય સંકરણ (Intergeneric hybridization)", "B) અંતરપ્રજાતીય સંકરણ (Interspecific hybridization)", "C) અંતરવર્ગીય સંકરણ (Intervarietal hybridization)", "D) સ્વ-સંકરણ (Self-hybridization)"], "correct": 1, "explanation": "જ્યારે બે અલગ પ્રજાતિઓ (species) વચ્ચે સંકરણ કરવામાં આવે, ત્યારે તેને અંતરપ્રજાતીય સંકરણ (Interspecific hybridization) કહેવાય. અંતરજાતીય સંકરણ (A) બે અલગ જાતિઓ (genera) વચ્ચે થાય, અંતરવર્ગીય સંકરણ (C) એક જ પ્રજાતિની અલગ વાવેતર વચ્ચે થાય, અને સ્વ-સંકરણ (D) એક જ વનસ્પતિના પુરુષ અને સ્ત્રી ભાગો વચ્ચે થાય.", "ncert_ref": "Class XII - પ્રકરણ 2: જનન તથા વિકાસ", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
