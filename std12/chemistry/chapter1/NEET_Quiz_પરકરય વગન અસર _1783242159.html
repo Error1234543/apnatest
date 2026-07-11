@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - પ્રક્રિયા વેગને અસર કરતા પરિબળો</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 પ્રક્રિયા વેગને અસર કરતા પરિબળો</span>
+                <span>🎯 Hard</span>
+                <span>📝 27 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક પ્રતિક્રિયામાં ઉત્સેચકની સાંદ્રતા બમણી કરતાં પ્રક્રિયા વેગ બમણો થાય છે. જો સબસ્ટ્રેટની સાંદ્રતા અમર્યાદિત હોય તો ઉત્સેચકની સાંદ્રતા ચાર ગણી કરવાથી પ્રક્રિયા વેગ કેટલો થશે?", "options": ["A) બમણો", "B) ચાર ગણો", "C) અચળ રહેશે", "D) અડધો"], "correct": 1, "explanation": "જ્યારે સબસ્ટ્રેટની સાંદ્રતા અમર્યાદિત હોય ત્યારે ઉત્સેચકની સાંદ્રતા વડે પ્રક્રિયા વેગ સીધો પ્રમાણમાં વધે છે. ઉત્સેચકની સાંદ્રતા બમણી કરવાથી વેગ બમણો થાય, ચાર ગણી કરવાથી વેગ ચાર ગણો થાય. A) ખોટું કારણ કે વેગ સબસ્ટ્રેટ પર આધાર રાખે છે, પરંતુ અહીં સબસ્ટ્રેટ અમર્યાદિત છે. C) ખોટું કારણ કે વેગ બદલાય છે. D) ખોટું કારણ કે વેગ ઘટતો નથી.", "ncert_ref": "Class XII - પ્રકરણ ૨: ઉત્સેચકો", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયું પરિબળ ઉત્સેચકની ક્રિયાશીલતા પર સૌથી ઓછું અસર કરે છે?", "options": ["A) તાપમાન", "B) pH", "C) ઉત્સેચકની આણ્વિક દળ", "D) સબસ્ટ્રેટની સાંદ્રતા"], "correct": 2, "explanation": "ઉત્સેચકની ક્રિયાશીલતા પર તાપમાન (A), pH (B), અને સબસ્ટ્રેટની સાંદ્રતા (D)ની મહત્વની અસર થાય છે. ઉત્સેચકની આણ્વિક દળ (C) એ તેની ક્રિયાશીલતાને સીધી રીતે અસર કરતું નથી, પરંતુ તેની રચના અને ક્રિયાશીલ સ્થાન પર આધાર રાખે છે.", "ncert_ref": "Class XII - પ્રકરણ ૨: ઉત્સેચકો", "difficulty": "Hard", "num": 2}, {"question": "એક પ્રતિક્રિયામાં સબસ્ટ્રેટની સાંદ્રતા વધારતાં પ્રક્રિયા વેગમાં કોઈ વધારો થતો નથી. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ઉત્સેચક સંપૂર્ણપણે નિષ્ક્રિય થઈ ગયો છે", "B) સબસ્ટ્રેટની સાંદ્રતા Vmax કરતાં ઓછી છે", "C) ઉત્સેચકના સક્રિય સ્થાનો સંપૂર્ણપણે વ્યસ્ત છે", "D) પ્રતિક્રિયા ઉષ્માગતિ વડે નિયંત્રિત થાય છે"], "correct": 2, "explanation": "જ્યારે સબસ્ટ્રેટની સાંદ્રતા વધારતાં પ્રક્રિયા વેગમાં કોઈ વધારો થતો નથી, ત્યારે ઉત્સેચકના સક્રિય સ્થાનો સંપૂર્ણપણે વ્યસ્ત થઈ ગયા હોય છે (Vmax સ્થિતિ). A) ખોટું કારણ કે ઉત્સેચક નિષ્ક્રિય નથી, પરંતુ સંપૂર્ણપણે વ્યસ્ત છે. B) ખોટું કારણ કે Vmax સ્થિતિમાં સબસ્ટ્રેટની સાંદ્રતા Vmax કરતાં વધારે હોય છે. D) ખોટું કારણ કે પ્રતિક્રિયા ઉત્સેચક વડે નિયંત્રિત થાય છે, ઉષ્માગતિ વડે નહીં.", "ncert_ref": "Class XII - પ્રકરણ ૨: ઉત્સેચકો", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયું પરિબળ ઉત્સેચકની ક્રિયાશીલતાને અસર કરતું નથી, પરંતુ પ્રક્રિયા વેગને અસર કરે છે?", "options": ["A) ઉત્સેચક નિષ્ક્રિયકારક", "B) સબસ્ટ્રેટની સાંદ્રતા", "C) ઉત્સેચકની જનીન રચના", "D) પ્રતિક્રિયા મિશ્રણનું કદ"], "correct": 3, "explanation": "પ્રતિક્રિયા મિશ્રણનું કદ (D) પ્રક્રિયા વેગને અસર કરે છે કારણ કે તે સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતાને બદલે છે, પરંતુ ઉત્સેચકની ક્રિયાશીલતાને સીધી રીતે અસર કરતું નથી. A) ઉત્સેચક નિષ્ક્રિયકારક ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે. B) સબસ્ટ્રેટની સાંદ્રતા ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે. C) ઉત્સેચકની જનીન રચના તેની ક્રિયાશીલતાને નક્કી કરે છે.", "ncert_ref": "Class XII - પ્રકરણ ૨: ઉત્સેચકો", "difficulty": "Hard", "num": 4}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૨૦°C થી ૪૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ બમણો થાય છે. જો તાપમાન ૪૦°C થી ૬૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ કેવી રીતે બદલાશે?", "options": ["A) બમણો થશે", "B) અડધો થશે", "C) અચળ રહેશે", "D) ઘટશે"], "correct": 3, "explanation": "ઉત્સેચકોનું ઇપ્ટિમલ તાપમાન (આદર્શ તાપમાન) હોય છે, જ્યાં તેની ક્રિયાશીલતા સૌથી વધારે હોય છે. ૪૦°C પછી તાપમાન વધારવાથી ઉત્સેચકનું ડીનેચરેશન (વિકૃતીકરણ) થાય છે, જેના કારણે તેની ક્રિયાશીલતા ઘટે છે અને પ્રક્રિયા વેગ ઘટે છે. A, B, અને C ખોટા છે કારણ કે વેગ ઘટશે, બમણો અથવા અડધો થશે નહીં.", "ncert_ref": "Class XII - પ્રકરણ ૨: ઉત્સેચકો", "difficulty": "Hard", "num": 5}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો pH ૭ થી ૫ સુધી ઘટાડવામાં આવે તો પ્રક્રિયા વેગમાં અચાનક ઘટાડો થાય છે. આના માટે નીચેનામાંથી કયું કારણ સૌથી યોગ્ય છે?", "options": ["A) ઉત્સેચકની સક્રિય સ્થાનની રચના બદલાઈ જાય છે, જેથી સબસ્ટ્રેટ બાંધી શકાતું નથી.", "B) સબસ્ટ્રેટની સાંદ્રતા ઘટી જાય છે, જેથી પ્રક્રિયા વેગ ઘટે છે.", "C) ઉત્સેચકની સાંદ્રતા ઘટી જાય છે, જેથી પ્રક્રિયા વેગ ઘટે છે.", "D) તાપમાનમાં ઘટાડો થવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટે છે."], "correct": 0, "explanation": "પ્રક્રિયા વેગમાં ઘટાડો pHના ઘટાડા કારણે ઉત્સેચકની સક્રિય સ્થાનની રચનામાં ફેરફાર થવાને કારણે થાય છે, જેથી સબસ્ટ્રેટ ઉત્સેચક સાથે બાંધી શકાતું નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) pHમાં ફેરફાર સબસ્ટ્રેટની સાંદ્રતાને અસર કરતો નથી. C) ઉત્સેચકની સાંદ્રતા pH પર આધારિત નથી. D) પ્રશ્નમાં તાપમાનમાં કોઈ ફેરફાર નથી.", "ncert_ref": "Class XII - Chapter 2: જીવનની વૈવિધ્યતા અને તેના સ્વરૂપો (ઉત્સેચકો)", "difficulty": "Hard", "num": 6}, {"question": "નીચેનામાંથી કયું પરિબળ ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે, પરંતુ તે પ્રક્રિયા વેગને સીધી રીતે અસર કરતું નથી?", "options": ["A) સબસ્ટ્રેટની સાંદ્રતા", "B) ઉત્સેચકની સાંદ્રતા", "C) ઉત્સેચક અવરોધક (Inhibitor)ની હાજરી", "D) પ્રક્રિયાનું તાપમાન"], "correct": 2, "explanation": "ઉત્સેચક અવરોધક (Inhibitor) ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે, પરંતુ તે સીધી રીતે પ્રક્રિયા વેગને અસર કરતું નથી. બાકીના વિકલ્પો સીધી રીતે પ્રક્રિયા વેગને અસર કરે છે: A) સબસ્ટ્રેટની સાંદ્રતા પ્રક્રિયા વેગને સીધી અસર કરે છે. B) ઉત્સેચકની સાંદ્રતા પ્રક્રિયા વેગને સીધી અસર કરે છે. D) તાપમાન પ્રક્રિયા વેગને સીધી અસર કરે છે.", "ncert_ref": "Class XII - Chapter 2: જીવનની વૈવિધ્યતા અને તેના સ્વરૂપો (ઉત્સેચકો)", "difficulty": "Hard", "num": 7}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો સબસ્ટ્રેટની સાંદ્રતા અતિશય વધારવામાં આવે તો પ્રક્રિયા વેગમાં કોઈ વધારો થતો નથી. આના માટે નીચેનામાંથી કયું કારણ સૌથી યોગ્ય છે?", "options": ["A) ઉત્સેચકની સાંદ્રતા ઓછી છે, જેથી સબસ્ટ્રેટના અણુઓ માટે પૂરતી સક્રિય સ્થાનો ઉપલબ્ધ નથી.", "B) પ્રક્રિયા વેગ તાપમાન પર આધારિત છે, જેથી સબસ્ટ્રેટની સાંદ્રતાનો કોઈ પ્રભાવ પડતો નથી.", "C) ઉત્સેચકની ક્રિયાશીલતા pH પર આધારિત છે, જેથી સબસ્ટ્રેટની સાંદ્રતાનો કોઈ પ્રભાવ પડતો નથી.", "D) સબસ્ટ્રેટની સાંદ્રતા વધારવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટે છે."], "correct": 0, "explanation": "જ્યારે સબસ્ટ્રેટની સાંદ્રતા અતિશય વધારે હોય છે, ત્યારે ઉત્સેચકની સક્રિય સ્થાનો સંપૂર્ણ રીતે વ્યસ્ત થઈ જાય છે, જેથી પ્રક્રિયા વેગમાં કોઈ વધારો થતો નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) તાપમાન પ્રક્રિયા વેગને અસર કરે છે, પરંતુ પ્રશ્નમાં તાપમાનનો ઉલ્લેખ નથી. C) pH પ્રક્રિયા વેગને અસર કરે છે, પરંતુ પ્રશ્નમાં pHનો ઉલ્લેખ નથી. D) સબસ્ટ્રેટની સાંદ્રતા વધારવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટતી નથી.", "ncert_ref": "Class XII - Chapter 2: જીવનની વૈવિધ્યતા અને તેના સ્વરૂપો (ઉત્સેચકો)", "difficulty": "Hard", "num": 8}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૪૦°C થી ૬૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગમાં અચાનક ઘટાડો થાય છે. આના માટે નીચેનામાંથી કયું કારણ સૌથી યોગ્ય છે?", "options": ["A) ઉત્સેચકની સક્રિય સ્થાનની રચના બદલાઈ જાય છે, જેથી સબસ્ટ્રેટ બાંધી શકાતું નથી.", "B) સબસ્ટ્રેટની સાંદ્રતા ઘટી જાય છે, જેથી પ્રક્રિયા વેગ ઘટે છે.", "C) ઉત્સેચકની સાંદ્રતા ઘટી જાય છે, જેથી પ્રક્રિયા વેગ ઘટે છે.", "D) તાપમાનમાં વધારો થવાથી સબસ્ટ્રેટની સાંદ્રતા ઘટે છે."], "correct": 0, "explanation": "તાપમાનમાં અતિશય વધારો થવાથી ઉત્સેચકની સક્રિય સ્થાનની રચના બદલાઈ જાય છે, જેથી સબસ્ટ્રેટ ઉત્સેચક સાથે બાંધી શકાતું નથી, અને પ્રક્રિયા વેગમાં ઘટાડો થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) તાપમાનમાં વધારો સબસ્ટ્રેટની સાંદ્રતાને અસર કરતો નથી. C) ઉત્સેચકની સાંદ્રતા તાપમાન પર આધારિત નથી. D) તાપમાનમાં વધારો સબસ્ટ્રેટની સાંદ્રતાને ઘટાડતો નથી.", "ncert_ref": "Class XII - Chapter 2: જીવનની વૈવિધ્યતા અને તેના સ્વરૂપો (ઉત્સેચકો)", "difficulty": "Hard", "num": 9}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રક્રિયામાં, જો સબસ્ટ્રેટની સાંદ્રતા અને ઉત્સેચકની સાંદ્રતા બંને બમણી કરવામાં આવે, તો પ્રક્રિયા વેગ કેવી રીતે બદલાશે? (ધારો કે તાપમાન અને pH અચળ રાખવામાં આવ્યા છે)", "options": ["A) પ્રક્રિયા વેગ બમણો થશે", "B) પ્રક્રિયા વેગ ચાર ગણો થશે", "C) પ્રક્રિયા વેગ અચળ રહેશે", "D) પ્રક્રિયા વેગ વીસ ગણો થશે"], "correct": 0, "explanation": "જ્યારે સબસ્ટ્રેટ અને ઉત્સેચક બંનેની સાંદ્રતા બમણી કરવામાં આવે, ત્યારે પ્રક્રિયા વેગ બમણો થાય છે. કારણ કે ઉત્સેચકની ક્રિયાશીલતા સબસ્ટ્રેટની ઉપલબ્ધતાથી મર્યાદિત હોય છે. જો સબસ્ટ્રેટની સાંદ્રતા પૂરતી હોય, તો ઉત્સેચકની સાંદ્રતા વધારવાથી પ્રક્રિયા વેગ વધે છે. પરંતુ અહીં બંને બમણા થતાં, પ્રક્રિયા વેગ પણ બમણો થાય છે. વિકલ્પ B, C, અને D અયોગ્ય છે કારણ કે તેઓ પ્રક્રિયા વેગમાં અતિશય વધારો અથવા અચળતાનો દાવો કરે છે, જે વાસ્તવિક પરિસ્થિતિઓમાં શક્ય નથી.", "ncert_ref": "Class XII - Chapter 2: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 10}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જ્યારે સબસ્ટ્રેટની સાંદ્રતા Vmaxના અડધા વેગે પ્રતિક્રિયા થાય છે ત્યારે તે સાંદ્રતાને કહેવાય છે:", "options": ["A) Km (માઇકેલિસ મંદાક)", "B) Vmax (મહત્તમ વેગ)", "C) Kcat (કેટાલિટિક દર અચળાંક)", "D) Ea (સક્રિયણ ઊર્જા)"], "correct": 0, "explanation": "Km (માઇકેલિસ મંદાક) એ સબસ્ટ્રેટની સાંદ્રતા છે જ્યારે પ્રતિક્રિયા વેગ Vmaxના અડધા જેટલો હોય છે. Vmax એ મહત્તમ વેગ છે જે સબસ્ટ્રેટની અમર્યાદ સાંદ્રતામાં મેળવી શકાય છે, Kcat એ ઉત્સેચકની કેટાલિટિક ક્ષમતા દર્શાવે છે, અને Ea એ સક્રિયણ ઊર્જા છે જે પ્રતિક્રિયા શરૂ થવા માટે જરૂરી છે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 11}, {"question": "નીચેનામાંથી કયું પરિબળ ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે પરંતુ તે પ્રક્રિયા વેગને સીધી રીતે અસર કરતું નથી?", "options": ["A) તાપમાન", "B) pH", "C) ઉત્સેચકની સાંદ્રતા", "D) સબસ્ટ્રેટની સાંદ્રતા"], "correct": 2, "explanation": "ઉત્સેચકની સાંદ્રતા એ ઉત્સેચકની ક્રિયાશીલતાને અસર કરે છે પરંતુ તે પ્રક્રિયા વેગને સીધી રીતે અસર કરતું નથી, કારણ કે પ્રક્રિયા વેગ સબસ્ટ્રેટની સાંદ્રતા પર પણ આધાર રાખે છે. તાપમાન અને pH એ ઉત્સેચકની ક્રિયાશીલતા અને પ્રક્રિયા વેગ બંનેને અસર કરે છે, જ્યારે સબસ્ટ્રેટની સાંદ્રતા સીધી રીતે પ્રક્રિયા વેગને અસર કરે છે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 12}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૦°C થી ૨૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ કેવી રીતે બદલાશે?", "options": ["A) પ્રક્રિયા વેગ ઘટશે", "B) પ્રક્રિયા વેગ બમણો થશે", "C) પ્રક્રિયા વેગ સતત વધશે", "D) પ્રક્રિયા વેગ અચળ રહેશે"], "correct": 2, "explanation": "તાપમાનમાં વધારો થતાં અણુની ગતિશીલતા વધે છે, જેના કારણે ઉત્સેચક અને સબસ્ટ્રેટ વચ્ચેના ટકરાવની સંખ્યા વધે છે, પરિણામે પ્રક્રિયા વેગ વધે છે. જોકે, તાપમાન એક મર્યાદા સુધી (ઓપ્ટિમમ તાપમાન) પ્રક્રિયા વેગ વધારે છે, પછી તે ઘટવા લાગે છે. ૦°C થી ૨૦°C સુધી તાપમાન વધારતાં પ્રક્રિયા વેગ સતત વધશે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 13}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો pH ૭ થી ૯ સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ કેવી રીતે બદલાશે જ્યારે ઉત્સેચકનું ઓપ્ટિમમ pH ૭ હોય?", "options": ["A) પ્રક્રિયા વેગ વધશે", "B) પ્રક્રિયા વેગ ઘટશે", "C) પ્રક્રિયા વેગ અચળ રહેશે", "D) પ્રક્રિયા વેગ પહેલા વધશે અને પછી ઘટશે"], "correct": 1, "explanation": "જ્યારે pH ઓપ્ટિમમ pH (આ કેસમાં ૭) થી દૂર જાય છે, ત્યારે ઉત્સેચકની ક્રિયાશીલતા ઘટે છે, પરિણામે પ્રક્રિયા વેગ ઘટે છે. ઓપ્ટિમમ pH થી ઉપર અથવા નીચે જતાં ઉત્સેચકની રચના બદલાઈ શકે છે, જે તેની ક્રિયાશીલતાને અસર કરે છે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 14}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, પ્રારંભિક વેગ (initial rate) પર નીચેનામાંથી કયા પરિબળની અસર સૌથી વધુ જટિલ અને અપ્રत्यક્ષ હોય છે?", "options": ["A) સબસ્ટ્રેટની સાંદ્રતા", "B) ઉત્સેચકની સક્રિય સ્થાન (active site) ની સંખ્યા", "C) પ્રતિક્રિયા મિશ્રણમાં હાજર અકાર્બનિક આયનો (inorganic ions) ની સાંદ્રતા", "D) પ્રતિક્રિયા મિશ્રણનું કુલ કદ (total volume)"], "correct": 2, "explanation": "સાચો જવાબ વિકલ્પ C છે. અકાર્બનિક આયનો ઉત્સેચકની ક્રિયાશીલતા પર અપ્રत्यક્ષ અને જટિલ અસર કરે છે, કારણ કે તેઓ સક્રિયકર્તા (activators) અથવા અવરોધકો (inhibitors) તરીકે કાર્ય કરી શકે છે. કેટલાક આયનો ઉત્સેચકની રચનાને સ્થિર કરે છે, જ્યારે અન્ય તેને બદલી શકે છે અથવા સક્રિય સ્થાનને અવરોધિત કરી શકે છે. આ અસર સબસ્ટ્રેટની સાંદ્રતા કે ઉત્સેચકની સક્રિય સ્થાનની સંખ્યા કરતાં વધુ જટિલ હોય છે. \n\nવિકલ્પ A ખોટો છે કારણ કે સબસ્ટ્રેટની સાંદ્રતા પ્રત્યક્ષ રીતે પ્રક્રિયા વેગને અસર કરે છે (Michaelis-Menten ગતિશાસ્ત્ર મુજબ). \n\nવિકલ્પ B ખોટો છે કારણ કે ઉત્સેચકની સક્રિય સ્થાનની સંખ્યા પ્રત્યક્ષ રીતે પ્રક્રિયા વેગને નિર્ધારિત કરે છે (વધુ સક્રિય સ્થાન = વધુ વેગ). \n\nવિકલ્પ D ખોટો છે કારણ કે પ્રતિક્રિયા મિશ્રણનું કુલ કદ પ્રતિક્રિયા વેગને અસર કરતું નથી, કારણ કે વેગ સાંદ્રતા પર આધારિત હોય છે, કુલ કદ પર નહીં.", "ncert_ref": "Class XII - પ્રકરણ 9: બાયોમોલેક્યુલ્સ (ઉત્સેચકોની ક્રિયાવિધિ અને પરિબળો)", "difficulty": "Hard", "num": 15}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૩૦°C થી ૫૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ પર નીચેનામાંથી કયું પરિણામ જોવા મળશે?", "options": ["A) પ્રક્રિયા વેગ સતત વધશે", "B) પ્રક્રિયા વેગ પ્રથમ વધશે અને પછી ઘટશે", "C) પ્રક્રિયા વેગ સતત ઘટશે", "D) પ્રક્રિયા વેગ પર કોઈ અસર થશે નહીં"], "correct": 1, "explanation": "ઉત્સેચકની ક્રિયાશીલતા તાપમાન પર આધારિત હોય છે. નીચા તાપમાને, તાપમાન વધારવાથી અણુઓની ગતિશીલતા વધે છે અને પ્રક્રિયા વેગ વધે છે. પરંતુ અતિશય તાપમાને (સામાન્ય રીતે ૦-૫૦°C પછી), ઉત્સેચક ડીનેચર થાય છે અને તેની ક્રિયાશીલતા ઘટે છે, જેથી પ્રક્રિયા વેગ ઘટે છે. આથી પ્રક્રિયા વેગ પ્રથમ વધશે અને પછી ઘટશે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 16}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૩૭°C થી ૪૨°C સુધી વધારવામાં આવે, તો નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રહેશે?", "options": ["A) પ્રક્રિયા વેગમાં નોંધપાત્ર વધારો થશે", "B) ઉત્સેચકની ક્રિયાશીલતા સંપૂર્ણ રીતે નષ્ટ થશે", "C) પ્રક્રિયા વેગમાં થોડો ઘટાડો થશે, કારણ કે ઉત્સેચકની ક્રિયાશીલતા ઘટશે", "D) પ્રક્રિયા વેગ પર કોઈ અસર થશે નહીં"], "correct": 2, "explanation": "37°C થી 42°C સુધી તાપમાન વધારવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટવાની શરૂઆત થાય છે, કારણ કે ઉત્સેચકોની અતિશય તાપમાને ડીનેચરલાઇઝેશન થવાની શરૂઆત થાય છે. આથી, પ્રક્રિયા વેગમાં થોડો ઘટાડો થશે. A) પ્રક્રિયા વેગમાં નોંધપાત્ર વધારો થવો એ 37°C થી 42°C વચ્ચે અપેક્ષિત નથી, કારણ કે 37°C મનુષ્ય શરીરનું ઇપ્ટિમલ તાપમાન છે. B) ઉત્સેચકની ક્રિયાશીલતા સંપૂર્ણ રીતે નષ્ટ થવી એ 42°C પર અતિશય હોઈ શકે નહીં. D) પ્રક્રિયા વેગ પર કોઈ અસર ન થવી એ સત્ય નથી, કારણ કે તાપમાનની અસર ઉત્સેચકની ક્રિયાશીલતા પર પડે છે.", "ncert_ref": "Class XII - Chapter 2: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 17}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો પ્રતિક્રિયા મિશ્રણમાં અકાર્બનિક ફોસ્ફેટ (Pi) ઉમેરવામાં આવે તો પ્રક્રિયા વેગ પર શું અસર થશે? (ઉત્સેચક ફોસ્ફોફ્રુક્ટોકાઇનેઝ-1 (PFK-1) છે, જે ગ્લાયકોલિસિસમાં મુખ્ય નિયંત્રક ઉત્સેચક છે.)", "options": ["A) પ્રક્રિયા વેગ વધશે, કારણ કે Pi એ PFK-1 નો સક્રિયકર્તા છે.", "B) પ્રક્રિયા વેગ ઘટશે, કારણ કે Pi એ PFK-1 નો અવરોધક છે.", "C) પ્રક્રિયા વેગ પર કોઈ અસર થશે નહીં, કારણ કે Pi ઉત્સેચકની ક્રિયાશીલતા સાથે સીધો સંબંધ ધરાવતું નથી.", "D) પ્રક્રિયા વેગ પ્રારંભમાં વધશે, પરંતુ પછી ઘટશે કારણ કે Pi ઉત્સેચકને અસ્થિર બનાવે છે."], "correct": 1, "explanation": "PFK-1 એ ગ્લાયકોલિસિસનો મુખ્ય નિયંત્રક ઉત્સેચક છે. અકાર્બનિક ફોસ્ફેટ (Pi) એ PFK-1 નો અવરોધક છે, જે ઉત્સેચકની ક્રિયાશીલતા ઘટાડે છે અને તેથી પ્રક્રિયા વેગ ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે Pi સક્રિયકર્તા નથી. વિકલ્પ C ખોટો છે કારણ કે Pi ઉત્સેચકની ક્રિયાશીલતા પર અસર કરે છે. વિકલ્પ D ખોટો છે કારણ કે Pi ઉત્સેચકને અસ્થિર બનાવતું નથી, પરંતુ તેના કાર્યને અવરોધે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: જૈવિક પ્રક્રિયાઓમાં ઉત્સેચકોની ભૂમિકા", "difficulty": "Hard", "num": 18}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો **પ્રતિક્રિયા મિશ્રણનું કુલ કદ બમણું** કરવામાં આવે (સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતા સમાન રાખીને), તો પ્રક્રિયા વેગ પર શું અસર થશે? (ધારો કે પ્રતિક્રિયા પ્રથમ ક્રમની છે.)", "options": ["A) પ્રક્રિયા વેગ બમણો થશે, કારણ કે સબસ્ટ્રેટ અને ઉત્સેચકના અણુઓની સંખ્યા વધે છે.", "B) પ્રક્રિયા વેગ અડધો થશે, કારણ કે સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતા અડધી થાય છે.", "C) પ્રક્રિયા વેગમાં કોઈ ફેર પડશે નહીં, કારણ કે સાંદ્રતા સમાન રહે છે.", "D) પ્રક્રિયા વેગ ચોથા ભાગનો થશે, કારણ કે પ્રતિક્રિયા દર સાંદ્રતાના વર્ગ પર આધારિત છે."], "correct": 1, "explanation": "જ્યારે પ્રતિક્રિયા મિશ્રણનું કુલ કદ બમણું કરવામાં આવે છે, ત્યારે સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતા અડધી થાય છે. પ્રથમ ક્રમની પ્રતિક્રિયામાં, પ્રક્રિયા વેગ સબસ્ટ્રેટની સાંદ્રતા પર સીધો આધારિત હોય છે. તેથી, સાંદ્રતા અડધી થતાં પ્રક્રિયા વેગ પણ અડધો થશે. અન્ય વિકલ્પો વૈજ્ઞાનિક રીતે અચોક્કસ છે કારણ કે તેઓ સાંદ્રતા અને પ્રક્રિયા વેગ વચ્ચેના સંબંધને યોગ્ય રીતે સમજાવતા નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "difficulty": "Hard", "num": 19}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, પ્રારંભિક સબસ્ટ્રેટ સાંદ્રતા Km મૂલ્ય કરતાં ઘણી વધારે છે. જો આ સ્થિતિમાં પ્રતિક્રિયા મિશ્રણનું કુલ કદ બમણું કરવામાં આવે (ઉત્સેચક અને સબસ્ટ્રેટની મોલ સંખ્યા અચળ રાખીને), તો પ્રક્રિયા વેગ પર શું અસર થશે?", "options": ["A) પ્રક્રિયા વેગ અડધો થઈ જશે કારણ કે સબસ્ટ્રેટની સાંદ્રતા અડધી થઈ જાય છે", "B) પ્રક્રિયા વેગ બમણો થઈ જશે કારણ કે ઉત્સેચકની સાંદ્રતા અસરકારક રીતે વધે છે", "C) પ્રક્રિયા વેગમાં કોઈ ફેર પડશે નહીં કારણ કે પ્રતિક્રિયા શૂન્ય ક્રમની છે", "D) પ્રક્રિયા વેગ અડધો થઈ જશે કારણ કે ઉત્સેચકની સાંદ્રતા અડધી થઈ જાય છે"], "correct": 2, "explanation": "સાચો જવાબ વિકલ્પ C છે. જ્યારે સબસ્ટ્રેટની સાંદ્રતા Km કરતાં ઘણી વધારે હોય છે, ત્યારે ઉત્સેચક સંપૂર્ણપણે સંતૃપ્ત થઈ જાય છે અને પ્રક્રિયા વેગ મહત્તમ (Vmax) હોય છે. આ સ્થિતિમાં પ્રક્રિયા શૂન્ય ક્રમની બને છે, જેમાં વેગ સબસ્ટ્રેટની સાંદ્રતા પર આધારિત હોતો નથી. તેથી કુલ કદ બમણું કરવાથી સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતા અડધી થઈ જાય છે, પરંતુ વેગમાં કોઈ ફેર પડતો નથી કારણ કે ઉત્સેચક પહેલેથી જ સંતૃપ્ત છે.\n\nવિકલ્પ A ખોટો છે કારણ કે પ્રક્રિયા શૂન્ય ક્રમની હોવાથી સબસ્ટ્રેટની સાંદ્રતા ઘટવાથી વેગ પર અસર થતી નથી.\n\nવિકલ્પ B ખોટો છે કારણ કે ઉત્સેચકની સાંદ્રતા અડધી થાય છે, પરંતુ પ્રક્રિયા શૂન્ય ક્રમની હોવાથી વેગ વધતો નથી.\n\nવિકલ્પ D ખોટો છે કારણ કે ઉત્સેચકની સાંદ્રતા અડધી થવા છતાં પ્રક્રિયા શૂન્ય ક્રમની હોવાથી વેગ અડધો થતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: ઉત્સેચકો", "difficulty": "Hard", "num": 20}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન 37°C થી 0°C સુધી ઘટાડવામાં આવે તો પ્રક્રિયા વેગ પર કયો પ્રભાવ થશે?", "options": ["A) પ્રક્રિયા વેગ અચાનક શૂન્ય થઈ જશે", "B) પ્રક્રિયા વેગ ધીમે ધીમે ઘટશે અને અંતે શૂન્ય થશે", "C) પ્રક્રિયા વેગ સતત રહેશે", "D) પ્રક્રિયા વેગ પહેલા વધશે અને પછી ઘટશે"], "correct": 1, "explanation": "તાપમાન ઘટાડવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટે છે, કારણ કે અણુઓની ગતિ અને સબસ્ટ્રેટ-ઉત્સેચક બંધનની ક્ષમતા ઘટે છે. આ પ્રક્રિયા ધીમે ધીમે થાય છે અને અંતે 0°C પર પ્રક્રિયા વેગ શૂન્ય થઈ જાય છે. પ્રક્રિયા વેગ અચાનક શૂન્ય થતો નથી, કારણ કે ઉત્સેચકની ક્રિયાશીલતા ધીમે ધીમે ઘટે છે. પ્રક્રિયા વેગ સતત રહેતો નથી, અને તે પહેલા વધતો પણ નથી.", "ncert_ref": "Class XII - Chapter 4: જૈવ-રસાયણ (Biomolecules)", "difficulty": "Hard", "num": 21}, {"question": "નીચેનામાંથી કયું વિધાન ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયાના વેગ પર તાપમાનની અસર વિશે સાચું નથી?", "options": ["A) નીચા તાપમાને (0°C થી 20°C) તાપમાન વધારવાથી પ્રક્રિયા વેગ વધે છે.", "B) ઓપ્ટિમમ તાપમાન પછી તાપમાન વધારવાથી ઉત્સેચકની ક્રિયાશીલતા ઘટે છે.", "C) ઓપ્ટિમમ તાપમાને ઉત્સેચકની ક્રિયાશીલતા સૌથી વધારે હોય છે.", "D) ઓપ્ટિમમ તાપમાન પછી તાપમાન વધારવાથી પ્રક્રિયા વેગ પુનઃસ્થાપિત થઈ શકે છે."], "correct": 3, "explanation": "તાપમાન ઓપ્ટિમમ તાપમાન પછી વધારવાથી ઉત્સેચકની રચના ખરાબ થાય છે અને તેની ક્રિયાશીલતા હંમેશા માટે ઘટી જાય છે, પ્રક્રિયા વેગ પુનઃસ્થાપિત થતો નથી. આથી D) ખોટું છે. A), B), અને C) વિધાનો સાચા છે.", "ncert_ref": "Class XII - Chapter 9: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 22}, {"question": "નીચેનામાંથી કયું પરિબળ ઉત્સેચકની ક્રિયાશીલતા પર સૌથી ઓછી અસર કરે છે, પરંતુ પ્રક્રિયા વેગ પર અસર કરે છે?", "options": ["A) સબસ્ટ્રેટની સાંદ્રતા", "B) ઉત્સેચકની સાંદ્રતા", "C) પ્રકાશની તીવ્રતા", "D) તાપમાન"], "correct": 2, "explanation": "પ્રકાશની તીવ્રતા (C) ઉત્સેચકની ક્રિયાશીલતાને સીધી અસર કરતી નથી, પરંતુ તે પ્રકાશસંશ્લેષણ જેવી પ્રક્રિયાઓમાં પ્રક્રિયા વેગ પર અસર કરે છે. સબસ્ટ્રેટની સાંદ્રતા (A) અને ઉત્સેચકની સાંદ્રતા (B) સીધી રીતે પ્રક્રિયા વેગને અસર કરે છે, જ્યારે તાપમાન (D) ઉત્સેચકની ક્રિયાશીલતા અને પ્રક્રિયા વેગ બંનેને અસર કરે છે.", "ncert_ref": "Class XII - Chapter 2: જૈવ અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 23}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, **પ્રતિક્રિયા મિશ્રણમાં એક અકાર્બનિક આયન ઉમેરવામાં આવે છે જે ઉત્સેચકના સક્રિય સ્થાન સાથે સ્પર્ધાત્મક રીતે જોડાય છે**, પરંતુ તે ઉત્સેચકની ત્રિપરિમાણીય રચનાને બદલતું નથી. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) Km મૂલ્ય વધશે, પરંતુ Vmax અચળ રહેશે", "B) Km મૂલ્ય ઘટશે, પરંતુ Vmax અચળ રહેશે", "C) Vmax ઘટશે, પરંતુ Km મૂલ્ય અચળ રહેશે", "D) Km અને Vmax બંને ઘટશે"], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે. અહીં ઉમેરવામાં આવેલ અકાર્બનિક આયન સ્પર્ધાત્મક અવરોધક (competitive inhibitor) તરીકે વર્તે છે, જે ઉત્સેચકના સક્રિય સ્થાન સાથે સ્પર્ધા કરી સબસ્ટ્રેટને જોડાતું અટકાવે છે. આથી Km મૂલ્ય વધે છે (કારણ કે સબસ્ટ્રેટને ઉત્સેચક સાથે જોડાવા માટે વધુ સાંદ્રતા જોઈએ), પરંતુ Vmax અચળ રહે છે (કારણ કે ઉત્સેચકની ક્રિયાશીલતા બદલાતી નથી, માત્ર સક્રિય સ્થાન અવરોધાય છે).\n\nવિકલ્પ B ખોટો છે કારણ કે Km મૂલ્ય ઘટતું નથી, તે વધે છે.\nવિકલ્પ C ખોટો છે કારણ કે Vmax અચળ રહે છે, ઘટતું નથી.\nવિકલ્પ D ખોટો છે કારણ કે Vmax અચળ રહે છે અને માત્ર Km વધે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: ઉત્સેચક અવરોધન અને Km-Vmax પર અસર", "difficulty": "Hard", "num": 24}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન 37°C થી 45°C સુધી વધારવામાં આવે, તો નીચેનામાંથી કયું પરિબળ પ્રક્રિયા વેગ પર સૌથી ઓછી અસર કરશે?", "options": ["A) ઉત્સેચકની સાંદ્રતા", "B) સબસ્ટ્રેટની સાંદ્રતા", "C) pH", "D) પ્રતિક્રિયા મિશ્રણનું કદ"], "correct": 3, "explanation": "તાપમાનમાં વધારો થવાથી ઉત્સેચકની ક્રિયાશીલતા પર અસર થાય છે, પરંતુ પ્રતિક્રિયા મિશ્રણનું કદ એ પ્રક્રિયા વેગ પર સીધી અસર કરતું નથી. ઉત્સેચકની સાંદ્રતા, સબસ્ટ્રેટની સાંદ્રતા, અને pH એ તાપમાનની સાથે મળીને પ્રક્રિયા વેગને અસર કરે છે. પ્રતિક્રિયા મિશ્રણનું કદ ફક્ત સાંદ્રતાને અસર કરે છે, પરંતુ પ્રક્રિયા વેગ પર તેની સીધી અસર નથી.", "ncert_ref": "Class XII - Chapter 2: જૈવ-અણુઓ અને ઉત્સેચકો", "difficulty": "Hard", "num": 25}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જો તાપમાન ૩૭°C થી ૪૦°C સુધી વધારવામાં આવે તો પ્રક્રિયા વેગ પર શું અસર થશે? ધારો કે ઉત્સેચક ૪૦°C પર સ્થિર છે.", "options": ["A) પ્રક્રિયા વેગ ઘટશે કારણ કે ઉત્સેચક નિષ્ક્રિય થશે", "B) પ્રક્રિયા વેગ વધશે કારણ કે અણુઓની ગતિશીલતા વધશે", "C) પ્રક્રિયા વેગ પર કોઈ અસર થશે નહીં કારણ કે ઉત્સેચક ૪૦°C પર સ્થિર છે", "D) પ્રક્રિયા વેગ ઘટશે કારણ કે સબસ્ટ્રેટની સાંદ્રતા ઘટશે"], "correct": 1, "explanation": "તાપમાન વધારવાથી અણુઓની ગતિશીલતા વધે છે, જે પ્રક્રિયા વેગને વધારે છે. ઉત્સેચક ૪૦°C પર સ્થિર હોવાથી તે નિષ્ક્રિય થશે નહીં, પરંતુ તાપમાન વધારવાથી પ્રક્રિયા વેગ વધશે. વિકલ્પ A ખોટો છે કારણ કે ઉત્સેચક નિષ્ક્રિય થતું નથી. વિકલ્પ C ખોટો છે કારણ કે તાપમાન વધારવાથી પ્રક્રિયા વેગ પર અસર થાય છે. વિકલ્પ D ખોટો છે કારણ કે સબસ્ટ્રેટની સાંદ્રતા તાપમાન સાથે સીધા સંબંધિત નથી.", "ncert_ref": "Class XII - Chapter 4: જૈવ-રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "difficulty": "Hard", "num": 26}, {"question": "એક ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, **પ્રતિક્રિયા મિશ્રણનું કુલ કદ અડધું કરવામાં આવે છે** (સબસ્ટ્રેટ અને ઉત્સેચકની મોલ સંખ્યા અચળ રહે છે). આ પરિવર્તનથી પ્રક્રિયા વેગ પર શું અસર થશે?", "options": ["A) પ્રક્રિયા વેગ બમણો થશે કારણ કે સાંદ્રતા બમણી થાય છે", "B) પ્રક્રિયા વેગ અડધો થશે કારણ કે સાંદ્રતા અડધી થાય છે", "C) પ્રક્રિયા વેગમાં કોઈ ફેર પડશે નહીં કારણ કે ઉત્સેચક અને સબસ્ટ્રેટની મોલ સંખ્યા અચળ છે", "D) પ્રક્રિયા વેગ ચાર ગણો થશે કારણ કે સાંદ્રતા બમણી અને કદ અડધું થાય છે"], "correct": 0, "explanation": "પ્રતિક્રિયા મિશ્રણનું કુલ કદ અડધું કરવાથી સબસ્ટ્રેટ અને ઉત્સેચકની સાંદ્રતા બમણી થાય છે (કારણ કે મોલ સંખ્યા અચળ રહે છે). ઉત્સેચક-નિયંત્રિત પ્રતિક્રિયામાં, જ્યારે સબસ્ટ્રેટની સાંદ્રતા Km કરતાં ઓછી હોય ત્યારે પ્રક્રિયા વેગ સબસ્ટ્રેટની સાંદ્રતા પર આધારિત હોય છે. આથી પ્રક્રિયા વેગ બમણો થશે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) સાંદ્રતા ઘટતી નથી, C) સાંદ્રતા બદલાતી હોવાથી વેગ પર અસર થશે, D) વેગ ચાર ગણો થતો નથી કારણ કે ઉત્સેચકની સાંદ્રતા પણ બમણી થાય છે પરંતુ તેનો પ્રભાવ મર્યાદિત હોય છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર (Chemical Kinetics) અને ક્લાસ XII - પ્રકરણ 9: ઉત્સેચકો", "difficulty": "Hard", "num": 27}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
