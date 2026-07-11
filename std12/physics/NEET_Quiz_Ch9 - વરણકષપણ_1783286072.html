@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch9 - વર્ણીક્ષેપણ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch9 - વર્ણીક્ષેપણ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "વર્ણીક્ષેપણ દરમિયાન કયા તબક્કામાં વર્ણસૂત્રોની સૌથી વધુ કન્ડેન્સેશન (ઘનત્વ) જોવા મળે છે?", "options": ["A) પ્રોફેઝ-I", "B) મેટાફેઝ-I", "C) એનાફેઝ-I", "D) ટેલોફેઝ-I"], "correct": 1, "explanation": "મેટાફેઝ-I દરમિયાન વર્ણસૂત્રો સૌથી વધુ કન્ડેન્સ થાય છે અને તે મધ્યરેખા પર ગોઠવાય છે. પ્રોફેઝ-Iમાં કન્ડેન્સેશન શરૂ થાય છે પરંતુ મેટાફેઝ-I જેટલું નહીં. એનાફેઝ-I અને ટેલોફેઝ-Iમાં વર્ણસૂત્રો અલગ પડવા લાગે છે, જેથી કન્ડેન્સેશન ઘટે છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 1}, {"question": "વર્ણીક્ષેપણ-I અને વર્ણીક્ષેપણ-II વચ્ચેનો મુખ્ય તફાવત કયો છે?", "options": ["A) વર્ણીક્ષેપણ-Iમાં હોમોલોગસ વર્ણસૂત્રો જોડાય છે, જ્યારે વર્ણીક્ષેપણ-IIમાં એ નથી થતું", "B) વર્ણીક્ષેપણ-Iમાં DNA દ્વિગુણિત થાય છે, જ્યારે વર્ણીક્ષેપણ-IIમાં નહીં", "C) વર્ણીક્ષેપણ-Iમાં સાયટોકાઇનેસિસ થાય છે, જ્યારે વર્ણીક્ષેપણ-IIમાં નહીં", "D) વર્ણીક્ષેપણ-Iમાં કોષકેન્દ્રીય પડદો નાશ પામે છે, જ્યારે વર્ણીક્ષેપણ-IIમાં નહીં"], "correct": 0, "explanation": "વર્ણીક્ષેપણ-Iમાં હોમોલોગસ વર્ણસૂત્રો સિનેપ્સિસ દ્વારા જોડાય છે અને ટેટ્રાડ બનાવે છે, જ્યારે વર્ણીક્ષેપણ-IIમાં આ પ્રક્રિયા થતી નથી. બાકીના વિકલ્પો અસત્ય છે: DNA દ્વિગુણિત વર્ણીક્ષેપણ-I પહેલા (S-ફેઝમાં) થાય છે, સાયટોકાઇનેસિસ વર્ણીક્ષેપણ-I અને II બંનેમાં થાય છે, અને કોષકેન્દ્રીય પડદો બંનેમાં નાશ પામે છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 2}, {"question": "કયા વર્ણીક્ષેપણ તબક્કામાં કાયાઝ્મા (Chiasmata) જોવા મળે છે?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેકીટીન", "D) ડાયકાઇનેસિસ"], "correct": 3, "explanation": "કાયાઝ્મા (Chiasmata) ડાયકાઇનેસિસ તબક્કામાં જોવા મળે છે, જ્યારે હોમોલોગસ વર્ણસૂત્રો વચ્ચે ક્રોસિંગ ઓવર થયા પછી તે જોડાયેલા રહે છે. લેપ્ટોટીનમાં વર્ણસૂત્રો અલગ પડવા લાગે છે, ઝાયગોટીનમાં સિનેપ્સિસ થાય છે, અને પેકીટીનમાં ટેટ્રાડ બનાવાય છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 3}, {"question": "વર્ણીક્ષેપણ દરમિયાન કયા ઉત્સેચક દ્વારા કોષકેન્દ્રીય પડદો નાશ પામે છે?", "options": ["A) DNA પોલિમરેઝ", "B) RNA પોલિમરેઝ", "C) કોષકેન્દ્રીય એનવેલપ લેમિન કાઇનેઝ", "D) હેલિકેઝ"], "correct": 2, "explanation": "કોષકેન્દ્રીય એનવેલપ લેમિન કાઇનેઝ ઉત્સેચક કોષકેન્દ્રીય પડદાને નાશ કરે છે, જેથી વર્ણસૂત્રો અલગ પડી શકે. DNA પોલિમરેઝ અને RNA પોલિમરેઝ DNA અને RNA સંશ્લેષણમાં ભાગ લે છે, જ્યારે હેલિકેઝ DNA ની ડબલ હેલિક્સ ખોલે છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 4}, {"question": "વર્ણીક્ષેપણ-I અને વર્ણીક્ષેપણ-II વચ્ચે કયો તબક્કો સામાન્ય નથી?", "options": ["A) પ્રોફેઝ", "B) મેટાફેઝ", "C) એનાફેઝ", "D) ઇન્ટરફેઝ"], "correct": 3, "explanation": "વર્ણીક્ષેપણ-I અને વર્ણીક્ષેપણ-II વચ્ચે ઇન્ટરફેઝ તબક્કો સામાન્ય નથી, કારણ કે વર્ણીક્ષેપણ-I પછી સીધું જ વર્ણીક્ષેપણ-II શરૂ થાય છે. પ્રોફેઝ, મેટાફેઝ, અને એનાફેઝ તબક્કા બંનેમાં જોવા મળે છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 5}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, હોમોલોગસ વર્ણસૂત્રોના જોડાણને કયા પદાર્થ દ્વારા સ્થિર રાખવામાં આવે છે?", "options": ["A) કોહેસિન પ્રોટીન", "B) કાયાઝ્મા", "C) સિનેપ્ટોનેમલ કોમ્પ્લેક્સ", "D) સેન્ટ્રોમિયર"], "correct": 2, "explanation": "સિનેપ્ટોનેમલ કોમ્પ્લેક્સ (C) હોમોલોગસ વર્ણસૂત્રોના જોડાણને સ્થિર રાખે છે, જે વર્ણીક્ષેપણ-I દરમિયાન સિનેપ્સિસ માટે જરૂરી છે. કોહેસિન પ્રોટીન (A) બહેન વર્ણસૂત્રોને જોડી રાખે છે, પરંતુ હોમોલોગસ વર્ણસૂત્રોને નહીં. કાયાઝ્મા (B) ક્રોસિંગ ઓવર પછી બનતી રચના છે, જ્યારે સેન્ટ્રોમિયર (D) વર્ણસૂત્રના વહનમાં ભૂમિકા ભજવે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 6}, {"question": "વર્ણીક્ષેપણ-II દરમિયાન, કયા તબક્કામાં બહેન ક્રોમેટિડ્સ અલગ થાય છે?", "options": ["A) મેટાફેઝ-II", "B) એનાફેઝ-II", "C) ટેલોફેઝ-II", "D) પ્રોફેઝ-II"], "correct": 1, "explanation": "એનાફેઝ-II (B) દરમિયાન બહેન ક્રોમેટિડ્સ અલગ થાય છે, કારણ કે સેન્ટ્રોમિયર વિભાજિત થાય છે. મેટાફેઝ-II (A)માં ક્રોમેટિડ્સ મધ્યરેખા પર ગોઠવાય છે, ટેલોફેઝ-II (C)માં ક્રોમેટિડ્સ ધ્રુવ તરફ ખસે છે, અને પ્રોફેઝ-II (D)માં કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 7}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, કયા તબક્કામાં કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામે છે?", "options": ["A) ટેલોફેઝ-I", "B) એનાફેઝ-I", "C) મેટાફેઝ-I", "D) પ્રોફેઝ-I"], "correct": 0, "explanation": "ટેલોફેઝ-I (A) દરમિયાન કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામે છે. એનાફેઝ-I (B) અને મેટાફેઝ-I (C) દરમિયાન કોષકેન્દ્રીય પડદો હાજર નથી, જ્યારે પ્રોફેઝ-I (D) દરમિયાન કોષકેન્દ્રીય પડદો નાશ પામે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 8}, {"question": "વર્ણીક્ષેપણ દરમિયાન, કયા ઉત્સેચક દ્વારા કોષકેન્દ્રીય પડદો નાશ પામે છે?", "options": ["A) DNA પોલિમરેઝ", "B) RNA પોલિમરેઝ", "C) પ્રોટીએઝ", "D) લેમિન કિનેઝ"], "correct": 3, "explanation": "લેમિન કિનેઝ (D) ઉત્સેચક કોષકેન્દ્રીય પડદાને નાશ કરે છે, જે વર્ણીક્ષેપણ દરમિયાન જરૂરી છે. DNA પોલિમરેઝ (A) અને RNA પોલિમરેઝ (B) અનુક્રમે DNA અને RNA સંશ્લેષણમાં ભૂમિકા ભજવે છે, જ્યારે પ્રોટીએઝ (C) પ્રોટીનના વિઘટનમાં ભૂમિકા ભજવે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 9}, {"question": "એક પ્રયોગમાં, વનસ્પતિના પરાગાશયમાંથી અપરિપક્વ પરાગરજ કોષોને અલગ કરીને તેમને કૃત્રિમ માધ્યમમાં ઉછેરવામાં આવ્યા. આ કોષોમાં વર્ણીક્ષેપણની પ્રક્રિયા શરૂ થઈ પરંતુ અમુક તબક્કે અટકી ગઈ. આ અટકાવેલ તબક્કામાં નીચેનામાંથી કઈ ઘટના જોવા મળે તેવી શક્યતા સૌથી વધુ છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રોના જોડાણ દરમિયાન સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું અપૂર્ણ નિર્માણ", "B) ડાયાકાઇનેસીસ તબક્કામાં કાયાઝ્મા (Chiasmata) નું અસામાન્ય રીતે વહેલું વિસર્જન", "C) એનાફેઝ-I દરમિયાન હોમોલોગસ વર્ણસૂત્રોનું અલગીકરણ ન થવું", "D) ટેલોફેઝ-II દરમિયાન કોષકેન્દ્રીય પડદાનું પુનર્નિર્માણ ન થવું"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B છે. વર્ણીક્ષેપણની પ્રક્રિયા સામાન્ય રીતે ડાયાકાઇનેસીસ તબક્કામાં અટકતી નથી, પરંતુ જો કાયાઝ્મા (Chiasmata) અસામાન્ય રીતે વહેલું વિસર્જન પામે તો હોમોલોગસ વર્ણસૂત્રોનું યોગ્ય જોડાણ અને અલગીકરણ પ્રભાવિત થાય છે. આ પરિસ્થિતિમાં, વર્ણીક્ષેપણ પ્રક્રિયા મેટાફેઝ-I પહેલા અટકી શકે છે કારણ કે કાયાઝ્મા વર્ણસૂત્રોને યોગ્ય રીતે ગોઠવવા માટે જરૂરી છે. વિકલ્પ A ખોટો છે કારણ કે સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું અપૂર્ણ નિર્માણ પ્રોફેઝ-I ના ઝાયગોટીન તબક્કામાં જોવા મળે છે, જે પ્રારંભિક તબક્કો છે. વિકલ્પ C ખોટો છે કારણ કે એનાફેઝ-I દરમિયાન અલગીકરણ ન થવું એ વધુ અદ્યતન તબક્કો છે, જે સામાન્ય રીતે પ્રયોગમાં અટકતો નથી. વિકલ્પ D ખોટો છે કારણ કે ટેલોફેઝ-II એ વર્ણીક્ષેપણની અંતિમ અવસ્થા છે, જે આ પ્રયોગમાં પહોંચી શકતી નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 10: કોષચક્ર અને કોષવિભાજન", "difficulty": "Hard", "num": 10}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, પેચીન તબક્કામાં કયા ઘટનાક્રમની શરૂઆત થાય છે જેના કારણે હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનના વિનિમયને સક્રિય કરે છે?", "options": ["A) કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર", "B) સિનેપ્સિસ અને કોષકેન્દ્રીય પડદાનો વિઘટન", "C) વર્ણસૂત્રોની કન્ડેન્સેશન અને સ્પિન્ડલ તંતુઓનું નિર્માણ", "D) કોષકેન્દ્રીય પડદાનું પુનર્નિર્માણ અને સાયટોકાઇનેસિસ"], "correct": 0, "explanation": "પેચીન તબક્કામાં કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવરની શરૂઆત થાય છે, જે હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનના વિનિમયને સક્રિય કરે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) સિનેપ્સિસ પેચીન પહેલા જ થાય છે, અને કોષકેન્દ્રીય પડદાનો વિઘટન પ્રોફેઝ-Iના અંતમાં થાય છે; C) વર્ણસૂત્રોની કન્ડેન્સેશન અને સ્પિન્ડલ તંતુઓનું નિર્માણ પ્રોમેટાફેઝમાં થાય છે; D) કોષકેન્દ્રીય પડદાનું પુનર્નિર્માણ અને સાયટોકાઇનેસિસ ટેલોફેઝ-I અને ટેલોફેઝ-IIમાં થાય છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 11}, {"question": "વર્ણીક્ષેપણ-II દરમિયાન, મેટાફેઝ-II તબક્કામાં વર્ણસૂત્રો કેવી રીતે ગોઠવાયેલા હોય છે?", "options": ["A) એક જ કોષકેન્દ્રીય પ્લેટ પર હોમોલોગસ વર્ણસૂત્રોના જોડા રૂપે", "B) કોષકેન્દ્રીય પ્લેટ પર અર્ધી સંખ્યામાં વર્ણસૂત્રો (ક્રોમોસોમ્સ) એકલા રૂપે", "C) કોષકેન્દ્રીય પ્લેટ પર બહેન ક્રોમેટિડ્સ સાથે જોડાયેલા રૂપે", "D) કોષકેન્દ્રીય પ્લેટ પર યાદચ્છિક રીતે ગોઠવાયેલા વર્ણસૂત્રો"], "correct": 1, "explanation": "મેટાફેઝ-II દરમિયાન, વર્ણસૂત્રો કોષકેન્દ્રીય પ્લેટ પર અર્ધી સંખ્યામાં એકલા રૂપે ગોઠવાયેલા હોય છે, કારણ કે વર્ણીક્ષેપણ-I દરમિયાન હોમોલોગસ વર્ણસૂત્રો અલગ થઈ ગયા હોય છે. A) હોમોલોગસ વર્ણસૂત્રોના જોડા મેટાફેઝ-Iમાં જોવા મળે છે; C) બહેન ક્રોમેટિડ્સ મેટાફેઝ-IIમાં પણ જોડાયેલા હોય છે, પરંતુ તે કોષકેન્દ્રીય પ્લેટ પર એકલા વર્ણસૂત્ર તરીકે ગણાય છે; D) વર્ણસૂત્રો યાદચ્છિક રીતે ગોઠવાયેલા હોતા નથી, પરંતુ સ્પિન્ડલ તંતુઓ દ્વારા નિયંત્રિત રીતે ગોઠવાયેલા હોય છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 12}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, ડાયકાઇનેસિસ તબક્કામાં કયું ઘટનાક્રમ થાય છે જેના કારણે જનીન વિવિધતા વર્ધે છે?", "options": ["A) કોષકેન્દ્રીય પડદાનો વિઘટન", "B) કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર", "C) સિનેપ્સિસનું પૂર્ણ થવું", "D) વર્ણસૂત્રોની કન્ડેન્સેશન"], "correct": 1, "explanation": "ડાયકાઇનેસિસ તબક્કામાં કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર થાય છે, જેના કારણે જનીન વિવિધતા વર્ધે છે. A) કોષકેન્દ્રીય પડદાનો વિઘટન પ્રોફેઝ-Iના અંતમાં થાય છે; C) સિનેપ્સિસનું પૂર્ણ થવું પેચીન તબક્કામાં થાય છે; D) વર્ણસૂત્રોની કન્ડેન્સેશન પ્રોફેઝ-Iના શરૂઆતમાં જ થાય છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 13}, {"question": "વર્ણીક્ષેપણ દરમિયાન, કયા તબક્કામાં કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામે છે અને સાયટોકાઇનેસિસની શરૂઆત થાય છે?", "options": ["A) ટેલોફેઝ-I અને ટેલોફેઝ-II", "B) એનાફેઝ-I અને એનાફેઝ-II", "C) પ્રોફેઝ-I અને પ્રોફેઝ-II", "D) મેટાફેઝ-I અને મેટાફેઝ-II"], "correct": 0, "explanation": "ટેલોફેઝ-I અને ટેલોફેઝ-II દરમિયાન કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામે છે અને સાયટોકાઇનેસિસની શરૂઆત થાય છે. B) એનાફેઝમાં કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામતો નથી; C) પ્રોફેઝમાં કોષકેન્દ્રીય પડદાનો વિઘટન થાય છે; D) મેટાફેઝમાં કોષકેન્દ્રીય પડદો હજુ વિઘટિત અવસ્થામાં હોય છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 14}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, કયા તબક્કામાં હોમોલોગસ વર્ણસૂત્રોના જોડા કોષકેન્દ્રીય પ્લેટ પર ગોઠવાય છે?", "options": ["A) લેપ્ટોટિન", "B) ઝાયગોટિન", "C) પેચીન", "D) મેટાફેઝ-I"], "correct": 3, "explanation": "મેટાફેઝ-I દરમિયાન હોમોલોગસ વર્ણસૂત્રોના જોડા કોષકેન્દ્રીય પ્લેટ પર ગોઠવાય છે. A) લેપ્ટોટિનમાં વર્ણસૂત્રોની કન્ડેન્સેશન શરૂ થાય છે; B) ઝાયગોટિનમાં હોમોલોગસ વર્ણસૂત્રો જોડાય છે (સિનેપ્સિસ); C) પેચીનમાં કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર થાય છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 15}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, લેપ્ટોટીન તબક્કામાં કયું ઘટનાક્રમ જોવા મળે છે જેના કારણે ક્રોમેટિનની સંરચના બદલાય છે?", "options": ["A) ક્રોમેટિનના કન્ડેન્સેશનની શરૂઆત અને હોમોલોગસ વર્ણસૂત્રોનું જોડાણ", "B) કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવરની શરૂઆત", "C) કોષકેન્દ્રીય પડદોનો વિઘટન અને ગોલ્ગી કોમ્પ્લેક્સનો નાશ", "D) સેન્ટ્રોમિયરનું વિભાજન અને ક્રોમેટિડ્સનું અલગ થવું"], "correct": 0, "explanation": "લેપ્ટોટીન તબક્કામાં ક્રોમેટિનનું કન્ડેન્સેશન શરૂ થાય છે અને હોમોલોગસ વર્ણસૂત્રો જોડાઈને સિનેપ્સિસ બનાવે છે. કાયાઝ્મા અને ક્રોસિંગ ઓવર પેચીન તબક્કામાં થાય છે, કોષકેન્દ્રીય પડદોનો વિઘટન પ્રોફેઝ-Iના અંતમાં થાય છે, અને સેન્ટ્રોમિયરનું વિભાજન વર્ણીક્ષેપણ-IIમાં થાય છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 16}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, કયા તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો પૂર્ણપણે નાશ થાય છે?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેચીન", "D) ડાયકાઇનેસિસ"], "correct": 3, "explanation": "ડાયકાઇનેસિસ તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો પૂર્ણપણે નાશ થાય છે. લેપ્ટોટીન અને ઝાયગોટીનમાં ક્રોમેટિનનું કન્ડેન્સેશન અને સિનેપ્સિસ થાય છે, જ્યારે પેચીનમાં કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર થાય છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 17}, {"question": "વર્ણીક્ષેપણ-II દરમિયાન, એનાફેઝ-II તબક્કામાં કયા ઘટનાક્રમને કારણે ક્રોમેટિડ્સ અલગ થાય છે?", "options": ["A) સેન્ટ્રોમિયરનું વિભાજન અને સ્પિન્ડલ ફાઇબર્સ દ્વારા ખેંચાણ", "B) કાયાઝ્મા નિર્માણ અને ક્રોસિંગ ઓવર", "C) કોષકેન્દ્રીય પડદોનો પુનર્નિર્માણ", "D) ક્રોમેટિનનું કન્ડેન્સેશન"], "correct": 0, "explanation": "એનાફેઝ-II તબક્કામાં સેન્ટ્રોમિયરનું વિભાજન થાય છે અને સ્પિન્ડલ ફાઇબર્સ દ્વારા ક્રોમેટિડ્સ અલગ થાય છે. કાયાઝ્મા અને ક્રોસિંગ ઓવર વર્ણીક્ષેપણ-Iમાં થાય છે, કોષકેન્દ્રીય પડદોનો પુનર્નિર્માણ ટેલોફેઝ-IIમાં થાય છે, અને ક્રોમેટિનનું કન્ડેન્સેશન પ્રોફેઝ-IIમાં થાય છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 18}, {"question": "વર્ણીક્ષેપણ દરમિયાન, કયા ઉત્સેચક દ્વારા કોષકેન્દ્રીય પડદોનો નાશ થાય છે અને કયા તબક્કામાં આ ઘટનાક્રમ થાય છે?", "options": ["A) ન્યુક્લિયેઝ - પ્રોફેઝ-I", "B) પ્રોટિયેઝ - મેટાફેઝ-I", "C) લાઇપેઝ - એનાફેઝ-I", "D) એમિલેઝ - ટેલોફેઝ-I"], "correct": 0, "explanation": "ન્યુક્લિયેઝ ઉત્સેચક દ્વારા કોષકેન્દ્રીય પડદોનો નાશ થાય છે અને આ ઘટનાક્રમ પ્રોફેઝ-Iના અંતમાં થાય છે. પ્રોટિયેઝ પ્રોટીનના વિઘટન માટે, લાઇપેઝ ચરબીના વિઘટન માટે, અને એમિલેઝ કાર્બોદિતના વિઘટન માટે જવાબદાર છે.", "ncert_ref": "Class XII - પ્રકરણ ૯: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 19}, {"question": "એક પ્રયોગમાં, વનસ્પતિના પરાગાશયમાંથી અલગ કરેલા પરાગરજ કોષોને કૃત્રિમ માધ્યમમાં ઉછેરવામાં આવે છે. આ કોષોમાં વર્ણીક્ષેપણની પ્રક્રિયા શરૂ થાય છે પરંતુ અમુક કોષોમાં વર્ણીક્ષેપણ-I પૂર્ણ થયા બાદ વર્ણીક્ષેપણ-II શરૂ થતું નથી. આ ઘટનાનું સૌથી સંભવિત કારણ શું હોઈ શકે?", "options": ["A) કોષોમાં સાયક્લિન-આશ્રિત કાઇનેઝ (CDK) નું પ્રમાણ અપૂરતું હોવાથી M-તબક્કાનું નિયમન ખોરવાઈ ગયું છે", "B) કોષોમાં ટ્યુબ્યુલિન પ્રોટીનનું સંશ્લેષણ અટકી ગયું હોવાથી સ્પિન્ડલ તંતુઓનું નિર્માણ થઈ શકતું નથી", "C) કોષોમાં MPF (Maturation Promoting Factor) નું સ્તર અચાનક ઘટી જવાથી વર્ણીક્ષેપણ-II ની શરૂઆત અટકી જાય છે", "D) કોષોમાં કોષકેન્દ્રીય પડદાના પુનર્નિર્માણ માટે જરૂરી લેમિન પ્રોટીનનું સંશ્લેષણ અપૂરતું હોવાથી વર્ણીક્ષેપણ-II શરૂ થતું નથી"], "correct": 2, "explanation": "વર્ણીક્ષેપણની પ્રક્રિયા MPF (Maturation Promoting Factor) દ્વારા નિયંત્રિત થાય છે, જે સાયક્લિન અને CDK નું સંયોજન છે. વર્ણીક્ષેપણ-I પૂર્ણ થયા બાદ MPF નું સ્તર ઘટી જાય છે, જે વર્ણીક્ષેપણ-II ની શરૂઆત માટે જરૂરી છે. જો MPF નું સ્તર અચાનક ઘટી જાય તો વર્ણીક્ષેપણ-II શરૂ થતું નથી. વિકલ્પ A ખોટો છે કારણ કે CDK નું પ્રમાણ અપૂરતું હોવાથી વર્ણીક્ષેપણ-I પણ શરૂ થઈ શકતું નથી. વિકલ્પ B ખોટો છે કારણ કે ટ્યુબ્યુલિન પ્રોટીનનું સંશ્લેષણ અટકી જવાથી સ્પિન્ડલ તંતુઓનું નિર્માણ અટકી જાય, પરંતુ વર્ણીક્ષેપણ-II શરૂ થઈ શકે છે. વિકલ્પ D ખોટો છે કારણ કે લેમિન પ્રોટીનનું સંશ્લેષણ અપૂરતું હોવાથી કોષકેન્દ્રીય પડદાનું પુનર્નિર્માણ અટકી જાય, પરંતુ વર્ણીક્ષેપણ-II શરૂ થઈ શકે છે. \"ncert_ref\":\"કક્ષા 11 - પ્રકરણ 10: કોષચક્ર અને કોષવિભાજન\"", "ncert_ref": "", "difficulty": "Hard", "num": 20}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, જ્યારે હોમોલોગસ વર્ણસૂત્રો વચ્ચે ક્રોસિંગ ઓવર થાય છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) કાયાઝ્મા બનવાનું પ્રમાણીકરણ કરે છે કે ક્રોસિંગ ઓવર થયું છે", "B) ક્રોસિંગ ઓવર ડાયકાઇનેસિસ તબક્કામાં થાય છે", "C) ક્રોસિંગ ઓવરના કારણે જનીન પુનરાવર્તન (recombination) થાય છે", "D) ક્રોસિંગ ઓવર પછી ક્રોમેટિડ્સની અદલાબદલી થાય છે"], "correct": 3, "explanation": "ક્રોસિંગ ઓવરના કારણે જનીન પુનરાવર્તન થાય છે, જે વંશાવળીની વિવિધતામાં યોગદાન આપે છે. કાયાઝ્મા ક્રોસિંગ ઓવરના સ્થાનને પ્રમાણીકરણ કરે છે, અને આ ઘટના ડાયકાઇનેસિસ તબક્કામાં થાય છે. પરંતુ ક્રોસિંગ ઓવર પછી ક્રોમેટિડ્સની અદલાબદલી થતી નથી, પરંતુ જનીન સામગ્રીની અદલાબદલી થાય છે. તેથી, વિકલ્પ D ખોટો છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 21}, {"question": "વર્ણીક્ષેપણ-II દરમિયાન, નીચેના પૈકી કયા તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનું પુનર્નિર્માણ થાય છે?", "options": ["A) પ્રોફેઝ-II", "B) મેટાફેઝ-II", "C) એનાફેઝ-II", "D) ટેલોફેઝ-II"], "correct": 3, "explanation": "વર્ણીક્ષેપણ-II દરમિયાન, કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનું પુનર્નિર્માણ ટેલોફેઝ-II તબક્કામાં થાય છે. પ્રોફેઝ-II અને મેટાફેઝ-II દરમિયાન, કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થાય છે, જ્યારે એનાફેઝ-II દરમિયાન ક્રોમેટિડ્સ અલગ થાય છે. તેથી, વિકલ્પ D સચોટ છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 22}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, નીચેના પૈકી કયું વિધાન સત્ય છે જ્યારે કોષ પ્રોફેઝ-I તબક્કામાં હોય છે?", "options": ["A) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થાય છે, પરંતુ કોષરસજાળકો (mitochondria) અને ક્લોરોપ્લાસ્ટ સક્રિય રહે છે", "B) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થાય છે, અને કોષરસજાળકો અને ક્લોરોપ્લાસ્ટ પણ નિષ્ક્રિય થાય છે", "C) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકો સક્રિય રહે છે, પરંતુ કોષરસજાળકો નિષ્ક્રિય થાય છે", "D) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકો સક્રિય રહે છે, અને કોષરસજાળકો પણ સક્રિય રહે છે"], "correct": 0, "explanation": "વર્ણીક્ષેપણ-I દરમિયાન પ્રોફેઝ-I તબક્કામાં, કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થાય છે, પરંતુ કોષરસજાળકો (mitochondria) અને ક્લોરોપ્લાસ્ટ સક્રિય રહે છે કારણ કે તેઓ કોષીકા શ્વસન અને પ્રકાશસંશ્લેષણ જેવી પ્રક્રિયાઓમાં મહત્વની ભૂમિકા ભજવે છે. તેથી, વિકલ્પ A સચોટ છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 23}, {"question": "વર્ણીક્ષેપણ દરમિયાન, નીચેના પૈકી કયા ઉત્સેચક દ્વારા કોષકેન્દ્રીય પડદોનો નાશ થાય છે અને કોષકેન્દ્રીય જાળકાનું વિઘટન થાય છે?", "options": ["A) એમાઇલેઝ", "B) પ્રોટિયેઝ", "C) ન્યુક્લિયેઝ", "D) લાઇપેઝ"], "correct": 2, "explanation": "વર્ણીક્ષેપણ દરમિયાન, કોષકેન્દ્રીય પડદોનો નાશ ન્યુક્લિયેઝ ઉત્સેચક દ્વારા થાય છે, અને કોષકેન્દ્રીય જાળકાનું વિઘટન પણ આ જ ઉત્સેચક દ્વારા થાય છે. એમાઇલેઝ કાર્બોદિતના વિઘટનમાં, પ્રોટિયેઝ પ્રોટીનના વિઘટનમાં, અને લાઇપેઝ ચરબીના વિઘટનમાં મદદ કરે છે. તેથી, વિકલ્પ C સચોટ છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 24}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, નીચેના પૈકી કયા તબક્કામાં હોમોલોગસ વર્ણસૂત્રો વચ્ચે કાયાઝ્મા બનવાનું શરૂ થાય છે અને ક્રોસિંગ ઓવર થાય છે?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેચીન", "D) ડાયકાઇનેસિસ"], "correct": 3, "explanation": "વર્ણીક્ષેપણ-I દરમિયાન, ડાયકાઇનેસિસ તબક્કામાં હોમોલોગસ વર્ણસૂત્રો વચ્ચે કાયાઝ્મા બનવાનું શરૂ થાય છે અને ક્રોસિંગ ઓવર થાય છે. લેપ્ટોટીનમાં વર્ણસૂત્રોની કન્ડેન્સેશન શરૂ થાય છે, ઝાયગોટીનમાં હોમોલોગસ વર્ણસૂત્રો જોડાઈ જાય છે, અને પેચીનમાં કાયાઝ્મા સ્પષ્ટ દેખાય છે. તેથી, વિકલ્પ D સચોટ છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 25}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, જો ડાયકાઇનેસિસ તબક્કામાં ક્રોસિંગ ઓવર ન થાય, તો નીચેના પૈકી કયું પરિણામ સૌથી યોગ્ય રીતે લાગુ પડે છે?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનની અદલાબદલી થશે નહીં, પરંતુ કાયાઝ્મા બનશે.", "B) કાયાઝ્મા બનશે નહીં, પરંતુ જનીન વિવિધતા કોઈપણ રીતે અસરગ્રસ્ત થશે નહીં.", "C) કાયાઝ્મા બનશે નહીં, અને જનીન વિવિધતા ઘટશે કારણ કે ક્રોસિંગ ઓવરનો અભાવ હશે.", "D) હોમોલોગસ વર્ણસૂત્રો સંપૂર્ણપણે અલગ થઈ જશે અને વર્ણીક્ષેપણ-I પૂર્ણ થશે."], "correct": 2, "explanation": "ક્રોસિંગ ઓવર ડાયકાઇનેસિસ દરમિયાન થાય છે, જેના કારણે કાયાઝ્મા બને છે અને જનીન વિવિધતા વધે છે. જો ક્રોસિંગ ઓવર ન થાય, તો કાયાઝ્મા બનશે નહીં, અને જનીન વિવિધતા ઘટશે. અહીં, વિકલ્પ C સૌથી યોગ્ય છે કારણ કે કાયાઝ્મા અને જનીન વિવિધતા બંને ક્રોસિંગ ઓવર પર આધારિત છે. વિકલ્પ A ખોટો છે કારણ કે કાયાઝ્મા ક્રોસિંગ ઓવરના પરિણામે જ બને છે. વિકલ્પ B ખોટો છે કારણ કે જનીન વિવિધતા ક્રોસિંગ ઓવર દ્વારા જ વધે છે. વિકલ્પ D ખોટો છે કારણ કે હોમોલોગસ વર્ણસૂત્રોનું અલગ થવું એનાફેઝ-I દરમિયાન થાય છે, પરંતુ ક્રોસિંગ ઓવરનો અભાવ જનીન વિવિધતાને અસર કરે છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 26}, {"question": "વર્ણીક્ષેપણ-II દરમિયાન, જો કોષમાં સાયટોકાઇનેસિસ થતી નથી, તો નીચેના પૈકી કયું પરિણામ થશે?", "options": ["A) એક જ કોષમાં બે કોષકેન્દ્રો બનશે અને વર્ણસૂત્રોની સંખ્યા દોઢ ગણી થશે.", "B) કોષમાં એક જ કોષકેન્દ્ર રહેશે અને વર્ણસૂત્રોની સંખ્યા અડધી થશે.", "C) કોષમાં બે કોષકેન્દ્રો બનશે, પરંતુ વર્ણસૂત્રોની સંખ્યા સમાન રહેશે.", "D) કોષ મૃત્યુ પામશે કારણ કે સાયટોકાઇનેસિસ વિના કોષ વહેંચાઈ શકશે નહીં."], "correct": 0, "explanation": "સાયટોકાઇનેસિસ કોષના પ્લાઝ્મા પડદાનું વિભાજન છે. જો સાયટોકાઇનેસિસ ન થાય, તો કોષમાં બે કોષકેન્દ્રો બનશે, પરંતુ કોષ વહેંચાઈ શકશે નહીં, જેના કારણે વર્ણસૂત્રોની સંખ્યા દોઢ ગણી થશે. વિકલ્પ A સૌથી યોગ્ય છે. વિકલ્પ B ખોટો છે કારણ કે વર્ણસૂત્રોની સંખ્યા અડધી થવાને બદલે દોઢ ગણી થાય છે. વિકલ્પ C ખોટો છે કારણ કે વર્ણસૂત્રોની સંખ્યા સમાન રહેતી નથી. વિકલ્પ D ખોટો છે કારણ કે કોષ મૃત્યુ પામતો નથી, પરંતુ તે બહુકેંદ્રીય બનશે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 27}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, નીચેના પૈકી કયા તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો પૂર્ણપણે નાશ થાય છે, પરંતુ કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામતો નથી?", "options": ["A) લેપ્ટોટીન", "B) ઝાયગોટીન", "C) પેચીન", "D) ડાયકાઇનેસિસ"], "correct": 3, "explanation": "ડાયકાઇનેસિસ તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો પૂર્ણપણે નાશ થાય છે, પરંતુ કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામતો નથી. લેપ્ટોટીન અને ઝાયગોટીન તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ શરૂ થાય છે, પરંતુ પૂર્ણપણે નહીં. પેચીન તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ પૂર્ણ થાય છે, પરંતુ કોષકેન્દ્રીય પડદો પુનર્નિર્માણ પામવાનું શરૂ થાય છે. તેથી, ડાયકાઇનેસિસ સૌથી યોગ્ય વિકલ્પ છે.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 28}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, જ્યારે કોષ ડાયકાઇનેસિસ તબક્કામાં હોય છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે કાયાઝ્મા સ્પષ્ટ દેખાય છે અને ક્રોસિંગ ઓવર પૂર્ણ થયું છે.", "B) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો પૂર્ણપણે નાશ થયો છે.", "C) કોષમાં સેન્ટ્રોમિયર વચ્ચેના સ્પિન્ડલ તંતુઓનું નિર્માણ શરૂ થયું છે.", "D) ક્રોમેટિડ્સની બહેન જોડીઓ વચ્ચે કોઈપણ પ્રકારનું વિનિમય થતું નથી."], "correct": 2, "explanation": "ડાયકાઇનેસિસ તબક્કામાં કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થયો હોય છે (B સત્ય છે). કાયાઝ્મા સ્પષ્ટ દેખાય છે અને ક્રોસિંગ ઓવર પૂર્ણ થયું હોય છે (A સત્ય છે). ક્રોમેટિડ્સની બહેન જોડીઓ વચ્ચે કોઈ વિનિમય થતો નથી (D સત્ય છે). પરંતુ સ્પિન્ડલ તંતુઓનું નિર્માણ મેટાફેઝ-I તબક્કામાં શરૂ થાય છે, ડાયકાઇનેસિસમાં નહીં (C ખોટું છે).", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 29}, {"question": "વર્ણીક્ષેપણ-I દરમિયાન, જો ડાયકાઇનેસિસ તબક્કામાં કાયાઝ્મા બનવાનું શરૂ થાય છે, તો નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનના વિનિમયની શક્યતા વધે છે", "B) કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ થવાનો પ્રારંભ થાય છે", "C) ક્રોમેટિડ્સ વચ્ચે ક્રોસિંગ ઓવર થવાની શક્યતા રહેતી નથી", "D) સિનેપ્ટોનેમલ કોમ્પ્લેક્સનું નિર્માણ થાય છે"], "correct": 2, "explanation": "કાયાઝ્મા બનવાનું ડાયકાઇનેસિસ તબક્કામાં શરૂ થાય છે, જે ક્રોસિંગ ઓવરના પરિણામે બને છે. ક્રોસિંગ ઓવર હોમોલોગસ વર્ણસૂત્રો વચ્ચે જનીનના વિનિમયની શક્યતા વધારે છે (A સત્ય). કોષકેન્દ્રીય પડદો અને કોષકેન્દ્રીય જાળકાનો નાશ પ્રોફેઝ-Iના અંતમાં શરૂ થાય છે (B સત્ય). સિનેપ્ટોનેમલ કોમ્પ્લેક્સ લેપ્ટોટીન તબક્કામાં બને છે (D સત્ય). પરંતુ કાયાઝ્મા બનવાનું ક્રોસિંગ ઓવરના કારણે જ થાય છે, તેથી C વિધાન સત્ય નથી.", "ncert_ref": "Class XII - Chapter 9: વર્ણીક્ષેપણ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
