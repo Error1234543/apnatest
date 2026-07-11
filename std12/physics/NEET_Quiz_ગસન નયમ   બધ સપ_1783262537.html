@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - ગોસનો નિયમ – બંધ સપાટીમાંથી પસાર થતા કુલ ફ્લક્સનો નિયમ.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 ગોસનો નિયમ – બંધ સપાટીમાંથી પસાર થતા કુલ ફ્લક્સનો નિયમ.</span>
+                <span>🎯 Medium</span>
+                <span>📝 20 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક બંધ સપાટીની અંદર +Q અને -Q બે બિંદુવત્ વિદ્યુતભારો મૂકેલા છે. આ સપાટી પરથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે?", "options": ["A) શૂન્ય, કારણ કે બંને વિદ્યુતભારોનું મૂલ્ય સમાન છે", "B) શૂન્ય, કારણ કે બંધ સપાટીની અંદર કુલ વિદ્યુતભાર શૂન્ય છે", "C) +Q/ε₀, કારણ કે માત્ર ધન વિદ્યુતભારનો ફાળો ગણાય છે", "D) -Q/ε₀, કારણ કે માત્ર ઋણ વિદ્યુતભારનો ફાળો ગણાય છે"], "correct": 1, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ સપાટીની અંદરના કુલ વિદ્યુતભારના સમપ્રમાણમાં હોય છે. અહીં કુલ વિદ્યુતભાર (+Q) + (-Q) = 0 હોવાથી કુલ ફ્લક્સ પણ શૂન્ય થશે. વિકલ્પ A ખોટો છે કારણ કે ફ્લક્સ માત્ર મૂલ્ય પર નહીં, પરંતુ કુલ વિદ્યુતભાર પર આધારિત છે. વિકલ્પ C અને D ખોટા છે કારણ કે બંને વિદ્યુતભારોનો ફાળો એકસાથે ગણાય છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 1}, {"question": "એક ગોળાકાર બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +q મૂકેલો છે. જો સપાટીનું ક્ષેત્રફળ ચાર ગણું કરવામાં આવે, તો સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેવું રહેશે?", "options": ["A) ચાર ગણું વધશે", "B) ચાર ગણું ઘટશે", "C) અચળ રહેશે", "D) બમણું થશે"], "correct": 2, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ માત્ર સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત છે, સપાટીના ક્ષેત્રફળ પર નહીં. તેથી સપાટીનું ક્ષેત્રફળ બદલાય તો પણ ફ્લક્સ અચળ રહેશે. વિકલ્પ A, B અને D ખોટા છે કારણ કે ફ્લક્સ સપાટીના કદ કે આકાર પર આધારિત નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 2}, {"question": "એક સમઘનની બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q મૂકેલો છે. જો આ વિદ્યુતભારને સમઘનના કેન્દ્રથી એક ખૂણે ખસેડવામાં આવે, તો સમઘનની સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેવું રહેશે?", "options": ["A) વધશે, કારણ કે વિદ્યુતભાર સપાટીની નજીક આવે છે", "B) ઘટશે, કારણ કે વિદ્યુતભાર સપાટીથી દૂર જાય છે", "C) અચળ રહેશે, કારણ કે કુલ વિદ્યુતભાર બદલાતો નથી", "D) શૂન્ય થશે, કારણ કે વિદ્યુતભાર સપાટી પર નથી"], "correct": 2, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ માત્ર સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત છે, વિદ્યુતભારની સ્થિતિ પર નહીં. તેથી વિદ્યુતભારને ખૂણે ખસેડવા છતાં ફ્લક્સ અચળ રહેશે. વિકલ્પ A અને B ખોટા છે કારણ કે ફ્લક્સ વિદ્યુતભારની સ્થિતિ પર આધારિત નથી. વિકલ્પ D ખોટો છે કારણ કે વિદ્યુતભાર સપાટીની અંદર છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 3}, {"question": "એક બંધ સપાટીની અંદર બે બિંદુવત્ વિદ્યુતભારો +2Q અને -Q મૂકેલા છે. જો બહારથી એક વધારાનો વિદ્યુતભાર +Q આ સપાટીની નજીક મૂકવામાં આવે, તો સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે?", "options": ["A) +2Q/ε₀", "B) +Q/ε₀", "C) શૂન્ય", "D) -Q/ε₀"], "correct": 1, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ માત્ર સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત છે. અહીં સપાટીની અંદરનો કુલ વિદ્યુતભાર (+2Q) + (-Q) = +Q છે. બહારનો વિદ્યુતભાર ફ્લક્સ પર અસર કરતો નથી. તેથી ફ્લક્સ +Q/ε₀ થશે. વિકલ્પ A ખોટો છે કારણ કે કુલ વિદ્યુતભાર +Q છે, +2Q નહીં. વિકલ્પ C અને D ખોટા છે કારણ કે કુલ વિદ્યુતભાર શૂન્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 4}, {"question": "એક લાંબા સુરેખ તારમાં સમાન રેખીય વિદ્યુતભાર ઘનતા λ છે. આ તારને સંપૂર્ણપણે ઘેરતી એક બંધ નળાકાર સપાટી માટે ગોસનો નિયમ લાગુ પાડતાં, નળાકારની સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે? (નળાકારની લંબાઈ L અને ત્રિજ્યા R છે)", "options": ["A) λL/ε₀", "B) λR/ε₀", "C) શૂન્ય, કારણ કે તાર સપાટીની અંદર નથી", "D) λL/(2πε₀R)"], "correct": 0, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ સપાટીની અંદરના કુલ વિદ્યુતભારના સમપ્રમાણમાં હોય છે. અહીં નળાકારની અંદરનો કુલ વિદ્યુતભાર λL છે (કારણ કે રેખીય વિદ્યુતભાર ઘનતા λ અને લંબાઈ L છે). તેથી ફ્લક્સ λL/ε₀ થશે. વિકલ્પ B ખોટો છે કારણ કે ફ્લક્સ ત્રિજ્યા પર આધારિત નથી. વિકલ્પ C ખોટો છે કારણ કે તાર સપાટીની અંદર છે. વિકલ્પ D ખોટો છે કારણ કે તે વિદ્યુતક્ષેત્રનું સૂત્ર છે, ફ્લક્સનું નહીં.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 5}, {"question": "એક ગોળાકાર બંધ સપાટીની અંદર ત્રણ બિંદુવત્ વિદ્યુતભારો +2 μC, -3 μC અને +5 μC મૂકેલા છે. ગોસના નિયમ અનુસાર, આ સપાટીમાંથી પસાર થતો કુલ વિદ્યુત ફ્લક્સ કેટલો હશે? (ε₀ = 8.85 × 10⁻¹² C²/Nm²)", "options": ["A) 4 μC / ε₀", "B) 10 μC / ε₀", "C) 0 μC / ε₀", "D) -3 μC / ε₀"], "correct": 0, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીમાંથી પસાર થતો કુલ વિદ્યુત ફ્લક્સ, સપાટીની અંદર રહેલા કુલ વિદ્યુતભારના ગુણોત્તર સાથે સંકળાયેલ છે. અહીં, કુલ ભાર = +2 μC + (-3 μC) + +5 μC = +4 μC છે. આથી, ફ્લક્સ = (કુલ ભાર) / ε₀ = 4 μC / ε₀. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ કુલ ભારની ગણતરી ચૂકી જાય છે અથવા ચિહ્નમાં ભૂલ કરે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 6}, {"question": "એક અરીસા આકારની બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q મૂકેલો છે. જો સપાટીને અડધા ગોળામાં ફેરવવામાં આવે, તો ફ્લક્સમાં શું ફેરફાર થશે?", "options": ["A) ફ્લક્સ અડધો થશે", "B) ફ્લક્સ બમણો થશે", "C) ફ્લક્સ અચળ રહેશે", "D) ફ્લક્સ શૂન્ય થશે"], "correct": 2, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીની અંદર રહેલા કુલ વિદ્યુતભાર પર ફ્લક્સ આધાર રાખે છે, સપાટીના આકાર પર નહીં. આથી, સપાટીનો આકાર બદલવાથી ફ્લક્સ અચળ રહેશે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ સપાટીના આકારને ફ્લક્સ સાથે સંકળે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 7}, {"question": "એક બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q મૂકેલો છે. જો સપાટીની બહાર એક બિંદુવત્ વિદ્યુતભાર -Q મૂકવામાં આવે, તો સપાટીમાંથી પસાર થતો કુલ ફ્લક્સ કેટલો હશે?", "options": ["A) Q / ε₀", "B) -Q / ε₀", "C) 0", "D) 2Q / ε₀"], "correct": 0, "explanation": "ગોસના નિયમ અનુસાર, ફ્લક્સ ફક્ત સપાટીની અંદર રહેલા વિદ્યુતભાર પર આધાર રાખે છે. અહીં, સપાટીની અંદર ફક્ત +Q ભાર છે, આથી ફ્લક્સ = Q / ε₀. બહારના ભાર -Q નો ફ્લક્સ પર કોઈ પ્રભાવ પડતો નથી. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ બહારના ભારને ધ્યાનમાં લે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 8}, {"question": "એક બંધ સપાટીની અંદર બે બિંદુવત્ વિદ્યુતભારો +Q અને -Q મૂકેલા છે. જો સપાટીને વિકૃત કરવામાં આવે (પરંતુ બંધ રાખવામાં આવે), તો ફ્લક્સમાં શું ફેરફાર થશે?", "options": ["A) ફ્લક્સ શૂન્ય થશે", "B) ફ્લક્સ બદલાશે", "C) ફ્લક્સ અચળ રહેશે", "D) ફ્લક્સ અનંત થશે"], "correct": 2, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીની અંદર રહેલા કુલ વિદ્યુતભાર પર ફ્લક્સ આધાર રાખે છે. અહીં, કુલ ભાર = +Q + (-Q) = 0 છે, આથી ફ્લક્સ શૂન્ય રહેશે. સપાટીને વિકૃત કરવાથી પણ ફ્લક્સ શૂન્ય જ રહેશે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ સપાટીના વિકૃતીકરણને ફ્લક્સ સાથે સંકળે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 9}, {"question": "એક ગોળાકાર બંધ સપાટીની અંદર એકસમાન વિદ્યુત ક્ષેત્ર E અસ્તિત્વમાં છે. જો સપાટીની ત્રિજ્યા r બમણી કરવામાં આવે, તો ફ્લક્સમાં શું ફેરફાર થશે?", "options": ["A) ફ્લક્સ અડધો થશે", "B) ફ્લક્સ બમણો થશે", "C) ફ્લક્સ ચાર ગણો થશે", "D) ફ્લક્સ અચળ રહેશે"], "correct": 3, "explanation": "ગોસના નિયમ અનુસાર, ફ્લક્સ = ∮ E · dA = (કુલ ભાર) / ε₀. જો સપાટીની અંદર કોઈ ભાર ન હોય, તો ફ્લક્સ શૂન્ય રહેશે. અહીં, એકસમાન ક્ષેત્ર E હોવા છતાં, જો સપાટીની અંદર કોઈ ભાર ન હોય, તો ફ્લક્સ શૂન્ય રહેશે અને ત્રિજ્યા બદલવાથી પણ ફ્લક્સ શૂન્ય જ રહેશે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ સપાટીના કદને ફ્લક્સ સાથે સંકળે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 10}, {"question": "એક બંધ સપાટીની અંદર એકસમાન વિદ્યુતભાર ઘનતા ρ ધરાવતો ઘન ગોળો મૂકેલો છે. જો આ ગોળાની ત્રિજ્યા R હોય અને ગોસના નિયમનો ઉપયોગ કરવામાં આવે, તો ગોળાની સપાટી પર વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી હશે?", "options": ["A) E = ρR/3ε₀", "B) E = ρR²/3ε₀", "C) E = ρR/ε₀", "D) E = ρ/3ε₀R"], "correct": 0, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ સપાટીની અંદરના કુલ વિદ્યુતભારના ε₀ ગણા જેટલું હોય છે. ઘન ગોળામાં કુલ વિદ્યુતભાર Q = ρ × (4/3)πR³ થાય. ગોસની સપાટી તરીકે ગોળાની સપાટી લેતાં, ફ્લક્સ Φ = E × 4πR² = Q/ε₀ = (ρ × (4/3)πR³)/ε₀. આ સમીકરણને ઉકેલતાં E = ρR/3ε₀ મળે છે. અન્ય વિકલ્પો ગાણિતિક ભૂલો ધરાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 11}, {"question": "એક લાંબા નળાકારની બંધ સપાટીની અંદર સમાન રેખીય વિદ્યુતભાર ઘનતા λ ધરાવતો સુરેખ તાર મૂકેલો છે. જો નળાકારની ત્રિજ્યા r હોય, તો નળાકારની સપાટી પર વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી હશે?", "options": ["A) E = λ/2πε₀r", "B) E = λ/πε₀r", "C) E = λr/2πε₀", "D) E = λ/4πε₀r"], "correct": 0, "explanation": "ગોસના નિયમ મુજબ, નળાકારની બંધ સપાટીમાંથી પસાર થતું કુલ ફ્લક્સ Φ = E × 2πrl (જ્યાં l નળાકારની લંબાઈ છે) = λl/ε₀ (કારણ કે કુલ વિદ્યુતભાર Q = λl). આ સમીકરણને ઉકેલતાં E = λ/2πε₀r મળે છે. અન્ય વિકલ્પો ગોસના નિયમની ખોટી ગાણિતિક અરજી દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 12}, {"question": "એક બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q અને એક અનંત લંબાઈનો સુરેખ તાર (રેખીય વિદ્યુતભાર ઘનતા λ) મૂકેલા છે. જો ગોસના નિયમનો ઉપયોગ કરવામાં આવે, તો બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે?", "options": ["A) Φ = (Q + λL)/ε₀, જ્યાં L સપાટીની લંબાઈ છે", "B) Φ = Q/ε₀", "C) Φ = λL/ε₀", "D) Φ = (Q + λ)/ε₀"], "correct": 1, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ માત્ર સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત હોય છે. અનંત લંબાઈના સુરેખ તારનો વિદ્યુતભાર સપાટીની અંદર સંપૂર્ણપણે આવતો નથી, તેથી તેનો ફાળો શૂન્ય ગણાય. આથી ફક્ત બિંદુવત્ વિદ્યુતભાર +Q નો ફાળો ગણતરીમાં લેવાય, જે Φ = Q/ε₀ આપે છે. અન્ય વિકલ્પો સપાટીની અંદરના વિદ્યુતભારની ખોટી ગણતરી દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 13}, {"question": "એક બંધ સપાટીની અંદર એકસમાન વિદ્યુતક્ષેત્ર E અસ્તિત્વમાં છે. જો સપાટીનો કુલ પૃષ્ઠક્ષેત્રફળ A હોય, તો ગોસના નિયમ મુજબ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે?", "options": ["A) Φ = EA", "B) Φ = E/A", "C) Φ = 0", "D) Φ = EA cosθ, જ્યાં θ વિદ્યુતક્ષેત્ર અને સપાટીના લંબ વચ્ચેનો ખૂણો છે"], "correct": 2, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત હોય છે. એકસમાન વિદ્યુતક્ષેત્રમાં બંધ સપાટીની અંદર કોઈ વિદ્યુતભાર હાજર નથી (કારણ કે વિદ્યુતક્ષેત્ર એકસમાન છે), તેથી કુલ ફ્લક્સ શૂન્ય થાય છે. અન્ય વિકલ્પો ખોટી રીતે વિદ્યુતભારની હાજરી ધારણા કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 14}, {"question": "એક બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q અને એક વિદ્યુત દ્વિધ્રુવ (જેમાં +q અને -q વિદ્યુતભારો અંતર 2a દૂર છે) મૂકેલા છે. ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ કેટલું હશે?", "options": ["A) Φ = (Q + q)/ε₀", "B) Φ = (Q - q)/ε₀", "C) Φ = Q/ε₀", "D) Φ = (Q + 2q)/ε₀"], "correct": 2, "explanation": "ગોસના નિયમ મુજબ, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ સપાટીની અંદરના કુલ વિદ્યુતભાર પર આધારિત હોય છે. વિદ્યુત દ્વિધ્રુવમાં +q અને -q વિદ્યુતભારો સમાન મૂલ્યના અને વિરુદ્ધ ચિહ્નના હોવાથી તેમનો કુલ વિદ્યુતભાર શૂન્ય થાય છે. આથી ફક્ત બિંદુવત્ વિદ્યુતભાર +Q નો ફાળો ગણતરીમાં લેવાય, જે Φ = Q/ε₀ આપે છે. અન્ય વિકલ્પો દ્વિધ્રુવના વિદ્યુતભારોની ખોટી ગણતરી દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 15}, {"question": "એક ગોળાકાર બંધ સપાટીની અંદર ત્રણ બિંદુવત્ વિદ્યુતભારો +4 μC, -2 μC અને -1 μC મૂકેલા છે. ગોસના નિયમ અનુસાર, આ સપાટીમાંથી પસાર થતો કુલ વિદ્યુત ફ્લક્સ કેટલો હશે? (ε₀ = 8.85 × 10⁻¹² C²/N·m²)", "options": ["A) 1/(8.85 × 10⁻¹²) N·m²/C", "B) 2/(8.85 × 10⁻¹²) N·m²/C", "C) 3/(8.85 × 10⁻¹²) N·m²/C", "D) શૂન્ય"], "correct": 0, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીમાંથી પસાર થતો કુલ વિદ્યુત ફ્લક્સ (Φ) = q/ε₀, જ્યાં q એ સપાટીની અંદરના કુલ વિદ્યુતભારનો સરવસુમ છે. અહીં, +4 μC - 2 μC - 1 μC = +1 μC = 1 × 10⁻⁶ C. આથી Φ = (1 × 10⁻⁶)/(8.85 × 10⁻¹²) = 1/(8.85 × 10⁻¹²) N·m²/C. વિકલ્પ B, C અને D ખોટા છે કારણ કે તેઓ કુલ ભારની ગણતરી ચૂકી જાય છે અથવા શૂન્ય ગણે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 16}, {"question": "એક અરધગોળાકાર બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q મૂકેલો છે. જો આ સપાટીને પૂર્ણ ગોળાકાર બંધ સપાટીમાં પૂરક (complementary) સપાટી ઉમેરીને પૂર્ણ કરવામાં આવે, તો કુલ ફ્લક્સમાં કયો ફેરફાર થશે?", "options": ["A) ફ્લક્સ અડધો થશે", "B) ફ્લક્સ બમણો થશે", "C) ફ્લક્સ અચળ રહેશે", "D) ફ્લક્સ શૂન્ય થશે"], "correct": 2, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીમાંથી પસાર થતો કુલ ફ્લક્સ ભારના પરિમાણ પર નિર્ભર કરે છે, સપાટીના આકાર પર નહીં. અરધગોળાકાર સપાટીને પૂર્ણ ગોળાકારમાં પૂરક સપાટી ઉમેરવાથી કુલ ભાર અચળ રહે છે, આથી ફ્લક્સ પણ અચળ રહેશે. વિકલ્પ A, B અને D ખોટા છે કારણ કે તેઓ સપાટીના આકારમાં ફેરફારને ફ્લક્સ સાથે સંકળે છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 17}, {"question": "એક બંધ સપાટીની અંદર બે વિદ્યુતભારો +3Q અને -Q મૂકેલા છે. જો સપાટીની બહાર +2Q ભાર મૂકવામાં આવે, તો સપાટીમાંથી પસાર થતો કુલ ફ્લક્સ કેટલો હશે?", "options": ["A) 2Q/ε₀", "B) 3Q/ε₀", "C) 4Q/ε₀", "D) Q/ε₀"], "correct": 0, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીમાંથી પસાર થતો કુલ ફ્લક્સ ફક્ત સપાટીની અંદરના ભાર પર નિર્ભર કરે છે. અહીં, અંદરના ભારો +3Q અને -Q છે, આથી કુલ ભાર = +3Q - Q = +2Q. સપાટીની બહાર મૂકેલો +2Q ભાર ફ્લક્સને અસર કરતો નથી. આથી Φ = 2Q/ε₀. વિકલ્પ B, C અને D ખોટા છે કારણ કે તેઓ બહારના ભારને સમાવે છે અથવા અંદરના ભારની ગણતરી ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 18}, {"question": "એક લંબચોરસ બંધ સપાટીની અંદર એકસમાન વિદ્યુત ક્ષેત્ર E અસ્તિત્વમાં છે. જો સપાટીનો કદ બમણો કરવામાં આવે, તો સપાટીમાંથી પસાર થતો કુલ ફ્લક્સ કેવી રીતે બદલાશે?", "options": ["A) ફ્લક્સ અડધો થશે", "B) ફ્લક્સ બમણો થશે", "C) ફ્લક્સ ચાર ગણો થશે", "D) ફ્લક્સ શૂન્ય થશે"], "correct": 1, "explanation": "ગોસના નિયમ અનુસાર, Φ = ∮ E·dA. જો સપાટીનો કદ બમણો કરવામાં આવે, તો તેનું ક્ષેત્રફળ બમણું થશે. જો વિદ્યુત ક્ષેત્ર E એકસમાન રહે, તો ફ્લક્સ Φ = E × A પણ બમણો થશે. વિકલ્પ A, C અને D ખોટા છે કારણ કે તેઓ ક્ષેત્રફળ અને ફ્લક્સ વચ્ચેના સંબંધને ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુતભાર અને ક્ષેત્ર", "difficulty": "Medium", "num": 19}, {"question": "એક બંધ સપાટીની અંદર એક બિંદુવત્ વિદ્યુતભાર +Q અને એક અનંત વિસ્તાર ધરાવતી સમાન વિદ્યુતભાર ઘનતા σ ધરાવતી સમતલ પટ્ટી મૂકેલ છે. જો ગોસના નિયમ અનુસાર બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ Φ હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) Φ = Q/ε₀ + σA/ε₀, જ્યાં A એ બંધ સપાટીનો સમતલ પટ્ટી સાથેનો છેદનો ક્ષેત્રફળ છે", "B) Φ = Q/ε₀, કારણ કે સમતલ પટ્ટીનો વિદ્યુતભાર બંધ સપાટીની બહાર ગણાય છે", "C) Φ = Q/ε₀ + σA/2ε₀, કારણ કે સમતલ પટ્ટીનો અડધો વિદ્યુતભાર બંધ સપાટીની અંદર ગણાય છે", "D) Φ = σA/ε₀, કારણ કે બિંદુવત્ વિદ્યુતભારનો ફાળો શૂન્ય છે"], "correct": 1, "explanation": "ગોસના નિયમ અનુસાર, બંધ સપાટીમાંથી પસાર થતું કુલ વિદ્યુત ફ્લક્સ Φ = (બંધ સપાટીની અંદર રહેલા કુલ વિદ્યુતભાર)/ε₀. અહીં બિંદુવત્ વિદ્યુતભાર +Q સંપૂર્ણપણે બંધ સપાટીની અંદર છે, તેથી તેનો ફાળો Q/ε₀ છે. સમતલ પટ્ટી અનંત વિસ્તાર ધરાવતી હોવાથી, તેનો માત્ર તે ભાગ જે બંધ સપાટીની અંદર છે તેનો જ ફાળો ગણાય. સમતલ પટ્ટીનો વિદ્યુતભાર ઘનતા σ છે, તેથી બંધ સપાટી સાથેના છેદનો ક્ષેત્રફળ A હોય તો તેનો ફાળો σA/ε₀ થાય. આમ, કુલ ફ્લક્સ Φ = Q/ε₀ + σA/ε₀. વિકલ્પ B ખોટો છે કારણ કે સમતલ પટ્ટીનો અંદરનો ભાગ ગણાય છે. વિકલ્પ C ખોટો છે કારણ કે સમતલ પટ્ટીનો અડધો ભાગ ગણવાનું કોઈ કારણ નથી. વિકલ્પ D ખોટો છે કારણ કે બિંદુવત્ વિદ્યુતભારનો ફાળો શૂન્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 20}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
