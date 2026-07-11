@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - બનાવટની પદ્ધતિઓ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 બનાવટની પદ્ધતિઓ</span>
+                <span>🎯 Hard</span>
+                <span>📝 28 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષરસ કલિકા (Protoplast) માંથી નવો કોષભિત્તિ બનાવવા માટે ગ્લુકોઝના બહુલકરણ (Polymerization) દ્વારા સેલ્યુલોઝનું નિર્માણ થાય છે, ત્યારે નીચેનામાંથી કયો ઉત્સેચક મુખ્ય ભૂમિકા ભજવે છે?", "options": ["A) સેલ્યુલેઝ", "B) સુક્રેઝ", "C) સેલ્યુલોઝ સિનથેઝ", "D) એમાઇલેઝ"], "correct": 2, "explanation": "સેલ્યુલોઝ સિનથેઝ ઉત્સેચક કોષરસ કલિકા (Protoplast) માં ગ્લુકોઝના બહુલકરણ દ્વારા સેલ્યુલોઝનું નિર્માણ કરે છે. સેલ્યુલેઝ સેલ્યુલોઝના વિઘટનમાં, સુક્રેઝ સુક્રોઝના વિઘટનમાં, અને એમાઇલેઝ સ્ટાર્ચના વિઘટનમાં ભૂમિકા ભજવે છે. આથી, સેલ્યુલોઝ સિનથેઝ જ સરનામું ઉત્સેચક છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૧: કોષ-ચયાપચય", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયો પદાર્થ કોષભિત્તિના નિર્માણમાં સીધી રીતે સામેલ નથી, પરંતુ કોષરસ કલિકા (Protoplast) ની રચનામાં મહત્વનો ભાગ ભજવે છે?", "options": ["A) સેલ્યુલોઝ", "B) હેમિસેલ્યુલોઝ", "C) પેક્ટિન", "D) ફોસ્ફોલિપિડ"], "correct": 3, "explanation": "ફોસ્ફોલિપિડ કોષભિત્તિનો ભાગ નથી, પરંતુ તે કોષરસ કલિકા (Protoplast) ની રચનામાં કોષછાદ (Plasma membrane) નો મુખ્ય ઘટક છે. સેલ્યુલોઝ, હેમિસેલ્યુલોઝ, અને પેક્ટિન કોષભિત્તિના મુખ્ય ઘટકો છે.", "ncert_ref": "Class XI - પ્રકરણ ૮: કોષ: જીવનની મૂળ એકમ", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે કોષભિત્તિનું નિર્માણ થાય છે, ત્યારે નીચેનામાંથી કયો પદાર્થ કોષભિત્તિની મજબૂતાઈ અને લવચીકતા માટે જવાબદાર છે?", "options": ["A) લિગ્નિન", "B) સબેરિન", "C) ક્યુટિન", "D) પેક્ટિન"], "correct": 0, "explanation": "લિગ્નિન કોષભિત્તિને મજબૂતાઈ અને કઠોરતા પ્રદાન કરે છે, ખાસ કરીને લાકડાના કોષોમાં. સબેરિન અને ક્યુટિન કોષભિત્તિને જળરોધક બનાવે છે, જ્યારે પેક્ટિન કોષભિત્તિના મધ્ય પટલ (Middle lamella) નું નિર્માણ કરે છે.", "ncert_ref": "Class XI - પ્રકરણ ૮: કોષ: જીવનની મૂળ એકમ", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયો વિકલ્પ કોષભિત્તિના નિર્માણ પ્રક્રિયામાં સામેલ નથી?", "options": ["A) ગોલ્ગી ઉપકરણ", "B) રાઇબોઝોમ", "C) એન્ડોપ્લાઝમિક જાળકું", "D) માઇટોકોન્ડ્રિયા"], "correct": 3, "explanation": "માઇટોકોન્ડ્રિયા કોષભિત્તિના નિર્માણમાં સીધી રીતે સામેલ નથી. તે શ્વસન અને ઉર્જા ઉત્પાદન માટે જવાબદાર છે. ગોલ્ગી ઉપકરણ અને એન્ડોપ્લાઝમિક જાળકું કોષભિત્તિના ઘટકોના સંશ્લેષણ અને પરિવહનમાં ભૂમિકા ભજવે છે, જ્યારે રાઇબોઝોમ પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે.", "ncert_ref": "Class XI - પ્રકરણ ૮: કોષ: જીવનની મૂળ એકમ", "difficulty": "Hard", "num": 4}, {"question": "કોષભિત્તિના નિર્માણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પ્રથમ તબક્કે જમા થાય છે અને કોષભિત્તિની રચનાનું આધારસ્તંભ તૈયાર કરે છે?", "options": ["A) સેલ્યુલોઝ માઇક્રોફિબ્રિલ્સ", "B) પેક્ટિન", "C) હેમિસેલ્યુલોઝ", "D) લિગ્નિન"], "correct": 0, "explanation": "કોષભિત્તિના નિર્માણ દરમિયાન, સેલ્યુલોઝ માઇક્રોફિબ્રિલ્સ પ્રથમ તબક્કે જમા થાય છે અને કોષભિત્તિની રચનાનું આધારસ્તંભ તૈયાર કરે છે. પેક્ટિન, હેમિસેલ્યુલોઝ, અને લિગ્નિન પછીના તબક્કે જમા થાય છે.", "ncert_ref": "Class XI - પ્રકરણ ૮: કોષ: જીવનની મૂળ એકમ", "difficulty": "Hard", "num": 5}, {"question": "પ્લાઝ્મોલાઇસિસ પામેલા કોષમાં કોષભિત્તિનું નિર્માણ પુનઃસ્થાપિત કરવા માટે નીચેનામાંથી કયો પગલો સૌથી અગત્યનો છે?", "options": ["A) કોષરસ કલિકામાં સક્રિય પરિવહન દ્વારા K+ આયનનો પ્રવેશ", "B) એન્ડોપ્લાઝ્મિક જાળકામાંથી વસ્ત્રણ (વેસિકલ) દ્વારા સેલ્યુલોઝના અણુઓનો સ્રાવ", "C) ગોલ્ગી ઉપકરણ દ્વારા પેક્ટિન પદાર્થોનો સ્રાવ", "D) માઇટોકોન્ડ્રિયામાંથી ATP ની ઉત્પત્તિ વડે ઉર્જા પુરવઠો"], "correct": 1, "explanation": "કોષભિત્તિનું નિર્માણ મુખ્યત્વે એન્ડોપ્લાઝ્મિક જાળકા અને ગોલ્ગી ઉપકરણ દ્વારા થાય છે, જ્યાં સેલ્યુલોઝના અણુઓ વસ્ત્રણ (વેસિકલ) દ્વારા કોષભિત્તિ તરફ વહન પામે છે. K+ આયનનો પ્રવેશ કોષરસ કલિકાના દબાણને જાળવે છે, પરંતુ કોષભિત્તિના નિર્માણમાં સીધી ભૂમિકા ભજવતો નથી. પેક્ટિન પદાર્થો કોષભિત્તિની મધ્યસ્થ સ્તરમાં જમા થાય છે, પરંતુ સેલ્યુલોઝ મુખ્ય ઘટક છે. ATP ઉર્જા પુરવઠો આપે છે, પરંતુ તે સીધો ઘટક નથી.", "ncert_ref": "Class XI - પ્રકરણ 8: કોષ: જીવનની મૂળ એકમ - કોષભિત્તિ અને કોષદીવાલ", "difficulty": "Hard", "num": 6}, {"question": "નીચેનામાંથી કયો વિકલ્પ કોષભિત્તિના નિર્માણ દરમિયાન સેલ્યુલોઝ સિંથેટેઝ કરતી ઉત્સેચકની ક્રિયાવિધિને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) ઉત્સેચક કોષરસ કલિકામાં મુક્ત રહે છે અને સેલ્યુલોઝના અણુઓને જોડે છે", "B) ઉત્સેચક કોષભિત્તિની બહાર રહે છે અને સેલ્યુલોઝના અણુઓને કોષભિત્તિની સપાટી પર જોડે છે", "C) ઉત્સેચક ગોલ્ગી ઉપકરણમાં રહે છે અને સેલ્યુલોઝના અણુઓને વસ્ત્રણ દ્વારા વહન કરે છે", "D) ઉત્સેચક કોષકેન્દ્રમાં રહે છે અને DNA વડે નિયંત્રિત થાય છે"], "correct": 2, "explanation": "સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક (સેલ્યુલોઝ સિંથેઝ) ગોલ્ગી ઉપકરણમાં રહે છે અને સેલ્યુલોઝના અણુઓને વસ્ત્રણ (વેસિકલ) દ્વારા કોષભિત્તિ તરફ વહન કરે છે. ઉત્સેચક કોષરસ કલિકામાં મુક્ત રહેતો નથી, કોષભિત્તિની બહાર રહેતો નથી, અને કોષકેન્દ્રમાં રહેતો નથી.", "ncert_ref": "Class XI - પ્રકરણ 8: કોષ: જીવનની મૂળ એકમ - કોષભિત્તિ અને કોષદીવાલ", "difficulty": "Hard", "num": 7}, {"question": "કોષભિત્તિના નિર્માણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ કોષભિત્તિની સ્તરો વચ્ચેના બંધનને મજબૂત કરે છે?", "options": ["A) સેલ્યુલોઝ", "B) લિગ્નિન", "C) કેલ્શિયમ પેક્ટેટ", "D) સબેરિન"], "correct": 2, "explanation": "કેલ્શિયમ પેક્ટેટ કોષભિત્તિની સ્તરો વચ્ચેના બંધનને મજબૂત કરે છે. સેલ્યુલોઝ મુખ્ય ઘટક છે, લિગ્નિન કોષભિત્તિને કઠણ બનાવે છે, અને સબેરિન કોષભિત્તિને જળરોધક બનાવે છે.", "ncert_ref": "Class XI - પ્રકરણ 8: કોષ: જીવનની મૂળ એકમ - કોષભિત્તિ અને કોષદીવાલ", "difficulty": "Hard", "num": 8}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચર પદ્ધતિમાં, કોષભિત્તિના પુનર્નિર્માણ દરમિયાન નીચેનામાંથી કયો હોર્મોન સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતાને પ્રોત્સાહન આપે છે, પરંતુ એકસાથે કોષવિભાજનને અટકાવે છે?", "options": ["A) ઓક્સિન (IAA)", "B) જિબરેલિન (GA₃)", "C) સાયટોકાઇનિન (kinetin)", "D) એબ્સિસિક એસિડ (ABA)"], "correct": 3, "explanation": "એબ્સિસિક એસિડ (ABA) કોષભિત્તિના પુનર્નિર્માણ દરમિયાન સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતાને પ્રોત્સાહન આપે છે, પરંતુ કોષવિભાજનને અટકાવે છે. ઓક્સિન (IAA) અને સાયટોકાઇનિન કોષવિભાજનને પ્રોત્સાહન આપે છે, જ્યારે જિબરેલિન (GA₃) કોષના વિકાસને પ્રભાવિત કરે છે, પરંતુ સેલ્યુલોઝ સિંથેટેઝ પર સીધો પ્રભાવ ધરાવતું નથી.", "ncert_ref": "Class XII - Chapter 11: જૈવતકનીકી (Biotechnology)", "difficulty": "Hard", "num": 9}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચરમાં, કોષભિત્તિના નિર્માણ દરમિયાન નીચેનામાંથી કયો પદાર્થ કોષભિત્તિની સ્થિરતા માટે જરૂરી છે, પરંતુ તે સેલ્યુલોઝ નથી?", "options": ["A) હેમિસેલ્યુલોઝ", "B) પેક્ટિન", "C) લિગ્નિન", "D) ક્યુટિન"], "correct": 1, "explanation": "પેક્ટિન કોષભિત્તિની સ્થિરતા માટે જરૂરી છે અને તે સેલ્યુલોઝ નથી. હેમિસેલ્યુલોઝ અને લિગ્નિન કોષભિત્તિના ઘટકો છે, પરંતુ લિગ્નિન મુખ્યત્વે દ્વિતીય કોષભિત્તિમાં જોવા મળે છે. ક્યુટિન કોષભિત્તિનો ઘટક નથી, પરંતુ તે પર્ણની સપાટી પર જોવા મળે છે.", "ncert_ref": "Class XI - Chapter 6: વનસ્પતિશાસ્ત્ર (Plant Anatomy)", "difficulty": "Hard", "num": 10}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચર પદ્ધતિમાં, કોષરસ કલિકા (પ્રોટોપ્લાસ્ટ) માંથી કોષભિત્તિના પુનર્નિર્માણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ સેલ્યુલોઝના સિંથેટેઝ માટે આવશ્યક ઉત્સેચકની ક્રિયાશીલતામાં વધારો કરે છે?", "options": ["A) ઓક્સિન (Auxin)", "B) જિબરેલિન (Gibberellin)", "C) સાયટોકાઇનિન (Cytokinin)", "D) એબ્સિસિક એસિડ (Abscisic Acid)"], "correct": 2, "explanation": "સાયટોકાઇનિન કોષવિભાજન અને કોષભિત્તિના નિર્માણને પ્રોત્સાહન આપે છે, જેમાં સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતા વધારે છે. ઓક્સિન કોષવૃદ્ધિ અને મૂળ નિર્માણમાં મદદ કરે છે, પરંતુ સેલ્યુલોઝ સિંથેટેઝ માટે સીધી રીતે જવાબદાર નથી. જિબરેલિન કોષવૃદ્ધિ અને લંબાઈમાં વધારો કરે છે, પરંતુ સેલ્યુલોઝ સિંથેટેઝ માટે નહીં. એબ્સિસિક એસિડ કોષવૃદ્ધિને અટકાવે છે અને સ્ટ્રેસ હોર્મોન તરીકે કામ કરે છે.", "ncert_ref": "Class XII - Chapter 11: વનસ્પતિ જીવવિજ્ઞાનમાં પ્રયોગશાળા તકનીકો (Plant Breeding)", "difficulty": "Hard", "num": 11}, {"question": "કોષભિત્તિના નિર્માણ દરમિયાન, સેલ્યુલોઝના રેખીય શૃંખલાઓ વચ્ચે હાઇડ્રોજન બંધન બનાવવા માટે નીચેનામાંથી કયો પદાર્થ જવાબદાર છે?", "options": ["A) પેક્ટિન", "B) હેમીસેલ્યુલોઝ", "C) લિગ્નિન", "D) ક્યુટિન"], "correct": 1, "explanation": "હેમીસેલ્યુલોઝ સેલ્યુલોઝના રેખીય શૃંખલાઓ વચ્ચે હાઇડ્રોજન બંધન બનાવવામાં મદદ કરે છે, જે કોષભિત્તિને મજબૂતાઈ આપે છે. પેક્ટિન કોષભિત્તિની મધ્યલેમેલામાં જોવા મળે છે અને કોષોને એકબીજા સાથે જોડવામાં મદદ કરે છે. લિગ્નિન કોષભિત્તિને કાઠીન્ય આપે છે, પરંતુ હાઇડ્રોજન બંધન બનાવતું નથી. ક્યુટિન કોષભિત્તિની બાહ્ય સ્તર પર જોવા મળે છે અને પાણીના નુકસાનને અટકાવે છે.", "ncert_ref": "Class XI - Chapter 6: વનસ્પતિના અંગોની રચના (Anatomy of Flowering Plants)", "difficulty": "Hard", "num": 12}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચરમાં, કોષરસ કલિકા (પ્રોટોપ્લાસ્ટ) માંથી કોષભિત્તિના પુનર્નિર્માણ દરમિયાન, નીચેનામાંથી કયો પગલો પ્રથમ થાય છે?", "options": ["A) સેલ્યુલોઝના મિક્રોફાઇબ્રિલ્સનું નિર્માણ", "B) પેક્ટિન પદાર્થોનું સ્રાવણ", "C) હેમીસેલ્યુલોઝનું સિંથેટેઝ", "D) લિગ્નિનનું જમા થવું"], "correct": 0, "explanation": "કોષભિત્તિના પુનર્નિર્માણ દરમિયાન પ્રથમ પગલો સેલ્યુલોઝના મિક્રોફાઇબ્રિલ્સનું નિર્માણ છે, જે કોષભિત્તિની આધારરચના બનાવે છે. પેક્ટિન પદાર્થો અને હેમીસેલ્યુલોઝ પછી જમા થાય છે. લિગ્નિન કોષભિત્તિના પાછળના તબક્કામાં જમા થાય છે અને કાઠીન્ય આપે છે.", "ncert_ref": "Class XII - Chapter 11: વનસ્પતિ જીવવિજ્ઞાનમાં પ્રયોગશાળા તકનીકો (Plant Breeding)", "difficulty": "Hard", "num": 13}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચરમાં, કોષભિત્તિના પુનર્નિર્માણ દરમિયાન, નીચેનામાંથી કયો હોર્મોન સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતામાં વધારો કરે છે, પરંતુ કોષવિભાજનને પ્રેરિત કરતો નથી?", "options": ["A) ઓક્સિન", "B) જિબ્રેલિન", "C) સાયટોકાઇનિન", "D) એબ્સિસિક એસિડ"], "correct": 1, "explanation": "જિબ્રેલિન (B) સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતામાં વધારો કરે છે, પરંતુ તે કોષવિભાજનને પ્રેરિત કરતું નથી. ઓક્સિન (A) અને સાયટોકાઇનિન (C) કોષવિભાજનને પ્રેરિત કરે છે, જ્યારે એબ્સિસિક એસિડ (D) વૃદ્ધિ અવરોધક તરીકે કામ કરે છે.", "ncert_ref": "Class XII - Chapter 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "difficulty": "Hard", "num": 14}, {"question": "એક સંશોધકે બેક્ટેરિયાના કોષમાંથી અલગ કરેલા પ્રોટોપ્લાસ્ટને યોગ્ય માધ્યમમાં ઉછેર્યો. થોડા સમય બાદ તેણે અવલોકન કર્યું કે પ્રોટોપ્લાસ્ટમાં કોષભિત્તિનું પુનઃનિર્માણ થયું નથી. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "options": ["A) માધ્યમમાં કેલ્શિયમ આયનોની અછત હતી, જે સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતા માટે જરૂરી છે", "B) માધ્યમમાં ઓક્ઝિન હોર્મોનની વધુ પડતી સાંદ્રતા હતી, જે સેલ્યુલોઝના સંશ્લેષણને અવરોધે છે", "C) પ્રોટોપ્લાસ્ટને અલગ કરવા માટે ઉપયોગમાં લેવાયેલ લાઇસોઝાઇમ ઉત્સેચકની અવશેષ અસર હતી, જે સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકને નિષ્ક્રિય કરે છે", "D) માધ્યમમાં સુક્રોઝની સાંદ્રતા ખૂબ ઓછી હતી, જે કોષભિત્તિના નિર્માણ માટે જરૂરી ઉર્જા પૂરી પાડવા અસમર્થ હતી"], "correct": 0, "explanation": "સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતા માટે કેલ્શિયમ આયનો આવશ્યક છે, જે કોષભિત્તિના નિર્માણમાં મુખ્ય ભૂમિકા ભજવે છે. NCERT Class XI - અધ્યાય 6: કોષ: જીવનનો એકમ માં સ્પષ્ટપણે ઉલ્લેખ છે કે કેલ્શિયમ આયનો સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની ક્રિયાશીલતા માટે જરૂરી છે. વિકલ્પ B ખોટો છે કારણ કે ઓક્ઝિન હોર્મોન કોષભિત્તિના નિર્માણને પ્રોત્સાહિત કરે છે, અવરોધતું નથી. વિકલ્પ C ખોટો છે કારણ કે લાઇસોઝાઇમ ઉત્સેચક કોષદીવાલને તોડવા માટે ઉપયોગમાં લેવાય છે, પરંતુ તેની અવશેષ અસર સેલ્યુલોઝ સિંથેટેઝને નિષ્ક્રિય કરતી નથી. વિકલ્પ D ખોટો છે કારણ કે સુક્રોઝની ઓછી સાંદ્રતા ઉર્જા પૂરી પાડવામાં અસમર્થ હોઈ શકે, પરંતુ કોષભિત્તિના નિર્માણ માટે સીધી રીતે જવાબદાર નથી.", "ncert_ref": "Class XI - અધ્યાય 6: કોષ: જીવનનો એકમ", "difficulty": "Hard", "num": 15}, {"question": "નીચેનામાંથી કયું વિધાન વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણની પ્રક્રિયા માટે ખોટું છે?", "options": ["A) સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક પ્લાઝ્મા કલામાં આવેલા રોસેટ સંકુલમાં સક્રિય હોય છે", "B) કોષભિત્તિના નિર્માણ દરમિયાન, હેમિસેલ્યુલોઝ અને પેક્ટિન સેલ્યુલોઝના સ્તરો વચ્ચે જમા થાય છે", "C) કોષભિત્તિના નિર્માણ માટે જરૂરી ગ્લુકોઝના અણુઓ સીધા જ કોષરસમાંથી મેળવવામાં આવે છે", "D) કોષભિત્તિના નિર્માણ દરમિયાન, માઇક્રોટ્યુબ્યુલ્સ સેલ્યુલોઝ તંતુઓની ગોઠવણી માટે માર્ગદર્શન પૂરું પાડે છે"], "correct": 2, "explanation": "સાચો જવાબ C છે કારણ કે કોષભિત્તિના નિર્માણ માટે જરૂરી ગ્લુકોઝના અણુઓ સીધા કોષરસમાંથી મેળવવામાં આવતા નથી, પરંતુ UDP-ગ્લુકોઝના રૂપમાં સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક દ્વારા ઉપયોગમાં લેવાય છે. વિકલ્પ A, B અને D વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણની સાચી પ્રક્રિયા દર્શાવે છે, જ્યારે C ખોટું છે કારણ કે ગ્લુકોઝ સીધો ઉપયોગમાં લેવાતો નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 16}, {"question": "વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પ્રાથમિક કોષભિત્તિના નિર્માણમાં સીધો ભાગ લેતો નથી?", "options": ["A) પેક્ટિન", "B) લિગ્નિન", "C) હેમિસેલ્યુલોઝ", "D) સેલ્યુલોઝ"], "correct": 1, "explanation": "સાચો જવાબ B છે કારણ કે લિગ્નિન મુખ્યત્વે દ્વિતીયક કોષભિત્તિના નિર્માણમાં જોવા મળે છે, પ્રાથમિક કોષભિત્તિમાં નહીં. વિકલ્પ A, C અને D પ્રાથમિક કોષભિત્તિના નિર્માણમાં સીધો ભાગ લે છે, જ્યારે લિગ્નિન દ્વિતીયક કોષભિત્તિને મજબૂત બનાવવા માટે જવાબદાર છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 17}, {"question": "એક સંશોધકે વનસ્પતિના પ્રોટોપ્લાસ્ટને યોગ્ય માધ્યમમાં ઉછેર્યો અને કોષભિત્તિનું પુનર્નિર્માણ થતું જોયું. આ પ્રક્રિયામાં, નીચેનામાંથી કયો હોર્મોન સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની પ્રવૃત્તિને સીધી રીતે પ્રોત્સાહિત કરતો નથી?", "options": ["A) ઓક્ઝિન", "B) સાયટોકાઇનિન", "C) જીબરેલિન", "D) એબ્સિસિક એસિડ"], "correct": 3, "explanation": "સાચો જવાબ D છે કારણ કે એબ્સિસિક એસિડ કોષભિત્તિના નિર્માણમાં સીધી રીતે સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકની પ્રવૃત્તિને પ્રોત્સાહિત કરતો નથી. ઓક્ઝિન (A), સાયટોકાઇનિન (B) અને જીબરેલિન (C) કોષભિત્તિના નિર્માણમાં સક્રિય ભૂમિકા ભજવે છે, જ્યારે એબ્સિસિક એસિડ તણાવ પ્રતિભાવ અને વૃદ્ધિ અવરોધક તરીકે કાર્ય કરે છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "difficulty": "Hard", "num": 18}, {"question": "વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણ દરમિયાન, નીચેનામાંથી કયો ઉત્સેચક સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે, પરંતુ તેનું સક્રિય સ્વરૂપ કોષરસપટલ (Plasma membrane) સાથે સંકળાયેલું હોય છે અને તેની ક્રિયાશીલતા માટે ગ્લાયકોસાઇલ ટ્રાન્સફરેઝ ડોમેન ધરાવે છે?", "options": ["A) સેલ્યુલોઝ સિંથેટેઝ (CesA)", "B) સુક્રોઝ સિંથેઝ (SuSy)", "C) પેક્ટિન મિથાઈલએસ્ટરેઝ (PME)", "D) લિગ્નિન પેરોક્સિડેઝ (LiP)"], "correct": 0, "explanation": "સેલ્યુલોઝ સિંથેટેઝ (CesA) ઉત્સેચક સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે અને તે કોષરસપટલ સાથે સંકળાયેલું હોય છે. તે ગ્લાયકોસાઇલ ટ્રાન્સફરેઝ ડોમેન ધરાવે છે, જે UDP-ગ્લુકોઝમાંથી સેલ્યુલોઝની રેખીય શૃંખલાઓ બનાવે છે. સુક્રોઝ સિંથેઝ (SuSy) સેલ્યુલોઝ સંશ્લેષણ માટે ગ્લુકોઝ પૂરો પાડે છે, પરંતુ સીધું સંશ્લેષણ કરતું નથી. પેક્ટિન મિથાઈલએસ્ટરેઝ (PME) પેક્ટિનના મિથાઈલેશનમાં ભાગ લે છે, જ્યારે લિગ્નિન પેરોક્સિડેઝ (LiP) લિગ્નિનના નિર્માણમાં ભાગ લે છે, જે કોષભિત્તિના નિર્માણમાં પાછળના તબક્કે જોડાય છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 11: કોષ: બંધારણ અને કાર્યો (કોષભિત્તિનું નિર્માણ)", "difficulty": "Hard", "num": 19}, {"question": "એક સંશોધકે બેક્ટેરિયાના પ્રોટોપ્લાસ્ટને યોગ્ય પોષક માધ્યમમાં ઉછેર્યો, જેમાં સેલ્યુલોઝ અને પેક્ટિન જેવા ઘટકો ઉમેર્યા હતા. થોડા સમય બાદ તેણે અવલોકન કર્યું કે પ્રોટોપ્લાસ્ટમાં કોષભિત્તિનું પુનઃનિર્માણ થયું ન હતું. આ ઘટનાનું સૌથી યોગ્ય કારણ શું હોઈ શકે?", "options": ["A) બેક્ટેરિયાના પ્રોટોપ્લાસ્ટમાં સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકનો અભાવ હોય છે", "B) બેક્ટેરિયામાં કોષભિત્તિનું નિર્માણ માત્ર પેક્ટિન દ્વારા થાય છે, સેલ્યુલોઝ દ્વારા નહીં", "C) બેક્ટેરિયાના પ્રોટોપ્લાસ્ટમાં કોષકેન્દ્રનો અભાવ હોય છે, જે કોષભિત્તિના નિર્માણ માટે જરૂરી છે", "D) બેક્ટેરિયામાં કોષભિત્તિનું નિર્માણ માત્ર ગોલ્ગી કાય દ્વારા થાય છે, જે પ્રોકેરિયોટ્સમાં હાજર નથી"], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે. બેક્ટેરિયા પ્રોકેરિયોટિક સજીવો છે, જેમાં સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચકનો અભાવ હોય છે. આ ઉત્સેચક વનસ્પતિકોષોમાં સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે, જે કોષભિત્તિના નિર્માણમાં મુખ્ય ઘટક છે. બેક્ટેરિયામાં કોષભિત્તિનું નિર્માણ થતું નથી કારણ કે તેમની કોષદીવાલ પેપ્ટિડોગ્લાયકેનથી બનેલી હોય છે, સેલ્યુલોઝ કે પેક્ટિનથી નહીં. વિકલ્પ B ખોટો છે કારણ કે બેક્ટેરિયામાં પેક્ટિન પણ કોષભિત્તિના નિર્માણમાં ભાગ લેતું નથી. વિકલ્પ C ખોટો છે કારણ કે કોષકેન્દ્રની હાજરી કોષભિત્તિના નિર્માણ માટે જરૂરી નથી, કારણ કે પ્રોકેરિયોટ્સમાં પણ કોષદીવાલ હોય છે. વિકલ્પ D ખોટો છે કારણ કે ગોલ્ગી કાય વનસ્પતિકોષોમાં પોલિસેકેરાઇડ્સના સંશ્લેષણમાં ભાગ લે છે, પરંતુ બેક્ટેરિયામાં ગોલ્ગી કાય હાજર નથી અને તેમની કોષદીવાલનું નિર્માણ અલગ રીતે થાય છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 8: કોષ - જીવનનો એકમ (પ્રોકેરિયોટિક અને યુકેરિયોટિક કોષોની રચના)", "difficulty": "Hard", "num": 20}, {"question": "નીચેનામાંથી કયો ઉત્સેચક વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણ દરમિયાન સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે, પરંતુ તેનું કાર્ય પ્રાણીકોષમાં જોવા મળતું નથી?", "options": ["A) સુક્રોઝ સિંથેઝ", "B) સેલ્યુલોઝ સિંથેટેઝ", "C) પેક્ટિન મિથાઇલ એસ્ટરેઝ", "D) લિગ્નિન પેરોક્સિડેઝ"], "correct": 1, "explanation": "સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક વનસ્પતિકોષમાં સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે, જે કોષભિત્તિનો મુખ્ય ઘટક છે. આ ઉત્સેચક પ્રાણીકોષમાં જોવા મળતું નથી કારણ કે પ્રાણીકોષમાં કોષભિત્તિ હોતી નથી. સુક્રોઝ સિંથેઝ સુક્રોઝના સંશ્લેષણમાં ભાગ લે છે, પેક્ટિન મિથાઇલ એસ્ટરેઝ પેક્ટિનના મિથાઇલેશનમાં ભાગ લે છે, અને લિગ્નિન પેરોક્સિડેઝ લિગ્નિનના સંશ્લેષણમાં ભાગ લે છે.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 6: કોષ: જીવનનો એકમ", "difficulty": "Hard", "num": 21}, {"question": "વનસ્પતિકોષમાં કોષભિત્તિના નિર્માણની પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયો પદાર્થ કોષભિત્તિની સ્તરો વચ્ચેના બંધનને મજબૂત કરવામાં મદદ કરે છે, પરંતુ તે સેલ્યુલોઝનો ભાગ નથી?", "options": ["A) હેમિસેલ્યુલોઝ", "B) પેક્ટિન", "C) એક્સ્ટેન્સિન", "D) લિગ્નિન"], "correct": 2, "explanation": "પેક્ટિન કોષભિત્તિની સ્તરો વચ્ચેના બંધનને મજબૂત કરવામાં મદદ કરે છે અને તે મધ્યપટલનો મુખ્ય ઘટક છે. હેમિસેલ્યુલોઝ અને એક્સ્ટેન્સિન પણ કોષભિત્તિના ઘટકો છે, પરંતુ પેક્ટિન મુખ્યત્વે સ્તરો વચ્ચેના બંધન માટે જવાબદાર છે. લિગ્નિન સેકન્ડરી કોષભિત્તિમાં જોવા મળે છે અને તે કોષભિત્તિને કઠોરતા પ્રદાન કરે છે.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 6: કોષ: જીવનનો એકમ", "difficulty": "Hard", "num": 22}, {"question": "વનસ્પતિ પેશી સંવર્ધન પદ્ધતિમાં, કોષરસ કલિકા (પ્રોટોપ્લાસ્ટ) માંથી કોષભિત્તિના પુનર્નિર્માણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પ્રથમ તબક્કે સેલ્યુલોઝના મિક્રોફિબ્રિલ્સના નિર્માણમાં સીધો ભાગ લે છે, પરંતુ અંતિમ કોષભિત્તિની રચનામાં સીધો સામેલ નથી?", "options": ["A) યુરીડિન ડાઇફોસ્ફેટ ગ્લુકોઝ (UDP-glu)", "B) ગ્વાનોસિન ડાઇફોસ્ફેટ મેનોઝ (GDP-man)", "C) સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક", "D) કેલોઝ"], "correct": 0, "explanation": "યુરીડિન ડાઇફોસ્ફેટ ગ્લુકોઝ (UDP-glu) સેલ્યુલોઝના મિક્રોફિબ્રિલ્સના નિર્માણ માટે ગ્લુકોઝના એકમો પૂરા પાડે છે, પરંતુ અંતિમ કોષભિત્તિની રચનામાં સીધો સામેલ નથી. ગ્વાનોસિન ડાઇફોસ્ફેટ મેનોઝ (GDP-man) હેમિસેલ્યુલોઝના નિર્માણમાં સામેલ છે, સેલ્યુલોઝ સિંથેટેઝ ઉત્સેચક સેલ્યુલોઝના સંશ્લેષણ માટે જવાબદાર છે, અને કેલોઝ કોષભિત્તિના ઘાવ ભરવામાં સામેલ છે.", "ncert_ref": "Class XII - Chapter 11: વનસ્પતિ જીવનમાં વૃદ્ધિ, વિકાસ અને પ્રજનન", "difficulty": "Hard", "num": 23}, {"question": "પ્લાન્ટ ટીશ્યૂ કલ્ચર દરમિયાન, કોષભિત્તિના પુનર્નિર્માણમાં નીચેનામાંથી કયો પદાર્થ પ્રાથમિક કોષભિત્તિની રચનામાં સીધો ભાગ લેતો નથી, પરંતુ દ્વિતીય કોષભિત્તિના ઘટક તરીકે મહત્વનો છે?", "options": ["A) સેલ્યુલોઝ", "B) હેમિસેલ્યુલોઝ", "C) પેક્ટિન", "D) લિગ્નિન"], "correct": 3, "explanation": "લિગ્નિન પ્રાથમિક કોષભિત્તિના ઘટક તરીકે સીધો ભાગ લેતો નથી, પરંતુ તે દ્વિતીય કોષભિત્તિમાં જમા થાય છે અને કોષભિત્તિને મજબૂતાઈ અને કઠિનતા પ્રદાન કરે છે. સેલ્યુલોઝ, હેમિસેલ્યુલોઝ અને પેક્ટિન પ્રાથમિક કોષભિત્તિના મુખ્ય ઘટકો છે.", "ncert_ref": "Class XI - Chapter 6: વનસ્પતિના અંગોની રચના", "difficulty": "Hard", "num": 24}, {"question": "એક સંશોધકે ફૂગના કોષમાંથી અલગ કરેલા પ્રોટોપ્લાસ્ટને યોગ્ય પોષક માધ્યમમાં ઉછેર્યો. કેટલાક સમય બાદ તેણે નિરીક્ષણ કર્યું કે કોષભિત્તિનું પુનઃનિર્માણ થયું નથી. આ ઘટનાનું સૌથી સંભવિત કારણ શું હોઈ શકે?", "options": ["A) માધ્યમમાં કાઇટિન સિન્થેઝ ઉત્સેચકની ગેરહાજરી હતી", "B) માધ્યમમાં સેલ્યુલોઝ સિન્થેઝ ઉત્સેચકની ગેરહાજરી હતી", "C) પ્રોટોપ્લાસ્ટમાં કોષકેન્દ્રની ગેરહાજરી હતી", "D) માધ્યમમાં પેક્ટિન પદાર્થોની અપૂરતી માત્રા હતી"], "correct": 0, "explanation": "ફૂગના કોષોમાં કોષભિત્તિ મુખ્યત્વે કાઇટિનથી બનેલી હોય છે, સેલ્યુલોઝથી નહીં. તેથી કાઇટિન સિન્થેઝ ઉત્સેચકની ગેરહાજરી કોષભિત્તિના પુનઃનિર્માણને અટકાવે છે. વિકલ્પ B ખોટો છે કારણ કે ફૂગમાં સેલ્યુલોઝ સિન્થેઝ હાજર હોતું નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રોટોપ્લાસ્ટમાં કોષકેન્દ્ર હાજર હોય છે. વિકલ્પ D ખોટો છે કારણ કે પેક્ટિન વનસ્પતિકોષોમાં જોવા મળે છે, ફૂગમાં નહીં.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 2: જૈવિક અણુઓ, પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 25}, {"question": "નીચેનામાંથી કયું વિધાન બેક્ટેરિયાના કોષભિત્તિના નિર્માણ માટે ખોટું છે?", "options": ["A) બેક્ટેરિયાના કોષભિત્તિ મુખ્યત્વે પેપ્ટિડોગ્લાયકેનથી બનેલી હોય છે", "B) બેક્ટેરિયાના કોષભિત્તિના નિર્માણમાં ટ્રાન્સપેપ્ટિડેશન પ્રક્રિયા મહત્વપૂર્ણ છે", "C) બેક્ટેરિયાના કોષભિત્તિના નિર્માણમાં સેલ્યુલોઝ સિન્થેઝ ઉત્સેચક સક્રિય ભાગ ભજવે છે", "D) ગ્રામ-પોઝિટિવ બેક્ટેરિયામાં કોષભિત્તિ જાડી હોય છે જ્યારે ગ્રામ-નેગેટિવ બેક્ટેરિયામાં પાતળી હોય છે"], "correct": 2, "explanation": "બેક્ટેરિયાના કોષભિત્તિ પેપ્ટિડોગ્લાયકેનથી બનેલી હોય છે, જેમાં સેલ્યુલોઝ સિન્થેઝ ઉત્સેચકની કોઈ ભૂમિકા નથી. વિકલ્પ A, B અને D બેક્ટેરિયાના કોષભિત્તિના નિર્માણ માટે સાચાં છે. વિકલ્પ C ખોટું છે કારણ કે સેલ્યુલોઝ સિન્થેઝ વનસ્પતિકોષોમાં જોવા મળે છે, બેક્ટેરિયામાં નહીં.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 2: જૈવિક અણુઓ, પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 26}, {"question": "એક સંશોધકે આર્કિયાના પ્રોટોપ્લાસ્ટને યોગ્ય માધ્યમમાં ઉછેર્યો અને નિરીક્ષણ કર્યું કે કોષભિત્તિનું પુનઃનિર્માણ થયું નથી. આ ઘટનાનું સંભવિત કારણ શું હોઈ શકે?", "options": ["A) માધ્યમમાં સ્યુડોપેપ્ટિડોગ્લાયકેનના સંશ્લેષણ માટે જરૂરી ઉત્સેચકોની ગેરહાજરી હતી", "B) માધ્યમમાં સેલ્યુલોઝ સિન્થેઝ ઉત્સેચકની ગેરહાજરી હતી", "C) પ્રોટોપ્લાસ્ટમાં રાઇબોઝોમ્સની ગેરહાજરી હતી", "D) માધ્યમમાં લિગ્નિનના સંશ્લેષણ માટે જરૂરી ઉત્સેચકોની ગેરહાજરી હતી"], "correct": 0, "explanation": "આર્કિયામાં કોષભિત્તિ મુખ્યત્વે સ્યુડોપેપ્ટિડોગ્લાયકેન અથવા અન્ય વિશિષ્ટ પોલિમરથી બનેલી હોય છે. તેથી સ્યુડોપેપ્ટિડોગ્લાયકેનના સંશ્લેષણ માટે જરૂરી ઉત્સેચકોની ગેરહાજરી કોષભિત્તિના પુનઃનિર્માણને અટકાવે છે. વિકલ્પ B ખોટો છે કારણ કે આર્કિયામાં સેલ્યુલોઝ સિન્થેઝ હાજર હોતું નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રોટોપ્લાસ્ટમાં રાઇબોઝોમ્સ હાજર હોય છે. વિકલ્પ D ખોટો છે કારણ કે લિગ્નિન વનસ્પતિકોષોમાં જોવા મળે છે, આર્કિયામાં નહીં.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 2: જૈવિક અણુઓ, પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 27}, {"question": "નીચેનામાંથી કયું વિધાન વનસ્પતિકોષમાં દ્વિતીયક કોષભિત્તિના નિર્માણ માટે ખોટું છે?", "options": ["A) દ્વિતીયક કોષભિત્તિનું નિર્માણ પ્રાથમિક કોષભિત્તિની અંદરની બાજુએ થાય છે", "B) દ્વિતીયક કોષભિત્તિમાં લિગ્નિનનું નિક્ષેપણ થાય છે જે તેને મજબૂત બનાવે છે", "C) દ્વિતીયક કોષભિત્તિનું નિર્માણ કોષના વિકાસના પ્રારંભિક તબક્કામાં જ થાય છે", "D) દ્વિતીયક કોષભિત્તિમાં સેલ્યુલોઝ અને હેમિસેલ્યુલોઝ ઉપરાંત અન્ય પદાર્થો પણ હોય છે"], "correct": 2, "explanation": "દ્વિતીયક કોષભિત્તિનું નિર્માણ કોષના વિકાસના પછીના તબક્કામાં થાય છે, પ્રારંભિક તબક્કામાં નહીં. વિકલ્પ A, B અને D દ્વિતીયક કોષભિત્તિના નિર્માણ માટે સાચાં છે. વિકલ્પ C ખોટું છે કારણ કે દ્વિતીયક કોષભિત્તિનું નિર્માણ કોષના પરિપક્વ થયા બાદ થાય છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 6: વનસ્પતિઓમાં અંતઃસ્ત્રાવો, પ્રકરણ 8: કોષ - રચના અને કાર્યો", "difficulty": "Hard", "num": 28}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
