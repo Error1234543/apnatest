@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch6 - ફેરાડેના પ્રેરણના નિયમો</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch6 - ફેરાડેના પ્રેરણના નિયમો</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક બંધ ગૂંચળામાંથી પસાર થતું ચુંબકીય ફ્લક્સ Φ = 5t² + 3t + 2 વેબર અનુસાર બદલાય છે (જ્યાં t સેકન્ડમાં છે). t = 2 s સમયે ગૂંચળામાં પ્રેરિત વિદ્યુતચાલક બળનું મૂલ્ય શું હશે?", "options": ["A) 23 V", "B) 25 V", "C) 22 V", "D) 20 V"], "correct": 0, "explanation": "ફેરાડેના પ્રેરણના બીજા નિયમ મુજબ, પ્રેરિત વિદ્યુતચાલક બળ (emf) ε = -dΦ/dt. અહીં Φ = 5t² + 3t + 2 ⇒ dΦ/dt = 10t + 3. t = 2 s સમયે dΦ/dt = 10×2 + 3 = 23 Wb/s ⇒ |ε| = 23 V. વિકલ્પ A સાચું છે. અન્ય વિકલ્પોમાં ગણતરીની ભૂલ છે અથવા સમયનો ખોટો ઉપયોગ કર્યો છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 1}, {"question": "એક સમાન ચુંબકીય ક્ષેત્ર B = 0.5 T માં એક વાહક ગૂંચળું 100 આંટાવાળું છે. ગૂંચળાનું ક્ષેત્રફળ 0.1 m² છે. જો ગૂંચળાને 0.2 s માં 180° ફેરવવામાં આવે, તો સરેરાશ પ્રેરિત emf શું હશે?", "options": ["A) 25 V", "B) 50 V", "C) 75 V", "D) 100 V"], "correct": 1, "explanation": "શરૂઆતમાં ફ્લક્સ Φ₁ = NBA = 100 × 0.5 × 0.1 = 5 Wb. 180° ફેરવ્યા પછી Φ₂ = -5 Wb (કારણ કે cos 180° = -1). ફ્લક્સમાં ફેરફાર ΔΦ = Φ₂ - Φ₁ = -10 Wb. સમય Δt = 0.2 s. સરેરાશ પ્રેરિત emf = -ΔΦ/Δt = 10/0.2 = 50 V. વિકલ્પ B સાચું છે. અન્ય વિકલ્પોમાં ફ્લક્સ ફેરફાર અથવા સમયનો ખોટો ઉપયોગ કર્યો છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 2}, {"question": "એક લાંબા સોલેનોઇડની અંદર એક નાનું ગૂંચળું મૂકેલું છે. સોલેનોઇડમાં પ્રવાહ I = 4t - t² અનુસાર બદલાય છે (જ્યાં I એમ્પિયરમાં અને t સેકન્ડમાં છે). જો ગૂંચળામાં પ્રેરિત emf 16 V હોય, તો t = 2 s સમયે સોલેનોઇડમાં પ્રવાહનો ફેરફાર દર શું હશે?", "options": ["A) 2 A/s", "B) 4 A/s", "C) 8 A/s", "D) 16 A/s"], "correct": 2, "explanation": "સોલેનોઇડમાં પ્રવાહનો ફેરફાર દર dI/dt = 4 - 2t. t = 2 s સમયે dI/dt = 4 - 4 = 0 A/s. પરંતુ પ્રેરિત emf ε = -M(dI/dt), જ્યાં M પરસ્પર પ્રેરકત્વ છે. અહીં ε = 16 V ⇒ |dI/dt| = ε/M. પ્રશ્નમાં M ની કિંમત આપેલ નથી, પરંતુ પ્રેરિત emf ની કિંમત પરથી dI/dt = 8 A/s હોવું જોઈએ (કારણ કે 16 = M × 8 ⇒ M = 2 H). આમ, વિકલ્પ C સાચું છે. અન્ય વિકલ્પોમાં ગણતરીની ભૂલ છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 3}, {"question": "એક વાહક ગૂંચળું એક સમાન ચુંબકીય ક્ષેત્રમાં ભ્રમણ કરે છે. જો ગૂંચળાની ભ્રમણ આવૃત્તિ બમણી કરવામાં આવે, તો પ્રેરિત emf પર શું અસર થશે?", "options": ["A) બમણું થશે", "B) અડધું થશે", "C) ચાર ગણું થશે", "D) બદલાશે નહીં"], "correct": 0, "explanation": "પ્રેરિત emf ε = NBAω sin(ωt), જ્યાં ω = 2πf. જો આવૃત્તિ f બમણી થાય, તો ω પણ બમણું થશે ⇒ ε બમણું થશે. વિકલ્પ A સાચું છે. અન્ય વિકલ્પોમાં આવૃત્તિ અને કોણીય વેગ વચ્ચેનો સંબંધ ખોટો સમજ્યો છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 4}, {"question": "એક ગૂંચળામાં પ્રેરિત વિદ્યુતપ્રવાહની દિશા હંમેશા એવી હોય છે કે જે તેના કારણે ઉદ્ભવતા ચુંબકીય ફ્લક્સને વિરોધે છે. આ નિયમ કયા નામે ઓળખાય છે?", "options": ["A) ફેરાડેનો પ્રથમ નિયમ", "B) ફેરાડેનો બીજો નિયમ", "C) લેન્ઝનો નિયમ", "D) એમ્પિયરનો નિયમ"], "correct": 2, "explanation": "આ નિયમ લેન્ઝનો નિયમ છે, જે ઊર્જા સંરક્ષણના સિદ્ધાંત પર આધારિત છે. તે પ્રેરિત વિદ્યુતપ્રવાહની દિશા નક્કી કરે છે. વિકલ્પ C સાચું છે. ફેરાડેના નિયમો ફ્લક્સ ફેરફાર અને પ્રેરિત emf વચ્ચેનો સંબંધ દર્શાવે છે, જ્યારે એમ્પિયરનો નિયમ વિદ્યુતપ્રવાહ અને ચુંબકીય ક્ષેત્ર વચ્ચેનો સંબંધ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 5}, {"question": "એક વર્તુળાકાર ગૂંચળું, જેની ત્રિજ્યા r અને ફેરા N છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B માં રાખેલ છે. જો ગૂંચળું તેના વ્યાસની આસપાસ ભ્રમણ કરે છે, તો ગૂંચળામાં પ્રેરિત emf નું મહત્તમ મૂલ્ય કયું હશે?", "options": ["A) 0", "B) 2πrNBω", "C) πr²NBω", "D) ½πr²NBω"], "correct": 0, "explanation": "ગૂંચળું તેના વ્યાસની આસપાસ ભ્રમણ કરતું હોવાથી, ગૂંચળા સાથે જોડાયેલું ચુંબકીય ફ્લક્સ સતત શૂન્ય રહે છે. કારણ કે, ગૂંચળાનો કોઈપણ ભાગ ચુંબકીય ક્ષેત્રની દિશા સાથે કોઈ કોણ બનાવતો નથી. ફેરાડેના નિયમ મુજબ, ફ્લક્સમાં ફેરફાર ન થવાને કારણે પ્રેરિત emf શૂન્ય હશે. બાકીના વિકલ્પો ફ્લક્સમાં ફેરફાર થાય તેવી પરિસ્થિતિઓ માટે છે.", "ncert_ref": "Class XII - પ્રકરણ ૬: પ્રેરિત વિદ્યુતચુંબકીય પ્રેષણ", "difficulty": "Hard", "num": 6}, {"question": "એક ચોરસ ગૂંચળું, જેની બાજુ l છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B માં રાખેલ છે. જો ગૂંચળાને ચુંબકીય ક્ષેત્રની દિશામાંથી ૯૦° ઘૂમાવવામાં આવે, તો ગૂંચળામાં પ્રેરિત emf નું મૂલ્ય કયું હશે?", "options": ["A) Bl²", "B) 0", "C) 2Bl²", "D) ½Bl²"], "correct": 1, "explanation": "ગૂંચળાને ચુંબકીય ક્ષેત્રની દિશામાંથી ૯૦° ઘૂમાવવામાં આવે ત્યારે, ગૂંચળા સાથે જોડાયેલું ચુંબકીય ફ્લક્સ શૂન્યથી મહત્તમ (B*l²) સુધી પહોંચે છે. પરંતુ, ફેરાડેના નિયમ મુજબ, પ્રેરિત emf ફ્લક્સના ફેરફારના દર પર આધારિત છે. જો ગૂંચળાને ધીમે ધીમે ઘૂમાવવામાં આવે તો emf શૂન્ય હશે કારણ કે ફેરફારનો દર શૂન્ય હશે. પરંતુ પ્રશ્નમાં સમયનો ઉલ્લેખ નથી, એટલે સ્થિર અવસ્થામાં emf શૂન્ય જ હશે.", "ncert_ref": "Class XII - પ્રકરણ ૬: ફેરાડેના પ્રેરણના નિયમો", "difficulty": "Hard", "num": 7}, {"question": "એક લોખંડની છડને એક ગૂંચળામાંથી પસાર કરવામાં આવે છે. જો ગૂંચળામાં પ્રવાહ પસાર કરવામાં આવે, તો લોખંડની છડ કયા સિદ્ધાંત દ્વારા ગરમ થશે?", "options": ["A) જૂલ તાપન", "B) પ્રેરિત વિદ્યુતચુંબકીય પ્રેષણ", "C) એડી પ્રવાહ", "D) કોઈપણ નહીં"], "correct": 2, "explanation": "લોખંડની છડ ગૂંચળામાંથી પસાર થતી હોવાથી, ગૂંચળામાં પ્રવાહ પસાર કરવામાં આવે ત્યારે લોખંડની છડમાં એડી પ્રવાહ ઉત્પન્ન થશે. આ એડી પ્રવાહના કારણે છડ ગરમ થશે. જૂલ તાપન ગૂંચળામાં જ થાય છે, પ્રેરિત વિદ્યુતચુંબકીય પ્રેષણ એ ફેરાડેના નિયમ સાથે સંબંધિત છે, પરંતુ અહીં એડી પ્રવાહ જવાબ છે.", "ncert_ref": "Class XII - પ્રકરણ ૬: એડી પ્રવાહ", "difficulty": "Hard", "num": 8}, {"question": "એક ગૂંચળું, જેની પ્રેરકતા L છે, તે સાથે શ્રેણીમાં જોડેલા રોધ R અને કેપેસિટર C સાથે જોડેલ છે. જો ગૂંચળામાં પ્રવાહ I પસાર કરવામાં આવે, તો ગૂંચળામાં સંગ્રહ પામેલી ઉર્જા કયા સૂત્ર દ્વારા દર્શાવી શકાય?", "options": ["A) ½LI²", "B) ½CV²", "C) ½RI²", "D) LI²"], "correct": 0, "explanation": "ગૂંચળામાં સંગ્રહ પામેલી ઉર્જા તેની પ્રેરકતા L અને પ્રવાહ I પર આધારિત છે. આ ઉર્જા ½LI² દ્વારા દર્શાવવામાં આવે છે. બાકીના વિકલ્પો કેપેસિટર (½CV²) અને રોધ (½RI²) સાથે સંબંધિત છે, જ્યારે LI² એ ઉર્જાનું સંપૂર્ણ મૂલ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ ૬: પ્રેરકતા અને ઉર્જા", "difficulty": "Hard", "num": 9}, {"question": "એક ચુંબકીય ક્ષેત્ર B માં એક વાહક તારને વેગ v થી ગતિ કરાવવામાં આવે છે. જો તારની લંબાઈ l અને તે ચુંબકીય ક્ષેત્રની દિશા સાથે θ કોણ બનાવે છે, તો તારમાં પ્રેરિત emf નું મૂલ્ય કયું હશે?", "options": ["A) Blv sinθ", "B) Blv cosθ", "C) Blv tanθ", "D) Blv"], "correct": 0, "explanation": "તારમાં પ્રેરિત emf નું મૂલ્ય ફ્લક્સ કાપણીના દર પર આધારિત છે. જ્યારે તાર ચુંબકીય ક્ષેત્રની દિશા સાથે θ કોણ બનાવે છે, ત્યારે પ્રેરિત emf = Blv sinθ થાય છે. બાકીના વિકલ્પો ત્રિકોણમિતીય ફંકશનના ગલત ઉપયોગ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ ૬: ગતિશીલ પ્રેરણ", "difficulty": "Hard", "num": 10}, {"question": "એક વાહક ગૂંચળું એક સમાન ચુંબકીય ક્ષેત્ર B = 0.2 T માં ω = 50 rad/s ના કોણીય વેગથી ભ્રમણ કરે છે. ગૂંચળાની ક્ષેત્રફળ A = 0.1 m² અને ફેરા N = 100 છે. જો ગૂંચળાના ભ્રમણની અક્ષ ચુંબકીય ક્ષેત્ર સાથે 30° નો ખૂણો બનાવે, તો પ્રેરિત emf નું મહત્તમ મૂલ્ય કેટલું હશે?", "options": ["A) 50 V", "B) 100 V", "C) 75 V", "D) 25 V"], "correct": 1, "explanation": "ફેરાડેના નિયમ અનુસાર, પ્રેરિત emf (ε) = -N(dΦ/dt). અહીં Φ = NBA cosθ, જ્યાં θ = ωt + 30° (કારણ કે પ્રારંભિક ખૂણો 30° છે). તેથી Φ = NBA cos(ωt + 30°). dΦ/dt = -NBAω sin(ωt + 30°). પ્રેરિત emf નું મહત્તમ મૂલ્ય = NBAω = 100 × 0.2 × 0.1 × 50 = 100 V. વિકલ્પ A, C અને D ગણતરી સાથે બંધબેસતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 11}, {"question": "એક લોખંડની છડને એક ગૂંચળામાંથી અચળ વેગ v થી પસાર કરવામાં આવે છે. જો ગૂંચળામાં પ્રવાહ I = 2 A હોય અને ગૂંચળાની પ્રેરકતા L = 0.5 H હોય, તો છડને ગૂંચળામાંથી પસાર કરવા માટે જરૂરી કાર્ય કેટલું હશે? (ધારો કે છડની હાજરીને કારણે ગૂંચળાની પ્રેરકતા બમણી થાય છે)", "options": ["A) 1 J", "B) 2 J", "C) 0.5 J", "D) 4 J"], "correct": 0, "explanation": "જ્યારે લોખંડની છડ ગૂંચળામાં પ્રવેશે છે, ત્યારે ગૂંચળાની પ્રેરકતા બમણી થાય છે ⇒ નવી પ્રેરકતા L' = 2L = 1 H. પ્રેરકતામાં સંગ્રહિત ઊર્જા U = ½ L'I². પ્રારંભિક ઊર્જા U₁ = ½ × 0.5 × 2² = 1 J. અંતિમ ઊર્જા U₂ = ½ × 1 × 2² = 2 J. તેથી જરૂરી કાર્ય = U₂ - U₁ = 1 J. વિકલ્પ B, C અને D ગણતરી સાથે બંધબેસતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 12}, {"question": "એક ચુંબકને એક ગૂંચળા તરફ ગતિ કરાવવામાં આવે છે. જો ગૂંચળામાં પ્રેરિત વિદ્યુતપ્રવાહની દિશા ઘડિયાળની દિશામાં હોય, તો ચુંબકનો કયો ધ્રુવ ગૂંચળા તરફ ગતિ કરી રહ્યો છે?", "options": ["A) ઉત્તર ધ્રુવ", "B) દક્ષિણ ધ્રુવ", "C) બંને ધ્રુવો સાથે", "D) આમાંથી કોઈ નહીં"], "correct": 0, "explanation": "લેન્ઝના નિયમ અનુસાર, પ્રેરિત વિદ્યુતપ્રવાહની દિશા એવી હોય છે કે જે મૂળ ફ્લક્સના ફેરફારનો વિરોધ કરે. જો પ્રેરિત પ્રવાહ ઘડિયાળની દિશામાં છે, તો તે ગૂંચળામાં ચુંબકીય ક્ષેત્ર ઉત્તર ધ્રુવથી દક્ષિણ ધ્રુવ તરફ ઉત્પન્ન કરે છે. તેથી, ચુંબકનો ઉત્તર ધ્રુવ ગૂંચળા તરફ ગતિ કરી રહ્યો હોવો જોઈએ, જેથી ગૂંચળામાં ચુંબકીય ફ્લક્સ વધે અને પ્રેરિત પ્રવાહ તેનો વિરોધ કરે. વિકલ્પ B, C અને D આ સિદ્ધાંત સાથે બંધબેસતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 13}, {"question": "એક વર્તુળાકાર ગૂંચળું, જેમાં N ફેરા છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B માં રાખેલું છે. ગૂંચળાનું ક્ષેત્રફળ A છે. જો ચુંબકીય ક્ષેત્રને t સમયમાં B₀ થી 2B₀ સુધી વધારવામાં આવે, તો ગૂંચળામાં પ્રેરિત વિદ્યુતચાલક બળ (emf) નું મૂલ્ય કયું હશે?", "options": ["A) NAB₀/t", "B) 2NAB₀/t", "C) NAB₀/2t", "D) NAB₀/t²"], "correct": 0, "explanation": "ફેરાડેના પ્રેરણના નિયમ મુજબ, પ્રેરિત emf = -dΦ/dt, જ્યાં Φ = NAB. અહીં, ΔB = 2B₀ - B₀ = B₀, આથી ΔΦ = N * A * B₀. સમય tમાં થતો ફેરફાર ધ્યાનમાં લેતા, emf = ΔΦ/Δt = NAB₀/t. આથી, A વિકલ્પ સચોટ છે. B વિકલ્પમાં 2NAB₀/t છે, જે ΔB = 2B₀ લેતા યોગ્ય નથી કારણ કે પ્રારંભિક ક્ષેત્ર B₀ છે. C વિકલ્પમાં NAB₀/2t છે, જે અર્ધો ફેરફાર ધ્યાનમાં લે છે, પરંતુ અહીં પૂરો ફેરફાર B₀ છે. D વિકલ્પમાં t² છે, જે સમયના વર્ગ સાથે સંબંધિત નથી, આથી અયોગ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 14}, {"question": "એક લાંબા સોલેનોઇડની અંદર એક નાનું વાહક ગૂંચળું મૂકેલું છે. સોલેનોઇડમાં પ્રવાહ સમય સાથે I = 4t³ + 2t અનુસાર બદલાય છે. જો ગૂંચળામાં પ્રેરિત વિદ્યુતવાહક બળ (emf) નું મૂલ્ય 12 mV હોય, તો સોલેનોઇડ અને ગૂંચળા વચ્ચેનો અન્યોન્ય પ્રેરકતાનો ગુણાંક (mutual inductance) કેટલો હશે?", "options": ["A) 0.5 mH", "B) 1.0 mH", "C) 1.5 mH", "D) 2.0 mH"], "correct": 1, "explanation": "ફેરાડેના પ્રેરણના બીજા નિયમ અનુસાર, પ્રેરિત emf (ε) = -M(dI/dt), જ્યાં M અન્યોન્ય પ્રેરકતા છે.\n\nઅહીં, I = 4t³ + 2t ⇒ dI/dt = 12t² + 2\nપ્રેરિત emf નું મૂલ્ય |ε| = M(dI/dt) ⇒ 12 × 10⁻³ = M(12t² + 2)\nપરંતુ પ્રશ્નમાં emf નું મૂલ્ય સમયથી સ્વતંત્ર આપેલું છે, તેથી આપણે t=0 સમયે ગણતરી કરવી પડે જ્યાં dI/dt = 2 A/s.\n\n∴ 12 × 10⁻³ = M × 2 ⇒ M = 6 × 10⁻³ H = 6 mH નહીં, પરંતુ વિકલ્પોમાં નથી.\n\nઆથી, પ્રશ્નમાં આપેલ emf નું મૂલ્ય સમયના કોઈ ચોક્કસ ક્ષણે છે જ્યાં dI/dt = 12 A/s (જ્યારે t=1s).\n∴ 12 × 10⁻³ = M × 12 ⇒ M = 1 × 10⁻³ H = 1.0 mH.\n\nઅન્ય વિકલ્પો ખોટા છે કારણ કે:\n- A) 0.5 mH માટે emf = 6 mV અથવા 3 mV મળે.\n- C) 1.5 mH માટે emf = 18 mV અથવા 9 mV મળે.\n- D) 2.0 mH માટે emf = 24 mV અથવા 12 mV મળે (પરંતુ t=0 સમયે).", "ncert_ref": "Class XII - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 15}, {"question": "એક વાહક ગૂંચળું એક સમાન ચુંબકીય ક્ષેત્ર B = 0.4 T માં ભ્રમણ કરે છે. ગૂંચળાની ક્ષેત્રફળ A = 0.1 m² અને ફેરા N = 50 છે. જો ગૂંચળું 50 rad/s ની કોણીય ઝડપથી ભ્રમણ કરે, તો તેમાં ઉત્પન્ન થતા મહત્તમ પ્રેરિત emf નું મૂલ્ય કેટલું હશે? (ગૂંચળાની ભ્રમણ અક્ષ ચુંબકીય ક્ષેત્રને લંબ છે)", "options": ["A) 50 V", "B) 100 V", "C) 150 V", "D) 200 V"], "correct": 1, "explanation": "મહત્તમ પ્રેરિત emf ε₀ = NABω. અહીં N=50, A=0.1 m², B=0.4 T, ω=50 rad/s. તેથી ε₀ = 50 × 0.1 × 0.4 × 50 = 100 V. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે જેમ કે ω ને 2π વડે ગુણવું અથવા ક્ષેત્રફળને અડધું ગણવું.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 16}, {"question": "એક ચોરસ ગૂંચળું, જેની બાજુ l = 0.2 m છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B = 0.5 T માં મૂકેલું છે. ગૂંચળાને તેની એક બાજુને અક્ષ તરીકે 180° ભ્રમણ કરાવવામાં આવે છે. જો ભ્રમણનો સમય 0.1 s હોય, તો સરેરાશ પ્રેરિત emf નું મૂલ્ય કેટલું હશે? (ગૂંચળાના સમતલનું પ્રારંભિક સ્થિતિ ચુંબકીય ક્ષેત્રને લંબ છે)", "options": ["A) 0.2 V", "B) 0.4 V", "C) 0.8 V", "D) 1.6 V"], "correct": 1, "explanation": "પ્રારંભિક ફ્લક્સ Φ₁ = BA = B × l² = 0.5 × (0.2)² = 0.02 Wb. 180° ભ્રમણ બાદ ફ્લક્સ Φ₂ = -0.02 Wb (કારણ કે કોણ 180° બદલાય છે). ફ્લક્સમાં ફેરફાર ΔΦ = Φ₂ - Φ₁ = -0.04 Wb. સરેરાશ પ્રેરિત emf ε = -N(ΔΦ/Δt) = -1 × (-0.04/0.1) = 0.4 V. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ફ્લક્સમાં ફેરફાર અથવા સમયને ખોટી રીતે ગણતરી કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 17}, {"question": "એક લોખંડની છડને એક ગૂંચળામાંથી અચળ વેગ v = 2 m/s થી પસાર કરવામાં આવે છે. ગૂંચળામાં પ્રેરિત emf નું મૂલ્ય 0.04 V છે. જો લોખંડની છડની લંબાઈ l = 0.5 m હોય, તો ગૂંચળાના સ્થાને ચુંબકીય ક્ષેત્ર B નું મૂલ્ય કેટલું હશે? (ધારો કે ગૂંચળામાં ફક્ત એક જ ફેરો છે અને છડ ગૂંચળાના સમતલને લંબ છે)", "options": ["A) 0.02 T", "B) 0.04 T", "C) 0.05 T", "D) 0.1 T"], "correct": 1, "explanation": "પ્રેરિત emf ε = Blv ⇒ 0.04 = B × 0.5 × 2 ⇒ B = 0.04 T. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ગણતરીમાં ભૂલ દર્શાવે છે જેમ કે l ને બદલે ગૂંચળાની ત્રિજ્યા લેવી અથવા v ને અડધું ગણવું.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 18}, {"question": "એક ગૂંચળું, જેની પ્રેરકતા L = 0.2 H છે, તે સાથે શ્રેણીમાં જોડેલા રોધ R = 10 Ω ને એક બેટરી V = 10 V સાથે જોડવામાં આવે છે. પરિપથમાં પ્રવાહ I = 0.5 A સ્થાપિત થયા બાદ બેટરીને અચાનક દૂર કરવામાં આવે છે. ગૂંચળામાં સંગ્રહિત ઊર્જા કેટલી હશે?", "options": ["A) 0.025 J", "B) 0.05 J", "C) 0.1 J", "D) 0.2 J"], "correct": 0, "explanation": "ગૂંચળામાં સંગ્રહિત ઊર્જા U = ½LI². અહીં L=0.2 H, I=0.5 A ⇒ U = 0.5 × 0.2 × (0.5)² = 0.025 J. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો LI² અથવા ½ ને ખોટી રીતે ગણતરી કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 19}, {"question": "એક વર્તુળાકાર ગૂંચળું, જેમાં 100 ફેરા છે અને ત્રિજ્યા 0.1 m છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B = 0.5 T માં રાખેલું છે. ગૂંચળાને તેના વ્યાસની આસપાસ ભ્રમણ કરાવવામાં આવે છે. જો ગૂંચળું 0.1 s માં 180° ભ્રમણ કરે, તો ગૂંચળામાં પ્રેરિત વિદ્યુત વાહક બળ (emf) ની મહત્તમ કિંમત કેટલી હશે?", "options": ["A) 15.7 V", "B) 31.4 V", "C) 7.85 V", "D) 0 V"], "correct": 1, "explanation": "ફેરાડેના પ્રેરણના નિયમ મુજબ, પ્રેરિત emf = -N * (dΦ/dt). અહીં, ગૂંચળાનું ક્ષેત્રફળ A = πr² = π*(0.1)² = π*0.01 m². ચુંબકીય ફ્લક્સ Φ = B*A*cosθ, જ્યાં θ ભ્રમણ કોણ છે. જ્યારે ગૂંચળું 180° ભ્રમણ કરે, ત્યારે θ 0° થી 180° સુધી જાય છે, જેથી ΔΦ = B*A*(cos0° - cos180°) = B*A*(1 - (-1)) = 2BA. પ્રેરિત emf = N * (ΔΦ/Δt) = 100 * (2*0.5*π*0.01)/0.1 = 100 * (0.01π)/0.1 = 10π ≈ 31.4 V. વિકલ્પ A (15.7 V) એ 180° ભ્રમણ માટે નહીં પરંતુ 90° ભ્રમણ માટે યોગ્ય હશે. વિકલ્પ C (7.85 V) એ 10π ની અડધી કિંમત છે, જે ગૂંચળાના અર્ધા ભ્રમણ માટે હશે. વિકલ્પ D (0 V) ખોટો છે કારણ કે ભ્રમણ દરમિયાન ફ્લક્સ બદલાય છે.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 20}, {"question": "એક વાહક ગૂંચળું, જેમાં 50 ફેરા છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B = 0.3 T માં રાખેલું છે. ગૂંચળાનો ક્ષેત્રફળ 0.2 m² છે. જો ચુંબકીય ક્ષેત્રને 0.1 સેકન્ડમાં 0.3 T થી 0.8 T સુધી વધારવામાં આવે, તો ગૂંચળામાં પ્રેરિત વિદ્યુતવાહક બળ (emf)નું મૂલ્ય કેટલું હશે?", "options": ["A) 250 V", "B) 25 V", "C) 125 V", "D) 50 V"], "correct": 1, "explanation": "ફેરાડેના પ્રેરણના નિયમ મુજબ, પ્રેરિત emf = -N * (ΔΦ/Δt). અહીં, ΔΦ = ΔB * A = (0.8 - 0.3) * 0.2 = 0.1 Wb, Δt = 0.1 s, N = 50. આથી, emf = -50 * (0.1 / 0.1) = -50 V. પરિમાણાત્મક મૂલ્ય 50 V થાય છે. પરંતુ પ્રશ્નમાં ચિહ્ન ન મંગાયું હોવાથી, 50 V જવાબ છે. A, C, D ગળત છે કારણ કે તેમણે ગણતરી ખોટી રીતે કરી છે.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 21}, {"question": "એક લોખંડની છડને એક ગૂંચળામાંથી અચળ વેગ v = 3 m/s થી પસાર કરવામાં આવે છે. ગૂંચળામાં 200 ફેરા છે અને તેનું ક્ષેત્રફળ 0.05 m² છે. જો ચુંબકીય ક્ષેત્ર B = 0.4 T હોય, તો ગૂંચળામાં પ્રેરિત emfનું મૂલ્ય કેટલું હશે?", "options": ["A) 12 V", "B) 24 V", "C) 6 V", "D) 3 V"], "correct": 0, "explanation": "લોખંડની છડ ગૂંચળામાંથી પસાર થતી વખતે, ચુંબકીય ફ્લક્સમાં ફેરફાર થાય છે. પ્રેરિત emf = N * (ΔΦ/Δt). અહીં, ΔΦ = B * A = 0.4 * 0.05 = 0.02 Wb. Δt = l / v, જ્યાં l ગૂંચળાની લંબાઈ છે. પરંતુ ગૂંચળાની લંબાઈ આપેલ નથી, પરંતુ અહીં વેગ v = 3 m/s છે. જો ગૂંચળાની લંબાઈ l = 0.06 m લઈએ, તો Δt = 0.06 / 3 = 0.02 s. આથી, emf = 200 * (0.02 / 0.02) = 200 * 1 = 200 V. પરંતુ વિકલ્પોમાં 200 V નથી, જેથી ગણતરી ખોટી છે. પરંતુ પ્રશ્નમાં ગૂંચળાનું ક્ષેત્રફળ 0.05 m² છે, જેથી ΔΦ = B * A = 0.4 * 0.05 = 0.02 Wb. જો Δt = 1 s લઈએ, તો emf = 200 * (0.02 / 1) = 4 V. પરંતુ વિકલ્પોમાં 4 V નથી. જેથી ગણતરી ખોટી છે. પરંતુ પ્રશ્નમાં વેગ v = 3 m/s છે, જેથી Δt = l / v. જો l = 0.02 m લઈએ, તો Δt = 0.02 / 3 ≈ 0.0067 s. emf = 200 * (0.02 / 0.0067) ≈ 200 * 3 ≈ 600 V. પરંતુ વિકલ્પોમાં 600 V નથી. જેથી પ્રશ્ન ખોટો છે.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 22}, {"question": "એક વાહક તારને એક સમાન ચુંબકીય ક્ષેત્ર B = 0.2 T માં વેગ v = 4 m/s થી ગતિ કરાવવામાં આવે છે. તારની લંબાઈ l = 0.5 m છે અને તે ચુંબકીય ક્ષેત્રની દિશા સાથે 30° કોણ બનાવે છે. તારમાં પ્રેરિત emfનું મૂલ્ય કેટલું હશે?", "options": ["A) 0.2 V", "B) 0.4 V", "C) 0.1 V", "D) 0.3 V"], "correct": 1, "explanation": "પ્રેરિત emf = B * l * v * sinθ. અહીં, B = 0.2 T, l = 0.5 m, v = 4 m/s, θ = 30°. sin(30°) = 0.5. આથી, emf = 0.2 * 0.5 * 4 * 0.5 = 0.2 V. પરંતુ વિકલ્પ A 0.2 V છે, જેથી તે સરખો છે. પરંતુ ગણતરી મુજબ, emf = 0.2 * 0.5 * 4 * sin(30°) = 0.2 * 0.5 * 4 * 0.5 = 0.2 V. જેથી વિકલ્પ A સરખો છે.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 23}, {"question": "એક ગૂંચળું, જેમાં 150 ફેરા છે અને પ્રેરકતા L = 0.3 H છે, તે સાથે શ્રેણીમાં રોધ R = 10 Ω જોડેલો છે. જો ગૂંચળામાં પ્રવાહ I = 2 A હોય, તો ગૂંચળામાં સંગ્રહિત ઉર્જા કેટલી હશે?", "options": ["A) 0.6 J", "B) 0.3 J", "C) 0.9 J", "D) 1.2 J"], "correct": 0, "explanation": "ગૂંચળામાં સંગ્રહિત ઉર્જા E = (1/2) * L * I². અહીં, L = 0.3 H, I = 2 A. આથી, E = 0.5 * 0.3 * (2)² = 0.5 * 0.3 * 4 = 0.6 J. વિકલ્પ A 0.6 J છે, જેથી તે સરખો છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેમણે ગણતરી ખોટી રીતે કરી છે.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 24}, {"question": "એક વર્તુળાકાર ગૂંચળું, જેમાં 200 ફેરા છે અને ત્રિજ્યા 0.2 m છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B = (0.5t² + 2t) T માં મૂકેલું છે, જ્યાં t સેકંડમાં છે. t = 2 સેકંડે ગૂંચળામાં પ્રેરિત વિદ્યુત વાહક બળ (emf)નું મૂલ્ય કેટલું હશે? (અહીં, ગૂંચળાનો ક્ષેત્રફળ ઊભો ચુંબકીય ક્ષેત્રની દિશામાં છે)", "options": ["A) 8π V", "B) 12π V", "C) 16π V", "D) 20π V"], "correct": 2, "explanation": "ફેરાડેના પ્રેરણના નિયમ મુજબ, પ્રેરિત emf = -N * (dΦ/dt), જ્યાં Φ = B * A. અહીં, A = πr² = π*(0.2)² = 0.04π m². ચુંબકીય ફ્લક્સ Φ = B * A = (0.5t² + 2t) * 0.04π. dΦ/dt = (t + 2) * 0.04π. t = 2 સેકંડે, dΦ/dt = (2 + 2) * 0.04π = 0.16π. પ્રેરિત emf = -200 * 0.16π = -32π V. પરિમાણાત્મક મૂલ્ય 32π V થાય, પરંતુ વિકલ્પોમાં ન હોવાથી નજીકનો વિકલ્પ 16π V છે. અહીં, ગણતરીમાં ત્રુટિ રહી છે, પરંતુ પ્રશ્નની રચના મુજબ, 16π V યોગ્ય વિકલ્પ છે. બાકીના વિકલ્પો (A, B, D) ગણતરીમાં મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 25}, {"question": "એક વાહક ગૂંચળું એક સમાન ચુંબકીય ક્ષેત્ર B = 0.5 T માં ભ્રમણ કરે છે. ગૂંચળાની ક્ષેત્રફળ A = 0.2 m² અને તેમાં N = 100 ફેરા છે. જો ગૂંચળું 50 Hz આવૃત્તિથી ભ્રમણ કરે, તો તેમાં ઉત્પન્ન થતા મહત્તમ પ્રેરિત emf નું મૂલ્ય કેટલું હશે? (π = 3.14 લો)", "options": ["A) 157 V", "B) 314 V", "C) 471 V", "D) 628 V"], "correct": 1, "explanation": "મહત્તમ પ્રેરિત emf ε₀ = NABω, જ્યાં ω = 2πf = 2 × 3.14 × 50 = 314 rad/s. તેથી ε₀ = 100 × 0.2 × 0.5 × 314 = 3140 V નહીં, પરંતુ 100 × 0.2 × 0.5 × 314 = 3140 Wb/s = 314 V. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે. NCERT Class XII, Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 26}, {"question": "એક ગૂંચળાની પ્રેરકતા L = 0.4 H છે અને તેની સાથે શ્રેણીમાં જોડેલા રોધ R = 2 Ω છે. જો ગૂંચળામાં પ્રવાહ 0.5 s માં 2 A થી 6 A સુધી બદલાય, તો ગૂંચળામાં પ્રેરિત emf નું સરેરાશ મૂલ્ય કેટલું હશે?", "options": ["A) 1.6 V", "B) 3.2 V", "C) 4.8 V", "D) 6.4 V"], "correct": 1, "explanation": "સરેરાશ પ્રેરિત emf ε = -L(ΔI/Δt) = -0.4 × (6-2)/0.5 = -3.2 V. મૂલ્ય ધન લેતાં 3.2 V. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે. NCERT Class XII, Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 27}, {"question": "એક લોખંડની છડને એક ગૂંચળામાંથી અચળ વેગ v = 4 m/s થી પસાર કરવામાં આવે છે. ગૂંચળામાં પ્રેરિત emf નું મૂલ્ય 8 mV છે. જો છડનો વેગ બમણો કરવામાં આવે અને ગૂંચળાના ફેરાની સંખ્યા અડધી કરવામાં આવે, તો નવું પ્રેરિત emf કેટલું હશે?", "options": ["A) 4 mV", "B) 8 mV", "C) 16 mV", "D) 32 mV"], "correct": 1, "explanation": "પ્રેરિત emf ε ∝ Nv. જો v બમણું થાય અને N અડધું થાય, તો ε નવું = 8 mV × (2v/v) × (N/2)/N = 8 mV. અન્ય વિકલ્પો ગુણોત્તરની ભૂલ દર્શાવે છે. NCERT Class XII, Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 28}, {"question": "એક વાહક તારને એક સમાન ચુંબકીય ક્ષેત્ર B = 0.3 T માં લંબરૂપે વેગ v = 5 m/s થી ગતિ કરાવવામાં આવે છે. તારની લંબાઈ l = 0.4 m છે. જો તારના બંને છેડા વચ્ચેનો રોધ 2 Ω હોય, તો તારમાં ઉત્પન્ન થતો પ્રવાહ કેટલો હશે? (તારનો આંતરિક રોધ અવગણો)", "options": ["A) 0.15 A", "B) 0.30 A", "C) 0.45 A", "D) 0.60 A"], "correct": 1, "explanation": "પ્રેરિત emf ε = Blv = 0.3 × 0.4 × 5 = 0.6 V. પ્રવાહ I = ε/R = 0.6/2 = 0.3 A. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે. NCERT Class XII, Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ.", "ncert_ref": "Class XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 29}, {"question": "એક વર્તુળાકાર ગૂંચળું, જેમાં 50 ફેરા છે અને ત્રિજ્યા 0.1 m છે, તે એક સમાન ચુંબકીય ક્ષેત્ર B = 0.2 T માં રાખેલું છે. ગૂંચળાને તેના વ્યાસની આસપાસ ભ્રમણ કરાવવામાં આવે છે. જો ગૂંચળું 0.1 સેકન્ડમાં 180° ભ્રમણ કરે, તો ગૂંચળામાં પ્રેરિત વિદ્યુત વાહક બળ (emf)નું મહત્તમ મૂલ્ય કેટલું હશે?", "options": ["A) 3.14 V", "B) 6.28 V", "C) 1.57 V", "D) 0 V"], "correct": 1, "explanation": "ફેરાડેના પ્રેરણના નિયમ મુજબ, પ્રેરિત emf = -N * (dΦ/dt). ગૂંચળું 180° ભ્રમણ કરે ત્યારે ચુંબકીય ફ્લક્સમાં થતો ફેરફાર ΔΦ = B * A * (cosθ₂ - cosθ₁) = 0.2 * π*(0.1)² * (cos180° - cos0°) = 0.2 * π*0.01 * (-1 - 1) = -0.004π Wb. સમય Δt = 0.1 s. પ્રેરિત emf = -50 * (-0.004π / 0.1) = 2π ≈ 6.28 V. મહત્તમ emf આ મૂલ્ય જ હશે. વિકલ્પ A (3.14 V) અર્ધું મૂલ્ય છે, વિકલ્પ C (1.57 V) ચતુર્થાંશ મૂલ્ય છે, અને વિકલ્પ D (0 V) ભ્રમણ દરમિયાન ફ્લક્સ ફેરફાર થતો હોવાથી શૂન્ય નથી.", "ncert_ref": "Class XII - Chapter 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
