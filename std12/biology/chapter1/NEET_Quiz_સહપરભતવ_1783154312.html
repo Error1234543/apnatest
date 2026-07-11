@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - સહપ્રભુત્વ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 સહપ્રભુત્વ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "સહપ્રભુત્વના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન સત્ય છે જ્યારે બે જુદા જુદા જનીનો એક જ લક્ષણ પર અસર કરે છે?", "options": ["A) બંને જનીનો એકબીજા સાથે સંપૂરક હોય છે અને એક જ પ્રોટીનનું નિર્માણ કરે છે", "B) બંને જનીનો એકબીજા સાથે પ્રતિસ્પર્ધી હોય છે અને એક જ લક્ષણને નિયંત્રિત કરે છે", "C) બંને જનીનો એકબીજા સાથે સહપ્રભુ હોય છે અને એક જ લક્ષણને સમાન પ્રમાણમાં પ્રભાવિત કરે છે", "D) બંને જનીનો એકબીજા સાથે અવલંબિત હોય છે અને એક જ લક્ષણને વિપરિત દિશામાં પ્રભાવિત કરે છે"], "correct": 2, "explanation": "સહપ્રભુત્વમાં, બે જુદા જુદા જનીનો એક જ લક્ષણ પર સમાન પ્રમાણમાં અસર કરે છે. વિકલ્પ A ખોટો છે કારણ કે સંપૂરક જનીનો એકબીજા સાથે મળીને નવું લક્ષણ દર્શાવે છે, પરંતુ તેઓ એક જ પ્રોટીનનું નિર્માણ કરતા નથી. વિકલ્પ B ખોટો છે કારણ કે પ્રતિસ્પર્ધી જનીનો એકબીજા સાથે લડે છે, પરંતુ તેઓ એક જ લક્ષણને નિયંત્રિત કરતા નથી. વિકલ્પ D ખોટો છે કારણ કે અવલંબિત જનીનો એકબીજા પર આધાર રાખે છે, પરંતુ તેઓ લક્ષણને વિપરિત દિશામાં પ્રભાવિત કરતા નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 1}, {"question": "મનુષ્યમાં, ABO રક્ત જૂથ સિસ્ટમના સંદર્ભમાં, I^A અને I^B એલિલ્સ વચ્ચે કયો પ્રકારનો આનુવંશિક સંબંધ જોવા મળે છે?", "options": ["A) પૂર્ણ પ્રભુત્વ", "B) અપૂર્ણ પ્રભુત્વ", "C) સહપ્રભુત્વ", "D) પ્રતિસ્પર્ધી અવરોધ"], "correct": 2, "explanation": "ABO રક્ત જૂથ સિસ્ટમમાં, I^A અને I^B એલિલ્સ સહપ્રભુ હોય છે, કારણ કે બંને એલિલ્સ એકબીજા સાથે સમાન પ્રમાણમાં પ્રભાવિત કરે છે અને AB રક્ત જૂથ ધરાવતા વ્યક્તિમાં બંને A અને B એન્ટિજન વિકસે છે. વિકલ્પ A ખોટો છે કારણ કે પૂર્ણ પ્રભુત્વમાં એક એલિલ બીજા પર પૂર્ણપણે પ્રભુત્વ ધરાવે છે. વિકલ્પ B ખોટો છે કારણ કે અપૂર્ણ પ્રભુત્વમાં બંને એલિલ્સના મિશ્રણથી નવું લક્ષણ દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે પ્રતિસ્પર્ધી અવરોધ એ આનુવંશિકતાનો એક પાસો નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 2}, {"question": "એક પશુ પ્રજાતિમાં, કાળા રંગના વાળ માટે B એલિલ અને પીળા રંગના વાળ માટે b એલિલ જવાબદાર છે. જ્યારે B અને b એલિલ્સ એકસાથે હાજર હોય ત્યારે પશુના વાળનો રંગ કાળો અને પીળો ચક્રાકાર દેખાય છે. આ કિસ્સામાં, કયો આનુવંશિક પેટર્ન લાગુ પડે છે?", "options": ["A) પૂર્ણ પ્રભુત્વ", "B) અપૂર્ણ પ્રભુત્વ", "C) સહપ્રભુત્વ", "D) પોલિજીનિક અનુવંશિકતા"], "correct": 2, "explanation": "જ્યારે B અને b એલિલ્સ એકસાથે હાજર હોય ત્યારે બંને લક્ષણો (કાળો અને પીળો) એકસાથે દેખાય છે, જે સહપ્રભુત્વનો સ્પષ્ટ ઉદાહરણ છે. વિકલ્પ A ખોટો છે કારણ કે પૂર્ણ પ્રભુત્વમાં એક એલિલ બીજા પર પૂર્ણપણે પ્રભુત્વ ધરાવે છે. વિકલ્પ B ખોટો છે કારણ કે અપૂર્ણ પ્રભુત્વમાં બંને એલિલ્સના મિશ્રણથી નવું લક્ષણ દર્શાવે છે (જેમ કે ગુલાબી રંગ). વિકલ્પ D ખોટો છે કારણ કે પોલિજીનિક અનુવંશિકતામાં બહુવિધ જનીનો એક જ લક્ષણને પ્રભાવિત કરે છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 3}, {"question": "સહપ્રભુત્વના કિસ્સામાં, જ્યારે બે સહપ્રભુ એલિલ્સ હાજર હોય ત્યારે કયું પરિણામ જોવા મળે છે?", "options": ["A) ફીનોટાઇપમાં કોઈ લક્ષણ દેખાતું નથી", "B) ફીનોટાઇપમાં બંને લક્ષણો સ્પષ્ટપણે દેખાય છે", "C) ફીનોટાઇપમાં બંને લક્ષણોનું મિશ્રણ દેખાય છે", "D) ફીનોટાઇપમાં માત્ર એક લક્ષણ દેખાય છે"], "correct": 1, "explanation": "સહપ્રભુત્વમાં, બંને એલિલ્સ સમાન પ્રમાણમાં પ્રભાવિત કરે છે, જેથી ફીનોટાઇપમાં બંને લક્ષણો સ્પષ્ટપણે દેખાય છે. વિકલ્પ A ખોટો છે કારણ કે લક્ષણો દેખાતા નથી તે અસંભવ છે. વિકલ્પ C ખોટો છે કારણ કે મિશ્રણ અપૂર્ણ પ્રભુત્વનો સંકેત છે. વિકલ્પ D ખોટો છે કારણ કે માત્ર એક લક્ષણ દેખાય તે પૂર્ણ પ્રભુત્વનો સંકેત છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 4}, {"question": "નીચેનામાંથી કયું ઉદાહરણ સહપ્રભુત્વનું સૌથી યોગ્ય ઉદાહરણ છે?", "options": ["A) મનુષ્યમાં લોહીના ABO જૂથ", "B) મટરના છોડમાં પીળા અને હરિયા બીજ", "C) મનુષ્યમાં લોહીના Rh જૂથ", "D) ડ્રોસોફિલામાં લાલ અને સફેદ આંખો"], "correct": 0, "explanation": "મનુષ્યમાં લોહીના ABO જૂથમાં I^A અને I^B એલિલ્સ સહપ્રભુ હોય છે, કારણ કે AB રક્ત જૂથ ધરાવતા વ્યક્તિમાં બંને A અને B એન્ટિજન વિકસે છે. વિકલ્પ B ખોટો છે કારણ કે મટરના છોડમાં પીળા અને હરિયા બીજ પૂર્ણ પ્રભુત્વનું ઉદાહરણ છે. વિકલ્પ C ખોટો છે કારણ કે Rh જૂથ પૂર્ણ પ્રભુત્વ દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે ડ્રોસોફિલામાં લાલ અને સફેદ આંખો માટે X-લિંક્ડ આનુવંશિકતા જવાબદાર છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 5}, {"question": "મનુષ્યમાં, MN રક્ત જૂથ સિસ્ટમના સંદર્ભમાં, L^M અને L^N એલિલ્સ વચ્ચે કયો પ્રકારનો સહપ્રભુત્વ જોવા મળે છે, જ્યારે તે હેટરોઝાયગસ અવસ્થામાં હોય છે?", "options": ["A) L^M એલિલ L^N એલિલ પર પૂર્ણ પ્રભુત્વ ધરાવે છે, પરિણામે ફક્ત M એન્ટિજન દેખાય છે.", "B) L^M અને L^N એલિલ્સ વચ્ચે અપૂર્ણ પ્રભુત્વ જોવા મળે છે, પરિણામે M અને N એન્ટિજનનો મિશ્ર રંગ દેખાય છે.", "C) L^M અને L^N એલિલ્સ સહપ્રભુ હોય છે, પરિણામે M અને N એન્ટિજન બંને સરખી માત્રામાં દેખાય છે.", "D) L^N એલિલ L^M એલિલ પર પૂર્ણ પ્રભુત્વ ધરાવે છે, પરિણામે ફક્ત N એન્ટિજન દેખાય છે."], "correct": 2, "explanation": "MN રક્ત જૂથ સિસ્ટમમાં, L^M અને L^N એલિલ્સ સહપ્રભુ હોય છે. હેટરોઝાયગસ (L^M L^N) વ્યક્તિમાં, બંને M અને N એન્ટિજન કોષની સપાટી પર સરખી માત્રામાં દેખાય છે. વિકલ્પ A અને D ખોટા છે કારણ કે કોઈ એલિલ પૂર્ણ પ્રભુત્વ ધરાવતું નથી. વિકલ્પ B ખોટો છે કારણ કે અહીં અપૂર્ણ પ્રભુત્વ નથી, પરંતુ સહપ્રભુત્વ છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને ભિન્નતા", "difficulty": "Hard", "num": 6}, {"question": "એક પોપ્યુલેશનમાં, કાળા અને પીળા રંગના પંખીના પીછાના રંગ માટે બે એલિલ્સ (B અને b) જવાબદાર છે. જ્યારે હેટરોઝાયગસ (Bb) અવસ્થામાં હોય ત્યારે પંખીના પીછામાં કાળા અને પીળા રંગના પટ્ટા દેખાય છે. આ કિસ્સામાં, કયું વિધાન સહપ્રભુત્વને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) એલિલ B અને b વચ્ચે પૂર્ણ પ્રભુત્વ જોવા મળે છે, જેમાં B પ્રભુત્વ ધરાવે છે.", "B) એલિલ B અને b વચ્ચે અપૂર્ણ પ્રભુત્વ જોવા મળે છે, પરિણામે મિશ્ર રંગ દેખાય છે.", "C) એલિલ B અને b સહપ્રભુ હોય છે, પરિણામે બંને રંગના પટ્ટા દેખાય છે.", "D) એલિલ b એલિલ B પર પૂર્ણ પ્રભુત્વ ધરાવે છે, પરિણામે ફક્ત પીળા રંગના પટ્ટા દેખાય છે."], "correct": 2, "explanation": "હેટરોઝાયગસ (Bb) અવસ્થામાં, જ્યારે બંને એલિલ્સના લક્ષણો સ્પષ્ટ રીતે દેખાય છે (કાળા અને પીળા પટ્ટા), ત્યારે તે સહપ્રભુત્વનું ઉદાહરણ છે. વિકલ્પ A અને D ખોટા છે કારણ કે કોઈ એલિલ પૂર્ણ પ્રભુત્વ ધરાવતું નથી. વિકલ્પ B ખોટો છે કારણ કે અહીં મિશ્ર રંગ નથી, પરંતુ સ્પષ્ટ પટ્ટા દેખાય છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને ભિન્નતા", "difficulty": "Hard", "num": 7}, {"question": "મનુષ્યમાં, કયા જનીન લોકસના સંદર્ભમાં સહપ્રભુત્વ જોવા મળે છે, જ્યાં હેટરોઝાયગસ જનીનપ્રરૂપમાં બંને એલિલ્સના ઉત્પાદનો સક્રિય હોય છે?", "options": ["A) હીમોગ્લોબિન જનીન (Hb^A અને Hb^S)", "B) લેક્ટેઝ જનીન (LCT)", "C) ABO રક્ત જૂથ જનીન (I^A, I^B, i)", "D) રોલર અને નોન-રોલર જીભ જનીન (R અને r)"], "correct": 2, "explanation": "ABO રક્ત જૂથ સિસ્ટમમાં, I^A અને I^B એલિલ્સ સહપ્રભુ હોય છે. હેટરોઝાયગસ (I^A I^B) વ્યક્તિમાં, બંને A અને B એન્ટિજન દેખાય છે. વિકલ્પ A ખોટો છે કારણ કે Hb^A અને Hb^S વચ્ચે સહપ્રભુત્વ નથી, પરંતુ સહ-પ્રભુત્વ જેવું લક્ષણ દેખાય છે (સિકલ સેલ ટ્રેઇટ). વિકલ્પ B અને D ખોટા છે કારણ કે તેમાં સહપ્રભુત્વ નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને ભિન્નતા", "difficulty": "Hard", "num": 8}, {"question": "એક પોપ્યુલેશનમાં, લાલ અને સફેદ ફૂલોના રંગ માટે બે એલિલ્સ (R અને W) જવાબદાર છે. જ્યારે હેટરોઝાયગસ (RW) અવસ્થામાં હોય ત્યારે ફૂલો પર લાલ અને સફેદ બંને રંગના પટ્ટા દેખાય છે. આ કિસ્સામાં, કયું વિધાન સહપ્રભુત્વને સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) એલિલ R અને W વચ્ચે પૂર્ણ પ્રભુત્વ જોવા મળે છે, જેમાં R પ્રભુત્વ ધરાવે છે.", "B) એલિલ R અને W વચ્ચે અપૂર્ણ પ્રભુત્વ જોવા મળે છે, પરિણામે ગુલાબી રંગ દેખાય છે.", "C) એલિલ R અને W સહપ્રભુ હોય છે, પરિણામે લાલ અને સફેદ પટ્ટા દેખાય છે.", "D) એલિલ W એલિલ R પર પૂર્ણ પ્રભુત્વ ધરાવે છે, પરિણામે ફક્ત સફેદ રંગ દેખાય છે."], "correct": 2, "explanation": "હેટરોઝાયગસ (RW) અવસ્થામાં, જ્યારે બંને એલિલ્સના લક્ષણો સ્પષ્ટ રીતે દેખાય છે (લાલ અને સફેદ પટ્ટા), ત્યારે તે સહપ્રભુત્વનું ઉદાહરણ છે. વિકલ્પ A અને D ખોટા છે કારણ કે કોઈ એલિલ પૂર્ણ પ્રભુત્વ ધરાવતું નથી. વિકલ્પ B ખોટો છે કારણ કે અહીં મિશ્ર રંગ (ગુલાબી) નથી, પરંતુ સ્પષ્ટ પટ્ટા દેખાય છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને ભિન્નતા", "difficulty": "Hard", "num": 9}, {"question": "મનુષ્યમાં, કયા રક્ત જૂથ સિસ્ટમમાં સહપ્રભુત્વ જોવા મળતું નથી?", "options": ["A) ABO રક્ત જૂથ સિસ્ટમ", "B) MN રક્ત જૂથ સિસ્ટમ", "C) Rh રક્ત જૂથ સિસ્ટમ", "D) લ્યૂઇસ રક્ત જૂથ સિસ્ટમ"], "correct": 2, "explanation": "Rh રક્ત જૂથ સિસ્ટમમાં, Rh+ (પ્રભુ) અને Rh- (પ્રકાશી) એલિલ્સ વચ્ચે સહપ્રભુત્વ જોવા મળતું નથી. Rh+ એલિલ Rh- એલિલ પર પૂર્ણ પ્રભુત્વ ધરાવે છે. ABO (વિકલ્પ A) અને MN (વિકલ્પ B) રક્ત જૂથ સિસ્ટમમાં સહપ્રભુત્વ જોવા મળે છે. લ્યૂઇસ રક્ત જૂથ સિસ્ટમ (વિકલ્પ D)માં પણ સહપ્રભુત્વ જોવા મળી શકે છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને ભિન્નતા", "difficulty": "Hard", "num": 10}, {"question": "મનુષ્યમાં, જ્યારે એક વ્યક્તિના માતા-પિતા બંનેમાં રક્ત જૂથ O છે પરંતુ તેમનું સંતાન રક્ત જૂથ AB ધરાવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સહપ્રભુત્વના સિદ્ધાંતને સૌથી યોગ્ય રીતે સમજાવે છે?", "options": ["A) માતા-પિતામાં I^A અને I^B એલિલ્સ છુપાયેલા હોવા છતાં, સંતાનમાં તે સહપ્રભુત્વ દર્શાવે છે.", "B) માતા-પિતામાં I^A અથવા I^B એલિલ્સ હાજર ન હોવા છતાં, સંતાનમાં મ્યુટેશન દ્વારા AB રક્ત જૂથ ઉદ્ભવે છે.", "C) માતા-પિતામાં I^A અને I^B એલિલ્સ હાજર છે પરંતુ તે સંપૂર્ણ પ્રભુત્વ ધરાવે છે, જેથી સંતાનમાં AB રક્ત જૂથ દેખાય છે.", "D) માતા-પિતામાં I^A અને I^B એલિલ્સ હાજર છે પરંતુ તે અસંપૂર્ણ પ્રભુત્વ ધરાવે છે, જેથી સંતાનમાં O રક્ત જૂથ દેખાય છે."], "correct": 0, "explanation": "સહપ્રભુત્વમાં, I^A અને I^B એલિલ્સ બંને સરખી રીતે પ્રભુત્વ ધરાવે છે. જ્યારે માતા-પિતા બંનેમાં O રક્ત જૂથ હોવા છતાં, તેઓ I^A અને I^B એલિલ્સના વાહક (હેટરોઝાયગસ) હોઈ શકે છે. સંતાનમાં I^A અને I^B એલિલ્સ મળીને AB રક્ત જૂથ દર્શાવે છે, જે સહપ્રભુત્વનું ઉદાહરણ છે. વિકલ્પ B મ્યુટેશનની વાત કરે છે, જે અહીં લાગુ પડતું નથી. વિકલ્પ C અને D અસંપૂર્ણ પ્રભુત્વ અથવા સંપૂર્ણ પ્રભુત્વની ભૂલભરેલી સમજ આપે છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 11}, {"question": "એક પોપ્યુલેશનમાં, લાલ ફૂલો (RR) અને સફેદ ફૂલો (rr) વચ્ચે સંકરણ કરવામાં આવે છે. F1 પેઢીમાં ગુલાબી ફૂલો પ્રાપ્ત થાય છે. જો F1 પેઢીને આત્મપરાગણ કરાવવામાં આવે, તો F2 પેઢીમાં કયો ફિનોટાઇપિક ગુણોત્તર મળશે?", "options": ["A) 1:2:1 (લાલ:ગુલાબી:સફેદ)", "B) 3:1 (લાલ:સફેદ)", "C) 9:3:3:1 (લાલ:ગુલાબી:સફેદ:વર્ણહીન)", "D) 1:1 (લાલ:સફેદ)"], "correct": 0, "explanation": "અહીં, લાલ અને સફેદ ફૂલો વચ્ચે સહપ્રભુત્વ જોવા મળે છે, જ્યાં R અને r એલિલ્સ બંને ગુલાબી ફિનોટાઇપ દર્શાવે છે. F1 પેઢીમાં સૌથી ગુલાબી ફૂલો હશે (Rr). F1ને આત્મપરાગણ કરાવતા, F2 પેઢીમાં 1 RR (લાલ), 2 Rr (ગુલાબી), અને 1 rr (સફેદ) મળશે, જે ગુણોત્તર 1:2:1 આપે છે. વિકલ્પ B, C, અને D સહપ્રભુત્વના કિસ્સામાં લાગુ પડતા નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 12}, {"question": "મનુષ્યમાં, નીચેનામાંથી કયું જનીન લોકસ સહપ્રભુત્વ દર્શાવતું નથી?", "options": ["A) ABO રક્ત જૂથ સિસ્ટમ", "B) MN રક્ત જૂથ સિસ્ટમ", "C) Rh રક્ત જૂથ સિસ્ટમ", "D) લ્યુકોસાઇટ એન્ટિજેન (HLA) સિસ્ટમ"], "correct": 2, "explanation": "ABO અને MN રક્ત જૂથ સિસ્ટમમાં સહપ્રભુત્વ જોવા મળે છે, જ્યાં I^A, I^B, L^M, અને L^N એલિલ્સ સહપ્રભુ હોય છે. HLA સિસ્ટમમાં પણ સહપ્રભુત્વ જોવા મળી શકે છે. પરંતુ Rh રક્ત જૂથ સિસ્ટમમાં, Rh+ (પ્રભુ) અને Rh- (પ્રચ્છન્ન) એલિલ્સ વચ્ચે સહપ્રભુત્વ જોવા મળતું નથી. Rh+ એલિલ Rh- એલિલ પર સંપૂર્ણ પ્રભુત્વ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 13}, {"question": "એક પ્રયોગશાળામાં, એક વૈજ્ઞાનિકે એક નવી પ્રજાતિમાં ફૂલોના રંગ માટે બે એલિલ્સ (P અને Q) શોધ્યા. જ્યારે P અને Q એલિલ્સ હેટરોઝાયગસ અવસ્થામાં હોય ત્યારે, ફૂલોનો રંગ જાંબલી દેખાય છે. જ્યારે P હોમોઝાયગસ હોય ત્યારે ફૂલ લાલ દેખાય છે, અને Q હોમોઝાયગસ હોય ત્યારે ફૂલ નીલો દેખાય છે. આ કિસ્સામાં, P અને Q એલિલ્સ વચ્ચે કયો અનુવંશિકતા પેટર્ન જોવા મળે છે?", "options": ["A) સંપૂર્ણ પ્રભુત્વ", "B) અસંપૂર્ણ પ્રભુત્વ", "C) સહપ્રભુત્વ", "D) પ્રચ્છન્નતા"], "correct": 2, "explanation": "અહીં, P અને Q એલિલ્સ હેટરોઝાયગસ અવસ્થામાં જાંબલી રંગ દર્શાવે છે, જે લાલ અને નીલા રંગનો મિશ્રણ છે. આ સહપ્રભુત્વનું ઉદાહરણ છે, જ્યાં બંને એલિલ્સ તેમના ફિનોટાઇપિક અસરને સરખી રીતે દર્શાવે છે. સંપૂર્ણ પ્રભુત્વ (A) અથવા અસંપૂર્ણ પ્રભુત્વ (B)માં, એક એલિલની અસર બીજા કરતાં વધુ અથવા ઓછી હોય છે. પ્રચ્છન્નતા (D)માં, એક એલિલની અસર દેખાતી નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 14}, {"question": "મનુષ્યમાં, જ્યારે એક વ્યક્તિના જનીનપ્રરૂપમાં I^A અને i એલિલ્સ હાજર હોય, ત્યારે તેનું રક્ત જૂથ A હોય છે. જો તે વ્યક્તિને I^B અને i એલિલ્સ ધરાવતી વ્યક્તિ સાથે લગ્ન કરે, તો તેમના સંતાનમાં કયા રક્ત જૂથની શક્યતા સૌથી ઓછી હશે?", "options": ["A) A", "B) B", "C) AB", "D) O"], "correct": 3, "explanation": "માતા-પિતા બંનેમાં I^A i અને I^B i જનીનપ્રરૂપ હોય, તો સંતાનમાં શક્ય જનીનપ્રરૂપો: I^A I^B (AB), I^A i (A), I^B i (B), અને ii (O) હશે. પરંતુ O રક્ત જૂથ માટે ii જનીનપ્રરૂપ હોવું જરૂરી છે, જે સહપ્રભુત્વના કિસ્સામાં સૌથી ઓછી શક્યતા ધરાવે છે, કારણ કે I^A અને I^B એલિલ્સ પ્રભુ હોય છે. વિકલ્પ A, B, અને Cની શક્યતા વધુ છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 15}, {"question": "એક પોપ્યુલેશનમાં, લાલ ફૂલો (R) અને નીલા ફૂલો (B) વચ્ચે સંકરણ કરવામાં આવે છે. જ્યારે F1 પેઢીમાં જાંબલી ફૂલો પ્રાપ્ત થાય છે, ત્યારે F1 ના સ્વ-પરાગીકરણથી F2 પેઢીમાં કયો ફીનોટાઇપ પ્રમાણ જોવા મળશે, જો R અને B એલિલ્સ સહપ્રભુ હોય અને અલગ અલગ વર્ણસૂત્ર પર આવેલા હોય?", "options": ["A) 9 લાલ : 3 જાંબલી : 3 નીલા : 1 સફેદ", "B) 1 લાલ : 2 જાંબલી : 1 નીલા", "C) 3 લાલ : 1 જાંબલી", "D) 1 લાલ : 1 જાંબલી : 1 નીલા : 1 સફેદ"], "correct": 1, "explanation": "સહપ્રભુત્વના કિસ્સામાં, જ્યારે બે સહપ્રભુ એલિલ્સ (R અને B) હાજર હોય ત્યારે જાંબલી રંગ પ્રગટ થાય છે. F1 પેઢી હેટરોઝાયગસ (RB) હોય છે, અને સ્વ-પરાગીકરણથી F2 પેઢીમાં 1:2:1 પ્રમાણ જોવા મળે છે (1 RR લાલ, 2 RB જાંબલી, 1 BB નીલા). અહીં, R અને B અલગ વર્ણસૂત્ર પર હોવાથી, મેન્ડલના સ્વતંત્ર વિતરણના નિયમ અનુસાર, ફીનોટાઇપિક પ્રમાણ 1:2:1 રહેશે. બાકીના વિકલ્પો મેન્ડલના સંકરણના નિયમો અથવા સહપ્રભુત્વના ગેરસમજ પર આધારિત છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 16}, {"question": "મનુષ્યમાં, એક જનીન લોકસ પર સહપ્રભુત્વ દર્શાવતા એલિલ્સની હાજરીમાં, નીચેનામાંથી કયું વિધાન સત્ય નથી?", "options": ["A) હેટરોઝાયગસ જનીનપ્રરૂપમાં બંને એલિલ્સના પ્રભાવ પ્રગટ થાય છે", "B) હોમોઝાયગસ જનીનપ્રરૂપમાં ફક્ત એક જ એલિલનો પ્રભાવ પ્રગટ થાય છે", "C) સહપ્રભુ એલિલ્સ હંમેશા એકબીજા પર પ્રભુત્વ ધરાવે છે", "D) સહપ્રભુત્વના કિસ્સામાં, ફીનોટાઇપિક પ્રમાણ 1:2:1 હોય છે"], "correct": 2, "explanation": "સહપ્રભુત્વમાં, બંને એલિલ્સ હેટરોઝાયગસ અવસ્થામાં સરખા પ્રભાવ ધરાવે છે, પરંતુ તે એકબીજા પર પ્રભુત્વ ધરાવતા નથી. વિકલ્પ C ખોટો છે કારણ કે સહપ્રભુ એલિલ્સ એકબીજા પર પ્રભુત્વ ધરાવતા નથી. વિકલ્પ A, B, અને D સહપ્રભુત્વના મૂળભૂત સિદ્ધાંતો અનુસાર સત્ય છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 17}, {"question": "એક પ્રયોગશાળામાં, એક વૈજ્ઞાનિકે એક પ્રજાતિમાં ફૂલોના રંગ માટે ત્રણ એલિલ્સ (R1, R2, R3) શોધ્યા છે. જ્યારે R1R2 જનીનપ્રરૂપ ધરાવતા પોપ્યુલેશનમાં લાલ ફૂલો, R2R3 જનીનપ્રરૂપ ધરાવતા પોપ્યુલેશનમાં જાંબલી ફૂલો, અને R1R3 જનીનપ્રરૂપ ધરાવતા પોપ્યુલેશનમાં ગુલાબી ફૂલો પ્રગટ થાય છે. આ કિસ્સામાં, કયું વિધાન સહપ્રભુત્વની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "options": ["A) R1, R2, અને R3 એલિલ્સ પૈકી કોઈ પણ બે એલિલ્સ સહપ્રભુ છે", "B) R1 અને R2 સહપ્રભુ છે, પરંતુ R3 પ્રભુત્વ ધરાવે છે", "C) R1, R2, અને R3 એલિલ્સ પૈકી કોઈ પણ એક પ્રભુત્વ ધરાવે છે", "D) R1 અને R3 સહપ્રભુ છે, પરંતુ R2 અપૂર્ણ પ્રભુત્વ ધરાવે છે"], "correct": 0, "explanation": "આ કિસ્સામાં, ત્રણેય એલિલ્સ (R1, R2, R3) પૈકી કોઈ પણ બે એલિલ્સ હેટરોઝાયગસ અવસ્થામાં હોવા છતાં, તેમના પ્રભાવ પ્રગટ થાય છે (લાલ, જાંબલી, ગુલાબી). આ સહપ્રભુત્વનું લક્ષણ છે, જ્યાં બંને એલિલ્સનો પ્રભાવ પ્રગટ થાય છે. વિકલ્પ B, C, અને D અપૂર્ણ પ્રભુત્વ અથવા પ્રભુત્વની ગેરસમજ પર આધારિત છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 18}, {"question": "મનુષ્યમાં, ABO રક્ત જૂથ સિસ્ટમમાં, I^A અને I^B એલિલ્સ સહપ્રભુ છે. જો એક વ્યક્તિના માતા-પિતા બંનેમાં રક્ત જૂથ AB હોય, તો તેમના સંતાનમાં કયા રક્ત જૂથની શક્યતા નહીં હોય?", "options": ["A) A", "B) B", "C) AB", "D) O"], "correct": 3, "explanation": "AB રક્ત જૂથ ધરાવતા માતા-પિતા બંનેમાં I^A અને I^B એલિલ્સ હાજર હોય છે. તેમના સંતાનમાં I^A, I^B, અથવા I^A I^B (AB) જનીનપ્રરૂપ હાજર હોઈ શકે, પરંતુ O રક્ત જૂથ માટે ii જનીનપ્રરૂપ હાજર નહીં હોય. આથી, O રક્ત જૂથની શક્યતા નહીં હોય. બાકીના વિકલ્પો (A, B, AB) શક્ય છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 19}, {"question": "એક પોપ્યુલેશનમાં, લાલ ફૂલો (R) અને સફેદ ફૂલો (r) વચ્ચે સંકરણ કરવામાં આવે છે. જો F1 પેઢીમાં ગુલાબી ફૂલો પ્રાપ્ત થાય છે, તો નીચેનામાંથી કયું વિધાન સહપ્રભુત્વના સંદર્ભમાં ખોટું છે?", "options": ["A) R અને r એલિલ્સ સહપ્રભુ છે", "B) F1 પેઢી હેટરોઝાયગસ છે", "C) F2 પેઢીમાં ફીનોટાઇપિક પ્રમાણ 1:2:1 હોય છે", "D) R એલિલ r એલિલ પર પ્રભુત્વ ધરાવે છે"], "correct": 3, "explanation": "ગુલાબી ફૂલોના કિસ્સામાં, R અને r એલિલ્સ સહપ્રભુ છે, અને F1 પેઢી હેટરોઝાયગસ (Rr) હોય છે. F2 પેઢીમાં ફીનોટાઇપિક પ્રમાણ 1:2:1 (1 RR લાલ, 2 Rr ગુલાબી, 1 rr સફેદ) જોવા મળે છે. વિકલ્પ D ખોટો છે કારણ કે R એલિલ r એલિલ પર પ્રભુત્વ ધરાવતું નથી, પરંતુ બંને સહપ્રભુ છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 20}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે બે એલિલ્સ (R1 અને R2) સહપ્રભુ છે. જ્યારે હેટરોઝાયગસ (R1R2) અવસ્થામાં, ફૂલનો રંગ ગુલાબી દેખાય છે. જો R1R1 જનીનપ્રરૂપ લાલ ફૂલ અને R2R2 જનીનપ્રરૂપ સફેદ ફૂલ દર્શાવે, તો નીચેનામાંથી કયું સંકરણ પેઢી (F1)માં 1:2:1 પ્રમાણમાં લાલ:ગુલાબી:સફેદ ફૂલો ઉત્પન્ન કરશે?", "options": ["A) R1R1 × R2R2", "B) R1R2 × R1R2", "C) R1R1 × R1R2", "D) R2R2 × R1R1"], "correct": 1, "explanation": "સહપ્રભુત્વના કિસ્સામાં, હેટરોઝાયગસ (R1R2) સંકરણથી F1 પેઢીમાં 1:2:1 પ્રમાણ મેળવવા માટે, બંને પિતૃઓ હેટરોઝાયગસ (R1R2) હોવા જોઈએ. આમ, R1R2 × R1R2 સંકરણથી લાલ (R1R1), ગુલાબી (R1R2), અને સફેદ (R2R2) ફૂલો 1:2:1 પ્રમાણમાં મળશે. બાકીના વિકલ્પો હોમોઝાયગસ સંકરણ છે, જે 1:2:1 પ્રમાણ આપશે નહીં.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 21}, {"question": "એક પ્રજાતિમાં, પંખીના પીછાના રંગ માટે બે એલિલ્સ (C અને D) સહપ્રભુ છે. જ્યારે હેટરોઝાયગસ (CD) અવસ્થામાં, પીછાનો રંગ કાળો અને પીળો ચક્રાકાર દેખાય છે. જો કાળા પીછાવાળા પશુ (CC) અને પીળા પીછાવાળા પશુ (DD) વચ્ચે સંકરણ કરવામાં આવે, તો F1 પેઢીમાં કયો રંગ જોવા મળશે?", "options": ["A) કાળો", "B) પીળો", "C) કાળો અને પીળો ચક્રાકાર", "D) સફેદ"], "correct": 2, "explanation": "સહપ્રભુત્વના કિસ્સામાં, હેટરોઝાયગસ (CD) જનીનપ્રરૂપ ધરાવતી વ્યક્તિમાં બંને એલિલ્સના લક્ષણો પ્રગટ થાય છે. આમ, CC (કાળો) અને DD (પીળો) વચ્ચે સંકરણથી F1 પેઢીમાં સહપ્રભુ લક્ષણ (કાળો અને પીળો ચક્રાકાર) જોવા મળશે. બાકીના વિકલ્પો સહપ્રભુત્વના સિદ્ધાંતને અનુરૂપ નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 22}, {"question": "મનુષ્યમાં, MN રક્ત જૂથ સિસ્ટમમાં, L^M અને L^N એલિલ્સ સહપ્રભુ છે. જો એક વ્યક્તિનો જનીનપ્રરૂપ L^M L^N છે, તો તેના લોહીમાં કયા પ્રકારના એન્ટિજન હાજર હશે?", "options": ["A) M એન્ટિજન", "B) N એન્ટિજન", "C) M અને N એન્ટિજન", "D) કોઈ એન્ટિજન નહીં"], "correct": 2, "explanation": "MN રક્ત જૂથ સિસ્ટમમાં, L^M અને L^N એલિલ્સ સહપ્રભુ હોવાથી, L^M L^N જનીનપ્રરૂપ ધરાવતી વ્યક્તિમાં M અને N બંને એન્ટિજન હાજર હોય છે. આમ, વિકલ્પ C સચોટ છે. બાકીના વિકલ્પો સહપ્રભુત્વના સિદ્ધાંતને અનુરૂપ નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 23}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે ત્રણ એલિલ્સ (R, S, અને T) હાજર છે, જેમાં R અને S સહપ્રભુ છે, જ્યારે T અપ્રભુ છે. જો R અને S વચ્ચે સંકરણ કરવામાં આવે, તો F1 પેઢીમાં કયો રંગ જોવા મળશે?", "options": ["A) R લક્ષણ", "B) S લક્ષણ", "C) R અને S લક્ષણોનો મિશ્રણ", "D) T લક્ષણ"], "correct": 2, "explanation": "R અને S એલિલ્સ સહપ્રભુ હોવાથી, તેમના સંકરણથી F1 પેઢીમાં બંને લક્ષણોનો મિશ્રણ (હેટરોઝાયગસ) જોવા મળશે. T એલિલ અપ્રભુ હોવાથી તે પ્રગટ થશે નહીં. આમ, વિકલ્પ C સચોટ છે. બાકીના વિકલ્પો સહપ્રભુત્વના સિદ્ધાંતને અનુરૂપ નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 24}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે બે એલિલ્સ (R અને S) સહપ્રભુત્વ દર્શાવે છે. જ્યારે RR જનીનપ્રરૂપ લાલ ફૂલો, SS જનીનપ્રરૂપ પીળા ફૂલો અને RS જનીનપ્રરૂપ કેસરી ફૂલો ઉત્પન્ન કરે છે. જો RR અને SS વચ્ચે સંકરણ કરવામાં આવે તો F2 પેઢીમાં કેસરી ફૂલો ધરાવતા પોષકોનો પ્રમાણ કેટલો હશે?", "options": ["A) 25%", "B) 50%", "C) 75%", "D) 100%"], "correct": 1, "explanation": "સહપ્રભુત્વના કિસ્સામાં, RR અને SS વચ્ચે સંકરણ કરવાથી F1 પેઢીમાં સરળતાથી RS (કેસરી) જનીનપ્રરૂપ મળે છે. F1 પેઢીના સ્વ-પરાગીકરણથી F2 પેઢીમાં જનીનપ્રરૂપોનો પ્રમાણ 1:2:1 (RR:RS:SS) હશે. અહીં, RS (કેસરી) જનીનપ્રરૂપ ધરાવતા પોષકોનો પ્રમાણ 2/4 અથવા 50% હશે. A) 25% ખોટું છે કારણ કે તે માત્ર RR અથવા SS જનીનપ્રરૂપ ધરાવતા પોષકોનો પ્રમાણ છે. C) 75% ખોટું છે કારણ કે તે RR અને RS અથવા SS અને RS નો સરવાળો છે. D) 100% ખોટું છે કારણ કે તમામ પોષકો કેસરી નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 25}, {"question": "મનુષ્યમાં, ABO રક્ત જૂથ સિસ્ટમમાં I^A અને I^B એલિલ્સ સહપ્રભુ છે. જો માતા I^A i અને પિતા I^B i હોય, તો તેમના સંતાનમાં કયો રક્ત જૂથ મળવાની શક્યતા નથી?", "options": ["A) A", "B) B", "C) AB", "D) O"], "correct": 3, "explanation": "માતા I^A i અને પિતા I^B i હોવાથી, સંતાનમાં I^A I^B (AB), I^A i (A), I^B i (B) જનીનપ્રરૂપો મળી શકે. પરંતુ O રક્ત જૂથ માટે ii જનીનપ્રરૂપ જરૂરી છે, જે આ સંકરણમાં મળી શકતું નથી. આથી વિકલ્પ D (O) સાચો જવાબ છે. વિકલ્પ A, B, અને C મળી શકે છે.", "ncert_ref": "Class XII - Chapter 5: વંશાવળી અને વારસાગતતા", "difficulty": "Hard", "num": 26}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે ત્રણ એલિલ્સ (R, S, T) હાજર છે. જ્યારે R અને S સહપ્રભુ છે, પરંતુ T, R અને S પર પ્રભુત્વ ધરાવે છે. જો એક પિતા જનીનપ્રરૂપ RS અને માતા જનીનપ્રરૂપ RT હોય, તો સંતાનમાં કયો ફિનોટાઇપ સૌથી ઓછો સંભાવિત હશે?", "options": ["A) R અને S ના મિશ્ર રંગનો ફૂલ", "B) T નું પ્રભુત્વ ધરાવતો ફૂલ", "C) R નું પ્રભુત્વ ધરાવતો ફૂલ", "D) S નું પ્રભુત્વ ધરાવતો ફૂલ"], "correct": 3, "explanation": "પિતા (RS) અને માતા (RT) પાસેથી સંતાનને R, S, અથવા T એલિલ મળી શકે. T, R અને S પર પ્રભુત્વ ધરાવે છે, તેથી TT, TR, અથવા TS જનીનપ્રરૂપ ધરાવતા સંતાનો T નું પ્રભુત્વ દર્શાવશે. RS જનીનપ્રરૂપ ધરાવતા સંતાનો R અને S ના મિશ્ર રંગનો ફૂલ દર્શાવશે. પરંતુ S નું પ્રભુત્વ ધરાવતો ફૂલ (SS) સંતાનમાં મેળવવા માટે બંને માતા-પિતા પાસેથી S એલિલ મળવો જરૂરી છે, જે અહીં શક્ય નથી. તેથી, D વિકલ્પ સૌથી ઓછો સંભાવિત છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 27}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે ત્રણ એલિલ્સ (R, S, T) હાજર છે, જેમાં R અને S સહપ્રભુ છે, જ્યારે T રીસેસિવ છે. જો R અને S એલિલ્સ વચ્ચે સંકરણ કરવામાં આવે, તો F1 પેઢીમાં કયો ફિનોટાઇપ જોવા મળશે?", "options": ["A) ફક્ત R લક્ષણ ધરાવતું ફૂલ", "B) ફક્ત S લક્ષણ ધરાવતું ફૂલ", "C) R અને S લક્ષણોનું મિશ્રણ ધરાવતું ફૂલ", "D) T લક્ષણ ધરાવતું ફૂલ"], "correct": 2, "explanation": "સહપ્રભુત્વમાં, R અને S એલિલ્સ એકબીજા પર પ્રભુત્વ ધરાવતા નથી, પરંતુ બંને લક્ષણો એકસાથે પ્રગટ થાય છે. આથી F1 પેઢીમાં R અને S લક્ષણોનું મિશ્રણ જોવા મળશે. A અને B વિકલ્પો ખોટા છે કારણ કે સહપ્રભુત્વમાં એક પણ એલિલ પ્રભુત્વ ધરાવતું નથી. D વિકલ્પ ખોટો છે કારણ કે T રીસેસિવ છે અને F1 પેઢીમાં પ્રગટ થશે નહીં.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિકાસ", "difficulty": "Hard", "num": 28}, {"question": "મનુષ્યમાં, MN રક્ત જૂથ સિસ્ટમમાં L^M અને L^N એલિલ્સ સહપ્રભુ છે. જો એક વ્યક્તિનો જનીનપ્રરૂપ L^M L^N હોય અને તેના પત્નીનો જનીનપ્રરૂપ L^M L^M હોય, તો તેમના સંતાનમાં કયા રક્ત જૂથની શક્યતા 50% હશે?", "options": ["A) M", "B) N", "C) MN", "D) O"], "correct": 0, "explanation": "L^M L^N જનીનપ્રરૂપ ધરાવતા વ્યક્તિ પાસેથી L^M અથવા L^N એલિલ પસાર થશે, જ્યારે L^M L^M જનીનપ્રરૂપ ધરાવતા પત્ની પાસેથી ફક્ત L^M એલિલ જ પસાર થશે. આથી સંતાનમાં L^M L^M (M રક્ત જૂથ) અથવા L^M L^N (MN રક્ત જૂથ) જનીનપ્રરૂપ હશે. M રક્ત જૂથની શક્યતા 50% હશે (L^M L^M), જ્યારે MN રક્ત જૂથની શક્યતા પણ 50% હશે (L^M L^N). વિકલ્પ B અને D ખોટા છે કારણ કે N રક્ત જૂથ માટે L^N L^N જનીનપ્રરૂપ જરૂરી છે, અને O રક્ત જૂથ MN સિસ્ટમમાં અસ્તિત્વ ધરાવતું નથી.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતા", "difficulty": "Hard", "num": 29}, {"question": "એક પ્રજાતિમાં, ફૂલના રંગ માટે બે એલિલ્સ (C અને D) સહપ્રભુ છે. જો C અને D વચ્ચે સંકરણ કરવામાં આવે, તો F1 પેઢીમાં કયો ફિનોટાઇપ જોવા મળશે?", "options": ["A) ફક્ત C જેવો રંગ", "B) ફક્ત D જેવો રંગ", "C) C અને D ના મિશ્રણ જેવો રંગ", "D) રંગહીન ફૂલ"], "correct": 2, "explanation": "સહપ્રભુત્વના કિસ્સામાં, બંને એલિલ્સ પોતપોતાની અસર દર્શાવે છે. આથી F1 પેઢીમાં C અને D ના મિશ્રણ જેવો રંગ જોવા મળશે. A, B, અને D વિકલ્પો ખોટા છે કારણ કે સહપ્રભુત્વમાં બંને એલિલ્સની અસર જોવા મળે છે.", "ncert_ref": "Class XII - Chapter 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
