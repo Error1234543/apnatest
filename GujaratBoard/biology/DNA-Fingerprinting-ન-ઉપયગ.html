@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA Fingerprinting ના ઉપયોગો.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>DNA Fingerprinting ના ઉપયોગો.</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">DNA Fingerprinting ના ઉપયોગો.</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા કેસમાં થતો નથી?", "opts": ["અપરાધીની ઓળખ કરવા", "પિતૃત્વની પુષ્ટિ કરવા", "વનસ્પતિની પ્રજાતિઓની ઓળખ કરવા", "રક્તવર્ગની નક્કી કરવા"], "ans": 3, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ અપરાધીની ઓળખ (A), પિતૃત્વની પુષ્ટિ (B), અને વનસ્પતિની પ્રજાતિઓની ઓળખ (C) કરવા થાય છે. પરંતુ રક્તવર્ગની નક્કી કરવા માટે DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ થતો નથી, કારણ કે રક્તવર્ગની ઓળખ રક્તમાં હાજર એન્ટીજેન અને એન્ટીબોડીના આધારે થાય છે, જે DNA ફિંગરપ્રિન્ટિંગથી નક્કી કરી શકાતી નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં વાપરાતા 'VNTR' શબ્દનો અર્થ શું છે?", "opts": ["Variable Number Tandem Repeats", "Very New Technical Resource", "Variable Nucleotide Transfer Region", "Vital Non-Transcribed Region"], "ans": 0, "exp": "VNTRનો પૂરો અર્થ 'Variable Number Tandem Repeats' છે, જે DNA ફિંગરપ્રિન્ટિંગમાં વાપરાતી પુનરાવર્તિત DNA ક્રમોની સંખ્યામાં ફરક દર્શાવે છે. બાકીના વિકલ્પો (B, C, D) આ શબ્દના અર્થ સાથે સંકળાયેલા નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગ દ્વારા કયા રોગની ઓળખ કરવામાં આવી શકે છે?", "opts": ["મધુમેહ", "હિમોફિલિયા", "હૃદયરોગ", "કોલેસ્ટ્રોલ"], "ans": 1, "exp": "હિમોફિલિયા એક અનુવંશિક રોગ છે જે X વર્ણસૂત્ર સાથે સંકળાયેલો છે, અને તેની ઓળખ DNA ફિંગરપ્રિન્ટિંગ દ્વારા કરી શકાય છે. મધુમેહ (A), હૃદયરોગ (C), અને કોલેસ્ટ્રોલ (D) એવા રોગો છે જેના માટે DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ સામાન્ય રીતે થતો નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં વાપરાતી 'RFLP' પદ્ધતિ શા માટે મહત્વપૂર્ણ છે?", "opts": ["તે DNAની લંબાઈ નક્કી કરે છે", "તે DNAમાં વિકૃતિઓ શોધે છે", "તે વિશિષ્ટ વ્યક્તિગત DNA પેટર્ન ઉત્પન્ન કરે છે", "તે પ્રોટીનની રચના કરે છે"], "ans": 2, "exp": "RFLP (Restriction Fragment Length Polymorphism) પદ્ધતિ DNA ફિંગરપ્રિન્ટિંગમાં વિશિષ્ટ વ્યક્તિગત DNA પેટર્ન ઉત્પન્ન કરવા માટે વાપરાય છે. તે DNAની લંબાઈ નક્કી કરતી નથી (A), વિકૃતિઓ શોધતી નથી (B), અને પ્રોટીનની રચના કરતી નથી (D).", "ref": "Std 12 - અધ્યાય 11: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા ક્ષેત્રમાં થતો નથી?", "opts": ["કાયદાકીય પુરાવા તરીકે", "પશુ પ્રજનન કાર્યક્રમોમાં", "ખાદ્ય પદાર્થોની ગુણવત્તા તપાસમાં", "અવકાશ યાનના ડિઝાઇનમાં"], "ans": 3, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કાયદાકીય પુરાવા (A), પશુ પ્રજનન કાર્યક્રમો (B), અને ખાદ્ય પદાર્થોની ગુણવત્તા તપાસ (C)માં થાય છે. પરંતુ અવકાશ યાનના ડિઝાઇન (D)માં તેનો કોઈ ઉપયોગ થતો નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ પશુપાલન ક્ષેત્રે કયા હેતુ માટે થતો નથી?", "opts": ["પશુઓની જાતિય શુદ્ધતા ચકાસવા", "પશુઓમાં રોગપ્રતિકારક શક્તિ વધારવા", "પશુઓની વંશાવળી નક્કી કરવા", "પશુઓમાં જનીનિક રોગોની ઓળખ કરવા"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ પશુઓની જાતિય શુદ્ધતા ચકાસવા (A), વંશાવળી નક્કી કરવા (C) અને જનીનિક રોગોની ઓળખ કરવા (D) માટે થાય છે. પરંતુ રોગપ્રતિકારક શક્તિ વધારવા (B) માટે તેનો ઉપયોગ થતો નથી, કારણ કે તે રોગપ્રતિકારક શક્તિ સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવ તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગ દ્વારા કયા કાનૂની કેસમાં સૌથી વધુ ઉપયોગ થાય છે?", "opts": ["મિલકતના વિવાદો", "હત્યા અને બળાત્કારના કેસો", "વ્યાપારી કાનૂની કેસો", "પર્યાવરણીય કાનૂની કેસો"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગનો સૌથી વધુ ઉપયોગ હત્યા અને બળાત્કાર જેવા ગુનાહિત કેસો (B)માં થાય છે, કારણ કે તે વ્યક્તિગત ઓળખ માટે ખૂબ જ ચોક્કસ પદ્ધતિ છે. મિલકતના વિવાદો (A), વ્યાપારી કેસો (C) અને પર્યાવરણીય કેસો (D)માં તેનો ઉપયોગ મર્યાદિત છે.", "ref": "Std 12 - અધ્યાય 11: જૈવ તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કૃષિ ક્ષેત્રે કયા હેતુ માટે થતો નથી?", "opts": ["પાકની જાતોની શુદ્ધતા ચકાસવા", "પાકમાં રોગપ્રતિકારક જીનની હાજરી ચકાસવા", "પાકની ઉત્પાદકતા વધારવા", "પાકની જનીનિક વૈવિધ્યતા નક્કી કરવા"], "ans": 2, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ પાકની જાતોની શુદ્ધતા ચકાસવા (A), રોગપ્રતિકારક જીનની હાજરી ચકાસવા (B) અને જનીનિક વૈવિધ્યતા નક્કી કરવા (D) માટે થાય છે. પરંતુ પાકની ઉત્પાદકતા વધારવા (C) માટે તેનો સીધો ઉપયોગ થતો નથી, કારણ કે ઉત્પાદકતા વધારવા માટે અન્ય કૃષિ તકનીકોનો ઉપયોગ થાય છે.", "ref": "Std 12 - અધ્યાય 11: જૈવ તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા પુરાવા માટે થતો નથી?", "opts": ["રક્તના નમૂનાઓ", "વાળના નમૂનાઓ", "હાડકાના નમૂનાઓ", "હવાના નમૂનાઓ"], "ans": 3, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ રક્ત (A), વાળ (B) અને હાડકાના (C) નમૂનાઓમાંથી DNA મેળવીને ઓળખ માટે થાય છે. પરંતુ હવાના નમૂનાઓ (D)માંથી DNA મેળવવું શક્ય નથી, તેથી તેનો ઉપયોગ થતો નથી.", "ref": "Std 12 - અધ્યાય 11: જૈવ તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા ક્ષેત્રે સૌથી ઓછો થાય છે?", "opts": ["કાનૂની ક્ષેત્ર", "વનસંવર્ધન ક્ષેત્ર", "ચિકિત્સા ક્ષેત્ર", "પશુપાલન ક્ષેત્ર"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગનો સૌથી ઓછો ઉપયોગ વનસંવર્ધન ક્ષેત્રે (B) થાય છે, કારણ કે આ ક્ષેત્રે અન્ય પદ્ધતિઓનો વધુ ઉપયોગ થાય છે. કાનૂની ક્ષેત્ર (A), ચિકિત્સા ક્ષેત્ર (C) અને પશુપાલન ક્ષેત્ર (D)માં તેનો ઉપયોગ વધુ પ્રમાણમાં થાય છે.", "ref": "Std 12 - અધ્યાય 11: જૈવ તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા કાનૂની કેસમાં થતો નથી જ્યારે પુરાવા એકત્રિત કરવા માટે વાપરવામાં આવે છે?", "opts": ["હત્યાના કેસમાં", "ચોરીના કેસમાં", "વાહન ચલાવવાની અયોગ્યતાના કેસમાં", "બળાત્કારના કેસમાં"], "ans": 2, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ હત્યા, ચોરી અને બળાત્કાર જેવા ગુનાહિત કેસમાં પુરાવા એકત્રિત કરવા માટે થાય છે. વાહન ચલાવવાની અયોગ્યતા જેવા કેસમાં DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ થતો નથી, કારણ કે તે કાનૂની રીતે સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિકાસ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કૃષિ ક્ષેત્રે કયા હેતુ માટે થાય છે જ્યારે પાકની જાતોની પસંદગી કરવામાં આવે છે?", "opts": ["પાકની ઉંચાઈ નક્કી કરવા માટે", "રોગપ્રતિકારક જાતોની ઓળખ કરવા માટે", "પાકના રંગની ઓળખ કરવા માટે", "પાકના સ્વાદની ગણતરી કરવા માટે"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કૃષિ ક્ષેત્રે રોગપ્રતિકારક જાતોની ઓળખ કરવા માટે થાય છે, જેથી રોગપ્રતિકારક પાકની જાતોની પસંદગી કરી શકાય. ઉંચાઈ, રંગ અને સ્વાદ જેવા લક્ષણો DNA ફિંગરપ્રિન્ટિંગ દ્વારા નક્કી કરવા મુશ્કેલ હોય છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિકાસ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા ક્ષેત્રે થાય છે જ્યારે વ્યક્તિની ઓળખ કરવા માટે વાપરવામાં આવે છે?", "opts": ["શિક્ષણ ક્ષેત્રે", "ચિકિત્સા ક્ષેત્રે", "કાનૂની ક્ષેત્રે", "ક્રીડા ક્ષેત્રે"], "ans": 2, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કાનૂની ક્ષેત્રે વ્યક્તિની ઓળખ કરવા માટે થાય છે, જેથી ગુનાહિત કેસમાં પુરાવા એકત્રિત કરવા માટે વાપરી શકાય. શિક્ષણ, ચિકિત્સા અને ક્રીડા ક્ષેત્રે DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ ઓળખ કરવા માટે થતો નથી.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિકાસ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા રોગની ઓળખ કરવા માટે થતો નથી?", "opts": ["કૅન્સર", "એડ્સ", "મધુમેહ", "મલેરિયા"], "ans": 3, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કૅન્સર, એડ્સ અને મધુમેહ જેવા રોગની ઓળખ કરવા માટે થાય છે. મલેરિયા એક પરોપજીવી જનિત રોગ છે, જેની ઓળખ DNA ફિંગરપ્રિન્ટિંગ દ્વારા થતી નથી.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિકાસ", "ch": ""}, {"q": "એક પુરાતત્વવિદ્ ટીમને પ્રાચીન કબરમાંથી મળેલા હાડકાના નમૂનાનું વિશ્લેષણ કરવાનું કાર્ય સોંપાયું છે. આ નમૂનાનું DNA ફિંગરપ્રિન્ટિંગ કરતી વખતે, તેમને જાણવા મળ્યું કે તેમાં અમુક વિશિષ્ટ VNTR (Variable Number Tandem Repeats) અનુક્રમોની સંખ્યા અપેક્ષા કરતાં અડધી છે. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું સૌથી વધુ સંભવિત કારણ હોઈ શકે?", "opts": ["હાડકાના નમૂનામાં બેક્ટેરિયલ દૂષણ થયું હોવાથી DNA નો નાશ થયો છે", "આ નમૂનો એક જ વ્યક્તિના બે અલગ-અલગ કોષોમાંથી મેળવવામાં આવ્યો હોવાથી VNTR ની સંખ્યામાં તફાવત જોવા મળ્યો છે", "હાડકાના નમૂનામાંથી મેળવેલ DNA અર્ધીકરણ (Haploid) સ્વરૂપનું હોવાથી VNTR ની સંખ્યા અડધી છે", "DNA નિષ્કર્ષણ દરમિયાન વપરાયેલ ઉત્સેચક (Enzyme) ની અયોગ્ય પ્રક્રિયાને કારણે VNTR ની સંખ્યામાં ઘટાડો થયો છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. પ્રાચીન હાડકામાંથી મેળવેલ DNA મોટાભાગે અર્ધીકરણ (Haploid) સ્વરૂપમાં હોય છે કારણ કે તે કોષકેન્દ્ર (Nucleus) ના બદલે મિટોકોન્ડ્રિયામાંથી મેળવવામાં આવે છે. મિટોકોન્ડ્રિયલ DNA હેપ્લોઈડ હોય છે અને તેમાં VNTR ની સંખ્યા પણ અડધી હોય છે. વિકલ્પ A ખોટો છે કારણ કે બેક્ટેરિયલ દૂષણથી DNA નો સંપૂર્ણ નાશ થતો નથી, માત્ર તેની ગુણવત્તા પ્રભાવિત થાય છે. વિકલ્પ B ખોટો છે કારણ કે એક જ વ્યક્તિના બે અલગ-અલગ કોષોમાં VNTR ની સંખ્યા સમાન હોય છે. વિકલ્પ D ખોટો છે કારણ કે ઉત્સેચકની અયોગ્ય પ્રક્રિયાથી DNA નો નાશ થઈ શકે છે, પરંતુ VNTR ની સંખ્યામાં ચોક્કસ અડધો ઘટાડો થવો અસંભવિત છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા કાનૂની કેસમાં થાય છે જ્યારે અપરાધીની ઓળખ કરવાની હોય, પરંતુ પુરાવા તરીકે માત્ર વાળના કેટલાક તંતુઓ (Hair Follicles) મળ્યા હોય?", "opts": ["માત્ર જ્યારે વાળના તંતુઓમાં કોષકેન્દ્ર હોય ત્યારે જ", "વાળના તંતુઓમાં કોષકેન્દ્ર ન હોય તો પણ તેનો ઉપયોગ થઈ શકે", "વાળના તંતુઓમાંથી ક્યારેય DNA મેળવી શકાતું નથી", "વાળના તંતુઓમાંથી મેળવેલી DNA વ્યક્તિગત ઓળખ માટે પૂરતી નથી"], "ans": 0, "exp": "DNA ફિંગરપ્રિન્ટિંગ માટે વાળના તંતુઓમાં કોષકેન્દ્ર હોવું જરૂરી છે, કારણ કે કોષકેન્દ્રમાં જ DNA હોય છે. જો વાળના તંતુઓમાં કોષકેન્દ્ર ન હોય, તો તેનાથી DNA મેળવી શકાતું નથી. બાકીના વિકલ્પો (B, C, D) ખોટા છે કારણ કે વાળના તંતુઓમાંથી DNA મેળવી શકાય છે, પરંતુ ફક્ત કોષકેન્દ્રની હાજરીમાં જ.", "ref": "Std 12 - Chapter 6: જૈવિક તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કયા રોગની ઓળખ કરવા માટે થતો નથી, પરંતુ તે રોગના જોખમી જનીનની હાજરી ચકાસવા માટે થાય છે?", "opts": ["કર્કરોગ (Cancer)", "મધુમેહ (Diabetes)", "હીમોફિલિયા (Haemophilia)", "એડ્સ (AIDS)"], "ans": 2, "exp": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ હીમોફિલિયા જેવા અનુવંશિક રોગોના જોખમી જનીનની હાજરી ચકાસવા માટે થાય છે. કર્કરોગ, મધુમેહ, અને એડ્સ એવા રોગો છે જ્યાં DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ રોગની ઓળખ કરવા માટે થતો નથી, પરંતુ હીમોફિલિયા એ અનુવંશિક રોગ છે જ્યાં જનીનિક તપાસ માટે DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ થાય છે.", "ref": "Std 12 - Chapter 6: જૈવિક તકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ પશુપાલન ક્ષેત્રે કરતી વખતે, કયા હેતુ માટે 'મિક્રોસેટેલાઇટ માર્કર'નો ઉપયોગ થાય છે, જ્યારે વંશવેલાની શુદ્ધતા ચકાસવાની હોય?", "opts": ["પશુઓની ઉંમર નક્કી કરવા", "જનીનિક વિવિધતાનું મૂલ્યાંકન કરવા", "પશુઓના રંગની ઓળખ કરવા", "પશુઓના વજનનું વિશ્લેષણ કરવા"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગમાં 'મિક્રોસેટેલાઇટ માર્કર'નો ઉપયોગ વંશવેલાની શુદ્ધતા ચકાસવા અને જનીનિક વિવિધતાનું મૂલ્યાંકન કરવા માટે થાય છે. ઉંમર, રંગ અને વજન જેવા લક્ષણો જનીનિક માર્કર દ્વારા નક્કી થતાં નથી, પરંતુ તે ફિનોટાઇપિક લક્ષણો છે. આથી, B) જનીનિક વિવિધતાનું મૂલ્યાંકન કરવા એ સરળ જવાબ છે.", "ref": "Std 12 - અધ્યાય 6: જૈવ પ્રૌદ્યોગિકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગનો ઉપયોગ કૃષિ ક્ષેત્રે કરતી વખતે, કયા હેતુ માટે 'ડીએનએ બારકોડિંગ' પદ્ધતિનો ઉપયોગ થાય છે, જ્યારે પાકની જાતની ઓળખ કરવાની હોય?", "opts": ["પાકની ઉત્પાદકતા વધારવા", "પાકની જાતની જનીનિક ઓળખ કરવા", "પાકની રોગપ્રતિકારક શક્તિ વધારવા", "પાકની વૃદ્ધિના દરને મોટા અંદાજે નક્કી કરવા"], "ans": 1, "exp": "DNA બારકોડિંગ પદ્ધતિનો ઉપયોગ પાકની જાતની જનીનિક ઓળખ કરવા માટે થાય છે. ઉત્પાદકતા, રોગપ્રતિકારક શક્તિ અને વૃદ્ધિના દર જેવા લક્ષણો જનીનિક ઓળખ દ્વારા નક્કી થતાં નથી, પરંતુ તે ફિનોટાઇપિક લક્ષણો છે. આથી, B) પાકની જાતની જનીનિક ઓળખ કરવા એ સરળ જવાબ છે.", "ref": "Std 12 - અધ્યાય 6: જૈવ પ્રૌદ્યોગિકી અને તેના ઉપયોગો", "ch": ""}, {"q": "એક પુરાતત્ત્વવિદ્ ટીમને પ્રાચીન સંસ્કૃતિના અવશેષોમાંથી મળેલા માનવ હાડકાના નમૂનાનું DNA ફિંગરપ્રિન્ટિંગ દ્વારા વિશ્લેષણ કરવામાં આવ્યું. આ વિશ્લેષણના પરિણામોના આધારે નીચેનામાંથી કયું તારણ કાઢવું શક્ય નથી?", "opts": ["આ હાડકાં કયા વંશીય સમૂહના વ્યક્તિના છે તે નક્કી કરી શકાય", "આ હાડકાંમાં રહેલા જનીનોના આધારે તે વ્યક્તિને કયા આનુવંશિક રોગ હતા તે જાણી શકાય", "આ હાડકાંના DNA ની તુલના અન્ય પ્રાચીન નમૂનાઓ સાથે કરીને સંસ્કૃતિના સ્થળાંતરનો ઇતિહાસ જાણી શકાય", "આ હાડકાંના DNA ના આધારે તે વ્યક્તિની ચોક્કસ ઉંમર નક્કી કરી શકાય"], "ans": 3, "exp": "DNA ફિંગરપ્રિન્ટિંગ દ્વારા વંશીય સમૂહ, આનુવંશિક રોગો અને સ્થળાંતરનો ઇતિહાસ જાણી શકાય છે કારણ કે તે વ્યક્તિગત અને વંશીય DNA ના વિશિષ્ટ નમૂનાઓ પર આધારિત છે. જોકે, DNA ફિંગરપ્રિન્ટિંગ વ્યક્તિની ચોક્કસ ઉંમર નક્કી કરવા માટે ઉપયોગી નથી, કારણ કે ઉંમર નક્કી કરવા માટે શારીરિક અને રાસાયણિક પૃથ્થકરણ જરૂરી છે, જે DNA ના આધારે શક્ય નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
