@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Struggle for Existence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Struggle for Existence</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Struggle for Existence</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ડાર્વિનના 'સર્વાઇવલ ઓફ ધ ફિટેસ્ટ' સિદ્ધાંત અનુસાર, જ્યારે બે જાતિઓ એક જ પર્યાવરણીય નિશમાં સ્પર્ધા કરે છે, ત્યારે શું થાય છે?", "opts": ["બંને જાતિઓ સહ-અસ્તિત્વમાં રહે છે અને સંકર જાતિ ઉત્પન્ન કરે છે", "વધુ શક્તિશાળી જાતિ ઓછી શક્તિશાળી જાતિને નાશ કરે છે", "બંને જાતિઓ વિકાસ પામે છે અને નવી પર્યાવરણીય નિશો શોધે છે", "ઓછી શક્તિશાળી જાતિ નિશમાં અલગ પડે છે અથવા લુપ્ત થાય છે"], "ans": 3, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, જ્યારે બે જાતિઓ એક જ નિશ માટે સ્પર્ધા કરે છે, ત્યારે ઓછી અનુકૂળિત જાતિ નિશ છોડી દે છે અથવા લુપ્ત થાય છે. આને 'કોમ્પિટિટિવ એક્સક્લુઝન' કહેવાય છે. વિકલ્પ A અને C સહ-અસ્તિત્વ અથવા સંકરણ વિશે વાત કરે છે, જે આ સિદ્ધાંતનો ભાગ નથી. વિકલ્પ B અતિશય સરળીકરણ છે, કારણ કે 'શક્તિ' એ અહીં મહત્વનો મુદ્દો નથી, પરંતુ અનુકૂળન છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કોઈ એક જંગલમાં બે પ્રકારના પક્ષીઓ એક જ પ્રકારના ખોરાક (બીજ) પર નિર્ભર છે. લાંબા ગાળામાં શું અપેક્ષિત છે?", "opts": ["બંને પક્ષીઓની વસ્તી સ્થિર રહેશે", "એક પક્ષીની ચોંચ વધુ મજબૂત બનશે જ્યારે બીજીની પાતળી બનશે", "બંને પક્ષીઓ એકબીજા સાથે સંકરણ કરશે", "એક પક્ષી નવી ખાદ્ય આદતો વિકસાવશે અથવા લુપ્ત થશે"], "ans": 3, "exp": "સ્પર્ધા દરમિયાન, જો બે જાતિઓ એક જ સ્રોત પર આધારિત હોય, તો એક જાતિ નવી આદતો વિકસાવશે અથવા લુપ્ત થશે. વિકલ્પ A અસંભવ છે કારણ કે સંસાધન મર્યાદિત છે. વિકલ્પ B ચોંચના આકારમાં ફેરફાર થઈ શકે, પરંતુ તે સ્પર્ધાનું સીધું પરિણામ નથી. વિકલ્પ C સંકરણ વિશે છે, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "મેલ્થસિયન સિદ્ધાંત અનુસાર, વસ્તી વૃદ્ધિ અને ખોરાક પુરવઠા વચ્ચેનો સંબંધ કયો છે?", "opts": ["વસ્તી ગુણોત્તરમાં વૃદ્ધિ પામે છે જ્યારે ખોરાક પુરવઠો અંકગણિતમાં વૃદ્ધિ પામે છે", "વસ્તી અને ખોરાક પુરવઠો બંને ગુણોત્તરમાં વૃદ્ધિ પામે છે", "વસ્તી અંકગણિતમાં વૃદ્ધિ પામે છે જ્યારે ખોરાક પુરવઠો ગુણોત્તરમાં વૃદ્ધિ પામે છે", "વસ્તી અને ખોરાક પુરવઠો સમાન ગતિએ વૃદ્ધિ પામે છે"], "ans": 0, "exp": "મેલ્થસિયન સિદ્ધાંત અનુસાર, વસ્તી ગુણોત્તર (જ્યોમેટ્રિક) હિસાબે વૃદ્ધિ પામે છે જ્યારે ખોરાક પુરવઠો અંકગણિત (અરિથમેટિક) હિસાબે વૃદ્ધિ પામે છે. આ કારણે સંસાધનની કમી ઉત્પન્ન થાય છે, જે સ્પર્ધાનું કારણ બને છે. વિકલ્પ B, C, અને D આ સિદ્ધાંત સાથે સુસંગત નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે એક જ જાતિના સભ્યો વચ્ચે ખોરાક માટે સ્પર્ધા થાય છે, ત્યારે તેને શું કહેવાય છે?", "opts": ["અંતર-જાતિય સ્પર્ધા (Interspecific competition)", "અંતઃ-જાતિય સ્પર્ધા (Intraspecific competition)", "પરજીવીતા (Parasitism)", "સહજીવન (Symbiosis)"], "ans": 1, "exp": "એક જ જાતિના સભ્યો વચ્ચેની સ્પર્ધાને 'અંતઃ-જાતિય સ્પર્ધા' કહેવાય છે. વિકલ્પ A બે વિવિધ જાતિઓ વચ્ચેની સ્પર્ધા માટે છે. વિકલ્પ C અને D સહજીવન સંબંધો છે, જે સ્પર્ધા નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કોઈ એક પર્યાવરણમાં, જો એક જાતિની વસ્તી ખૂબ જ વધી જાય, તો શું થશે?", "opts": ["સંસાધનોની અછત ઉત્પન્ન થશે, જે સ્પર્ધાનું કારણ બનશે", "જાતિની વસ્તી સ્થિર રહેશે", "જાતિ નવી પર્યાવરણીય પરિસ્થિતિઓમાં સ્થળાંતર કરશે", "જાતિની જનીનિક વૈવિધ્યતા ઘટશે"], "ans": 0, "exp": "વસ્તી વૃદ્ધિ સાથે સંસાધનોની અછત ઉત્પન્ન થાય છે, જે સ્પર્ધાનું કારણ બને છે. વિકલ્પ B અસંભવ છે કારણ કે વસ્તી વૃદ્ધિ સંસાધન પર દબાણ લાવે છે. વિકલ્પ C અને D સીધા પરિણામો નથી, પરંતુ લાંબા ગાળાનું પરિણામ હોઈ શકે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે બે વિવિધ જાતિઓ એક જ સંસાધન (જેવા કે ખોરાક) માટે સ્પર્ધા કરે છે, ત્યારે કયા પરિણામની શક્યતા સૌથી વધુ હોય છે?", "opts": ["બંને જાતિઓ સહ-અસ્તિત્વમાં રહે છે અને સંસાધનનો સમાન હિસ્સો મેળવે છે.", "એક જાતિ સંપૂર્ણપણે નાશ પામે છે જ્યારે બીજી જાતિ ટકી રહે છે.", "બંને જાતિઓમાં ઉત્ક્રાંતિ દ્વારા નવી લાક્ષણિકતાઓ વિકસે છે જેથી તેઓ વિવિધ સંસાધનોનો ઉપયોગ કરવા લાગે છે.", "બંને જાતિઓની વસ્તી સતત વધતી રહે છે અને સંસાધનની કમી સર્જાય છે."], "ans": 2, "exp": "સ્પર્ધા દરમિયાન, જો બે જાતિઓ એક જ સંસાધન પર આધારિત હોય, તો ઉત્ક્રાંતિ દ્વારા તેઓ અલગ-અલગ સંસાધનોનો ઉપયોગ કરવા માટે અનુકૂલન પામે છે (નિચ સ્પેશિયલાઇઝેશન). આથી, બંને જાતિઓ ટકી રહે છે અને સહ-અસ્તિત્વમાં રહે છે. વિકલ્પ A અશક્ય છે કારણ કે સંસાધન મર્યાદિત હોય છે. વિકલ્પ B અતિશયોક્તિ છે કારણ કે સંપૂર્ણ નાશ પામવું હમેશા થતું નથી. વિકલ્પ D અશક્ય છે કારણ કે સંસાધનની કમી વસ્તી વૃદ્ધિને મર્યાદિત કરે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ડાર્વિનના 'સ્ટ્રગલ ફોર એક્ઝિસ્ટન્સ' સિદ્ધાંત અનુસાર, કયા પરિબળોને કારણે જીવસૃષ્ટિમાં સ્પર્ધા સર્જાય છે?", "opts": ["ખોરાક, આશ્રય અને જગ્યા માટેની મર્યાદિત ઉપલબ્ધતા", "હવામાનમાં થતી અચાનક ફેરફારો", "પ્રજનન દરમાં થતો અચાનક ઘટાડો", "શિકારીઓની અભાવે શિકારની વસ્તીમાં થતો અતિરેક"], "ans": 0, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, સ્પર્ધા મુખ્યત્વે સંસાધનો (ખોરાક, આશ્રય, જગ્યા)ની મર્યાદિત ઉપલબ્ધતાને કારણે સર્જાય છે. વિકલ્પ B, C, અને D સ્પર્ધાને પ્રભાવિત કરે છે, પરંતુ મુખ્ય કારણ સંસાધનની કમી છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "એક જ જાતિના સભ્યો વચ્ચે થતી સ્પર્ધાને કયા નામે ઓળખવામાં આવે છે?", "opts": ["અંતર-જાતીય સ્પર્ધા (Interspecific competition)", "અંતર-વ્યક્તિગત સ્પર્ધા (Intraspecific competition)", "પરજીવી સ્પર્ધા (Parasitic competition)", "સહ-ઉત્ક્રાંતિ સ્પર્ધા (Co-evolutionary competition)"], "ans": 1, "exp": "એક જ જાતિના સભ્યો વચ્ચે થતી સ્પર્ધાને 'અંતર-વ્યક્તિગત સ્પર્ધા' કહેવાય છે. વિકલ્પ A બે વિવિધ જાતિઓ વચ્ચેની સ્પર્ધા માટે છે. વિકલ્પ C પરજીવી અને યજમાન વચ્ચેના સંબંધ માટે છે. વિકલ્પ D બે જાતિઓ વચ્ચેની પરસ્પર ઉત્ક્રાંતિ માટે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે એક જાતિની વસ્તી ખૂબ જ વધી જાય છે, ત્યારે કયા પરિણામની શક્યતા સૌથી વધુ હોય છે?", "opts": ["વસ્તી સતત વધતી રહે છે અને પર્યાવરણીય સંતુલન બગડે છે.", "ખોરાક અને સંસાધનોની કમીને કારણે વસ્તી ઘટવા લાગે છે.", "જાતિ નવી પર્યાવરણીય પરિસ્થિતિઓમાં સ્થળાંતર કરે છે.", "જાતિના સભ્યો વચ્ચે સહકાર વધે છે અને સંસાધનોનો સમૂહિક ઉપયોગ થાય છે."], "ans": 1, "exp": "વસ્તી વૃદ્ધિ સાથે સંસાધનોની કમી સર્જાય છે, જેના કારણે વસ્તી ઘટવા લાગે છે (મેલ્થસિયન સિદ્ધાંત). વિકલ્પ A અશક્ય છે કારણ કે પર્યાવરણીય સંતુલન બગડવાથી વસ્તી ઘટે છે. વિકલ્પ C અને D અપૂરતા પુરાવાઓ સાથે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કયા સિદ્ધાંત અનુસાર, જીવસૃષ્ટિમાં સ્પર્ધા અને સહ-અસ્તિત્વ વચ્ચે સંતુલન જાળવવામાં આવે છે?", "opts": ["લેમાર્કનો ઉત્ક્રાંતિ સિદ્ધાંત", "ડાર્વિનનો પ્રાકૃતિક પસંદગી સિદ્ધાંત", "ગૌસનો સ્પર્ધા બહિષ્કરણ સિદ્ધાંત (Competitive Exclusion Principle)", "મેન્ડલનો અનુવંશિકતા સિદ્ધાંત"], "ans": 2, "exp": "ગૌસનો સ્પર્ધા બહિષ્કરણ સિદ્ધાંત જણાવે છે કે બે જાતિઓ એક જ સંસાધન માટે સ્પર્ધા કરતી નથી, પરંતુ તેઓ અલગ-અલગ નિચ (ecological niches) વિકસાવે છે. વિકલ્પ A અને B ઉત્ક્રાંતિના સિદ્ધાંતો છે, પરંતુ સ્પર્ધા અને સહ-અસ્તિત્વના સંતુલન માટે નહીં. વિકલ્પ D અનુવંશિકતાના સિદ્ધાંત સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ડાર્વિનના 'સ્ટ્રગલ ફોર એક્ઝિસ્ટન્સ' સિદ્ધાંત અનુસાર, જ્યારે એક જ જાતિના સભ્યો વચ્ચે સ્પર્ધા થાય છે, ત્યારે નીચેના પૈકી કયું પરિણામ સૌથી ઓછું સંભવિત છે?", "opts": ["જાતિની વસ્તીમાં ઘટાડો થાય છે", "સ્પર્ધામાં હારેલા સભ્યોનું અસ્તિત્વ ટકી શકે છે", "સ્પર્ધામાં જીતેલા સભ્યોને પ્રજનનનું વધુ અવસર મળે છે", "જાતિની જનેટિક વૈવિધ્યતા ઘટે છે"], "ans": 1, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, સ્પર્ધામાં હારેલા સભ્યોનું અસ્તિત્વ ટકી શકવું ઓછું સંભવિત છે, કારણ કે સંસાધનોની અછતમાં મજબૂત સભ્યો જ ટકી શકે છે. વસ્તી ઘટાડો (A), પ્રજનનના અવસર (C), અને જનેટિક વૈવિધ્યતા ઘટવી (D) એ સ્પર્ધાનાં સીધાં પરિણામો છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જ પર્યાવરણમાં રહેતી બે જાતિઓ વચ્ચે ખોરાક માટે સ્પર્ધા થાય છે. જો એક જાતિ ખોરાકના સ્રોતને પૂરતી માત્રામાં ઉપયોગી બનાવી શકે છે, તો બીજી જાતિને કયું પરિણામ ભોગવવું પડે છે?", "opts": ["તે જાતિનું સ્થાનાંતર થાય છે", "તે જાતિનું લુપ્ત થવું શરૂ થાય છે", "તે જાતિ અન્ય સ્રોતો શોધી કાઢે છે", "તે જાતિની વસ્તીમાં અચાનક વૃદ્ધિ થાય છે"], "ans": 1, "exp": "જો એક જાતિ ખોરાકના સ્રોતને પૂરતી માત્રામાં ઉપયોગી બનાવી શકે છે, તો બીજી જાતિને ખોરાકની અછતને કારણે લુપ્ત થવું શરૂ થાય છે. સ્થાનાંતર (A) અને અન્ય સ્રોતો શોધવા (C) એ શક્ય પરિણામો છે, પરંતુ લુપ્ત થવું એ સૌથી ગંભીર પરિણામ છે. વસ્તી વૃદ્ધિ (D) એ અસંભવિત છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના 'સ્ટ્રગલ ફોર એક્ઝિસ્ટન્સ' સિદ્ધાંત અનુસાર, નીચેના પૈકી કયું પરિબળ સ્પર્ધાને પ્રેરિત કરતું નથી?", "opts": ["ખોરાકની અછત", "પ્રજનન માટેના સાથીની અછત", "હવામાનમાં અચાનક પરિવર્તન", "પ્રકાશસંશ્લેષણ માટે સૂર્યપ્રકાશની અછત"], "ans": 2, "exp": "હવામાનમાં અચાનક પરિવર્તન (C) એ સ્પર્ધાને પ્રેરિત કરતું નથી, પરંતુ તે જાતિના અસ્તિત્વને અસર કરે છે. ખોરાક (A), પ્રજનન માટેના સાથી (B), અને સૂર્યપ્રકાશ (D) એ સ્પર્ધાનાં મુખ્ય કારણો છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના સિદ્ધાંત અનુસાર, જ્યારે એક જ જાતિની વસ્તી ખૂબ જ વધી જાય છે, ત્યારે નીચેના પૈકી કયું પરિણામ સૌથી ઓછું સંભવિત છે?", "opts": ["ખોરાકની અછત સર્જાય છે", "જાતિની જનેટિક વૈવિધ્યતા વધે છે", "સ્પર્ધા તીવ્ર બને છે", "રોગોનો ફેલાવો વધે છે"], "ans": 1, "exp": "જાતિની વસ્તી વધવાને કારણે ખોરાકની અછત (A), સ્પર્ધા તીવ્ર બનવી (C), અને રોગોનો ફેલાવો વધવો (D) એ સૌથી સંભવિત પરિણામો છે. જનેટિક વૈવિધ્યતા વધવી (B) એ ઓછું સંભવિત છે, કારણ કે સ્પર્ધામાં મજબૂત સભ્યો જ ટકી શકે છે, જે વૈવિધ્યતાને ઘટાડે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જંગલમાં ત્રણ પ્રકારના વૃક્ષો (A, B અને C) એકસાથે ઉગે છે. વૃક્ષ A અને B બંને સૂર્યપ્રકાશ માટે સ્પર્ધા કરે છે, જ્યારે વૃક્ષ C નાઇટ્રોજન-ફિક્સિંગ બેક્ટેરિયા સાથે સહજીવન ધરાવે છે અને તેને સૂર્યપ્રકાશની ઓછી જરૂરિયાત રહે છે. આ પરિસ્થિતિમાં, ડાર્વિનના 'સંઘર્ષ માટે અસ્તિત્વ' (Struggle for Existence) સિદ્ધાંત અનુસાર, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["વૃક્ષ A અને B વચ્ચેની સ્પર્ધા 'આંતરજાતીય સંઘર્ષ' (Interspecific Struggle) નું ઉદાહરણ છે.", "વૃક્ષ C ની હાજરી વૃક્ષ A અને B વચ્ચેની સ્પર્ધાને ઘટાડી શકે છે કારણ કે તે સૂર્યપ્રકાશનો ઓછો ઉપયોગ કરે છે.", "જો વૃક્ષ A ની વૃદ્ધિ દર વધુ હોય, તો તે વૃક્ષ B ને સંપૂર્ણપણે નાબૂદ કરી શકે છે કારણ કે તે વધુ સૂર્યપ્રકાશ મેળવશે.", "વૃક્ષ C નું સહજીવન સંબંધ તેને 'સંઘર્ષ માટે અસ્તિત્વ' માં લાભ આપે છે, પરંતુ તે સ્પર્ધાને સંપૂર્ણપણે દૂર કરતું નથી."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે કારણ કે ડાર્વિનના સિદ્ધાંત અનુસાર, એક જાતિ બીજી જાતિને સંપૂર્ણપણે નાબૂદ કરી શકતી નથી. સ્પર્ધામાં સંતુલન જળવાઈ રહે છે અને બંને જાતિઓ કોઈક રીતે સહ-અસ્તિત્વ જાળવે છે. વિકલ્પ A સાચો છે કારણ કે બે અલગ-અલગ જાતિઓ વચ્ચેની સ્પર્ધા આંતરજાતીય સંઘર્ષ છે. વિકલ્પ B સાચો છે કારણ કે વૃક્ષ C સૂર્યપ્રકાશનો ઓછો ઉપયોગ કરે છે, જેનાથી A અને B વચ્ચેની સ્પર્ધા ઘટી શકે છે. વિકલ્પ D પણ સાચો છે કારણ કે સહજીવન સંબંધ વૃક્ષ C ને લાભ આપે છે, પરંતુ તે પર્યાવરણમાં અન્ય સ્પર્ધાત્મક પરિબળો હજુ પણ અસ્તિત્વ ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, જ્યારે એક જ જાતિના સભ્યો વચ્ચે ખોરાક માટે સ્પર્ધા થાય છે, ત્યારે નીચેના પૈકી કયું પરિણામ સૌથી ઓછું સંભવિત છે?", "opts": ["જાતિના સભ્યો વચ્ચે પ્રજનન દર ઘટે છે", "જાતિના સભ્યો વચ્ચે શારીરિક લક્ષણોમાં વૈવિધ્ય વધે છે", "જાતિના સભ્યો વચ્ચે સહકારી વર્તન વિકસે છે", "જાતિના સભ્યો વચ્ચે અતિ-પ્રજનન થાય છે"], "ans": 3, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, ખોરાક માટેની સ્પર્ધા વખતે જાતિના સભ્યો વચ્ચે અતિ-પ્રજનન થવું ઓછું સંભવિત છે, કારણ કે સંસાધનની અછતને કારણે પ્રજનન દર ઘટે છે. વૈવિધ્ય વધવું (B) અને સહકારી વર્તન (C) સ્પર્ધાની પરિસ્થિતિમાં શક્ય છે, પરંતુ અતિ-પ્રજનન (D) સંસાધનની અછતને કારણે અશક્ય બને છે. પ્રજનન દર ઘટવો (A) સ્પર્ધાનું સીધું પરિણામ છે, પરંતુ પ્રશ્ન ઓછું સંભવિત પરિણામ પૂછે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, નીચેના પૈકી કયું પરિબળ સ્પર્ધાને પ્રેરિત કરતું નથી?", "opts": ["ખોરાકની અછત", "આવાસની અછત", "પ્રકાશની અછત", "પ્રજનનના સ્થળની અછત"], "ans": 2, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, ખોરાક, આવાસ અને પ્રજનનના સ્થળની અછત સ્પર્ધાને પ્રેરિત કરે છે. પ્રકાશની અછત (C) સ્પર્ધાને પ્રેરિત કરતું નથી, કારણ કે પ્રકાશ એ એક અમર્યાદિત સંસાધન છે (સૂર્યપ્રકાશ સતત ઉપલબ્ધ હોય છે). ખોરાક (A), આવાસ (B) અને પ્રજનનના સ્થળ (D) એ મર્યાદિત સંસાધનો છે, જે સ્પર્ધાને પ્રેરિત કરે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જંગલમાં, બે પ્રકારના સસ્તન પ્રાણીઓ (X અને Y) એક જ પ્રકારના ફળ પર આહાર લે છે. જો X પ્રાણી ઓછા પ્રમાણમાં ફળ ખાય છે અને Y પ્રાણી વધુ પ્રમાણમાં ખાય છે, તો ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, લાંબા ગાળામાં કયું પરિણામ સૌથી યોગ્ય રીતે લાગુ પડે છે?", "opts": ["X પ્રાણીની વસ્તી વધશે કારણ કે તે ઓછું ખાય છે અને સંસાધન બચાવે છે.", "Y પ્રાણીની વસ્તી ઘટશે કારણ કે તે વધુ ખાય છે અને સંસાધનનો દુરુપયોગ કરે છે.", "X પ્રાણીની વસ્તી ઘટશે કારણ કે તે Y પ્રાણી સાથે સ્પર્ધામાં પાછળ રહે છે.", "બંને પ્રાણીઓની વસ્તી સ્થિર રહેશે કારણ કે તેઓ એકબીજા પર આધાર રાખે છે."], "ans": 2, "exp": "ડાર્વિનના સિદ્ધાંત અનુસાર, સ્પર્ધામાં પાછળ રહેનાર જાતિ (X)ની વસ્તી ઘટશે કારણ કે Y પ્રાણી વધુ સંસાધનનો ઉપયોગ કરે છે અને સ્પર્ધામાં આગળ રહે છે. A અને B વિકલ્પો તર્કસંગત નથી કારણ કે સંસાધનનો ઉપયોગ અને વસ્તી વૃદ્ધિ વચ્ચેનો સંબંધ સીધો નથી. D વિકલ્પ પણ યોગ્ય નથી કારણ કે સ્પર્ધા દરમિયાન વસ્તી સ્થિર રહેતી નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' (Struggle for Existence) સિદ્ધાંત અનુસાર, નીચેના પૈકી કયું ઉદાહરણ આ સંઘર્ષનો અપવાદ ગણી શકાય?", "opts": ["એક જ પ્રકારના વૃક્ષોની વચ્ચે સૂર્યપ્રકાશ માટેની સ્પર્ધા", "એક જ પ્રકારના પક્ષીઓની વચ્ચે માળો બનાવવા માટે યોગ્ય સ્થળની સ્પર્ધા", "એક જ પ્રકારના છોડની વચ્ચે જમીનમાં પાણી અને ખનીજ ક્ષારો માટેની સ્પર્ધા", "એક જ પ્રકારના ફૂગ અને લીલ વચ્ચે સહજીવન (Symbiosis) દ્વારા લાઈકેનનું નિર્માણ"], "ans": 3, "exp": "ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, એક જ જાતિ અથવા વિવિધ જાતિઓ વચ્ચે સંસાધનો માટે સ્પર્ધા થાય છે. પરંતુ વિકલ્પ D માં ફૂગ અને લીલ વચ્ચે સહજીવન (Symbiosis) થાય છે, જે સંઘર્ષને બદલે સહકાર દર્શાવે છે. આથી આ ઉદાહરણ સંઘર્ષનો અપવાદ ગણી શકાય. બાકીના વિકલ્પોમાં સ્પર્ધા દર્શાવવામાં આવી છે, જે સંઘર્ષના સિદ્ધાંત સાથે સુસંગત છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જંગલમાં ત્રણ પ્રકારના વૃક્ષો (P, Q અને R) એકસાથે ઉગે છે. વૃક્ષ P અને Q વચ્ચે સૂર્યપ્રકાશ માટે સ્પર્ધા થાય છે, જ્યારે વૃક્ષ R એવું છે જે છાયામાં પણ સારી રીતે વૃદ્ધિ કરી શકે છે. આ પરિસ્થિતિમાં ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["વૃક્ષ R ની વસ્તી સમય જતાં ઘટી જશે કારણ કે તે સ્પર્ધામાં પાછળ રહી જશે", "વૃક્ષ P અને Q વચ્ચેની સ્પર્ધાને કારણે બંનેની વસ્તી ઘટશે, પરંતુ R ની વસ્તી વધશે", "વૃક્ષ R ની હાજરીને કારણે P અને Q વચ્ચેની સ્પર્ધા વધુ તીવ્ર બનશે", "વૃક્ષ P, Q અને R વચ્ચે કોઈ સ્પર્ધા નહીં થાય કારણ કે તેઓ જુદી જુદી પરિસ્થિતિમાં વૃદ્ધિ કરે છે"], "ans": 1, "exp": "ડાર્વિનના 'અસ્તિત્વ માટેના સંઘર્ષ' સિદ્ધાંત અનુસાર, સ્પર્ધામાં જે જાતિ વધુ અનુકૂલિત હોય તે ટકી રહે છે. વૃક્ષ P અને Q વચ્ચે સૂર્યપ્રકાશ માટે સ્પર્ધા થતી હોવાથી તેમની વસ્તી પર અસર થશે, જ્યારે વૃક્ષ R છાયામાં વૃદ્ધિ કરી શકતું હોવાથી તેની વસ્તી વધશે. આથી વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે R ની વસ્તી ઘટશે નહીં. વિકલ્પ C ખોટો છે કારણ કે R ની હાજરી P અને Q વચ્ચેની સ્પર્ધાને અસર કરશે નહીં. વિકલ્પ D ખોટો છે કારણ કે P અને Q વચ્ચે સ્પર્ધા થાય છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
