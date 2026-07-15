@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structural Gene</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Structural Gene</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Structural Gene</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "લેક ઓપેરોન મોડેલમાં 'z', 'y' અને 'a' જનીનોને શું કહેવાય છે?", "opts": ["નિયામક જનીનો", "બંધારણીય જનીનો", "ઓપરેટર જનીનો", "પ્રમોટર જનીનો"], "ans": 1, "exp": "લેક ઓપેરોન મોડેલમાં 'z', 'y' અને 'a' જનીનો β-ગેલેક્ટોસાઇડેઝ, પરમિએઝ અને ટ્રાન્સએસિટાઇલેઝ ઉત્સેચકોનું સંશ્લેષણ કરે છે, જે ચોક્કસ પ્રોટીનનું નિર્માણ કરે છે. આથી તેમને બંધારણીય જનીનો કહે છે. નિયામક જનીન લેક-આઇ જનીન છે, ઓપરેટર અને પ્રમોટર જનીનો નિયંત્રણ માટેના ક્ષેત્રો છે, પ્રોટીનનું નિર્માણ કરતા નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન બંધારણીય જનીન માટે ખોટું છે?", "opts": ["તે પ્રોટીન અથવા ઉત્સેચકનું સંશ્લેષણ કરે છે", "તેનું નિયંત્રણ ઓપરેટર અને પ્રમોટર દ્વારા થાય છે", "તે હંમેશા સક્રિય રહે છે અને સતત પ્રોટીનનું ઉત્પાદન કરે છે", "તેના દ્વારા ઉત્પન્ન થતા ઉત્સેચક ચયાપચયિક પ્રક્રિયાઓમાં ભાગ લે છે"], "ans": 2, "exp": "બંધારણીય જનીનો હંમેશા સક્રિય રહેતા નથી. તેમનું નિયંત્રણ ઓપરેટર અને પ્રમોટર ક્ષેત્રો દ્વારા થાય છે, જે નિયામક જનીનના ઉત્પાદન (રિપ્રેસર) સાથે જોડાઈને તેમની પ્રવૃત્તિને અવરોધે છે. બાકીના વિકલ્પો બંધારણીય જનીનની લાક્ષણિકતાઓ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ લેક ઓપેરોન પર પ્રયોગ કરતાં જોયું કે લેક્ટોઝની ગેરહાજરીમાં પણ 'z' જનીન દ્વારા β-ગેલેક્ટોસાઇડેઝ ઉત્પન્ન થાય છે. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["ઓપરેટર ક્ષેત્રમાં મ્યુટેશન થવાથી રિપ્રેસર જોડાઈ શકતું નથી", "પ્રમોટર ક્ષેત્રમાં મ્યુટેશન થવાથી RNA પોલિમરેઝ જોડાઈ શકતું નથી", "નિયામક જનીનમાં મ્યુટેશન થવાથી રિપ્રેસર પ્રોટીન બનતું નથી", "'z' જનીનમાં મ્યુટેશન થવાથી તેનું નિયંત્રણ બંધ થયું છે"], "ans": 0, "exp": "લેક્ટોઝની ગેરહાજરીમાં પણ β-ગેલેક્ટોસાઇડેઝ ઉત્પન્ન થવાનું કારણ ઓપરેટર ક્ષેત્રમાં મ્યુટેશન છે, જેના કારણે રિપ્રેસર પ્રોટીન ઓપરેટર સાથે જોડાઈ શકતું નથી અને બંધારણીય જનીનો સતત સક્રિય રહે છે. પ્રમોટર મ્યુટેશનથી RNA પોલિમરેઝ જોડાઈ શકતું ન હોવાથી જનીન અક્રિય બને છે. નિયામક જનીન મ્યુટેશનથી રિપ્રેસર ન બનતું હોવાથી પણ જનીન સક્રિય રહે છે, પરંતુ ઓપરેટર મ્યુટેશન વધુ સીધું કારણ છે. 'z' જનીન મ્યુટેશનથી ઉત્સેચક બનતું નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "ટ્રિપ્ટોફેન ઓપેરોનમાં બંધારણીય જનીનોનું કાર્ય શું છે?", "opts": ["ટ્રિપ્ટોફેનના સંશ્લેષણ માટે જરૂરી ઉત્સેચકોનું નિર્માણ કરવું", "ટ્રિપ્ટોફેનના વિઘટન માટે જરૂરી ઉત્સેચકોનું નિર્માણ કરવું", "રિપ્રેસર પ્રોટીનનું નિર્માણ કરવું", "RNA પોલિમરેઝને જોડાવા માટેનું સ્થાન પૂરું પાડવું"], "ans": 0, "exp": "ટ્રિપ્ટોફેન ઓપેરોનમાં બંધારણીય જનીનો ટ્રિપ્ટોફેન એમિનો એસિડના સંશ્લેષણ માટે જરૂરી ઉત્સેચકોનું નિર્માણ કરે છે. ટ્રિપ્ટોફેનના વિઘટન માટેના ઉત્સેચકો લેક ઓપેરોનમાં જોવા મળે છે. રિપ્રેસર પ્રોટીન નિયામક જનીન દ્વારા બને છે, અને RNA પોલિમરેઝ જોડાવા માટેનું સ્થાન પ્રમોટર ક્ષેત્ર પૂરું પાડે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ બંધારણીય જનીનનું નથી?", "opts": ["લેક ઓપેરોનમાં 'z' જનીન", "ટ્રિપ્ટોફેન ઓપેરોનમાં 'E' જનીન", "લેક ઓપેરોનમાં 'i' જનીન", "હિસ્ટિડિન ઓપેરોનમાં બંધારણીય જનીનો"], "ans": 2, "exp": "લેક ઓપેરોનમાં 'i' જનીન નિયામક જનીન છે, જે રિપ્રેસર પ્રોટીનનું નિર્માણ કરે છે, જ્યારે બંધારણીય જનીનો પ્રોટીન અથવા ઉત્સેચકનું નિર્માણ કરે છે. 'z' જનીન (β-ગેલેક્ટોસાઇડેઝ), ટ્રિપ્ટોફેન ઓપેરોનનું 'E' જનીન (એન્ઝાઇમનું નિર્માણ), અને હિસ્ટિડિન ઓપેરોનના બંધારણીય જનીનો પ્રોટીનનું નિર્માણ કરે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "લેક ઓપેરોનમાં, બંધારણીય જનીનોના ઉત્પાદનને નિયંત્રિત કરતો રિપ્રેસર પ્રોટીન કયા જનીન દ્વારા કોડ થાય છે?", "opts": ["લેક Z જનીન", "લેક Y જનીન", "લેક I જનીન", "લેક A જનીન"], "ans": 2, "exp": "લેક I જનીન રિપ્રેસર પ્રોટીનને કોડ કરે છે, જે બંધારણીય જનીનો (Z, Y, A)ના પ્રસરણને અવરોધે છે. લેક Z, Y, અને A જનીનો ક્રમશઃ બીટા-ગેલેક્ટોઝિડેઝ, લેક્ટોઝ પર્મિએઝ, અને થાયોગેલેક્ટોઝિડ ટ્રાન્સએસિલેઝ ઉત્સેચકોને કોડ કરે છે, પરંતુ રિપ્રેસર પ્રોટીન માટે નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "જો એક બંધારણીય જનીનમાં મ્યુટેશન થાય અને તેના પ્રમોટર પ્રદેશમાં ફેરફાર થાય, તો શું પરિણામ થશે?", "opts": ["જનીનનું પ્રસરણ વધશે", "જનીનનું પ્રસરણ ઘટશે અથવા બંધ થશે", "જનીન દ્વારા કોડ થતો પ્રોટીન બદલાશે", "જનીનનું પ્રસરણ અચાનક વધી જશે"], "ans": 1, "exp": "પ્રમોટર પ્રદેશમાં ફેરફાર થવાથી RNA પોલિમરેઝ તે જનીનને ઓળખી શકશે નહીં, જેથી જનીનનું પ્રસરણ ઘટશે અથવા બંધ થશે. પ્રમોટર પ્રદેશ જનીનના પ્રસરણ માટે જરૂરી છે, પરંતુ તે પ્રોટીનની રચના બદલતો નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન બંધારણીય જનીન અને નિયંત્રક જનીન વચ્ચેનો તફાવત સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["બંધારણીય જનીન પ્રોટીન માટે કોડ કરે છે, જ્યારે નિયંત્રક જનીન RNA માટે કોડ કરે છે", "બંધારણીય જનીન ઉત્સેચકો માટે કોડ કરે છે, જ્યારે નિયંત્રક જનીન હોર્મોન માટે કોડ કરે છે", "બંધારણીય જનીન પ્રોટીન અથવા RNA માટે કોડ કરે છે, જ્યારે નિયંત્રક જનીન અન્ય જનીનોના પ્રસરણને નિયંત્રિત કરે છે", "બંધારણીય જનીન કોષકેન્દ્રમાં જોવા મળે છે, જ્યારે નિયંત્રક જનીન કોષરસમાં જોવા મળે છે"], "ans": 2, "exp": "બંધારણીય જનીન પ્રોટીન અથવા RNA માટે કોડ કરે છે, જ્યારે નિયંત્રક જનીન (જેમ કે રિપ્રેસર અથવા એક્ટિવેટર) અન્ય જનીનોના પ્રસરણને નિયંત્રિત કરે છે. અન્ય વિકલ્પો અયોગ્ય છે કારણ કે નિયંત્રક જનીનો પણ પ્રોટીન માટે કોડ કરે છે, અને બંને પ્રકારના જનીનો કોષકેન્દ્રમાં જોવા મળે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ટ્રિપ્ટોફેન ઓપેરોનમાં, ટ્રિપ્ટોફેનની ઉચ્ચ સાંદ્રતામાં, બંધારણીય જનીનોનું પ્રસરણ કેમ બંધ થાય છે?", "opts": ["ટ્રિપ્ટોફેન રિપ્રેસર પ્રોટીન સાથે જોડાઈને તેને અક્રિય કરે છે", "ટ્રિપ્ટોફેન ઓપેરેટર પ્રદેશ સાથે જોડાઈને RNA પોલિમરેઝને અવરોધે છે", "ટ્રિપ્ટોફેન રિપ્રેસર પ્રોટીનને ઓપેરેટર પ્રદેશ સાથે જોડાવા માટે સક્રિય કરે છે", "ટ્રિપ્ટોફેન પ્રમોટર પ્રદેશને બદલી નાખે છે"], "ans": 2, "exp": "ટ્રિપ્ટોફેન રિપ્રેસર પ્રોટીન સાથે જોડાઈને તેને ઓપેરેટર પ્રદેશ સાથે જોડાવા માટે સક્રિય કરે છે, જેથી RNA પોલિમરેઝ બંધારણીય જનીનોનું પ્રસરણ કરી શકતું નથી. અન્ય વિકલ્પો અયોગ્ય છે કારણ કે ટ્રિપ્ટોફેન રિપ્રેસર પ્રોટીનને અક્રિય કરતું નથી અથવા પ્રમોટર પ્રદેશને બદલતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું જનીન, બંધારણીય જનીન ન હોવા છતાં, તેના પ્રસરણથી બંધારણીય જનીનોના પ્રસરણને અસર થાય છે?", "opts": ["લેક Z જનીન", "લેક I જનીન", "લેક Y જનીન", "લેક A જનીન"], "ans": 1, "exp": "લેક I જનીન નિયંત્રક જનીન છે, જે રિપ્રેસર પ્રોટીનને કોડ કરે છે. આ રિપ્રેસર પ્રોટીન બંધારણીય જનીનો (Z, Y, A)ના પ્રસરણને નિયંત્રિત કરે છે. લેક Z, Y, અને A જનીનો બંધારણીય જનીનો છે, જે ઉત્સેચકોને કોડ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, બંધારણીય જનીનો (z, y, a) ના પ્રસરણ દરમિયાન નીચેનામાંથી કયો પરિબળ સીધો સક્રિય ભૂમિકા ભજવે છે?", "opts": ["લેક્ટોઝ રિપ્રેસર પ્રોટીન", "cAMP-CAP કોમ્પ્લેક્સ", "RNA પોલિમરેઝ", "ટ્રિપ્ટોફેન કો-રિપ્રેસર"], "ans": 2, "exp": "RNA પોલિમરેઝ એ ઉત્સેચક છે જે સીધો જ બંધારણીય જનીનોના પ્રસરણ (Transcription) માટે જવાબદાર છે. લેક્ટોઝ રિપ્રેસર પ્રોટીન (A) તો નિયંત્રણ કરે છે પરંતુ સીધો પ્રસરણ કરતું નથી. cAMP-CAP કોમ્પ્લેક્સ (B) પ્રમોટર પ્રદેશ સાથે બંધાય છે અને પ્રસરણને સહાય કરે છે, પરંતુ સીધો પ્રસરણ કરતું નથી. ટ્રિપ્ટોફેન કો-રિપ્રેસર (D) ટ્રિપ્ટોફેન ઓપેરોન સાથે સંબંધિત છે, લેક ઓપેરોન સાથે નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "એક બંધારણીય જનીનમાં મ્યુટેશન થવાથી તેના પ્રમોટર પ્રદેશમાં ફેરફાર થાય છે. આ ફેરફારના પરિણામે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે થશે?", "opts": ["જનીનનું પ્રસરણ વેગવાન થશે", "જનીનનું પ્રસરણ સંપૂર્ણ બંધ થશે", "જનીનનું પ્રસરણ ઘટશે અથવા બંધ થશે", "જનીનનું પ્રસરણ અસર વગર રહેશે"], "ans": 2, "exp": "પ્રમોટર પ્રદેશ એ RNA પોલિમરેઝ માટે બંધાય તે સ્થાન છે. જો પ્રમોટર પ્રદેશમાં મ્યુટેશન થાય તો RNA પોલિમરેઝ યોગ્ય રીતે બંધાઈ શકશે નહીં, જેના કારણે જનીનનું પ્રસરણ ઘટશે અથવા સંપૂર્ણ બંધ થશે. વેગવાન પ્રસરણ (A) અથવા અસર વગર રહેવું (D) અશક્ય છે. સંપૂર્ણ બંધ થવું (B) પણ શક્ય છે, પરંતુ ઘટવું એ વધુ સામાન્ય પરિણામ છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ટ્રિપ્ટોફેન ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન બંધારણીય જનીનોના નિયંત્રણ વિશે ખોટું છે?", "opts": ["ટ્રિપ્ટોફેનની ઉચ્ચ સાંદ્રતામાં, ટ્રિપ્ટોફેન કો-રિપ્રેસર રિપ્રેસર પ્રોટીન સાથે બંધાય છે", "રિપ્રેસર-કો-રિપ્ટોફેન કોમ્પ્લેક્સ ઓપેરેટર પ્રદેશ સાથે બંધાય છે", "ઓપેરોનનું પ્રસરણ શરૂ થવા માટે cAMP-CAP કોમ્પ્લેક્સની જરૂર પડે છે", "ટ્રિપ્ટોફેનની ઓછી સાંદ્રતામાં, રિપ્રેસર પ્રોટીન ઓપેરેટર પ્રદેશ સાથે બંધાય છે"], "ans": 3, "exp": "ટ્રિપ્ટોફેનની ઓછી સાંદ્રતામાં, રિપ્રેસર પ્રોટીન ઓપેરેટર પ્રદેશ સાથે બંધાય નહીં, પરંતુ ટ્રિપ્ટોફેનની ઉચ્ચ સાંદ્રતામાં જ બંધાય છે. ટ્રિપ્ટોફેન કો-રિપ્રેસર રિપ્રેસર પ્રોટીન સાથે બંધાય છે (A) અને રિપ્રેસર-કો-રિપ્ટોફેન કોમ્પ્લેક્સ ઓપેરેટર પ્રદેશ સાથે બંધાય છે (B), જે પ્રસરણને અટકાવે છે. cAMP-CAP કોમ્પ્લેક્સ (C) લેક ઓપેરોનમાં મહત્વનો ભાગ ભજવે છે, પરંતુ ટ્રિપ્ટોફેન ઓપેરોનમાં નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો cAMPની સાંદ્રતા ઓછી હોય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["લેક ઓપેરોનનું પ્રસરણ વેગવાન થશે", "લેક ઓપેરોનનું પ્રસરણ ઘટશે", "લેક ઓપેરોનનું પ્રસરણ અસર વગર રહેશે", "લેક ઓપેરોનનું પ્રસરણ સંપૂર્ણ બંધ થશે"], "ans": 1, "exp": "cAMP એ કેપ (CAP) પ્રોટીન સાથે બંધાય છે અને પ્રમોટર પ્રદેશ સાથે બંધાઈને પ્રસરણને વેગ આપે છે. જો cAMPની સાંદ્રતા ઓછી હોય, તો cAMP-CAP કોમ્પ્લેક્સ બનશે નહીં, જેના કારણે પ્રસરણ ઘટશે. વેગવાન પ્રસરણ (A) અથવા અસર વગર રહેવું (C) અશક્ય છે. સંપૂર્ણ બંધ થવું (D) પણ અતિશયોક્તિ છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો રિપ્રેસર પ્રોટીનમાં મ્યુટેશન થાય અને તેના DNA-બાઇન્ડિંગ ડોમેઇનને અસર થાય, તો બંધારણીય જનીનો (z, y, a) નું પ્રસરણ કેવી રીતે અસર પામશે જ્યારે લેક્ટોઝ ગેરહાજર હોય?", "opts": ["બંધારણીય જનીનોનું પ્રસરણ સંપૂર્ણપણે બંધ થશે કારણ કે રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાઈ શકશે નહીં.", "બંધારણીય જનીનોનું પ્રસરણ સતત ચાલુ રહેશે કારણ કે રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાઈ શકશે નહીં.", "બંધારણીય જનીનોનું પ્રસરણ માત્ર લેક્ટોઝની હાજરીમાં જ થશે કારણ કે રિપ્રેસર પ્રોટીનની ક્રિયા અવરોધાશે.", "બંધારણીય જનીનોનું પ્રસરણ ઓપેરેટર પર cAMP-CAP કોમ્પ્લેક્સની હાજરી પર આધાર રાખશે."], "ans": 1, "exp": "બંધારણીય જનીનોનું પ્રસરણ સતત ચાલુ રહેશે કારણ કે રિપ્રેસર પ્રોટીનનું DNA-બાઇન્ડિંગ ડોમેઇન નિષ્ક્રિય થવાને લીધે તે ઓપેરેટર સાથે બંધાઈ શકશે નહીં. આથી, રિપ્રેસર ઓપેરેટરને બ્લોક કરશે નહીં, અને RNA પોલિમરેઝ બંધારણીય જનીનોનું પ્રસરણ કરશે. A) ખોટું છે કારણ કે રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાઈ શકતું ન હોવાથી પ્રસરણ બંધ થશે નહીં. C) ખોટું છે કારણ કે લેક્ટોઝની હાજરી અગત્યની નથી, રિપ્રેસર પ્રોટીનની ક્રિયા અવરોધાયેલી છે. D) ખોટું છે કારણ કે cAMP-CAP કોમ્પ્લેક્સ પ્રસરણને પ્રોત્સાહન આપે છે, પરંતુ રિપ્રેસર પ્રોટીનની ગેરહાજરીમાં પ્રસરણ પહેલેથી જ ચાલુ રહેશે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, બંધારણીય જનીન 'z' દ્વારા ઉત્પન્ન થતું ઉત્સેચક કયું છે અને તેનો મુખ્ય કાર્ય કયો છે?", "opts": ["β-ગેલેક્ટોઝિડેઝ – લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં તોડવું", "β-ગેલેક્ટોઝિડેઝ – લેક્ટોઝને સક્રિય કરવું", "લેક્ટોઝ પર્મિયેઝ – લેક્ટોઝને કોષમાં પ્રવેશ કરાવવો", "થાયોગેલેક્ટોઝિડ ટ્રાન્સએસિટેલેઝ – લેક્ટોઝને એસિટાઇલેટ કરવો"], "ans": 0, "exp": "બંધારણીય જનીન 'z' દ્વારા ઉત્પન્ન થતું ઉત્સેચક β-ગેલેક્ટોઝિડેઝ છે, જે લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં તોડે છે. વિકલ્પ B ખોટો છે કારણ કે β-ગેલેક્ટોઝિડેઝ લેક્ટોઝને સક્રિય કરતું નથી, પરંતુ તોડે છે. વિકલ્પ C અને D અનુક્રમે લેક્ટોઝ પર્મિયેઝ અને થાયોગેલેક્ટોઝિડ ટ્રાન્સએસિટેલેઝ છે, જે 'y' અને 'a' જનીન દ્વારા ઉત્પન્ન થાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ટ્રિપ્ટોફેન ઓપેરોનમાં, બંધારણીય જનીનોનું પ્રસરણ નિયંત્રિત કરતી વ્યવસ્થામાં, નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["ટ્રિપ્ટોફેનની ઉચ્ચ સાંદ્રતામાં, રિપ્રેસર પ્રોટીન ટ્રિપ્ટોફેન સાથે જોડાઈને ઓપેરેટર સાથે બંધાય છે", "ટ્રિપ્ટોફેનની નીચી સાંદ્રતામાં, રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાય નહીં", "ટ્રિપ્ટોફેન ઓપેરોનમાં, રિપ્રેસર પ્રોટીન હંમેશા સક્રિય રહે છે", "ટ્રિપ્ટોફેન ઓપેરોનમાં, બંધારણીય જનીનોનું પ્રસરણ ટ્રિપ્ટોફેનની ગેરહાજરીમાં થાય છે"], "ans": 2, "exp": "ટ્રિપ્ટોફેન ઓપેરોનમાં, રિપ્રેસર પ્રોટીન ટ્રિપ્ટોફેનની ગેરહાજરીમાં નિષ્ક્રિય રહે છે અને ટ્રિપ્ટોફેનની હાજરીમાં સક્રિય થાય છે. વિકલ્પ C ખોટો છે કારણ કે રિપ્રેસર પ્રોટીન હંમેશા સક્રિય રહેતું નથી. વિકલ્પ A, B, અને D સત્ય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું જનીન બંધારણીય જનીન ન હોવા છતાં, તેના પ્રસરણથી બંધારણીય જનીનોના નિયંત્રણમાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["i જનીન", "z જનીન", "y જનીન", "a જનીન"], "ans": 0, "exp": "લેક ઓપેરોનમાં, 'i' જનીન રિપ્રેસર પ્રોટીનનું ઉત્પાદન કરે છે, જે બંધારણીય જનીનોના નિયંત્રણમાં મહત્વની ભૂમિકા ભજવે છે. 'z', 'y', અને 'a' જનીનો બંધારણીય જનીનો છે, જે ઉત્સેચકોનું ઉત્પાદન કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો 'i' જનીનમાં મ્યુટેશન થાય અને રિપ્રેસર પ્રોટીન બનવાનું બંધ થાય, તો બંધારણીય જનીનો (z, y, a) ના પ્રસરણ વિશે નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય છે?", "opts": ["બંધારણીય જનીનોનું પ્રસરણ લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત ચાલુ રહેશે.", "બંધારણીય જનીનોનું પ્રસરણ ફક્ત લેક્ટોઝની હાજરીમાં જ થશે.", "બંધારણીય જનીનોનું પ્રસરણ ફક્ત cAMPની હાજરીમાં જ થશે.", "બંધારણીય જનીનોનું પ્રસરણ લેક્ટોઝ અને cAMP બંનેમાંથી કોઈપણ એકની હાજરીમાં થશે."], "ans": 0, "exp": "રિપ્રેસર પ્રોટીન 'i' જનીન દ્વારા ઉત્પન્ન થાય છે અને તે ઓપેરેટર પ્રદેશ સાથે બંધાઈને બંધારણીય જનીનોના પ્રસરણને અટકાવે છે. જો 'i' જનીનમાં મ્યુટેશન થાય અને રિપ્રેસર પ્રોટીન બનવાનું બંધ થાય, તો ઓપેરેટર પ્રદેશ મુક્ત રહેશે, જેથી RNA પોલિમરેઝ બંધારણીય જનીનો (z, y, a) નું પ્રસરણ લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત કરશે. અ) સરળતાથી સત્ય છે. બ) ખોટું છે કારણ કે લેક્ટોઝની ગેરહાજરીમાં પણ પ્રસરણ થશે. ક) ખોટું છે કારણ કે cAMPની હાજરી અગત્યની નથી. ડ) ખોટું છે કારણ કે બંનેમાંથી કોઈપણ એકની હાજરી જરૂરી નથી.", "ref": "Std 12 - Chapter 6: વંશવેલા અને જનીન અભિવ્યક્તિ (Molecular Basis of Inheritance)", "ch": ""}, {"q": "ટ્રિપ્ટોફેન ઓપેરોનમાં, જો ટ્રિપ્ટોફેનની સાંદ્રતા ઓછી હોય, તો નીચેનામાંથી કયું પરિણામ બંધારણીય જનીનોના પ્રસરણ પર થશે?", "opts": ["રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાઈ શકશે નહીં, જેથી પ્રસરણ ચાલુ રહેશે.", "રિપ્રેસર પ્રોટીન ટ્રિપ્ટોફેન સાથે બંધાઈને ઓપેરેટરને બ્લોક કરશે, જેથી પ્રસરણ બંધ થશે.", "રિપ્રેસર પ્રોટીન ટ્રિપ્ટોફેન વિના ઓપેરેટર સાથે બંધાઈ શકશે, જેથી પ્રસરણ બંધ થશે.", "પ્રસરણની દરમાં કોઈ ફેરફાર થશે નહીં, કારણ કે ટ્રિપ્ટોફેન ઓપેરોનમાં રિપ્રેસર પ્રોટીનનું કાર્ય ટ્રિપ્ટોફેનની સાંદ્રતાથી સ્વતંત્ર છે."], "ans": 0, "exp": "ટ્રિપ્ટોફેન ઓપેરોનમાં, રિપ્રેસર પ્રોટીન ટ્રિપ્ટોફેનની હાજરીમાં જ ઓપેરેટર સાથે બંધાઈ શકે છે. જો ટ્રિપ્ટોફેનની સાંદ્રતા ઓછી હોય, તો રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાઈ શકશે નહીં, જેથી RNA પોલિમરેઝ બંધારણીય જનીનોનું પ્રસરણ કરશે. અ) સરળતાથી સત્ય છે. બ) ખોટું છે કારણ કે ટ્રિપ્ટોફેનની ઓછી સાંદ્રતામાં રિપ્રેસર ઓપેરેટર સાથે બંધાઈ શકશે નહીં. ક) ખોટું છે કારણ કે રિપ્રેસર ટ્રિપ્ટોફેન વિના ઓપેરેટર સાથે બંધાઈ શકતું નથી. ડ) ખોટું છે કારણ કે રિપ્રેસર પ્રોટીનનું કાર્ય ટ્રિપ્ટોફેનની સાંદ્રતાથી નિયંત્રિત થાય છે.", "ref": "Std 12 - Chapter 6: વંશવેલા અને જનીન અભિવ્યક્તિ (Molecular Basis of Inheritance)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
