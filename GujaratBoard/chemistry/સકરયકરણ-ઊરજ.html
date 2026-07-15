@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સક્રિયકરણ ઊર્જા</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>સક્રિયકરણ ઊર્જા</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">સક્રિયકરણ ઊર્જા</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક રાસાયણિક પ્રક્રિયામાં ઉત્સેચક ઉમેરતાં સક્રિયકરણ ઊર્જામાં ઘટાડો થાય છે. આ ઘટાડો શાના કારણે થાય છે?", "opts": ["ઉત્સેચક પ્રક્રિયાના સંતુલનને બદલે છે", "ઉત્સેચક પ્રક્રિયાના માર્ગને બદલીને નવો નિમ્ન-ઊર્જા માર્ગ પૂરો પાડે છે", "ઉત્સેચક પ્રક્રિયકોની સાંદ્રતા વધારે છે", "ઉત્સેચક પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) ઘટાડે છે"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે ઉત્સેચક પ્રક્રિયાના સક્રિયકરણ ઊર્જામાં ઘટાડો કરવા માટે પ્રક્રિયાના માર્ગને બદલીને નવો નિમ્ન-ઊર્જા માર્ગ પૂરો પાડે છે. ઉત્સેચક પ્રક્રિયાના સંતુલનને બદલતા નથી (A ખોટું), પ્રક્રિયકોની સાંદ્રતા વધારતા નથી (C ખોટું), અને પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) પણ બદલતા નથી (D ખોટું).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન સક્રિયકરણ ઊર્જા માટે ખોટું છે?", "opts": ["સક્રિયકરણ ઊર્જા પ્રક્રિયાની ગતિ નક્કી કરે છે", "ઉત્સેચક સક્રિયકરણ ઊર્જા ઘટાડીને પ્રક્રિયાને ઝડપી બનાવે છે", "સક્રિયકરણ ઊર્જા પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) પર અસર કરે છે", "ઉષ્મા આપવાથી સક્રિયકરણ ઊર્જા પૂરી પાડી શકાય છે"], "ans": 2, "exp": "સાચો જવાબ C છે કારણ કે સક્રિયકરણ ઊર્જા પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) પર અસર કરતી નથી. તે માત્ર પ્રક્રિયાની ગતિને અસર કરે છે (A સાચું), ઉત્સેચક તેને ઘટાડે છે (B સાચું), અને ઉષ્મા આપવાથી તે પૂરી પાડી શકાય છે (D સાચું).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં, જો ઉત્સેચકની સાંદ્રતા અચળ રાખીને પ્રક્રિયકની સાંદ્રતા વધારવામાં આવે, તો નીચેનામાંથી શું થશે?", "opts": ["સક્રિયકરણ ઊર્જામાં વધારો થશે", "પ્રક્રિયાની મહત્તમ ગતિ (Vmax) વધશે", "પ્રક્રિયાની ગતિ પ્રારંભમાં વધશે, પરંતુ પછી સંતૃપ્ત થશે", "સક્રિયકરણ ઊર્જામાં કોઈ ફેર પડશે નહીં, પરંતુ પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) બદલાશે"], "ans": 2, "exp": "સાચો જવાબ C છે કારણ કે ઉત્સેચકની સાંદ્રતા અચળ રાખતાં પ્રક્રિયકની સાંદ્રતા વધારવાથી પ્રક્રિયાની ગતિ પ્રારંભમાં વધે છે, પરંતુ ઉત્સેચકના સક્રિય સ્થાનો સંતૃપ્ત થતાં ગતિ સ્થિર થાય છે. સક્રિયકરણ ઊર્જામાં વધારો થતો નથી (A ખોટું), Vmax વધતી નથી કારણ કે ઉત્સેચકની સાંદ્રતા અચળ છે (B ખોટું), અને ΔG બદલાતી નથી (D ખોટું).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં, જો pHનું મૂલ્ય ઉત્સેચકના ઇષ્ટતમ pHથી દૂર કરવામાં આવે, તો નીચેનામાંથી શું થવાની સંભાવના છે?", "opts": ["સક્રિયકરણ ઊર્જામાં વધારો થશે કારણ કે ઉત્સેચકની રચના બદલાશે", "પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) વધશે", "ઉત્સેચકની સક્રિયતા વધશે કારણ કે વધુ પ્રોટોન ઉપલબ્ધ થશે", "પ્રક્રિયાની ગતિ વધશે કારણ કે પ્રક્રિયકોની સાંદ્રતા વધશે"], "ans": 0, "exp": "સાચો જવાબ A છે કારણ કે pHમાં ફેરફારથી ઉત્સેચકની ત્રિપરિમાણીય રચના બદલાઈ શકે છે, જેના કારણે તેની સક્રિયતા ઘટે છે અને સક્રિયકરણ ઊર્જામાં વધારો થાય છે. પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) બદલાતી નથી (B ખોટું), ઉત્સેચકની સક્રિયતા ઘટે છે (C ખોટું), અને પ્રક્રિયકોની સાંદ્રતા પર કોઈ અસર થતી નથી (D ખોટું).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન સક્રિયકરણ ઊર્જા અને ઉત્સેચકની ક્રિયાવિધિ માટે અપવાદરૂપ છે?", "opts": ["ઉત્સેચક સક્રિયકરણ ઊર્જા ઘટાડે છે, પરંતુ પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) બદલતો નથી", "ઉત્સેચક પ્રક્રિયાના સંતુલનને બદલતો નથી, પરંતુ તેને ઝડપી બનાવે છે", "કેટલાક ઉત્સેચકો સક્રિયકરણ ઊર્જા વધારીને પ્રક્રિયાને ધીમી બનાવે છે", "ઉત્સેચકની ગેરહાજરીમાં પણ પ્રક્રિયા થઈ શકે છે, પરંતુ તે ખૂબ ધીમી હોય છે"], "ans": 2, "exp": "સાચો જવાબ C છે કારણ કે ઉત્સેચકો હંમેશાં સક્રિયકરણ ઊર્જા ઘટાડીને પ્રક્રિયાને ઝડપી બનાવે છે, તેને વધારતા નથી. ઉત્સેચકો ΔG બદલતા નથી (A સાચું), સંતુલન બદલતા નથી (B સાચું), અને ઉત્સેચકની ગેરહાજરીમાં પ્રક્રિયા ધીમી હોય છે (D સાચું).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક એન્ઝાઇમ-કેટાલિઝ્ડ પ્રક્રિયામાં, જો તાપમાનમાં વધારો કરવામાં આવે તો સક્રિયકરણ ઊર્જા પર શું અસર થાય છે? (ધારો કે એન્ઝાઇમ ડીનેચર ન થાય)", "opts": ["સક્રિયકરણ ઊર્જા ઘટે છે કારણ કે અણુઓની ગતિઊર્જા વધે છે", "સક્રિયકરણ ઊર્જા અચળ રહે છે કારણ કે એન્ઝાઇમ પ્રક્રિયાનો માર્ગ બદલતું નથી", "સક્રિયકરણ ઊર્જા વધે છે કારણ કે એન્ઝાઇમની ક્રિયાશીલતા ઘટે છે", "સક્રિયકરણ ઊર્જા શૂન્ય થઈ જાય છે કારણ કે પ્રક્રિયા સ્વયંસ્ફૂર્ત બને છે"], "ans": 1, "exp": "સક્રિયકરણ ઊર્જા એ પ્રક્રિયાના માર્ગ પર આધારિત હોય છે, એન્ઝાઇમ પ્રક્રિયાનો માર્ગ બદલતું નથી પરંતુ પ્રક્રિયાને નીચી સક્રિયકરણ ઊર્જા વાળા માર્ગથી પસાર કરાવે છે. તાપમાનમાં વધારો થતાં અણુઓની ગતિઊર્જા વધે છે, પરંતુ સક્રિયકરણ ઊર્જા એ પ્રક્રિયાના માર્ગનું લાક્ષણિક ગુણ છે, જે એન્ઝાઇમ દ્વારા બદલાતું નથી. આથી સક્રિયકરણ ઊર્જા અચળ રહે છે. A) ખોટું છે કારણ કે સક્રિયકરણ ઊર્જા અણુઓની ગતિઊર્જા પર આધારિત નથી. C) ખોટું છે કારણ કે એન્ઝાઇમની ક્રિયાશીલતા ઘટતી નથી (ધારો કે ડીનેચર ન થાય). D) ખોટું છે કારણ કે પ્રક્રિયા સ્વયંસ્ફૂર્ત બનતી નથી.", "ref": "Std 12 - Chapter 4: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેના પૈકી કયા જોડીમાં સક્રિયકરણ ઊર્જા અને પ્રક્રિયાની ગતિ વચ્ચેનો સંબંધ યોગ્ય રીતે દર્શાવેલ છે?", "opts": ["નીચી સક્રિયકરણ ઊર્જા → ધીમી પ્રક્રિયા", "ઉચ્ચી સક્રિયકરણ ઊર્જા → ઝડપી પ્રક્રિયા", "નીચી સક્રિયકરણ ઊર્જા → ઝડપી પ્રક્રિયા", "સક્રિયકરણ ઊર્જા અને પ્રક્રિયાની ગતિ વચ્ચે કોઈ સંબંધ નથી"], "ans": 2, "exp": "સક્રિયકરણ ઊર્જા જેટલી ઓછી હોય, પ્રક્રિયા એટલી ઝડપી થાય છે કારણ કે ઓછી ઊર્જા વાળા અણુઓ પ્રક્રિયામાં ભાગ લઈ શકે છે. A) ખોટું છે કારણ કે નીચી સક્રિયકરણ ઊર્જા ધરાવતી પ્રક્રિયા ઝડપી હોય છે. B) ખોટું છે કારણ કે ઉચ્ચી સક્રિયકરણ ઊર્જા ધરાવતી પ્રક્રિયા ધીમી હોય છે. D) ખોટું છે કારણ કે સક્રિયકરણ ઊર્જા અને પ્રક્રિયાની ગતિ વચ્ચે સીધો સંબંધ છે.", "ref": "Std 12 - Chapter 4: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા શૂન્ય હોય, તો નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["પ્રક્રિયા સ્વયંસ્ફૂર્ત છે અને બંને દિશામાં સરખી ગતિએ થાય છે", "પ્રક્રિયા અસ્વયંસ્ફૂર્ત છે અને એક દિશામાં જ થાય છે", "પ્રક્રિયા સ્વયંસ્ફૂર્ત છે અને એક દિશામાં જ થાય છે", "પ્રક્રિયા અસ્વયંસ્ફૂર્ત છે અને બંને દિશામાં સરખી ગતિએ થાય છે"], "ans": 0, "exp": "જો સક્રિયકરણ ઊર્જા શૂન્ય હોય, તો પ્રક્રિયા સ્વયંસ્ફૂર્ત હોય છે અને બંને દિશામાં સરખી ગતિએ થાય છે કારણ કે કોઈ ઊર્જા અવરોધ નથી. B) ખોટું છે કારણ કે પ્રક્રિયા સ્વયંસ્ફૂર્ત હોય છે. C) ખોટું છે કારણ કે પ્રક્રિયા બંને દિશામાં થાય છે. D) ખોટું છે કારણ કે પ્રક્રિયા સ્વયંસ્ફૂર્ત હોય છે.", "ref": "Std 12 - Chapter 3: રાસાયણિક ગતિકી (Chemical Kinetics)", "ch": ""}, {"q": "એક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા 50 kJ/mol હોય અને પ્રક્રિયાની એન્થાલ્પી -20 kJ/mol હોય, તો પ્રક્રિયા માટે નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["પ્રક્રિયા અસ્વયંસ્ફૂર્ત છે અને સક્રિયકરણ ઊર્જા એનર્જી બેરિયર તરીકે કામ કરે છે", "પ્રક્રિયા સ્વયંસ્ફૂર્ત છે અને સક્રિયકરણ ઊર્જા એનર્જી બેરિયર તરીકે કામ કરે છે", "પ્રક્રિયા અસ્વયંસ્ફૂર્ત છે અને સક્રિયકરણ ઊર્જા પ્રક્રિયાની ગતિ પર અસર કરતી નથી", "પ્રક્રિયા સ્વયંસ્ફૂર્ત છે અને સક્રિયકરણ ઊર્જા પ્રક્રિયાની ગતિ પર અસર કરતી નથી"], "ans": 1, "exp": "પ્રક્રિયાની એન્થાલ્પી નકારાત્મક (-20 kJ/mol) હોય તો પ્રક્રિયા સ્વયંસ્ફૂર્ત હોય છે. સક્રિયકરણ ઊર્જા હંમેશા એનર્જી બેરિયર તરીકે કામ કરે છે, ભલે પ્રક્રિયા સ્વયંસ્ફૂર્ત હોય કે અસ્વયંસ્ફૂર્ત. A) ખોટું છે કારણ કે પ્રક્રિયા સ્વયંસ્ફૂર્ત છે. C) અને D) ખોટા છે કારણ કે સક્રિયકરણ ઊર્જા પ્રક્રિયાની ગતિ પર અસર કરે છે.", "ref": "Std 12 - Chapter 3: રાસાયણિક ગતિકી (Chemical Kinetics)", "ch": ""}, {"q": "એક રાસાયણિક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા (Eₐ) અને પ્રક્રિયાની એન્થાલ્પી (ΔH) બંનેમાં ઘટાડો થાય, તો નીચેના પૈકી કયું વિધાન અચોક્કસ છે?", "opts": ["પ્રક્રિયાની ગતિ વધશે કારણ કે સક્રિયકરણ ઊર્જા ઓછી થાય છે.", "પ્રક્રિયા વધુ સ્વતઃસ્ફૂર્ત બનશે કારણ કે ΔH નકારાત્મક દિશામાં વધુ ઘટે છે.", "પ્રક્રિયા માટે આવશ્યક તાપમાન ઓછું થશે કારણ કે Eₐ ઘટે છે.", "પ્રક્રિયા ઉશ્કેરક (exothermic) બનશે અને સક્રિયકરણ ઊર્જા શૂન્ય થશે."], "ans": 3, "exp": "વિકલ્પ D ખોટો છે કારણ કે સક્રિયકરણ ઊર્જા (Eₐ) ક્યારેય શૂન્ય થતી નથી, ભલે પ્રક્રિયા ઉશ્કેરક (exothermic) હોય. Eₐ એ પ્રક્રિયા શરૂ થવા માટેની ન્યૂનતમ ઊર્જા છે અને તે હંમેશા શૂન્યથી વધુ જ હોય છે. વિકલ્પ A સચોટ છે કારણ કે Eₐ ઘટવાથી પ્રક્રિયાની ગતિ વધે છે (Arrhenius સમીકરણ મુજબ). વિકલ્પ B સચોટ છે કારણ કે ΔH નકારાત્મક દિશામાં ઘટવાથી પ્રક્રિયા વધુ સ્વતઃસ્ફૂર્ત બને છે. વિકલ્પ C સચોટ છે કારણ કે ઓછી Eₐ વાળી પ્રક્રિયા ઓછા તાપમાને થઈ શકે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 4 - રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક એન્ઝાઇમ-કેટાલિઝ્ડ પ્રક્રિયામાં, સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની મુક્ત ઊર્જા (ΔG) વચ્ચેનો સંબંધ કયો છે, જ્યારે પ્રક્રિયા સ્વયંસ્ફૂર્ત (spontaneous) હોય છે?", "opts": ["Ea અને ΔG બંને ધન હોય છે, પરંતુ Ea > ΔG", "Ea ધન હોય છે, પરંતુ ΔG ઋણ હોય છે", "Ea અને ΔG બંને ઋણ હોય છે", "Ea શૂન્ય હોય છે અને ΔG ધન હોય છે"], "ans": 1, "exp": "સ્વયંસ્ફૂર્ત પ્રક્રિયાઓ માટે ΔG ઋણ હોય છે, પરંતુ સક્રિયકરણ ઊર્જા (Ea) હંમેશા ધન જ હોય છે, કારણ કે પ્રક્રિયા શરૂ થવા માટે ઊર્જા અવરોધ વટાવવો પડે છે. વિકલ્પ A ખોટો છે કારણ કે Ea અને ΔG વચ્ચેનો સંબંધ આવશ્યક નથી. વિકલ્પ C ખોટો છે કારણ કે Ea ક્યારેય ઋણ નથી હોતી. વિકલ્પ D ખોટો છે કારણ કે Ea શૂન્ય હોવું અશક્ય છે અને ΔG ધન હોવું સ્વયંસ્ફૂર્ત પ્રક્રિયા માટે અયોગ્ય છે.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની ગતિ વચ્ચેનો સંબંધ એરહેનિયસ સમીકરણના સિદ્ધાંતને અનુરૂપ નથી?", "opts": ["જ્યારે તાપમાનમાં વધારો કરવામાં આવે ત્યારે પ્રક્રિયાની ગતિ વધે છે", "જ્યારે ઉત્સેચક ઉમેરવામાં આવે ત્યારે Ea ઘટે છે અને પ્રક્રિયાની ગતિ વધે છે", "જ્યારે પ્રક્રિયકની સાંદ્રતા વધારવામાં આવે ત્યારે Ea બદલાતી નથી પરંતુ પ્રક્રિયાની ગતિ વધે છે", "જ્યારે પ્રક્રિયા ઉષ્માક્ષેપી (exothermic) હોય ત્યારે Ea અને ΔH વચ્ચેનો તફાવત શૂન્ય હોય છે"], "ans": 3, "exp": "એરહેનિયસ સમીકરણ મુજબ, Ea અને ΔH વચ્ચેનો તફાવત ક્યારેય શૂન્ય નથી હોતો. ઉષ્માક્ષેપી પ્રક્રિયાઓમાં Ea અને ΔH વચ્ચેનો તફાવત હંમેશા હાજર હોય છે. વિકલ્પ A, B, અને C એરહેનિયસ સમીકરણના સિદ્ધાંતને અનુરૂપ છે.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં, જો ઉત્સેચકની સક્રિય સ્થાન પર પ્રતિબંધક (inhibitor) બંધાય છે, તો સક્રિયકરણ ઊર્જા (Ea) પર શું અસર થશે?", "opts": ["Ea પર કોઈ અસર થશે નહીં", "Ea વધશે", "Ea ઘટશે", "Ea શૂન્ય થશે"], "ans": 1, "exp": "પ્રતિબંધક ઉત્સેચકની સક્રિય સ્થાન પર બંધાઈને ઉત્સેચકની ક્રિયાશીલતા ઘટાડે છે, જેના કારણે પ્રક્રિયા માટેની સક્રિયકરણ ઊર્જા (Ea) વધે છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે પ્રતિબંધકની હાજરીમાં Ea પર અસર થાય છે અને તે ક્યારેય ઘટતી નથી અથવા શૂન્ય થતી નથી.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની ક્રમ (order) વચ્ચેના સંબંધને યોગ્ય રીતે વર્ણવે છે?", "opts": ["પ્રક્રિયાની ક્રમ જેટલી ઉચ્ચ હોય, Ea એટલી ઓછી હોય છે", "પ્રક્રિયાની ક્રમ અને Ea વચ્ચે કોઈ સંબંધ નથી", "પ્રક્રિયાની ક્રમ જેટલી ઉચ્ચ હોય, Ea એટલી વધુ હોય છે", "પ્રક્રિયાની ક્રમ શૂન્ય હોય ત્યારે Ea શૂન્ય હોય છે"], "ans": 1, "exp": "પ્રક્રિયાની ક્રમ અને સક્રિયકરણ ઊર્જા (Ea) વચ્ચે કોઈ સીધો સંબંધ નથી. પ્રક્રિયાની ક્રમ પ્રક્રિયકની સાંદ્રતાને આધારિત હોય છે, જ્યારે Ea પ્રક્રિયાની ઊર્જા અવરોધને આધારિત હોય છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ અયોગ્ય સંબંધ દર્શાવે છે.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની એન્થાલ્પી (ΔH) બંનેમાં Ea > ΔH હોય, તો નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["પ્રક્રિયા ઉષ્માક્ષેપી (exothermic) છે અને Ea = ΔH + કેટલીક ઊર્જા", "પ્રક્રિયા ઉષ્માશોષી (endothermic) છે અને Ea = ΔH", "પ્રક્રિયા ઉષ્માશોષી (endothermic) છે અને Ea = ΔH + કેટલીક ઊર્જા", "પ્રક્રિયા ઉષ્માક્ષેપી (exothermic) છે અને Ea = ΔH"], "ans": 0, "exp": "જ્યારે Ea > ΔH હોય, ત્યારે પ્રક્રિયા ઉષ્માક્ષેપી (exothermic) હોય છે અને Ea = ΔH + કેટલીક અતિરિક્ત ઊર્જા (સક્રિયકરણ માટે જરૂરી). વિકલ્પ B અને D ખોટા છે કારણ કે Ea ક્યારેય ΔH જેટલી નથી હોતી. વિકલ્પ C ખોટો છે કારણ કે ઉષ્માશોષી પ્રક્રિયાઓમાં ΔH ધન હોય છે, પરંતુ Ea હંમેશા ΔH કરતાં વધુ હોય છે.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક રાસાયણિક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની એન્થાલ્પી (ΔH) બંનેમાં Ea > ΔH હોય, તો નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["પ્રક્રિયા એન્ડોથર્મિક છે અને પ્રક્રિયાની ગતિ તાપમાન સાથે વધે છે.", "પ્રક્રિયા એક્ઝોથર્મિક છે અને પ્રક્રિયાની ગતિ તાપમાન સાથે ઘટે છે.", "પ્રક્રિયા એન્ડોથર્મિક છે અને પ્રક્રિયાની ગતિ તાપમાન સાથે ઘટે છે.", "પ્રક્રિયા એક્ઝોથર્મિક છે અને પ્રક્રિયાની ગતિ તાપમાન સાથે વધે છે."], "ans": 0, "exp": "સક્રિયકરણ ઊર્જા (Ea) પ્રક્રિયા શરૂ થવા માટે જરૂરી ઊર્જા છે, જ્યારે એન્થાલ્પી (ΔH) પ્રક્રિયા દરમિયાન થતો ઊર્જા ફેરફાર છે. જો Ea > ΔH હોય, તો પ્રક્રિયા એન્ડોથર્મિક (ΔH > 0) હોઈ શકે છે. એન્ડોથર્મિક પ્રક્રિયાઓમાં, તાપમાન વધારવાથી પ્રક્રિયાની ગતિ વધે છે કારણ કે અણુઓ પાસે સક્રિયકરણ ઊર્જા ઓળંગવા માટે વધુ ગતિઊર્જા હોય છે. આથી, વિકલ્પ A સત્ય છે. વિકલ્પ B અને D ખોટા છે કારણ કે પ્રક્રિયા એક્ઝોથર્મિક નથી. વિકલ્પ C ખોટો છે કારણ કે એન્ડોથર્મિક પ્રક્રિયાઓમાં ગતિ તાપમાન સાથે ઘટતી નથી.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક પ્રક્રિયામાં, જો સક્રિયકરણ ઊર્જા (Ea) શૂન્ય હોય, તો નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["પ્રક્રિયા તરત જ થાય છે.", "પ્રક્રિયા માટે કોઈ ઊર્જા અવશ્યક નથી.", "પ્રક્રિયાની ગતિ તાપમાન પર આધાર રાખતી નથી.", "પ્રક્રિયા એન્ડોથર્મિક હોઈ શકે છે."], "ans": 3, "exp": "જો સક્રિયકરણ ઊર્જા (Ea) શૂન્ય હોય, તો પ્રક્રિયા માટે કોઈ ઊર્જા અવશ્યક નથી અને પ્રક્રિયા તરત જ થાય છે. પ્રક્રિયાની ગતિ તાપમાન પર આધાર રાખતી નથી કારણ કે Ea શૂન્ય છે. પરંતુ, પ્રક્રિયા એન્ડોથર્મિક (ΔH > 0) ન હોઈ શકે કારણ કે એન્ડોથર્મિક પ્રક્રિયાઓ માટે Ea હંમેશા ΔH કરતાં વધુ હોય છે. આથી, વિકલ્પ D ખોટો છે.", "ref": "Std 12 - Chapter 4: રાસાયણિક ગતિકી", "ch": ""}, {"q": "એક રાસાયણિક પ્રક્રિયામાં, જો પ્રક્રિયક અણુઓની સાંદ્રતા બમણી કરવામાં આવે અને સાથે સાથે ઉત્સેચક ઉમેરવામાં આવે, તો નીચેના પૈકી કયું વિધાન સક્રિયકરણ ઊર્જા (Ea) માટે સત્ય નથી?", "opts": ["સક્રિયકરણ ઊર્જા (Ea)નું મૂલ્ય ઘટશે કારણ કે ઉત્સેચક પ્રક્રિયાની ગતિ વધારે છે.", "સક્રિયકરણ ઊર્જા (Ea)નું મૂલ્ય અચળ રહેશે કારણ કે ઉત્સેચક માત્ર પ્રક્રિયાની ગતિ વધારે છે, Eaને બદલતો નથી.", "સક્રિયકરણ ઊર્જા (Ea)નું મૂલ્ય વધશે કારણ કે પ્રક્રિયક અણુઓની સાંદ્રતા વધતા અથડામણની સંખ્યા વધે છે.", "સક્રિયકરણ ઊર્જા (Ea)નું મૂલ્ય પ્રક્રિયક અણુઓની સાંદ્રતા પર આધારિત નથી, માત્ર ઉત્સેચકની હાજરી પર આધારિત છે."], "ans": 1, "exp": "સક્રિયકરણ ઊર્જા (Ea) એ પ્રક્રિયાની આંતરિક લાક્ષણિકતા છે અને તે ઉત્સેચકની હાજરીમાં પણ બદલાતી નથી. ઉત્સેચક માત્ર પ્રક્રિયાના માર્ગને બદલે છે, જેનાથી પ્રક્રિયાની ગતિ વધે છે, પરંતુ Eaનું મૂલ્ય અચળ રહે છે. પ્રક્રિયક અણુઓની સાંદ્રતા વધવાથી પ્રક્રિયાની ગતિ વધે છે, પરંતુ Ea પર કોઈ અસર થતી નથી. તેથી વિકલ્પ B સાચો છે, જ્યારે વિકલ્પ A, C અને D ખોટા છે કારણ કે તેઓ Eaના મૂલ્યમાં ફેરફાર દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં સક્રિયકરણ ઊર્જા (Ea)નું મૂલ્ય પ્રક્રિયાની એન્થાલ્પી (ΔH) કરતાં વધુ હોઈ શકે નહીં?", "opts": ["ઉષ્માક્ષેપક પ્રક્રિયા (Exothermic reaction)માં, જ્યાં ΔH ઋણ હોય.", "ઉષ્માશોષક પ્રક્રિયા (Endothermic reaction)માં, જ્યાં ΔH ધન હોય.", "પ્રક્રિયા જ્યાં ΔH શૂન્ય હોય.", "કોઈ પણ પ્રક્રિયામાં, કારણ કે Ea હંમેશા ΔH કરતાં વધુ હોય છે."], "ans": 0, "exp": "ઉષ્માક્ષેપક પ્રક્રિયામાં, પ્રક્રિયાની એન્થાલ્પી (ΔH) ઋણ હોય છે, પરંતુ સક્રિયકરણ ઊર્જા (Ea) હંમેશા ધન હોય છે. તેથી Eaનું મૂલ્ય ΔH કરતાં વધુ હોય છે. ઉષ્માશોષક પ્રક્રિયામાં ΔH ધન હોય છે, પરંતુ Eaનું મૂલ્ય ΔH કરતાં વધુ કે ઓછું હોઈ શકે છે. જ્યારે ΔH શૂન્ય હોય ત્યારે પણ Ea ધન હોય છે. તેથી વિકલ્પ A સાચો છે, જ્યારે વિકલ્પ B, C અને D ખોટા છે કારણ કે તેઓ Ea અને ΔH વચ્ચેના સંબંધને યોગ્ય રીતે દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક ઉષ્માક્ષેપક પ્રક્રિયામાં પ્રારંભિક તાપમાનમાં વધારો કરતાં પ્રક્રિયાની સક્રિયકરણ ઊર્જા (Ea) અને પ્રક્રિયાની સમતોલન સ્થિતિ પર થતી અસર માટે નીચેના પૈકી કયું વિધાન યોગ્ય છે?", "opts": ["સક્રિયકરણ ઊર્જા (Ea) ઘટે છે અને પ્રક્રિયા વધુ પ્રમાણમાં ઉત્પાદન તરફ વળે છે.", "સક્રિયકરણ ઊર્જા (Ea) અચળ રહે છે પરંતુ પ્રક્રિયા ઓછા પ્રમાણમાં ઉત્પાદન તરફ વળે છે.", "સક્રિયકરણ ઊર્જા (Ea) અચળ રહે છે પરંતુ પ્રક્રિયા વધુ પ્રમાણમાં ઉત્પાદન તરફ વળે છે.", "સક્રિયકરણ ઊર્જા (Ea) વધે છે અને પ્રક્રિયા ઓછા પ્રમાણમાં ઉત્પાદન તરફ વળે છે."], "ans": 1, "exp": "સક્રિયકરણ ઊર્જા (Ea) એ પ્રક્રિયાની આંતરિક લાક્ષણિકતા છે અને તે તાપમાન પર આધારિત નથી, તેથી તે અચળ રહે છે. ઉષ્માક્ષેપક પ્રક્રિયામાં તાપમાન વધારતાં લ-શૅટેલિયરના સિદ્ધાંત અનુસાર પ્રક્રિયા પ્રતિગામી દિશામાં આગળ વધે છે, જેના કારણે ઉત્પાદનનું પ્રમાણ ઘટે છે. તેથી વિકલ્પ B યોગ્ય છે. વિકલ્પ A ખોટો છે કારણ કે Ea તાપમાન પર આધારિત નથી. વિકલ્પ C ખોટો છે કારણ કે ઉષ્માક્ષેપક પ્રક્રિયામાં તાપમાન વધારતાં ઉત્પાદનનું પ્રમાણ ઘટે છે. વિકલ્પ D ખોટો છે કારણ કે Ea વધતી નથી અને ઉત્પાદનનું પ્રમાણ પણ ઘટે છે.", "ref": "Std 12 - પ્રકરણ 5: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
