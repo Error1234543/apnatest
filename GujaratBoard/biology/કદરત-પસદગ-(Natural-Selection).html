@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>કુદરતી પસંદગી (Natural Selection)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>કુદરતી પસંદગી (Natural Selection)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">કુદરતી પસંદગી (Natural Selection)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "કુદરતી પસંદગીમાં 'સહ-ઉત્ક્રાંતિ' (Co-evolution) નો ઉદાહરણ રૂપે કયું જોડીને ઓળખવામાં આવે છે, જ્યાં એક પ્રજાતિની ઉત્ક્રાંતિ બીજી પ્રજાતિની ઉત્ક્રાંતિને પ્રભાવિત કરે છે?", "opts": ["મધમાખી અને ફૂલો", "શેર અને હરણ", "માછલી અને પાણી", "પક્ષી અને વૃક્ષ"], "ans": 0, "exp": "મધમાખી અને ફૂલોનું જોડી સહ-ઉત્ક્રાંતિનો સરળ ઉદાહરણ છે. મધમાખી ફૂલોમાંથી મકંદ એકત્ર કરે છે, જ્યારે ફૂલો મધમાખી દ્વારા પરાગન ફેલાવે છે. આ પરસ્પર લાભદાયી સંબંધ છે, જેમાં એક પ્રજાતિની ઉત્ક્રાંતિ બીજી પ્રજાતિની ઉત્ક્રાંતિને પ્રભાવિત કરે છે. શેર અને હરણ શિકારી-શિકાર સંબંધ છે, માછલી અને પાણી એ વાસ્તવિક વાતાવરણ છે, જ્યારે પક્ષી અને વૃક્ષ એ સહજીવન નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, કયા પરિબળને કારણે જનસંખ્યામાં વૈવિધ્ય ઉત્પન્ન થાય છે?", "opts": ["પ્રજનન દરમાં ઘટાડો", "અનુવંશિક વૈવિધ્ય અને પર્યાવરણીય દબાણ", "સ્થિર પર્યાવરણ", "એકસરખી જનીનિક રચના"], "ans": 1, "exp": "કુદરતી પસંદગી માટે અનુવંશિક વૈવિધ્ય અને પર્યાવરણીય દબાણ જરૂરી છે. અનુવંશિક વૈવિધ્ય જનસંખ્યામાં વિવિધ લક્ષણો ઉત્પન્ન કરે છે, જ્યારે પર્યાવરણીય દબાણ (જેવા કે શિકારી, ખોરાકની અછત) ને કારણે કેટલાક લક્ષણો વધુ અનુકૂળ બને છે. પ્રજનન દરમાં ઘટાડો, સ્થિર પર્યાવરણ, અથવા એકસરખી જનીનિક રચના વૈવિધ્ય ઉત્પન્ન કરતી નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગીમાં 'ડાયરેક્શનલ સિલેક્શન' (Directional Selection) નો ઉદાહરણ કયો છે?", "opts": ["મનુષ્યમાં લાંબી ગરદનવાળા જીરાફની પસંદગી", "પોપટની ચોંચની આકારમાં વૈવિધ્ય", "મધમાખીના રંગમાં ફેરફાર", "ફૂલોના આકારમાં વૈવિધ્ય"], "ans": 0, "exp": "ડાયરેક્શનલ સિલેક્શનમાં, જનસંખ્યામાં એક દિશામાં લક્ષણોનો વિકાસ થાય છે. જીરાફની લાંબી ગરદન એ ડાયરેક્શનલ સિલેક્શનનો ઉદાહરણ છે, કારણ કે લાંબી ગરદનવાળા જીરાફ વધુ પર્ણ ખાઈ શકે છે અને જીવિત રહે છે. પોપટની ચોંચ, મધમાખીના રંગ, અથવા ફૂલોના આકારમાં વૈવિધ્ય એ ડિસરપ્ટિવ અથવા સ્ટેબિલાઇઝિંગ સિલેક્શનના ઉદાહરણો હોઈ શકે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગીમાં 'સ્ટેબિલાઇઝિંગ સિલેક્શન' (Stabilizing Selection) નો ઉદાહરણ કયો છે?", "opts": ["મનુષ્યમાં જન્મ વખતે બાળકનું વજન", "પક્ષીઓમાં ચોંચની લંબાઈ", "માછલીઓમાં રંગની વૈવિધ્યતા", "ફૂલોમાં પાંદડાની સંખ્યા"], "ans": 0, "exp": "સ્ટેબિલાઇઝિંગ સિલેક્શનમાં, મધ્યમ લક્ષણો ધરાવતા જીવો વધુ જીવિત રહે છે. મનુષ્યમાં જન્મ વખતે બાળકનું વજન એ સ્ટેબિલાઇઝિંગ સિલેક્શનનો ઉદાહરણ છે, કારણ કે ખૂબ ઓછા અથવા ખૂબ વધુ વજનવાળા બાળકોનું જીવન ધોરણ ઓછું હોય છે. પક્ષીઓમાં ચોંચની લંબાઈ, માછલીઓમાં રંગની વૈવિધ્યતા, અથવા ફૂલોમાં પાંદડાની સંખ્યા એ ડાયરેક્શનલ અથવા ડિસરપ્ટિવ સિલેક્શનના ઉદાહરણો હોઈ શકે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગીમાં 'જનીનિક ડ્રિફ્ટ' (Genetic Drift) ની અસર ક્યારે સૌથી વધુ જોવા મળે છે?", "opts": ["મોટી જનસંખ્યામાં", "નાની જનસંખ્યામાં", "સ્થિર પર્યાવરણમાં", "ઉચ્ચ પ્રજનન દરમાં"], "ans": 1, "exp": "જનીનિક ડ્રિફ્ટ એ અયાદી રીતે જનીનની આવર્તનમાં થતો ફેરફાર છે, જે નાની જનસંખ્યામાં સૌથી વધુ પ્રભાવી હોય છે. મોટી જનસંખ્યામાં, કુદરતી પસંદગીનો પ્રભાવ વધુ મહત્વપૂર્ણ હોય છે. સ્થિર પર્યાવરણ અથવા ઉચ્ચ પ્રજનન દર જનીનિક ડ્રિફ્ટની અસરને ઘટાડે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, જ્યારે એક જ જનસંખ્યામાં બે અલગ અલગ લક્ષણો ધરાવતા જૂથો વચ્ચે પ્રજનન અવરોધ ઉત્પન્ન થાય છે, ત્યારે તેને કયા પ્રકારની પસંદગી તરીકે ઓળખવામાં આવે છે?", "opts": ["વિભાજક પસંદગી (Disruptive Selection)", "સ્થિર કરનાર પસંદગી (Stabilizing Selection)", "દિશાત્મક પસંદગી (Directional Selection)", "જનીનિક પસંદગી (Genetic Selection)"], "ans": 0, "exp": "વિભાજક પસંદગી (Disruptive Selection) માં, જનસંખ્યામાં બે અલગ અલગ લક્ષણો ધરાવતા જૂથો વચ્ચે પ્રજનન અવરોધ ઉત્પન્ન થાય છે, જેથી મધ્યમ લક્ષણો ધરાવતા પ્રાણીઓનું પ્રમાણ ઘટે છે. સ્થિર કરનાર પસંદગી મધ્યમ લક્ષણોને પ્રોત્સાહન આપે છે, દિશાત્મક પસંદગી એક દિશામાં લક્ષણોના વિકાસને પ્રોત્સાહન આપે છે, અને જનીનિક પસંદગી એ કુદરતી પસંદગીનો મૂળભૂત સિદ્ધાંત છે, પરંતુ તે વિભાજક પસંદગી જેવી વિશિષ્ટ પરિસ્થિતિ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે એક જનીનના બે અલગ અલગ એલિલ્સ (alleles) માંથી એક એલિલની આગળ વર્ચસ્વ ધરાવે છે, પરંતુ પર્યાવરણીય પરિસ્થિતિઓ બદલાતા અન્ય એલિલ વધુ ફાયદાકારક બને છે, ત્યારે તેને કયા સિદ્ધાંત દ્વારા સમજાવી શકાય છે?", "opts": ["હાર્ડી-વાઇનબર્ગ સંતુલન (Hardy-Weinberg Equilibrium)", "બેલેન્સિંગ સિલેક્શન (Balancing Selection)", "જનીનિક ડ્રિફ્ટ (Genetic Drift)", "મ્યુટેશન (Mutation)"], "ans": 1, "exp": "બેલેન્સિંગ સિલેક્શન (Balancing Selection) માં, એક જનીનના બે અલગ અલગ એલિલ્સ વચ્ચે સંતુલન જાળવવામાં આવે છે, કારણ કે પર્યાવરણીય પરિસ્થિતિઓ બદલાતા એક એલિલની ફાયદાકારકતા બદલાય છે. હાર્ડી-વાઇનબર્ગ સંતુલન જનીનિક ફ્રીક્વન્સીના સ્થિરતાને વર્ણવે છે, જનીનિક ડ્રિફ્ટ અકસ્માતી રીતે જનીનિક ફ્રીક્વન્સીમાં ફેરફાર કરે છે, અને મ્યુટેશન નવા જનીનિક વૈવિધ્ય ઉત્પન્ન કરે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, જ્યારે એક જનસંખ્યામાં કેટલાક પ્રાણીઓમાં અતિ વિશિષ્ટ લક્ષણો વિકસિત થાય છે, જેમ કે મોરના પીછાના રંગ અથવા હરણના શીંગ, ત્યારે તેને કયા પ્રકારની પસંદગી તરીકે ઓળખવામાં આવે છે?", "opts": ["લૈંગિક પસંદગી (Sexual Selection)", "કુદરતી પસંદગી (Natural Selection)", "કૃત્રિમ પસંદગી (Artificial Selection)", "સહ-ઉત્ક્રાંતિ (Co-evolution)"], "ans": 0, "exp": "લૈંગિક પસંદગી (Sexual Selection) માં, અતિ વિશિષ્ટ લક્ષણો જેમ કે મોરના પીછાના રંગ અથવા હરણના શીંગ વિકસિત થાય છે, કારણ કે તે પ્રજનન માટે ફાયદાકારક સાબિત થાય છે. કુદરતી પસંદગી જીવન ટકાવવા માટે ફાયદાકારક લક્ષણોને પ્રોત્સાહન આપે છે, કૃત્રિમ પસંદગી માનવી દ્વારા થાય છે, અને સહ-ઉત્ક્રાંતિ બે જાતિઓ વચ્ચેની પરસ્પર અસરને વર્ણવે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે એક જનસંખ્યામાં કેટલાક પ્રાણીઓમાં અતિ નાનાં અથવા અતિ મોટાં કદ ધરાવતા પ્રાણીઓનું પ્રમાણ ઘટે છે અને મધ્યમ કદ ધરાવતા પ્રાણીઓનું પ્રમાણ વધે છે, ત્યારે તેને કયા પ્રકારની પસંદગી તરીકે ઓળખવામાં આવે છે?", "opts": ["વિભાજક પસંદગી (Disruptive Selection)", "સ્થિર કરનાર પસંદગી (Stabilizing Selection)", "દિશાત્મક પસંદગી (Directional Selection)", "લૈંગિક પસંદગી (Sexual Selection)"], "ans": 1, "exp": "સ્થિર કરનાર પસંદગી (Stabilizing Selection) માં, મધ્યમ લક્ષણો ધરાવતા પ્રાણીઓનું પ્રમાણ વધે છે, જ્યારે અતિ નાનાં અથવા અતિ મોટાં કદ ધરાવતા પ્રાણીઓનું પ્રમાણ ઘટે છે. વિભાજક પસંદગી અતિ લક્ષણોને પ્રોત્સાહન આપે છે, દિશાત્મક પસંદગી એક દિશામાં લક્ષણોના વિકાસને પ્રોત્સાહન આપે છે, અને લૈંગિક પસંદગી પ્રજનન માટે ફાયદાકારક લક્ષણોને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, જો એક જનસંખ્યામાં અતિ દુર્લભ જનીનિક પરિવર્તન (mutation) થાય જે તે જનસંખ્યાને પર્યાવરણીય દબાણ સામે લાભદાયી બનાવે, તો આ પરિવર્તનની આનુવંશિકતામાં કયો પરિબળ સૌથી મહત્વનો ભૂમિકા ભજવે છે?", "opts": ["જનીનિક ડ્રિફ્ટ (Genetic Drift)", "જનીનિક પ્રવાહ (Gene Flow)", "કુદરતી પસંદગી (Natural Selection)", "યાદૃચ્છિક સંયોગ (Random Mating)"], "ans": 2, "exp": "કુદરતી પસંદગી (Natural Selection) એ જનસંખ્યામાં લાભદાયી પરિવર્તનોને પ્રોત્સાહન આપે છે અને હાનિકારક પરિવર્તનોને દૂર કરે છે. અહીં, અતિ દુર્લભ પરિવર્તન લાભદાયી હોવાથી કુદરતી પસંદગી તેને જનસંખ્યામાં ફેલાવશે. જનીનિક ડ્રિફ્ટ (A) યાદૃચ્છિક પરિવર્તનોને અસર કરે છે, પરંતુ લાભદાયી પરિવર્તન માટે કુદરતી પસંદગી વધુ મહત્વની છે. જનીનિક પ્રવાહ (B) જનસંખ્યાઓ વચ્ચે જનીનના વિનિમયને અસર કરે છે, પરંતુ અહીં એક જ જનસંખ્યાની વાત છે. યાદૃચ્છિક સંયોગ (D) જનીનિક વિતરણને અસર કરે છે, પરંતુ લાભદાયી પરિવર્તન માટે કુદરતી પસંદગી જ મુખ્ય પરિબળ છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે એક જનસંખ્યામાં 'હેટરોઝાયગસ એડવાન્ટેજ' (Heterozygous Advantage) જોવા મળે છે, ત્યારે કયા રોગના સંદર્ભમાં આ ઘટના સૌથી વધુ પ્રસિદ્ધ છે?", "opts": ["સિકલ સેલ એનિમિયા (Sickle Cell Anemia)", "હિમોફિલિયા (Hemophilia)", "કલર બ્લાઇન્ડનેસ (Color Blindness)", "ડાઉન સિન્ડ્રોમ (Down Syndrome)"], "ans": 0, "exp": "હેટરોઝાયગસ એડવાન્ટેજમાં, હેટરોઝાયગસ (Aa) વ્યક્તિઓને સિકલ સેલ એનિમિયા વિરુદ્ધ મેલેરિયા પ્રતિરક્ષા મળે છે, જ્યારે હોમોઝાયગસ રીસેસિવ (aa) વ્યક્તિઓને એનિમિયા થાય છે અને હોમોઝાયગસ ડોમિનન્ટ (AA) વ્યક્તિઓ મેલેરિયા પ્રત્યે સંવેદનશીલ હોય છે. હિમોફિલિયા, કલર બ્લાઇન્ડનેસ અને ડાઉન સિન્ડ્રોમમાં આ પ્રકારનો ફાયદો જોવા મળતો નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે 'બોટલનેક ઇફેક્ટ' (Bottleneck Effect) ની ઘટના બને છે, ત્યારે કયું પરિણામ સૌથી યોગ્ય છે?", "opts": ["જનસંખ્યામાં જનીનિક ડ્રિફ્ટની અસર વધે છે", "જનસંખ્યામાં કુદરતી પસંદગીની ગતિ ઘટે છે", "જનસંખ્યામાં નવા જનીનની ઉત્પત્તિ થાય છે", "જનસંખ્યામાં સંપૂર્ણપણે નવા લક્ષણો ઉત્પન્ન થાય છે"], "ans": 0, "exp": "બોટલનેક ઇફેક્ટમાં, જનસંખ્યામાં અચાનક ઘટાડો થવાથી જનીનિક ડ્રિફ્ટની અસર વધે છે, કારણ કે નાની જનસંખ્યામાં યાદચ્છિક જનીનિક પરિવર્તનોની અસર વધુ પ્રબળ બને છે. બાકીના વિકલ્પો બોટલનેક ઇફેક્ટની સીધી અસર નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે 'જનીનિક લોડ' (Genetic Load) ની વાત કરવામાં આવે છે, ત્યારે કયું પરિણામ સૌથી યોગ્ય રીતે ઓળખાય છે?", "opts": ["જનસંખ્યામાં હાનિકારક જનીનની હાજરીને કારણે ફિટનેસ ઘટે છે", "જનસંખ્યામાં નવા જનીનની ઉત્પત્તિ થાય છે", "જનસંખ્યામાં સંપૂર્ણપણે નવા લક્ષણો ઉત્પન્ન થાય છે", "જનસંખ્યામાં કુદરતી પસંદગીની ગતિ વધે છે"], "ans": 0, "exp": "જનીનિક લોડમાં, જનસંખ્યામાં હાનિકારક જનીનની હાજરીને કારણે સરેરાશ ફિટનેસ ઘટે છે. બાકીના વિકલ્પો જનીનિક લોડની સીધી અસર નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n\n(1) કુદરતી પસંદગી દરમિયાન, જો કોઈ જનસંખ્યામાં પર્યાવરણીય પરિસ્થિતિઓ લાંબા સમય સુધી સ્થિર રહે, તો તે જનસંખ્યામાં 'સ્ટેબિલાઇઝિંગ સિલેક્શન' પ્રભાવી બને છે.\n(2) જો કોઈ જનસંખ્યામાં નવું પરિવર્તન (mutation) ઉદ્ભવે અને તે પરિવર્તન પર્યાવરણીય પરિસ્થિતિઓ માટે હાનિકારક હોય, તો તે પરિવર્તન કુદરતી પસંદગી દ્વારા દૂર થવાની શક્યતા વધારે હોય છે.\n(3) કુદરતી પસંદગી માત્ર વ્યક્તિગત સ્તરે જ કાર્ય કરે છે, સમૂહ સ્તરે નહીં.\n(4) 'જનીનિક ડ્રિફ્ટ' ની અસર નાની જનસંખ્યામાં વધુ જોવા મળે છે, પરંતુ તે કુદરતી પસંદગીનો એક ભાગ નથી.", "opts": ["વિધાન 1, 2 અને 4 સાચાં છે, વિધાન 3 ખોટું છે", "વિધાન 1, 2 અને 3 સાચાં છે, વિધાન 4 ખોટું છે", "વિધાન 2, 3 અને 4 સાચાં છે, વિધાન 1 ખોટું છે", "વિધાન 1 અને 4 સાચાં છે, વિધાન 2 અને 3 ખોટાં છે"], "ans": 0, "exp": "વિધાન 1 સાચું છે કારણ કે સ્થિર પર્યાવરણમાં મધ્યમ લક્ષણો ધરાવતી વ્યક્તિઓને લાભ મળે છે, જેને 'સ્ટેબિલાઇઝિંગ સિલેક્શન' કહે છે. વિધાન 2 સાચું છે કારણ કે હાનિકારક પરિવર્તનો કુદરતી પસંદગી દ્વારા દૂર થાય છે. વિધાન 3 ખોટું છે કારણ કે કુદરતી પસંદગી વ્યક્તિગત તેમજ સમૂહ સ્તરે (જેમ કે કુટુંબ પસંદગી) કાર્ય કરી શકે છે. વિધાન 4 સાચું છે કારણ કે 'જનીનિક ડ્રિફ્ટ' એ યાદચ્છિક ઘટના છે અને તે કુદરતી પસંદગીનો ભાગ નથી, પરંતુ નાની જનસંખ્યામાં તેની અસર વધુ જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક દ્વીપ પર રહેતી પક્ષીઓની જનસંખ્યામાં, કેટલાક પક્ષીઓના ચાંચની લંબાઈ ખૂબ જ ટૂંકી હોય છે, જ્યારે કેટલાકની ખૂબ જ લાંબી હોય છે. સમય જતાં, આ જનસંખ્યામાં મધ્યમ લંબાઈની ચાંચ ધરાવતા પક્ષીઓની સંખ્યા વધે છે. આ ઘટનાને કયા પ્રકારની કુદરતી પસંદગી સાથે સાંકળી શકાય?\n\nઆ ઘટનામાં નીચેનામાંથી કયું પરિબળ સૌથી ઓછું સંબંધિત છે?", "opts": ["સ્ટેબિલાઇઝિંગ સિલેક્શન, કારણ કે પર્યાવરણીય પરિસ્થિતિઓમાં અચાનક ફેરફાર થયો ન હતો", "ડિસરપ્ટિવ સિલેક્શન, કારણ કે બંને અંતિમ લક્ષણો ધરાવતા પક્ષીઓને લાભ મળ્યો ન હતો", "જનીનિક ડ્રિફ્ટ, કારણ કે આ ઘટના નાની જનસંખ્યામાં જોવા મળે છે", "ડાયરેક્શનલ સિલેક્શન, કારણ કે પર્યાવરણમાં એક જ દિશામાં ફેરફાર થયો હતો"], "ans": 2, "exp": "આ ઘટના 'સ્ટેબિલાઇઝિંગ સિલેક્શન' નું ઉદાહરણ છે, જેમાં મધ્યમ લક્ષણો ધરાવતી વ્યક્તિઓને લાભ મળે છે. વિકલ્પ A સાચો છે પરંતુ પ્રશ્નમાં પૂછવામાં આવ્યું છે કે કયું પરિબળ સૌથી ઓછું સંબંધિત છે. વિકલ્પ B ખોટો છે કારણ કે 'ડિસરપ્ટિવ સિલેક્શન' માં બંને અંતિમ લક્ષણોને લાભ મળે છે, જે અહીં જોવા મળતું નથી. વિકલ્પ C સાચો છે કારણ કે 'જનીનિક ડ્રિફ્ટ' આ ઘટનામાં સૌથી ઓછું સંબંધિત છે, કારણ કે અહીં પર્યાવરણીય દબાણને કારણે ફેરફાર થયો છે, નહીં કે યાદચ્છિક ઘટનાને કારણે. વિકલ્પ D ખોટો છે કારણ કે 'ડાયરેક્શનલ સિલેક્શન' માં એક જ દિશામાં ફેરફાર થાય છે, જે અહીં જોવા મળતું નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે 'સેક્સ્યુઅલ સિલેક્શન' (Sexual Selection) ની વાત કરવામાં આવે છે, ત્યારે નીચેના પૈકી કયું વિધાન સાચું નથી?", "opts": ["નર અને માદા વચ્ચેના લક્ષણોના આધારે પસંદગી થાય છે.", "આ પસંદગીને કારણે જાતિય દ્વિરૂપતા (Sexual Dimorphism) ઉત્પન્ન થાય છે.", "આ પસંદગી મુખ્યત્વે પર્યાવરણીય દબાણને કારણે થાય છે.", "નરમાં આકર્ષક લક્ષણો જેવા કે રંગબેરંગી પીછા અથવા ગીત ગાવા જેવા વર્તન વિકસિત થાય છે."], "ans": 2, "exp": "સેક્સ્યુઅલ સિલેક્શનમાં, પસંદગી નર અને માદા વચ્ચેના લક્ષણોના આધારે થાય છે (A સાચું), જેથી જાતિય દ્વિરૂપતા ઉત્પન્ન થાય છે (B સાચું). નરમાં આકર્ષક લક્ષણો વિકસિત થાય છે (D સાચું). પરંતુ, આ પસંદગી પર્યાવરણીય દબાણને કારણે નથી થતી, પરંતુ જાતિય પસંદગીને કારણે થાય છે, આથી C ખોટું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, 'અડાપ્ટિવ રેડિયેશન' (Adaptive Radiation) નો ઉદાહરણ કયો છે?", "opts": ["ડાર્વિનના ફિંચ પક્ષીઓના ચાંચના આકારમાં ફેરફાર", "ગાલાપાગોસ ટાપુઓ પરના કાચબાના કવચના આકારમાં ફેરફાર", "ઓસ્ટ્રેલિયામાં મર્યાદિત ભૌગોલિક વિસ્તારમાં રહેતા માર્સુપિયલ્સની જાતિઓ", "અંતરિક્ષમાં રહેતા જીવોના ઉત્ક્રાંતિ"], "ans": 2, "exp": "અડાપ્ટિવ રેડિયેશનમાં, એક જ પૂર્વજથી વિવિધ પર્યાવરણીય પરિસ્થિતિઓમાં રહેતી જાતિઓ વિકસિત થાય છે. ઓસ્ટ્રેલિયામાં મર્યાદિત ભૌગોલિક વિસ્તારમાં રહેતા માર્સુપિયલ્સની જાતિઓ આનો ઉદાહરણ છે (C સાચું). વિકલ્પ A અને B તો કુદરતી પસંદગીના ઉદાહરણો છે, પરંતુ અડાપ્ટિવ રેડિયેશનના નહીં. વિકલ્પ D અસંભવિત છે કારણ કે અંતરિક્ષમાં જીવોના અસ્તિત્વનો પુરાવો નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કુદરતી પસંદગી દરમિયાન, જ્યારે 'બેલેન્સિંગ સિલેક્શન' (Balancing Selection) ની વાત કરવામાં આવે છે, ત્યારે નીચેના પૈકી કયું પરિણામ સાચું છે?", "opts": ["એક જનીનના એક એલિલનું પ્રમાણ 100% થાય છે.", "હેટરોઝાયગસ જીવોને ફાયદો થાય છે, જેથી એલિલ્સનું પ્રમાણ સંતુલિત રહે છે.", "જનસંખ્યામાં જનીનિક વૈવિધ્ય ખૂબ જ ઝડપથી ઘટે છે.", "કુદરતી પસંદગીની અસર તરત જ દેખાય છે."], "ans": 1, "exp": "બેલેન્સિંગ સિલેક્શનમાં, હેટરોઝાયગસ જીવોને ફાયદો થાય છે, જેથી એલિલ્સનું પ્રમાણ સંતુલિત રહે છે (B સાચું). વિકલ્પ A ખોટો છે કારણ કે એક એલિલનું પ્રમાણ 100% થતું નથી. વિકલ્પ C ખોટો છે કારણ કે જનીનિક વૈવિધ્ય સંતુલિત રહે છે. વિકલ્પ D ખોટો છે કારણ કે કુદરતી પસંદગીની અસર લાંબા ગાળામાં દેખાય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાર્વિનના કુદરતી પસંદગીના સિદ્ધાંત અનુસાર, 'ઇન્ડસ્ટ્રિયલ મેલાનિઝમ' (Industrial Melanism) નો ઉદાહરણ કયો છે?", "opts": ["બિસ્ટર મોથ (Biston betularia) ના કાળા અને સફેદ રંગના ફેરફાર", "ગાલાપાગોસ ટાપુઓ પરના કાચબાના કવચના રંગમાં ફેરફાર", "પેંગ્વિનના શરીરના રંગમાં ફેરફાર", "ચીપકળીના શરીરના રંગમાં ફેરફાર"], "ans": 0, "exp": "ઇન્ડસ્ટ્રિયલ મેલાનિઝમનો ઉદાહરણ બિસ્ટર મોથ (Biston betularia) છે, જેમાં કાળા અને સફેદ રંગના ફેરફારને કારણે કુદરતી પસંદગી થાય છે (A સાચું). વિકલ્પ B, C, અને D આ ઘટનાના ઉદાહરણો નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો:\n(1) કુદરતી પસંદગી દરમિયાન, જો કોઈ લક્ષણ પર્યાવરણીય પરિબળોને કારણે લાભદાયી હોય તો તે લક્ષણ ધરાવતા સજીવોની સંખ્યા વધે છે.\n(2) કુદરતી પસંદગી માત્ર વસ્તીના જનીનિક બંધારણમાં ફેરફાર લાવે છે, વ્યક્તિગત સ્તરે નહીં.\n(3) કુદરતી પસંદગી હંમેશા પ્રગતિશીલ ઉત્ક્રાંતિ તરફ દોરી જાય છે.\n(4) કુદરતી પસંદગી દરમિયાન, જો કોઈ લક્ષણ પર્યાવરણ માટે તટસ્થ હોય તો તે લક્ષણની આવૃત્તિ સ્થિર રહે છે.", "opts": ["વિધાન 1, 2 અને 4 સાચાં છે, વિધાન 3 ખોટું છે", "વિધાન 1 અને 2 સાચાં છે, વિધાન 3 અને 4 ખોટાં છે", "વિધાન 1, 3 અને 4 સાચાં છે, વિધાન 2 ખોટું છે", "વિધાન 2 અને 3 સાચાં છે, વિધાન 1 અને 4 ખોટાં છે"], "ans": 0, "exp": "વિધાન 1 સાચું છે કારણ કે કુદરતી પસંદગી લાભદાયી લક્ષણો ધરાવતા સજીવોની સંખ્યા વધારે છે. વિધાન 2 સાચું છે કારણ કે કુદરતી પસંદગી વસ્તીના જનીનિક બંધારણમાં ફેરફાર લાવે છે, વ્યક્તિગત સ્તરે નહીં. વિધાન 3 ખોટું છે કારણ કે કુદરતી પસંદગી હંમેશા પ્રગતિશીલ ઉત્ક્રાંતિ તરફ દોરી જતી નથી - તે પર્યાવરણીય પરિસ્થિતિઓ પર આધારિત છે. વિધાન 4 સાચું છે કારણ કે તટસ્થ લક્ષણોની આવૃત્તિ સામાન્ય રીતે સ્થિર રહે છે કારણ કે તેના પર કુદરતી પસંદગીની કોઈ અસર થતી નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
