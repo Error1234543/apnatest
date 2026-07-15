@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પરાગ-વર્તિકાગ્ર ક્રિયા (Pollen-Pistil Interaction)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પરાગ-વર્તિકાગ્ર ક્રિયા (Pollen-Pistil Interaction)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પરાગ-વર્તિકાગ્ર ક્રિયા (Pollen-Pistil Interaction)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગકણની વૃદ્ધિ માટે જવાબદાર મુખ્ય ઉત્સેચક કયો છે, જે વર્તિકાગ્રની કોષભિત્તિના પેક્ટિન પદાર્થોનું પાચન કરે છે?", "opts": ["એમાઇલેઝ", "પેક્ટિનેઝ", "સેલ્યુલેઝ", "પ્રોટિયેઝ"], "ans": 1, "exp": "પેક્ટિનેઝ ઉત્સેચક વર્તિકાગ્રની કોષભિત્તિમાં રહેલા પેક્ટિન પદાર્થોનું પાચન કરે છે, જેથી પરાગકણની વૃદ્ધિ માટે રસ્તો મોકળો થાય. એમાઇલેઝ કાર્બોદિતનું, સેલ્યુલેઝ સેલ્યુલોઝનું, અને પ્રોટિયેઝ પ્રોટીનનું પાચન કરે છે, જે આ પ્રક્રિયામાં મુખ્ય ભૂમિકા ભજવતું નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "વર્તિકાગ્રમાં પરાગકણની વૃદ્ધિ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પરાગનલિકાની દિશા નક્કી કરવામાં મદદ કરે છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "બોરોન અને કેલ્શિયમ", "ઇથિલીન"], "ans": 2, "exp": "બોરોન અને કેલ્શિયમ પરાગનલિકાની વૃદ્ધિ અને દિશા નક્કી કરવામાં મહત્વની ભૂમિકા ભજવે છે. ઓક્સિન અને જિબરેલિન વૃદ્ધિ હોર્મોન છે, પરંતુ પરાગનલિકાની દિશા નક્કી કરવામાં તેઓ મુખ્ય નથી. ઇથિલીન પકવણ અને વૃદ્ધિ સાથે સંકળાયેલ છે, પરંતુ આ પ્રક્રિયામાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગકણ અને વર્તિકાગ્ર વચ્ચેની અનુકૂળતા નક્કી કરવામાં નીચેનામાંથી કયો પદાર્થ મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["પ્રોટીન", "લિપિડ", "કાર્બોદિત", "ગ્લાયકોપ્રોટીન"], "ans": 3, "exp": "ગ્લાયકોપ્રોટીન પરાગકણ અને વર્તિકાગ્રની સપાટી પર હાજર હોય છે અને તેમની વચ્ચેની અનુકૂળતા (કોમ્પેટિબિલિટી) નક્કી કરવામાં મહત્વની ભૂમિકા ભજવે છે. પ્રોટીન, લિપિડ, અને કાર્બોદિત આ પ્રક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પરાગ-વર્તિકાગ્ર ક્રિયા વિશે સાચું નથી?", "opts": ["પરાગકણની વૃદ્ધિ માટે વર્તિકાગ્રમાં સક્રિય પરિવહન થાય છે.", "પરાગનલિકા વર્તિકાગ્રમાંથી પસાર થતી વખતે, તેની દિશા બોરોન અને કેલ્શિયમ દ્વારા નિયંત્રિત થાય છે.", "પરાગકણ અને વર્તિકાગ્ર વચ્ચેની અનુકૂળતા ફક્ત જનીન પર આધારિત હોય છે.", "પરાગકણની વૃદ્ધિ દરમિયાન, વર્તિકાગ્રની કોષભિત્તિના પેક્ટિન પદાર્થોનું પાચન થાય છે."], "ans": 2, "exp": "પરાગકણ અને વર્તિકાગ્ર વચ્ચેની અનુકૂળતા ફક્ત જનીન પર આધારિત નથી, પરંતુ ગ્લાયકોપ્રોટીન અને અન્ય રાસાયણિક પદાર્થો પણ મહત્વની ભૂમિકા ભજવે છે. બાકીના વિધાનો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગનલિકાની વૃદ્ધિ માટે નીચેનામાંથી કયો પદાર્થ એટીપી (ATP) નું સંશ્લેષણ કરવામાં મદદ કરે છે?", "opts": ["ગ્લુકોઝ", "સુક્રોઝ", "મિટોકોન્ડ્રિયા", "ક્લોરોપ્લાસ્ટ"], "ans": 2, "exp": "મિટોકોન્ડ્રિયા કોષમાં એટીપી (ATP) નું સંશ્લેષણ કરે છે, જે પરાગનલિકાની વૃદ્ધિ માટે આવશ્યક ઉર્જા પૂરી પાડે છે. ગ્લુકોઝ અને સુક્રોઝ કાર્બોદિત છે, જ્યારે ક્લોરોપ્લાસ્ટ પ્રકાશસંશ્લેષણ માટે જવાબદાર છે, પરંતુ પરાગનલિકાની વૃદ્ધિ દરમિયાન એટીપી સંશ્લેષણમાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, વર્તિકાગ્રની સપાટી પર રહેલા ગ્લાઇકોપ્રોટીનના સ્તરમાં ફેરફાર થવાથી કયો પ્રક્રિયા પ્રભાવિત થાય છે?", "opts": ["પરાગકણની અંકુરણ ક્રિયા", "પરાગનલિકાની વૃદ્ધિની દિશા", "પરાગકણ અને વર્તિકાગ્ર વચ્ચેની પછાત ક્રિયા (Incompatibility)", "પરાગકણમાં સ્ટાર્ચના સંગ્રહ"], "ans": 2, "exp": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, વર્તિકાગ્રની સપાટી પર રહેલા ગ્લાઇકોપ્રોટીનના સ્તરમાં ફેરફાર થવાથી પરાગકણ અને વર્તિકાગ્ર વચ્ચેની પછાત ક્રિયા (Incompatibility) પ્રભાવિત થાય છે. આ ગ્લાઇકોપ્રોટીન પરાગકણની ઓળખ અને અનુકૂળતા નક્કી કરવામાં મહત્વની ભૂમિકા ભજવે છે. અંકુરણ ક્રિયા (A), પરાગનલિકાની વૃદ્ધિની દિશા (B), અને સ્ટાર્ચનો સંગ્રહ (D) આ પ્રક્રિયાથી સીધા જોડાયેલા નથી.", "ref": "Std 12 - Chapter 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ (Sexual Reproduction in Flowering Plants)", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગકણની વૃદ્ધિ દરમિયાન, નીચેનામાંથી કયો હોર્મોન પરાગનલિકાની લંબાઈને પ્રોત્સાહન આપે છે?", "opts": ["ઓક્સિન", "જિબ્રેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 0, "exp": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, ઓક્સિન હોર્મોન પરાગનલિકાની લંબાઈને પ્રોત્સાહન આપે છે. ઓક્સિન કોષવિભાજન અને કોષવિસ્તારમાં મહત્વની ભૂમિકા ભજવે છે, જે પરાગનલિકાની વૃદ્ધિ માટે જરૂરી છે. જિબ્રેલિન (B) અને સાયટોકાઇનિન (C) પણ વૃદ્ધિ હોર્મોન છે, પરંતુ પરાગનલિકાની લંબાઈ માટે ઓક્સિન વધુ મહત્વનું છે. એબ્સિસિક એસિડ (D) વૃદ્ધિને અવરોધે છે.", "ref": "Std 12 - Chapter 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ (Sexual Reproduction in Flowering Plants)", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગનલિકાની વૃદ્ધિ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પરાગનલિકાની દિવાલને મજબૂત બનાવે છે?", "opts": ["કેલોઝ", "પેક્ટિન", "સેલ્યુલોઝ", "લિગ્નિન"], "ans": 2, "exp": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, સેલ્યુલોઝ પરાગનલિકાની દિવાલને મજબૂત બનાવે છે. સેલ્યુલોઝ એક મજબૂત પોલિસેકેરાઇડ છે જે કોષદિવાલને મજબૂતી આપે છે. કેલોઝ (A) પરાગનલિકાની વૃદ્ધિને અવરોધે છે, પેક્ટિન (B) કોષદિવાલમાં રહેલું છે પરંતુ મજબૂતી આપતું નથી, અને લિગ્નિન (D) લાકડામાં જોવા મળે છે.", "ref": "Std 12 - Chapter 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ (Sexual Reproduction in Flowering Plants)", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, જો પરાગકણ અને વર્તિકાગ્ર વચ્ચેની અનુકૂળતા ન હોય તો નીચેનામાંથી કયું પરિણામ સામાન્ય રીતે જોવા મળતું નથી?", "opts": ["પરાગનલિકાની વૃદ્ધિ અટકી જાય છે અને વર્તિકાગ્રમાં પ્રવેશ થતો નથી", "વર્તિકાગ્રના કોષો દ્વારા હાઇડ્રોલાઇટિક ઉત્સેચકોનો સ્રાવ થાય છે, જે પરાગકણને નષ્ટ કરે છે", "પરાગકણનું કોષકેન્દ્ર વિભાજન પામીને બે નર જનનકોષો ઉત્પન્ન કરે છે, પરંતુ ફલન થતું નથી", "વર્તિકાગ્રની સપાટી પર રહેલા કેલોઝ પદાર્થનું નિર્માણ થાય છે, જે પરાગનલિકાને અવરોધે છે"], "ans": 2, "exp": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન અનુકૂળતા ન હોય ત્યારે પરાગકણનું કોષકેન્દ્ર વિભાજન સામાન્ય રીતે થતું નથી. પરાગકણની વૃદ્ધિ અટકી જાય છે અને વર્તિકાગ્રમાં પ્રવેશ થતો નથી (વિકલ્પ A ખોટો નથી). વર્તિકાગ્રના કોષો હાઇડ્રોલાઇટિક ઉત્સેચકોનો સ્રાવ કરીને પરાગકણને નષ્ટ કરી શકે છે (વિકલ્પ B ખોટો નથી). વર્તિકાગ્ર પર કેલોઝ પદાર્થનું નિર્માણ થાય છે, જે પરાગનલિકાને અવરોધે છે (વિકલ્પ D ખોટો નથી). પરંતુ પરાગકણનું કોષકેન્દ્ર વિભાજન પામીને બે નર જનનકોષો ઉત્પન્ન કરે તેવું સામાન્ય રીતે અનુકૂળતા ન હોય ત્યારે જોવા મળતું નથી, કારણ કે પરાગનલિકાની વૃદ્ધિ જ અટકી જાય છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પરાગ-વર્તિકાગ્ર ક્રિયાના 'સ્વ-અસંગતતા' (Self-Incompatibility) તંત્ર વિશે ખોટું છે?", "opts": ["સ્વ-અસંગતતા તંત્રમાં, પરાગકણ અને વર્તિકાગ્ર વચ્ચેના પ્રોટીન-પ્રોટીન આંતરક્રિયા દ્વારા અનુકૂળતા નક્કી થાય છે", "ગેમેટોફાઇટિક સ્વ-અસંગતતા તંત્રમાં, પરાગકણના જનીન પ્રકાર પર આધારિત પ્રતિક્રિયા થાય છે", "સ્પોરોફાઇટિક સ્વ-અસંગતતા તંત્રમાં, પરાગકણના પિતૃ વનસ્પતિના જનીન પ્રકાર પર આધારિત પ્રતિક્રિયા થાય છે", "સ્વ-અસંગતતા તંત્ર માત્ર પરાગનલિકાની વૃદ્ધિને અટકાવે છે, પરંતુ પરાગકણનું અંકુરણ અટકાવતું નથી"], "ans": 3, "exp": "સ્વ-અસંગતતા તંત્રમાં પરાગકણનું અંકુરણ અટકતું નથી, પરંતુ પરાગનલિકાની વૃદ્ધિ અટકી જાય છે (વિકલ્પ D સાચું છે). ગેમેટોફાઇટિક સ્વ-અસંગતતા તંત્રમાં પરાગકણના જનીન પ્રકાર પર આધારિત પ્રતિક્રિયા થાય છે (વિકલ્પ B સાચું છે). સ્પોરોફાઇટિક સ્વ-અસંગતતા તંત્રમાં પરાગકણના પિતૃ વનસ્પતિના જનીન પ્રકાર પર આધારિત પ્રતિક્રિયા થાય છે (વિકલ્પ C સાચું છે). પરંતુ સ્વ-અસંગતતા તંત્રમાં પરાગકણ અને વર્તિકાગ્ર વચ્ચેના પ્રોટીન-પ્રોટીન આંતરક્રિયા દ્વારા અનુકૂળતા નક્કી થતી નથી, પરંતુ જનીનિક નિયંત્રણ દ્વારા થાય છે (વિકલ્પ A ખોટું છે).", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગકણના અંકુરણ પછી બનતી પરાગનલિકામાં કયા કોષકેન્દ્રની સંખ્યા હોય છે?", "opts": ["એક (હેપ્લોઇડ)", "બે (ડિપ્લોઇડ)", "બે (હેપ્લોઇડ)", "ત્રણ (ટ્રિપ્લોઇડ)"], "ans": 2, "exp": "પરાગકણના અંકુરણ પછી બનતી પરાગનલિકામાં બે હેપ્લોઇડ કોષકેન્દ્ર હોય છે: એક વૃદ્ધિ માટે જવાબદાર અને એક જનન કોષ માટે જવાબદાર. A) એક કોષકેન્દ્ર હેપ્લોઇડ હોય તો તે પરાગકણના મૂળ સ્વરૂપને દર્શાવે, પરંતુ અંકુરણ પછી બે કોષકેન્દ્ર બને છે. B) ડિપ્લોઇડ કોષકેન્દ્ર પરાગકણના અંકુરણ પછી બનતું નથી. D) ત્રણ કોષકેન્દ્ર ટ્રિપ્લોઇડ એન્ડોસ્પર્મમાં જોવા મળે છે, પરાગનલિકામાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, પરાગકણના અંકુરણ પછી, પરાગનલિકાની વૃદ્ધિ માટે નીચેનામાંથી કયો પદાર્થ મુખ્યત્વે જવાબદાર છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "બોરોન અને કેલ્શિયમ", "ઇથિલીન"], "ans": 2, "exp": "પરાગકણના અંકુરણ પછી, પરાગનલિકાની વૃદ્ધિ માટે બોરોન અને કેલ્શિયમ મુખ્યત્વે જવાબદાર હોય છે. બોરોન પરાગનલિકાની વૃદ્ધિ અને દિશા નક્કી કરવામાં મદદ કરે છે, જ્યારે કેલ્શિયમ પરાગકણના કોષરસમાં રહેલા કોષકેન્દ્રની ગતિશીલતામાં મદદ કરે છે. A) ઓક્સિન વૃદ્ધિ હોર્મોન છે, પરંતુ પરાગનલિકાની વૃદ્ધિ માટે તે મુખ્ય પદાર્થ નથી. B) જિબરેલિન બીજના અંકુરણ અને વૃદ્ધિ માટે જવાબદાર છે. D) ઇથિલીન ફળના પાકવા અને પર્ણપાત માટે જવાબદાર છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, સ્વ-અસંગતતા (Self-Incompatibility) ના S-જનીન પ્રણાલીમાં, નીચેનામાંથી કયો જનીન સંકેત વર્તિકાગ્રની સપાટી પર ગ્લાઇકોપ્રોટીનના સ્રાવ માટે જવાબદાર હોય છે?", "opts": ["S-RNase જનીન", "S-લોકસ જનીન (S-Locus Gene)", "પેક્ટિનેસ ઉત્સેચક જનીન", "ઓક્સિન સંવેદનશીલ જનીન"], "ans": 1, "exp": "સ્વ-અસંગતતા પ્રણાલીમાં, S-લોકસ જનીન (S-Locus Gene) વર્તિકાગ્રની સપાટી પર ગ્લાઇકોપ્રોટીનના સ્રાવ માટે જવાબદાર હોય છે, જે પરાગકણની ઓળખ અને અસ્વીકૃતિ માટે મહત્વપૂર્ણ ભૂમિકા ભજવે છે. A) S-RNase જનીન પરાગનલિકામાં પ્રોટીનના વિઘટન માટે જવાબદાર હોય છે, પરંતુ વર્તિકાગ્રની સપાટી પર ગ્લાઇકોપ્રોટીનના સ્રાવ માટે નહીં. C) પેક્ટિનેસ ઉત્સેચક જનીન પરાગનલિકાની વૃદ્ધિ માટે પેક્ટિનના વિઘટનમાં મદદ કરે છે. D) ઓક્સિન સંવેદનશીલ જનીન વૃદ્ધિ હોર્મોન સાથે સંબંધિત હોય છે, પરંતુ સ્વ-અસંગતતામાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, જ્યારે પરાગકણ વર્તિકાગ્રની સપાટી પર ઉતરે છે, ત્યારે નીચેનામાંથી કયો ઘટક પરાગકણના અંકુરણને અટકાવી શકે છે, જો વર્તિકાગ્રમાં S-જનીનની હાજરી હોત?", "opts": ["કેલોઝ", "પેક્ટિન", "ગ્લાઇકોપ્રોટીન", "સેલ્યુલોઝ"], "ans": 2, "exp": "સ્વ-અસંગતતા (Self-Incompatibility) દરમિયાન, વર્તિકાગ્રની સપાટી પર રહેલા ગ્લાઇકોપ્રોટીન (S-જનીન દ્વારા નિયંત્રિત) પરાગકણના અંકુરણને અટકાવે છે. કેલોઝ, પેક્ટિન અને સેલ્યુલોઝ પરાગનલિકાની વૃદ્ધિ અથવા રચનામાં ભૂમિકા ભજવે છે, પરંતુ સ્વ-અસંગતતામાં ગ્લાઇકોપ્રોટીન જવાબદાર હોય છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "એક વનસ્પતિશાસ્ત્રીને એક એવી વનસ્પતિ મળી જેમાં પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન પરાગનલિકા વર્તિકાગ્રના પેશીઓમાં પ્રવેશ કરે છે, પરંતુ અંડકોષ સુધી પહોંચતા પહેલા જ તેની વૃદ્ધિ અટકી જાય છે. આ ઘટનામાં નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે, જેને 'સ્પોરોફાઇટિક સ્વ-અસંગતતા' તંત્ર સાથે સાંકળી શકાય નહીં?", "opts": ["વર્તિકાગ્રના પેશીઓમાં રહેલા S-જનીન દ્વારા ઉત્પન્ન થતા ગ્લાયકોપ્રોટીન પરાગનલિકાની વૃદ્ધિને અવરોધે છે", "પરાગકણના બાહ્ય આવરણમાં રહેલા પ્રોટીન વર્તિકાગ્રના પેશીઓ સાથે પ્રતિક્રિયા કરી પરાગનલિકાની વૃદ્ધિ અટકાવે છે", "પરાગનલિકામાં રહેલા કોષકેન્દ્રમાંથી ઉત્સર્જિત થતા સિગ્નલિંગ અણુઓ વર્તિકાગ્રના પેશીઓમાં અસંગતતા પ્રતિક્રિયા શરૂ કરે છે", "વર્તિકાગ્રના પેશીઓમાં રહેલા કેલોઝ ઉત્સેચકો પરાગનલિકાની દિવાલને નબળી પાડી તેની વૃદ્ધિ અટકાવે છે"], "ans": 2, "exp": "સ્પોરોફાઇટિક સ્વ-અસંગતતા તંત્રમાં, પરાગકણના બાહ્ય આવરણમાં રહેલા પ્રોટીન (જે પિતૃ વનસ્પતિના જનીન દ્વારા નિર્ધારિત થાય છે) વર્તિકાગ્રના પેશીઓ સાથે પ્રતિક્રિયા કરી પરાગનલિકાની વૃદ્ધિ અટકાવે છે. વિકલ્પ A અને B બંને સ્પોરોફાઇટિક સ્વ-અસંગતતા સાથે સંબંધિત છે, પરંતુ વિકલ્પ C ગેમેટોફાઇટિક સ્વ-અસંગતતા તંત્રનું લક્ષણ છે, જેમાં પરાગનલિકાના કોષકેન્દ્રમાંથી ઉત્સર્જિત થતા સિગ્નલિંગ અણુઓ અસંગતતા પ્રતિક્રિયા શરૂ કરે છે. વિકલ્પ D ખોટો છે કારણ કે કેલોઝ ઉત્સેચકો પરાગનલિકાની વૃદ્ધિને અટકાવવા માટે જવાબદાર નથી, પરંતુ પરાગનલિકાની દિશા નક્કી કરવામાં મદદ કરે છે. તેથી, વિકલ્પ C એ સ્પોરોફાઇટિક સ્વ-અસંગતતા તંત્ર સાથે સાંકળી શકાય નહીં.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, 'S-જનીન પ્રણાલી' અંતર્ગત, જો પરાગકણ અને વર્તિકાગ્ર બંનેમાં સમાન S-એલિલ હોય, તો નીચેનામાંથી કયું ઘટનાક્રમ બને છે?", "opts": ["પરાગકણનું અંકુરણ થાય છે અને પરાગનલિકા વર્તિકાગ્ર તરફ વૃદ્ધિ પામે છે", "પરાગકણનું અંકુરણ થતું નથી અને પરાગનલિકાની વૃદ્ધિ અટકી જાય છે", "પરાગકણનું અંકુરણ થાય છે પરંતુ પરાગનલિકા વર્તિકાગ્રની સપાટી પર જ વિકસે છે", "પરાગકણ અને વર્તિકાગ્ર વચ્ચે રાસાયણિક સંકેતોનો આદાન-પ્રદાન વેગવંતી થાય છે"], "ans": 1, "exp": "S-જનીન પ્રણાલીમાં, જો પરાગકણ અને વર્તિકાગ્ર બંનેમાં સમાન S-એલિલ હોય, તો સ્વ-અસંગતતા (Self-Incompatibility) સક્રિય થાય છે, જેના કારણે પરાગકણનું અંકુરણ થતું નથી અથવા પરાગનલિકાની વૃદ્ધિ અટકી જાય છે. આમ, વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે સમાન S-એલિલ ધરાવતા પરાગકણ અને વર્તિકાગ્ર વચ્ચે અનુકૂળતા નથી બનતી, જેના કારણે પરાગનલિકાની વૃદ્ધિ અટકે છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, 'સ્વ-અસંગતતા' (Self-Incompatibility) ના કિસ્સામાં, નીચેનામાંથી કયો પદાર્થ પરાગકણના અંકુરણને અટકાવે છે?", "opts": ["પ્રોટીનેઝ ઇન્હિબિટર", "RNAએઝ", "કેલોઝ", "ફ્લેવોનોઇડ્સ"], "ans": 2, "exp": "સ્વ-અસંગતતા (Self-Incompatibility) ના કિસ્સામાં, કેલોઝ નામનો પદાર્થ પરાગકણના અંકુરણને અટકાવે છે. કેલોઝ વર્તિકાગ્ર દ્વારા સ્રાવાય છે અને પરાગકણની કોષરસકલા સાથે પ્રતિક્રિયા કરે છે, જેના કારણે અંકુરણ અટકી જાય છે. વિકલ્પ A (પ્રોટીનેઝ ઇન્હિબિટર) અને B (RNAએઝ) આ પ્રક્રિયામાં સીધી ભૂમિકા ભજવતા નથી. વિકલ્પ D (ફ્લેવોનોઇડ્સ) પરાગકણ અને વર્તિકાગ્ર વચ્ચેની અનુકૂળતામાં મદદ કરે છે, પરંતુ અંકુરણ અટકાવવામાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, નીચેનામાંથી કયો કિસ્સો 'સ્વ-અસંગતતા' (Self-Incompatibility) ની ઘટનાને દર્શાવે છે?", "opts": ["પરાગકણ અને વર્તિકાગ્ર વચ્ચે S-જનીનની જનીન પ્રકારની સમાનતા હોવા છતાં પરાગનલિકાની વૃદ્ધિ થાય છે.", "પરાગકણ અને વર્તિકાગ્ર વચ્ચે S-જનીનની જનીન પ્રકારની અસમાનતા હોવા છતાં પરાગનલિકાની વૃદ્ધિ અટકી જાય છે.", "પરાગકણ અને વર્તિકાગ્ર વચ્ચે S-જનીનની જનીન પ્રકારની સમાનતા હોવાથી પરાગનલિકાની વૃદ્ધિ અટકી જાય છે.", "પરાગકણ અને વર્તિકાગ્ર વચ્ચે કોઈપણ જનીન સમાનતા ન હોવા છતાં પરાગનલિકાની વૃદ્ધિ અટકી જાય છે."], "ans": 2, "exp": "સ્વ-અસંગતતા (Self-Incompatibility) દરમિયાન, જો પરાગકણ અને વર્તિકાગ્ર વચ્ચે S-જનીનની જનીન પ્રકારની સમાનતા હોય, ત્યારે પરાગનલિકાની વૃદ્ધિ અટકી જાય છે. આમ, વિકલ્પ C સાચો છે. વિકલ્પ A અને B ખોટા છે કારણ કે સમાનતા હોવા છતાં વૃદ્ધિ થાય છે અથવા અસમાનતા હોવા છતાં વૃદ્ધિ અટકી જાય છે, જે સ્વ-અસંગતતાના સિદ્ધાંતને અનુરૂપ નથી. વિકલ્પ D પણ ખોટો છે કારણ કે કોઈપણ જનીન સમાનતા ન હોવા છતાં વૃદ્ધિ અટકી જવી એ સ્વ-અસંગતતાના લક્ષણ નથી.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, જો વર્તિકાગ્રમાં 'S-રાઇબોન્યુક્લીએઝ' (S-RNase) ઉત્પન્ન થાય છે, તો નીચેનામાંથી કયો કિસ્સો સ્વ-અસંગતતા (Self-Incompatibility) ની ઘટનાને અટકાવી શકે છે?", "opts": ["પરાગકણમાં S-જનીન ન હોય અને વર્તિકાગ્રમાં S-RNase ના ઉત્પાદન માટે જરૂરી પ્રોટીન સંપૂર્ણ રીતે અભાવમાં હોય", "પરાગકણમાં S-જનીન હોય પરંતુ વર્તિકાગ્રમાં S-RNase નું ઉત્પાદન થતું ન હોય", "પરાગકણ અને વર્તિકાગ્ર બંનેમાં સમાન S-જનીન હોય પરંતુ પરાગકણમાં S-RNase ને તોડી નાખવા માટેનો ઉત્સેચક (RNase inhibitor) હોય", "પરાગકણમાં S-જનીન હોય અને વર્તિકાગ્રમાં S-RNase નું ઉત્પાદન થાય પરંતુ પરાગનલિકાની વૃદ્ધિ એટલી ઝડપી હોય કે S-RNase નો પ્રભાવ થતો ન હોય"], "ans": 2, "exp": "સ્વ-અસંગતતા (Self-Incompatibility) ની ઘટનામાં, S-RNase પરાગનલિકાની વૃદ્ધિને અટકાવે છે જ્યારે પરાગકણ અને વર્તિકાગ્ર બંનેમાં સમાન S-જનીન હોય છે. પરંતુ જો પરાગકણમાં S-RNase ને તોડી નાખવા માટેનો ઉત્સેચક (RNase inhibitor) હોય, તો S-RNase નો પ્રભાવ નહીં થાય અને પરાગનલિકાની વૃદ્ધિ ચાલુ રહે છે. અહીં, વિકલ્પ C સાચો છે કારણ કે તે S-RNase ને નિષ્ક્રિય કરવા માટેનો મેકેનિઝમ દર્શાવે છે. વિકલ્પ A અને Bમાં S-RNase નું ઉત્પાદન જ થતું નથી અથવા S-જનીન નથી, જે સ્વ-અસંગતતા ની ઘટનાને અટકાવી શકે પરંતુ તે મૂળ ભૌતિક અભાવ છે, ન કે પ્રતિકાર તંત્ર. વિકલ્પ D અસંભવ છે કારણ કે પરાગનલિકાની વૃદ્ધિ એટલી ઝડપી હોવી શક્ય નથી કે S-RNase નો પ્રભાવ ન થાય.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગ-વર્તિકાગ્ર ક્રિયા દરમિયાન, જ્યારે પરાગકણ અને વર્તિકાગ્ર વચ્ચે 'સ્વ-અસંગતતા' (Self-Incompatibility) જોવા મળે છે, ત્યારે નીચેનામાંથી કયો ઘટક પરાગનલિકાની વૃદ્ધિને રોકવા માટે સીધો જવાબદાર હોય છે, જ્યારે વર્તિકાગ્રમાં S-જનીન સક્રિય થાય છે?", "opts": ["ક્યુટીન (Cutin) ના સ્તરમાં વૃદ્ધિ થવી", "S-રાઇબોન્યુક્લીએઝ (S-RNase) દ્વારા પરાગનલિકાના RNA નો વિઘટન", "પેક્ટિન (Pectin) ના વિઘટન દ્વારા કોષભિત્તિનું નબળું પડવું", "ઓક્સિન (Auxin) હોર્મોનનું અતિરિક્ત સ્રાવ થવું"], "ans": 1, "exp": "સ્વ-અસંગતતા દરમિયાન, વર્તિકાગ્રમાં S-જનીન સક્રિય થાય છે, જે S-રાઇબોન્યુક્લીએઝ (S-RNase) નું ઉત્પાદન કરે છે. આ ઉત્સેચક પરાગનલિકાના RNA નો વિઘટન કરે છે, જેથી પરાગનલિકાની વૃદ્ધિ રોકાઈ જાય છે. અ) ક્યુટીનનો સ્તર વૃદ્ધિ સાથે સીધો સંબંધ નથી. બ) પેક્ટિનનો વિઘટન કોષભિત્તિને નબળી પાડે છે, પરંતુ તે સ્વ-અસંગતતાનો મુખ્ય કારણ નથી. ડ) ઓક્સિન હોર્મોન વૃદ્ધિને પ્રોત્સાહન આપે છે, પરંતુ સ્વ-અસંગતતામાં તે રોકી શકતું નથી.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
