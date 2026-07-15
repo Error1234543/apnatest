@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gene Pool</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Gene Pool</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Gene Pool</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જનીન પૂલમાં જનીનની આવર્તનમાં થતો ફેરફાર કયા પરિબળ દ્વારા સૌથી ઓછો અસર પામે છે ?", "opts": ["જનીન વહન (Gene flow)", "પ્રાકૃતિક પસંદગી (Natural selection)", "જનીન મ્યુટેશન (Gene mutation)", "જનીન વિરુદ્ધ પસંદગી (Genetic drift)"], "ans": 2, "exp": "જનીન મ્યુટેશન એ જનીન પૂલમાં નવા એલિલ્સ ઉમેરે છે, પરંતુ તેની આવર્તન પર સીધી અસર ઓછી હોય છે. જનીન વહન, પ્રાકૃતિક પસંદગી અને જનીન વિરુદ્ધ પસંદગી એ જનીન આવર્તનમાં સીધી અસર કરે છે. જનીન મ્યુટેશન એલિલ્સની સંખ્યામાં ફેરફાર કરે છે, પરંતુ તેની આવર્તન પર સીધી અસર ઓછી હોય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક લઘુ જનસંખ્યામાં જનીન વિરુદ્ધ પસંદગીનો પ્રભાવ કેવો હોય છે ?", "opts": ["જનીન પૂલમાં એલિલ્સની આવર્તનમાં ઝડપી ફેરફાર થાય છે", "જનીન પૂલમાં એલિલ્સની આવર્તનમાં ધીમો ફેરફાર થાય છે", "જનીન પૂલમાં કોઈ ફેરફાર થતો નથી", "જનીન પૂલમાં એલિલ્સની આવર્તનમાં સ્થિરતા રહે છે"], "ans": 0, "exp": "લઘુ જનસંખ્યામાં જનીન વિરુદ્ધ પસંદગીનો પ્રભાવ ઝડપી હોય છે કારણ કે અલ્પ સંખ્યામાં વ્યક્તિઓ હોય છે, જેથી એલિલ્સની આવર્તનમાં ઝડપી ફેરફાર થાય છે. બાકીના વિકલ્પો અસત્ય છે કારણ કે જનીન વિરુદ્ધ પસંદગી લઘુ જનસંખ્યામાં ઝડપી ફેરફાર લાવે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં હાર્ડી-વાઇનબર્ગ સંતુલન જાળવવા માટે કયું પગલું આવશ્યક નથી ?", "opts": ["મોટી જનસંખ્યા", "કોઈ મ્યુટેશન ન હોય", "કોઈ પ્રવાસી ન હોય", "પ્રાકૃતિક પસંદગીનો અભાવ"], "ans": 3, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન જાળવવા માટે પ્રાકૃતિક પસંદગીનો અભાવ આવશ્યક નથી. હાર્ડી-વાઇનબર્ગ સંતુલન જાળવવા માટે મોટી જનસંખ્યા, કોઈ મ્યુટેશન ન હોય, કોઈ પ્રવાસી ન હોય, અને યાદૃચ્છિક સંવરણ હોય તે આવશ્યક છે. પ્રાકૃતિક પસંદગીનો અભાવ એ સંતુલન જાળવવા માટે આવશ્યક નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર થવાનું કયું કારણ નથી ?", "opts": ["જનીન વહન", "પ્રાકૃતિક પસંદગી", "જનીન મ્યુટેશન", "જનીન પ્રકાશસંશ્લેષણ"], "ans": 3, "exp": "જનીન પ્રકાશસંશ્લેષણ એ જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર થવાનું કારણ નથી. જનીન વહન, પ્રાકૃતિક પસંદગી અને જનીન મ્યુટેશન એ જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર લાવે છે. જનીન પ્રકાશસંશ્લેષણ એ એક જૈવિક પ્રક્રિયા છે જેના સાથે જનીન પૂલનો સીધો સંબંધ નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં A અને a એલિલ્સની આવર્તન અનુક્રમે 0.6 અને 0.4 છે. હાર્ડી-વાઇનબર્ગ સંતુલન અનુસાર, AA જનીનપ્રકારની આવર્તન કેટલી હશે ?", "opts": ["0.16", "0.24", "0.36", "0.48"], "ans": 2, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન અનુસાર, AA જનીનપ્રકારની આવર્તન p² હોય છે, જ્યાં p એ A એલિલની આવર્તન છે. અહીં, p = 0.6, તેથી AA જનીનપ્રકારની આવર્તન = (0.6)² = 0.36 હશે. બાકીના વિકલ્પો અસત્ય છે કારણ કે તે હાર્ડી-વાઇનબર્ગ સૂત્ર અનુસાર યોગ્ય નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં જનીન વૈવિધ્યમાં ઘટાડો થવાનું મુખ્ય કારણ કયું છે?", "opts": ["જનીન પ્રવાહ", "જનીન વિકિરણ", "જનીન વરસાદ", "જનીન સંકોચન"], "ans": 3, "exp": "જનીન સંકોચન (Genetic drift) લઘુ જનસંખ્યામાં જનીન વૈવિધ્યમાં ઘટાડો કરે છે, ખાસ કરીને જ્યારે યાદચ્છિક ઘટનાઓથી એલિલ્સની આવર્તન બદલાય છે. જનીન પ્રવાહ (A) અને જનીન વિકિરણ (B) જનીન વૈવિધ્યમાં વધારો કરે છે, જ્યારે જનીન વરસાદ (C) એ અસ્તિત્વમાં નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં હાર્ડી-વાઇનબર્ગ સંતુલન ભંગ થવાનું કારણ કયું નથી?", "opts": ["પ્રજનનમાં પસંદગી", "યાદચ્છિક પ્રજનન", "મ્યુટેશન", "જનીન પ્રવાહ"], "ans": 1, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન ભંગ થવાનાં કારણો પૈકી પ્રજનનમાં પસંદગી (A), મ્યુટેશન (C), અને જનીન પ્રવાહ (D) છે. યાદચ્છિક પ્રજનન (B) સંતુલન જાળવવામાં મદદ કરે છે, ભંગ કરતું નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર થવાનું કારણ કયું છે જ્યારે જનસંખ્યામાં નવા વસતી સભ્યોનો સમાવેશ થાય છે?", "opts": ["જનીન વિકિરણ", "જનીન પ્રવાહ", "મ્યુટેશન", "પ્રાકૃતિક પસંદગી"], "ans": 1, "exp": "જનીન પ્રવાહ (Gene flow) એ જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર કરે છે જ્યારે નવા વસતી સભ્યો જનસંખ્યામાં પ્રવેશે છે. જનીન વિકિરણ (A) અને મ્યુટેશન (C) અન્ય કારણો છે, જ્યારે પ્રાકૃતિક પસંદગી (D) એલિલ્સની આવર્તનમાં ફેરફાર કરે છે પરંતુ નવા સભ્યોના સમાવેશ દ્વારા નહીં.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં A એલિલની આવર્તન 0.3 છે. જો હાર્ડી-વાઇનબર્ગ સંતુલન લાગુ પડે તો aa જનીનપ્રકારની આવર્તન કેટલી હશે?", "opts": ["0.09", "0.21", "0.42", "0.49"], "ans": 3, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન અનુસાર, aa જનીનપ્રકારની આવર્તન q² થાય છે, જ્યાં q = a એલિલની આવર્તન છે. અહીં p = 0.3, તેથી q = 1 - p = 0.7, અને q² = 0.7 × 0.7 = 0.49. બાકીના વિકલ્પો (A, B, C) ગણિતીય ગણતરીથી મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક લઘુ અને અલગથળગ પોપ્યુલેશનમાં જનીન પૂલની રચનામાં કયો પરિબળ સૌથી વધુ તીવ્ર અસર કરે છે, જ્યારે તે પોપ્યુલેશનમાં જનીન પ્રવાહ (gene flow) શૂન્ય હોય અને પ્રાકૃતિક પસંદગીનો પ્રભાવ નગણ્ય હોય?", "opts": ["જનીન વિકિરણ (Genetic drift)", "મ્યુટેશન (Mutation)", "જનીન પસંદગી (Genetic selection)", "જનીન સંયોજન (Genetic recombination)"], "ans": 0, "exp": "લઘુ અને અલગથળગ પોપ્યુલેશનમાં જનીન વિકિરણ (Genetic drift) સૌથી તીવ્ર અસર કરે છે, કારણ કે એલિલ્સની આવર્તનમાં યાદૃચ્છિક ફેરફારો થાય છે. મ્યુટેશન (B) ની અસર લાંબા ગાળામાં થાય છે અને તેની આવર્તન ઓછી હોય છે. જનીન પસંદગી (C) નો પ્રભાવ પ્રશ્નમાં નગણ્ય હોવાનું જણાવેલ છે. જનીન સંયોજન (D) એ પોપ્યુલેશનમાં વૈવિધ્ય લાવે છે, પરંતુ લઘુ પોપ્યુલેશનમાં તેની અસર જનીન વિકિરણ જેટલી તીવ્ર નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જનીન પૂલમાં જનીન વૈવિધ્યમાં અચાનક ઘટાડો થાય છે, ત્યારે નીચેનામાંથી કયો પરિબળ સૌથી વધુ જવાબદાર ગણી શકાય ?", "opts": ["જનીન વહન (Gene flow)", "પ્રાકૃતિક પસંદગી (Natural selection)", "જનીન પસરણ (Genetic drift)", "પર્યાવરણીય અનુકૂલન (Environmental adaptation)"], "ans": 2, "exp": "જનીન પસરણ (Genetic drift) લઘુ જનસંખ્યામાં અચાનક જનીન વૈવિધ્યમાં ઘટાડો કરે છે, ખાસ કરીને જ્યારે જનસંખ્યા અલગ થઈ જાય અથવા બોટલનેક ઇફેક્ટ થાય. જનીન વહન જનીન વૈવિધ્ય વધારે છે, પ્રાકૃતિક પસંદગી ધીમે ધીમે અસર કરે છે, અને પર્યાવરણીય અનુકૂલન જનીન પૂલ પર પરોક્ષ અસર કરે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "હાર્ડી-વાઇનબર્ગ સંતુલનમાં, જો એક જનસંખ્યામાં A અને a એલિલ્સની આવર્તન અનુક્રમે 0.4 અને 0.6 હોય, તો AA જનીનપ્રકારની આવર્તન કેટલી હશે ?", "opts": ["0.16", "0.24", "0.36", "0.48"], "ans": 0, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન અનુસાર, AA જનીનપ્રકારની આવર્તન p² હોય છે, જ્યાં p = A એલિલની આવર્તન છે. અહીં p = 0.4, તેથી p² = 0.16. બાકીના વિકલ્પો (0.24, 0.36, 0.48) હાર્ડી-વાઇનબર્ગ સૂત્ર અનુસાર યોગ્ય નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયો પરિબળ જનીન પૂલમાં એલિલ્સની આવર્તનમાં સૌથી ઓછો ફેરફાર કરે છે ?", "opts": ["મ્યુટેશન (Mutation)", "જનીન વહન (Gene flow)", "જનીન પસરણ (Genetic drift)", "પ્રાકૃતિક પસંદગી (Natural selection)"], "ans": 0, "exp": "મ્યુટેશન (Mutation) જનીન પૂલમાં એલિલ્સની આવર્તનમાં સૌથી ઓછો ફેરફાર કરે છે, કારણ કે તે ખૂબ જ ધીમી પ્રક્રિયા છે. જનીન વહન, જનીન પસરણ, અને પ્રાકૃતિક પસંદગી વધુ તીવ્ર અસર કરે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં A એલિલની આવર્તન 0.7 છે. જો હાર્ડી-વાઇનબર્ગ સંતુલન હોય, તો aa જનીનપ્રકારની આવર્તન કેટલી હશે ?", "opts": ["0.09", "0.21", "0.42", "0.49"], "ans": 0, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન અનુસાર, aa જનીનપ્રકારની આવર્તન q² હોય છે, જ્યાં q = a એલિલની આવર્તન છે. અહીં p = 0.7, તેથી q = 1 - p = 0.3, અને q² = 0.09. બાકીના વિકલ્પો (0.21, 0.42, 0.49) હાર્ડી-વાઇનબર્ગ સૂત્ર અનુસાર યોગ્ય નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "એક લઘુ જનસંખ્યામાં જનીન પૂલમાં જનીન વૈવિધ્યમાં અચાનક ઘટાડો થાય છે, ત્યારે નીચેનામાંથી કયો પરિબળ સૌથી વધુ જવાબદાર હોઈ શકે છે, જ્યારે આ જનસંખ્યામાં પ્રજનન માટેની પસંદગી અથવા મ્યુટેશનનો કોઈ પ્રભાવ ન હોય?", "opts": ["જનીન વહન (Gene flow)", "જનીન પસંદગી (Genetic selection)", "જનીન વિકિરણ (Genetic drift)", "મ્યુટેશન (Mutation)"], "ans": 2, "exp": "જનીન વિકિરણ (Genetic drift) લઘુ જનસંખ્યામાં જનીન પૂલમાં અચાનક અને યાદૃચ્છિક ફેરફાર લાવે છે, જેને કારણે જનીન વૈવિધ્યમાં ઘટાડો થાય છે. જનીન વહન (A) નવી જનસંખ્યામાં જનીનનો પ્રવેશ કરાવે છે, પરંતુ લઘુ અને અલગથળગ જનસંખ્યામાં તેનો પ્રભાવ ઓછો હોય છે. જનીન પસંદગી (B) અને મ્યુટેશન (D) પ્રશ્નમાં જણાવ્યા મુજબ અહીં પ્રભાવશાલી નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં A અને B એલિલ્સની આવર્તન અનુક્રમે 0.5 અને 0.5 છે. જો આ જનસંખ્યામાં અચાનક પ્રવાસી જૂથ દ્વારા નવા C એલિલની ભરતી થાય, તો નીચેનામાંથી કયો પરિબળ સૌથી વધુ પ્રભાવિત થશે?", "opts": ["જનીન વૈવિધ્યમાં વધારો", "હાર્ડી-વાઇનબર્ગ સંતુલનની સ્થાપના", "જનીન પૂલમાં એલિલ્સની આવર્તનમાં સ્થિરતા", "પ્રજનન દરમાં ઘટાડો"], "ans": 0, "exp": "જનીન પૂલમાં નવા એલિલ (C)ની ભરતી થવાથી જનીન વૈવિધ્યમાં વધારો થશે, કારણ કે નવા જનીનિક પરિબળો ઉમેરાય છે. હાર્ડી-વાઇનબર્ગ સંતુલન ભંગ પામશે, કારણ કે નવા એલિલની ભરતી એ સંતુલન ભંગ કરનાર પરિબળ છે. એલિલ્સની આવર્તનમાં સ્થિરતા રહેતી નથી, કારણ કે નવા એલિલની ભરતી થવાથી આવર્તન બદલાશે. પ્રજનન દર પર આ પરિબળનો સીધો પ્રભાવ પડતો નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં હાર્ડી-વાઇનબર્ગ સંતુલન જાળવવા માટે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["જનસંખ્યાનો કદ મોટો હોવો જોઈએ", "જનસંખ્યામાં પ્રવાસ અને અપ્રવાસ થવો જોઈએ", "યાદચ્છિક સંવરણ થવું જોઈએ", "પર્યાવરણીય પરિબળો સ્થિર હોવા જોઈએ"], "ans": 1, "exp": "હાર્ડી-વાઇનબર્ગ સંતુલન જાળવવા માટે જનસંખ્યામાં પ્રવાસ અને અપ્રવાસ થવો જોઈએ નહીં, કારણ કે તે એલિલ્સની આવર્તનમાં ફેરફાર કરે છે. જનસંખ્યાનો કદ મોટો હોવો, યાદચ્છિક સંવરણ થવું અને પર્યાવરણીય પરિબળો સ્થિર હોવા એ સંતુલન જાળવવા માટેના આવશ્યક પરિબળો છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જનસંખ્યામાં જનીન પૂલમાં A એલિલની આવર્તન 0.8 છે. જો આ જનસંખ્યામાં અચાનક જનીનિક વિકિરણ (genetic drift) થાય, તો નીચેનામાંથી કયું પરિણામ સૌથી વધુ સંભવિત છે?", "opts": ["A એલિલની આવર્તન 0.8 જ રહેશે", "A એલિલની આવર્તન 1.0 થશે", "A એલિલની આવર્તન 0.4 થશે", "જનીન પૂલમાં નવા એલિલની ઉમેરણ થશે"], "ans": 2, "exp": "જનીનિક વિકિરણ (genetic drift) લઘુ જનસંખ્યામાં એલિલ્સની આવર્તનમાં અચાનક ફેરફાર કરે છે. A એલિલની આવર્તન 0.8 હોવાથી, વિકિરણના કારણે તે ઘટીને 0.4 થઈ શકે છે. A એલિલની આવર્તન 0.8 રહેતી નથી, કારણ કે વિકિરણ એલિલ્સની આવર્તન બદલે છે. A એલિલની આવર્તન 1.0 થવી અસંભવિત છે, કારણ કે તે માટે પૂરતી પસંદગી અથવા વિકિરણની જરૂર પડે. નવા એલિલની ઉમેરણ વિકિરણ દ્વારા થતી નથી, પરંતુ મ્યુટેશન અથવા પ્રવાસ દ્વારા થાય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જનીન પૂલમાં એલિલ્સની આવર્તનમાં ફેરફાર થવાનું કારણ કયું નથી જ્યારે જનસંખ્યામાં નવા જનીનિક પરિબળો ઉમેરાય છે?", "opts": ["મ્યુટેશન", "પ્રવાસ", "યાદચ્છિક સંવરણ", "પ્રાકૃતિક પસંદગી"], "ans": 2, "exp": "યાદચ્છિક સંવરણ એલિલ્સની આવર્તનમાં ફેરફાર કરતું નથી, કારણ કે તે એલિલ્સની આવર્તનને સ્થિર રાખે છે. મ્યુટેશન, પ્રવાસ અને પ્રાકૃતિક પસંદગી એ એલિલ્સની આવર્તનમાં ફેરફાર કરનારા પરિબળો છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક અલગથળગ ટાપુ પર વસતી નાની જનસંખ્યામાં જનીન પૂલની રચનામાં અચાનક ફેરફાર થાય છે. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ ઘટના 'જનીનિક ડ્રિફ્ટ' તરીકે ઓળખાય છે અને તે લઘુ જનસંખ્યામાં વધુ અસરકારક હોય છે", "જનીનિક ડ્રિફ્ટને કારણે જનીન પૂલમાં હાનિકારક એલિલ્સની આવર્તનમાં વધારો થઈ શકે છે", "આ પરિસ્થિતિમાં હાર્ડી-વાઇનબર્ગ સંતુલન જળવાઈ રહે છે કારણ કે જનસંખ્યા અલગથળગ છે", "જનીનિક ડ્રિફ્ટને કારણે જનીન પૂલમાં જનીન વૈવિધ્યમાં ઘટાડો થઈ શકે છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. જનીનિક ડ્રિફ્ટ એ લઘુ જનસંખ્યામાં જનીન પૂલમાં અચાનક ફેરફારનું કારણ બને છે, જે હાર્ડી-વાઇનબર્ગ સંતુલનને ભંગ કરે છે. વિકલ્પ A, B અને D સાચા છે કારણ કે જનીનિક ડ્રિફ્ટ લઘુ જનસંખ્યામાં વધુ અસરકારક હોય છે, હાનિકારક એલિલ્સની આવર્તન વધારી શકે છે અને જનીન વૈવિધ્યમાં ઘટાડો કરી શકે છે. વિકલ્પ C ખોટો છે કારણ કે જનીનિક ડ્રિફ્ટ હંમેશા હાર્ડી-વાઇનબર્ગ સંતુલનને ભંગ કરે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
