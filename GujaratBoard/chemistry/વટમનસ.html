@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિટામિન્સ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વિટામિન્સ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વિટામિન્સ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયું વિટામિન યકૃતમાં સંગ્રહિત થતું નથી અને તેની ઉણપથી રાત્રિ અંધત્વ થાય છે?", "opts": ["વિટામિન A", "વિટામિન D", "વિટામિન E", "વિટામિન K"], "ans": 0, "exp": "વિટામિન A એ ચરબીમાં દ્રાવ્ય વિટામિન છે, પરંતુ તે યકૃતમાં સંગ્રહિત થતું નથી. તેની ઉણપથી રાત્રિ અંધત્વ (Night Blindness) થાય છે. વિટામિન D, E અને K યકૃતમાં સંગ્રહિત થાય છે અને તેમની ઉણપથી અન્ય રોગો થાય છે.", "ref": "Std 11 - પ્રકરણ 14: માનવ કણવિજ્ઞાન અને આરોગ્ય (વિટામિન્સ)", "ch": ""}, {"q": "એક દર્દીને સ્કર્વી રોગના લક્ષણો જોવા મળે છે. આ રોગનું મુખ્ય કારણ કયા વિટામિનની ઉણપ છે અને તે વિટામિન કયા ખાદ્ય પદાર્થોમાં મુખ્યત્વે મળે છે?", "opts": ["વિટામિન C - લીંબુ અને આમળાં", "વિટામિન B₁₂ - માંસ અને માછલી", "વિટામિન D - સૂર્યપ્રકાશ અને દૂધ", "વિટામિન K - લીલાં પાંદડાવાળા શાકભાજી"], "ans": 0, "exp": "સ્કર્વી રોગ વિટામિન Cની ઉણપથી થાય છે. વિટામિન C મુખ્યત્વે લીંબુ, આમળાં, નારંગી જેવા ખાટાં ફળોમાં મળે છે. વિટામિન B₁₂ની ઉણપથી એનિમિયા, વિટામિન Dની ઉણપથી રિકેટ્સ અને વિટામિન Kની ઉણપથી રક્તસ્ત્રાવ થાય છે.", "ref": "Std 11 - પ્રકરણ 14: માનવ કણવિજ્ઞાન અને આરોગ્ય (વિટામિન્સ)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: \n(1) વિટામિન B₁ (થાયમિન)ની ઉણપથી બેરીબેરી રોગ થાય છે. \n(2) વિટામિન B₂ (રાઇબોફ્લેવિન)ની ઉણપથી ચિલોસિસ થાય છે. \n(3) વિટામિન B₃ (નાયાસિન)ની ઉણપથી પેલાગ્રા રોગ થાય છે. \nઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો ખોટું/ખોટાં છે?", "opts": ["માત્ર (1)", "માત્ર (2)", "માત્ર (3)", "એક પણ નહીં"], "ans": 3, "exp": "આપેલ તમામ વિધાનો સાચાં છે. વિટામિન B₁ની ઉણપથી બેરીબેરી, વિટામિન B₂ની ઉણપથી ચિલોસિસ અને વિટામિન B₃ની ઉણપથી પેલાગ્રા રોગ થાય છે. આથી એક પણ વિધાન ખોટું નથી.", "ref": "Std 11 - પ્રકરણ 14: માનવ કણવિજ્ઞાન અને આરોગ્ય (વિટામિન્સ)", "ch": ""}, {"q": "એક વિટામિન જેનું સંશ્લેષણ માનવ શરીરમાં આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થાય છે અને તે રક્ત જામવા માટે જરૂરી છે. આ વિટામિન કયું છે અને તેની ઉણપથી કયો રોગ થાય છે?", "opts": ["વિટામિન K - હેમરેજિક રોગ", "વિટામિન D - ઓસ્ટીયોમલેશિયા", "વિટામિન E - નપુંસકતા", "વિટામિન B₁₂ - પર્નિશિયસ એનિમિયા"], "ans": 0, "exp": "વિટામિન Kનું સંશ્લેષણ આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થાય છે અને તે રક્ત જામવા માટે જરૂરી છે. તેની ઉણપથી હેમરેજિક રોગ (રક્તસ્ત્રાવ) થાય છે. વિટામિન Dની ઉણપથી ઓસ્ટીયોમલેશિયા, વિટામિન Eની ઉણપથી પ્રજનન સમસ્યાઓ અને વિટામિન B₁₂ની ઉણપથી પર્નિશિયસ એનિમિયા થાય છે.", "ref": "Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં સૂક્ષ્મજીવો (વિટામિન Kનું સંશ્લેષણ)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન પાણીમાં દ્રાવ્ય છે પરંતુ તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી અને તેની ઉણપથી મેગાલોબ્લાસ્ટિક એનિમિયા થાય છે?", "opts": ["વિટામિન B₉ (ફોલિક એસિડ)", "વિટામિન B₁₂ (સાયનોકોબાલામિન)", "વિટામિન C (એસ્કોર્બિક એસિડ)", "વિટામિન B₆ (પાયરિડોક્સિન)"], "ans": 1, "exp": "વિટામિન B₁₂ (સાયનોકોબાલામિન) પાણીમાં દ્રાવ્ય છે, પરંતુ તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી. તેની ઉણપથી મેગાલોબ્લાસ્ટિક એનિમિયા થાય છે. વિટામિન B₉ (ફોલિક એસિડ)ની ઉણપથી પણ મેગાલોબ્લાસ્ટિક એનિમિયા થાય છે, પરંતુ તેનું સંશ્લેષણ શરીરમાં થતું નથી એવું નથી. વિટામિન C અને B₆ની ઉણપથી અન્ય રોગો થાય છે.", "ref": "Std 11 - પ્રકરણ 14: માનવ કણવિજ્ઞાન અને આરોગ્ય (વિટામિન્સ)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન પ્રકાશની હાજરીમાં નાશ પામે છે અને તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી, પરંતુ તેની ઉણપથી ચેતાતંત્રને લગતી ગંભીર સમસ્યાઓ ઉદ્ભવે છે?", "opts": ["વિટામિન B₁₂ (સાયનોકોબાલામિન)", "વિટામિન K (ફાયલોક્વિનોન)", "વિટામિન B₉ (ફોલિક એસિડ)", "વિટામિન B₆ (પાયરિડોક્સિન)"], "ans": 0, "exp": "વિટામિન B₁₂ (સાયનોકોબાલામિન) પ્રકાશની હાજરીમાં નાશ પામે છે અને તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી. તેની ઉણપથી ચેતાતંત્રને લગતી ગંભીર સમસ્યાઓ જેમ કે પેરિફેરલ ન્યુરોપથી થાય છે. વિટામિન K અને B₉નું સંશ્લેષણ આંતરડામાં બેક્ટેરિયા દ્વારા થાય છે, જ્યારે વિટામિન B₆નું સંશ્લેષણ શરીરમાં થતું નથી પરંતુ તે પ્રકાશથી નાશ પામતું નથી.", "ref": "Std 12 - પ્રકરણ 9: ખનીજ પોષણ અને વિટામિન્સ", "ch": ""}, {"q": "એક દર્દીને લોહીના ગંઠાઈ જવાની પ્રક્રિયામાં વિક્ષેપ જોવા મળે છે. આ સ્થિતિ માટે નીચેના પૈકી કયું વિટામિન જવાબદાર હોઈ શકે છે, જેનું સંશ્લેષણ આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થાય છે પરંતુ તેની ઉણપથી રક્તસ્રાવની સમસ્યા ઉદ્ભવે છે?", "opts": ["વિટામિન E (ટોકોફેરોલ)", "વિટામિન K (ફાયલોક્વિનોન)", "વિટામિન D (કેલ્સિફેરોલ)", "વિટામિન A (રેટિનોલ)"], "ans": 1, "exp": "વિટામિન K (ફાયલોક્વિનોન) લોહીના ગંઠાઈ જવાની પ્રક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે અને તેનું સંશ્લેષણ આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થાય છે. તેની ઉણપથી રક્તસ્રાવની સમસ્યા ઉદ્ભવે છે. વિટામિન E એન્ટીઓક્સિડન્ટ તરીકે, વિટામિન D હાડકાં માટે અને વિટામિન A દ્રષ્ટિ માટે જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 9: ખનીજ પોષણ અને વિટામિન્સ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) વિટામિન B₂ (રાઇબોફ્લેવિન)ની ઉણપથી ચીલોસિસ અને ગ્લોસાઇટિસ જેવા રોગ થાય છે. (2) વિટામિન B₂નું સંશ્લેષણ માનવ શરીરમાં થતું નથી પરંતુ તે પાણીમાં દ્રાવ્ય છે. (3) વિટામિન B₂ પ્રકાશની હાજરીમાં સ્થિર રહે છે. ઉપરોક્ત વિધાનો પૈકી કયું/કયાં વિધાન/વિધાનો ખોટું/ખોટાં છે?", "opts": ["માત્ર (1)", "માત્ર (2) અને (3)", "માત્ર (3)", "માત્ર (1) અને (3)"], "ans": 2, "exp": "વિધાન (3) ખોટું છે કારણ કે વિટામિન B₂ (રાઇબોફ્લેવિન) પ્રકાશની હાજરીમાં નાશ પામે છે. વિધાન (1) અને (2) સાચાં છે. વિટામિન B₂ની ઉણપથી ચીલોસિસ અને ગ્લોસાઇટિસ થાય છે અને તેનું સંશ્લેષણ શરીરમાં થતું નથી પરંતુ તે પાણીમાં દ્રાવ્ય છે.", "ref": "Std 11 - પ્રકરણ 14: માનવ પોષણ", "ch": ""}, {"q": "એક વિટામિન જેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી પરંતુ તે ચરબીમાં દ્રાવ્ય છે અને તેની ઉણપથી નપુંસકતા તેમજ સ્નાયુઓની નબળાઈ જેવી સમસ્યાઓ ઉદ્ભવે છે. આ વિટામિન કયું છે?", "opts": ["વિટામિન E (ટોકોફેરોલ)", "વિટામિન K (ફાયલોક્વિનોન)", "વિટામિન D (કેલ્સિફેરોલ)", "વિટામિન A (રેટિનોલ)"], "ans": 0, "exp": "વિટામિન E (ટોકોફેરોલ) ચરબીમાં દ્રાવ્ય છે અને તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી. તેની ઉણપથી નપુંસકતા અને સ્નાયુઓની નબળાઈ જેવી સમસ્યાઓ ઉદ્ભવે છે. વિટામિન K લોહીના ગંઠાઈ જવા માટે, વિટામિન D હાડકાં માટે અને વિટામિન A દ્રષ્ટિ માટે જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 9: ખનીજ પોષણ અને વિટામિન્સ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન પ્રોટીનના ચયાપચયમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે અને તેની ઉણપથી એનિમિયા તેમજ ચેતાતંત્રને લગતી સમસ્યાઓ ઉદ્ભવે છે, પરંતુ તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી?", "opts": ["વિટામિન B₅ (પેન્ટોથેનિક એસિડ)", "વિટામિન B₇ (બાયોટિન)", "વિટામિન B₆ (પાયરિડોક્સિન)", "વિટામિન B₃ (નાયાસિન)"], "ans": 2, "exp": "વિટામિન B₆ (પાયરિડોક્સિન) પ્રોટીનના ચયાપચયમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે અને તેની ઉણપથી એનિમિયા તેમજ ચેતાતંત્રને લગતી સમસ્યાઓ ઉદ્ભવે છે. તેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી. વિટામિન B₅ અને B₇ અન્ય ચયાપચય પ્રક્રિયાઓમાં ભાગ લે છે, જ્યારે વિટામિન B₃ (નાયાસિન)ની ઉણપથી પેલાગ્રા રોગ થાય છે.", "ref": "Std 12 - પ્રકરણ 9: ખનીજ પોષણ અને વિટામિન્સ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન એવું છે કે જેની ઉણપથી હાડકાંની વૃદ્ધિ અવરોધાય છે અને તેના અતિરેકથી હાયપરકેલ્સીમિયા થાય છે, પરંતુ તે પાણીમાં દ્રાવ્ય નથી?", "opts": ["વિટામિન A", "વિટામિન D", "વિટામિન K", "વિટામિન E"], "ans": 1, "exp": "વિટામિન D હાડકાંની વૃદ્ધિ અને કેલ્શિયમના શોષણ માટે જરૂરી છે. તેની ઉણપથી રિકેટ્સ (હાડકાંની વૃદ્ધિ અવરોધાય) અને ઓસ્ટિયોમેલેસિયા થાય છે, જ્યારે અતિરેકથી હાયપરકેલ્સીમિયા થાય છે. વિટામિન D ચરબીમાં દ્રાવ્ય છે, પાણીમાં નહીં. વિટામિન A, K, અને E પણ ચરબીમાં દ્રાવ્ય છે, પરંતુ Aની ઉણપથી રાત્રિ અંધત્વ અને Kની ઉણપથી રક્તસ્રાવ થાય છે, જ્યારે Eની ઉણપથી ન્યુરોપેથી થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "એક વિદ્યાર્થી એવું કહે છે કે 'વિટામિન B12ની ઉણપથી મેગાલોબ્લાસ્ટિક એનિમિયા થાય છે, પરંતુ તેનું શોષણ આંતરડામાં ઇન્ટ્રિનસિક ફેક્ટરની હાજરીમાં જ થાય છે.' નીચેના પૈકી કયું વિધાન ઉપરોક્ત કથનને સૌથી સારી રીતે સમજાવે છે?", "opts": ["વિટામિન B12 પાણીમાં દ્રાવ્ય છે અને તેનું શોષણ જથ્થાબંધ પરિવહન દ્વારા થાય છે.", "ઇન્ટ્રિનસિક ફેક્ટર પેટના પેશી દ્વારા સ્રાવાય છે અને તે વિટામિન B12 સાથે જોડાઈને તેના શોષણમાં મદદ કરે છે.", "વિટામિન B12 ચરબીમાં દ્રાવ્ય છે અને તેનું શોષણ લસિકા વાહિનીઓ દ્વારા થાય છે.", "મેગાલોબ્લાસ્ટિક એનિમિયા ફક્ત લોહીની ઉણપથી જ થાય છે."], "ans": 1, "exp": "વિટામિન B12 પાણીમાં દ્રાવ્ય છે અને તેનું શોષણ આંતરડામાં ઇન્ટ્રિનસિક ફેક્ટરની હાજરીમાં જ થાય છે, જે પેટની પેશી દ્વારા સ્રાવાય છે. ઇન્ટ્રિનસિક ફેક્ટર વિટામિન B12 સાથે જોડાઈને તેના શોષણમાં મદદ કરે છે. A વિકલ્પ અધૂરો છે કારણ કે તે ઇન્ટ્રિનસિક ફેક્ટરનો ઉલ્લેખ કરતો નથી. C વિકલ્પ ખોટો છે કારણ કે વિટામિન B12 ચરબીમાં દ્રાવ્ય નથી. D વિકલ્પ ખોટો છે કારણ કે મેગાલોબ્લાસ્ટિક એનિમિયા વિટામિન B12 અથવા ફોલિક એસિડની ઉણપથી થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન એવું છે કે જે ઉત્સેચકોના કોફેક્ટર તરીકે કામ કરે છે અને તેની ઉણપથી ડર્મેટાઇટિસ, ડાયરિયા, અને ડિમેનશિયા થાય છે?", "opts": ["વિટામિન B1 (થાયમિન)", "વિટામિન B3 (નાયસિન)", "વિટામિન B6 (પાયરિડોક્સિન)", "વિટામિન B2 (રાઇબોફ્લેવિન)"], "ans": 1, "exp": "વિટામિન B3 (નાયસિન) ઉત્સેચકોના કોફેક્ટર તરીકે કામ કરે છે અને તેની ઉણપથી પેલેગ્રા રોગ થાય છે, જેમાં ડર્મેટાઇટિસ, ડાયરિયા, અને ડિમેનશિયા (3D લક્ષણો) જોવા મળે છે. વિટામિન B1ની ઉણપથી બેરીબેરી, B2ની ઉણપથી ચીલોસિસ અને ગ્લોસાઇટિસ, જ્યારે B6ની ઉણપથી એનિમિયા અને ત્વચા રોગો થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "એક વ્યક્તિને નિયમિત રીતે અંધારામાં જોવાની તકલીફ પડે છે અને તેની ત્વચા શુષ્ક અને ખરબચડી થઈ ગઈ છે. ડોક્ટરે તેને વિટામિન Aની ગોળીઓ આપી છે. નીચેના પૈકી કયું વિધાન આ સ્થિતિને સૌથી સારી રીતે સમજાવે છે?", "opts": ["વિટામિન Aની ઉણપથી રાત્રિ અંધત્વ અને કેરેટોમેલેસિયા થાય છે, પરંતુ તે ત્વચા માટે જરૂરી નથી.", "વિટામિન A ચરબીમાં દ્રાવ્ય છે અને તેની ઉણપથી રાત્રિ અંધત્વ, કેરેટોમેલેસિયા, અને ત્વચા સંબંધી વિકારો થાય છે.", "વિટામિન A પાણીમાં દ્રાવ્ય છે અને તેની ઉણપથી ફક્ત રાત્રિ અંધત્વ જ થાય છે.", "વિટામિન Aની ઉણપથી સ્કર્વી રોગ થાય છે."], "ans": 1, "exp": "વિટામિન A ચરબીમાં દ્રાવ્ય છે અને તેની ઉણપથી રાત્રિ અંધત્વ (ન્યક્ટલોપિયા), કેરેટોમેલેસિયા (કોર્નિયા શુષ્ક થવું), અને ત્વચા સંબંધી વિકારો જેવા કે શુષ્ક અને ખરબચડી ત્વચા થાય છે. A વિકલ્પ ખોટો છે કારણ કે વિટામિન A ત્વચા માટે પણ જરૂરી છે. C વિકલ્પ ખોટો છે કારણ કે વિટામિન A પાણીમાં દ્રાવ્ય નથી. D વિકલ્પ ખોટો છે કારણ કે સ્કર્વી વિટામિન Cની ઉણપથી થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન એવું છે કે જેનું સંશ્લેષણ માનવ શરીરમાં થતું નથી, પરંતુ તે ચરબીમાં દ્રાવ્ય છે અને તેની ઉણપથી રક્તસ્રાવ થવાની પ્રવૃત્તિ વધે છે?", "opts": ["વિટામિન E", "વિટામિન K", "વિટામિન D", "વિટામિન A"], "ans": 1, "exp": "વિટામિન K માનવ શરીરમાં સંશ્લેષિત થતું નથી (આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થોડું સંશ્લેષણ થાય છે, પરંતુ પૂરતું નથી), ચરબીમાં દ્રાવ્ય છે, અને તેની ઉણપથી રક્તસ્રાવ થવાની પ્રવૃત્તિ વધે છે કારણ કે તે રક્ત ગંઠાઈ જવાની પ્રક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. વિટામિન E, D, અને A પણ ચરબીમાં દ્રાવ્ય છે, પરંતુ તેમની ઉણપથી રક્તસ્રાવ થતો નથી.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન એવું છે કે જેની ઉણપથી 'હોમોસિસ્ટીન'નું સ્તર શરીરમાં વધે છે અને હૃદયરોગનો ખતરો વધે છે, પરંતુ તેની ભરપાઈ માટે ફોલિક એસિડ સાથે સંયોજનમાં લેવામાં આવે છે?", "opts": ["વિટામિન B1 (થાયમિન)", "વિટામિન B6 (પાયરિડોક્સિન)", "વિટામિન B12 (કોબાલામિન)", "વિટામિન B3 (નિયાસિન)"], "ans": 2, "exp": "વિટામિન B12 (કોબાલામિન)ની ઉણપથી 'હોમોસિસ્ટીન'નું સ્તર શરીરમાં વધે છે, જે હૃદયરોગનો ખતરો વધારે છે. ફોલિક એસિડ સાથે વિટામિન B12 લેવાથી આ સ્થિતિ સુધરે છે. થાયમિન (A) એનર્જી ચયાપચયમાં, પાયરિડોક્સિન (B) એમિનો એસિડના ચયાપચયમાં, અને નિયાસિન (D) કોષીય શ્વસનમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે, પરંતુ હોમોસિસ્ટીનના સ્તર પર અસર કરતું નથી.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "એક વ્યક્તિને ત્વચા પર લાલ ચકામા, ડાયરિયા અને મનોભ્રમ જેવા લક્ષણો જોવા મળે છે. આ લક્ષણો કયા વિટામિનની ઉણપને કારણે થાય છે, જે નિકોટિનિક એસિડના રૂપમાં પણ ઓળખાય છે?", "opts": ["વિટામિન B2 (રાઇબોફ્લેવિન)", "વિટામિન B3 (નિયાસિન)", "વિટામિન B5 (પેન્ટોથેનિક એસિડ)", "વિટામિન B7 (બાયોટિન)"], "ans": 1, "exp": "વિટામિન B3 (નિયાસિન)ની ઉણપથી પેલેગ્રા રોગ થાય છે, જેમાં ત્વચા પર લાલ ચકામા (ડર્મેટાઇટિસ), ડાયરિયા અને મનોભ્રમ (ડિમેન્શિયા) જેવા લક્ષણો જોવા મળે છે. રાઇબોફ્લેવિન (A)ની ઉણપથી ચીલોસિસ અને ગ્લોસાઇટિસ, પેન્ટોથેનિક એસિડ (C)ની ઉણપથી થાક અને નિર્બળતા, અને બાયોટિન (D)ની ઉણપથી વાળનું પડી જવું અને ત્વચાના રોગો થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) વિટામિન Kની ઉણપથી રક્તસ્રાવ થવાની પ્રવૃત્તિ વધે છે. (2) વિટામિન K ચરબીમાં દ્રાવ્ય છે અને યકૃતમાં સંગ્રહિત થાય છે. (3) વિટામિન Kનું સંશ્લેષણ આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થતું નથી. (4) વિટામિન K પ્રકાશસંશ્લેષણ પ્રક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. ઉપરોક્ત વિધાનોમાંથી કયા વિધાનો સાચા છે?", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (1), (2) અને (3)", "ફક્ત (1) અને (4)", "ફક્ત (2) અને (4)"], "ans": 0, "exp": "વિટામિન Kની ઉણપથી રક્તસ્રાવ થવાની પ્રવૃત્તિ વધે છે (1 સાચું). તે ચરબીમાં દ્રાવ્ય છે અને યકૃતમાં સંગ્રહિત થાય છે (2 સાચું). વિટામિન Kનું સંશ્લેષણ આંતરડામાં રહેલા બેક્ટેરિયા દ્વારા થાય છે (3 ખોટું). વિટામિન K રક્તના ગંઠાઈ જવાની પ્રક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે, પ્રકાશસંશ્લેષણમાં નહીં (4 ખોટું).", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "એક વિટામિન એવું છે કે જેની ઉણપથી 'વર્ણાન્ધતા' (કલર બ્લાઇન્ડનેસ) થાય છે અને તે કોષીય શ્વસનમાં ઇલેક્ટ્રોન વાહક તરીકે કામ કરે છે. આ વિટામિન કયું છે?", "opts": ["વિટામિન A (રેટિનોલ)", "વિટામિન B2 (રાઇબોફ્લેવિન)", "વિટામિન C (એસ્કોર્બિક એસિડ)", "વિટામિન E (ટોકોફેરોલ)"], "ans": 1, "exp": "વિટામિન B2 (રાઇબોફ્લેવિન)ની ઉણપથી વર્ણાન્ધતા થાય છે અને તે કોષીય શ્વસનમાં FAD (ફ્લેવિન એડિનિન ડાયન્યુક્લિયોટાઇડ) તરીકે ઇલેક્ટ્રોન વાહક તરીકે કામ કરે છે. વિટામિન A (A) દૃષ્ટિ માટે, વિટામિન C (C) પ્રતિરક્ષાતંત્ર અને કોલેજન સંશ્લેષણ માટે, અને વિટામિન E (D) એન્ટી-ઑક્સિડન્ટ તરીકે મહત્વપૂર્ણ છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિટામિન એવું છે કે જેની ઉણપથી 'ક્વાશિયોરકોર' રોગ થાય છે, જે મુખ્યત્વે પ્રોટીનની અછત સાથે સંકળાયેલ છે અને તેની ભરપાઈ માટે તાજા ફળો અને શાકભાજીની જરૂર પડે છે?", "opts": ["વિટામિન A", "વિટામિન C", "વિટામિન D", "વિટામિન K"], "ans": 1, "exp": "ક્વાશિયોરકોર રોગ વિટામિન C (એસ્કોર્બિક એસિડ)ની ઉણપ અને પ્રોટીનની અછતને કારણે થાય છે. આ રોગની ભરપાઈ માટે તાજા ફળો અને શાકભાજી (જેમાં વિટામિન C પ્રચુર પ્રમાણમાં હોય છે)ની જરૂર પડે છે. વિટામિન A (A)ની ઉણપથી રાત્રિ અંધત્વ, વિટામિન D (C)ની ઉણપથી રિકેટ્સ, અને વિટામિન K (D)ની ઉણપથી રક્તસ્રાવ થાય છે.", "ref": "Std 12 - Chapter 10: પોષણ અને આહાર (Vitamins)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
