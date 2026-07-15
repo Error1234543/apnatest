@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સાયનોબેક્ટેરિયા</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>સાયનોબેક્ટેરિયા</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">સાયનોબેક્ટેરિયા</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "સાયનોબેક્ટેરિયામાં ક્યાં જીવવિજ્ઞાનીય લક્ષણો જોવા મળે છે જે તેને પ્લાન્ટ અને બેક્ટેરિયા વચ્ચેનું સેતુ બનાવે છે?", "opts": ["કોષભિત્તિમાં સેલ્યુલોઝની હાજરી અને ક્લોરોપ્લાસ્ટની અનુપસ્થિતિ", "પ્રકાશસંશ્લેષણ માટે ક્લોરોફિલ-એ અને ફાઇકોબિલીનની હાજરી તથા બેક્ટેરિયલ જેવી 70S રાઇબોઝોમ", "કોષકેન્દ્રની હાજરી અને પ્રોટીન સંશ્લેષણ માટે 80S રાઇબોઝોમ", "વર્ણસૂત્રમાં હિસ્ટોન પ્રોટીનની હાજરી અને મિટોકોન્ડ્રિયા દ્વારા શ્વસન"], "ans": 1, "exp": "સાયનોબેક્ટેરિયા (નીલ-હરિત શેવાળ)માં પ્રકાશસંશ્લેષણ માટે ક્લોરોફિલ-એ અને ફાઇકોબિલીન (ફાઇકોસાયનિન અને ફાઇકોએરિથ્રિન) હાજર હોય છે, જે પ્લાન્ટ જેવું લક્ષણ છે. પરંતુ તેની કોષરચના બેક્ટેરિયલ જેવી હોય છે, જેમ કે 70S રાઇબોઝોમ, કોષકેન્દ્રની અનુપસ્થિતિ અને મિટોકોન્ડ્રિયા ન હોવું. વિકલ્પ A મૂળભૂત તથ્યો સાથે ચૂક છે કારણ કે સાયનોબેક્ટેરિયામાં સેલ્યુલોઝ નથી હોતું. વિકલ્પ C અને D કોષકેન્દ્ર અને 80S રાઇબોઝોમ તથા હિસ્ટોનની હાજરી સૂચવે છે, જે યુકેરિયોટિક લક્ષણ છે અને સાયનોબેક્ટેરિયામાં હાજર નથી.", "ref": "Std 11 - પ્રકરણ 2: જીવસૃષ્ટીની વિવિધતા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયા દ્વારા નાઇટ્રોજન સ્થિરીકરણમાં કયા ઉત્સેચકની ભૂમિકા મહત્વની છે?", "opts": ["નાઇટ્રેઝ", "નાઇટ્રોજિનેઝ", "યુરિયેઝ", "ડિએમિનેઝ"], "ans": 1, "exp": "સાયનોબેક્ટેરિયા (જેમ કે નોસ્ટોક, એનાબીના) વાતાવરણમાંથી નાઇટ્રોજન ગેસને સ્થિર કરવા માટે નાઇટ્રોજિનેઝ ઉત્સેચકનો ઉપયોગ કરે છે. નાઇટ્રેઝ બેક્ટેરિયા દ્વારા અમોનિયાનું નાઇટ્રેટમાં રૂપાંતર કરે છે, યુરિયેઝ યુરિયાનું વિઘટન કરે છે, અને ડિએમિનેઝ એમિનો એસિડમાંથી અમોનિયા મુક્ત કરે છે. આથી, નાઇટ્રોજિનેઝ જ સાયનોબેક્ટેરિયામાં નાઇટ્રોજન સ્થિરીકરણ માટે જવાબદાર છે.", "ref": "Std 11 - પ્રકરણ 12: ખનિજ પોષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં હેટરોસિસ્ટ કોષની ભૂમિકા શું છે?", "opts": ["પ્રકાશસંશ્લેષણ દરમ્યાન ઓક્સિજન ઉત્પન્ન કરવું", "નાઇટ્રોજન સ્થિરીકરણ માટે એનાએરોબિક વાતાવરણ પૂરું પાડવું", "કાર્બોદિતના સંગ્રહ માટે ઉપયોગી હોવું", "પ્રજનન કોષોનું નિર્માણ કરવું"], "ans": 1, "exp": "હેટરોસિસ્ટ કોષ સાયનોબેક્ટેરિયામાં નાઇટ્રોજન સ્થિરીકરણ માટે જવાબદાર છે. આ કોષો પાસે જાડી કોષભિત્તિ હોય છે જે ઓક્સિજનને અંદર પ્રવેશતી અટકાવે છે, કારણ કે નાઇટ્રોજિનેઝ ઉત્સેચક ઓક્સિજનની હાજરીમાં નિષ્ક્રિય થઈ જાય છે. આથી, હેટરોસિસ્ટ એનાએરોબિક વાતાવરણ પૂરું પાડે છે. વિકલ્પ A, C, અને D હેટરોસિસ્ટની પ્રાથમિક ભૂમિકા સાથે સંગત નથી.", "ref": "Std 11 - પ્રકરણ 12: ખનિજ પોષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયા અને યુકેરિયોટિક શેવાળ વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["સાયનોબેક્ટેરિયામાં ક્લોરોપ્લાસ્ટ હાજર નથી, પરંતુ યુકેરિયોટિક શેવાળમાં હાજર છે", "સાયનોબેક્ટેરિયામાં કોષકેન્દ્ર હાજર છે, પરંતુ યુકેરિયોટિક શેવાળમાં નથી", "સાયનોબેક્ટેરિયામાં પ્રકાશસંશ્લેષણ થતું નથી, પરંતુ યુકેરિયોટિક શેવાળમાં થાય છે", "સાયનોબેક્ટેરિયામાં મિટોકોન્ડ્રિયા હાજર છે, પરંતુ યુકેરિયોટિક શેવાળમાં નથી"], "ans": 0, "exp": "સાયનોબેક્ટેરિયા પ્રોકેરિયોટિક સજીવ છે, જેમાં કોષકેન્દ્ર, મિટોકોન્ડ્રિયા, અને ક્લોરોપ્લાસ્ટ જેવી સંગઠિત કોષીય રચનાઓ હાજર નથી. પ્રકાશસંશ્લેષણ માટે તે ક્લોરોફિલ-એ અને ફાઇકોબિલીન ધરાવે છે, પરંતુ આ રંગદ્રવ્યો ક્લોરોપ્લાસ્ટમાં નહીં પરંતુ થાયલેકોઇડમાં સ્થિત હોય છે. યુકેરિયોટિક શેવાળમાં ક્લોરોપ્લાસ્ટ હાજર હોય છે. વિકલ્પ B, C, અને D તથ્યાત્મક રીતે ચૂક છે.", "ref": "Std 11 - પ્રકરણ 2: જીવસૃષ્ટીની વિવિધતા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં કયા પિગમેન્ટની હાજરી તેને લાલ રંગ આપે છે?", "opts": ["ક્લોરોફિલ-એ", "ફાઇકોસાયનિન", "ફાઇકોએરિથ્રિન", "કેરોટિનોઇડ"], "ans": 2, "exp": "સાયનોબેક્ટેરિયામાં ફાઇકોએરિથ્રિન પિગમેન્ટની હાજરી તેને લાલ રંગ આપે છે. ક્લોરોફિલ-એ હરિયો રંગ આપે છે, ફાઇકોસાયનિન નીલો રંગ આપે છે, અને કેરોટિનોઇડ પીળો અથવા નારંગી રંગ આપે છે. આથી, ફાઇકોએરિથ્રિન જ લાલ રંગ માટે જવાબદાર છે.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ગ્લાયકોકેલિક્સ' નામની રચના કયા હેતુ સારુ બનાવવામાં આવે છે?", "opts": ["કાર્બન ડાયોક્સાઇડના સંગ્રહ માટે", "નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઓક્સિજન-મુક્ત વાતાવરણ પૂરું પાડવા", "પ્રકાશસંશ્લેષણ દરમિયાન ઉત્પન્ન થતી ઉર્જાને સંગ્રહવા", "કોષની દીવાલને મજબૂત બનાવવા"], "ans": 1, "exp": "ગ્લાયકોકેલિક્સ સાયનોબેક્ટેરિયામાં હેટરોસિસ્ટ કોષોની આસપાસ બનતી જેલ-જેવી રચના છે, જે નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઓક્સિજન-મુક્ત વાતાવરણ પૂરું પાડે છે. ઓક્સિજન નાઇટ્રોજનેસ ઉત્સેચકની ક્રિયાને અવરોધે છે, તેથી આ રચના નાઇટ્રોજન સ્થિરીકરણ માટે મહત્વની છે. બાકીના વિકલ્પો: A) કાર્બન ડાયોક્સાઇડનો સંગ્રહ કાર્બોક્સીસોમમાં થાય છે. C) ઉર્જા સંગ્રહ માટે અન્ય રચનાઓ જવાબદાર છે. D) કોષદીવાલ મજબૂતી માટે પેક્ટિન અથવા અન્ય પદાર્થો જવાબદાર છે.", "ref": "Std 11 - અધ્યાય 2: જીવસૃષ્ટિની વૈવિધ્યતા - સાયનોબેક્ટેરિયા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ફાઇકોબિલિસોમ' ની ભૂમિકા શું છે?", "opts": ["પ્રકાશસંશ્લેષણ દરમિયાન પાણીના અણુઓનું વિભાજન કરવા", "પ્રકાશ ઉર્જાને શોષીને પ્રકાશસંશ્લેષણમાં મદદ કરવા", "નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઉત્સેચકોનું ઉત્પાદન કરવા", "કોષની વૃદ્ધિ માટે જરૂરી હોર્મોનનું સ્રાવ કરવા"], "ans": 1, "exp": "ફાઇકોબિલિસોમ સાયનોબેક્ટેરિયામાં પ્રકાશ શોષણ માટે જવાબદાર પિગમેન્ટ-પ્રોટીન કોમ્પલેક્સ છે, જે પ્રકાશસંશ્લેષણમાં મહત્વની ભૂમિકા ભજવે છે. A) પાણીના અણુઓનું વિભાજન ફોટોસિસ્ટમ II દ્વારા થાય છે. C) નાઇટ્રોજન સ્થિરીકરણ માટે નાઇટ્રોજનેસ ઉત્સેચક જવાબદાર છે. D) હોર્મોન સ્રાવ સાયનોબેક્ટેરિયામાં નહીં થતું હોય.", "ref": "Std 11 - અધ્યાય 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ઓસિલેટોરિયા' નામના જાતિમાં કયું લક્ષણ જોવા મળે છે જે તેને અન્ય સાયનોબેક્ટેરિયાથી અલગ પાડે છે?", "opts": ["તે પાણીના પ્રવાહીમાં તરતી રહે છે", "તેના કોષો વચ્ચે 'પ્લાસ્મોડેસમેટા' જેવી રચના હોય છે", "તે હવાના વાતાવરણમાં જીવી શકે છે", "તેના કોષોમાં કોષકેન્દ્ર હોય છે"], "ans": 1, "exp": "ઓસિલેટોરિયા જાતિમાં કોષો વચ્ચે 'પ્લાસ્મોડેસમેટા' જેવી રચના હોય છે, જે કોષો વચ્ચે સંપર્ક અને પદાર્થોના વિનિમયમાં મદદ કરે છે. A) તરતી રહેવું એ સાયનોબેક્ટેરિયાનું સામાન્ય લક્ષણ છે. C) સાયનોબેક્ટેરિયા હવાના વાતાવરણમાં જીવી શકે છે, પરંતુ આ ઓસિલેટોરિયાનું વિશિષ્ટ લક્ષણ નથી. D) સાયનોબેક્ટેરિયા પ્રોકેરિયોટિક છે, તેથી કોષકેન્દ્ર હોતું નથી.", "ref": "Std 11 - અધ્યાય 2: જીવસૃષ્ટિની વૈવિધ્યતા - સાયનોબેક્ટેરિયા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'સાયનોફાઇસિન' નામના પિગમેન્ટની ભૂમિકા શું છે?", "opts": ["લાલ પ્રકાશ શોષવા", "નીલા પ્રકાશ શોષવા", "હરિયા પ્રકાશ શોષવા", "પીળા પ્રકાશ શોષવા"], "ans": 1, "exp": "સાયનોફાઇસિન એ સાયનોબેક્ટેરિયામાં જોવા મળતું પિગમેન્ટ છે જે મુખ્યત્વે નીલા પ્રકાશને શોષે છે. A) લાલ પ્રકાશ શોષવા માટે ફાઇકોએરિથ્રિન જવાબદાર છે. C) હરિયા પ્રકાશ શોષવા માટે ક્લોરોફિલ જવાબદાર છે. D) પીળા પ્રકાશ શોષવા માટે કેરોટિનોઇડ્સ જવાબદાર છે.", "ref": "Std 11 - અધ્યાય 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'એકાઇનેટ' કોષની ભૂમિકા કઈ નથી?", "opts": ["અતિશય પ્રકાશથી રક્ષણ આપવા", "નાઇટ્રોજન સ્થિરીકરણમાં મદદ કરવા", "સ્પોર બનાવવા", "કોષવિભાજનમાં મદદ કરવા"], "ans": 2, "exp": "એકાઇનેટ કોષ સાયનોબેક્ટેરિયામાં અતિશય પ્રકાશથી રક્ષણ આપવા અને નાઇટ્રોજન સ્થિરીકરણમાં મદદ કરે છે. પરંતુ સ્પોર બનાવવું એ તેની ભૂમિકા નથી. સાયનોબેક્ટેરિયામાં સ્પોર બનાવવાની ક્ષમતા નથી. D) કોષવિભાજન એ સાયનોબેક્ટેરિયાનું સામાન્ય લક્ષણ છે, પરંતુ એકાઇનેટ કોષ તે માટે જવાબદાર નથી.", "ref": "Std 11 - અધ્યાય 2: જીવસૃષ્ટિની વૈવિધ્યતા - સાયનોબેક્ટેરિયા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'હોર્મોગોનિયા' નામની રચના કયા કાર્ય માટે જવાબદાર છે?", "opts": ["નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી વાતાવરણ પૂરું પાડવા", "પ્રકાશસંશ્લેષણ દરમિયાન ઓક્સિજન ઉત્પાદનને નિયંત્રિત કરવા", "અતિશય પ્રકાશથી બચાવવા માટે કોષીય રચનાઓને સુરક્ષિત રાખવા", "જલીય વાતાવરણમાં તરતા રહેવા માટે ગેસના કોથળો તરીકે કામ કરવા"], "ans": 3, "exp": "હોર્મોગોનિયા સાયનોબેક્ટેરિયામાં ગેસના કોથળો તરીકે કામ કરે છે, જે જલીય વાતાવરણમાં તરવા અને પ્રકાશ મેળવવામાં મદદ કરે છે. A) નાઇટ્રોજન સ્થિરીકરણ હેટરોસિસ્ટ દ્વારા થાય છે. B) પ્રકાશસંશ્લેષણનું નિયમન ફાઇકોબિલિસોમ અને અન્ય પિગમેન્ટ્સ દ્વારા થાય છે. C) અતિશય પ્રકાશથી બચાવવા માટે સાયનોફાઇસિન અને કેરોટિનોઇડ્સ જવાબદાર છે.", "ref": "Std 11 - પ્રકરણ 3: સૂક્ષ્મજીવો", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ટ્રાઇકોમ' નામની રચના કયા લક્ષણ સાથે સંબંધિત છે?", "opts": ["એકલ કોષીય જીવનચક્ર", "બહુકોષીય, શાખિત ફિલામેન્ટસ રચના", "ગોળાકાર કોષોની કલસ્ટર રચના", "સ્પાઇરલ આકારની કોષરચના"], "ans": 1, "exp": "ટ્રાઇકોમ સાયનોબેક્ટેરિયામાં બહુકોષીય, શાખિત ફિલામેન્ટસ રચના છે, જે કોષોની શ્રેણી બનાવે છે. A) સાયનોબેક્ટેરિયા એકલ કોષીય અથવા કોલોનીયલ હોઈ શકે, પરંતુ ટ્રાઇકોમ શબ્દ ફિલામેન્ટસ રચનાને દર્શાવે છે. C) ગોળાકાર કલસ્ટરને 'કોકસ' કહેવાય છે. D) સ્પાઇરલ આકાર 'સ્પાઇરિલમ' જેવી બેક્ટેરિયામાં જોવા મળે છે.", "ref": "Std 11 - પ્રકરણ 3: સૂક્ષ્મજીવો", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'સાયનોટોક્સિન' ઉત્પન્ન કરવાની ક્રિયા કયા પર્યાવરણીય પરિબળ દ્વારા પ્રેરિત થાય છે?", "opts": ["નાઇટ્રોજનની ઉણપ", "ફોસ્ફરસની અછત", "ઉચ્ચ તાપમાન અને પ્રકાશની તીવ્રતા", "કાર્બન ડાયોક્સાઇડની અછત"], "ans": 2, "exp": "સાયનોટોક્સિનનું ઉત્પાદન સામાન્ય રીતે ઉચ્ચ તાપમાન અને પ્રકાશની તીવ્રતાથી પ્રેરિત થાય છે, જે સાયનોબેક્ટેરિયલ બ્લૂમ્સ દરમિયાન થાય છે. A) નાઇટ્રોજનની ઉણપ નાઇટ્રોજન સ્થિરીકરણને પ્રેરિત કરે છે. B) ફોસ્ફરસની અછત વૃદ્ધિને મર્યાદિત કરે છે. D) કાર્બન ડાયોક્સાઇડની અછત પ્રકાશસંશ્લેષણને અસર કરે છે, પરંતુ સાયનોટોક્સિન ઉત્પાદન સાથે સીધો સંબંધ નથી.", "ref": "Std 12 - પ્રકરણ 8: પર્યાવરણ અને જૈવવિવિધતા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ગ્લાયકોલિપિડ' ની ભૂમિકા કઈ છે?", "opts": ["કોષરસપટલની સ્થિરતા જાળવવા", "પ્રકાશસંશ્લેષણ દરમિયાન ઇલેક્ટ્રોન વહન શૃંખલામાં ભાગ લેવા", "નાઇટ્રોજન સ્થિરીકરણ ઉત્સેચકોને સક્રિય કરવા", "કોષને ડિહાઇડ્રેશનથી બચાવવા"], "ans": 1, "exp": "ગ્લાયકોલિપિડ સાયનોબેક્ટેરિયામાં પ્રકાશસંશ્લેષણ દરમિયાન ઇલેક્ટ્રોન વહન શૃંખલામાં ભાગ લે છે, ખાસ કરીને થાઇલેકોઇડ પટલમાં. A) કોષરસપટલની સ્થિરતા માટે ફોસ્ફોલિપિડ્સ જવાબદાર છે. C) નાઇટ્રોજન સ્થિરીકરણ ઉત્સેચકો (નિટ્રોજનેઝ) માટે મોલિબ્ડેનમ અને લોહ જેવા ધાતુઓ જરૂરી છે. D) ડિહાઇડ્રેશનથી બચાવવા માટે સાયનોબેક્ટેરિયા પોલીસેકરાઇડ્સ જેવા કે ગ્લાયકોકેલિક્સનો ઉપયોગ કરે છે.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'હેટરોસિસ્ટ' કોષમાં નાઇટ્રોજનેઝ ઉત્સેચકની સક્રિયતા કયા પરિબળ દ્વારા નિયંત્રિત થાય છે?", "opts": ["ઓક્સિજનની હાજરી", "કાર્બન ડાયોક્સાઇડની સાંદ્રતા", "પ્રકાશની તીવ્રતા", "તાપમાન"], "ans": 0, "exp": "નાઇટ્રોજનેઝ ઉત્સેચક ઓક્સિજન માટે અતિશય સંવેદનશીલ છે, અને હેટરોસિસ્ટ કોષમાં ઓક્સિજનની હાજરી તેની સક્રિયતાને અવરોધે છે. હેટરોસિસ્ટ કોષમાં ઓક્સિજનની સાંદ્રતા ન્યૂનતમ રાખવામાં આવે છે, જેથી નાઇટ્રોજનેઝ સક્રિય રહે. B), C), અને D) પરિબળો નાઇટ્રોજનેઝની સક્રિયતાને સીધી અસર કરતા નથી.", "ref": "Std 11 - પ્રકરણ 3: સૂક્ષ્મજીવો", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ગેસ વેસિકલ' (વાયુ કોથળી) ની હાજરીનો મુખ્ય હેતુ કયો છે?", "opts": ["પ્રકાશસંશ્લેષણ દરમાં વધારો કરવા માટે કોષને પાણીની સપાટી પર તરતા રાખવા", "નાઇટ્રોજન સ્થિરીકરણ માટે ઓક્સિજનની અસરને ઘટાડવા", "કોષીય શ્વસન માટે ઓક્સિજનનો સંગ્રહ કરવા", "અનુકૂળ પર્યાવરણીય પરિસ્થિતિઓમાં બીજાણુ નિર્માણ માટે ઉર્જા પૂરી પાડવા"], "ans": 0, "exp": "ગેસ વેસિકલ સાયનોબેક્ટેરિયાને પાણીની સપાટી પર તરવા માટે મદદ કરે છે, જેથી તે વધુ પ્રકાશ મેળવી શકે અને પ્રકાશસંશ્લેષણની ક્રિયા વધુ કુશળતાથી થઈ શકે. ઓક્સિજનની અસર ઘટાડવા માટે હેટરોસિસ્ટ કોષ જવાબદાર હોય છે, કોષીય શ્વસન માટે ઓક્સિજનનો સંગ્રહ કરવો એ ગેસ વેસિકલનો હેતુ નથી, અને બીજાણુ નિર્માણ માટે ઉર્જા પૂરી પાડવી એ પણ ગેસ વેસિકલની ભૂમિકા નથી.", "ref": "Std 11 - અધ્યાય 3: સૂક્ષ્મજીવો અને વનસ્પતિ જગતમાં તેમની ભૂમિકા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ફિકોસાયનિન' અને 'ફિકોએરિથ્રિન' પિગમેન્ટ્સની હાજરીનો મુખ્ય ફાયદો કયો છે?", "opts": ["તે સાયનોબેક્ટેરિયાને લાલ અને નીલા પ્રકાશને શોષીને ગહન પાણીમાં જીવિત રહેવામાં મદદ કરે છે", "તે ક્લોરોફિલની જગ્યાએ પ્રકાશસંશ્લેષણ માટે ઉર્જા પૂરી પાડે છે", "તે સાયનોબેક્ટેરિયાને યજમાન વનસ્પતિ સાથે સહજીવન સંબંધ સ્થાપવામાં મદદ કરે છે", "તે નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઉત્સેચકોની સક્રિયતા વધારે છે"], "ans": 0, "exp": "ફિકોસાયનિન અને ફિકોએરિથ્રિન પિગમેન્ટ્સ સાયનોબેક્ટેરિયાને લાલ અને નીલા પ્રકાશને શોષીને ગહન પાણીમાં જીવિત રહેવામાં મદદ કરે છે, જ્યાં સૂર્યપ્રકાશની તીવ્રતા ઓછી હોય છે. ક્લોરોફિલ પ્રકાશસંશ્લેષણ માટે મુખ્ય પિગમેન્ટ છે, સહજીવન સંબંધ અથવા નાઇટ્રોજન સ્થિરીકરણ સાથે આ પિગમેન્ટ્સનો સીધો સંબંધ નથી.", "ref": "Std 11 - અધ્યાય 3: સૂક્ષ્મજીવો અને વનસ્પતિ જગતમાં તેમની ભૂમિકા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ટ્રાન્સપોઝોન' ની ભૂમિકા કઈ છે?", "opts": ["જનીનીય વૈવિધ્યતામાં વધારો કરવા માટે DNAના ટુકડાને એક જગ્યાએથી બીજી જગ્યાએ ખસેડવા", "પ્રકાશસંશ્લેષણ દરમાં વધારો કરવા માટે ક્લોરોપ્લાસ્ટમાં પિગમેન્ટ્સનું નિયંત્રણ કરવા", "નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઉત્સેચકોનું ઉત્પાદન કરવા", "કોષીય શ્વસન માટે મિટોકોન્ડ્રિયાનું નિયંત્રણ કરવા"], "ans": 0, "exp": "ટ્રાન્સપોઝોન (Transposon) જનીનીય વૈવિધ્યતામાં વધારો કરવા માટે DNAના ટુકડાને એક જગ્યાએથી બીજી જગ્યાએ ખસેડવામાં મદદ કરે છે. પ્રકાશસંશ્લેષણ, નાઇટ્રોજન સ્થિરીકરણ અથવા કોષીય શ્વસન સાથે ટ્રાન્સપોઝોનનો સીધો સંબંધ નથી.", "ref": "Std 12 - અધ્યાય 6: આનુવંશિકતા અને વિકાસ", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'કેપ્સ્યુલ' ની હાજરીનો મુખ્ય ઉદ્દેશ કયો છે?", "opts": ["કોષને શુષ્ક પરિસ્થિતિઓમાં જીવિત રાખવા માટે પાણીનો સંગ્રહ કરવા", "યજમાન કોષમાં પ્રવેશવા અને સહજીવન સંબંધ સ્થાપવા માટે", "પ્રકાશસંશ્લેષણ માટે જરૂરી કાર્બન ડાયોક્સાઇડને શોષવા", "કોષને યાંત્રિક ઇજાથી બચાવવા અને ચોંટાડી રાખવા માટે"], "ans": 3, "exp": "કેપ્સ્યુલનો મુખ્ય ઉદ્દેશ કોષને યાંત્રિક ઇજાથી બચાવવા અને ચોંટાડી રાખવા માટે છે. પાણીનો સંગ્રહ, સહજીવન સંબંધ અથવા કાર્બન ડાયોક્સાઇડ શોષણ સાથે કેપ્સ્યુલનો સીધો સંબંધ નથી.", "ref": "Std 11 - અધ્યાય 3: સૂક્ષ્મજીવો અને વનસ્પતિ જગતમાં તેમની ભૂમિકા", "ch": ""}, {"q": "સાયનોબેક્ટેરિયામાં 'ગ્લાયકોકેલિક્સ' અને 'હેટરોસિસ્ટ' કોષ વચ્ચેનો સંબંધ કયો છે?", "opts": ["ગ્લાયકોકેલિક્સ હેટરોસિસ્ટ કોષને નાઇટ્રોજન સ્થિરીકરણ માટે ઓક્સિજન-મુક્ત વાતાવરણ પૂરું પાડે છે.", "હેટરોસિસ્ટ કોષ ગ્લાયકોકેલિક્સમાં કાર્બન ડાયોક્સાઇડનું સંગ્રહણ કરે છે.", "ગ્લાયકોકેલિક્સ હેટરોસિસ્ટ કોષને પ્રકાશસંશ્લેષણ માટે ઉર્જા પૂરી પાડે છે.", "હેટરોસિસ્ટ કોષ ગ્લાયકોકેલિક્સમાં નાઇટ્રોજન યુક્ત પદાર્થોનું વહન કરે છે."], "ans": 0, "exp": "ગ્લાયકોકેલિક્સ હેટરોસિસ્ટ કોષને નાઇટ્રોજન સ્થિરીકરણ માટે જરૂરી ઓક્સિજન-મુક્ત વાતાવરણ પૂરું પાડે છે, કારણ કે નાઇટ્રોજનેઝ ઉત્સેચક ઓક્સિજનની હાજરીમાં નિષ્ક્રિય થઈ જાય છે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) હેટરોસિસ્ટ કોષ કાર્બન ડાયોક્સાઇડનું સંગ્રહણ કરતું નથી, C) ગ્લાયકોકેલિક્સ પ્રકાશસંશ્લેષણ માટે ઉર્જા પૂરી પાડતું નથી, D) હેટરોસિસ્ટ કોષ નાઇટ્રોજન યુક્ત પદાર્થોનું વહન કરતું નથી.", "ref": "Std 11 - Chapter 5: સાયનોબેક્ટેરિયા અને તેના જીવવિજ્ઞાનીય મહત્વ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
