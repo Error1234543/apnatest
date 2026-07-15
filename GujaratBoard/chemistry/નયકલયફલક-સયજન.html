@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ન્યુક્લિયોફિલિક સંયોજન</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ન્યુક્લિયોફિલિક સંયોજન</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ન્યુક્લિયોફિલિક સંયોજન</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ન્યુક્લિયોફિલિક સંયોજનોમાં ન્યુક્લિયોફિલિક સ્થાને હાજર હાઇડ્રોક્સિલ સમૂહ (–OH) ની જગ્યાએ કયો સમૂહ હાજર હોય ત્યારે તે સંયોજન ન્યુક્લિયોસાઇડ તરીકે ઓળખાય છે?", "opts": ["ફોસ્ફેટ સમૂહ (–PO₄)", "શર્કરા (Sugar) સમૂહ", "નાઇટ્રોજનયુક્ત બેઇઝ (Nitrogenous base)", "એમિનો સમૂહ (–NH₂)"], "ans": 1, "exp": "ન્યુક્લિયોસાઇડમાં ન્યુક્લિયોફિલિક સ્થાને શર્કરા (રાઇબોઝ અથવા ડિઓક્સીરાઇબોઝ) અને નાઇટ્રોજનયુક્ત બેઇઝ હાજર હોય છે. ફોસ્ફેટ સમૂહ ન્યુક્લિયોટાઇડમાં હાજર હોય છે, નહીં કે ન્યુક્લિયોસાઇડમાં. એમિનો સમૂહ પ્રોટીનમાં હાજર હોય છે. નાઇટ્રોજનયુક્ત બેઇઝ તો ન્યુક્લિયોસાઇડનો એક ઘટક છે, પરંતુ શર્કરા વગર તે અપૂર્ણ છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક સંયોજનોમાં કયો નાઇટ્રોજનયુક્ત બેઇઝ RNA અને DNA બંનેમાં હાજર હોય છે?", "opts": ["એડેનિન (Adenine)", "થાયમિન (Thymine)", "યુરેસિલ (Uracil)", "ગ્વાનિન (Guanine)"], "ans": 0, "exp": "એડેનિન (A) RNA અને DNA બંનેમાં હાજર હોય છે. થાયમિન (T) ફક્ત DNAમાં જ હાજર હોય છે, યુરેસિલ (U) ફક્ત RNAમાં જ હાજર હોય છે, જ્યારે ગ્વાનિન (G) બંનેમાં હાજર હોય છે પરંતુ પ્રશ્ન એડેનિનની જેમ સાર્વત્રિક હાજરી ધરાવતો નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ન્યુક્લિયોટાઇડના બંધારણમાં કયો ઘટક ફોસ્ફોડાયેસ્ટર બંધ રચનામાં ભાગ લેતો નથી?", "opts": ["ફોસ્ફેટ સમૂહ", "શર્કરા", "નાઇટ્રોજનયુક્ત બેઇઝ", "હાઇડ્રોક્સિલ સમૂહ"], "ans": 2, "exp": "ફોસ્ફોડાયેસ્ટર બંધ ફોસ્ફેટ સમૂહ અને શર્કરાના હાઇડ્રોક્સિલ સમૂહ વચ્ચે રચાય છે. નાઇટ્રોજનયુક્ત બેઇઝ આ બંધ રચનામાં સીધો ભાગ લેતો નથી, પરંતુ તે ન્યુક્લિયોટાઇડનો એક મહત્વનો ઘટક છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ની દ્વિગુણન પ્રક્રિયામાં કયું ન્યુક્લિયોફિલિક સંયોજન પ્રારંભિક બિંદુ (Origin of Replication) ની ઓળખમાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["ATP", "GTP", "RNA પ્રાઇમર", "DNA પોલિમરેઝ"], "ans": 2, "exp": "DNA દ્વિગુણન પ્રક્રિયામાં RNA પ્રાઇમર પ્રારંભિક બિંદુની ઓળખમાં અને DNA સિંથેસિસની શરૂઆતમાં મહત્વની ભૂમિકા ભજવે છે. ATP અને GTP ઉર્જા સ્રોત તરીકે કામ કરે છે, જ્યારે DNA પોલિમરેઝ DNA ની નકલ કરવાનું કામ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડમાં કયો બંધ ન્યુક્લિયોટાઇડને એકબીજા સાથે જોડીને પોલિન્યુક્લિયોટાઇડ શૃંખલા રચે છે?", "opts": ["હાઇડ્રોજન બંધ", "પેપ્ટાઇડ બંધ", "ફોસ્ફોડાયેસ્ટર બંધ", "ગ્લાયકોસિડિક બંધ"], "ans": 2, "exp": "ફોસ્ફોડાયેસ્ટર બંધ ન્યુક્લિયોટાઇડને એકબીજા સાથે જોડીને પોલિન્યુક્લિયોટાઇડ શૃંખલા રચે છે. હાઇડ્રોજન બંધ DNA ની દ્વિ-શૃંખલા વચ્ચે રચાય છે, પેપ્ટાઇડ બંધ પ્રોટીનમાં હાજર હોય છે, અને ગ્લાયકોસિડિક બંધ કાર્બોદિતોમાં હાજર હોય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડની દ્વિપરિમાણીય રચનામાં, કયા ન્યુક્લિયોટાઇડ વચ્ચે હાઇડ્રોજન બંધની સંખ્યા સૌથી ઓછી હોય છે?", "opts": ["એડિનિન અને થાયમિન", "ગ્વાનિન અને સાયટોસિન", "એડિનિન અને સાયટોસિન", "ગ્વાનિન અને થાયમિન"], "ans": 0, "exp": "એડિનિન અને થાયમિન વચ્ચે બે હાઇડ્રોજન બંધ બને છે, જ્યારે ગ્વાનિન અને સાયટોસિન વચ્ચે ત્રણ હાઇડ્રોજન બંધ બને છે. એડિનિન અને સાયટોસિન તેમજ ગ્વાનિન અને થાયમિન વચ્ચે હાઇડ્રોજન બંધ બનતો નથી, કારણ કે આ જોડી DNAની રચનામાં સ્વીકાર્ય નથી. અહીં, એડિનિન અને થાયમિન વચ્ચે સૌથી ઓછા (બે) હાઇડ્રોજન બંધ હોય છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિયિક એસિડ", "ch": ""}, {"q": "RNA ની રચનામાં, કયા ન્યુક્લિયોફિલિક બેઇઝનો સમાવેશ થતો નથી, પરંતુ તે DNA માં હાજર હોય છે?", "opts": ["એડિનિન", "થાયમિન", "ગ્વાનિન", "સાયટોસિન"], "ans": 1, "exp": "થાયમિન એ DNA માં હાજર હોય છે, પરંતુ RNA માં તેનો સમાવેશ થતો નથી. RNA માં થાયમિનની જગ્યાએ યુરેસિલ હાજર હોય છે. એડિનિન, ગ્વાનિન અને સાયટોસિન એ ત્રણેય RNA અને DNA બંનેમાં હાજર હોય છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિયિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડની રચનામાં, કયો ઘટક ન્યુક્લિયોસાઇડ અને ન્યુક્લિયોટાઇડ બંનેમાં સામાન્ય હોય છે?", "opts": ["ફોસ્ફેટ સમૂહ", "પેન્ટોઝ શર્કરા", "નાઇટ્રોજનયુક્ત બેઇઝ", "હાઇડ્રોક્સિલ સમૂહ"], "ans": 2, "exp": "નાઇટ્રોજનયુક્ત બેઇઝ એ ન્યુક્લિયોસાઇડ અને ન્યુક્લિયોટાઇડ બંનેમાં સામાન્ય ઘટક છે. ફોસ્ફેટ સમૂહ ફક્ત ન્યુક્લિયોટાઇડમાં જ હાજર હોય છે, જ્યારે પેન્ટોઝ શર્કરા ન્યુક્લિયોસાઇડ અને ન્યુક્લિયોટાઇડ બંનેમાં હાજર હોય છે, પરંતુ તેની પ્રકાર (રાઇબોઝ અથવા ડિઓક્સીરાઇબોઝ) બદલાય છે. હાઇડ્રોક્સિલ સમૂહ તો શર્કરામાં હાજર હોય છે, પરંતુ તે ન્યુક્લિયોસાઇડ અને ન્યુક્લિયોટાઇડની વ્યાખ્યામાં સામાન્ય ઘટક નથી.", "ref": "Std 12 - Chapter 6: ન્યુક્લિયિક એસિડ", "ch": ""}, {"q": "DNA ની દ્વિગુણન પ્રક્રિયામાં, કયા ઉત્સેચક દ્વારા RNA પ્રાઇમરની રચના થાય છે?", "opts": ["DNA પોલિમરેઝ I", "DNA પોલિમરેઝ III", "પ્રાઇમેઝ", "હેલિકેઝ"], "ans": 2, "exp": "DNA ની દ્વિગુણન પ્રક્રિયામાં, પ્રાઇમેઝ ઉત્સેચક દ્વારા RNA પ્રાઇમરની રચના થાય છે. DNA પોલિમરેઝ I અને III DNA ની સિંથેસિસમાં ભાગ લે છે, પરંતુ RNA પ્રાઇમરની રચના કરતું નથી. હેલિકેઝ ઉત્સેચક DNA ની દ્વિગુણન પ્રક્રિયામાં ડબલ હેલિક્સને ખોલવામાં મદદ કરે છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિયિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડની રચનામાં, કયા ન્યુક્લિયોટાઇડમાં પેન્ટોઝ શર્કરા તરીકે રાઇબોઝ હાજર હોય છે?", "opts": ["DNA ના ન્યુક્લિયોટાઇડ", "RNA ના ન્યુક્લિયોટાઇડ", "ATP", "NAD"], "ans": 1, "exp": "RNA ના ન્યુક્લિયોટાઇડમાં પેન્ટોઝ શર્કરા તરીકે રાઇબોઝ હાજર હોય છે. DNA ના ન્યુક્લિયોટાઇડમાં ડિઓક્સીરાઇબોઝ હાજર હોય છે. ATP અને NAD એ ન્યુક્લિયોટાઇડના વ્યુત્પન્ન છે, પરંતુ તે RNA અથવા DNA ના ન્યુક્લિયોટાઇડ નથી.", "ref": "Std 12 - Chapter 6: ન્યુક્લિયિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક સંયોજનોમાં, કયા ન્યુક્લિયોટાઇડમાં પાયરિમિડિન બેઇઝ હાજર હોય છે, પરંતુ તેના કોઈપણ ટૉટોમરિક સ્વરૂપમાં ઇમિનોફૉસ્ફેટ સમૂહ રચતો નથી?", "opts": ["એડિનિન", "ગ્વાનિન", "સાયટોસિન", "થાયમિન"], "ans": 3, "exp": "થાયમિન (D) એ પાયરિમિડિન બેઇઝ છે જે ક્યારેય ઇમિનોફૉસ્ફેટ સમૂહ રચતો નથી, કારણ કે તેની રાસાયણિક રચનામાં ઇમિન સમૂહ (–NH) ની જગ્યાએ મિથાઇલ સમૂહ (–CH₃) હાજર હોય છે. એડિનિન (A) અને ગ્વાનિન (B) પ્યુરિન બેઇઝ છે, જ્યારે સાયટોસિન (C) પાયરિમિડિન બેઇઝ છે પરંતુ તે ઇમિનોફૉસ્ફેટ સ્વરૂપ ધારણ કરી શકે છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "DNA ની દ્વિગુણન પ્રક્રિયામાં, કયા ન્યુક્લિયોફિલિક સંયોજન દ્વારા 'પ્રૂફરીડિંગ' (Proofreading) ક્રિયા હાથ ધરવામાં આવે છે?", "opts": ["DNA પોલિમરેઝ I", "DNA પોલિમરેઝ III", "હેલિકેઝ", "લાઇગેઝ"], "ans": 1, "exp": "DNA પોલિમરેઝ III (B) એ ઉત્સેચક છે જે DNA દ્વિગુણન દરમિયાન 'પ્રૂફરીડિંગ' ક્રિયા કરે છે, જેમાં તે ભૂલભરેલા ન્યુક્લિયોટાઇડને ઓળખીને કાઢી નાખે છે. DNA પોલિમરેઝ I (A) મુખ્યત્વે ઓકાઝાકી ફ્રેગમેન્ટ્સને જોડવામાં ભાગ લે છે, હેલિકેઝ (C) DNA ને અનવાઇન્ડ કરે છે, અને લાઇગેઝ (D) ન્યુક્લિયોટાઇડ વચ્ચેના ફોસ્ફોડાયેસ્ટર બંધને સ્થિર કરે છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડની રચનામાં, કયા ન્યુક્લિયોટાઇડમાં ફોસ્ફેટ સમૂહની જગ્યાએ સલ્ફેટ સમૂહ (–SO₃H) હાજર હોય છે, જેને 'થાયોફૉસ્ફેટ ન્યુક્લિયોટાઇડ' કહેવાય છે?", "opts": ["ATP", "GTP", "TTP", "UTP"], "ans": 2, "exp": "TTP (થાયમિડિન ટ્રાઇફોસ્ફેટ) (C) નું થાયોફૉસ્ફેટ સ્વરૂપ, જેમાં ફોસ્ફેટ સમૂહની જગ્યાએ સલ્ફેટ સમૂહ (–SO₃H) હાજર હોય છે, તેને 'થાયોફૉસ્ફેટ ન્યુક્લિયોટાઇડ' કહેવાય છે. ATP (A), GTP (B), અને UTP (D) એ સામાન્ય ન્યુક્લિયોટાઇડ છે જેમાં ફોસ્ફેટ સમૂહ હાજર હોય છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "RNA ની રચનામાં, કયા ન્યુક્લિયોફિલિક બેઇઝનો સમાવેશ થાય છે જે DNA માં હાજર નથી, પરંતુ તેના કોઈપણ ટૉટોમરિક સ્વરૂપમાં કીટો ફૉસ્ફેટ સમૂહ રચી શકે છે?", "opts": ["એડિનિન", "યુરેસિલ", "ગ્વાનિન", "થાયમિન"], "ans": 1, "exp": "યુરેસિલ (B) એ RNA માં હાજર પાયરિમિડિન બેઇઝ છે જે DNA માં હાજર નથી. તે કીટો ફૉસ્ફેટ સમૂહ રચી શકે છે, જ્યારે એડિનિન (A) અને ગ્વાનિન (C) પ્યુરિન બેઇઝ છે, અને થાયમિન (D) DNA માં હાજર છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક સંયોજનોમાં, કયા ન્યુક્લિયોટાઇડમાં પેન્ટોઝ શર્કરા તરીકે ડિઓક્સીરાઇબોઝ હાજર હોય છે, પરંતુ તેના બેઇઝમાં હાઇડ્રોક્સિલ સમૂહ (–OH) ની જગ્યાએ મિથાઇલ સમૂહ (–CH₃) હાજર હોય છે?", "opts": ["એડિનોસિન મોનોફોસ્ફેટ (AMP)", "ગ્વાનોસિન મોનોફોસ્ફેટ (GMP)", "થાયમિડિન મોનોફોસ્ફેટ (TMP)", "સાયટિડિન મોનોફોસ્ફેટ (CMP)"], "ans": 2, "exp": "થાયમિડિન મોનોફોસ્ફેટ (TMP) (C) એ એકમાત્ર ન્યુક્લિયોટાઇડ છે જેમાં પેન્ટોઝ શર્કરા તરીકે ડિઓક્સીરાઇબોઝ હાજર હોય છે અને તેના બેઇઝ (થાયમિન) માં હાઇડ્રોક્સિલ સમૂહ (–OH) ની જગ્યાએ મિથાઇલ સમૂહ (–CH₃) હાજર હોય છે. AMP (A), GMP (B), અને CMP (D) એ સામાન્ય ન્યુક્લિયોટાઇડ છે જેમાં રાઇબોઝ શર્કરા હાજર હોય છે.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક એસિડની રચનામાં, કયા ન્યુક્લિયોટાઇડ વચ્ચે હાઇડ્રોજન બંધની સંખ્યા સૌથી વધુ હોય છે?", "opts": ["એડેનિન (A) અને થાયમિન (T)", "ગ્વાનિન (G) અને સાયટોસિન (C)", "એડેનિન (A) અને સાયટોસિન (C)", "ગ્વાનિન (G) અને થાયમિન (T)"], "ans": 1, "exp": "ગ્વાનિન (G) અને સાયટોસિન (C) વચ્ચે ત્રણ હાઇડ્રોજન બંધ હોય છે, જે સૌથી વધુ છે. એડેનિન (A) અને થાયમિન (T) વચ્ચે બે હાઇડ્રોજન બંધ હોય છે. એડેનિન (A) અને સાયટોસિન (C) તથા ગ્વાનિન (G) અને થાયમિન (T) વચ્ચે હાઇડ્રોજન બંધ રચાતા નથી.", "ref": "Std 12 - Chapter 6: ન્યુક્લિક એસિડ", "ch": ""}, {"q": "DNA ની દ્વિગુણન પ્રક્રિયામાં, કયા ઉત્સેચક દ્વારા DNA પોલિમરેઝની ક્રિયા અટકાવવામાં આવે છે જ્યારે તે ભૂલ પારખે છે?", "opts": ["હેલિકેઝ", "ટોપોઇઝોમરેઝ", "DNA પોલિમરેઝ I", "લાઇગેઝ"], "ans": 2, "exp": "DNA પોલિમરેઝ I એ ઉત્સેચક છે જે DNA દ્વિગુણન દરમિયાન ભૂલો શોધી કાઢે છે અને તેની મરામત કરે છે. હેલિકેઝ DNA ની દ્વિગુણન પ્રક્રિયામાં ડબલ હેલિક્સ ખોલે છે, ટોપોઇઝોમરેઝ DNA ની સુપરકોઇલિંગને દૂર કરે છે, અને લાઇગેઝ DNA ની શૃંખલાઓને જોડે છે. તેથી, DNA પોલિમરેઝ I એ સૌથી યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન ન્યુક્લિયોફિલિક સંયોજનોના સંદર્ભમાં ખોટું છે?\n1. DNA અને RNA બંનેમાં નાઇટ્રોજનયુક્ત બેઇઝ અને પેન્ટોઝ શર્કરા વચ્ચે β-N-ગ્લાયકોસિડિક બંધ રચાય છે.\n2. ન્યુક્લિયોટાઇડમાં ફોસ્ફેટ સમૂહ 5' કાર્બન સાથે એસ્ટર બંધથી જોડાયેલો હોય છે.\n3. RNA માં યુરેસિલ બેઇઝ હાજર હોય છે, જે DNA માં થાઇમિન દ્વારા બદલાય છે.\n4. ન્યુક્લિયોસાઇડમાં ફોસ્ફેટ સમૂહ હાજર ન હોવાથી તે ન્યુક્લિયોટાઇડ કરતાં વધુ સ્થિર હોય છે.", "opts": ["વિધાન 1 અને 2 ખોટાં છે", "વિધાન 3 અને 4 ખોટાં છે", "માત્ર વિધાન 4 ખોટું છે", "વિધાન 2 અને 3 ખોટાં છે"], "ans": 2, "exp": "વિધાન 4 ખોટું છે કારણ કે ન્યુક્લિયોસાઇડમાં ફોસ્ફેટ સમૂહ હાજર ન હોવાથી તે ન્યુક્લિયોટાઇડ કરતાં ઓછું સ્થિર હોય છે, વધુ સ્થિર નહીં. વિધાન 1, 2 અને 3 સાચાં છે: DNA અને RNA બંનેમાં β-N-ગ્લાયકોસિડિક બંધ રચાય છે, ફોસ્ફેટ સમૂહ 5' કાર્બન સાથે એસ્ટર બંધથી જોડાયેલો હોય છે, અને RNA માં યુરેસિલ બેઇઝ DNA માં થાઇમિન દ્વારા બદલાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "ન્યુક્લિયોફિલિક સંયોજનોના સંદર્ભમાં નીચેના પૈકી કયું જોડકું યોગ્ય નથી?\n(ઉત્સેચક → કાર્ય)", "opts": ["DNA પોલિમરેઝ III → પ્રૂફરીડિંગ અને 5'→3' પોલિમરાઇઝેશન", "લાઇગેઝ → ઓકાઝાકી ટુકડાઓને જોડવું", "હેલિકેઝ → ફોસ્ફોડાયેસ્ટર બંધ તોડી DNA ને ખોલવું", "પ્રાઇમેઝ → RNA પ્રાઇમરનું સંશ્લેષણ"], "ans": 2, "exp": "હેલિકેઝ ઉત્સેચક હાઇડ્રોજન બંધ તોડી DNA ને ખોલે છે, ફોસ્ફોડાયેસ્ટર બંધ નહીં. બાકીના જોડકાં યોગ્ય છે: DNA પોલિમરેઝ III પ્રૂફરીડિંગ અને 5'→3' પોલિમરાઇઝેશન કરે છે, લાઇગેઝ ઓકાઝાકી ટુકડાઓને જોડે છે, અને પ્રાઇમેઝ RNA પ્રાઇમરનું સંશ્લેષણ કરે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એક સંશોધકને એક અજ્ઞાત ન્યુક્લિયોફિલિક સંયોજન મળ્યું છે જેમાં નીચેના ગુણધર્મો છે:\n- તેમાં રાઇબોઝ શર્કરા હાજર છે.\n- તે એકલ શૃંખલા ધરાવે છે.\n- તેમાં થાઇમિન બેઇઝ હાજર નથી.\n- તે પ્રોટીન સંશ્લેષણમાં ભાગ લે છે.\nઆ સંયોજનને ઓળખો અને તેના કાર્ય સાથે યોગ્ય જોડકું પસંદ કરો.", "opts": ["mRNA → જનીનિક માહિતીનું વહન", "tRNA → એમિનો એસિડનું વહન", "rRNA → રિબોઝોમનું બંધારણીય ઘટક", "snRNA → સ્પ્લાઇસિંગમાં ભાગ લેવો"], "ans": 0, "exp": "આ સંયોજન mRNA છે કારણ કે તેમાં રાઇબોઝ શર્કરા, એકલ શૃંખલા, થાઇમિનનો અભાવ અને પ્રોટીન સંશ્લેષણમાં ભાગ લેવાની લાક્ષણિકતા છે. mRNA જનીનિક માહિતીનું વહન કરે છે. tRNA એમિનો એસિડનું વહન કરે છે, rRNA રિબોઝોમનું બંધારણીય ઘટક છે, અને snRNA સ્પ્લાઇસિંગમાં ભાગ લે છે, પરંતુ આ સંયોજનના ગુણધર્મો mRNA સાથે મેળ ખાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
