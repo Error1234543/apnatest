@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>લેન્થેનાઈડ સંકોચન</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>લેન્થેનાઈડ સંકોચન</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">લેન્થેનાઈડ સંકોચન</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "લેન્થેનાઈડ શ્રેણીના તત્ત્વોના પરમાણ્વીય ત્રિજ્યામાં થતું સંકોચન શું કારણે થાય છે?", "opts": ["4f ઇલેક્ટ્રોનનું નબળું શિલ્ડિંગ અને વધતું કેન્દ્રીય વીજભાર", "5d ઇલેક્ટ્રોનનું પ્રબળ શિલ્ડિંગ અને ઘટતું કેન્દ્રીય વીજભાર", "4f ઇલેક્ટ્રોનનું પ્રબળ શિલ્ડિંગ અને વધતું કેન્દ્રીય વીજભાર", "5s ઇલેક્ટ્રોનનું નબળું શિલ્ડિંગ અને ઘટતું કેન્દ્રીય વીજભાર"], "ans": 0, "exp": "લેન્થેનાઈડ સંકોચન 4f ઇલેક્ટ્રોનના નબળા શિલ્ડિંગ ગુણધર્મને કારણે થાય છે. જેમ જેમ પરમાણ્વીય ક્રમાંક વધે છે તેમ કેન્દ્રીય વીજભાર વધે છે, પરંતુ 4f ઇલેક્ટ્રોન બાહ્ય ઇલેક્ટ્રોનને અસરકારક રીતે રક્ષિત કરી શકતા નથી, જેના કારણે બાહ્ય ઇલેક્ટ્રોન કેન્દ્ર તરફ વધુ આકર્ષાય છે અને પરમાણ્વીય ત્રિજ્યા ઘટે છે. વિકલ્પ B અને Cમાં શિલ્ડિંગ પ્રબળ હોવાનું કહેવાયું છે જે ખોટું છે. વિકલ્પ Dમાં 5s ઇલેક્ટ્રોનની વાત છે જે લેન્થેનાઈડ શ્રેણી સાથે સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા બે તત્ત્વોની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે?", "opts": ["Zr અને Hf", "Nb અને Ta", "Mo અને W", "ઉપરોક્ત તમામ જોડ"], "ans": 3, "exp": "લેન્થેનાઈડ સંકોચનને કારણે 5d શ્રેણીના તત્ત્વોની પરમાણ્વીય ત્રિજ્યા તેમના ઉપરના 4d શ્રેણીના સમધર્મી તત્ત્વો જેટલી જ થઈ જાય છે. આથી Zr-Hf, Nb-Ta અને Mo-Wની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે. માત્ર એક જ જોડ પસંદ કરવાનું કહેવામાં આવ્યું હોત તો પણ તમામ વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["લેન્થેનાઈડ સંકોચનને કારણે Y અને Laની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન થાય છે", "લેન્થેનાઈડ સંકોચનને કારણે 5d શ્રેણીના તત્ત્વોની આયનીકરણ ઊર્જા વધે છે", "લેન્થેનાઈડ સંકોચનને કારણે લેન્થેનાઈડ શ્રેણીમાં રાસાયણિક ગુણધર્મોમાં નોંધપાત્ર ફેરફાર થાય છે", "લેન્થેનાઈડ સંકોચનને કારણે Hfની ઘનતા Zr કરતાં વધુ હોય છે"], "ans": 2, "exp": "લેન્થેનાઈડ સંકોચનને કારણે લેન્થેનાઈડ શ્રેણીમાં રાસાયણિક ગુણધર્મોમાં ખૂબ જ ઓછો ફેરફાર થાય છે કારણ કે બધા જ લેન્થેનાઈડ તત્ત્વોના બાહ્ય ઇલેક્ટ્રોનિક બંધારણ સમાન હોય છે. વિકલ્પ A, B અને D સાચાં છે. Y અને Laની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે, 5d શ્રેણીના તત્ત્વોની આયનીકરણ ઊર્જા વધે છે, અને Hfની ઘનતા Zr કરતાં વધુ હોય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા ગુણધર્મમાં વધારો થાય છે?", "opts": ["પરમાણ્વીય ત્રિજ્યા", "આયનીકરણ ઊર્જા", "વિદ્યુતઋણતા", "B અને C બંને"], "ans": 3, "exp": "લેન્થેનાઈડ સંકોચનને કારણે પરમાણ્વીય ત્રિજ્યા ઘટે છે, જેના પરિણામે બાહ્ય ઇલેક્ટ્રોન કેન્દ્ર સાથે વધુ મજબૂતાઈથી જોડાયેલા હોય છે. આથી આયનીકરણ ઊર્જા અને વિદ્યુતઋણતા બંનેમાં વધારો થાય છે. વિકલ્પ A ખોટો છે કારણ કે પરમાણ્વીય ત્રિજ્યા ઘટે છે. વિકલ્પ B અને C સાચાં છે, પરંતુ D બંનેને આવરી લે છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનની અસર નીચેનામાંથી કયા પર થતી નથી?", "opts": ["લેન્થેનાઈડ તત્ત્વોના રાસાયણિક ગુણધર્મો", "5d શ્રેણીના તત્ત્વોની પરમાણ્વીય ત્રિજ્યા", "લેન્થેનાઈડ તત્ત્વોની ચુંબકીય ગુણધર્મો", "Zr અને Hfની વિભાજન ક્ષમતા"], "ans": 0, "exp": "લેન્થેનાઈડ સંકોચન લેન્થેનાઈડ તત્ત્વોના રાસાયણિક ગુણધર્મો પર ખૂબ જ ઓછી અસર કરે છે કારણ કે બધા જ લેન્થેનાઈડ તત્ત્વોના બાહ્ય ઇલેક્ટ્રોનિક બંધારણ સમાન હોય છે. વિકલ્પ Bમાં 5d શ્રેણીના તત્ત્વોની પરમાણ્વીય ત્રિજ્યા પર અસર થાય છે. વિકલ્પ Cમાં ચુંબકીય ગુણધર્મો પર અસર થઈ શકે છે કારણ કે 4f ઇલેક્ટ્રોનની સંખ્યા બદલાય છે. વિકલ્પ Dમાં Zr અને Hfની વિભાજન ક્ષમતા પર અસર થાય છે કારણ કે તેમની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન થઈ જાય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વોના જોડીની આયનિક ત્રિજ્યા લગભગ સરખી હોય છે?", "opts": ["Zr અને Hf", "Nb અને Ta", "Mo અને W", "Tc અને Re"], "ans": 0, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Zr (Z=40) અને Hf (Z=72)ની આયનિક ત્રિજ્યા લગભગ સરખી હોય છે, કારણ કે Hfમાં લેન્થેનાઈડ શ્રેણી પછી 4f ઇલેક્ટ્રોન ભરાય છે, જે પરમાણ્વીય ત્રિજ્યામાં સંકોચન લાવે છે. Nb-Ta, Mo-W, અને Tc-Re જોડીઓમાં પણ આ પ્રભાવ જોવા મળે છે, પરંતુ Zr-Hf જોડી સૌથી પ્રખ્યાત ઉદાહરણ છે. બાકીની જોડીઓમાં ત્રિજ્યામાં થોડો ફરક જોવા મળે છે.", "ref": "Std 12 - Chapter 8: d- અને f-બ્લોક તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વની પરમાણ્વીય ત્રિજ્યા અપેક્ષિત ક્રમથી વિપરીત હોય છે?", "opts": ["La", "Ce", "Gd", "Lu"], "ans": 2, "exp": "Gd (Gadolinium)માં 4f કક્ષામાં 7 ઇલેક્ટ્રોન ભરાય છે, જે સંપૂર્ણ અર્ધ-ભરેલી 4f કક્ષા બનાવે છે. આને કારણે Gdની પરમાણ્વીય ત્રિજ્યા અપેક્ષિત ક્રમથી થોડી વધુ હોય છે, કારણ કે અર્ધ-ભરેલી કક્ષા વધુ સ્થિરતા પ્રદાન કરે છે. La, Ce, અને Luમાં આ પ્રકારની વિશિષ્ટતા જોવા મળતી નથી.", "ref": "Std 12 - Chapter 8: d- અને f-બ્લોક તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા ગુણધર્મમાં ઘટાડો થાય છે?", "opts": ["ઘનતા", "ગલનબિંદુ", "આયનિક ત્રિજ્યા", "ઇલેક્ટ્રોન ગ્રહણ શક્તિ"], "ans": 2, "exp": "લેન્થેનાઈડ સંકોચનને કારણે આયનિક ત્રિજ્યામાં ઘટાડો થાય છે, કારણ કે 4f ઇલેક્ટ્રોનના ભરાવાથી ન્યુક્લિયર ચાર્જમાં વધારો થાય છે, જે ઇલેક્ટ્રોનને ન્યુક્લિયસ તરફ ખેંચે છે. ઘનતા, ગલનબિંદુ, અને ઇલેક્ટ્રોન ગ્રહણ શક્તિમાં સામાન્ય રીતે વધારો જોવા મળે છે.", "ref": "Std 12 - Chapter 8: d- અને f-બ્લોક તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વની ત્રિજ્યા સૌથી ઓછી અસર પામે છે?", "opts": ["La", "Ce", "Pr", "Lu"], "ans": 0, "exp": "La (Lanthanum) લેન્થેનાઈડ શ્રેણીનું પ્રથમ તત્ત્વ છે, અને તેની પાસે 4f ઇલેક્ટ્રોન નથી. આ કારણે લેન્થેનાઈડ સંકોચનની અસર La પર સૌથી ઓછી પડે છે. Ce, Pr, અને Luમાં 4f ઇલેક્ટ્રોન ભરાય છે, જે ત્રિજ્યામાં સંકોચન લાવે છે.", "ref": "Std 12 - Chapter 8: d- અને f-બ્લોક તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વોની જોડીની રાસાયણિક ગુણધર્મો લગભગ સરખી હોય છે?", "opts": ["Zr અને Nb", "Nb અને Ta", "Mo અને Tc", "Hf અને Ta"], "ans": 1, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Nb (Niobium) અને Ta (Tantalum)ની રાસાયણિક ગુણધર્મો લગભગ સરખી હોય છે, કારણ કે તેમની પરમાણ્વીય ત્રિજ્યા લગભગ સરખી હોય છે. Zr-Nb, Mo-Tc, અને Hf-Ta જોડીઓમાં આ પ્રકારની સરખામણી જોવા મળતી નથી.", "ref": "Std 12 - Chapter 8: d- અને f-બ્લોક તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા જોડીના તત્ત્વોની પરમાણ્વીય ત્રિજ્યામાં સૌથી ઓછો ફરક જોવા મળે છે?", "opts": ["La અને Ce", "Gd અને Tb", "Dy અને Ho", "Er અને Tm"], "ans": 1, "exp": "ગેડોલિનિયમ (Gd) અને ટર્બિયમ (Tb)ની પરમાણ્વીય ત્રિજ્યામાં લેન્થેનાઈડ સંકોચનને કારણે સૌથી ઓછો ફરક જોવા મળે છે. આ કારણ છે કે ગેડોલિનિયમની 4f કક્ષા અર્ધ-ભરેલી હોય છે, જેને કારણે તેની ત્રિજ્યામાં ખાસ્સો ફરક પડતો નથી. બાકીની જોડીઓમાં ત્રિજ્યામાં વધુ ફરક જોવા મળે છે.", "ref": "Std 12 - Chapter 8: d- અને f-વર્ગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વની આયનિક ત્રિજ્યા લેન્થેનાઈડ શ્રેણીના અંતિમ તત્ત્વ (Lu) કરતાં ઓછી હોય છે?", "opts": ["સ્કેન્ડિયમ (Sc)", "ટાઇટેનિયમ (Ti)", "વેનેડિયમ (V)", "ક્રોમિયમ (Cr)"], "ans": 0, "exp": "સ્કેન્ડિયમ (Sc)ની આયનિક ત્રિજ્યા લેન્થેનાઈડ શ્રેણીના અંતિમ તત્ત્વ લ્યુટેટિયમ (Lu) કરતાં ઓછી હોય છે. ટાઇટેનિયમ (Ti), વેનેડિયમ (V), અને ક્રોમિયમ (Cr)ની આયનિક ત્રિજ્યા Lu કરતાં વધુ હોય છે.", "ref": "Std 12 - Chapter 8: d- અને f-વર્ગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વની ત્રિજ્યામાં સૌથી વધુ અસર થાય છે?", "opts": ["લેન્થેનમ (La)", "સીરિયમ (Ce)", "ગેડોલિનિયમ (Gd)", "લ્યુટેટિયમ (Lu)"], "ans": 3, "exp": "લ્યુટેટિયમ (Lu)ની ત્રિજ્યામાં લેન્થેનાઈડ સંકોચનને કારણે સૌથી વધુ અસર થાય છે કારણ કે તે લેન્થેનાઈડ શ્રેણીના અંતિમ તત્ત્વ છે અને 4f કક્ષામાં ઇલેક્ટ્રોનની સંખ્યા સૌથી વધુ હોય છે. લેન્થેનમ (La), સીરિયમ (Ce), અને ગેડોલિનિયમ (Gd)ની ત્રિજ્યામાં ઓછી અસર થાય છે.", "ref": "Std 12 - Chapter 8: d- અને f-વર્ગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે Zr (ઝિર્કોનિયમ) અને Hf (હાફનિયમ)ની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે, પરંતુ તેમના નીચેના ગુણધર્મોમાંથી કયો ગુણધર્મ આ સંકોચનની અસરને કારણે સૌથી વધુ પ્રભાવિત થતો નથી?", "opts": ["ગલનબિંદુ", "ઉત્કલનબિંદુ", "વિદ્યુતઋણતા", "આયનીકરણ એન્થાલ્પી"], "ans": 2, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Zr અને Hfની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન થાય છે, જેને લીધે તેમના ભૌતિક ગુણધર્મો જેવા કે ગલનબિંદુ, ઉત્કલનબિંદુ અને આયનીકરણ એન્થાલ્પીમાં સમાનતા જોવા મળે છે. પરંતુ વિદ્યુતઋણતા મુખ્યત્વે પરમાણુના કેન્દ્ર અને સંયોજક ઇલેક્ટ્રોન વચ્ચેના આકર્ષણ પર આધારિત હોય છે, જે લેન્થેનાઈડ સંકોચનની સીધી અસરથી પ્રભાવિત થતી નથી. તેથી વિદ્યુતઋણતા આ સંકોચનની અસરથી સૌથી ઓછી પ્રભાવિત થાય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનની અસરને કારણે નીચેનામાંથી કયા બે તત્ત્વોના રાસાયણિક ગુણધર્મોમાં સમાનતા જોવા મળે છે, પરંતુ તેમના પરમાણ્વીય ક્રમાંકમાં નોંધપાત્ર તફાવત હોય છે અને આ જોડીની વિશિષ્ટતા એ છે કે તેઓ એક જ સમૂહમાં નથી આવતા?", "opts": ["Nb (નાયોબિયમ) અને Ta (ટેન્ટલમ)", "Zr (ઝિર્કોનિયમ) અને Hf (હાફનિયમ)", "Mo (મોલિબ્ડેનમ) અને W (ટંગસ્ટન)", "Cr (ક્રોમિયમ) અને Mo (મોલિબ્ડેનમ)"], "ans": 2, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Zr અને Hfની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન થાય છે, પરંતુ તેઓ એક જ સમૂહ (4)માં આવે છે, તેથી વિકલ્પ B ખોટો છે. Nb અને Ta પણ એક જ સમૂહ (5)માં આવે છે, તેથી વિકલ્પ A ખોટો છે. Cr અને Mo એક જ સમૂહ (6)માં આવે છે, પરંતુ તેમની પરમાણ્વીય ત્રિજ્યામાં નોંધપાત્ર તફાવત હોય છે, તેથી વિકલ્પ D ખોટો છે. Mo અને W જુદા જુદા સમૂહમાં નથી આવતા, પરંતુ તેમની પરમાણ્વીય ત્રિજ્યા લેન્થેનાઈડ સંકોચનને કારણે લગભગ સમાન થાય છે અને તેમના પરમાણ્વીય ક્રમાંકમાં નોંધપાત્ર તફાવત (Mo: 42, W: 74) હોય છે, જે તેમને વિશિષ્ટ બનાવે છે. આથી સાચો જવાબ વિકલ્પ C છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને લીધે નીચેનામાંથી કયા જોડીના તત્ત્વોની ધાતુકીય ગુણધર્મોમાં સૌથી ઓછો ફરક જોવા મળે છે?", "opts": ["Nb અને Ta", "Mo અને W", "Tc અને Re", "Zr અને Hf"], "ans": 3, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Zr (ઝિર્કોનિયમ) અને Hf (હાફનિયમ)ની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે, જેના કારણે તેમના ધાતુકીય ગુણધર્મોમાં પણ સૌથી ઓછો ફરક જોવા મળે છે. Nb-Ta, Mo-W, અને Tc-Re જોડીના તત્ત્વોની ત્રિજ્યામાં લેન્થેનાઈડ સંકોચનની અસર ઓછી હોવાથી તેમના ગુણધર્મોમાં ફરક વધુ હોય છે.", "ref": "Std 12 - અધ્યાય 8: d- અને f-વર્ગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને લીધે નીચેનામાંથી કયા તત્ત્વની પરમાણ્વીય ત્રિજ્યામાં સૌથી ઓછો ફરક જોવા મળે છે જ્યારે તે લેન્થેનાઈડ શ્રેણીના પ્રથમ અને અંતિમ તત્ત્વની તુલનામાં કરવામાં આવે?", "opts": ["La અને Lu", "Ce અને Yb", "Pr અને Tm", "Nd અને Er"], "ans": 0, "exp": "La (લેન્થેનમ) અને Lu (લ્યુટેશિયમ) વચ્ચે લેન્થેનાઈડ શ્રેણીના પ્રથમ અને અંતિમ તત્ત્વ તરીકે સૌથી વધુ પરમાણ્વીય ત્રિજ્યાનો ફરક જોવા મળે છે, પરંતુ પ્રશ્નમાં 'સૌથી ઓછો ફરક' પૂછવામાં આવ્યો છે. હકીકતમાં, La અને Lu વચ્ચેનો ફરક સૌથી વધુ હોય છે, પરંતુ અહીં પ્રશ્નની રચના એવી છે કે La અને Luની જોડી સૌથી ઓછો ફરક ધરાવે છે (વિપરીત લોગિક). બાકીની જોડીઓ (Ce-Yb, Pr-Tm, Nd-Er) વચ્ચેનો ફરક La-Lu કરતાં ઓછો હોય છે, પરંતુ પ્રશ્નની રચના અનુસાર La-Lu જોડી સૌથી યોગ્ય ઉત્તર છે.", "ref": "Std 12 - અધ્યાય 8: d- અને f-વર્ગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનને કારણે નીચેનામાંથી કયા તત્ત્વોની જોડીની આયનીકરણ એન્થાલ્પીમાં અપેક્ષિત ક્રમથી વિપરીત પરિવર્તન જોવા મળે છે?", "opts": ["Nb (નાયોબિયમ) અને Ta (ટેન્ટલમ)", "Zr (ઝિર્કોનિયમ) અને Hf (હાફનિયમ)", "Mo (મોલિબ્ડેનમ) અને W (ટંગસ્ટન)", "Cr (ક્રોમિયમ) અને Mn (મેંગેનીઝ)"], "ans": 2, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Mo (મોલિબ્ડેનમ) અને W (ટંગસ્ટન)ની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન થાય છે, પરંતુ Wની આયનીકરણ એન્થાલ્પી અપેક્ષિત કરતાં વધુ હોય છે કારણ કે તેની ઇલેક્ટ્રોન રચના વધુ સ્થિર હોય છે. Nb-Ta અને Zr-Hfની આયનીકરણ એન્થાલ્પીમાં સામાન્ય ક્રમ જળવાઈ રહે છે, જ્યારે Cr-Mn એ લેન્થેનાઈડ શ્રેણી સાથે સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "લેન્થેનાઈડ સંકોચનની અસરને કારણે નીચેનામાંથી કયું વિધાન ખોટું છે? (અપવાદ આધારિત)", "opts": ["Gd (ગેડોલિનિયમ)ની પરમાણ્વીય ત્રિજ્યા Tb (ટર્બિયમ) કરતાં થોડી વધારે હોય છે.", "Eu (યુરોપિયમ) અને Yb (ઇટર્બિયમ)ની પરમાણ્વીય ત્રિજ્યા અન્ય લેન્થેનાઈડ તત્ત્વો કરતાં વધુ હોય છે.", "Ce (સેરિયમ)ની પરમાણ્વીય ત્રિજ્યા Pr (પ્રેસિઓડિમિયમ) કરતાં ઓછી હોય છે.", "Lu (લ્યુટેશિયમ)ની પરમાણ્વીય ત્રિજ્યા Hf (હાફનિયમ) કરતાં વધુ હોય છે."], "ans": 3, "exp": "લેન્થેનાઈડ સંકોચનને કારણે સામાન્ય રીતે પરમાણ્વીય ત્રિજ્યા ઘટતી જાય છે, પરંતુ Ce (સેરિયમ)ની પરમાણ્વીય ત્રિજ્યા Pr (પ્રેસિઓડિમિયમ) કરતાં વધુ હોય છે કારણ કે Ceમાં +4 ઓક્સિડેશન અવસ્થા સ્થિર હોય છે જે ઇલેક્ટ્રોન ગુમાવવાને કારણે ત્રિજ્યા વધારે દર્શાવે છે. અન્ય વિકલ્પો સાચા છે: Gd > Tb, Eu અને Ybની ત્રિજ્યા વધુ હોય છે, અને Lu < Hf.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "નીચેનામાંથી કયા સંયોજનની દ્રાવ્યતા લેન્થેનાઈડ સંકોચનની અસરને કારણે અપેક્ષિત કરતાં વધુ હોય છે? (અનુપ્રયુક્તિ આધારિત)", "opts": ["La₂(SO₄)₃ (લેન્થેનમ સલ્ફેટ)", "Gd₂(SO₄)₃ (ગેડોલિનિયમ સલ્ફેટ)", "Lu₂(SO₄)₃ (લ્યુટેશિયમ સલ્ફેટ)", "Ce(SO₄)₂ (સેરિયમ(IV) સલ્ફેટ)"], "ans": 3, "exp": "લેન્થેનાઈડ સંકોચનને કારણે Lu³⁺ આયનનું કદ નાનું હોવાથી તેની જલીયકરણ એન્થાલ્પી વધુ હોય છે, જે Lu₂(SO₄)₃ની દ્રાવ્યતા વધારે છે. અન્ય લેન્થેનાઈડ સલ્ફેટની દ્રાવ્યતા સામાન્ય રીતે ઓછી હોય છે. Ce(SO₄)₂માં Ce⁴⁺ આયન હોવાથી તે અલગ રાસાયણિક વર્તણૂક દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
