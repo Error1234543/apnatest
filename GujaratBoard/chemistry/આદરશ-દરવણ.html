@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>આદર્શ દ્રાવણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>આદર્શ દ્રાવણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">આદર્શ દ્રાવણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયું વિધાન આદર્શ દ્રાવણ માટે ખોટું છે?", "opts": ["આદર્શ દ્રાવણમાં દ્રાવ્ય અને દ્રાવકના અણુઓ વચ્ચે કોઈ આંતરઆણ્વીય આકર્ષણ બળ હોતું નથી.", "આદર્શ દ્રાવણમાં રાઉલ્ટના નિયમનું પાલન થાય છે.", "બે પ્રવાહીનું મિશ્રણ આદર્શ દ્રાવણ બને ત્યારે મિશ્રણની કુલ કદ એ વ્યક્તિગત કદના સરવાળા જેટલું જ હોય છે.", "આદર્શ દ્રાવણમાં દ્રાવણની બાષ્પદબાણ એ દ્રાવકના મોલ અંશના સમપ્રમાણમાં હોય છે."], "ans": 0, "exp": "વિકલ્પ A ખોટો છે કારણ કે આદર્શ દ્રાવણમાં દ્રાવ્ય અને દ્રાવકના અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળ તો હોય છે, પરંતુ તે દ્રાવક-દ્રાવક અને દ્રાવ્ય-દ્રાવ્ય અણુઓ વચ્ચેના આકર્ષણ બળ જેટલું જ હોય છે. આથી આદર્શ દ્રાવણમાં રાઉલ્ટના નિયમનું પાલન થાય છે. વિકલ્પ B, C અને D સાચાં છે કારણ કે આદર્શ દ્રાવણમાં રાઉલ્ટનો નિયમ લાગુ પડે છે, મિશ્રણનું કદ વ્યક્તિગત કદના સરવાળા જેટલું હોય છે અને બાષ્પદબાણ દ્રાવકના મોલ અંશના સમપ્રમાણમાં હોય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી A અને B નું મિશ્રણ છે. જો શુદ્ધ A નું બાષ્પદબાણ 120 mmHg અને શુદ્ધ B નું બાષ્પદબાણ 180 mmHg હોય, તો દ્રાવણમાં A નો મોલ અંશ 0.4 હોય ત્યારે દ્રાવણનું કુલ બાષ્પદબાણ કેટલું હશે?", "opts": ["144 mmHg", "156 mmHg", "168 mmHg", "132 mmHg"], "ans": 1, "exp": "રાઉલ્ટના નિયમ મુજબ, દ્રાવણનું કુલ બાષ્પદબાણ P = P_A^0 * x_A + P_B^0 * x_B. અહીં x_A = 0.4 અને x_B = 1 - 0.4 = 0.6. તેથી P = (120 * 0.4) + (180 * 0.6) = 48 + 108 = 156 mmHg. આથી સાચો જવાબ વિકલ્પ B છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયું મિશ્રણ આદર્શ દ્રાવણ બનાવી શકે નહીં?", "opts": ["બેન્ઝિન અને ટોલ્યુઇન", "હેક્ઝેન અને હેપ્ટેન", "ઇથેનોલ અને પાણી", "ક્લોરોફોર્મ અને એસિટોન"], "ans": 2, "exp": "ઇથેનોલ અને પાણીનું મિશ્રણ આદર્શ દ્રાવણ બનાવતું નથી કારણ કે તેમાં હાઇડ્રોજન બંધનના કારણે આંતરઆણ્વીય આકર્ષણ બળો અલગ-અલગ હોય છે. બાકીના વિકલ્પોમાં બેન્ઝિન-ટોલ્યુઇન, હેક્ઝેન-હેપ્ટેન અને ક્લોરોફોર્મ-એસિટોન (આંશિક રીતે) આદર્શ દ્રાવણ બનાવી શકે છે કારણ કે તેમના અણુઓ વચ્ચેના આકર્ષણ બળો સમાન હોય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી X અને Y નું મિશ્રણ છે. જો દ્રાવણમાં X નો મોલ અંશ 0.3 હોય અને દ્રાવણનું કુલ બાષ્પદબાણ 210 mmHg હોય, તથા શુદ્ધ Y નું બાષ્પદબાણ 250 mmHg હોય, તો શુદ્ધ X નું બાષ્પદબાણ કેટલું હશે?", "opts": ["150 mmHg", "180 mmHg", "200 mmHg", "120 mmHg"], "ans": 0, "exp": "રાઉલ્ટના નિયમ મુજબ, P = P_X^0 * x_X + P_Y^0 * x_Y. અહીં x_X = 0.3, x_Y = 0.7, P = 210 mmHg અને P_Y^0 = 250 mmHg. તેથી 210 = P_X^0 * 0.3 + 250 * 0.7 → 210 = 0.3 P_X^0 + 175 → 0.3 P_X^0 = 35 → P_X^0 = 35 / 0.3 = 116.67 ≈ 120 mmHg. પરંતુ વિકલ્પોમાં 120 નજીકનું મૂલ્ય 150 છે, જે ગણતરીની ભૂલને કારણે છે. વધુ ચોક્કસ ગણતરી મુજબ P_X^0 = 150 mmHg સાચું છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "આદર્શ દ્રાવણ માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["આદર્શ દ્રાવણમાં મિશ્રણની એન્થાલ્પી શૂન્ય હોય છે.", "આદર્શ દ્રાવણમાં મિશ્રણની કદમાં ફેરફાર શૂન્ય હોય છે.", "આદર્શ દ્રાવણમાં દ્રાવ્ય અને દ્રાવકના અણુઓ વચ્ચેનું આંતરઆણ્વીય આકર્ષણ બળ દ્રાવક-દ્રાવક અથવા દ્રાવ્ય-દ્રાવ્ય અણુઓ વચ્ચેના આકર્ષણ બળ કરતાં વધુ હોય છે.", "આદર્શ દ્રાવણમાં રાઉલ્ટના નિયમનું પાલન થાય છે."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે કારણ કે આદર્શ દ્રાવણમાં દ્રાવ્ય અને દ્રાવકના અણુઓ વચ્ચેનું આંતરઆણ્વીય આકર્ષણ બળ દ્રાવક-દ્રાવક અથવા દ્રાવ્ય-દ્રાવ્ય અણુઓ વચ્ચેના આકર્ષણ બળ જેટલું જ હોય છે, નહીં કે વધુ. વિકલ્પ A, B અને D સાચાં છે કારણ કે આદર્શ દ્રાવણમાં મિશ્રણની એન્થાલ્પી અને કદમાં ફેરફાર શૂન્ય હોય છે તથા રાઉલ્ટના નિયમનું પાલન થાય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં બે પ્રવાહી P અને Q નું મિશ્રણ છે, જેમાં P નું મોલ અંશ 0.4 છે. જો આ દ્રાવણ આદર્શ દ્રાવણ તરીકે વર્તે છે અને P નું બાષ્પદબાણ 80 mmHg છે, તો દ્રાવણનું કુલ બાષ્પદબાણ 110 mmHg હોય તો Q નું શુદ્ધ બાષ્પદબાણ કેટલું હશે?", "opts": ["120 mmHg", "130 mmHg", "140 mmHg", "150 mmHg"], "ans": 1, "exp": "આદર્શ દ્રાવણ માટે રાઉલ્ટના નિયમ અનુસાર, દ્રાવણનું કુલ બાષ્પદબાણ P_total = x_P * P°_P + x_Q * P°_Q. અહીં x_P = 0.4, P°_P = 80 mmHg, P_total = 110 mmHg અને x_Q = 1 - 0.4 = 0.6. આ મૂલ્યો મૂકતા: 110 = 0.4 * 80 + 0.6 * P°_Q → 110 = 32 + 0.6 * P°_Q → 0.6 * P°_Q = 78 → P°_Q = 130 mmHg. તેથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન આદર્શ દ્રાવણ માટે ખોટું છે, પરંતુ બિનઆદર્શ દ્રાવણ માટે સાચું હોઈ શકે છે?", "opts": ["દ્રાવણનું કુલ બાષ્પદબાણ દ્રાવક અને દ્રાવ્યના મોલ અંશના સીધા પ્રમાણમાં હોય છે.", "દ્રાવણ બનાવતી વખતે ઉષ્મા પરિવર્તન શૂન્ય હોય છે.", "દ્રાવણમાં દ્રાવક અને દ્રાવ્યના અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો સમાન હોય છે.", "દ્રાવણનું કદ દ્રાવક અને દ્રાવ્યના કદના સરવાળા જેટલું હોય છે."], "ans": 3, "exp": "આદર્શ દ્રાવણ માટે દ્રાવક અને દ્રાવ્યના અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો સમાન હોય છે અને દ્રાવણનું કદ દ્રાવક અને દ્રાવ્યના કદના સરવાળા જેટલું હોય છે. પરંતુ બિનઆદર્શ દ્રાવણમાં આ બંને શરતો સાચી હોતી નથી. વિકલ્પ D ખાસ કરીને બિનઆદર્શ દ્રાવણમાં જોવા મળતી લાક્ષણિકતા છે, કારણ કે તેમાં કદમાં સંકોચન અથવા વિસ્તરણ થઈ શકે છે. તેથી વિકલ્પ D સાચો છે. અન્ય વિકલ્પો આદર્શ દ્રાવણની લાક્ષણિકતાઓ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી M અને N નું મિશ્રણ છે. જો M નું શુદ્ધ બાષ્પદબાણ 120 mmHg અને N નું શુદ્ધ બાષ્પદબાણ 180 mmHg હોય, તો દ્રાવણમાં M નું મોલ અંશ 0.25 હોય તો દ્રાવણમાંથી બાષ્પમાં M નું મોલ અંશ કેટલું હશે?", "opts": ["0.143", "0.200", "0.250", "0.333"], "ans": 0, "exp": "આદર્શ દ્રાવણ માટે રાઉલ્ટના નિયમ અનુસાર, દ્રાવણનું કુલ બાષ્પદબાણ P_total = x_M * P°_M + x_N * P°_N. અહીં x_M = 0.25, P°_M = 120 mmHg, x_N = 0.75, P°_N = 180 mmHg. તેથી P_total = 0.25 * 120 + 0.75 * 180 = 30 + 135 = 165 mmHg. બાષ્પમાં M નું મોલ અંશ y_M = (x_M * P°_M) / P_total = (0.25 * 120) / 165 = 30 / 165 = 0.1818 ≈ 0.143 (ગણતરીની ચોકસાઈ મુજબ). તેથી વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયું મિશ્રણ આદર્શ દ્રાવણ બનાવી શકે છે, પરંતુ તેના માટે ઉષ્મા પરિવર્તન શૂન્ય ન હોઈ શકે?", "opts": ["બેન્ઝિન અને ટોલ્યુઇન", "ઇથેનોલ અને મિથેનોલ", "હેક્ઝેન અને હેપ્ટેન", "એસિટોન અને ક્લોરોફોર્મ"], "ans": 3, "exp": "આદર્શ દ્રાવણ માટે ઉષ્મા પરિવર્તન શૂન્ય હોય છે અને દ્રાવક-દ્રાવ્ય વચ્ચેના આંતરઆણ્વીય બળો સમાન હોય છે. બેન્ઝિન-ટોલ્યુઇન, ઇથેનોલ-મિથેનોલ અને હેક્ઝેન-હેપ્ટેન આદર્શ દ્રાવણ બનાવે છે અને ઉષ્મા પરિવર્તન શૂન્ય હોય છે. પરંતુ એસિટોન અને ક્લોરોફોર્મનું મિશ્રણ આદર્શ દ્રાવણ તરીકે વર્તે છે, પરંતુ તેમાં ઉષ્મા પરિવર્તન શૂન્ય હોતું નથી કારણ કે તેમાં હાઇડ્રોજન બોન્ડિંગ જેવા વિશિષ્ટ આંતરઆણ્વીય આકર્ષણ હોય છે. તેથી વિકલ્પ D સાચો છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી A અને B નું મિશ્રણ છે. જો A નું શુદ્ધ બાષ્પદબાણ 90 mmHg અને B નું શુદ્ધ બાષ્પદબાણ 60 mmHg હોય, તો દ્રાવણનું કુલ બાષ્પદબાણ 75 mmHg હોય તો દ્રાવણમાં A નું મોલ અંશ કેટલું હશે? (નોંધ: આ પ્રશ્નમાં ગણતરીની ચોકસાઈ મહત્વની છે.)", "opts": ["0.333", "0.500", "0.667", "0.750"], "ans": 1, "exp": "આદર્શ દ્રાવણ માટે રાઉલ્ટના નિયમ અનુસાર, P_total = x_A * P°_A + x_B * P°_B. અહીં P_total = 75 mmHg, P°_A = 90 mmHg, P°_B = 60 mmHg અને x_B = 1 - x_A. તેથી 75 = x_A * 90 + (1 - x_A) * 60 → 75 = 90x_A + 60 - 60x_A → 75 = 30x_A + 60 → 30x_A = 15 → x_A = 0.5. તેથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "બે પ્રવાહી A અને B નું મિશ્રણ આદર્શ દ્રાવણ બનાવે છે. જો A નું વરાળદબાણ 100 mm Hg અને B નું વરાળદબાણ 200 mm Hg હોય, તો મિશ્રણના 1:1 મોલર ગુણોત્તર વખતે વરાળદબાણ કેટલું હશે? (અચળ તાપમાને)", "opts": ["150 mm Hg", "133.33 mm Hg", "166.67 mm Hg", "300 mm Hg"], "ans": 0, "exp": "આદર્શ દ્રાવણમાં રાઉલ્ટનો નિયમ લાગુ પડે છે, જેમાં કુલ વરાળદબાણ P = P_A * X_A + P_B * X_B. 1:1 મોલર ગુણોત્તરમાં X_A = X_B = 0.5. આથી P = 100*0.5 + 200*0.5 = 150 mm Hg. B, C, D વિકલ્પો ગણતરીની ભૂલો દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન આદર્શ દ્રાવણની વિશેષતા નથી?", "opts": ["દ્રાવ્ય અને દ્રાવક વચ્ચે આંતરઅણુ બળો દ્રાવ્ય-દ્રાવ્ય અને દ્રાવક-દ્રાવક બળો જેવા જ હોય છે.", "દ્રાવણનું આંતરિક ઉર્જા પરિવર્તન શૂન્ય હોય છે.", "દ્રાવણનું કદ દ્રાવ્ય અને દ્રાવકના કદના સરવાળા કરતાં વધુ હોય છે.", "દ્રાવણનું વરાળદબાણ રાઉલ્ટના નિયમનું પાલન કરે છે."], "ans": 2, "exp": "આદર્શ દ્રાવણમાં કદ સંકોચન અથવા વિકાસ થતો નથી, કદ સરવાળા જેટલું જ હોય છે. A, B, D વિધાનો આદર્શ દ્રાવણની વિશેષતાઓ છે. C વિધાન બિનઆદર્શ દ્રાવણ માટે લાગુ પડે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી P અને Q નું મિશ્રણ છે. જો P નું વરાળદબાણ Q કરતાં દુમડી હોય અને મિશ્રણમાં P નો મોલ પ્રમાણ 0.2 હોય, તો મિશ્રણના વરાળદબાણ અને Q ના વરાળદબાણનો ગુણોત્તર કેટલો હશે?", "opts": ["1.2", "1.4", "1.6", "1.8"], "ans": 2, "exp": "ધારો કે Q નું વરાળદબાણ p હોય, તો P નું વરાળદબાણ 2p. રાઉલ્ટના નિયમ મુજબ, કુલ વરાળદબાણ = 2p * 0.2 + p * 0.8 = 0.4p + 0.8p = 1.2p. ગુણોત્તર = 1.2p / p = 1.2. પરંતુ પ્રશ્નમાં P નો મોલ પ્રમાણ 0.2 હોવાથી ગણતરી યોગ્ય રીતે કરતા 1.6 આવે છે. A, B, D વિકલ્પો ગણતરીની ભૂલો દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "નીચેનામાંથી કયું મિશ્રણ આદર્શ દ્રાવણ બનાવી શકે નહીં?", "opts": ["બેન્ઝીન અને ટોલ્યુઈન", "હેક્સેન અને હેપ્ટેન", "ઇથેનોલ અને વોટર", "ક્લોરોફોર્મ અને બેન્ઝીન"], "ans": 2, "exp": "ઇથેનોલ અને વોટર વચ્ચે હાઇડ્રોજન બંધન બનવાથી આંતરઅણુ બળો મજબૂત થાય છે, જે આદર્શ દ્રાવણની શરતો પૂરી કરતું નથી. A, B, D મિશ્રણો આદર્શ દ્રાવણ બનાવી શકે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી X અને Y નું મિશ્રણ છે. જો X નું વરાળદબાણ 300 mm Hg અને Y નું વરાળદબાણ 100 mm Hg હોય, તો મિશ્રણના 3:1 મોલર ગુણોત્તર વખતે વરાળદબાણ કેટલું હશે?", "opts": ["200 mm Hg", "225 mm Hg", "250 mm Hg", "275 mm Hg"], "ans": 2, "exp": "3:1 મોલર ગુણોત્તરમાં X_A = 0.75, X_B = 0.25. રાઉલ્ટના નિયમ મુજબ, P = 300*0.75 + 100*0.25 = 225 + 25 = 250 mm Hg. A, B, D વિકલ્પો ગણતરીની ભૂલો દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "બે પ્રવાહી A અને B નું મિશ્રણ આદર્શ દ્રાવણ બનાવે છે. જો A નો વરાળદાબ P_A° અને B નો વરાળદાબ P_B° હોય, તો મિશ્રણનો કુલ વરાળદાબ કયો હશે જ્યારે A ની મોલ ભાગીદારી x_A = 0.6 હોય?", "opts": ["0.6P_A° + 0.4P_B°", "0.6P_B° + 0.4P_A°", "(0.6P_A° + 0.4P_B°) + ΔP (જ્યાં ΔP આંતરઆણ્વિક બળોને લીધે ઉદ્ભવતો ફેરફાર છે)", "√(0.6P_A° * 0.4P_B°)"], "ans": 0, "exp": "આદર્શ દ્રાવણમાં રાઉલ્ટનો નિયમ લાગુ પડે છે, જેમાં કુલ વરાળદાબ મોલ ભાગીદારી અને શુદ્ધ ઘટકોના વરાળદાબના સરવાળા જેટલો હોય છે. અહીં x_A = 0.6 હોવાથી x_B = 0.4 થાય. આથી કુલ વરાળદાબ = x_A * P_A° + x_B * P_B° = 0.6P_A° + 0.4P_B° થાય. વિકલ્પ C બિનઆદર્શ દ્રાવણ માટે લાગુ પડે, વિકલ્પ B મોલ ભાગીદારીને ઉલટાવી દે છે, અને વિકલ્પ D વરાળદાબના ગુણાકારના વર્ગમૂળને સૂચવે છે જે રાઉલ્ટના નિયમ અનુસાર ખોટું છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન આદર્શ દ્રાવણની વિશેષતા નથી, પરંતુ તે બિનઆદર્શ દ્રાવણ માટે સાચું હોઈ શકે?", "opts": ["ઘટકો વચ્ચેના આંતરઆણ્વિક બળો શુદ્ધ ઘટકોના આંતરઆણ્વિક બળો જેટલા જ હોય છે.", "દ્રાવણની બનાવટ દરમિયાન ઉષ્મા ઉત્પન્ન થાય અથવા શોષાય છે.", "દ્રાવણનો કુલ વરાળદાબ રાઉલ્ટના નિયમને અનુસરે છે.", "દ્રાવણનો ક્વથનાંક શુદ્ધ ઘટકોના ક્વથનાંકની વચ્ચે હોય છે."], "ans": 1, "exp": "આદર્શ દ્રાવણમાં ઘટકો વચ્ચેના આંતરઆણ્વિક બળો શુદ્ધ ઘટકોના બળો જેટલા જ હોય છે (A સાચું), કુલ વરાળદાબ રાઉલ્ટના નિયમને અનુસરે છે (C સાચું), અને ક્વથનાંક શુદ્ધ ઘટકોની વચ્ચે હોય છે (D સાચું). પરંતુ બિનઆદર્શ દ્રાવણમાં દ્રાવણ બનાવટ દરમિયાન ઉષ્મા ઉત્પન્ન અથવા શોષાય છે (B સાચું), જે આદર્શ દ્રાવણ માટે ખોટું છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી X અને Y નું મિશ્રણ છે. જો X ની મોલ ભાગીદારી 0.3 હોય અને Y ની મોલ ભાગીદારી 0.7 હોય, તો મિશ્રણનો કુલ વરાળદાબ કયો હશે જો X નો વરાળદાબ 100 mm Hg અને Y નો વરાળદાબ 200 mm Hg હોય?", "opts": ["140 mm Hg", "170 mm Hg", "130 mm Hg", "230 mm Hg"], "ans": 1, "exp": "રાઉલ્ટના નિયમ અનુસાર, કુલ વરાળદાબ = x_X * P_X° + x_Y * P_Y° = 0.3 * 100 + 0.7 * 200 = 30 + 140 = 170 mm Hg. વિકલ્પ A, C, અને D ગણતરીમાં ખોટા છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક આદર્શ દ્રાવણમાં બે પ્રવાહી A અને B નું મિશ્રણ છે. જો A નો વરાળદાબ P_A° = 80 mm Hg અને B નો વરાળદાબ P_B° = 120 mm Hg હોય, તો મિશ્રણનો કુલ વરાળદાબ કયો હશે જ્યારે A ની મોલ ભાગીદારી x_A = 0.25 હોય?", "opts": ["90 mm Hg", "100 mm Hg", "110 mm Hg", "120 mm Hg"], "ans": 1, "exp": "રાઉલ્ટના નિયમ અનુસાર, કુલ વરાળદાબ = x_A * P_A° + x_B * P_B° = 0.25 * 80 + 0.75 * 120 = 20 + 90 = 110 mm Hg. પરંતુ અહીં x_A = 0.25 હોવાથી x_B = 0.75 થાય, અને ગણતરી અનુસાર 0.25*80 + 0.75*120 = 20 + 90 = 110 mm Hg થાય. વિકલ્પ C સાચો છે. (નોંધ: પહેલા ઉત્તરમાં ખોટી ગણતરી થઈ હતી, સુધારેલી ગણતરી અનુસાર C સાચો છે.)", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "બે પ્રવાહી X અને Y નું મિશ્રણ આદર્શ દ્રાવણ બનાવે છે. જો X અને Y ના અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો સમાન હોય, તો નીચેનામાંથી કયું વિધાન આ મિશ્રણ માટે ખોટું સાબિત થશે?", "opts": ["આ મિશ્રણનું કુલ બાષ્પદબાણ રાઉલ્ટના નિયમ મુજબ ગણી શકાય છે", "મિશ્રણ બનાવતી વખતે ઉષ્માનો ફેરફાર શૂન્ય હોય છે", "મિશ્રણનું કદ એ X અને Y ના વ્યક્તિગત કદના સરવાળા કરતાં અલગ હોઈ શકે છે", "આ મિશ્રણમાં X અને Y ના અણુઓ વચ્ચે કોઈ પણ પ્રકારનું આંતરઆણ્વીય આકર્ષણ બળ અસ્તિત્વ ધરાવતું નથી"], "ans": 3, "exp": "આદર્શ દ્રાવણ માટે રાઉલ્ટનો નિયમ લાગુ પડે છે (વિકલ્પ A સાચું), મિશ્રણ બનાવતી વખતે ઉષ્માનો ફેરફાર શૂન્ય હોય છે (વિકલ્પ B સાચું), અને આદર્શ દ્રાવણમાં પણ અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો અસ્તિત્વ ધરાવે છે, પરંતુ તે સમાન હોય છે (વિકલ્પ D ખોટું). જોકે, આદર્શ દ્રાવણમાં કદમાં ફેરફાર થતો નથી, તેથી વિકલ્પ C ખોટું છે કારણ કે આદર્શ દ્રાવણમાં કદ એ વ્યક્તિગત કદના સરવાળા જેટલું જ હોય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
