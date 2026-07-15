@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA Fingerprinting</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>DNA Fingerprinting</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">DNA Fingerprinting</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "DNA ફિંગરપ્રિન્ટિંગમાં વપરાતી 'VNTR' (Variable Number of Tandem Repeats) ની ભૂમિકા શું છે?", "opts": ["તે DNA ની કુલ લંબાઈ નક્કી કરે છે.", "તે વ્યક્તિગત ભિન્નતા દર્શાવવા માટે અતિશય પુનરાવર્તિત અનુક્રમોનો ઉપયોગ કરે છે.", "તે માત્ર પ્રોટીન સિંથેસિસ માટે જવાબદાર છે.", "તે કોષના વિભાજન દરને નિયંત્રિત કરે છે."], "ans": 1, "exp": "VNTR (Variable Number of Tandem Repeats) એ DNA ફિંગરપ્રિન્ટિંગમાં વ્યક્તિગત ભિન્નતા દર્શાવવા માટે ઉપયોગી અતિશય પુનરાવર્તિત અનુક્રમો છે. A) ખોટું છે કારણ કે DNA ની કુલ લંબાઈ VNTR દ્વારા નક્કી થતી નથી. C) ખોટું છે કારણ કે VNTR પ્રોટીન સિંથેસિસ સાથે સીધો સંબંધ ધરાવતું નથી. D) ખોટું છે કારણ કે કોષવિભાજન દર VNTR દ્વારા નિયંત્રિત થતો નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગ માટે કયું ઉત્સેચક 'રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ' તરીકે ઓળખાય છે?", "opts": ["DNA પોલિમરેઝ", "EcoRI", "RNA પોલિમરેઝ", "લાયગેઝ"], "ans": 1, "exp": "EcoRI એ રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ ઉત્સેચક છે જે DNA ફિંગરપ્રિન્ટિંગમાં વપરાય છે. A) DNA પોલિમરેઝ DNA ની નકલ કરવા માટે વપરાય છે. C) RNA પોલિમરેઝ RNA સિંથેસિસ માટે વપરાય છે. D) લાયગેઝ DNA ટુકડાઓને જોડવા માટે વપરાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં 'સદર્ભ પ્રોબ' (Probe) નો ઉપયોગ શા માટે થાય છે?", "opts": ["DNA ના ટુકડાઓને કાપવા માટે", "વિશિષ્ટ DNA અનુક્રમોને ઓળખવા અને જોડવા માટે", "પ્રોટીન સિંથેસિસને વેગ આપવા માટે", "કોષના વિકાસને નિયંત્રિત કરવા માટે"], "ans": 1, "exp": "સદર્ભ પ્રોબનો ઉપયોગ વિશિષ્ટ DNA અનુક્રમોને ઓળખવા અને જોડવા માટે થાય છે. A) DNA ના ટુકડાઓને કાપવા માટે રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ વપરાય છે. C) પ્રોટીન સિંથેસિસને વેગ આપવા માટે રાઇબોઝોમ્સ જવાબદાર છે. D) કોષના વિકાસને નિયંત્રિત કરવા માટે હોર્મોન અને જનીન સંકેતો જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં 'પોલિમરેઝ ચેઇન રિએક્શન (PCR)' ની ભૂમિકા શું છે?", "opts": ["DNA ના ટુકડાઓને કાપવા માટે", "વિશિષ્ટ DNA અનુક્રમોની નકલ કરવા અને વધારવા માટે", "પ્રોટીનને શુદ્ધ કરવા માટે", "કોષના વિભાજનને રોકવા માટે"], "ans": 1, "exp": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) નો ઉપયોગ વિશિષ્ટ DNA અનુક્રમોની નકલ કરવા અને વધારવા માટે થાય છે. A) DNA ના ટુકડાઓને કાપવા માટે રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ વપરાય છે. C) પ્રોટીનને શુદ્ધ કરવા માટે ક્રોમેટોગ્રાફી જેવી પદ્ધતિઓ વપરાય છે. D) કોષના વિભાજનને રોકવા માટે કોલ્ચિસિન જેવા પદાર્થો વપરાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં 'અગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસ' નો ઉપયોગ શા માટે થાય છે?", "opts": ["DNA ની નકલ કરવા માટે", "DNA ના ટુકડાઓને લંબાઈ મુજબ અલગ કરવા માટે", "પ્રોટીનની રચના કરવા માટે", "કોષના વિકાસને નિયંત્રિત કરવા માટે"], "ans": 1, "exp": "અગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસનો ઉપયોગ DNA ના ટુકડાઓને લંબાઈ મુજબ અલગ કરવા માટે થાય છે. A) DNA ની નકલ કરવા માટે PCR વપરાય છે. C) પ્રોટીનની રચના કરવા માટે રાઇબોઝોમ્સ જવાબદાર છે. D) કોષના વિકાસને નિયંત્રિત કરવા માટે હોર્મોન અને જનીન સંકેતો જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં 'RFLP' (Restriction Fragment Length Polymorphism) તકનીકનો ઉપયોગ કરતી વખતે, કયા પરિબળને લીધે વિવિધ વ્યક્તિઓના DNA ફ્રેગમેન્ટ્સની લંબાઈમાં ફરક પડે છે?", "opts": ["DNAમાં VNTR પ્રદેશોની સંખ્યામાં ફેરફાર", "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ ઉત્સેચકની ક્રિયાશીલતામાં ફેરફાર", "DNAના દ્વિ-સૂત્રી સ્વરૂપમાં થતી મ્યુટેશનની સંખ્યા", "PCR પ્રક્રિયા દરમિયાન પ્રાઇમરની બંધારણીય ભૂલો"], "ans": 0, "exp": "RFLP તકનીકમાં, DNA ફ્રેગમેન્ટ્સની લંબાઈમાં ફરક VNTR (Variable Number of Tandem Repeats) પ્રદેશોની સંખ્યામાં ફેરફારને લીધે થાય છે. રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ ઉત્સેચકની ક્રિયાશીલતા (B) સરખી રહે છે, મ્યુટેશન (C) RFLPનો મુખ્ય કારણ નથી, અને PCR પ્રાઇમરની ભૂલો (D) RFLP સાથે સંબંધિત નથી.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જનીન ઇજનેરી", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સદર્ભ પ્રોબ' (Probe) ની પસંદગી કરતી વખતે કયું પરિબળ સૌથી મહત્વપૂર્ણ છે?", "opts": ["પ્રોબની લંબાઈ 10-20 ન્યુક્લિયોટાઇડ્સની હોવી જોઈએ", "પ્રોબ એવા ક્રમની હોવી જોઈએ જે VNTR પ્રદેશો સાથે પૂરકતા ધરાવે", "પ્રોબ રેડિયોએક્ટિવ અથવા ફ્લોરેસન્ટ લેબલ ધરાવતી હોવી જોઈએ", "પ્રોબ એ DNAના એવા ક્રમની હોવી જોઈએ જે સરળતાથી સિંથેસ થઈ શકે"], "ans": 1, "exp": "સદર્ભ પ્રોબની પસંદગી કરતી વખતે સૌથી મહત્વપૂર્ણ પરિબળ એ છે કે તે VNTR પ્રદેશો સાથે પૂરકતા ધરાવે (B). પ્રોબની લંબાઈ (A) મહત્વપૂર્ણ છે પરંતુ પ્રાથમિક નથી, રેડિયોએક્ટિવ અથવા ફ્લોરેસન્ટ લેબલ (C) ડિટેક્શન માટે ઉપયોગી છે પરંતુ પસંદગીનું મુખ્ય માપદંડ નથી, અને સિંથેસની સરળતા (D) ગૌણ છે.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જનીન ઇજનેરી", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'પોલિમરેઝ ચેઇન રિએક્શન (PCR)' દરમિયાન કયા ઘટકની ગેરહાજરીમાં DNA પ્રવર્ધન થશે નહીં?", "opts": ["Mg²⁺ આયન", "dNTPs (ડિઓક્સીરાઇબોન્યુક્લિયોટાઇડ ટ્રાયફોસ્ફેટ)", "DNA પોલિમરેઝ ઉત્સેચક", "પ્રાઇમર"], "ans": 3, "exp": "PCR દરમિયાન પ્રાઇમરની ગેરહાજરીમાં DNA પ્રવર્ધન થશે નહીં, કારણ કે પ્રાઇમર DNA પોલિમરેઝને બંધારણીય આરંભ બિંદુ પૂરું પાડે છે. Mg²⁺ આયન (A) ઉત્સેચકની ક્રિયાશીલતા માટે જરૂરી છે, dNTPs (B) ન્યુક્લિયોટાઇડ્સ પૂરા પાડે છે, અને DNA પોલિમરેઝ (C) પ્રક્રિયાને કેટાલાઇઝ કરે છે, પરંતુ પ્રાઇમર વગર પ્રક્રિયા શરૂ થઈ શકતી નથી.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જનીન ઇજનેરી", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'અગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસ' દરમિયાન, DNA ફ્રેગમેન્ટ્સની ગતિ કયા પરિબળ પર આધાર રાખે છે?", "opts": ["DNA ફ્રેગમેન્ટ્સની ન્યુક્લિયોટાઇડ ક્રમ", "DNA ફ્રેગમેન્ટ્સની લંબાઈ", "DNA ફ્રેગમેન્ટ્સની ગાઢતા", "DNA ફ્રેગમેન્ટ્સની રાસાયણિક સંરચના"], "ans": 1, "exp": "અગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસમાં, DNA ફ્રેગમેન્ટ્સની ગતિ તેમની લંબાઈ પર આધાર રાખે છે. લંબાઈ ઓછી હોય તે ફ્રેગમેન્ટ્સ વધુ દૂર જાય છે. ન્યુક્લિયોટાઇડ ક્રમ (A), ગાઢતા (C), અને રાસાયણિક સંરચના (D) ગતિ પર અસર કરતા નથી.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જનીન ઇજનેરી", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સદર્ભ પ્રોબ' અને 'ટાર્ગેટ DNA' વચ્ચેની હાઇબ્રિડાઇઝેશન પ્રક્રિયા કયા પરિબળ દ્વારા પ્રભાવિત થાય છે?", "opts": ["તાપમાન અને લવણતા", "DNAની સાંદ્રતા", "PCR ચક્રની સંખ્યા", "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝની પસંદગી"], "ans": 0, "exp": "હાઇબ્રિડાઇઝેશન પ્રક્રિયા મુખ્યત્વે તાપમાન અને લવણતાથી પ્રભાવિત થાય છે, કારણ કે આ પરિબળો હાઇડ્રોજન બંધોની સ્થિરતા નક્કી કરે છે. DNAની સાંદ્રતા (B) ગૌણ છે, PCR ચક્રની સંખ્યા (C) હાઇબ્રિડાઇઝેશન સાથે સંબંધિત નથી, અને રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ (D) હાઇબ્રિડાઇઝેશન પર અસર કરતું નથી.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જનીન ઇજનેરી", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'મિનિસેટેલાઇટ DNA' અને 'માઇક્રોસેટેલાઇટ DNA' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["મિનિસેટેલાઇટ DNA 10-60 ન્યુક્લિયોટાઇડની પુનરાવર્તિત ક્રમો ધરાવે છે, જ્યારે માઇક્રોસેટેલાઇટ DNA 1-6 ન્યુક્લિયોટાઇડની પુનરાવર્તિત ક્રમો ધરાવે છે.", "મિનિસેટેલાઇટ DNA એક જ કોષમાં જોવા મળે છે, જ્યારે માઇક્રોસેટેલાઇટ DNA બહુવિધ કોષોમાં જોવા મળે છે.", "મિનિસેટેલાઇટ DNA ફક્ત યુકેરિયોટિક કોષોમાં જોવા મળે છે, જ્યારે માઇક્રોસેટેલાઇટ DNA ફક્ત પ્રોકેરિયોટિક કોષોમાં જોવા મળે છે.", "મિનિસેટેલાઇટ DNA ફક્ત જનીન કોડિંગ ક્ષેત્રોમાં જોવા મળે છે, જ્યારે માઇક્રોસેટેલાઇટ DNA ફક્ત નોન-કોડિંગ ક્ષેત્રોમાં જોવા મળે છે."], "ans": 0, "exp": "મિનિસેટેલાઇટ DNA 10-60 ન્યુક્લિયોટાઇડની પુનરાવર્તિત ક્રમો (VNTR) ધરાવે છે, જ્યારે માઇક્રોસેટેલાઇટ DNA (STR - Short Tandem Repeats) 1-6 ન્યુક્લિયોટાઇડની પુનરાવર્તિત ક્રમો ધરાવે છે. આ તફાવત તેમની લંબાઈ અને ઉપયોગિતામાં મહત્વનો છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે મિનિસેટેલાઇટ અને માઇક્રોસેટેલાઇટ DNA બંને યુકેરિયોટિક કોષોમાં જોવા મળે છે અને તેઓ કોડિંગ અને નોન-કોડિંગ ક્ષેત્રોમાં હાજર હોઈ શકે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સદર્ભ પ્રોબ' (Probe) ની હાઇબ્રિડાઇઝેશન ક્ષમતા કયા પરિબળ પર આધારિત નથી?", "opts": ["તાપમાન", "લવણતા (Salt concentration)", "DNA ની લંબાઈ", "પ્રોબ અને ટાર્ગેટ DNA વચ્ચેનો અનુક્રમ સદર્ભતા"], "ans": 2, "exp": "સદર્ભ પ્રોબની હાઇબ્રિડાઇઝેશન ક્ષમતા મુખ્યત્વે તાપમાન, લવણતા અને પ્રોબ અને ટાર્ગેટ DNA વચ્ચેના અનુક્રમ સદર્ભતા પર આધારિત હોય છે. DNA ની લંબાઈ હાઇબ્રિડાઇઝેશન ક્ષમતાને પ્રભાવિત કરતું નથી, પરંતુ હાઇબ્રિડાઇઝેશનની ગતિ અને સ્થિરતાને પ્રભાવિત કરી શકે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'RFLP' તકનીકનો ઉપયોગ કરતી વખતે, કયા ઉત્સેચકની ગેરહાજરીમાં DNA ફ્રેગમેન્ટ્સની લંબાઈમાં ફેરફાર થશે નહીં?", "opts": ["રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ", "DNA પોલિમરેઝ", "DNA લાઇગેઝ", "એલ્કલાઇન ફોસ્ફેટેઝ"], "ans": 1, "exp": "RFLP (Restriction Fragment Length Polymorphism) તકનીકમાં, રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ ઉત્સેચક વડે DNA ને કાપવામાં આવે છે. DNA પોલિમરેઝનો ઉપયોગ PCRમાં થાય છે, પરંતુ RFLPમાં તેની ગેરહાજરીથી DNA ફ્રેગમેન્ટ્સની લંબાઈ પર કોઈ અસર થતી નથી. DNA લાઇગેઝ અને એલ્કલાઇન ફોસ્ફેટેઝનો ઉપયોગ અન્ય પ્રક્રિયાઓમાં થાય છે, પરંતુ RFLPમાં તેમની ગેરહાજરીથી ફ્રેગમેન્ટ્સની લંબાઈ પર અસર થતી નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સિંગલ ન્યુક્લિયોટાઇડ પોલિમોર્ફિઝમ (SNP)' નો ઉપયોગ કરતી વખતે, નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["SNP એ VNTR કરતાં વધુ લાંબા ક્રમના પુનરાવર્તનને આધારિત હોય છે.", "SNP એ DNA ક્રમમાં એક જ ન્યુક્લિયોટાઇડનો ફેરફાર દર્શાવે છે, જે વ્યક્તિગત ઓળખ માટે ઉપયોગી હોય છે.", "SNP તકનીકમાં RFLP કરતાં ઓછી સંવેદનશીલતા હોય છે.", "SNP એ મુખ્યત્વે પ્રોટીન-કોડિંગ ક્ષેત્રોમાં જોવા મળે છે અને અનુવંશિકતામાં કોઈ ભૂમિકા ભજવતું નથી."], "ans": 1, "exp": "SNP (સિંગલ ન્યુક્લિયોટાઇડ પોલિમોર્ફિઝમ) એ DNA ક્રમમાં એક જ ન્યુક્લિયોટાઇડનો ફેરફાર દર્શાવે છે, જે વ્યક્તિગત ઓળખ અને રોગોની ઓળખ માટે ઉપયોગી હોય છે. A) ખોટું છે કારણ કે SNP એ VNTR જેવા લાંબા પુનરાવર્તનને આધારિત નથી. C) ખોટું છે કારણ કે SNP તકનીક RFLP કરતાં વધુ સંવેદનશીલ હોય છે. D) ખોટું છે કારણ કે SNP પ્રોટીન-કોડિંગ અને નોન-કોડિંગ બંને ક્ષેત્રોમાં જોવા મળે છે અને અનુવંશિકતામાં મહત્વની ભૂમિકા ભજવે છે.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જીનેટિક ઇંજિનિયરિંગ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'ડાયરેક્ટ બ્લોટિંગ' અને 'સદર્ભ હાઇબ્રિડાઇઝેશન' તકનીકો વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["ડાયરેક્ટ બ્લોટિંગમાં DNA ને જેલમાંથી સીધું જ નાઇટ્રોસેલ્યુલોઝ મેમ્બ્રેન પર ટ્રાન્સફર કરવામાં આવે છે, જ્યારે સદર્ભ હાઇબ્રિડાઇઝેશનમાં પ્રોબનો ઉપયોગ કરવામાં આવે છે.", "ડાયરેક્ટ બ્લોટિંગમાં પ્રોબનો ઉપયોગ થાય છે, જ્યારે સદર્ભ હાઇબ્રિડાઇઝેશનમાં DNA ને જેલમાંથી ટ્રાન્સફર કરવામાં આવે છે.", "ડાયરેક્ટ બ્લોટિંગ અને સદર્ભ હાઇબ્રિડાઇઝેશન બંનેમાં પ્રોબનો ઉપયોગ થતો નથી.", "ડાયરેક્ટ બ્લોટિંગમાં DNA ને રેડિયોએક્ટિવ લેબલ કરવામાં આવે છે, જ્યારે સદર્ભ હાઇબ્રિડાઇઝેશનમાં ફ્લોરેસન્ટ લેબલનો ઉપયોગ થાય છે."], "ans": 0, "exp": "ડાયરેક્ટ બ્લોટિંગમાં DNA ને જેલ ઇલેક્ટ્રોફોરેસિસ પછી સીધું જ નાઇટ્રોસેલ્યુલોઝ મેમ્બ્રેન પર ટ્રાન્સફર કરવામાં આવે છે, જ્યારે સદર્ભ હાઇબ્રિડાઇઝેશનમાં પ્રોબનો ઉપયોગ કરીને ટાર્ગેટ DNA ની ઓળખ કરવામાં આવે છે. B) ખોટું છે કારણ કે ડાયરેક્ટ બ્લોટિંગમાં પ્રોબનો ઉપયોગ થતો નથી. C) ખોટું છે કારણ કે સદર્ભ હાઇબ્રિડાઇઝેશનમાં પ્રોબનો ઉપયોગ થાય છે. D) ખોટું છે કારણ કે ડાયરેક્ટ બ્લોટિંગમાં રેડિયોએક્ટિવ અથવા ફ્લોરેસન્ટ લેબલનો ઉપયોગ થઈ શકે છે, પરંતુ તે મુખ્ય તફાવત નથી.", "ref": "Std 12 - Chapter 6: મોલેક્યુલર બાયોલોજી અને જીનેટિક ઇંજિનિયરિંગ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સ્ટ્રિંગેન્ટ વોશિંગ' (Stringent Washing) પ્રક્રિયાનો મુખ્ય હેતુ શો છે?", "opts": ["અસ્પષ્ટ હાઇબ્રિડાઇઝેશનને દૂર કરવા અને કેવળ સંપૂર્ણ જોડાણ ધરાવતા DNA-પ્રોબ કોમ્પ્લેક્સને જાળવી રાખવા", "DNA ફ્રેગમેન્ટ્સની લંબાઈને વધારવા માટે", "PCR પ્રક્રિયાને ઝડપી બનાવવા માટે", "અગરોઝ જેલમાં DNA ફ્રેગમેન્ટ્સની ગતિને વધારવા માટે"], "ans": 0, "exp": "સ્ટ્રિંગેન્ટ વોશિંગનો હેતુ અસંપૂર્ણ જોડાણ ધરાવતા DNA-પ્રોબ કોમ્પ્લેક્સને દૂર કરવાનો અને કેવળ સંપૂર્ણ જોડાણ ધરાવતા કોમ્પ્લેક્સને જાળવી રાખવાનો છે. બાકીના વિકલ્પો (B, C, D) આ પ્રક્રિયા સાથે સંબંધિત નથી. B) DNA ફ્રેગમેન્ટ્સની લંબાઈને વધારવી એ PCR અથવા લાઇગેશન જેવી પ્રક્રિયાઓનો ભાગ છે. C) PCR પ્રક્રિયાને ઝડપી બનાવવી એ પ્રાઇમર ડિઝાઇન અથવા તાપમાન નિયંત્રણ સાથે સંબંધિત છે. D) અગરોઝ જેલમાં DNA ફ્રેગમેન્ટ્સની ગતિ એ ઇલેક્ટ્રોફોરેસિસના વોલ્ટેજ અથવા જેલની સાંદ્રતાથી નક્કી થાય છે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'ડેનેચરિંગ ગ્રેડિયન્ટ જેલ ઇલેક્ટ્રોફોરેસિસ' (DGGE) તકનીકનો ઉપયોગ ક્યારે થાય છે?", "opts": ["જ્યારે DNA ફ્રેગમેન્ટ્સમાં મ્યુટેશન શોધવાનું હોય છે", "જ્યારે DNA ફ્રેગમેન્ટ્સની લંબાઈ શોધવાનું હોય છે", "જ્યારે DNA ફ્રેગમેન્ટ્સને રંગીન કરવાના હોય છે", "જ્યારે DNA ફ્રેગમેન્ટ્સને વરસાદી કરવાના હોય છે"], "ans": 0, "exp": "DGGE તકનીકનો ઉપયોગ DNA ફ્રેગમેન્ટ્સમાં મ્યુટેશન (જનીન પરિવર્તન) શોધવા માટે થાય છે, કારણ કે ડેનેચરિંગ ગ્રેડિયન્ટ જેલમાં DNA ફ્રેગમેન્ટ્સની ગતિ તેમની ન્યુક્લિયોટાઇડ ક્રમ પર આધારિત હોય છે. B) DNA ફ્રેગમેન્ટ્સની લંબાઈ શોધવા માટે સામાન્ય ઇલેક્ટ્રોફોરેસિસ પૂરતી હોય છે. C) DNA ફ્રેગમેન્ટ્સને રંગીન કરવા માટે ઇથિડિયમ બ્રોમાઇડ જેવા રંગદ્રવ્યોનો ઉપયોગ થાય છે. D) વરસાદી કરવું એ ઇલેક્ટ્રોફોરેસિસ સાથે સંબંધિત નથી.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'સિંગલ સ્ટ્રેન્ડ કોનફોર્મેશન પોલિમોર્ફિઝમ (SSCP)' તકનીકનો ઉપયોગ શા માટે થાય છે?", "opts": ["સિંગલ સ્ટ્રેન્ડ DNA ફ્રેગમેન્ટ્સની ત્રિપરિમાણીય રચનામાં થતાં ફેરફારોને શોધવા માટે", "ડબલ સ્ટ્રેન્ડ DNA ફ્રેગમેન્ટ્સની લંબાઈ શોધવા માટે", "DNA ફ્રેગમેન્ટ્સને પ્રવર્ધિત કરવા માટે", "DNA ફ્રેગમેન્ટ્સને કાપવા માટે"], "ans": 0, "exp": "SSCP તકનીકનો ઉપયોગ સિંગલ સ્ટ્રેન્ડ DNA ફ્રેગમેન્ટ્સની ત્રિપરિમાણીય રચનામાં થતાં ફેરફારો (મ્યુટેશન) શોધવા માટે થાય છે. B) ડબલ સ્ટ્રેન્ડ DNA ફ્રેગમેન્ટ્સની લંબાઈ શોધવા માટે સામાન્ય ઇલેક્ટ્રોફોરેસિસ પૂરતી હોય છે. C) DNA ફ્રેગમેન્ટ્સને પ્રવર્ધિત કરવા માટે PCR તકનીકનો ઉપયોગ થાય છે. D) DNA ફ્રેગમેન્ટ્સને કાપવા માટે રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝ ઉત્સેચકનો ઉપયોગ થાય છે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'ટેન્ડમ રિપીટ' અને 'ઇન્ટરસ્પર્સડ રિપીટ' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["ટેન્ડમ રિપીટ્સ એકબીજાની પાછળ સતત ગોઠવાયેલા હોય છે, જ્યારે ઇન્ટરસ્પર્સડ રિપીટ્સ DNAમાં વિખેરાયેલા હોય છે", "ટેન્ડમ રિપીટ્સ DNAની શરૂઆતમાં હોય છે, જ્યારે ઇન્ટરસ્પર્સડ રિપીટ્સ અંતમાં હોય છે", "ટેન્ડમ રિપીટ્સ પ્રોટીન કોડિંગ કરે છે, જ્યારે ઇન્ટરસ્પર્સડ રિપીટ્સ નહીં", "ટેન્ડમ રિપીટ્સ RNAમાં જોવા મળે છે, જ્યારે ઇન્ટરસ્પર્સડ રિપીટ્સ DNAમાં જોવા મળે છે"], "ans": 0, "exp": "ટેન્ડમ રિપીટ્સ એકબીજાની પાછળ સતત ગોઠવાયેલા હોય છે (જેમ કે VNTR), જ્યારે ઇન્ટરસ્પર્સડ રિપીટ્સ DNAમાં વિખેરાયેલા હોય છે. B) ટેન્ડમ રિપીટ્સ અને ઇન્ટરસ્પર્સડ રિપીટ્સની જગ્યા DNAમાં નિર્ધારિત નથી. C) ટેન્ડમ રિપીટ્સ અને ઇન્ટરસ્પર્સડ રિપીટ્સ બંને પ્રોટીન કોડિંગ કરતા નથી. D) બંને પ્રકારના રિપીટ્સ DNAમાં જોવા મળે છે, RNAમાં નહીં.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં, 'ડાયરેક્ટ ટુ સીક્વન્સિંગ' અને 'ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગ' તકનીકો વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["ડાયરેક્ટ ટુ સીક્વન્સિંગમાં DNA ફ્રેગમેન્ટ્સને સીધા જ ક્રમમાં મૂકવામાં આવે છે, જ્યારે ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગમાં PCR દ્વારા પ્રવર્ધન કર્યા પછી ક્રમમાં મૂકવામાં આવે છે", "ડાયરેક્ટ ટુ સીક્વન્સિંગમાં રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝનો ઉપયોગ થાય છે, જ્યારે ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગમાં નહીં", "ડાયરેક્ટ ટુ સીક્વન્સિંગમાં અગરોઝ જેલનો ઉપયોગ થાય છે, જ્યારે ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગમાં પોલીએક્રાઇલેમાઇડ જેલનો ઉપયોગ થાય છે", "ડાયરેક્ટ ટુ સીક્વન્સિંગમાં ફ્લોરોસેન્ટ ડાયનો ઉપયોગ થાય છે, જ્યારે ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગમાં રેડિયોએક્ટિવ લેબલનો ઉપયોગ થાય છે"], "ans": 0, "exp": "ડાયરેક્ટ ટુ સીક્વન્સિંગમાં DNA ફ્રેગમેન્ટ્સને સીધા જ ક્રમમાં મૂકવામાં આવે છે, જ્યારે ઇન્ડાયરેક્ટ ટુ સીક્વન્સિંગમાં PCR દ્વારા પ્રવર્ધન કર્યા પછી ક્રમમાં મૂકવામાં આવે છે. B) બંને તકનીકોમાં રેસ્ટ્રિક્શન એન્ડોન્યુક્લિયેઝનો ઉપયોગ થઈ શકે છે. C) બંને તકનીકોમાં જેલ ઇલેક્ટ્રોફોરેસિસનો ઉપયોગ થાય છે, પરંતુ જેલનો પ્રકાર તકનીક પર આધારિત નથી. D) બંને તકનીકોમાં ફ્લોરોસેન્ટ ડાય અથવા રેડિયોએક્ટિવ લેબલનો ઉપયોગ થઈ શકે છે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
