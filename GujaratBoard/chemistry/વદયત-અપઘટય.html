@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિદ્યુત અપઘટ્ય</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વિદ્યુત અપઘટ્ય</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વિદ્યુત અપઘટ્ય</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયો પદાર્થ વિદ્યુત અપઘટ્ય નથી, પરંતુ તેના જલીય દ્રાવણમાં વિદ્યુતનું વહન થાય છે?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "હાઇડ્રોક્લોરિક એસિડ (HCl)", "એમોનિયા (NH₃)", "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH)"], "ans": 2, "exp": "એમોનિયા (NH₃) એ વિદ્યુત અપઘટ્ય નથી કારણ કે તે પાણીમાં ઓગળે ત્યારે આયનો ઉત્પન્ન કરતું નથી, પરંતુ તે પાણી સાથે પ્રક્રિયા કરીને NH₄⁺ અને OH⁻ આયનો બનાવે છે, જેના કારણે વિદ્યુતનું વહન થાય છે. બાકીના વિકલ્પો (NaCl, HCl, KOH) વિદ્યુત અપઘટ્ય છે કારણ કે તેઓ પાણીમાં સીધા આયનો ઉત્પન્ન કરે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણવિજ્ઞાન", "ch": ""}, {"q": "એક વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાંથી 2 એમ્પિયર વિદ્યુતપ્રવાહ 30 મિનિટ સુધી પસાર કરતાં 0.6 ગ્રામ ધાતુ જમા થાય છે. આ ધાતુનો તુલ્યભાર કેટલો હશે? (1 ફેરાડે = 96500 કુલંબ)", "opts": ["12 ગ્રામ/તુલ્યભાર", "32 ગ્રામ/તુલ્યભાર", "56 ગ્રામ/તુલ્યભાર", "64 ગ્રામ/તુલ્યભાર"], "ans": 2, "exp": "વિદ્યુતપ્રવાહ (I) = 2 A, સમય (t) = 30 મિનિટ = 1800 સેકન્ડ. કુલંબ (Q) = I × t = 2 × 1800 = 3600 કુલંબ. ફેરાડેના નિયમ મુજબ, જમા થતી ધાતુનું દળ (w) = (Q × તુલ્યભાર) / 96500. તેથી, તુલ્યભાર = (w × 96500) / Q = (0.6 × 96500) / 3600 = 16.08 ≈ 56 ગ્રામ/તુલ્યભાર. આથી સાચો જવાબ 56 ગ્રામ/તુલ્યભાર છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણવિજ્ઞાન", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) વિદ્યુત અપઘટ્યના દ્રાવણમાં આયનોની સંખ્યા વધારે હોય તો વિદ્યુતવાહકતા વધે છે. (ii) વિદ્યુત અપઘટ્યના દ્રાવણમાં તાપમાન વધારતાં વિદ્યુતવાહકતા ઘટે છે. (iii) પ્રબળ વિદ્યુત અપઘટ્યના દ્રાવણમાં આયનોનું સંપૂર્ણ વિયોજન થાય છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં સાચું/સાચાં છે?", "opts": ["માત્ર (i) અને (ii)", "માત્ર (i) અને (iii)", "માત્ર (ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 1, "exp": "વિધાન (i) સાચું છે કારણ કે આયનોની સંખ્યા વધારે હોય તો વિદ્યુતવાહકતા વધે છે. વિધાન (iii) પણ સાચું છે કારણ કે પ્રબળ વિદ્યુત અપઘટ્યમાં સંપૂર્ણ વિયોજન થાય છે. વિધાન (ii) ખોટું છે કારણ કે તાપમાન વધારતાં આયનોની ગતિશીલતા વધે છે, જેના કારણે વિદ્યુતવાહકતા વધે છે, ઘટતી નથી.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણવિજ્ઞાન", "ch": ""}, {"q": "એક વિદ્યુત અપઘટ્યના દ્રાવણમાંથી વિદ્યુતપ્રવાહ પસાર કરતાં કેથોડ પર હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે. આ દ્રાવણમાં નીચેના પૈકી કયો પદાર્થ હાજર હોઈ શકે નહીં?", "opts": ["સોડિયમ સલ્ફેટ (Na₂SO₄)", "કોપર સલ્ફેટ (CuSO₄)", "મેગ્નેશિયમ ક્લોરાઇડ (MgCl₂)", "પોટેશિયમ નાઇટ્રેટ (KNO₃)"], "ans": 1, "exp": "કેથોડ પર હાઇડ્રોજન વાયુ ઉત્પન્ન થાય ત્યારે દ્રાવણમાં ધાતુ આયનો હાજર ન હોવા જોઈએ જે હાઇડ્રોજન કરતાં વધુ સક્રિય હોય. કોપર સલ્ફેટ (CuSO₄)માં Cu²⁺ આયનો હાજર હોય છે, જે હાઇડ્રોજન કરતાં ઓછા સક્રિય હોવાથી કેથોડ પર કોપર જમા થાય, હાઇડ્રોજન નહીં. બાકીના વિકલ્પોમાં ધાતુ આયનો હાઇડ્રોજન કરતાં વધુ સક્રિય હોવાથી હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણવિજ્ઞાન", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં ઓગળે ત્યારે વિદ્યુત અપઘટ્ય તરીકે વર્તે છે, પરંતુ તેનું પિગલિત સ્વરૂપ વિદ્યુતનું વહન કરતું નથી?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "એલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃)", "લેડ બ્રોમાઇડ (PbBr₂)", "કેલ્શિયમ ફ્લોરાઇડ (CaF₂)"], "ans": 2, "exp": "લેડ બ્રોમાઇડ (PbBr₂) પાણીમાં ઓગળે ત્યારે આયનો ઉત્પન્ન કરે છે, તેથી તે વિદ્યુત અપઘટ્ય તરીકે વર્તે છે. પરંતુ તેનું પિગલિત સ્વરૂપ આયનોને ગતિશીલતા આપતું નથી, તેથી વિદ્યુતનું વહન થતું નથી. બાકીના વિકલ્પો (NaCl, Al₂O₃, CaF₂) પિગલિત અવસ્થામાં પણ વિદ્યુતનું વહન કરે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણવિજ્ઞાન", "ch": ""}, {"q": "એક વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાંથી વિદ્યુતપ્રવાહ પસાર કરતાં નીચેના પૈકી કયું પરિબળ વિદ્યુતવિભાજનની પ્રક્રિયાને સૌથી વધુ પ્રભાવિત કરશે નહીં?", "opts": ["દ્રાવણનું તાપમાન", "વિદ્યુત અપઘટ્યની સાંદ્રતા", "વિદ્યુતધ્રુવોની સામગ્રી", "દ્રાવણમાં હાજર અશુદ્ધિઓનું પ્રમાણ"], "ans": 2, "exp": "વિદ્યુતધ્રુવોની સામગ્રી (જેમ કે પ્લેટિનમ, કાર્બન) વિદ્યુતવિભાજનની પ્રક્રિયાની ગતિને પ્રભાવિત કરતી નથી, પરંતુ તે માત્ર વિદ્યુતપ્રવાહના વહન માટે માધ્યમ પૂરું પાડે છે. જ્યારે તાપમાન, સાંદ્રતા અને અશુદ્ધિઓ વિદ્યુતવિભાજનની ગતિ અને ઉત્પાદનને સીધી રીતે પ્રભાવિત કરે છે. તેથી સાચો જવાબ વિકલ્પ C છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) પીગળેલ NaCl નું વિદ્યુતવિભાજન કરતાં કેથોડ પર સોડિયમ ધાતુ મળે છે. (ii) પાણીમાં HCl નું વિદ્યુતવિભાજન કરતાં એનોડ પર ક્લોરિન વાયુ ઉત્પન્ન થાય છે. (iii) પીગળેલ Al₂O₃ નું વિદ્યુતવિભાજન કરતાં કેથોડ પર એલ્યુમિનિયમ મળે છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન ખોટું/ખોટાં છે?", "opts": ["માત્ર (i)", "માત્ર (ii)", "(i) અને (iii)", "એક પણ નહીં"], "ans": 3, "exp": "વિધાન (i) અને (iii) બંને સાચાં છે કારણ કે પીગળેલ NaCl અને Al₂O₃ ના વિદ્યુતવિભાજનમાં અનુક્રમે સોડિયમ અને એલ્યુમિનિયમ ધાતુ કેથોડ પર મળે છે. વિધાન (ii) પણ સાચું છે કારણ કે HCl ના જલીય દ્રાવણમાંથી ક્લોરિન વાયુ એનોડ પર ઉત્પન્ન થાય છે. તેથી એક પણ વિધાન ખોટું નથી, સાચો જવાબ વિકલ્પ D છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુત અપઘટ્યના દ્રાવણમાંથી 0.5 એમ્પિયર વિદ્યુતપ્રવાહ 2 કલાક સુધી પસાર કરતાં કેથોડ પર 0.745 ગ્રામ ધાતુ જમા થાય છે. આ ધાતુનું તુલ્યભાર કેટલું હશે? (ફેરેડે અચળાંક = 96500 C/mol)", "opts": ["31.75", "63.5", "108", "207"], "ans": 0, "exp": "વિદ્યુતપ્રવાહ (I) = 0.5 A, સમય (t) = 2 કલાક = 7200 સેકન્ડ, જમા થયેલ ધાતુનું દળ (w) = 0.745 ગ્રામ. વિદ્યુતભાર (Q) = I × t = 0.5 × 7200 = 3600 C. ફેરેડેના નિયમ મુજબ, w = (Q × E) / 96500, જ્યાં E = તુલ્યભાર. તેથી, E = (w × 96500) / Q = (0.745 × 96500) / 3600 ≈ 31.75. આ મૂલ્ય કોપરના તુલ્યભારને અનુરૂપ છે. તેથી સાચો જવાબ વિકલ્પ A છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "પીગળેલ સોડિયમ હાઇડ્રોક્સાઇડ (NaOH) નું વિદ્યુતવિભાજન કરતાં એનોડ પર કયો વાયુ મુક્ત થાય છે અને તેની સાથે કયો ધાતુ ઉત્પન્ન થાય છે?", "opts": ["ઓક્સિજન વાયુ અને સોડિયમ ધાતુ", "હાઇડ્રોજન વાયુ અને ઓક્સિજન વાયુ", "હાઇડ્રોજન વાયુ અને સોડિયમ ધાતુ", "ઓક્સિજન વાયુ અને હાઇડ્રોજન વાયુ"], "ans": 0, "exp": "પીગળેલ NaOH નું વિદ્યુતવિભાજન કરતાં એનોડ પર OH⁻ આયન ઓક્સિડાઇઝ થઈ ઓક્સિજન વાયુ મુક્ત થાય છે, જ્યારે કેથોડ પર Na⁺ આયન રિડ્યુસ થઈ સોડિયમ ધાતુ ઉત્પન્ન થાય છે. ઓપશન B, C, અને D ખોટા છે કારણ કે તેમાં હાઇડ્રોજન વાયુનો ઉલ્લેખ છે, જે પીગળેલ NaOH ના વિભાજન દરમિયાન ઉત્પન્ન થતો નથી. ઓપશન D માં બંને વાયુનો ઉલ્લેખ છે, પરંતુ એનોડ પર ફક્ત ઓક્સિજન જ મુક્ત થાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન વિદ્યુત અપઘટ્યના વિદ્યુતવિભાજન દરમિયાન કેથોડ પર થતી પ્રક્રિયા વિશે સાચું નથી?", "opts": ["કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે", "કેથોડ પર ધન આયનો (કેટાયનો) રિડ્યુસ થાય છે", "કેથોડ પર ઋણ આયનો (એનાયનો) ઓક્સિડાઇઝ થાય છે", "કેથોડ પર ઇલેક્ટ્રોનનો સ્વીકાર થાય છે"], "ans": 2, "exp": "કેથોડ પર હંમેશા રિડક્શન પ્રક્રિયા થાય છે, જેમાં ધન આયનો (કેટાયનો) ઇલેક્ટ્રોન મેળવી રિડ્યુસ થાય છે. ઓપશન C ખોટું છે કારણ કે કેથોડ પર ઋણ આયનો (એનાયનો) ઓક્સિડાઇઝ થતાં નથી, પરંતુ એનોડ પર ઓક્સિડેશન થાય છે. ઓપશન A, B, અને D સાચા છે કારણ કે તેઓ કેથોડ પર થતી રિડક્શન પ્રક્રિયાનું સચોટ વર્ણન કરે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "પીગળેલ સોડિયમ ક્લોરાઇડ (NaCl) નું વિદ્યુતવિભાજન કરતાં એનોડ પર કયો વાયુ મુક્ત થાય છે અને તેની સાથે કયો ધાતુ કેથોડ પર જમા થાય છે?", "opts": ["ક્લોરિન વાયુ અને સોડિયમ ધાતુ", "ઓક્સિજન વાયુ અને સોડિયમ ધાતુ", "હાઇડ્રોજન વાયુ અને ક્લોરિન ધાતુ", "ક્લોરિન વાયુ અને પોટેશિયમ ધાતુ"], "ans": 0, "exp": "પીગળેલ NaCl નું વિદ્યુતવિભાજન કરતાં એનોડ પર ક્લોરાઇડ આયન (Cl⁻) ઑક્સિડાઇઝ થઈ ક્લોરિન વાયુ (Cl₂) મુક્ત થાય છે, જ્યારે કેથોડ પર સોડિયમ આયન (Na⁺) રિડ્યુસ થઈ સોડિયમ ધાતુ જમા થાય છે. ઓક્સિજન વાયુ મુક્ત થતો નથી કારણ કે NaCl માં ઓક્સિજન હાજર નથી. હાઇડ્રોજન વાયુ પણ મુક્ત થતો નથી કારણ કે હાઇડ્રોજન આયન હાજર નથી. પોટેશિયમ ધાતુ જમા થતી નથી કારણ કે NaCl માં પોટેશિયમ હાજર નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં ઓગળે ત્યારે સૌથી ઓછી વિદ્યુત ચાલકતા ધરાવે છે?", "opts": ["એસિટિક એસિડ (CH₃COOH)", "હાઇડ્રોક્લોરિક એસિડ (HCl)", "સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)", "સોડિયમ ક્લોરાઇડ (NaCl)"], "ans": 0, "exp": "એસિટિક એસિડ (CH₃COOH) એક નબળો વિદ્યુત અપઘટ્ય છે, જે પાણીમાં અંશતઃ આયનિત થાય છે, જ્યારે HCl, NaOH, અને NaCl મજબૂત વિદ્યુત અપઘટ્ય છે અને પૂર્ણપણે આયનિત થાય છે. આથી એસિટિક એસિડની વિદ્યુત ચાલકતા સૌથી ઓછી હોય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાં વિદ્યુતપ્રવાહ પસાર કરતાં કેથોડ પર હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે. નીચેના પૈકી કયું સંયોજન આ પ્રક્રિયામાં હાજર હોવું જરૂરી છે?", "opts": ["Na₂SO₄", "CuSO₄", "AgNO₃", "KOH"], "ans": 0, "exp": "Na₂SO₄ નું જલીય દ્રાવણ વિદ્યુતવિભાજન કરતાં કેથોડ પર H⁺ આયન રિડ્યુસ થઈ હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે. CuSO₄ અને AgNO₃ ના દ્રાવણમાં ક્રમશઃ કોપર અને સિલ્વર ધાતુ કેથોડ પર જમા થાય છે, જ્યારે KOH નું દ્રાવણમાં હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે, પરંતુ Na₂SO₄ સૌથી સ્પષ્ટ ઉદાહરણ છે કારણ કે તેમાં ધાતુ આયન (Na⁺) હાઇડ્રોજન કરતાં ઓછી રિડક્શન ક્ષમતા ધરાવે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન પીગળેલ અવસ્થામાં વિદ્યુત અપઘટ્ય તરીકે વર્તે છે, પરંતુ તેના જલીય દ્રાવણમાં વિદ્યુત અપઘટ્ય તરીકે વર્તતું નથી?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "લેડ બ્રોમાઇડ (PbBr₂)", "ઍલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃)", "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH)"], "ans": 2, "exp": "સાચો જવાબ: C) ઍલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃). \n\nકારણ: ઍલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃) પીગળેલ અવસ્થામાં આયનો ધરાવે છે, તેથી તે વિદ્યુત અપઘટ્ય તરીકે વર્તે છે. પરંતુ તેનું જલીય દ્રાવણ બનતું નથી કારણ કે તે પાણીમાં અદ્રાવ્ય છે. તેથી તે જલીય દ્રાવણમાં વિદ્યુત અપઘટ્ય તરીકે વર્તતું નથી.\n\nA) સોડિયમ ક્લોરાઇડ (NaCl) પીગળેલ અને જલીય બંને અવસ્થામાં વિદ્યુત અપઘટ્ય તરીકે વર્તે છે.\nB) લેડ બ્રોમાઇડ (PbBr₂) પણ પીગળેલ અને જલીય બંને અવસ્થામાં વિદ્યુત અપઘટ્ય તરીકે વર્તે છે.\nD) પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH) પીગળેલ અને જલીય બંને અવસ્થામાં વિદ્યુત અપઘટ્ય તરીકે વર્તે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ બે વિવિધ વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાં સમાન વિદ્યુતપ્રવાહ પસાર કર્યો. પ્રથમ દ્રાવણમાં કેથોડ પર ધાતુ જમા થઈ, જ્યારે બીજા દ્રાવણમાં કેથોડ પર હાઇડ્રોજન વાયુ ઉત્પન્ન થયો. નીચેના પૈકી કયું સંયોજન બીજા દ્રાવણમાં હાજર હોઈ શકે?", "opts": ["સિલ્વર નાઇટ્રેટ (AgNO₃)", "ઝિંક સલ્ફેટ (ZnSO₄)", "કોપર સલ્ફેટ (CuSO₄)", "સોડિયમ ક્લોરાઇડ (NaCl)"], "ans": 3, "exp": "સાચો જવાબ: D) સોડિયમ ક્લોરાઇડ (NaCl). \n\nકારણ: જ્યારે વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાં વિદ્યુતપ્રવાહ પસાર કરવામાં આવે છે, ત્યારે કેથોડ પર ધાતુ જમા થાય છે અથવા હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે. જો દ્રાવણમાં હાજર ધાતુનો રિડક્શન પોટેન્શિયલ હાઇડ્રોજન કરતાં ઓછો હોય, તો હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે.\n\nસોડિયમ ક્લોરાઇડ (NaCl) ના જલીય દ્રાવણમાં Na⁺ આયનનો રિડક્શન પોટેન્શિયલ H⁺ કરતાં ઓછો હોવાથી કેથોડ પર હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે.\n\nA) સિલ્વર નાઇટ્રેટ (AgNO₃) ના દ્રાવણમાં Ag⁺ આયનનો રિડક્શન પોટેન્શિયલ વધુ હોવાથી કેથોડ પર ચાંદી જમા થાય છે.\nB) ઝિંક સલ્ફેટ (ZnSO₄) ના દ્રાવણમાં Zn²⁺ આયનનો રિડક્શન પોટેન્શિયલ ઓછો હોવાથી કેથોડ પર ઝિંક જમા થઈ શકે છે અથવા હાઇડ્રોજન વાયુ ઉત્પન્ન થઈ શકે છે, પરંતુ સામાન્ય રીતે હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે.\nC) કોપર સલ્ફેટ (CuSO₄) ના દ્રાવણમાં Cu²⁺ આયનનો રિડક્શન પોટેન્શિયલ વધુ હોવાથી કેથોડ પર તાંબુ જમા થાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુત અપઘટ્યના જલીય દ્રાવણમાંથી 1 એમ્પિયર વિદ્યુતપ્રવાહ 965 સેકન્ડ સુધી પસાર કરતાં કેથોડ પર 0.3175 ગ્રામ ધાતુ જમા થાય છે. આ ધાતુની તુલ્યભાર કેટલી હશે? (ફેરાડેનો અચળાંક = 96500 C/mol)", "opts": ["31.75", "63.5", "108", "207"], "ans": 0, "exp": "ફેરાડેના નિયમ મુજબ, જમા થતી ધાતુનું દળ = (I × t × E) / F, જ્યાં I = વિદ્યુતપ્રવાહ, t = સમય, E = તુલ્યભાર, F = ફેરાડેનો અચળાંક. અહીં, 0.3175 = (1 × 965 × E) / 96500. આ સમીકરણ ઉકેલતાં E = 31.75 મળે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "પીગળેલ કેલ્શિયમ ફ્લોરાઇડ (CaF₂) નું વિદ્યુતવિભાજન કરતાં એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "opts": ["ફ્લોરિન વાયુ (F₂)", "ઓક્સિજન વાયુ (O₂)", "કેલ્શિયમ ધાતુ (Ca)", "હાઇડ્રોજન વાયુ (H₂)"], "ans": 0, "exp": "પીગળેલ CaF₂ નું વિદ્યુતવિભાજન કરતાં એનોડ પર ફ્લોરાઇડ આયન (F⁻) ઓક્સિડાઇઝ થઈ ફ્લોરિન વાયુ (F₂) મુક્ત થાય છે. ઓક્સિજન વાયુ (O₂) મુક્ત થતો નથી કારણ કે CaF₂ માં ઓક્સિજન હાજર નથી. કેલ્શિયમ ધાતુ (Ca) કેથોડ પર મુક્ત થાય છે, એનોડ પર નહીં. હાઇડ્રોજન વાયુ (H₂) પણ હાજર નથી, કારણ કે CaF₂ માં હાઇડ્રોજન નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન વિદ્યુત અપઘટ્યના જલીય દ્રાવણના વિદ્યુતવિભાજન દરમિયાન કેથોડ પર થતી પ્રક્રિયા વિશે સાચું નથી?", "opts": ["કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે.", "કેથોડ પર ધન આયનો (કેટાયનો) ઓછા થાય છે.", "કેથોડ પર હાઇડ્રોક્સાઇડ આયનો (OH⁻) ઓક્સિડાઇઝ થાય છે.", "કેથોડ પર ધાતુ આયનો (જેમ કે Cu²⁺) ધાતુમાં રૂપાંતરિત થાય છે."], "ans": 2, "exp": "કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે, જ્યાં ધન આયનો (કેટાયનો) ઇલેક્ટ્રોન ગ્રહણ કરી ઓછા થાય છે (A અને B સાચા છે). ધાતુ આયનો જેમ કે Cu²⁺ ધાતુમાં રૂપાંતરિત થાય છે (D સાચું છે). પરંતુ કેથોડ પર હાઇડ્રોક્સાઇડ આયનો (OH⁻) ઓક્સિડાઇઝ થતાં નથી, કારણ કે ઓક્સિડેશન એનોડ પર થાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) પાણીમાં ઓગળેલા બધા જ આયનીય સંયોજનો વિદ્યુત અપઘટ્ય તરીકે વર્તે છે. (ii) પીગળેલ અવસ્થામાં બધા જ આયનીય સંયોજનો વિદ્યુતનું વહન કરે છે. (iii) કેટલાક સહસંયોજક સંયોજનો પાણીમાં ઓગળે ત્યારે વિદ્યુત અપઘટ્ય તરીકે વર્તે છે. ઉપરોક્ત વિધાનો પૈકી કયું/કયાં વિધાન/વિધાનો ખોટું/ખોટાં છે?", "opts": ["ફક્ત (i)", "ફક્ત (ii)", "ફક્ત (i) અને (ii)", "ફક્ત (i) અને (iii)"], "ans": 0, "exp": "આ પ્રશ્નમાં વિધાન (i) ખોટું છે કારણ કે પાણીમાં ઓગળેલા બધા જ આયનીય સંયોજનો વિદ્યુત અપઘટ્ય તરીકે વર્તતા નથી. ઉદાહરણ તરીકે, બેરિયમ સલ્ફેટ (BaSO₄) પાણીમાં અદ્રાવ્ય છે અને વિદ્યુતનું વહન કરતું નથી. વિધાન (ii) સાચું છે કારણ કે પીગળેલ અવસ્થામાં આયનીય સંયોજનો આયનો મુક્ત કરે છે અને વિદ્યુતનું વહન કરે છે. વિધાન (iii) પણ સાચું છે કારણ કે કેટલાક સહસંયોજક સંયોજનો જેમ કે હાઇડ્રોજન ક્લોરાઇડ (HCl) પાણીમાં ઓગળે ત્યારે આયનો બનાવે છે અને વિદ્યુત અપઘટ્ય તરીકે વર્તે છે. આથી ફક્ત વિધાન (i) ખોટું છે.", "ref": "Std 11 - પ્રકરણ 7: રાસાયણિક ગતિકી અને સંતુલન, Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "પીગળેલ સોડિયમ એસિટેટ (CH3COONa) નું વિદ્યુતવિભાજન કરતાં એનોડ પર કયો પદાર્થ મુક્ત થાય છે?", "opts": ["ક્લોરિન વાયુ (Cl2)", "ઇથેન વાયુ (C2H6)", "કાર્બન ડાયોક્સાઇડ (CO2) અને મિથેન (CH4) નો મિશ્રણ", "ઓક્સિજન વાયુ (O2)"], "ans": 2, "exp": "પીગળેલ સોડિયમ એસિટેટ (CH3COONa) નું વિદ્યુતવિભાજન કરતાં એસિટેટ આયન (CH3COO-) એનોડ પર ઓક્સિડેશન પામે છે. એસિટેટ આયનનું ઓક્સિડેશન થતાં કાર્બન ડાયોક્સાઇડ (CO2) અને મિથેન (CH4) ઉત્પન્ન થાય છે. ક્લોરિન વાયુ (Cl2) એસિટેટમાં ક્લોરિન ન હોવાથી મુક્ત થતો નથી. ઇથેન (C2H6) ઉત્પન્ન થતું નથી કારણ કે એસિટેટ આયનનું સીધું જ ડિકાર્બોક્સિલેશન થતું નથી. ઓક્સિજન વાયુ (O2) પણ એસિટેટ આયનમાં ઓક્સિજનની ગેરહાજરીમાં મુક્ત થતો નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
