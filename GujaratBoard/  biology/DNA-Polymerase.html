@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA Polymerase</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>DNA Polymerase</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">DNA Polymerase</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 19 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 19 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "DNA પોલિમરેઝ I અને DNA પોલિમરેઝ III વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["DNA પોલિમરેઝ I પાસે 5'→3' પોલિમરેઝ ક્રિયા છે, જ્યારે DNA પોલિમરેઝ III પાસે 3'→5' એક્સોન્યુક્લિયેઝ ક્રિયા છે.", "DNA પોલિમરેઝ I પાસે 5'→3' એક્સોન્યુક્લિયેઝ ક્રિયા છે, જ્યારે DNA પોલિમરેઝ III પાસે પ્રૂફરીડિંગ ક્રિયા નથી.", "DNA પોલિમરેઝ I પાસે 5'→3' પોલિમરેઝ અને 3'→5' એક્સોન્યુક્લિયેઝ ક્રિયા છે, જ્યારે DNA પોલિમરેઝ III પાસે 5'→3' પોલિમરેઝ અને પ્રૂફરીડિંગ ક્રિયા છે.", "DNA પોલિમરેઝ I અને III બંને પાસે પ્રૂફરીડિંગ ક્રિયા છે, પરંતુ DNA પોલિમરેઝ III પાસે 5'→3' એક્સોન્યુક્લિયેઝ ક્રિયા નથી."], "ans": 2, "exp": "DNA પોલિમરેઝ I પાસે 5'→3' પોલિમરેઝ ક્રિયા અને 3'→5' એક્સોન્યુક્લિયેઝ ક્રિયા હોય છે, જ્યારે DNA પોલિમરેઝ III પાસે 5'→3' પોલિમરેઝ ક્રિયા અને પ્રૂફરીડિંગ (3'→5' એક્સોન્યુક્લિયેઝ) ક્રિયા હોય છે. વિકલ્પ A અને B અપૂર્ણ છે, જ્યારે વિકલ્પ D ખોટો છે કારણ કે DNA પોલિમરેઝ III પાસે પ્રૂફરીડિંગ ક્રિયા હોય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝની પ્રૂફરીડિંગ ક્રિયા કયા દિશામાં કાર્ય કરે છે?", "opts": ["5'→3'", "3'→5'", "5'→5'", "3'→3'"], "ans": 1, "exp": "DNA પોલિમરેઝની પ્રૂફરીડિંગ ક્રિયા 3'→5' દિશામાં કાર્ય કરે છે, જેથી તે DNAની દિશામાં પાછળ વળીને તપાસ કરી શકે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તે DNA પોલિમરેઝની ક્રિયાની દિશા સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝની ક્રિયા માટે કયા કોફેક્ટરની જરૂર પડે છે?", "opts": ["Mg²⁺", "Zn²⁺", "Ca²⁺", "Fe²⁺"], "ans": 0, "exp": "DNA પોલિમરેઝની ક્રિયા માટે Mg²⁺ કોફેક્ટરની જરૂર પડે છે, કારણ કે તે ન્યુક્લિયોટાઇડની ફોસ્ફોડાયેસ્ટર બંધ રચનામાં મદદ કરે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તે DNA પોલિમરેઝની ક્રિયા માટે જરૂરી નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ IIIની કયી ઉપ-એકમ (subunit) પ્રૂફરીડિંગ ક્રિયા માટે જવાબદાર છે?", "opts": ["α (અલ્ફા)", "β (બીટા)", "ε (એપ્સિલોન)", "θ (થીટા)"], "ans": 2, "exp": "DNA પોલિમરેઝ IIIની ε (એપ્સિલોન) ઉપ-એકમ પ્રૂફરીડિંગ ક્રિયા માટે જવાબદાર છે. વિકલ્પ A (α) પોલિમરેઝ ક્રિયા માટે, વિકલ્પ B (β) સ્લાઇડિંગ ક્લેમ્પ માટે, અને વિકલ્પ D (θ) અન્ય કાર્ય માટે જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ દ્વારા DNAની નકલ દરમિયાન કયા પ્રકારના ત્રુટિ (error) સૌથી વધુ સામાન્ય રીતે થાય છે?", "opts": ["ટ્રાન્સવર્ઝન (Transversion)", "ટ્રાન્ઝિશન (Transition)", "ડિલિશન (Deletion)", "ઇન્સર્શન (Insertion)"], "ans": 1, "exp": "DNA પોલિમરેઝ દ્વારા DNAની નકલ દરમિયાન ટ્રાન્ઝિશન (પ્યુરિનથી પ્યુરિન અથવા પિરિમિડિનથી પિરિમિડિન) ત્રુટિ સૌથી વધુ સામાન્ય રીતે થાય છે. વિકલ્પ A (ટ્રાન્સવર્ઝન) પ્યુરિનથી પિરિમિડિન અથવા ઉલટું હોય છે, જ્યારે વિકલ્પ C અને D (ડિલિશન અને ઇન્સર્શન) DNA પોલિમરેઝની પ્રૂફરીડિંગ ક્રિયા દ્વારા સુધારવામાં આવે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ I દ્વારા કેટલાક ન્યુક્લિયોટાઇડ્સની ઉમેરણી પછી, તેની 5’ → 3’ એક્સોન્યુક્લિએઝ ક્રિયા કયા હેતુ માટે ઉપયોગી થાય છે?", "opts": ["લીડિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સને જોડવા", "લેગિંગ સ્ટ્રેન્ડ પર RNA પ્રાઇમરને દૂર કરવા અને DNA વડે બદલવા", "DNAની દિશામાં ત્રુટિ સુધારવા માટે પ્રૂફરીડિંગ કરવા", "DNAની ડબલ હેલિક્સને અલગ પાડવા"], "ans": 1, "exp": "DNA પોલિમરેઝ Iની 5’ → 3’ એક્સોન્યુક્લિએઝ ક્રિયા લેગિંગ સ્ટ્રેન્ડ પરના RNA પ્રાઇમરને દૂર કરવા અને તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ઉમેરવા માટે ઉપયોગી થાય છે. A) લીડિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સને DNA લિગેઝ જોડે છે, નહીં કે DNA પોલિમરેઝ I. C) પ્રૂફરીડિંગ ક્રિયા 3’ → 5’ એક્સોન્યુક્લિએઝ દ્વારા થાય છે, નહીં કે 5’ → 3’. D) DNA હેલિકેઝ ઉત્સેચક ડબલ હેલિક્સને અલગ પાડે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ III દ્વારા DNA સિંથેસિસ દરમિયાન, કયા પરિબળને લીધે લેગિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સ બનાવવામાં આવે છે?", "opts": ["DNA પોલિમરેઝ IIIની 5’ → 3’ પોલિમરેઝ ક્રિયાની મર્યાદા", "DNA હેલિકેઝની અસમતોલ ક્રિયા", "RNA પ્રાઇમરની અસ્થિરતા", "ટોપોઇઝોમરેઝની અનુપસ્થિતિ"], "ans": 0, "exp": "DNA પોલિમરેઝ III ફક્ત 5’ → 3’ દિશામાં જ DNA સિંથેસિસ કરી શકે છે. લેગિંગ સ્ટ્રેન્ડ પર, ટેમ્પલેટ સ્ટ્રેન્ડ 5’ → 3’ દિશામાં હોય છે, જેથી DNA પોલિમરેઝ IIIને વારંવાર વળતર લેવું પડે છે, પરિણામે ઓકાઝાકી ફ્રેગમેન્ટ્સ બને છે. B) DNA હેલિકેઝ ડબલ હેલિક્સને અલગ પાડે છે, પરંતુ તે ઓકાઝાકી ફ્રેગમેન્ટ્સ બનાવવા માટે જવાબદાર નથી. C) RNA પ્રાઇમર અસ્થિર હોવા છતાં, તે ઓકાઝાકી ફ્રેગમેન્ટ્સ બનાવવા માટેનું મુખ્ય કારણ નથી. D) ટોપોઇઝોમરેઝ DNAની સુપરકોઇલિંગને દૂર કરે છે, પરંતુ તે ઓકાઝાકી ફ્રેગમેન્ટ્સ બનાવવા માટે જવાબદાર નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ દ્વારા ક્રિયા દરમિયાન, કયા ન્યુક્લિયોટાઇડની ગેરહાજરીમાં સિંથેસિસ અટકી જાય છે?", "opts": ["dATP", "dTTP", "dGTP", "કોઈપણ ડિઓક્સીરિબોન્યુક્લિયોટાઇડ ટ્રાઇફોસ્ફેટ (dNTP)"], "ans": 3, "exp": "DNA પોલિમરેઝને તેની ક્રિયા માટે ચારેય પ્રકારના ડિઓક્સીરિબોન્યુક્લિયોટાઇડ ટ્રાઇફોસ્ફેટ (dATP, dTTP, dGTP, dCTP)ની જરૂર પડે છે. જો કોઈપણ એક dNTPની ગેરહાજરી હોય, તો DNA સિંથેસિસ અટકી જાય છે. A, B, અને C માત્ર એક-એક dNTPની ગેરહાજરી દર્શાવે છે, પરંતુ પ્રશ્નમાં કોઈપણ એકની ગેરહાજરી અટકાવી શકે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ I અને DNA પોલિમરેઝ III વચ્ચેનો કયો તફાવત સૌથી યોગ્ય રીતે દર્શાવે છે કે DNA પોલિમરેઝ I પાસે પ્રૂફરીડિંગ ક્રિયા નથી?", "opts": ["DNA પોલિમરેઝ I પાસે 3’ → 5’ એક્સોન્યુક્લિએઝ ક્રિયા નથી", "DNA પોલિમરેઝ I પાસે 5’ → 3’ એક્સોન્યુક્લિએઝ ક્રિયા છે", "DNA પોલિમરેઝ I પાસે હેલિકેઝ ક્રિયા નથી", "DNA પોલિમરેઝ I પાસે પ્રાઇમર સિંથેસિસની ક્ષમતા નથી"], "ans": 0, "exp": "DNA પોલિમરેઝ I પાસે 3’ → 5’ એક્સોન્યુક્લિએઝ ક્રિયા નથી, જેથી તે પ્રૂફરીડિંગ કરી શકતું નથી. DNA પોલિમરેઝ III પાસે 3’ → 5’ પ્રૂફરીડિંગ ક્રિયા હોય છે. B) DNA પોલિમરેઝ I પાસે 5’ → 3’ એક્સોન્યુક્લિએઝ ક્રિયા છે, પરંતુ તે પ્રૂફરીડિંગ માટે નહીં. C) હેલિકેઝ ક્રિયા DNA પોલિમરેઝની નહીં, પરંતુ DNA હેલિકેઝની હોય છે. D) DNA પોલિમરેઝ I પાસે પ્રાઇમર સિંથેસિસની ક્ષમતા નથી, પરંતુ તે પ્રૂફરીડિંગની અછતનું કારણ નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રયોગમાં, બેક્ટેરિયાના કોષમાંથી અલગ કરેલ DNA પોલિમરેઝ III ને એક ટેસ્ટ ટ્યુબમાં લેવામાં આવે છે જેમાં નીચેના ઘટકો છે: ટેમ્પલેટ DNA, પ્રાઇમર, ચારેય dNTPs (dATP, dTTP, dCTP, dGTP), Mg²⁺ આયનો અને ATP. આ પ્રણાલીમાં DNA સંશ્લેષણ શરૂ થાય છે, પરંતુ થોડા સમય પછી અટકી જાય છે. આ અટકાવનું સૌથી સંભવિત કારણ શું હોઈ શકે?", "opts": ["ATP ની ગેરહાજરીને કારણે DNA પોલિમરેઝ III ની પ્રૂફરીડિંગ ક્રિયા નિષ્ક્રિય થઈ ગઈ છે", "DNA પોલિમરેઝ III ની 5’ → 3’ એક્ઝોન્યુક્લિએઝ પ્રવૃત્તિ માટે જરૂરી પ્રોટીન સહકારકોની ગેરહાજરી છે", "લેગિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ટુકડાઓને જોડવા માટે DNA લિગેઝની ગેરહાજરી છે", "DNA પોલિમરેઝ III ની પ્રક્રિયાશીલતા (processivity) જાળવવા માટે β-ક્લેમ્પ પ્રોટીનની ગેરહાજરી છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. DNA પોલિમરેઝ III ની પ્રક્રિયાશીલતા (processivity) એટલે કે તે લાંબા DNA સ્ટ્રેન્ડ પર સતત કામ કરી શકે તે માટે β-ક્લેમ્પ પ્રોટીન જરૂરી છે. β-ક્લેમ્પ DNA પોલિમરેઝ III ને DNA સાથે જોડી રાખે છે અને તેને સ્લાઇડિંગ ક્લેમ્પ તરીકે કામ કરે છે. તેની ગેરહાજરીમાં DNA પોલિમરેઝ III થોડા ન્યુક્લિયોટાઇડ્સ ઉમેર્યા પછી DNA થી અલગ થઈ જાય છે, જેના કારણે સંશ્લેષણ અટકી જાય છે.\n\nવિકલ્પ A ખોટો છે કારણ કે ATP પ્રૂફરીડિંગ ક્રિયા માટે જરૂરી નથી, તે તો DNA લિગેઝ માટે જરૂરી છે.\n\nવિકલ્પ B ખોટો છે કારણ કે DNA પોલિમરેઝ III માં 5’ → 3’ એક્ઝોન્યુક્લિએઝ પ્રવૃત્તિ હોતી નથી, આ પ્રવૃત્તિ DNA પોલિમરેઝ I માં હોય છે.\n\nવિકલ્પ C ખોટો છે કારણ કે DNA લિગેઝ ઓકાઝાકી ટુકડાઓને જોડવા માટે જરૂરી છે, પરંતુ તે DNA સંશ્લેષણની શરૂઆતને અટકાવતું નથી. તે તો સંશ્લેષણ પૂર્ણ થયા પછીની પ્રક્રિયા છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય અને આનુવંશિકતા", "ch": ""}, {"q": "DNA પોલિમરેઝ I ની 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા કયા હેતુ માટે મહત્વની છે?", "opts": ["લીડિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સને જોડવા", "RNA પ્રાઇમરને હટાવીને તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ઉમેરવા", "DNA ની દ્વિપક્વ સંરચનાને સ્થિર કરવા", "DNA ની નકલ દરમિયાન ટોપોઇસોમરેઝની ક્રિયાને સહાય કરવા"], "ans": 1, "exp": "DNA પોલિમરેઝ I ની 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા RNA પ્રાઇમરને હટાવીને તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ઉમેરવા માટે મહત્વની છે. લીડિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સને જોડવાનું કામ DNA લિગેઝ કરે છે, ન કે DNA પોલિમરેઝ I. DNA ની દ્વિપક્વ સંરચનાને સ્થિર કરવા માટે હાઇડ્રોજન બંધો જવાબદાર છે, અને ટોપોઇસોમરેઝ DNA ની નકલ દરમિયાન સુપરકોઇલિંગને હટાવે છે, પરંતુ તે DNA પોલિમરેઝ I ની ક્રિયા નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ III ની કયી વિશેષતા તેને DNA પોલિમરેઝ I કરતાં વધુ કુશળ બનાવે છે?", "opts": ["તે 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા ધરાવે છે", "તે 5’ → 3’ પોલિમરેઝ ક્રિયા સાથે 3’ → 5’ પ્રૂફરીડિંગ ક્રિયા એકસાથે કરે છે", "તે RNA પ્રાઇમરની જરૂર વગર કામ કરે છે", "તે એકલા સ્ટ્રેન્ડ પર કામ કરે છે"], "ans": 1, "exp": "DNA પોલિમરેઝ III 5’ → 3’ પોલિમરેઝ ક્રિયા સાથે 3’ → 5’ પ્રૂફરીડિંગ ક્રિયા એકસાથે કરે છે, જે તેને વધુ કુશળ બનાવે છે. DNA પોલિમરેઝ I પણ 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા ધરાવે છે, પરંતુ તે પ્રૂફરીડિંગ અને પોલિમરેઝ ક્રિયા એકસાથે કરતું નથી. DNA પોલિમરેઝ III એ RNA પ્રાઇમરની જરૂર પડે છે, અને તે દ્વિપક્વ DNA પર કામ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA ની નકલ દરમિયાન, લેગિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સનું નિર્માણ કયા કારણસર થાય છે?", "opts": ["DNA પોલિમરેઝ III ફક્ત 5’ → 3’ દિશામાં જ કામ કરે છે", "DNA પોલિમરેઝ I ની 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા ધીમી હોય છે", "હેલિકેઝ ઉત્સેચક દ્વિપક્વ DNA ને ખૂબ જ ઝડપથી અલગ કરે છે", "સિંગલ-સ્ટ્રેન્ડ બાઇન્ડિંગ પ્રોટીન (SSB) ની ગેરહાજરી"], "ans": 0, "exp": "DNA પોલિમરેઝ III ફક્ત 5’ → 3’ દિશામાં જ કામ કરે છે, જેના કારણે લેગિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સનું નિર્માણ થાય છે. DNA પોલિમરેઝ I ની 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા ધીમી હોવી એ ઓકાઝાકી ફ્રેગમેન્ટ્સના નિર્માણનું કારણ નથી. હેલિકેઝ ઉત્સેચક અને SSB પ્રોટીનની ક્રિયા DNA ની નકલ માટે જરૂરી છે, પરંતુ તે ઓકાઝાકી ફ્રેગમેન્ટ્સના નિર્માણનું મુખ્ય કારણ નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ દ્વારા DNA ની નકલ દરમિયાન, કયા પરિબળને લીધે ત્રુટિ દર (error rate) અત્યંત ઓછો રહે છે?", "opts": ["DNA પોલિમરેઝની 3’ → 5’ પ્રૂફરીડિંગ ક્રિયા", "DNA પોલિમરેઝની 5’ → 3’ પોલિમરેઝ ક્રિયાની ઝડપ", "DNA લિગેઝની ક્રિયા", "ટોપોઇસોમરેઝની ક્રિયા"], "ans": 0, "exp": "DNA પોલિમરેઝની 3’ → 5’ પ્રૂફરીડિંગ ક્રિયા ત્રુટિ દરને અત્યંત ઓછો રાખવા માટે જવાબદાર છે. DNA પોલિમરેઝની 5’ → 3’ પોલિમરેઝ ક્રિયાની ઝડપ ત્રુટિ દરને ઓછો કરતી નથી. DNA લિગેઝ અને ટોપોઇસોમરેઝની ક્રિયા DNA ની નકલમાં મહત્વની ભૂમિકા ભજવે છે, પરંતુ તે ત્રુટિ દરને ઓછો કરવા માટે જવાબદાર નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ III દ્વારા લેગિંગ સ્ટ્રેન્ડ પર ઓકાઝાકી ફ્રેગમેન્ટ્સનું નિર્માણ થાય છે, પરંતુ પ્રાઇમરની જરૂરિયાત વારંવાર પડે છે. આ માટે કયું કારણ સૌથી યોગ્ય છે?", "opts": ["DNA પોલિમરેઝ III ફક્ત 5’ → 3’ દિશામાં જ કામ કરે છે, જ્યારે લેગિંગ સ્ટ્રેન્ડ 3’ → 5’ દિશામાં ઉઘડે છે.", "હેલિકેઝ ઉત્સેચક દ્વારા ડબલ હેલિક્સ ખૂલતી વખતે લેગિંગ સ્ટ્રેન્ડ પર તણાવ પેદા થાય છે.", "DNA પોલિમરેઝ III પાસે પ્રાઇમર બનાવવાની ક્ષમતા નથી, તેથી તેને RNA પ્રાઇમેઝની જરૂર પડે છે.", "ટોપોઇઝોમરેઝ ઉત્સેચક લેગિંગ સ્ટ્રેન્ડને તોડી નાખે છે, જેથી નવા પ્રાઇમરની જરૂર પડે છે."], "ans": 0, "exp": "DNA પોલિમરેઝ III ફક્ત 5’ → 3’ દિશામાં જ DNA સિંથેસિસ કરે છે. લેગિંગ સ્ટ્રેન્ડ 3’ → 5’ દિશામાં ઉઘડે છે, જેથી DNA પોલિમરેઝ III એ એક જ વખતે થોડા ન્યુક્લિયોટાઇડ્સ ઉમેરી શકે છે અને પછી નવો પ્રાઇમર બનાવવો પડે છે, જેથી ઓકાઝાકી ફ્રેગમેન્ટ્સ બને છે. બાકીના વિકલ્પો અસત્ય છે: હેલિકેઝ તણાવ પેદા કરે છે પરંતુ તે પ્રાઇમરની જરૂરિયાતનું મુખ્ય કારણ નથી; DNA પોલિમરેઝ III પ્રાઇમર બનાવી શકતું નથી, પરંતુ આ પ્રશ્નમાં મુખ્ય કારણ દિશા સંબંધિત છે; ટોપોઇઝોમરેઝ DNAને તોડી નાખે છે પરંતુ તે પ્રાઇમરની જરૂરિયાત સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "DNA પોલિમરેઝ I ની 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા કયા હેતુ માટે મહત્વપૂર્ણ છે?", "opts": ["લીડિંગ સ્ટ્રેન્ડ પર ન્યુક્લિયોટાઇડ્સની ઉમેરણી કરવા", "RNA પ્રાઇમરને હટાવીને તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ભરવા", "DNA ની દ્વિપટલી સ્થિરતા જાળવવા", "હેલિકેઝ ઉત્સેચકની ક્રિયામાં મદદ કરવા"], "ans": 1, "exp": "DNA પોલિમરેઝ I ની 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા RNA પ્રાઇમરને હટાવીને તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ભરવા માટે મહત્વપૂર્ણ છે. આ ક્રિયા DNA નકલ દરમિયાન ઓકાઝાકી ફ્રેગમેન્ટ્સને જોડવા માટે જરૂરી છે. બાકીના વિકલ્પો અયોગ્ય છે: A) લીડિંગ સ્ટ્રેન્ડ પર ન્યુક્લિયોટાઇડ્સની ઉમેરણી DNA પોલિમરેઝ III દ્વારા થાય છે. C) DNA ની દ્વિપટલી સ્થિરતા હાઇડ્રોજન બંધો દ્વારા જાળવવામાં આવે છે. D) હેલિકેઝ ઉત્સેચકની ક્રિયા DNA ની દ્વિપટલી ખોલવા માટે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ III ની કયી વિશેષતા તેને પ્રૂફરીડિંગ ક્રિયા માટે સક્ષમ બનાવે છે?", "opts": ["તેની પાસે 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા હોય છે", "તેની પાસે 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા હોય છે", "તેની પાસે હેલિકેઝ ક્રિયા હોય છે", "તેની પાસે લાઇગેઝ ક્રિયા હોય છે"], "ans": 0, "exp": "DNA પોલિમરેઝ III પાસે 3’ → 5’ એક્સોન્યુક્લિયેઝ ક્રિયા હોય છે, જે પ્રૂફરીડિંગ માટે જવાબદાર છે. આ ક્રિયા દ્વારા તે ગલત ઉમેરાયેલા ન્યુક્લિયોટાઇડ્સને હટાવી શકે છે. બાકીના વિકલ્પો અયોગ્ય છે: B) 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા DNA પોલિમરેઝ I માં જોવા મળે છે. C) હેલિકેઝ ક્રિયા DNA હેલિકેઝ ઉત્સેચક દ્વારા થાય છે. D) લાઇગેઝ ક્રિયા DNA લાઇગેઝ ઉત્સેચક દ્વારા થાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "DNA પોલિમરેઝ I ની 5’ → 3’ પોલિમરેઝ ક્રિયા અને 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા વચ્ચેનો સહસંબંધ કયો છે?", "opts": ["5’ → 3’ પોલિમરેઝ ક્રિયા DNA ની નકલ કરે છે, જ્યારે 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા RNA પ્રાઇમરને દૂર કરે છે.", "5’ → 3’ પોલિમરેઝ ક્રિયા RNA પ્રાઇમરની જગ્યાએ DNA ન્યુક્લિયોટાઇડ્સ ઉમેરે છે, જ્યારે 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા DNA ની નકલ દરમિયાન ત્રુટિઓને દૂર કરે છે.", "5’ → 3’ પોલિમરેઝ ક્રિયા અને 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા બંને DNA ની નકલ દરમિયાન ત્રુટિઓને સુધારે છે.", "5’ → 3’ પોલિમરેઝ ક્રિયા DNA ની નકલ કરે છે, જ્યારે 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા DNA ની નકલ દરમિયાન ઉમેરાયેલા ન્યુક્લિયોટાઇડ્સને કાપે છે."], "ans": 0, "exp": "DNA પોલિમરેઝ I ની 5’ → 3’ પોલિમરેઝ ક્રિયા DNA ની નકલ કરે છે, જ્યારે તેની 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા RNA પ્રાઇમરને દૂર કરે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા ત્રુટિઓને દૂર કરતી નથી, C) બંને ક્રિયાઓ ત્રુટિઓ સુધારતી નથી, D) 5’ → 3’ એક્સોન્યુક્લિયેઝ ક્રિયા ન્યુક્લિયોટાઇડ્સને કાપતી નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રયોગમાં, DNA પોલિમરેઝ III ની ક્રિયા દરમિયાન, અચાનક dATP ની ગેરહાજરીને લીધે સિંથેસિસ અટકી જાય છે. આ સ્થિતિમાં, કયો પરિણામ સૌથી યોગ્ય રીતે થશે?", "opts": ["લીડિંગ સ્ટ્રેન્ડ પર સિંથેસિસ અટકી જશે, પરંતુ લેગિંગ સ્ટ્રેન્ડ પર ચાલુ રહેશે", "લેગિંગ સ્ટ્રેન્ડ પર સિંથેસિસ અટકી જશે, પરંતુ લીડિંગ સ્ટ્રેન્ડ પર ચાલુ રહેશે", "બંને સ્ટ્રેન્ડ પર સિંથેસિસ અટકી જશે", "સિંથેસિસ અટકશે નહીં, કારણ કે DNA પોલિમરેઝ I તેની જગ્યાએ કામ કરશે"], "ans": 2, "exp": "DNA પોલિમરેઝ III એ બંને સ્ટ્રેન્ડ (લીડિંગ અને લેગિંગ) પર DNA સિંથેસિસ માટે જવાબદાર છે. dATP ની ગેરહાજરીમાં, બંને સ્ટ્રેન્ડ પર સિંથેસિસ અટકી જશે, કારણ કે dATP એ DNA સિંથેસિસ માટે આવશ્યક ન્યુક્લિયોટાઇડ છે. લીડિંગ સ્ટ્રેન્ડ પર સિંથેસિસ અટકી જશે (A) અને લેગિંગ સ્ટ્રેન્ડ પર અટકી જશે (B) એ અધૂરા પરિણામ છે. DNA પોલિમરેઝ I (D) DNA પોલિમરેઝ III ની જગ્યાએ કામ કરતી નથી, કારણ કે તેની પાસે પ્રૂફરીડિંગ ક્ષમતા નથી અને તે મુખ્યત્વે રિપ્લિકેશન દરમિયાન ગેપ ભરવા માટે કામ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
