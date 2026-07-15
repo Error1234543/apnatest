@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અર્ધ-સંરક્ષક પ્રતિકૃતિ (Semi-conservative Replication)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>અર્ધ-સંરક્ષક પ્રતિકૃતિ (Semi-conservative Replication)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">અર્ધ-સંરક્ષક પ્રતિકૃતિ (Semi-conservative Replication)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "મેસેલ્સન અને સ્ટાહલના પ્રયોગમાં E. coli ને ¹⁵N ધરાવતા માધ્યમમાં ઉછેર્યા બાદ ¹⁴N ધરાવતા માધ્યમમાં એક પેઢી સુધી ઉછેરતાં, સેન્ટ્રીફ્યુજેશન બાદ DNA ના બેન્ડનું અવલોકન કરતાં નીચેનામાંથી કયું પરિણામ મળ્યું હતું જે અર્ધ-સંરક્ષક પ્રતિકૃતિની પુષ્ટિ કરે છે?", "opts": ["એક જ બેન્ડ જે ¹⁴N અને ¹⁵N ના મધ્યવર્તી ઘનતાવાળો હતો", "બે અલગ બેન્ડ જેમાં એક ¹⁴N અને બીજો ¹⁵N ની ઘનતાવાળો હતો", "એક જ બેન્ડ જે માત્ર ¹⁴N ની ઘનતાવાળો હતો", "ત્રણ બેન્ડ જેમાં ¹⁴N, ¹⁵N અને મધ્યવર્તી ઘનતાવાળા હતા"], "ans": 0, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિ અનુસાર, પ્રત્યેક નવો DNA અણુ એક જૂના (¹⁵N) અને એક નવા (¹⁴N) સૂત્રથી બને છે. તેથી એક પેઢી બાદ બધા DNA અણુઓ મધ્યવર્તી ઘનતા ધરાવતા હોવાથી એક જ બેન્ડ મળે છે. વિકલ્પ A સિવાયના બધા વિકલ્પો અર્ધ-સંરક્ષક પ્રતિકૃતિ સાથે સુસંગત નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન અર્ધ-સંરક્ષક પ્રતિકૃતિ માટે ખોટું છે?", "opts": ["પ્રતિકૃતિ દરમિયાન DNA હેલિકેઝ ઉત્સેચક DNA ના બેવડા સૂત્રને છૂટા પાડે છે", "પ્રત્યેક નવા DNA અણુમાં એક જૂનું અને એક નવું પોલિન્યુક્લિઓટાઇડ સૂત્ર હોય છે", "પ્રતિકૃતિ પૂર્ણ થયા બાદ બંને નવા DNA અણુઓમાં માત્ર નવા સંશ્લેષિત સૂત્રો જ હોય છે", "DNA પોલિમરેઝ ઉત્સેચક નવા ન્યુક્લિઓટાઇડ્સને જોડે છે"], "ans": 2, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિ અનુસાર, પ્રત્યેક નવા DNA અણુમાં એક જૂનું (પેરેન્ટલ) અને એક નવું (નવું સંશ્લેષિત) સૂત્ર હોય છે. વિકલ્પ C ખોટું છે કારણ કે તે સંપૂર્ણ રૂપે નવા સૂત્રોની વાત કરે છે, જે અર્ધ-સંરક્ષક પ્રતિકૃતિના સિદ્ધાંત વિરુદ્ધ છે. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "DNA પ્રતિકૃતિ દરમિયાન ઓકાઝાકી ટુકડાઓનું નિર્માણ કયા સૂત્ર પર થાય છે?", "opts": ["લીડિંગ સૂત્ર (Leading strand)", "લેગિંગ સૂત્ર (Lagging strand)", "બંને સૂત્રો પર સમાન રીતે", "પ્રાઇમર સૂત્ર પર"], "ans": 1, "exp": "DNA પ્રતિકૃતિ દરમિયાન લેગિંગ સૂત્ર પર અવિરત રીતે સંશ્લેષણ શક્ય ન હોવાથી નાના ઓકાઝાકી ટુકડાઓનું નિર્માણ થાય છે. લીડિંગ સૂત્ર પર સતત સંશ્લેષણ થાય છે, તેથી વિકલ્પ A ખોટો છે. વિકલ્પ C અને D પણ અયોગ્ય છે કારણ કે ઓકાઝાકી ટુકડાઓ માત્ર લેગિંગ સૂત્ર પર જ બને છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉત્સેચક DNA પ્રતિકૃતિ દરમિયાન પ્રાઇમરને દૂર કરી તેની જગ્યાએ DNA ન્યુક્લિઓટાઇડ્સ ઉમેરે છે?", "opts": ["DNA હેલિકેઝ", "DNA પોલિમરેઝ I", "DNA લાઇગેઝ", "ટોપોઆઇસોમરેઝ"], "ans": 1, "exp": "DNA પોલિમરેઝ I ઉત્સેચક RNA પ્રાઇમરને દૂર કરી તેની જગ્યાએ DNA ન્યુક્લિઓટાઇડ્સ ઉમેરે છે. DNA હેલિકેઝ DNA ના બેવડા સૂત્રને છૂટા પાડે છે, DNA લાઇગેઝ ઓકાઝાકી ટુકડાઓને જોડે છે, અને ટોપોઆઇસોમરેઝ DNA ના સુપરકોઇલને દૂર કરે છે. તેથી વિકલ્પ B સિવાયના બધા વિકલ્પો ખોટા છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "એક કોષમાં DNA પ્રતિકૃતિ દરમિયાન જો DNA પોલિમરેઝ III ઉત્સેચક કાર્ય ન કરે તો નીચેનામાંથી શું થશે?", "opts": ["DNA ના બેવડા સૂત્ર છૂટા નહીં પડે", "પ્રાઇમરનું સંશ્લેષણ નહીં થાય", "નવા DNA સૂત્રનું સંશ્લેષણ અટકી જશે", "ઓકાઝાકી ટુકડાઓ એકબીજા સાથે જોડાઈ નહીં શકે"], "ans": 2, "exp": "DNA પોલિમરેઝ III ઉત્સેચક નવા DNA સૂત્રના સંશ્લેષણ માટે જવાબદાર છે. જો તે કાર્ય ન કરે તો નવા ન્યુક્લિઓટાઇડ્સ ઉમેરાઈ શકશે નહીં, તેથી DNA સંશ્લેષણ અટકી જશે. વિકલ્પ A DNA હેલિકેઝ સાથે સંબંધિત છે, વિકલ્પ B પ્રાઇમેઝ સાથે, અને વિકલ્પ D DNA લાઇગેઝ સાથે સંબંધિત છે, તેથી આ બધા વિકલ્પો ખોટા છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "DNAની અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો મૂળ DNA અણુમાં એક સૂત્ર પર 3'-ATGC-5' ક્રમ હોય, તો નવી રચાયેલી ડબલ હેલિક્સમાં કયો ક્રમ મળશે?", "opts": ["5'-TACG-3' અને 3'-ATGC-5'", "3'-TACG-5' અને 5'-ATGC-3'", "5'-GCAT-3' અને 3'-CGTA-5'", "3'-GCAT-5' અને 5'-CGTA-3'"], "ans": 0, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિમાં, મૂળ સૂત્રો વહેંચાય છે અને નવા સૂત્રો તેમની પૂરક ક્રમ સાથે જોડાય છે. મૂળ સૂત્ર 3'-ATGC-5' હોવાથી, તેની પૂરક સૂત્ર 5'-TACG-3' હશે. નવી ડબલ હેલિક્સમાં એક મૂળ સૂત્ર (3'-ATGC-5') અને એક નવું સૂત્ર (5'-TACG-3') હશે. બાકીના વિકલ્પો ક્રમ અથવા દિશા બાબતે ચૂકી જાય છે.", "ref": "Std 12 - અધ્યાય 6: વંશવેલા અને ઉત્ક્રાંતિ (DNA પ્રતિકૃતિ)", "ch": ""}, {"q": "DNA પોલિમરેઝ I ઉત્સેચકનું મુખ્ય કાર્ય અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન શું છે?", "opts": ["ઓકાઝાકી ટુકડાઓને જોડવા", "RNA પ્રાઇમરને દૂર કરી તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ ઉમેરવા", "હેલિકેઝ ઉત્સેચકને સક્રિય કરવા", "ટોપોઇઝોમેરેઝની ક્રિયા વેગવાન કરવા"], "ans": 1, "exp": "DNA પોલિમરેઝ Iનું મુખ્ય કાર્ય RNA પ્રાઇમરને દૂર કરી તેની જગ્યાએ DNA ન્યુક્લિયોટાઇડ ઉમેરવાનું છે. ઓકાઝાકી ટુકડાઓને જોડવાનું કાર્ય DNA લિગેઝ કરે છે. હેલિકેઝ અને ટોપોઇઝોમેરેઝના કાર્યો અલગ છે.", "ref": "Std 12 - અધ્યાય 6: વંશવેલા અને ઉત્ક્રાંતિ (DNA પ્રતિકૃતિ)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન અર્ધ-સંરક્ષક પ્રતિકૃતિની ખાસિયત નથી?", "opts": ["મૂળ DNAના બંને સૂત્રો નવી ડબલ હેલિક્સમાં વહેંચાય છે", "નવી રચાયેલી DNAમાં એક મૂળ સૂત્ર અને એક નવું સૂત્ર હોય છે", "પ્રતિકૃતિ દરમિયાન DNAના બંને સૂત્રો નવીકરણ પામે છે", "પ્રતિકૃતિ બિડિરેક્શનલ (દ્વિદિશ) હોય છે"], "ans": 2, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિમાં મૂળ DNAના બંને સૂત્રો વહેંચાય છે અને નવી ડબલ હેલિક્સમાં એક મૂળ અને એક નવું સૂત્ર હોય છે. પ્રતિકૃતિ બિડિરેક્શનલ હોય છે. પરંતુ મૂળ સૂત્રો નવીકરણ પામતું નથી, તે જળવાય છે. હોવાનું નથી.", "ref": "Std 12 - અધ્યાય 6: વંશવેલા અને ઉત્ક્રાંતિ (DNA પ્રતિકૃતિ)", "ch": ""}, {"q": "જો એક DNA અણુમાં 30% સાયટોસિન હોય, તો અર્ધ-સંરક્ષક પ્રતિકૃતિ પછી નવી રચાયેલી DNAમાં ગુઆનિનનો ટકાવારી કેટલો હશે?", "opts": ["20%", "30%", "40%", "70%"], "ans": 1, "exp": "DNAમાં સાયટોસિન (C) અને ગુઆનિન (G)ની માત્રા સરખી હોય છે. જો C = 30% હોય, તો G પણ 30% હશે. અર્ધ-સંરક્ષક પ્રતિકૃતિમાં નવી DNAની રચના મૂળ DNAની જેમ જ હોય છે, તેથી Gનો ટકાવારી 30% રહેશે.", "ref": "Std 12 - અધ્યાય 6: વંશવેલા અને ઉત્ક્રાંતિ (DNA રચના)", "ch": ""}, {"q": "DNA પ્રતિકૃતિ દરમિયાન, લીડિંગ સૂત્ર અને લેગિંગ સૂત્ર વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["લીડિંગ સૂત્ર પર પ્રતિકૃતિ 5' થી 3' દિશામાં થાય છે, જ્યારે લેગિંગ સૂત્ર પર 3' થી 5' દિશામાં થાય છે", "લીડિંગ સૂત્ર પર પ્રતિકૃતિ સતત થાય છે, જ્યારે લેગિંગ સૂત્ર પર ઓકાઝાકી ટુકડાઓના રૂપમાં થાય છે", "લીડિંગ સૂત્ર પર RNA પ્રાઇમરની જરૂર પડતી નથી, જ્યારે લેગિંગ સૂત્ર પર પડે છે", "લીડિંગ સૂત્ર પર DNA પોલિમરેઝ I કાર્ય કરે છે, જ્યારે લેગિંગ સૂત્ર પર DNA પોલિમરેઝ III કાર્ય કરે છે"], "ans": 1, "exp": "લીડિંગ સૂત્ર પર પ્રતિકૃતિ સતત (કન્ટિન્યુઅસ) રીતે થાય છે, જ્યારે લેગિંગ સૂત્ર પર ઓકાઝાકી ટુકડાઓના રૂપમાં (ડિસકન્ટિન્યુઅસ) થાય છે. બંને સૂત્રો પર પ્રતિકૃતિ 5' થી 3' દિશામાં થાય છે, અને બંને માટે RNA પ્રાઇમરની જરૂર પડે છે. DNA પોલિમરેઝ III બંને સૂત્રો પર કાર્ય કરે છે.", "ref": "Std 12 - અધ્યાય 6: વંશવેલા અને ઉત્ક્રાંતિ (DNA પ્રતિકૃતિ)", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો મૂળ DNAના એક સૂત્ર પર 5'-TACGGATTC-3' ક્રમ હોય, તો નવી રચાયેલી ડબલ હેલિક્સમાં કયો ક્રમ લેગિંગ સૂત્ર પર મળશે?", "opts": ["5'-AATCCGTA-3'", "5'-TACGGATTC-3'", "3'-AATCCGTA-5'", "3'-UACGGAUUC-5'"], "ans": 2, "exp": "લેગિંગ સૂત્ર પર ઓકાઝાકી ટુકડાઓ દ્વારા સિંથેસિસ થાય છે, જેમાં ન્યુક્લિયોટાઇડ્સ 5' થી 3' દિશામાં જોડાય છે. મૂળ સૂત્ર 5'-TACGGATTC-3' હોવાથી, તેના પૂરક સૂત્રનો ક્રમ 3'-AATCCGTA-5' થશે. ઓપ્શન A અને B 5' થી 3' દિશામાં છે, પરંતુ લેગિંગ સૂત્ર પર રચાયેલ સૂત્ર 3' થી 5' દિશામાં હોવાથી, ઓપ્શન C સાચું છે. ઓપ્શન D RNA ક્રમ દર્શાવે છે, જે DNA પ્રતિકૃતિમાં ઉપયોગી નથી.", "ref": "Std 12 - અધ્યાય 6: આનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "DNA પ્રતિકૃતિ દરમિયાન, જો DNA પોલિમરેઝ I ઉત્સેચકનું કાર્ય અવરોધાય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["ઓકાઝાકી ટુકડાઓ યોગ્ય રીતે જોડાશે નહીં", "પ્રાઇમરની રચના થશે નહીં", "હેલિકેઝ ઉત્સેચક કાર્ય કરશે નહીં", "DNAની ડબલ હેલિક્સ ખુલશે નહીં"], "ans": 0, "exp": "DNA પોલિમરેઝ I ઉત્સેચકનું મુખ્ય કાર્ય ઓકાઝાકી ટુકડાઓ વચ્ચેના ખાલી જગ્યાને ભરવાનું અને RNA પ્રાઇમરને DNA સાથે બદલવાનું છે. જો આ ઉત્સેચક કાર્ય ન કરે, તો ઓકાઝાકી ટુકડાઓ યોગ્ય રીતે જોડાશે નહીં. ઓપ્શન B ખોટું છે કારણ કે પ્રાઇમરની રચના DNA પોલિમરેઝ I દ્વારા નહીં, પરંતુ પ્રાઇમેઝ ઉત્સેચક દ્વારા થાય છે. ઓપ્શન C અને D હેલિકેઝ ઉત્સેચકના કાર્ય સાથે સંબંધિત છે, જે DNAની ડબલ હેલિક્સ ખોલવા માટે જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: આનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["મૂળ DNAના બંને સૂત્રો નવી DNA અણુઓમાં સમાવિષ્ટ થાય છે", "નવી રચાયેલી DNA અણુઓમાં એક મૂળ સૂત્ર અને એક નવું સૂત્ર હોવું જરૂરી છે", "પ્રતિકૃતિ દરમિયાન DNAની માત્રા દુગણી થાય છે", "પ્રતિકૃતિ બે દિશામાં (બાઇડાયરેક્શનલ) થાય છે"], "ans": 0, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિમાં, મૂળ DNAના બંને સૂત્રો અલગ થાય છે અને પ્રત્યેક સૂત્ર તેના પૂરક સૂત્ર સાથે જોડાઈને નવી DNA અણુઓ રચે છે. પરંતુ મૂળ DNAના બંને સૂત્રો એક જ નવી DNA અણુઓમાં સમાવિષ્ટ થતાં નથી. ઓપ્શન B સાચું છે કારણ કે નવી DNA અણુઓમાં એક મૂળ સૂત્ર અને એક નવું સૂત્ર હોવું જરૂરી છે. ઓપ્શન C અને D પણ સાચાં છે કારણ કે પ્રતિકૃતિ દરમિયાન DNAની માત્રા દુગણી થાય છે અને તે બાઇડાયરેક્શનલ હોય છે.", "ref": "Std 12 - અધ્યાય 6: આનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, નીચેનામાંથી કયું ઉત્સેચક DNAની ડબલ હેલિક્સને ખોલવા માટે જવાબદાર છે?", "opts": ["DNA પોલિમરેઝ I", "હેલિકેઝ", "લાઇગેઝ", "ટોપોઇઝોમેરેઝ"], "ans": 1, "exp": "હેલિકેઝ ઉત્સેચક DNAની ડબલ હેલિક્સને ખોલવા અને એકલ સૂત્રો રચવા માટે જવાબદાર છે. DNA પોલિમરેઝ I ઓકાઝાકી ટુકડાઓને જોડવા અને RNA પ્રાઇમરને દૂર કરવા માટે જવાબદાર છે. લાઇગેઝ ઉત્સેચક DNA ટુકડાઓ વચ્ચે ફોસ્ફોડાયેસ્ટર બંધ રચવા માટે જવાબદાર છે. ટોપોઇઝોમેરેઝ ઉત્સેચક DNAની સુપરકોઇલિંગને દૂર કરવા માટે જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: આનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો એક DNA અણુમાં 5'-GATTCG-3' ક્રમ ધરાવતું એક સૂત્ર હોય અને પ્રતિકૃતિ દરમિયાન DNA પોલિમરેઝ III દ્વારા નવું સૂત્ર બનાવવામાં આવે, તો નવી બનેલી ડબલ હેલિક્સમાં કયો ક્રમ હશે જ્યારે તે પૂર્ણ થાય? (ધ્યાન રાખો: પ્રાઇમર અને ઓકાઝાકી ટુકડાઓનો પણ વિચાર કરો)", "opts": ["5'-GATTCG-3' અને 3'-CTAAGC-5' (મૂળ સૂત્ર + નવું સૂત્ર)", "5'-GATTCG-3' અને 5'-CTAAGC-3' (બંને સૂત્રો સમાન દિશામાં)", "3'-GATTCG-5' અને 5'-CTAAGC-3' (મૂળ સૂત્ર ઉલટાયેલું + નવું સૂત્ર)", "5'-GATTCG-3' અને 3'-GAUUCG-5' (RNA પ્રાઇમર સાથે મિશ્રિત)"], "ans": 0, "exp": "સરળતાથી કહીએ તો, અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન મૂળ DNAના એક સૂત્રને ટેમ્પલેટ તરીકે વાપરીને નવું સૂત્ર બનાવવામાં આવે છે, જે તેની પૂરક ક્રમ ધરાવે છે. મૂળ સૂત્ર 5'-GATTCG-3' હોવાથી, નવું સૂત્ર 3'-CTAAGC-5' હશે. આમ, પૂર્ણ ડબલ હેલિક્સમાં મૂળ સૂત્ર અને નવું સૂત્ર (A) વિકલ્પ પ્રમાણે હશે. B ખોટું છે કારણ કે બંને સૂત્રો વિરુદ્ધ દિશામાં હોવા જોઈએ. C ખોટું છે કારણ કે મૂળ સૂત્ર ઉલટાયેલું નથી. D ખોટું છે કારણ કે DNA પ્રતિકૃતિ દરમિયાન RNA પ્રાઇમરને પછી DNA પોલિમરેઝ I દ્વારા દૂર કરવામાં આવે છે, પરિણામે શુદ્ધ DNA જ હશે.", "ref": "Std 12 - અધ્યાય 6: વંશવિધાનના આણ્વિક આધારો (Molecular Basis of Inheritance)", "ch": ""}, {"q": "એક કોષમાં DNAની અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો હેલિકેઝ ઉત્સેચક કાર્ય ન કરે તો નીચેનામાંથી કયું પરિણામ જોવા મળે?", "opts": ["DNAના બંને સૂત્રો અકબંધ રહેશે અને પ્રતિકૃતિ શરૂ થશે નહીં", "DNA પોલિમરેઝ III ઉત્સેચક પ્રતિકૃતિ શરૂ કરી શકશે, પરંતુ ઓકાઝાકી ટુકડાઓ બનશે નહીં", "પ્રાઇમરનું નિર્માણ થશે, પરંતુ DNA સૂત્રોનું વિસ્તરણ થશે નહીં", "DNA લિગેઝ ઉત્સેચક કાર્ય કરી શકશે, પરંતુ સૂત્રોનું જોડાણ અધૂરું રહેશે"], "ans": 0, "exp": "હેલિકેઝ ઉત્સેચક DNAની ડબલ હેલિક્સને ખોલવા માટે જવાબદાર છે. જો તે કાર્ય ન કરે, તો DNAના બંને સૂત્રો અલગ થશે નહીં અને પ્રતિકૃતિની પ્રક્રિયા શરૂ થશે નહીં. તેથી વિકલ્પ A સાચો છે. વિકલ્પ B, C અને D ખોટા છે કારણ કે પ્રતિકૃતિ શરૂ થયા વગર આ ઉત્સેચકો કાર્ય કરી શકતા નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો DNA પોલિમરેઝ III ઉત્સેચક માત્ર 5'→3' દિશામાં જ કાર્ય કરે છે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["લીડિંગ સૂત્રનું સંશ્લેષણ સતત થશે", "લેગિંગ સૂત્રનું સંશ્લેષણ અવિરત ટુકડાઓમાં થશે", "ઓકાઝાકી ટુકડાઓનું નિર્માણ માત્ર લેગિંગ સૂત્ર પર થશે", "DNA પોલિમરેઝ I ઉત્સેચક લીડિંગ સૂત્ર પર પ્રાઇમર દૂર કરશે"], "ans": 3, "exp": "DNA પોલિમરેઝ I ઉત્સેચક લેગિંગ સૂત્ર પરના પ્રાઇમરને દૂર કરી DNAથી બદલે છે, લીડિંગ સૂત્ર પર નહીં. તેથી વિકલ્પ D ખોટો છે. વિકલ્પ A, B અને C સાચા છે કારણ કે DNA પોલિમરેઝ III માત્ર 5'→3' દિશામાં કાર્ય કરે છે, જે લીડિંગ સૂત્રનું સતત સંશ્લેષણ અને લેગિંગ સૂત્ર પર ઓકાઝાકી ટુકડાઓનું નિર્માણ કરે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉત્સેચક અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન DNA સૂત્રોને સુપરકોઇલિંગથી બચાવવા માટે જવાબદાર છે?", "opts": ["હેલિકેઝ", "ટોપોઆઇસોમરેઝ", "DNA પોલિમરેઝ I", "લિગેઝ"], "ans": 1, "exp": "ટોપોઆઇસોમરેઝ ઉત્સેચક DNA સૂત્રોને સુપરકોઇલિંગથી બચાવવા માટે જવાબદાર છે. તે DNAની ડબલ હેલિક્સમાં તણાવ દૂર કરે છે. વિકલ્પ A ખોટો છે કારણ કે હેલિકેઝ DNAને ખોલે છે. વિકલ્પ C ખોટો છે કારણ કે DNA પોલિમરેઝ I પ્રાઇમર દૂર કરે છે. વિકલ્પ D ખોટો છે કારણ કે લિગેઝ DNA ટુકડાઓને જોડે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક પ્રયોગમાં, E. coli ને 15N ધરાવતા માધ્યમમાં ઉછેર્યા બાદ 14N ધરાવતા માધ્યમમાં બે પેઢી સુધી ઉછેરવામાં આવે છે. અર્ધ-સંરક્ષક પ્રતિકૃતિ અનુસાર, બીજી પેઢીના DNA અણુઓમાં નીચેનામાંથી કયું પ્રમાણ જોવા મળશે?", "opts": ["50% હાઇબ્રિડ (15N-14N) અને 50% હલકું (14N-14N)", "25% ભારે (15N-15N), 50% હાઇબ્રિડ (15N-14N) અને 25% હલકું (14N-14N)", "100% હાઇબ્રિડ (15N-14N)", "75% હલકું (14N-14N) અને 25% હાઇબ્રિડ (15N-14N)"], "ans": 0, "exp": "અર્ધ-સંરક્ષક પ્રતિકૃતિ અનુસાર, બીજી પેઢીમાં 50% DNA અણુઓ હાઇબ્રિડ (15N-14N) અને 50% હલકું (14N-14N) હશે. તેથી વિકલ્પ A સાચો છે. વિકલ્પ B પ્રથમ પેઢી માટે સાચો છે, બીજી પેઢી માટે નહીં. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ બીજી પેઢીના પ્રમાણને યોગ્ય રીતે દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "અર્ધ-સંરક્ષક પ્રતિકૃતિ દરમિયાન, જો DNA લિગેઝ ઉત્સેચકનું કાર્ય અવરોધાય, તો નીચેનામાંથી કયું પરિણામ જોવા મળે?", "opts": ["લીડિંગ સૂત્રનું સંશ્લેષણ અટકી જશે", "ઓકાઝાકી ટુકડાઓ એકબીજા સાથે જોડાઈ શકશે નહીં", "DNA પોલિમરેઝ III ઉત્સેચક કાર્ય કરી શકશે નહીં", "પ્રાઇમરનું નિર્માણ થશે નહીં"], "ans": 1, "exp": "DNA લિગેઝ ઉત્સેચક ઓકાઝાકી ટુકડાઓને એકબીજા સાથે જોડવા માટે જવાબદાર છે. જો તેનું કાર્ય અવરોધાય, તો ઓકાઝાકી ટુકડાઓ જોડાઈ શકશે નહીં. તેથી વિકલ્પ B સાચો છે. વિકલ્પ A, C અને D ખોટા છે કારણ કે લિગેઝનું કાર્ય લીડિંગ સૂત્ર, DNA પોલિમરેઝ III અથવા પ્રાઇમરના નિર્માણ સાથે સીધું સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
