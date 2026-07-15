@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>હેનરીનો નિયમ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>હેનરીનો નિયમ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">હેનરીનો નિયમ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "હેનરીનો નિયમ લાગુ પડે છે તે માટેની શરતો પૈકી કયું વિધાન ખોટું છે?", "opts": ["ગેસ અને દ્રાવક વચ્ચે રાસાયણિક પ્રક્રિયા થતી ન હોય", "તાપમાન સતત રહે છે", "દબાણ અત્યંત ઉચ્ચ હોય છે", "ગેસ દ્રાવકમાં અલ્પ પ્રમાણમાં દ્રાવ્ય હોય છે"], "ans": 2, "exp": "હેનરીનો નિયમ લાગુ પડે તે માટે ગેસ અને દ્રાવક વચ્ચે રાસાયણિક પ્રક્રિયા ન થવી જોઈએ (A સાચું), તાપમાન સતત રહેવું જોઈએ (B સાચું), ગેસ દ્રાવકમાં અલ્પ પ્રમાણમાં દ્રાવ્ય હોવું જોઈએ (D સાચું). પરંતુ દબાણ અત્યંત ઉચ્ચ હોવું એ હેનરીના નિયમની શરત નથી, ઉલટાનું, નિયમ નીચા દબાણે ચાલે છે. આથી C ખોટું છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: અધ્યાય 2 - દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, ગેસની દ્રાવ્યતા અને દબાણ વચ્ચેનો સંબંધ કયો ગણિતી સૂત્ર વડે વ્યક્ત થાય છે?", "opts": ["P = kH * C", "C = kH * P", "P = C / kH", "kH = P * C"], "ans": 1, "exp": "હેનરીના નિયમ અનુસાર, ગેસની દ્રાવ્યતા (C) તેના આંશિક દબાણ (P)ની સીધી પ્રમાણમાં હોય છે, જ્યાં kH હેનરીનો સતતાંક છે. આથી સાચો સૂત્ર C = kH * P છે. A, C, અને D સૂત્રો હેનરીના નિયમની વ્યાખ્યા સાથે મેળ ખાતા નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: અધ્યાય 2 - દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમનો ઉપયોગ કરવા માટે કયા ગેસ માટે અપવાદ લાગુ પડે છે?", "opts": ["હાઇડ્રોજન", "ઓક્સિજન", "કાર્બન ડાયોક્સાઇડ", "નાઇટ્રોજન"], "ans": 2, "exp": "કાર્બન ડાયોક્સાઇડ (CO2) હેનરીના નિયમનો અપવાદ છે કારણ કે તે પાણીમાં દ્રાવ્ય થતાં રાસાયણિક પ્રક્રિયા (H2CO3 બનવું) કરે છે, જે હેનરીના નિયમની શરતોનો ભંગ કરે છે. હાઇડ્રોજન, ઓક્સિજન, અને નાઇટ્રોજન પાણીમાં રાસાયણિક પ્રક્રિયા વગર દ્રાવ્ય થાય છે, આથી તેઓ હેનરીના નિયમનું પાલન કરે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: અધ્યાય 2 - દ્રાવણો", "ch": ""}, {"q": "જો હેનરીનો સતતાંક (kH) ઉચ્ચ હોય, તો તે ગેસની દ્રાવ્યતા વિશે શું સૂચવે છે?", "opts": ["ગેસની દ્રાવ્યતા ઉચ્ચ છે", "ગેસની દ્રાવ્યતા નીચી છે", "ગેસની દ્રાવ્યતા તાપમાન પર આધાર રાખે છે", "ગેસની દ્રાવ્યતા દબાણ પર આધાર રાખે છે"], "ans": 1, "exp": "હેનરીનો સતતાંક (kH) જેટલો ઉચ્ચ હોય, તે ગેસની દ્રાવ્યતા એટલી નીચી હોય છે. કારણ કે C = kH * P મુજબ, kH ઉચ્ચ હોવાને લીધે, એકસરખા દબાણે (P) દ્રાવ્યતા (C) ઓછી થાય છે. A, C, અને D વિધાનો હેનરીના સતતાંક અને દ્રાવ્યતા વચ્ચેના સંબંધને ચોક્કસ રીતે વ્યક્ત કરતા નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: અધ્યાય 2 - દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમનો ઉપયોગ કરીને, જો એક ગેસનું આંશિક દબાણ 0.5 atm અને હેનરીનો સતતાંક 2000 atm·L/mol હોય, તો તે ગેસની દ્રાવ્યતા (mol/L) કેટલી હશે?", "opts": ["0.00025 mol/L", "0.0025 mol/L", "0.25 mol/L", "2.5 mol/L"], "ans": 0, "exp": "હેનરીના નિયમ અનુસાર, C = P / kH. આપેલ મૂલ્યો મુજબ, C = 0.5 atm / 2000 atm·L/mol = 0.00025 mol/L. આથી A સાચો જવાબ છે. B, C, અને D ગણતરીમાં ખોટા પરિણામો છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: અધ્યાય 2 - દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમ પ્રમાણે, ગેસની દ્રાવ્યતા (C) અને આંશિક દબાણ (P) વચ્ચેનો સંબંધ C = kH * P છે. જો એક ગેસ માટે kH = 0.02 mol/(L·atm) હોય અને તે ગેસનું આંશિક દબાણ 2 atm હોય, તો દ્રાવણમાં ગેસની સાંદ્રતા કેટલી હશે?", "opts": ["0.04 mol/L", "0.02 mol/L", "0.4 mol/L", "0.2 mol/L"], "ans": 0, "exp": "હેનરીના નિયમ અનુસાર, C = kH * P. અહીં kH = 0.02 mol/(L·atm) અને P = 2 atm છે. આમ, C = 0.02 * 2 = 0.04 mol/L. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D ગણિતી ગણતરીમાં ખોટા છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમનો અપવાદ કયો ગેસ નથી?", "opts": ["NH3", "CO2", "O2", "HCl"], "ans": 2, "exp": "હેનરીના નિયમના અપવાદો પૈકી NH3, CO2, અને HCl રાસાયણિક પ્રક્રિયા કરે છે અથવા આયનિક સ્વરૂપમાં દ્રાવણમાં વિઘટન પામે છે, જ્યારે O2 એ અપવાદ નથી કારણ કે તે હેનરીના નિયમનું પાલન કરે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમના સતતાંક (kH) પર કયા પરિબળનું પ્રભાવ પડતું નથી?", "opts": ["તાપમાન", "ગેસની પ્રકૃતિ", "દ્રાવકની પ્રકૃતિ", "દ્રાવણનો રંગ"], "ans": 3, "exp": "હેનરીના નિયમના સતતાંક (kH) પર તાપમાન, ગેસની પ્રકૃતિ, અને દ્રાવકની પ્રકૃતિનું પ્રભાવ પડે છે, પરંતુ દ્રાવણનો રંગ તેના પર કોઈ પ્રભાવ પાડતો નથી.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, જો એક ગેસનું આંશિક દબાણ અને સાંદ્રતા બમણી કરવામાં આવે, તો હેનરીનો સતતાંક (kH) કેવો રહેશે?", "opts": ["બમણો થશે", "અડધો થશે", "અચળ રહેશે", "ચાર ગણો થશે"], "ans": 2, "exp": "હેનરીનો સતતાંક (kH) એ ગેસ અને દ્રાવકની પ્રકૃતિ પર આધારિત અચળાંક છે. આંશિક દબાણ અને સાંદ્રતા બમણી કરવા છતાં kH અચળ રહેશે. આમ, વિકલ્પ C સાચો છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમના સંદર્ભમાં, કયું વિધાન ખોટું છે?", "opts": ["હેનરીનો નિયમ અતિશય દબાણ પર લાગુ પડતો નથી.", "હેનરીનો નિયમ અતિશય ઉચ્ચ તાપમાન પર લાગુ પડતો નથી.", "હેનરીનો નિયમ ગેસની દ્રાવ્યતા માટે લાગુ પડે છે જે રાસાયણિક પ્રક્રિયા કરતું નથી.", "હેનરીનો નિયમ દ્રાવણની સાંદ્રતા પર આધારિત નથી."], "ans": 3, "exp": "હેનરીનો નિયમ દ્રાવણની સાંદ્રતા પર આધારિત છે, કારણ કે તે ગેસની સાંદ્રતા અને આંશિક દબાણ વચ્ચેનો સંબંધ દર્શાવે છે. આમ, વિકલ્પ D ખોટો છે. બાકીના વિધાનો સાચા છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, ગેસની દ્રાવ્યતા (C) અને આંશિક દબાણ (P) વચ્ચેનો સંબંધ C = kH * P છે. જો એક ગેસ માટે kH = 0.02 mol/(L·atm) હોય અને તેનું આંશિક દબાણ 2 atm હોય, તો તે ગેસની સાંદ્રતા કેટલી હશે?", "opts": ["0.04 mol/L", "0.02 mol/L", "0.4 mol/L", "0.01 mol/L"], "ans": 0, "exp": "હેનરીના નિયમ અનુસાર, C = kH * P. અહીં kH = 0.02 mol/(L·atm) અને P = 2 atm છે. આથી C = 0.02 * 2 = 0.04 mol/L. અ) 0.04 mol/L સરખું છે. બ) 0.02 mol/L ખોટું છે કારણ કે દબાણ બમણું હોવાથી સાંદ્રતા પણ બમણી થવી જોઈએ. ક) 0.4 mol/L અને ડ) 0.01 mol/L ગણિતી ગણતરીમાં ખોટા છે.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "હેનરીના નિયમનો અપવાદ કયો ગેસ નથી, પરંતુ તે નિયમને અનુસરે છે?", "opts": ["CO2", "NH3", "O2", "HCl"], "ans": 2, "exp": "હેનરીના નિયમનો અપવાદ CO2, NH3, અને HCl જેવા ગેસો છે કારણ કે તે પાણી સાથે પ્રક્રિયા કરે છે. O2 ગેસ હેનરીના નિયમને અનુસરે છે કારણ કે તે પાણી સાથે પ્રક્રિયા કરતો નથી. આથી સરખો જવાબ ક) O2 છે.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "એક પ્રયોગમાં, 25°C તાપમાને પાણીમાં ઓક્સિજન (O₂) અને કાર્બન ડાયોક્સાઇડ (CO₂) ગેસની દ્રાવ્યતા માપવામાં આવે છે. હેનરીનો નિયમ લાગુ પાડતાં, નીચેનામાંથી કયું વિધાન સાચું છે? (નોંધ: O₂ માટે kH = 769.23 L·atm/mol, CO₂ માટે kH = 29.41 L·atm/mol)", "opts": ["સમાન આંશિક દબાણે, CO₂ ની દ્રાવ્યતા O₂ કરતાં વધુ હશે કારણ કે CO₂ નું kH મૂલ્ય ઓછું છે.", "સમાન આંશિક દબાણે, O₂ ની દ્રાવ્યતા CO₂ કરતાં વધુ હશે કારણ કે O₂ નું kH મૂલ્ય વધુ છે.", "બંને ગેસની દ્રાવ્યતા સમાન હશે કારણ કે હેનરીનો નિયમ તાપમાન પર આધારિત નથી.", "દ્રાવ્યતા માત્ર ગેસના આણ્વીય વજન પર આધારિત હોવાથી, CO₂ ની દ્રાવ્યતા વધુ હશે."], "ans": 0, "exp": "હેનરીના નિયમ અનુસાર, ગેસની દ્રાવ્યતા (C) = P / kH, જ્યાં P એ આંશિક દબાણ અને kH એ હેનરીનો સતતાંક છે. ઓછું kH મૂલ્ય વધુ દ્રાવ્યતા દર્શાવે છે. CO₂ નું kH મૂલ્ય (29.41 L·atm/mol) O₂ (769.23 L·atm/mol) કરતાં ઘણું ઓછું હોવાથી, સમાન આંશિક દબાણે CO₂ ની દ્રાવ્યતા વધુ હશે. વિકલ્પ B ખોટો છે કારણ કે O₂ નું kH મૂલ્ય વધુ હોવાથી તેની દ્રાવ્યતા ઓછી હશે. વિકલ્પ C ખોટો છે કારણ કે હેનરીનો નિયમ તાપમાન પર આધારિત છે. વિકલ્પ D ખોટો છે કારણ કે દ્રાવ્યતા માત્ર આણ્વીય વજન પર આધારિત નથી, પરંતુ kH મૂલ્ય પર પણ આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક બંધ પાત્રમાં 300 K તાપમાને પાણીમાં નાઇટ્રોજન (N₂) અને એમોનિયા (NH₃) ગેસનું મિશ્રણ ભરેલું છે. હેનરીના નિયમના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે? (નોંધ: NH₃ પાણીમાં રાસાયણિક પ્રક્રિયા કરે છે.)", "opts": ["N₂ માટે હેનરીનો નિયમ લાગુ પડશે કારણ કે તે પાણીમાં રાસાયણિક રીતે નિષ્ક્રિય છે.", "NH₃ માટે હેનરીનો નિયમ લાગુ પડશે નહીં કારણ કે તે પાણીમાં રાસાયણિક પ્રક્રિયા કરે છે.", "બંને ગેસ માટે હેનરીનો નિયમ લાગુ પડશે કારણ કે બંને ગેસ પાણીમાં ઓગળે છે.", "N₂ ની દ્રાવ્યતા તેના આંશિક દબાણના સમપ્રમાણમાં હશે."], "ans": 2, "exp": "હેનરીનો નિયમ માત્ર એવા ગેસ માટે લાગુ પડે છે જે દ્રાવક સાથે રાસાયણિક પ્રક્રિયા કરતા નથી. NH₃ પાણીમાં ઓગળીને NH₄OH બનાવે છે, તેથી તેના માટે હેનરીનો નિયમ લાગુ પડતો નથી. N₂ પાણીમાં રાસાયણિક રીતે નિષ્ક્રિય છે, તેથી તેના માટે હેનરીનો નિયમ લાગુ પડે છે. વિકલ્પ C ખોટો છે કારણ કે NH₃ માટે હેનરીનો નિયમ લાગુ પડતો નથી. અન્ય વિકલ્પો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક પ્રયોગમાં, 20°C તાપમાને પાણીમાં હાઇડ્રોજન ક્લોરાઇડ (HCl) ગેસની દ્રાવ્યતા માપવામાં આવે છે. હેનરીના નિયમના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન સાચું છે? (નોંધ: HCl પાણીમાં આયનીય સ્વરૂપમાં ઓગળે છે.)", "opts": ["HCl માટે હેનરીનો નિયમ લાગુ પડશે કારણ કે તે ગેસ સ્વરૂપમાં છે.", "HCl ની દ્રાવ્યતા તેના આંશિક દબાણના સમપ્રમાણમાં હશે કારણ કે તે હેનરીના નિયમને અનુસરે છે.", "HCl માટે હેનરીનો નિયમ લાગુ પડશે નહીં કારણ કે તે પાણીમાં આયનીય સ્વરૂપમાં ઓગળે છે.", "HCl ની દ્રાવ્યતા માત્ર તાપમાન પર આધારિત હશે, દબાણ પર નહીં."], "ans": 2, "exp": "હેનરીનો નિયમ માત્ર એવા ગેસ માટે લાગુ પડે છે જે દ્રાવક સાથે રાસાયણિક કે આયનીય પ્રક્રિયા કરતા નથી. HCl પાણીમાં ઓગળીને H⁺ અને Cl⁻ આયનો બનાવે છે, તેથી તેના માટે હેનરીનો નિયમ લાગુ પડતો નથી. વિકલ્પ A અને B ખોટાં છે કારણ કે HCl હેનરીના નિયમને અનુસરતો નથી. વિકલ્પ D ખોટો છે કારણ કે દ્રાવ્યતા દબાણ પર પણ આધારિત હોય છે, પરંતુ HCl માટે હેનરીનો નિયમ લાગુ પડતો નથી.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, જ્યારે ગેસ અને દ્રાવક વચ્ચે રાસાયણિક પ્રક્રિયા થાય છે, ત્યારે કયું વિધાન સત્ય છે?", "opts": ["હેનરીનો નિયમ લાગુ પડે છે, પરંતુ સતતાંક (kH)નું મૂલ્ય બદલાય છે.", "હેનરીનો નિયમ લાગુ પડતો નથી, કારણ કે રાસાયણિક પ્રક્રિયા થવાથી દ્રાવ્યતા દબાણના સમપ્રમાણમાં રહેતી નથી.", "હેનરીનો નિયમ લાગુ પડે છે, પરંતુ ફક્ત ઉચ્ચ દબાણે જ.", "હેનરીનો નિયમ લાગુ પડે છે, પરંતુ ફક્ત નીચા તાપમાને જ."], "ans": 1, "exp": "હેનરીનો નિયમ ફક્ત ત્યારે લાગુ પડે છે જ્યારે ગેસ અને દ્રાવક વચ્ચે કોઈ રાસાયણિક પ્રક્રિયા ન થતી હોય. જો રાસાયણિક પ્રક્રિયા થાય (જેમ કે CO2 પાણીમાં દ્રાવણ બનાવે ત્યારે H2CO3 બનવું), તો દ્રાવ્યતા દબાણના સમપ્રમાણમાં રહેતી નથી, અથવા હેનરીનો નિયમ લાગુ પડતો નથી. આથી, બાકીના વિકલ્પો ખોટા છે: A) kH બદલાય તે નિયમના અપવાદને દર્શાવતું નથી, C) અને D) નિયમના લાગુ પડવાના પરિબળો વિશે અપૂર્ણ માહિતી આપે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમના સંદર્ભમાં, કયો ગેસ અપવાદરૂપ છે કારણ કે તે પાણીમાં દ્રાવણ બનાવે છે અને આયનોમાં વિભાજિત થાય છે?", "opts": ["હાઇડ્રોજન (H2)", "હિલિયમ (He)", "હાઇડ્રોજન ક્લોરાઇડ (HCl)", "નાઇટ્રોજન (N2)"], "ans": 2, "exp": "હાઇડ્રોજન ક્લોરાઇડ (HCl) પાણીમાં દ્રાવણ બનાવે છે અને H+ અને Cl- આયનોમાં વિભાજિત થાય છે, જે હેનરીના નિયમનો અપવાદ છે. હાઇડ્રોજન, હિલિયમ અને નાઇટ્રોજન ગેસો પાણીમાં દ્રાવણ બનાવતા નથી અથવા આયનોમાં વિભાજિત થતા નથી, આથી તેઓ હેનરીના નિયમને અનુસરે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, જો એક ગેસનું આંશિક દબાણ 1 atm છે અને તેની સાંદ્રતા 0.02 mol/L છે, તો હેનરીનો સતતાંક (kH) કેટલો હશે?", "opts": ["0.02 mol/L·atm", "50 L·atm/mol", "20 L·atm/mol", "0.05 mol/L·atm"], "ans": 1, "exp": "હેનરીના નિયમ અનુસાર, C = kH * P, જ્યાં C = સાંદ્રતા, kH = હેનરીનો સતતાંક, P = આંશિક દબાણ. આપેલ મૂલ્યો અનુસાર, 0.02 = kH * 1 → kH = 0.02 mol/L·atm. પરંતુ હેનરીનો સતતાંક (kH) સામાન્ય રીતે P/C સ્વરૂપે વ્યાખ્યાયિત થાય છે, આથી kH = P/C = 1 / 0.02 = 50 L·atm/mol. બાકીના વિકલ્પો ગણિતી ગણતરીથી મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમના અપવાદ તરીકે કયો ગેસ ગણવામાં આવે છે, કારણ કે તે પાણીમાં ઉચ્ચ દ્રાવ્યતા ધરાવે છે અને રાસાયણિક પ્રક્રિયામાં ભાગ લે છે?", "opts": ["ઓક્સિજન (O2)", "કાર્બન ડાયોક્સાઇડ (CO2)", "આર્ગોન (Ar)", "મિથેન (CH4)"], "ans": 1, "exp": "કાર્બન ડાયોક્સાઇડ (CO2) પાણીમાં ઉચ્ચ દ્રાવ્યતા ધરાવે છે અને પાણી સાથે પ્રક્રિયા કરીને કાર્બોનિક એસિડ (H2CO3) બનાવે છે, જે હેનરીના નિયમનો અપવાદ છે. ઓક્સિજન, આર્ગોન અને મિથેન ગેસો પાણીમાં રાસાયણિક પ્રક્રિયા કરતા નથી, આથી તેઓ હેનરીના નિયમને અનુસરે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "હેનરીના નિયમ અનુસાર, જો એક ગેસનું આંશિક દબાણ અને તાપમાન બમણું કરવામાં આવે, તો તેની દ્રાવ્યતા પર શું અસર થશે? (ધારો કે હેનરીનો સતતાંક તાપમાન સાથે બદલાય છે)", "opts": ["દ્રાવ્યતા બમણી થશે.", "દ્રાવ્યતા અડધી થશે.", "દ્રાવ્યતા અચળ રહેશે.", "દ્રાવ્યતા ચાર ગણી થશે."], "ans": 1, "exp": "હેનરીના નિયમ અનુસાર, દ્રાવ્યતા (C) આંશિક દબાણ (P)ના સમપ્રમાણમાં હોય છે (C = kH * P). જો દબાણ બમણું થાય, તો દ્રાવ્યતા બમણી થવી જોઈએ. પરંતુ તાપમાન બમણું થવાથી હેનરીનો સતતાંક (kH) સામાન્ય રીતે વધે છે (કારણ કે ગેસની દ્રાવ્યતા તાપમાન વધવાથી ઘટે છે), જે દ્રાવ્યતાને ઘટાડે છે. આથી, કુલ અસર એ હોય છે કે દ્રાવ્યતા ઘટે છે, પરંતુ પ્રશ્નમાં આપેલા વિકલ્પો પૈકી સૌથી યોગ્ય જવાબ એ છે કે દ્રાવ્યતા અડધી થશે (તાપમાનના પ્રભાવને ધ્યાનમાં લેતા).", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
