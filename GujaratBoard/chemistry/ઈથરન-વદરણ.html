@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ઈથરનું વિદારણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ઈથરનું વિદારણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ઈથરનું વિદારણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું પદાર્થ મુખ્યત્વે ઉત્પન્ન થાય છે?", "opts": ["ઈથાઇલ એસિટેટ", "ઈથેનોલ", "એસિટિક એસિડ", "ઈથેન"], "ans": 2, "exp": "ઈથરનું વિદારણ (Oxidation) થતાં એસિટિક એસિડ (CH₃COOH) ઉત્પન્ન થાય છે. ઈથાઇલ એસિટેટ એ એસ્ટર છે જે ઈથરના હાઇડ્રોલિસિસથી બને છે, પરંતુ વિદારણમાં નહીં. ઈથેનોલ અને ઈથેન ઈથરના વિઘટનના અન્ય ઉત્પાદનો હોઈ શકે, પરંતુ મુખ્ય ઉત્પાદન એસિટિક એસિડ છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ માટે નીચેનામાંથી કયો કેટાલિસ્ટ સૌથી યોગ્ય છે?", "opts": ["Pt", "Al₂O₃", "KMnO₄ (તટસ્થ મધ્યમ)", "ZnCl₂"], "ans": 2, "exp": "ઈથરના વિદારણ માટે પોટેશિયમ પરમેંગેનેટ (KMnO₄) તટસ્થ મધ્યમમાં કેટાલિસ્ટ તરીકે વપરાય છે. Pt અને Al₂O₃ વપરાતા નથી, જ્યારે ZnCl₂ ઈથરના સંશ્લેષણમાં વપરાય છે (વિલિયમસન સંશ્લેષણ).", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ દરમિયાન નીચેનામાંથી કયું પગલું પ્રથમ થાય છે?", "opts": ["C-O બંધનું તૂટવું", "C-H બંધનું તૂટવું", "O-H બંધનું નિર્માણ", "કાર્બન-કાર્બન ડબલ બંધનું નિર્માણ"], "ans": 1, "exp": "ઈથરના વિદારણમાં પ્રથમ પગલું C-H બંધનું તૂટવું છે, જેથી ફ્રી રેડિકલ ઉત્પન્ન થાય. C-O બંધનું તૂટવું પછીના પગલામાં થાય છે. O-H બંધ અથવા C=C બંધનું નિર્માણ વિદારણના અંતિમ પગલાંમાં થાય છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ દરમિયાન ઉત્પન્ન થતી મધ્યવર્તી સ્પીશીઝ કઈ છે?", "opts": ["કાર્બોકેટાયન", "કાર્બેન", "પેરોક્સાઇડ રેડિકલ", "નાઇટ્રિન"], "ans": 2, "exp": "ઈથરના વિદારણ દરમિયાન પેરોક્સાઇડ રેડિકલ (ROO·) મધ્યવર્તી સ્પીશીઝ તરીકે ઉત્પન્ન થાય છે. કાર્બોકેટાયન, કાર્બેન અને નાઇટ્રિન ઈથરના વિદારણમાં ઉત્પન્ન થતી નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણને રોકવા માટે નીચેનામાંથી કયું પદાર્થ ઉમેરવામાં આવે છે?", "opts": ["બેન્ઝોઇક એસિડ", "ફિનોલ", "હાઇડ્રોક્વિનોન", "એસિટોન"], "ans": 2, "exp": "ઈથરના વિદારણને રોકવા માટે એન્ટી-ઓક્સિડન્ટ તરીકે હાઇડ્રોક્વિનોન ઉમેરવામાં આવે છે. બેન્ઝોઇક એસિડ, ફિનોલ અને એસિટોન એન્ટી-ઓક્સિડન્ટ તરીકે કામ કરતા નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો ઓક્સિજનની હાજરીમાં પ્રકાશની હાજરી હોય તો કયો ઉત્પાદન સૌથી વધુ પ્રમાણમાં મળશે?", "opts": ["ઈથિલીન", "એસિટાલ્ડિહાઇડ", "પેરોક્સાઇડ", "કાર્બન ડાયોક્સાઇડ અને પાણી"], "ans": 3, "exp": "ઈથરના વિદારણ દરમિયાન, ઓક્સિજન અને પ્રકાશની હાજરીમાં, પૂર્ણ દહન થાય છે, જેમાં કાર્બન ડાયોક્સાઇડ અને પાણી ઉત્પન્ન થાય છે. ઈથિલીન (A) અને એસિટાલ્ડિહાઇડ (B) અપૂર્ણ દહનના ઉત્પાદનો છે, જ્યારે પેરોક્સાઇડ (C) વિદારણના મધ્યવર્તી પગલામાં બનતી વસ્તુ છે, પરંતુ સંપૂર્ણ ઓક્સિડેશનમાં નહીં.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયો કેટલાક પ્રયોગશાળા પરિસ્થિતિઓમાં વિદારણને ઝડપી બનાવવા માટે ઉપયોગી થાય છે?", "opts": ["નાઇટ્રોજન ગેસનો વાતાવરણ", "સલ્ફ્યુરિક એસિડની હાજરી", "લોખંડના કણોની હાજરી", "નીચા તાપમાને રાખવું"], "ans": 2, "exp": "લોખંડના કણો (C) વિદારણ પ્રક્રિયાને ઉત્પ્રેરક તરીકે ઝડપી બનાવે છે. નાઇટ્રોજન ગેસ (A) વિદારણને રોકે છે, સલ્ફ્યુરિક એસિડ (B) ઈથરના નિર્જલીકરણમાં ઉપયોગી છે, અને નીચા તાપમાન (D) પ્રક્રિયાને મંદ કરે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ વિદારણના પ્રથમ પગલામાં ઉત્પન્ન થતો નથી?", "opts": ["હાઇડ્રોજન પેરોક્સાઇડ", "એસિટાલ્ડિહાઇડ", "ફોર્મિક એસિડ", "કાર્બન મોનોક્સાઇડ"], "ans": 0, "exp": "ઈથરના વિદારણના પ્રથમ પગલામાં, ઈથર ઓક્સિજન સાથે પ્રક્રિયા કરે છે અને એસિટાલ્ડિહાઇડ (B), ફોર્મિક એસિડ (C), અને કાર્બન મોનોક્સાઇડ (D) જેવા ઉત્પાદનો બને છે. હાઇડ્રોજન પેરોક્સાઇડ (A) મધ્યવર્તી પગલામાં બનતી વસ્તુ છે, પરંતુ પ્રથમ પગલામાં નહીં.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો તાપમાન 150°C થી 200°C સુધી વધારવામાં આવે, તો કયો ઉત્પાદન સૌથી વધુ પ્રમાણમાં મળશે?", "opts": ["મિથેન", "ઈથિલીન", "એસિટોન", "કાર્બન ડાયોક્સાઇડ"], "ans": 1, "exp": "150°C થી 200°C તાપમાને, ઈથરનું વિદારણ થાય છે અને ઈથિલીન (B) મુખ્ય ઉત્પાદન તરીકે મળે છે. મિથેન (A) અને એસિટોન (C) અપૂર્ણ દહનના ઉત્પાદનો છે, જ્યારે કાર્બન ડાયોક્સાઇડ (D) પૂર્ણ દહનમાં મળે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયો પદાર્થ વિદારણને રોકવા માટે સૌથી અસરકારક છે?", "opts": ["પોટેશિયમ હાઇડ્રોક્સાઇડ", "એસિટિક એસિડ", "ફિનોલ", "બેન્ઝીન"], "ans": 2, "exp": "ફિનોલ (C) ઈથરના વિદારણને રોકવા માટે સૌથી અસરકારક છે, કારણ કે તે મુક્ત કણો (free radicals) ને શોષી લે છે, જે વિદારણ પ્રક્રિયાને ચાલુ રાખવા માટે જરૂરી છે. પોટેશિયમ હાઇડ્રોક્સાઇડ (A) અને એસિટિક એસિડ (B) વિદારણને રોકવામાં અસરકારક નથી, જ્યારે બેન્ઝીન (D) વિદારણ પ્રક્રિયાને પ્રભાવિત કરતું નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો ઈથરની સાંદ્રતા વધારવામાં આવે તો પ્રક્રિયાની ગતિ પર કયો પ્રભાવ પડશે?", "opts": ["પ્રક્રિયાની ગતિ વધશે કારણ કે અણુઓ વચ્ચેના ટકરાવની સંખ્યા વધશે.", "પ્રક્રિયાની ગતિ ઘટશે કારણ કે ઈથર અણુઓ વચ્ચે આંતરઅણુ બળ વધશે.", "પ્રક્રિયાની ગતિ અચળ રહેશે કારણ કે વિદારણ પ્રક્રિયા સાંદ્રતાથી સ્વતંત્ર હોય છે.", "પ્રક્રિયાની ગતિ પ્રથમ વધશે અને પછી ઘટશે કારણ કે ઉચ્ચ સાંદ્રતાએ અણુઓની ગતિ મર્યાદિત થાય છે."], "ans": 0, "exp": "પ્રક્રિયાની ગતિ વધશે કારણ કે અણુઓ વચ્ચેના ટકરાવની સંખ્યા વધશે. ઈથરના વિદારણ પ્રક્રિયા એક પ્રથમ ક્રમની પ્રક્રિયા છે, જેમાં સાંદ્રતા વધારવાથી ટકરાવની સંખ્યા વધે છે, જે પ્રક્રિયાની ગતિ વધારે છે. બાકીના વિકલ્પો ખોટા છે: B) આંતરઅણુ બળનો પ્રભાવ પ્રક્રિયાની ગતિ પર નગણ્ય હોય છે. C) વિદારણ પ્રક્રિયા સાંદ્રતાથી સ્વતંત્ર નથી. D) ઉચ્ચ સાંદ્રતાએ પ્રક્રિયાની ગતિ સતત વધતી જાય છે, મર્યાદિત થતી નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન (વિદારણ પ્રક્રિયા)", "ch": ""}, {"q": "ઈથરના વિદારણ દરમિયાન, નીચેનામાંથી કયો પદાર્થ ઉત્પન્ન થતો નથી જ્યારે પ્રક્રિયા અંધારામાં થાય છે?", "opts": ["મિથેન", "ઈથિલીન", "એસિટાલ્ડિહાઇડ", "કાર્બન મોનોક્સાઇડ"], "ans": 3, "exp": "ઈથરના વિદારણ દરમિયાન, કાર્બન મોનોક્સાઇડ ઉત્પન્ન થતું નથી. મિથેન, ઈથિલીન અને એસિટાલ્ડિહાઇડ એ વિદારણ પ્રક્રિયાના મુખ્ય ઉત્પાદનો છે, પરંતુ કાર્બન મોનોક્સાઇડ એ ઓક્સિજનની હાજરીમાં જ ઉત્પન્ન થાય છે, જે અંધારામાં નથી હાજર. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ વિદારણ પ્રક્રિયાના સ્વાભાવિક ઉત્પાદનો છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન (વિદારણ પ્રક્રિયાના ઉત્પાદનો)", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો તાપમાન 300°C સુધી વધારવામાં આવે, તો નીચેનામાંથી કયો પદાર્થ મુખ્યત્વે ઉત્પન્ન થશે?", "opts": ["મિથેન અને ઈથેન", "ઈથિલીન અને એસિટિલીન", "એસિટાલ્ડિહાઇડ અને ફોર્માલ્ડિહાઇડ", "કાર્બન ડાયોક્સાઇડ અને પાણી"], "ans": 1, "exp": "300°C તાપમાને, ઈથરના વિદારણ દરમિયાન મુખ્યત્વે ઈથિલીન અને એસિટિલીન ઉત્પન્ન થાય છે. આ તાપમાને, ઈથરના અણુઓ વધુ વિઘટિત થઈને અસંતૃપ્ત હાઇડ્રોકાર્બન બનાવે છે. બાકીના વિકલ્પો ખોટા છે: A) મિથેન અને ઈથેન નીચા તાપમાને ઉત્પન્ન થાય છે. C) એસિટાલ્ડિહાઇડ અને ફોર્માલ્ડિહાઇડ મધ્યમ તાપમાને ઉત્પન્ન થાય છે. D) કાર્બન ડાયોક્સાઇડ અને પાણી ઓક્સિડેશન પ્રક્રિયામાં ઉત્પન્ન થાય છે, વિદારણમાં નહીં.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન (તાપમાનનો પ્રભાવ)", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયો કેટલાક ઉત્પ્રેરક (કેટાલિસ્ટ) હાજર હોવા છતાં પ્રક્રિયાની ગતિ પર કોઈ પ્રભાવ પાડતો નથી?", "opts": ["એલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃)", "સલ્ફ્યુરિક એસિડ (H₂SO₄)", "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH)", "પ્લેટિનમ (Pt)"], "ans": 2, "exp": "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH) એ ઈથરના વિદારણ પ્રક્રિયા પર કોઈ પ્રભાવ પાડતું નથી. એલ્યુમિનિયમ ઓક્સાઇડ, સલ્ફ્યુરિક એસિડ અને પ્લેટિનમ એ વિદારણ પ્રક્રિયાના ઉત્પ્રેરક તરીકે કામ કરે છે, પરંતુ KOH એ ક્ષારીય પદાર્થ છે જે વિદારણ પ્રક્રિયા પર કોઈ પ્રભાવ પાડતું નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન (ઉત્પ્રેરકોનો પ્રભાવ)", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો પ્રક્રિયા એક બંધ પાત્રમાં થાય છે, તો નીચેનામાંથી કયો પદાર્થ પ્રક્રિયાના અંતે મળશે?", "opts": ["શુદ્ધ ઈથર", "મિથેન અને ઈથિલીનનો મિશ્રણ", "કાર્બન અને હાઇડ્રોજન", "ઈથેનોલ અને પાણી"], "ans": 2, "exp": "બંધ પાત્રમાં, ઈથરના વિદારણ પ્રક્રિયા સંપૂર્ણપણે થઈ શકે છે, જેથી અંતે કાર્બન અને હાઇડ્રોજન મળશે. શુદ્ધ ઈથર તો પ્રક્રિયા શરૂ થાય તે પહેલા જ હોય છે. મિથેન અને ઈથિલીનનો મિશ્રણ ખુલ્લા પાત્રમાં મળે છે. ઈથેનોલ અને પાણી એ વિદારણ પ્રક્રિયાના ઉત્પાદનો નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન (બંધ પાત્રમાં પ્રક્રિયા)", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો ઈથરની સાથે થોડું એસિટિલીન ગેસ મિશ્રિત કરવામાં આવે, તો નીચેનામાંથી કયો પરિણામ જોવા મળશે?", "opts": ["વિદારણ પ્રક્રિયા તરત જ રોકાઈ જશે", "વિદારણ પ્રક્રિયાની ગતિ વધશે અને એસિટિલીનની માત્રા ઘટશે", "વિદારણ પ્રક્રિયા ધીમી પડશે પરંતુ એસિટિલીનની માત્રામાં ફેરફાર થશે નહીં", "એસિટિલીન અને ઈથર વચ્ચે પ્રક્રિયા થશે અને નવું યૌગિક બનશે"], "ans": 1, "exp": "ઈથરના વિદારણ દરમિયાન, એસિટિલીન ગેસની હાજરી વિદારણ પ્રક્રિયાની ગતિ વધારે છે કારણ કે એસિટિલીન મુક્ત મૂળો (free radicals) ની રચનાને પ્રોત્સાહન આપે છે, જે વિદારણ પ્રક્રિયાને ઝડપી બનાવે છે. એસિટિલીનની માત્રા પ્રક્રિયા દરમિયાન ઘટે છે કારણ કે તે પ્રક્રિયામાં ભાગ લે છે. અહીં, A) ખોટું છે કારણ કે પ્રક્રિયા રોકાતી નથી, C) ખોટું છે કારણ કે ગતિ વધે છે અને એસિટિલીનની માત્રા ઘટે છે, D) ખોટું છે કારણ કે નવું યૌગિક બનતું નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો પ્રક્રિયા એક ખુલ્લા પાત્રમાં થાય છે, તો નીચેનામાંથી કયો પરિણામ સૌથી યોગ્ય રીતે લાગુ પડે છે?", "opts": ["વિદારણ પ્રક્રિયા ધીમી પડશે કારણ કે ઓક્સિજનની હાજરી રહેશે", "વિદારણ પ્રક્રિયા ઝડપી થશે કારણ કે મુક્ત મૂળોની સાંદ્રતા વધશે", "વિદારણ પ્રક્રિયા રોકાઈ જશે કારણ કે ઈથર વરાળ બનીને ઉડી જશે", "વિદારણ પ્રક્રિયા ધીમી પડશે કારણ કે ઉત્પન્ન થતાં પદાર્થો પાત્રમાંથી બહાર નીકળશે"], "ans": 3, "exp": "ખુલ્લા પાત્રમાં, ઉત્પન્ન થતાં પદાર્થો (જેમ કે મીથેન, ઈથિલીન વગેરે) પાત્રમાંથી બહાર નીકળી જાય છે, જે લે શ્વેટલીના સિદ્ધાંત (Le Chatelier’s principle) અનુસાર, પ્રક્રિયાને ધીમી પાડે છે. A) ખોટું છે કારણ કે ઓક્સિજનની હાજરી વિદારણ પ્રક્રિયાને પ્રભાવિત કરતી નથી, B) ખોટું છે કારણ કે મુક્ત મૂળોની સાંદ્રતા વધતી નથી, C) ખોટું છે કારણ કે ઈથર વરાળ બનીને ઉડી જવાને કારણે પ્રક્રિયા રોકાતી નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો તાપમાન 400°C સુધી વધારવામાં આવે, તો નીચેનામાંથી કયો પદાર્થ મુખ્યત્વે ઉત્પન્ન થશે?", "opts": ["મીથેન અને કાર્બન મોનોક્સાઇડ", "ઈથિલીન અને હાઇડ્રોજન", "એસિટિલીન અને કાર્બન ડાયોક્સાઇડ", "બ્યુટેડાયન અને પાણી"], "ans": 2, "exp": "400°C જેટલા ઉચ્ચ તાપમાને, ઈથરનું વિદારણ એસિટિલીન અને કાર્બન ડાયોક્સાઇડમાં થાય છે. A) ખોટું છે કારણ કે મીથેન અને કાર્બન મોનોક્સાઇડ નીચા તાપમાને ઉત્પન્ન થાય છે, B) ખોટું છે કારણ કે ઈથિલીન અને હાઇડ્રોજન મધ્યમ તાપમાને ઉત્પન્ન થાય છે, D) ખોટું છે કારણ કે બ્યુટેડાયન અને પાણી ઉત્પન્ન થતાં નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "ઈથરના વિદારણ પ્રક્રિયા દરમિયાન, જો ઈથરની સાથે થોડું ક્લોરિન ગેસ મિશ્રિત કરવામાં આવે, તો નીચેનામાંથી કયો પરિણામ જોવા મળશે?", "opts": ["વિદારણ પ્રક્રિયા રોકાઈ જશે અને ક્લોરિન યોગ્ય રીતે પ્રક્રિયા કરશે નહીં", "વિદારણ પ્રક્રિયા ઝડપી થશે અને ક્લોરિન યોગ્ય રીતે પ્રક્રિયા કરશે", "વિદારણ પ્રક્રિયા ધીમી પડશે અને ક્લોરિન યોગ્ય રીતે પ્રક્રિયા કરશે", "ક્લોરિન અને ઈથર વચ્ચે પ્રક્રિયા થશે અને વિદારણ પ્રક્રિયા થશે નહીં"], "ans": 3, "exp": "ક્લોરિન ગેસની હાજરીમાં, ઈથર સાથે ક્લોરિનની પ્રક્રિયા થાય છે અને વિદારણ પ્રક્રિયા થતી નથી. ક્લોરિન મુક્ત મૂળો સાથે પ્રક્રિયા કરે છે અને વિદારણ પ્રક્રિયાને રોકે છે. A), B), અને C) ખોટા છે કારણ કે ક્લોરિન પ્રક્રિયા કરે છે અને વિદારણ પ્રક્રિયા થતી નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "ડાયઇથાઇલ ઈથરના વિદારણ પ્રક્રિયામાં નીચેનામાંથી કયું વિધાન ખોટું છે, જ્યારે પ્રક્રિયા હવામાં ખુલ્લા પાત્રમાં 140°C તાપમાને કરવામાં આવે છે?", "opts": ["પ્રક્રિયા દરમિયાન મુખ્યત્વે ઈથેનોલ અને એસિટાલ્ડિહાઇડ ઉત્પન્ન થાય છે", "પ્રક્રિયા દરમિયાન પેરોક્સાઇડ મધ્યવર્તી સ્વરૂપ તરીકે ઉત્પન્ન થાય છે જે વિસ્ફોટક હોઈ શકે છે", "પ્રક્રિયા દરમિયાન ઉત્પન્ન થતો મુખ્ય વાયુ કાર્બન મોનોક્સાઇડ છે જે ઝેરી હોય છે", "પ્રક્રિયા દરમિયાન ઉત્પન્ન થતો એક મુખ્ય પદાર્થ ફોર્માલ્ડિહાઇડ છે જે પ્રકાશસંશ્લેષણ માટે જરૂરી છે"], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે ડાયઇથાઇલ ઈથરના વિદારણ પ્રક્રિયામાં ફોર્માલ્ડિહાઇડ મુખ્યત્વે ઉત્પન્ન થતો નથી. આ પ્રક્રિયામાં મુખ્યત્વે ઈથેનોલ, એસિટાલ્ડિહાઇડ, પેરોક્સાઇડ અને કાર્બન મોનોક્સાઇડ ઉત્પન્ન થાય છે. ફોર્માલ્ડિહાઇડ પ્રકાશસંશ્લેષણ માટે જરૂરી નથી અને તે ઈથરના વિદારણમાં મુખ્ય ઉત્પાદન તરીકે ઉત્પન્ન થતો નથી.\n\nA વિકલ્પ સાચો છે કારણ કે ઈથરના વિદારણમાં ઈથેનોલ અને એસિટાલ્ડિહાઇડ મુખ્ય ઉત્પાદનો છે.\nB વિકલ્પ સાચો છે કારણ કે પેરોક્સાઇડ મધ્યવર્તી સ્વરૂપ તરીકે ઉત્પન્ન થાય છે અને તે વિસ્ફોટક હોઈ શકે છે.\nC વિકલ્પ સાચો છે કારણ કે કાર્બન મોનોક્સાઇડ ઝેરી વાયુ તરીકે ઉત્પન્ન થાય છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
