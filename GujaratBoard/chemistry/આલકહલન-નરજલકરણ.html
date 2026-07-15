@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>આલ્કોહોલનું નિર્જલીકરણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>આલ્કોહોલનું નિર્જલીકરણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">આલ્કોહોલનું નિર્જલીકરણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક પ્રયોગમાં ઇથેનોલને સાંદ્ર સલ્ફ્યુરિક એસિડ સાથે 170°C તાપમાને ગરમ કરતાં ઇથિન મળે છે. આ પ્રક્રિયામાં સલ્ફ્યુરિક એસિડનું મુખ્ય કાર્ય શું છે?", "opts": ["ઉદ્દીપક તરીકે વર્તે છે અને પ્રક્રિયાને ઝડપી બનાવે છે", "નિર્જલીકરણકર્તા તરીકે વર્તે છે અને પાણીનું અણુ દૂર કરે છે", "ઇથેનોલનું ઓક્સિડેશન કરીને ઇથિન બનાવે છે", "પ્રક્રિયામાં પાણી ઉમેરીને જળવિભાજન કરે છે"], "ans": 1, "exp": "સાચો જવાબ B છે. આલ્કોહોલના નિર્જલીકરણમાં સાંદ્ર સલ્ફ્યુરિક એસિડ નિર્જલીકરણકર્તા તરીકે વર્તે છે અને આલ્કોહોલમાંથી પાણીનું અણુ દૂર કરીને આલ્કીન બનાવે છે. વિકલ્પ A ખોટો છે કારણ કે સલ્ફ્યુરિક એસિડ માત્ર ઉદ્દીપક નથી, તે પ્રક્રિયામાં સક્રિય ભાગ ભજવે છે. વિકલ્પ C ખોટો છે કારણ કે આ પ્રક્રિયા ઓક્સિડેશન નથી. વિકલ્પ D ખોટો છે કારણ કે સલ્ફ્યુરિક એસિડ પાણી ઉમેરતું નથી, તે દૂર કરે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયો આલ્કોહોલ નિર્જલીકરણ પ્રક્રિયામાં સૌથી સરળતાથી આલ્કીન બનાવશે?", "opts": ["પ્રાથમિક આલ્કોહોલ (1°)", "દ્વિતીયક આલ્કોહોલ (2°)", "તૃતીયક આલ્કોહોલ (3°)", "ફિનોલ"], "ans": 2, "exp": "સાચો જવાબ C છે. તૃતીયક આલ્કોહોલ (3°) નિર્જલીકરણ પ્રક્રિયામાં સૌથી સરળતાથી કાર્બોકેટાયન મધ્યવર્તી બનાવે છે, જે સ્થિર હોય છે અને આલ્કીન બનાવવામાં સહાયક છે. વિકલ્પ A અને B ખોટા છે કારણ કે પ્રાથમિક અને દ્વિતીયક આલ્કોહોલ ઓછી સ્થિરતા ધરાવતા કાર્બોકેટાયન બનાવે છે. વિકલ્પ D ખોટો છે કારણ કે ફિનોલ નિર્જલીકરણ પ્રક્રિયા દર્શાવતું નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ઇથેનોલનું નિર્જલીકરણ કરીને ઇથિન મેળવવા માટે નીચેના પૈકી કયું સંયોજન વધુ યોગ્ય નિર્જલીકરણકર્તા છે?", "opts": ["સાંદ્ર હાઇડ્રોક્લોરિક એસિડ (HCl)", "સાંદ્ર સલ્ફ્યુરિક એસિડ (H₂SO₄)", "ફોસ્ફરિક એસિડ (H₃PO₄)", "નાઇટ્રિક એસિડ (HNO₃)"], "ans": 1, "exp": "સાચો જવાબ B છે. સાંદ્ર સલ્ફ્યુરિક એસિડ (H₂SO₄) આલ્કોહોલના નિર્જલીકરણ માટે સૌથી યોગ્ય નિર્જલીકરણકર્તા છે કારણ કે તે પ્રબળ નિર્જલીકરણ ગુણધર્મ ધરાવે છે. વિકલ્પ A ખોટો છે કારણ કે HCl નિર્જલીકરણ માટે યોગ્ય નથી. વિકલ્પ C ખોટો છે કારણ કે ફોસ્ફરિક એસિડ ઓછો પ્રબળ નિર્જલીકરણકર્તા છે. વિકલ્પ D ખોટો છે કારણ કે નાઇટ્રિક એસિડ ઓક્સિડેશન માટે વધુ જાણીતું છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નિર્જલીકરણ પ્રક્રિયામાં ઇથેનોલમાંથી ઇથિન મેળવતી વખતે નીચેના પૈકી કયું મધ્યવર્તી સંયોજન બને છે?", "opts": ["કાર્બોકેટાયન", "કાર્બોનાયન", "કાર્બીન", "ઇથાઇલ હાઇડ્રોજન સલ્ફેટ"], "ans": 3, "exp": "સાચો જવાબ D છે. ઇથેનોલના નિર્જલીકરણમાં સાંદ્ર સલ્ફ્યુરિક એસિડ સાથે પ્રથમ ઇથાઇલ હાઇડ્રોજન સલ્ફેટ મધ્યવર્તી સંયોજન બને છે, જે પછી ઇથિનમાં રૂપાંતરિત થાય છે. વિકલ્પ A ખોટો છે કારણ કે કાર્બોકેટાયન સીધું મધ્યવર્તી નથી. વિકલ્પ B અને C ખોટા છે કારણ કે આ પ્રક્રિયામાં કાર્બોનાયન કે કાર્બીન બનતા નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયો આલ્કોહોલ નિર્જલીકરણ પ્રક્રિયા દરમિયાન સૌથી વધુ સ્થિર આલ્કીન ઉત્પન્ન કરશે?", "opts": ["1-પેન્ટેનોલ", "2-પેન્ટેનોલ", "3-પેન્ટેનોલ", "2-મિથાઇલ-2-બ્યુટેનોલ"], "ans": 3, "exp": "સાચો જવાબ D છે. 2-મિથાઇલ-2-બ્યુટેનોલ નિર્જલીકરણ પ્રક્રિયામાં સૌથી વધુ સ્થિર આલ્કીન (2-મિથાઇલ-2-બ્યુટીન) ઉત્પન્ન કરશે કારણ કે તે તૃતીયક આલ્કોહોલ છે અને સૌથી સ્થિર કાર્બોકેટાયન મધ્યવર્તી બનાવે છે. વિકલ્પ A, B અને C ખોટા છે કારણ કે તેઓ પ્રાથમિક કે દ્વિતીયક આલ્કોહોલ છે, જે ઓછી સ્થિરતા ધરાવતા આલ્કીન ઉત્પન્ન કરે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ઇથેનોલના નિર્જલીકરણ દરમિયાન સાંદ્ર H₂SO₄ની હાજરીમાં 140°C તાપમાને પ્રથમ કયું ઉત્પન્ન બને છે, જે પછી ઉચ્ચ તાપમાને આલ્કીનમાં રૂપાંતરિત થાય છે?", "opts": ["ડાયિથાયલ ઇથર", "ઇથીન", "ઇથેનલ", "ઇથેનોઇક એસિડ"], "ans": 0, "exp": "140°C તાપમાને ઇથેનોલનું નિર્જલીકરણ થતાં પ્રથમ ડાયિથાયલ ઇથર (C₂H₅OC₂H₅) બને છે, જે આંતરઅણુ નિર્જલીકરણની પ્રક્રિયા છે. 170°C તાપમાને આગળ આલ્કીન (ઇથીન) બને છે. ઇથીન 170°C પર બને છે, ઇથેનલ ઓક્સિડેશનનું ઉત્પન્ન છે, અને ઇથેનોઇક એસિડ ઓક્સિડેશનની અંતિમ પ્રક્રિયાનું ઉત્પન્ન છે.", "ref": "Std 12 - અભ્યાસક્રમ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ટર્શિયરી આલ્કોહોલના નિર્જલીકરણ દરમિયાન સૌથી મુખ્ય ઉત્પન્ન કયું હોય છે અને શા માટે?", "opts": ["આલ્કીન, કારણ કે ટર્શિયરી આલ્કોહોલમાં β-હાઇડ્રોજનની ઉણપ હોય છે", "આલ્કીન, કારણ કે ટર્શિયરી આલ્કોહોલમાં β-હાઇડ્રોજન વધુ સક્રિય હોય છે", "આલ્કીન, કારણ કે ટર્શિયરી કાર્બોકેટાયન સ્થિર હોય છે", "આલ્કીન અને ઇથરનો મિશ્રણ, કારણ કે ટર્શિયરી આલ્કોહોલમાં બંને પ્રક્રિયા શક્ય હોય છે"], "ans": 2, "exp": "ટર્શિયરી આલ્કોહોલના નિર્જલીકરણ દરમિયાન પ્રથમ ટર્શિયરી કાર્બોકેટાયન બને છે, જે સ્થિર હોય છે અને પછી તે આલ્કીનમાં રૂપાંતરિત થાય છે. ટર્શિયરી આલ્કોહોલમાં β-હાઇડ્રોજનની ઉણપ નથી, પરંતુ કાર્બોકેટાયનની સ્થિરતા મુખ્ય કારણ છે. ઇથર બનવાની પ્રક્રિયા પ્રાથમિક અને દ્વિતીય આલ્કોહોલમાં જોવા મળે છે.", "ref": "Std 12 - અભ્યાસક્રમ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયો આલ્કોહોલ નિર્જલીકરણ પ્રક્રિયામાં સૌથી ઓછી ક્ષમતા ધરાવે છે અને શા માટે?", "opts": ["મિથેનોલ, કારણ કે તેમાં β-હાઇડ્રોજન નથી", "ઇથેનોલ, કારણ કે તે પ્રાથમિક આલ્કોહોલ છે", "પ્રોપેન-2-ઓલ, કારણ કે તે દ્વિતીય આલ્કોહોલ છે", "2-મિથાયલપ્રોપેન-2-ઓલ, કારણ કે તે ટર્શિયરી આલ્કોહોલ છે"], "ans": 0, "exp": "મિથેનોલ (CH₃OH)માં β-હાઇડ્રોજન નથી, જેથી તે નિર્જલીકરણ પ્રક્રિયામાં આલ્કીન બનાવી શકતું નથી. ઇથેનોલ, પ્રોપેન-2-ઓલ અને 2-મિથાયલપ્રોપેન-2-ઓલમાં β-હાઇડ્રોજન હોય છે, જેથી તેઓ આલ્કીન બનાવી શકે છે.", "ref": "Std 12 - અભ્યાસક્રમ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ઇથેનોલના નિર્જલીકરણ દરમિયાન સાંદ્ર H₂SO₄ની હાજરીમાં નીચેના પૈકી કયું ક્રમમાં ઉત્પન્ન બને છે?", "opts": ["ઇથીન → ડાયિથાયલ ઇથર → ઇથેનોલ", "ડાયિથાયલ ઇથર → ઇથીન → ઇથેનોલ", "ઇથેનોલ → ડાયિથાયલ ઇથર → ઇથીન", "ઇથીન → ઇથેનોલ → ડાયિથાયલ ઇથર"], "ans": 2, "exp": "ઇથેનોલના નિર્જલીકરણ દરમિયાન પ્રથમ 140°C તાપમાને આંતરઅણુ નિર્જલીકરણથી ડાયિથાયલ ઇથર બને છે, અને પછી 170°C તાપમાને અણુનાં અંતર્ગત નિર્જલીકરણથી ઇથીન બને છે. ઇથેનોલ પ્રારંભિક પદાર્થ છે, જેથી તે પ્રથમ હોઈ શકતું નથી.", "ref": "Std 12 - અભ્યાસક્રમ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયો આલ્કોહોલ નિર્જલીકરણ પ્રક્રિયામાં સૌથી વધુ સેતુયુક્ત આલ્કીન ઉત્પન્ન કરશે?", "opts": ["બ્યુટેન-1-ઓલ", "બ્યુટેન-2-ઓલ", "2-મિથાયલપ્રોપેન-2-ઓલ", "પેન્ટેન-3-ઓલ"], "ans": 2, "exp": "2-મિથાયલપ્રોપેન-2-ઓલ (ટર્શિયરી આલ્કોહોલ) નિર્જલીકરણ દરમિયાન સૌથી સ્થિર કાર્બોકેટાયન બને છે, જે પછી સેતુયુક્ત આલ્કીન (2-મિથાયલપ્રોપીન)માં રૂપાંતરિત થાય છે. બ્યુટેન-1-ઓલ અને બ્યુટેન-2-ઓલમાંથી બનતા આલ્કીન ઓછા સેતુયુક્ત હોય છે, જ્યારે પેન્ટેન-3-ઓલમાંથી બનતા આલ્કીનમાં સેતુયુક્તતા ઓછી હોય છે.", "ref": "Std 12 - અભ્યાસક્રમ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ટર્શિયરી આલ્કોહોલના નિર્જલીકરણ દરમિયાન સાંદ્ર H₂SO₄ની હાજરીમાં નીચેના પૈકી કયું ઉત્પન્ન થશે?", "opts": ["આલ્કીન", "આલ્કેન", "આલ્કાઇન", "કીટોન"], "ans": 1, "exp": "ટર્શિયરી આલ્કોહોલના નિર્જલીકરણ દરમિયાન સાંદ્ર H₂SO₄ની હાજરીમાં મુખ્યત્વે આલ્કેન બનાવે છે. આ કારણથી વિકલ્પ B સરળ છે. વિકલ્પ A ખોટો છે કારણ કે ટર્શિયરી આલ્કોહોલ આલ્કીન બનાવતો નથી. વિકલ્પ C ખોટો છે કારણ કે આલ્કાઇન બનતો નથી. વિકલ્પ D ખોટો છે કારણ કે કીટોન બનતો નથી.", "ref": "Std 12 - અભ્યાસક્રમ 12: કર્બનિક રસાયણશાસ્ત્ર - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયો આલ્કોહોલ નિર્જલીકરણ પ્રક્રિયા દરમિયાન કાર્બોકેટાયન પુનર્વ્યવસ્થા (carbocation rearrangement) દર્શાવીને અપેક્ષિત આલ્કીન કરતાં અલગ આલ્કીન ઉત્પન્ન કરશે?", "opts": ["2-મિથાઇલ-2-પ્રોપેનોલ", "3-મિથાઇલ-2-બ્યુટેનોલ", "2-પ્રોપેનોલ", "1-બ્યુટેનોલ"], "ans": 1, "exp": "3-મિથાઇલ-2-બ્યુટેનોલનું નિર્જલીકરણ કરતી વખતે દ્વિતીયક કાર્બોકેટાયન મિથાઇલ સમૂહના સ્થાનાંતરણ દ્વારા વધુ સ્થિર તૃતીયક કાર્બોકેટાયનમાં રૂપાંતરિત થાય છે, જે અપેક્ષિત 3-મિથાઇલ-2-બ્યુટેન કરતાં 2-મિથાઇલ-2-બ્યુટેન ઉત્પન્ન કરે છે. 2-મિથાઇલ-2-પ્રોપેનોલ પહેલેથી જ તૃતીયક કાર્બોકેટાયન બનાવે છે તેથી પુનર્વ્યવસ્થા થતી નથી. 2-પ્રોપેનોલ અને 1-બ્યુટેનોલમાં પુનર્વ્યવસ્થા માટે યોગ્ય સમૂહ ન હોવાથી અપેક્ષિત આલ્કીન જ મળે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "આલ્કોહોલના નિર્જલીકરણ પ્રક્રિયામાં સાંદ્ર H₂SO₄ની સાથે Al₂O₃ ઉમેરવામાં આવે તો નીચેના પૈકી કયું સાચું નથી?", "opts": ["Al₂O₃ ઉત્પ્રેરક તરીકે કાર્ય કરે છે અને પ્રક્રિયાને ઝડપી બનાવે છે", "Al₂O₃ની હાજરીમાં પ્રક્રિયા નીચા તાપમાને પણ થઈ શકે છે", "Al₂O₃ની હાજરીમાં કાર્બોકેટાયન પુનર્વ્યવસ્થા થવાની સંભાવના વધી જાય છે", "Al₂O₃ની હાજરીમાં આલ્કોહોલનું નિર્જલીકરણ E₂ ક્રિયાવિધિ દ્વારા થાય છે"], "ans": 2, "exp": "Al₂O₃ ઉત્પ્રેરક તરીકે કાર્ય કરીને પ્રક્રિયાને ઝડપી બનાવે છે અને નીચા તાપમાને પણ પ્રક્રિયા થઈ શકે છે. પરંતુ Al₂O₃ની હાજરીમાં કાર્બોકેટાયન મધ્યવર્તી ન બને તેથી પુનર્વ્યવસ્થા થતી નથી. Al₂O₃ની હાજરીમાં પ્રક્રિયા E₂ ક્રિયાવિધિ દ્વારા થાય છે, જેમાં કાર્બોકેટાયન મધ્યવર્તી ન બને.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયા આલ્કોહોલનું નિર્જલીકરણ કરતી વખતે સૌથી વધુ સંખ્યામાં વિવિધ આલ્કીન સમઘટકો ઉત્પન્ન થવાની સંભાવના છે?", "opts": ["2-બ્યુટેનોલ", "3-હેક્ઝેનોલ", "2-મિથાઇલ-2-બ્યુટેનોલ", "1-પેન્ટેનોલ"], "ans": 1, "exp": "3-હેક્ઝેનોલનું નિર્જલીકરણ કરતી વખતે દ્વિતીયક કાર્બોકેટાયન બને છે, જે હાઇડ્રાઇડ શિફ્ટ દ્વારા બે અલગ-અલગ દ્વિતીયક કાર્બોકેટાયનમાં રૂપાંતરિત થઈ શકે છે. આ દરેક કાર્બોકેટાયનમાંથી વિવિધ આલ્કીન ઉત્પન્ન થઈ શકે છે, જેથી કુલ ત્રણ અલગ-અલગ આલ્કીન સમઘટકો મળે છે. 2-બ્યુટેનોલમાંથી બે, 2-મિથાઇલ-2-બ્યુટેનોલમાંથી એક અને 1-પેન્ટેનોલમાંથી મુખ્યત્વે એક જ આલ્કીન મળે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "ઇથેનોલનું નિર્જલીકરણ કરતી વખતે સાંદ્ર H₂SO₄ સાથે 140°C તાપમાને મુખ્ય ઉત્પાદન ડાયઇથાઇલ ઇથર બને છે, જ્યારે 170°C તાપમાને ઇથિન બને છે. આ બંને પ્રક્રિયાઓ માટે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["140°C તાપમાને આંતરઆણ્વીય નિર્જલીકરણ થાય છે જ્યારે 170°C તાપમાને આંતરઆણ્વીય નિર્જલીકરણ થાય છે", "140°C તાપમાને પ્રક્રિયા Sₙ2 ક્રિયાવિધિ દ્વારા થાય છે જ્યારે 170°C તાપમાને E₁ ક્રિયાવિધિ દ્વારા થાય છે", "140°C તાપમાને પ્રક્રિયામાં કાર્બોકેટાયન મધ્યવર્તી બને છે જ્યારે 170°C તાપમાને પણ કાર્બોકેટાયન મધ્યવર્તી બને છે", "140°C તાપમાને પ્રક્રિયા માટે ઓછી ઊર્જા જરૂરી છે જ્યારે 170°C તાપમાને વધુ ઊર્જા જરૂરી છે"], "ans": 0, "exp": "140°C તાપમાને આંતરઆણ્વીય નિર્જલીકરણ થઈને ડાયઇથાઇલ ઇથર બને છે, જ્યારે 170°C તાપમાને આંતરઆણ્વીય નિર્જલીકરણ થઈને ઇથિન બને છે. 140°C તાપમાને પ્રક્રિયા Sₙ2 ક્રિયાવિધિ દ્વારા થાય છે જેમાં કાર્બોકેટાયન મધ્યવર્તી બનતું નથી, જ્યારે 170°C તાપમાને E₁ ક્રિયાવિધિ દ્વારા કાર્બોકેટાયન મધ્યવર્તી બને છે. બંને પ્રક્રિયાઓ માટે કાર્બોકેટાયન મધ્યવર્તી બને છે એ વિધાન ખોટું છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નિર્જલીકરણ પ્રક્રિયામાં નીચેના પૈકી કયા આલ્કોહોલમાંથી મેળવેલ કાર્બોકેટાયન સૌથી વધુ સ્થિર હશે અને શા માટે?", "opts": ["ઇથેનોલ", "પ્રોપેન-2-ઓલ", "2-મિથાઇલપ્રોપેન-2-ઓલ", "બ્યુટેન-1-ઓલ"], "ans": 2, "exp": "2-મિથાઇલપ્રોપેન-2-ઓલ (ટર્શિયરી આલ્કોહોલ)માંથી મળતો કાર્બોકેટાયન ત્રણ આલ્કાઇલ સમૂહોના +I અસરને કારણે સૌથી વધુ સ્થિર હોય છે. ઇથેનોલ અને બ્યુટેન-1-ઓલ પ્રાથમિક આલ્કોહોલ છે, જ્યારે પ્રોપેન-2-ઓલ દ્વિતીયક આલ્કોહોલ છે, જેના કાર્બોકેટાયન ઓછા સ્થિર હોય છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નિર્જલીકરણ પ્રક્રિયા દરમિયાન નીચેના પૈકી કયા આલ્કોહોલમાંથી મેળવેલ આલ્કીનમાં સૌથી વધુ સેતુયુક્ત (hyperconjugation) અસર જોવા મળશે?", "opts": ["ઇથેનોલ", "પ્રોપેન-2-ઓલ", "2-મિથાઇલપ્રોપીન", "બ્યુટેન-2-ઓલ"], "ans": 2, "exp": "2-મિથાઇલપ્રોપીન (આલ્કીન)માં ત્રણ આલ્કાઇલ સમૂહો હોવાથી સૌથી વધુ સેતુયુક્ત અસર જોવા મળે છે. ઇથેનોલ અને બ્યુટેન-2-ઓલમાંથી મળતા આલ્કીનમાં ઓછા આલ્કાઇલ સમૂહો હોય છે, જ્યારે પ્રોપેન-2-ઓલમાંથી મળતું પ્રોપીન માત્ર એક આલ્કાઇલ સમૂહ ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નિર્જલીકરણ પ્રક્રિયામાં નીચેના પૈકી કયા આલ્કોહોલનું નિર્જલીકરણ કરતી વખતે મુખ્ય ઉત્પાદન તરીકે સૌથી ઓછું સ્થિર આલ્કીન મળશે?", "opts": ["પ્રોપેન-1-ઓલ", "બ્યુટેન-1-ઓલ", "2-મિથાઇલપ્રોપેન-2-ઓલ", "પેન્ટેન-3-ઓલ"], "ans": 0, "exp": "પ્રોપેન-1-ઓલ (પ્રાથમિક આલ્કોહોલ)માંથી મળતું પ્રોપીન સૌથી ઓછું સ્થિર આલ્કીન છે કારણ કે તેમાં માત્ર એક આલ્કાઇલ સમૂહ હોવાથી સેતુયુક્ત અસર નહિવત્ હોય છે. બાકીના વિકલ્પોમાંથી મળતા આલ્કીન વધુ સ્થિર હોય છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નિર્જલીકરણ પ્રક્રિયામાં નીચેના પૈકી કયો આલ્કોહોલ સાંદ્ર H₂SO₄ સાથે 180°C તાપમાને ગરમ કરતાં મુખ્ય ઉત્પાદન તરીકે સાયક્લોઆલ્કીન ઉત્પન્ન કરશે?", "opts": ["સાયક્લોહેક્ઝેનોલ", "સાયક્લોપેન્ટેનોલ", "1-મિથાઇલસાયક્લોહેક્ઝેનોલ", "સાયક્લોબ્યુટેનોલ"], "ans": 0, "exp": "સાયક્લોહેક્ઝેનોલનું નિર્જલીકરણ કરતાં સાયક્લોહેક્ઝિન મળે છે, જે સાયક્લોઆલ્કીન છે. સાયક્લોપેન્ટેનોલ અને સાયક્લોબ્યુટેનોલમાંથી મળતા સાયક્લોઆલ્કીન ઓછા સ્થિર હોય છે, જ્યારે 1-મિથાઇલસાયક્લોહેક્ઝેનોલમાં કાર્બોકેટાયન પુનર્વ્યવસ્થા થઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પ્રયોગમાં, 2-મિથાઇલ-2-પ્રોપેનોલ (ટર્શિયરી બ્યુટાઇલ આલ્કોહોલ)નું નિર્જલીકરણ સાંદ્ર H2SO4 સાથે 180°C તાપમાને કરવામાં આવે છે. આ પ્રક્રિયા દરમિયાન નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["મુખ્ય ઉત્પન્ન તરીકે 2-મિથાઇલપ્રોપીન (આઇસોબ્યુટિલીન) મળે છે અને પ્રક્રિયા E1 યંત્રવિભાગ અનુસાર થાય છે.", "મુખ્ય ઉત્પન્ન તરીકે 1-બ્યુટીન મળે છે અને પ્રક્રિયા E2 યંત્રવિભાગ અનુસાર થાય છે.", "મુખ્ય ઉત્પન્ન તરીકે 2-બ્યુટીન મળે છે અને પ્રક્રિયામાં કાર્બોકેટાયન પુનર્વ્યવસ્થા થતી નથી.", "મુખ્ય ઉત્પન્ન તરીકે ઈથર બને છે અને પ્રક્રિયા SN2 યંત્રવિભાગ અનુસાર થાય છે."], "ans": 0, "exp": "ટર્શિયરી આલ્કોહોલ (2-મિથાઇલ-2-પ્રોપેનોલ)નું નિર્જલીકરણ E1 યંત્રવિભાગ અનુસાર થાય છે, જેમાં પ્રથમ પગલામાં કાર્બોકેટાયન બને છે. ટર્શિયરી કાર્બોકેટાયન સ્થિર હોવાથી, તેની પુનર્વ્યવસ્થા થતી નથી અને મુખ્ય ઉત્પન્ન તરીકે 2-મિથાઇલપ્રોપીન (આઇસોબ્યુટિલીન) મળે છે. વિકલ્પ B ખોટો છે કારણ કે 1-બ્યુટીન ટર્શિયરી આલ્કોહોલમાંથી બનતું નથી અને E2 યંત્રવિભાગ પ્રાથમિક કે દ્વિતીય આલ્કોહોલ માટે લાગુ પડે છે. વિકલ્પ C ખોટો છે કારણ કે 2-બ્યુટીન ટર્શિયરી આલ્કોહોલમાંથી બનતું નથી અને કાર્બોકેટાયન પુનર્વ્યવસ્થા થાય છે. વિકલ્પ D ખોટો છે કારણ કે ઈથર બનવાની પ્રક્રિયા આંતરઅણુ નિર્જલીકરણ (140°C)માં થાય છે, જ્યારે 180°C પર આલ્કીન બને છે અને SN2 યંત્રવિભાગ આ પ્રક્રિયા માટે લાગુ પડતો નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: આલ્કોહોલ, ફિનોલ અને ઈથર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
