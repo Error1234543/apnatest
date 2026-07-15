@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>મેન્ડેલ અને તેમના પ્રયોગો</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>મેન્ડેલ અને તેમના પ્રયોગો</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">મેન્ડેલ અને તેમના પ્રયોગો</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 17 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 17 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "મેન્ડેલના પ્રયોગોમાં, F2 પેઢીમાં 3:1નો ગુણોત્તર મળે છે, પરંતુ જ્યારે તેઓએ બે જુદા જુદા લક્ષણોના સંયોજનનો અભ્યાસ કર્યો ત્યારે F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મળ્યો. આનો અર્થ શું થાય છે?", "opts": ["જનીનો એકબીજા સાથે મિશ્રિત થાય છે અને નવા લક્ષણો બનાવે છે", "જનીનો એકબીજાથી સ્વતંત્ર રીતે વિતરિત થાય છે અને સંયોજન પેઢીમાં નવા સંયોજનો બનાવે છે", "જનીનો એકબીજા સાથે જોડાયેલા હોય છે અને એકસાથે વહન પામે છે", "જનીનો એકબીજા પર પ્રભાવ પાડે છે અને લક્ષણોને બદલી નાખે છે"], "ans": 1, "exp": "મેન્ડેલના સ્વતંત્ર વિતરણના નિયમ મુજબ, જનીનો એકબીજાથી સ્વતંત્ર રીતે વિતરિત થાય છે. આથી F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મળે છે. વિકલ્પ A ખોટો છે કારણ કે જનીનો મિશ્રિત થતાં નથી. વિકલ્પ C ખોટો છે કારણ કે જનીનો એકબીજા સાથે જોડાયેલા નથી. વિકલ્પ D ખોટો છે કારણ કે જનીનો એકબીજા પર પ્રભાવ પાડતાં નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, તેને એવું જણાયું કે કેટલાક લક્ષણો એક પેઢીમાં છુપાયેલા રહે છે અને પછીની પેઢીમાં પુનઃપ્રગટ થાય છે. આ ઘટનાને શું કહેવાય છે?", "opts": ["પ્રભાવીતા (Dominance)", "અપ્રભાવીતા (Recessiveness)", "સહ-પ્રભાવીતા (Co-dominance)", "અપૂર્ણ પ્રભાવીતા (Incomplete dominance)"], "ans": 1, "exp": "મેન્ડેલના પ્રયોગોમાં, અપ્રભાવી લક્ષણો એક પેઢીમાં છુપાયેલા રહે છે અને પછીની પેઢીમાં પુનઃપ્રગટ થાય છે. આને અપ્રભાવીતા કહેવાય છે. વિકલ્પ A ખોટો છે કારણ કે પ્રભાવી લક્ષણો હંમેશા દેખાય છે. વિકલ્પ C ખોટો છે કારણ કે સહ-પ્રભાવીતામાં બંને લક્ષણો દેખાય છે. વિકલ્પ D ખોટો છે કારણ કે અપૂર્ણ પ્રભાવીતામાં મિશ્રિત લક્ષણો દેખાય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલે તેના પ્રયોગો માટે મટરના છોડની પસંદગી શા માટે કરી હતી?", "opts": ["મટરના છોડમાં લક્ષણોની વિશાળ વિવિધતા હોય છે અને તેઓ સરળતાથી ઉગાડી શકાય છે", "મટરના છોડમાં ફક્ત એક જ પ્રકારના લક્ષણો હોય છે", "મટરના છોડમાં જનીનોની સંખ્યા ખૂબ ઓછી હોય છે", "મટરના છોડમાં કૃત્રિમ પરાગનયન સરળતાથી થઈ શકતું નથી"], "ans": 0, "exp": "મેન્ડેલે મટરના છોડની પસંદગી કરી કારણ કે તેમાં લક્ષણોની વિશાળ વિવિધતા હોય છે, તેઓ સરળતાથી ઉગાડી શકાય છે, અને કૃત્રિમ પરાગનયન સરળતાથી થઈ શકે છે. વિકલ્પ B ખોટો છે કારણ કે મટરના છોડમાં ઘણા પ્રકારના લક્ષણો હોય છે. વિકલ્પ C ખોટો છે કારણ કે મટરના છોડમાં જનીનોની સંખ્યા ઓછી નથી. વિકલ્પ D ખોટો છે કારણ કે કૃત્રિમ પરાગનયન સરળતાથી થઈ શકે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, F1 પેઢીમાં સંકર છોડમાં ફક્ત એક જ લક્ષણ દેખાય છે, પરંતુ F2 પેઢીમાં બંને લક્ષણો દેખાય છે. આનો અર્થ શું થાય છે?", "opts": ["F1 પેઢીમાં અપ્રભાવી લક્ષણ નષ્ટ થઈ ગયું છે", "F1 પેઢીમાં અપ્રભાવી લક્ષણ છુપાયેલું રહે છે અને F2 પેઢીમાં પુનઃપ્રગટ થાય છે", "F1 પેઢીમાં પ્રભાવી લક્ષણ નષ્ટ થઈ ગયું છે", "F1 પેઢીમાં બંને લક્ષણો મિશ્રિત થઈ ગયા છે"], "ans": 1, "exp": "F1 પેઢીમાં અપ્રભાવી લક્ષણ છુપાયેલું રહે છે અને F2 પેઢીમાં પુનઃપ્રગટ થાય છે. વિકલ્પ A ખોટો છે કારણ કે અપ્રભાવી લક્ષણ નષ્ટ થતું નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રભાવી લક્ષણ નષ્ટ થતું નથી. વિકલ્પ D ખોટો છે કારણ કે લક્ષણો મિશ્રિત થતાં નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ બે સ્વરૂપીય લક્ષણો વાળા છોડનું સંકરણ કર્યું, ત્યારે F1 પેઢીમાં ફક્ત એક જ લક્ષણ દેખાયું. આ ઘટનાને શું કહેવાય છે?", "opts": ["સહ-પ્રભાવીતા (Co-dominance)", "પ્રભાવીતા (Dominance)", "અપૂર્ણ પ્રભાવીતા (Incomplete dominance)", "પોલિજીનિક અનુવંશિકતા (Polygenic inheritance)"], "ans": 1, "exp": "જ્યારે બે સ્વરૂપીય લક્ષણો વાળા છોડનું સંકરણ કરવામાં આવે છે, ત્યારે F1 પેઢીમાં ફક્ત પ્રભાવી લક્ષણ દેખાય છે. આને પ્રભાવીતા કહેવાય છે. વિકલ્પ A ખોટો છે કારણ કે સહ-પ્રભાવીતામાં બંને લક્ષણો દેખાય છે. વિકલ્પ C ખોટો છે કારણ કે અપૂર્ણ પ્રભાવીતામાં મિશ્રિત લક્ષણો દેખાય છે. વિકલ્પ D ખોટો છે કારણ કે પોલિજીનિક અનુવંશિકતામાં ઘણા જનીનો એક લક્ષણને નિયંત્રિત કરે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ પીળા બીજવાળા (YY) અને હરિયા બીજવાળા (yy) મટરના છોડનું સંકરણ કર્યું, ત્યારે F1 પેઢીમાં સંકર છોડ (Yy) પીળા બીજ ધરાવે છે. જો આ F1 છોડને પોતાને જ સ્વ-પરાગનયન કરાવવામાં આવે, તો F2 પેઢીમાં હરિયા બીજ ધરાવતા છોડની ટકાવારી કેટલી હશે, જો Y અલેલ હરિયા બીજ માટે પ્રભાવી હોય?", "opts": ["0%", "25%", "50%", "75%"], "ans": 1, "exp": "F1 પેઢીના સંકર છોડ (Yy)માં Y (પીળા બીજ) પ્રભાવી અલેલ છે, જ્યારે y (હરિયા બીજ) અપ્રભાવી અલેલ છે. F1 છોડનું સ્વ-પરાગનયન કરતાં F2 પેઢીમાં જનીનીય ગુણોત્તર 1:2:1 (YY:Yy:yy) મળે છે. અહીં, yy જનીનપ્રકાર ધરાવતા છોડ હરિયા બીજ ધરાવશે, જે 25% (1/4) ટકાવારી ધરાવે છે. A) 0% ખોટું છે કારણ કે અપ્રભાવી લક્ષણ F2 પેઢીમાં દેખાય છે. C) 50% ખોટું છે કારણ કે ફક્ત yy જનીનપ્રકાર જ હરિયા બીજ ધરાવે છે, જે 25% છે. D) 75% ખોટું છે કારણ કે પ્રભાવી લક્ષણ (પીળા બીજ) 75% નહીં પરંતુ 75% (YY + Yy) ધરાવે છે, પરંતુ હરિયા બીજ માટે 25% જ ટકાવારી છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ બે સ્વરૂપીય લક્ષણો (દા.ત., પીળા અને ગોળ બીજ vs. હરિયા અને કાટખૂણા બીજ) વાળા છોડનું સંકરણ કર્યું, ત્યારે F2 પેઢીમાં ગુણોત્તર 9:3:3:1 મળે છે. આ ગુણોત્તર કયા સિદ્ધાંત પર આધારિત છે?", "opts": ["પ્રભાવિતા અને અપ્રભાવિતાનો નિયમ", "સ્વતંત્ર વિતરણનો નિયમ", "જોડીકરણનો નિયમ", "અલેલોનો નિયમ"], "ans": 1, "exp": "F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મેન્ડેલના સ્વતંત્ર વિતરણના નિયમ પર આધારિત છે, જે જણાવે છે કે બે અથવા વધુ લક્ષણોના અલેલો એકબીજાથી સ્વતંત્ર રીતે વિતરિત થાય છે. A) પ્રભાવિતા અને અપ્રભાવિતાનો નિયમ ફક્ત એક લક્ષણના ગુણોત્તર (3:1) સમાવે છે. C) જોડીકરણનો નિયમ મેન્ડેલના સમયે જાણીતો નહોતો અને તે લિંકેજ સાથે સંબંધિત છે. D) અલેલોનો નિયમ મેન્ડેલના પ્રયોગોમાં વપરાતો નથી, પરંતુ તે આધુનિક જનીનશાસ્ત્રમાં વપરાય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ મટરના છોડ પર પ્રયોગ કર્યો, ત્યારે તેણે જોયું કે કેટલાક લક્ષણો (દા.ત., ફુલનું રંગ) F1 પેઢીમાં દેખાયા નહીં, પરંતુ F2 પેઢીમાં પુન:પ્રકટ થયા. આ ઘટનાને શું કહેવાય છે?", "opts": ["પ્રભાવિતા", "અપ્રભાવિતા", "અતિપ્રભાવિતા", "સહ-પ્રભાવિતા"], "ans": 1, "exp": "જ્યારે કોઈ લક્ષણ F1 પેઢીમાં દેખાતું નથી પરંતુ F2 પેઢીમાં પુન:પ્રકટ થાય છે, ત્યારે તેને અપ્રભાવિતા કહેવાય છે. પ્રભાવી અલેલ (A) લક્ષણને દેખાડે છે, જ્યારે અપ્રભાવી અલેલ (a) લક્ષણને છુપાવે છે. A) પ્રભાવિતા એ લક્ષણ છે જે F1 પેઢીમાં દેખાય છે. C) અતિપ્રભાવિતા એવી સ્થિતિ છે જ્યારે બંને અલેલો પોતપોતાના લક્ષણો દર્શાવે છે. D) સહ-પ્રભાવિતા એવી સ્થિતિ છે જ્યારે બંને અલેલો મિશ્ર લક્ષણ દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જો એક મટરનો છોડ પીળા બીજ (Y) અને ગોળ બીજ (R) માટે સંકર (YyRr) હોય, તો તેનું સ્વ-પરાગનયન કરતાં F2 પેઢીમાં પીળા અને કાટખૂણા બીજ ધરાવતા છોડની ટકાવારી કેટલી હશે?", "opts": ["1/16", "3/16", "9/16", "1/4"], "ans": 1, "exp": "F1 પેઢીનો જનીનપ્રકાર YyRr છે. સ્વ-પરાગનયન કરતાં F2 પેઢીમાં જનીનીય ગુણોત્તર 9:3:3:1 મળે છે. પીળા અને કાટખૂણા બીજ ધરાવતા છોડનો જનીનપ્રકાર Y_rr (YYrr અથવા Yyrr) હશે. આ ગુણોત્તરમાં 3 ભાગ (3/16) Y_rr માટે છે. A) 1/16 ખોટું છે કારણ કે તે ફક્ત YYrr અથવા Yyrrમાંથી એક જનીનપ્રકાર ધરાવે છે. C) 9/16 ખોટું છે કારણ કે તે પીળા અને ગોળ બીજ (Y_R_) માટે છે. D) 1/4 ખોટું છે કારણ કે તે કુલ ટકાવારી નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ બે સ્વતંત્ર લક્ષણો (દા.ત., બીજનો આકાર અને બીજનો રંગ) ધરાવતા મટરના છોડનું સંકરણ કર્યું, ત્યારે F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મળે છે. પરંતુ જો આ લક્ષણો સંપૂર્ણ રીતે જોડાયેલા (completely linked) હોય, તો F2 પેઢીમાં કયો ગુણોત્તર અપેક્ષિત હશે?", "opts": ["9:3:3:1", "1:1", "3:1", "1:2:1"], "ans": 1, "exp": "સંપૂર્ણ જોડાયેલા લક્ષણો (completely linked genes) વચ્ચે કોઈ ક્રોસિંગ ઓવર થતું નથી, જેથી તેઓ એકસાથે વારસામાં આવે છે. જ્યારે બે સ્વરૂપીય લક્ષણો સંપૂર્ણ રીતે જોડાયેલા હોય, ત્યારે F2 પેઢીમાં ફક્ત પિતૃ પ્રકારના જ સંયોજનો મળે છે, જેથી ગુણોત્તર 1:1 (હોમોઝાયગસ પિતૃ પ્રકારો) મળે છે. વિકલ્પ A (9:3:3:1) સ્વતંત્ર વિતરણના કિસ્સામાં મળે છે, વિકલ્પ C (3:1) એક લક્ષણના સંકરણ માટે મળે છે, અને વિકલ્પ D (1:2:1) એક જીનના અપૂર્ણ પ્રભાવ માટે મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (મેન્ડેલના પ્રયોગો અને જોડાયેલા જનીનો)", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જો એક મટરનો છોડ જેના બીજનો રંગ પીળો અને આકાર ગોળ હોય (YyRr) અને બીજો છોડ જેના બીજનો રંગ લીલો અને આકાર ખરબચડો હોય (yyrr) વચ્ચે સંકરણ કરવામાં આવે, તો F2 પેઢીમાં કયા પ્રમાણમાં સંપૂર્ણ પ્રભાવી લક્ષણો ધરાવતા છોડ મળશે?", "opts": ["1/16", "3/16", "9/16", "1/4"], "ans": 2, "exp": "મેન્ડેલના દ્વિસંકરણ પ્રયોગ મુજબ, જ્યારે બે સ્વતંત્ર લક્ષણોનું સંકરણ કરવામાં આવે ત્યારે F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મળે છે. અહીં સંપૂર્ણ પ્રભાવી લક્ષણો (પીળો અને ગોળ બીજ) ધરાવતા છોડનું પ્રમાણ 9/16 હોય છે. બાકીના વિકલ્પો અંશતઃ પ્રભાવી અથવા પ્રચ્છન્ન લક્ષણો દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જો એક લક્ષણ માટે વિષમયુગ્મી છોડ (Aa)નું સ્વફલન કરવામાં આવે, તો F1 પેઢીમાં કયા પ્રકારના જનીન પ્રકારો મળશે અને તેમનું પ્રમાણ શું હશે?", "opts": ["AA: 1, Aa: 2, aa: 1", "AA: 1, Aa: 1, aa: 1", "AA: 2, Aa: 1, aa: 1", "AA: 1, Aa: 0, aa: 1"], "ans": 0, "exp": "વિષમયુગ્મી છોડ (Aa)ના સ્વફલનથી F1 પેઢીમાં જનીન પ્રકારોનું પ્રમાણ 1:2:1 (AA:Aa:aa) મળે છે. આ મેન્ડેલના એકસંકરણ પ્રયોગનો મૂળભૂત સિદ્ધાંત છે. બાકીના વિકલ્પો ખોટા પ્રમાણ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, નીચેનામાંથી કયું વિધાન મેન્ડેલના 'સ્વતંત્ર વહેંચણીના નિયમ'નું ઉલ્લંઘન કરે છે?", "opts": ["બે જનીનો એક જ વર્ણસૂત્ર પર નજીકમાં આવેલા હોય ત્યારે તેમનું વહેંચણી સ્વતંત્ર નથી હોતું", "બે જનીનો જુદા જુદા વર્ણસૂત્રો પર હોય ત્યારે તેમનું વહેંચણી સ્વતંત્ર હોય છે", "એક જનીન એક કરતાં વધુ લક્ષણોને અસર કરે ત્યારે સ્વતંત્ર વહેંચણી થાય છે", "જ્યારે બે લક્ષણોનું સંકરણ કરવામાં આવે ત્યારે F2 પેઢીમાં 9:3:3:1નો ગુણોત્તર મળે છે"], "ans": 0, "exp": "મેન્ડેલનો સ્વતંત્ર વહેંચણીનો નિયમ ત્યારે જ લાગુ પડે છે જ્યારે બે જનીનો જુદા જુદા વર્ણસૂત્રો પર હોય. જો બે જનીનો એક જ વર્ણસૂત્ર પર નજીકમાં આવેલા હોય તો તેમનું વહેંચણી સ્વતંત્ર નથી હોતું, જેને 'જનીન જોડાણ' કહે છે. આ મેન્ડેલના નિયમનું ઉલ્લંઘન છે. બાકીના વિકલ્પો મેન્ડેલના નિયમો સાથે સુસંગત છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જો એક લક્ષણ માટે વિષમયુગ્મી છોડ (Aa) અને પ્રચ્છન્ન સમયુગ્મી છોડ (aa) વચ્ચે પરીક્ષણ સંકરણ કરવામાં આવે, તો સંતતિમાં કયા પ્રકારના જનીન પ્રકારો મળશે અને તેમનું પ્રમાણ શું હશે?", "opts": ["Aa: 1, aa: 1", "AA: 1, Aa: 1", "Aa: 2, aa: 1", "AA: 1, aa: 1"], "ans": 0, "exp": "પરીક્ષણ સંકરણમાં વિષમયુગ્મી છોડ (Aa) અને પ્રચ્છન્ન સમયુગ્મી છોડ (aa) વચ્ચે સંકરણ કરતાં સંતતિમાં 50% વિષમયુગ્મી (Aa) અને 50% પ્રચ્છન્ન સમયુગ્મી (aa) છોડ મળે છે. આ મેન્ડેલના પ્રયોગોમાં પરીક્ષણ સંકરણનો મૂળભૂત સિદ્ધાંત છે. બાકીના વિકલ્પો ખોટા પ્રમાણ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જો એક મટરનો છોડ વિષમયુગ્મી (AaBb) હોય અને તેનું સ્વફલન કરવામાં આવે, તો F1 પેઢીમાં મળતી જનુકીય સંભાવનાઓમાં નીચેનામાંથી કયું સંયોજન મળશે નહીં?", "opts": ["AABB", "AaBb", "AAbb", "aabb"], "ans": 0, "exp": "વિષમયુગ્મી છોડ (AaBb)નું સ્વફલન કરતા, F1 પેઢીમાં મળતી જનુકીય સંભાવનાઓ AABB, AAbb, AaBb, Aabb, aabb, aaBB, aaBb, AaBB હોય છે. પરંતુ AABB મળવાની સંભાવના શૂન્ય હોય છે કારણ કે AaBb પાસે A અને B અલેલ્સની પ્રચ્છન્ન રીતે વહેંચણી થતી નથી, પરંતુ સ્વતંત્ર રીતે વહેંચણી થાય છે. તો AABB મળવાની સંભાવના નથી.", "ref": "Std 12 - પ્રકરણ 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, જ્યારે તેઓએ મટરના છોડ પર કામ કર્યું, ત્યારે તેણે જોયું કે કેટલાક લક્ષણો એકબીજા સાથે સંકળિત રહે છે. આ ઘટનાનું કારણ શું છે?", "opts": ["જનીનો વર્ણસૂત્ર પર એકબીજાની નજીક સ્થિત હોય છે", "જનીનો વર્ણસૂત્ર પર દૂર સ્થિત હોય છે", "જનીનો ભિન્ન વર્ણસૂત્ર પર સ્થિત હોય છે", "જનીનો એક જ સ્થાન પર સ્થિત હોય છે"], "ans": 0, "exp": "સંકળન (linkage) ત્યારે થાય છે જ્યારે જનીનો એક જ વર્ણસૂત્ર પર નજીક સ્થિત હોય છે, પરિણામે તેઓ સ્વતંત્ર રીતે વહેંચાતા નથી. વિકલ્પ B (દૂર સ્થિત) સ્વતંત્ર વહેંચણી તરફ દોરી જાય છે, વિકલ્પ C (ભિન્ન વર્ણસૂત્ર) મેન્ડેલના સ્વતંત્ર વહેંચણીના નિયમ અનુસાર છે, અને વિકલ્પ D (એક જ સ્થાન) અશક્ય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડેલના પ્રયોગોમાં, નીચેનામાંથી કયું વિધાન 'સ્વતંત્ર વહેંચણીના નિયમ'નું ઉલ્લંઘન કરતું નથી, પરંતુ મેન્ડેલના પ્રયોગોમાં અપવાદરૂપ પરિસ્થિતિ દર્શાવે છે?", "opts": ["એક જ વર્ણસૂત્ર પર આવેલા બે જનીનોનું સંકરણ કરતી વખતે ૯:૩:૩:૧ નો ગુણોત્તર મળે છે.", "જો બે જનીનો એકબીજાની ખૂબ નજીક આવેલા હોય, તો તેમનું પુનઃસંયોજન પ્રમાણ ઘટે છે.", "જો એક જનીન એક કરતાં વધુ લક્ષણોને અસર કરે, તો તેને 'પ્લીઓટ્રોપી' કહે છે.", "જો એક લક્ષણ માટે બહુવૈકલ્પિક જનીનો જવાબદાર હોય, તો તેને 'બહુવૈકલ્પિકતા' કહે છે."], "ans": 1, "exp": "સ્વતંત્ર વહેંચણીનો નિયમ ત્યારે જ લાગુ પડે છે જ્યારે બે જનીનો અલગ-અલગ વર્ણસૂત્રો પર હોય. જો બે જનીનો એક જ વર્ણસૂત્ર પર અને એકબીજાની ખૂબ નજીક આવેલા હોય, તો તેમનું પુનઃસંયોજન પ્રમાણ ઘટે છે, જેને 'લિન્કેજ' કહે છે. આ મેન્ડેલના સ્વતંત્ર વહેંચણીના નિયમનું ઉલ્લંઘન નથી કરતું, પરંતુ તેનો અપવાદ છે. અન્ય વિકલ્પો ખોટા છે કારણ કે: A) ખોટો ગુણોત્તર દર્શાવે છે, C) અને D) મેન્ડેલના નિયમો સાથે સીધો સંબંધ ધરાવતા નથી.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
