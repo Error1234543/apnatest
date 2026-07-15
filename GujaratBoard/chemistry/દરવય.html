@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દ્રાવ્ય</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>દ્રાવ્ય</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">દ્રાવ્ય</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે ગ્લુકોઝ અને ફ્રક્ટોઝનું મિશ્રણ પાણીમાં ઓગાળવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["મિશ્રણનું દ્રાવ્યતા સંપૂર્ણપણે ગ્લુકોઝની માત્રા પર આધાર રાખે છે.", "ફ્રક્ટોઝ ગ્લુકોઝ કરતાં વધુ દ્રાવ્ય હોય છે, પરંતુ મિશ્રણની દ્રાવ્યતા બંનેમાંથી ઓછી હોય છે.", "મિશ્રણની દ્રાવ્યતા ગ્લુકોઝ અથવા ફ્રક્ટોઝ એકલા કરતાં વધુ હોય છે.", "તાપમાન વધારવાથી મિશ્રણની દ્રાવ્યતા ઘટે છે."], "ans": 2, "exp": "ગ્લુકોઝ અને ફ્રક્ટોઝ બંને પાણીમાં ઉચ્ચ દ્રાવ્યતા ધરાવે છે, પરંતુ જ્યારે બંનેને મિશ્રિત કરવામાં આવે છે ત્યારે તેમની દ્રાવ્યતા વધે છે કારણ કે તેઓ એકબીજા સાથે હાઇડ્રોજન બંધન બનાવી શકે છે, જે દ્રાવણની સ્થિરતા વધારે છે. A) ખોટું છે કારણ કે દ્રાવ્યતા ફક્ત ગ્લુકોઝ પર આધારિત નથી. B) ખોટું છે કારણ કે ફ્રક્ટોઝ ગ્લુકોઝ કરતાં વધુ દ્રાવ્ય છે, પરંતુ મિશ્રણની દ્રાવ્યતા વધે છે, ઘટતી નથી. D) ખોટું છે કારણ કે તાપમાન વધારવાથી દ્રાવ્યતા સામાન્ય રીતે વધે છે.", "ref": "Std 12 - અભ્યાસક્રમ 1: કાર્બોદિત (Carbohydrates)", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની સાંદ્રતા વધારવા માટે નીચેનામાંથી કયું પગલું સૌથી અસરકારક છે?", "opts": ["દ્રાવણને ગરમ કરવું", "દ્રાવણમાં વધુ દ્રાવક ઉમેરવું", "દ્રાવણને હલાવવું", "દ્રાવણમાં ઇલેક્ટ્રોલાઇટ ઉમેરવું"], "ans": 0, "exp": "દ્રાવણને ગરમ કરવાથી દ્રાવ્ય પદાર્થની દ્રાવ્યતા સામાન્ય રીતે વધે છે, ખાસ કરીને ઘન દ્રાવ્ય પદાર્થો માટે. B) ખોટું છે કારણ કે વધુ દ્રાવક ઉમેરવાથી સાંદ્રતા ઘટે છે. C) ખોટું છે કારણ કે હલાવવાથી દ્રાવ્યતા પર કોઈ અસર થતી નથી, ફક્ત દ્રાવણની સજાતીયતા સુધારે છે. D) ખોટું છે કારણ કે ઇલેક્ટ્રોલાઇટ ઉમેરવાથી દ્રાવ્યતા પર કોઈ સીધી અસર થતી નથી, પરંતુ તે દ્રાવણની વાહકતા વધારે છે.", "ref": "Std 11 - અભ્યાસક્રમ 2: દ્રાવણ અને દ્રાવ્યતા", "ch": ""}, {"q": "નીચેનામાંથી કયું દ્રાવ્ય પદાર્થ પાણીમાં ઓગળતી વખતે ઉષ્મા શોષે છે?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "એમોનિયમ ક્લોરાઇડ (NH4Cl)", "પોટેશિયમ નાઇટ્રેટ (KNO3)", "કેલ્શિયમ ક્લોરાઇડ (CaCl2)"], "ans": 1, "exp": "એમોનિયમ ક્લોરાઇડ (NH4Cl) પાણીમાં ઓગળતી વખતે ઉષ્મા શોષે છે, જેને એન્ડોથર્મિક પ્રક્રિયા કહેવાય છે. A) ખોટું છે કારણ કે NaCl ઓગળતી વખતે ઉષ્મા શોષતું નથી. C) ખોટું છે કારણ કે KNO3 ઓગળતી વખતે ઉષ્મા શોષતું નથી. D) ખોટું છે કારણ કે CaCl2 ઓગળતી વખતે ઉષ્મા મુક્ત કરે છે.", "ref": "Std 11 - અભ્યાસક્રમ 2: દ્રાવણ અને દ્રાવ્યતા", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની દ્રાવ્યતા નીચેનામાંથી કયા પરિબળ પર આધાર રાખતી નથી?", "opts": ["દ્રાવકની પ્રકૃતિ", "દ્રાવ્ય પદાર્થની પ્રકૃતિ", "દ્રાવણનો રંગ", "તાપમાન"], "ans": 2, "exp": "દ્રાવણનો રંગ દ્રાવ્યતાને અસર કરતો નથી. દ્રાવ્યતા દ્રાવક અને દ્રાવ્ય પદાર્થની પ્રકૃતિ, તાપમાન, અને દબાણ (ગેસ માટે) પર આધાર રાખે છે. A, B, અને D સહી પરિબળો છે જે દ્રાવ્યતાને અસર કરે છે.", "ref": "Std 11 - અભ્યાસક્રમ 2: દ્રાવણ અને દ્રાવ્યતા", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન દ્રાવ્યતા અને તાપમાનના સંબંધ વિશે સાચું છે?", "opts": ["ગેસની દ્રાવ્યતા તાપમાન વધારવાથી વધે છે.", "ઘન પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે.", "પ્રવાહી પદાર્થની દ્રાવ્યતા તાપમાન પર આધાર રાખતી નથી.", "ગેસની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે."], "ans": 3, "exp": "ગેસની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે કારણ કે ઉચ્ચ તાપમાને ગેસના અણુઓની ગતિશીલતા વધે છે, જે દ્રાવણમાંથી બહાર નીકળવા પ્રેરે છે. A) ખોટું છે કારણ કે ગેસની દ્રાવ્યતા ઘટે છે. B) ખોટું છે કારણ કે ઘન પદાર્થની દ્રાવ્યતા સામાન્ય રીતે વધે છે. C) ખોટું છે કારણ કે પ્રવાહી પદાર્થની દ્રાવ્યતા તાપમાન પર આધાર રાખે છે.", "ref": "Std 11 - અભ્યાસક્રમ 2: દ્રાવણ અને દ્રાવ્યતા", "ch": ""}, {"q": "જ્યારે કેલ્શિયમ ક્લોરાઇડ (CaCl₂) ને પાણીમાં ઓગાળવામાં આવે છે, ત્યારે દ્રાવણનું તાપમાન વધે છે. આ ઘટનાનું કયું કારણ છે?", "opts": ["CaCl₂ ની દ્રાવ્યતા ઉચ્ચ હોવાને લીધે ઉષ્મા મુક્ત થાય છે.", "CaCl₂ ની જાળવણી એન્થાલ્પી (ΔH_solution) ઋણ હોય છે, જેથી ઉષ્મા મુક્ત થાય છે.", "પાણીના અણુઓ CaCl₂ ના આયનો સાથે હાઇડ્રોજન બંધ બનાવે છે, જેથી ઉષ્મા શોષાય છે.", "CaCl₂ ની દ્રાવ્યતા નીચી હોવાને લીધે ઉષ્મા શોષાય છે."], "ans": 1, "exp": "CaCl₂ ની જાળવણી એન્થાલ્પી (ΔH_solution) ઋણ હોય છે, જેથી દ્રાવ્ય પદાર્થ ઓગળતી વખતે ઉષ્મા મુક્ત થાય છે. આ કારણે દ્રાવણનું તાપમાન વધે છે. વિકલ્પ A અસત્ય છે કારણ કે દ્રાવ્યતા ઉચ્ચ હોવું ઉષ્મા મુક્ત થવાનું કારણ નથી. વિકલ્પ C અને D અસત્ય છે કારણ કે હાઇડ્રોજન બંધ બનવાને લીધે ઉષ્મા શોષાય નહીં, અને દ્રાવ્યતા નીચી હોવું પણ ઉષ્મા શોષવાનું કારણ નથી.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયું દ્રાવ્ય પદાર્થ પાણીમાં ઓગળતી વખતે દ્રાવણની વિસરણ પટ્ટી (colligative property) પર અસર કરતું નથી?", "opts": ["ગ્લુકોઝ (C₆H₁₂O₆)", "સોડિયમ ક્લોરાઇડ (NaCl)", "યુરિયા (NH₂CONH₂)", "બેન્ઝીન (C₆H₆)"], "ans": 3, "exp": "બેન્ઝીન (C₆H₆) એક અપોલર દ્રાવ્ય પદાર્થ છે અને પાણીમાં ઓગળતું નથી, જેથી તે દ્રાવણની વિસરણ પટ્ટી (colligative property) પર અસર કરતું નથી. ગ્લુકોઝ, સોડિયમ ક્લોરાઇડ, અને યુરિયા પાણીમાં ઓગળે છે અને વિસરણ પટ્ટી પર અસર કરે છે.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની સાંદ્રતા 20% (w/v) છે. જ્યારે દ્રાવણને 50°C તાપમાને ગરમ કરવામાં આવે છે, ત્યારે દ્રાવ્ય પદાર્થની દ્રાવ્યતા 25% (w/v) થાય છે. આ સ્થિતિમાં દ્રાવણનું વર્ણન કયું સાચું છે?", "opts": ["દ્રાવણ અસંતૃપ્ત છે.", "દ્રાવણ સંતૃપ્ત છે.", "દ્રાવણ અતિસંતૃપ્ત છે.", "દ્રાવણ પૂર્ણપણે અદ્રાવ્ય છે."], "ans": 2, "exp": "જ્યારે દ્રાવણની સાંદ્રતા (20%) દ્રાવ્યતાથી (25%) ઓછી હોય છે, ત્યારે દ્રાવણ અસંતૃપ્ત હોય છે. પરંતુ જ્યારે તાપમાન વધારવાથી દ્રાવ્યતા વધે છે અને સાંદ્રતા દ્રાવ્યતાથી ઓછી રહે છે, ત્યારે દ્રાવણ અતિસંતૃપ્ત બને છે. વિકલ્પ A અને B અસત્ય છે કારણ કે દ્રાવણ અસંતૃપ્ત અથવા સંતૃપ્ત નથી. વિકલ્પ D અસત્ય છે કારણ કે દ્રાવ્ય પદાર્થ પૂર્ણપણે અદ્રાવ્ય નથી.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયું દ્રાવ્ય પદાર્થ પાણીમાં ઓગળતી વખતે આયનિકરણ (ionization) થતું નથી?", "opts": ["સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)", "એસિટિક એસિડ (CH₃COOH)", "ગ્લુકોઝ (C₆H₁₂O₆)", "કેલ્શિયમ ક્લોરાઇડ (CaCl₂)"], "ans": 2, "exp": "ગ્લુકોઝ (C₆H₁₂O₆) એક કોવેલન્ટ યોગિક છે અને પાણીમાં ઓગળતી વખતે આયનિકરણ થતું નથી. સોડિયમ હાઇડ્રોક્સાઇડ, એસિટિક એસિડ, અને કેલ્શિયમ ક્લોરાઇડ પાણીમાં ઓગળતી વખતે આયનિકરણ થાય છે.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે. નીચેનામાંથી કયું દ્રાવ્ય પદાર્થ આ વર્તણૂક દર્શાવે છે?", "opts": ["પોટેશિયમ નાઇટ્રેટ (KNO₃)", "સોડિયમ ક્લોરાઇડ (NaCl)", "કેલ્શિયમ હાઇડ્રોક્સાઇડ (Ca(OH)₂)", "ગ્લુકોઝ (C₆H₁₂O₆)"], "ans": 2, "exp": "કેલ્શિયમ હાઇડ્રોક્સાઇડ (Ca(OH)₂) ની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે. પોટેશિયમ નાઇટ્રેટ, સોડિયમ ક્લોરાઇડ, અને ગ્લુકોઝની દ્રાવ્યતા તાપમાન વધારવાથી વધે છે.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "જ્યારે એમોનિયમ ક્લોરાઇડ (NH4Cl) ને પાણીમાં ઓગાળવામાં આવે છે, ત્યારે દ્રાવણનું તાપમાન ઘટે છે. આ ઘટનાનું કારણ નીચેનામાંથી કયું છે?", "opts": ["એમોનિયમ ક્લોરાઇડનું ઓગળવું ઉષ્માશોષી (endothermic) પ્રક્રિયા છે, જેમાં દ્રાવ્ય પદાર્થ દ્રાવણમાંથી ઉષ્મા શોષી લે છે.", "એમોનિયમ ક્લોરાઇડનું ઓગળવું ઉષ્માઉત્સર્જી (exothermic) પ્રક્રિયા છે, જેમાં દ્રાવ્ય પદાર્થ દ્રાવણમાં ઉષ્મા મુક્ત કરે છે.", "પાણીનું વરાળીકરણ તાપમાન ઘટે છે, જેથી દ્રાવણનું તાપમાન ઘટે છે.", "એમોનિયમ ક્લોરાઇડના આયનો પાણી સાથે હાઇડ્રોજન બંધ બનાવે છે, જેથી ઉષ્મા મુક્ત થાય છે."], "ans": 0, "exp": "એમોનિયમ ક્લોરાઇડ (NH4Cl) નું ઓગળવું ઉષ્માશોષી પ્રક્રિયા છે, જેમાં દ્રાવ્ય પદાર્થ દ્રાવણમાંથી ઉષ્મા શોષી લે છે, જેથી દ્રાવણનું તાપમાન ઘટે છે. બાકીના વિકલ્પો ખોટા છે: B) એમોનિયમ ક્લોરાઇડનું ઓગળવું ઉષ્માઉત્સર્જી નથી, C) પાણીનું વરાળીકરણ તાપમાન ઘટવાનું કારણ નથી, અને D) હાઇડ્રોજન બંધ બનવાને કારણે ઉષ્મા મુક્ત થતી નથી.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "જ્યારે એક દ્રાવણમાં દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["દ્રાવ્ય પદાર્થ ઉષ્માશોષી (endothermic) રીતે ઓગળે છે.", "દ્રાવ્ય પદાર્થ ઉષ્માઉત્સર્જી (exothermic) રીતે ઓગળે છે.", "દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન પર આધાર રાખતી નથી.", "દ્રાવ્ય પદાર્થ પાણીમાં અદ્રાવ્ય છે."], "ans": 1, "exp": "જ્યારે દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે, ત્યારે તે ઉષ્માઉત્સર્જી (exothermic) રીતે ઓગળે છે. બાકીના વિકલ્પો ખોટા છે: A) ઉષ્માશોષી રીતે ઓગળતાં દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી વધે છે. C) દ્રાવ્યતા તાપમાન પર આધાર રાખે છે. D) દ્રાવ્ય પદાર્થ પાણીમાં અદ્રાવ્ય નથી, પરંતુ તેની દ્રાવ્યતા તાપમાન પર આધાર રાખે છે.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની સાંદ્રતા 10% (w/v) છે. જો દ્રાવણને 100°C તાપમાને ગરમ કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["દ્રાવ્ય પદાર્થની દ્રાવ્યતા વધશે, જો દ્રાવ્ય પદાર્થ ઉષ્માશોષી (endothermic) રીતે ઓગળે છે.", "દ્રાવ્ય પદાર્થની દ્રાવ્યતા ઘટશે, જો દ્રાવ્ય પદાર્થ ઉષ્માઉત્સર્જી (exothermic) રીતે ઓગળે છે.", "દ્રાવ્ય પદાર્થની દ્રાવ્યતા બદલાશે નહીં, કારણ કે સાંદ્રતા 10% છે.", "દ્રાવ્ય પદાર્થ પાણીમાં અદ્રાવ્ય બનશે."], "ans": 0, "exp": "જો દ્રાવ્ય પદાર્થ ઉષ્માશોષી (endothermic) રીતે ઓગળે છે, તો તાપમાન વધારવાથી તેની દ્રાવ્યતા વધશે. બાકીના વિકલ્પો ખોટા છે: B) ઉષ્માઉત્સર્જી (exothermic) રીતે ઓગળતાં દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધારવાથી ઘટશે, પરંતુ પ્રશ્નમાં દ્રાવ્ય પદાર્થની પ્રકૃતિ ઉલ્લેખાયેલ નથી. C) દ્રાવ્યતા તાપમાન પર આધાર રાખે છે, સાંદ્રતાને લગતું નથી. D) દ્રાવ્ય પદાર્થ અદ્રાવ્ય બનશે નહીં, પરંતુ તેની દ્રાવ્યતા બદલાશે.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "જ્યારે કોઈ દ્રાવ્ય પદાર્થ પાણીમાં ઓગળે છે ત્યારે તેના દ્રાવણની દ્રાવ્યતા પર નીચેનામાંથી કયા પરિબળનો પ્રભાવ સૌથી ઓછો હોય છે?", "opts": ["દ્રાવકનું પ્રકૃતિ (પોલર અથવા અપોલર)", "દ્રાવ્ય પદાર્થનું આણ્વીય વજન", "દ્રાવણનું તાપમાન", "દ્રાવ્ય પદાર્થની સ્ફટિકીય રચના"], "ans": 1, "exp": "દ્રાવ્યતાનો સૌથી ઓછો પ્રભાવ દ્રાવ્ય પદાર્થના આણ્વીય વજન પર હોય છે. દ્રાવકનું પ્રકૃતિ (A) દ્રાવ્યતાને મહત્વપૂર્ણ રીતે અસર કરે છે કારણ કે પોલર દ્રાવ્ય પદાર્થો પોલર દ્રાવકમાં અને અપોલર દ્રાવ્ય પદાર્થો અપોલર દ્રાવકમાં સરળતાથી ઓગળે છે. તાપમાન (C) પણ દ્રાવ્યતાને અસર કરે છે, ખાસ કરીને ઘન દ્રાવ્ય પદાર્થો માટે. દ્રાવ્ય પદાર્થની સ્ફટિકીય રચના (D) પણ દ્રાવ્યતાને અસર કરે છે કારણ કે સ્ફટિકીય રચના ધરાવતા પદાર્થો ઓગળવા માટે વધુ ઊર્જાની જરૂર પડે છે. પરંતુ આણ્વીય વજન (B) દ્રાવ્યતાનો સીધો સંબંધ ધરાવતું નથી, જેથી તેનો પ્રભાવ સૌથી ઓછો હોય છે.", "ref": "Std 12 - અભ્યાસક્રમ 1: રસાયણવિજ્ઞાન - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક વિદ્યાર્થીએ 50 ગ્રામ પાણીમાં 15 ગ્રામ કોઈ અજ્ઞાત દ્રાવ્ય પદાર્થ ઉમેરીને સંતૃપ્ત દ્રાવણ બનાવ્યું. ત્યારબાદ તેણે આ દ્રાવણને ગરમ કરીને તાપમાન 20°C થી 60°C સુધી વધાર્યું. જો 60°C તાપમાને દ્રાવણમાં વધુ 12 ગ્રામ દ્રાવ્ય પદાર્થ ઉમેર્યા પછી ફરીથી સંતૃપ્ત બને, તો નીચેનામાંથી કયું વિધાન આ દ્રાવ્ય પદાર્થ માટે સાચું છે? (નોંધ: દ્રાવકનું બાષ્પીભવન અવગણો)", "opts": ["આ દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધવાની સાથે વધે છે અને તે ઉષ્મા શોષક પ્રક્રિયા દર્શાવે છે", "આ દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધવાની સાથે ઘટે છે અને તે ઉષ્મા મુક્ત કરતી પ્રક્રિયા દર્શાવે છે", "આ દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધવાની સાથે વધે છે અને તે ઉષ્મા મુક્ત કરતી પ્રક્રિયા દર્શાવે છે", "આ દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધવાની સાથે ઘટે છે અને તે ઉષ્મા શોષક પ્રક્રિયા દર્શાવે છે"], "ans": 0, "exp": "20°C તાપમાને 50 ગ્રામ પાણીમાં 15 ગ્રામ દ્રાવ્ય પદાર્થ ઓગળે છે, જ્યારે 60°C તાપમાને 50 ગ્રામ પાણીમાં 15 + 12 = 27 ગ્રામ દ્રાવ્ય પદાર્થ ઓગળે છે. આ દર્શાવે છે કે તાપમાન વધવાની સાથે દ્રાવ્યતા વધે છે. જ્યારે દ્રાવ્ય પદાર્થની દ્રાવ્યતા તાપમાન વધવાની સાથે વધે છે, ત્યારે તે ઉષ્મા શોષક પ્રક્રિયા (endothermic process) હોય છે કારણ કે દ્રાવણને ગરમ કરવાથી વધુ દ્રાવ્ય પદાર્થ ઓગળે છે. વિકલ્પ B અને D ખોટા છે કારણ કે તેમાં દ્રાવ્યતા ઘટવાની વાત છે, જે આ કિસ્સામાં સાચી નથી. વિકલ્પ C ખોટો છે કારણ કે ઉષ્મા મુક્ત કરતી પ્રક્રિયામાં તાપમાન વધતાં દ્રાવ્યતા ઘટે છે.", "ref": "Std 11 - પ્રકરણ 7: રાસાયણિક સંતુલન અને દ્રાવણો", "ch": ""}, {"q": "જ્યારે ગ્લુકોઝ અને યુરિયા બંને પાણીમાં ઓગાળવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["ગ્લુકોઝની દ્રાવ્યતા યુરિયા કરતાં ઓછી હોય છે કારણ કે ગ્લુકોઝ હાઇડ્રોજન બંધો બનાવે છે", "યુરિયા ગ્લુકોઝ કરતાં વધુ દ્રાવ્ય હોય છે કારણ કે યુરિયા પોલર અણુ છે", "બંનેની દ્રાવ્યતા સરખી હોય છે કારણ કે બંને કાર્બન, હાઇડ્રોજન, ઓક્સિજન અને નાઇટ્રોજન ધરાવે છે", "ગ્લુકોઝની દ્રાવ્યતા યુરિયા કરતાં વધુ હોય છે કારણ કે ગ્લુકોઝમાં હાઇડ્રોક્સિલ સમૂહો હોય છે"], "ans": 3, "exp": "ગ્લુકોઝમાં હાઇડ્રોક્સિલ સમૂહો (-OH) હોય છે, જે પાણી સાથે હાઇડ્રોજન બંધો બનાવી શકે છે, જેથી તેની દ્રાવ્યતા વધુ હોય છે. યુરિયા પણ પોલર છે, પરંતુ ગ્લુકોઝ કરતાં ઓછા હાઇડ્રોજન બંધો બનાવે છે. વિકલ્પ A ખોટો છે કારણ કે ગ્લુકોઝની દ્રાવ્યતા યુરિયા કરતાં વધુ હોય છે. વિકલ્પ B ખોટો છે કારણ કે યુરિયા ગ્લુકોઝ કરતાં ઓછું દ્રાવ્ય હોય છે. વિકલ્પ C ખોટો છે કારણ કે બંનેની રચના સરખી નથી અને દ્રાવ્યતા પણ સરખી નથી.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં દ્રાવ્ય પદાર્થની સાંદ્રતા 25% (w/v) છે. જો દ્રાવણને 100°C તાપમાને ગરમ કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["દ્રાવ્ય પદાર્થની દ્રાવ્યતા ઘટશે", "દ્રાવ્ય પદાર્થની દ્રાવ્યતા વધશે", "દ્રાવ્ય પદાર્થની દ્રાવ્યતા બદલાશે નહીં", "દ્રાવ્ય પદાર્થ પાણીમાંથી અલગ થશે"], "ans": 1, "exp": "અમુક દ્રાવ્ય પદાર્થોની દ્રાવ્યતા તાપમાન વધારવાથી વધે છે, જેમ કે સોડિયમ ક્લોરાઇડ (NaCl) અથવા પોટેશિયમ નાઇટ્રેટ (KNO3). વિકલ્પ A ખોટો છે કારણ કે દ્રાવ્યતા ઘટશે નહીં. વિકલ્પ C ખોટો છે કારણ કે દ્રાવ્યતા બદલાશે. વિકલ્પ D ખોટો છે કારણ કે દ્રાવ્ય પદાર્થ પાણીમાંથી અલગ થશે નહીં.", "ref": "Std 12 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "જ્યારે સલ્ફર ડાયોક્સાઇડ (SO₂) વાયુને પાણીમાં ઓગાળવામાં આવે છે, ત્યારે દ્રાવ્યતા પર નીચેનામાંથી કયો પરિબળ સૌથી વધુ અસર કરે છે?", "opts": ["દબાણ વધારવું", "તાપમાન ઘટાડવું", "દ્રાવણને હલાવવું", "દ્રાવણમાં ઇલેક્ટ્રોલાઇટ ઉમેરવું"], "ans": 1, "exp": "SO₂ વાયુ પાણીમાં ઓગળતી વખતે ઉષ્મા મુક્ત કરે છે (ઉષ્માક્ષેપી પ્રક્રિયા), જેથી તાપમાન ઘટાડવાથી દ્રાવ્યતા વધે છે (લે ચેટેલિયરનો સિદ્ધાંત). દબાણ વધારવાથી પણ દ્રાવ્યતા થોડી વધે, પરંતુ તાપમાનની અસર વધુ પ્રબળ હોય છે. હલાવવું અને ઇલેક્ટ્રોલાઇટ ઉમેરવું દ્રાવ્યતાએ સીધી અસર કરતું નથી.", "ref": "Std 11 - અધ્યાય 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "જ્યારે એસિટોન (CH₃COCH₃) અને ક્લોરોફોર્મ (CHCl₃) ના મિશ્રણને પાણીમાં ઓગાળવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["એસિટોન પાણીમાં સરળતાથી ઓગળે છે કારણ કે તે ધ્રુવીય અણુ છે અને હાઇડ્રોજન બંધ રચે છે.", "ક્લોરોફોર્મ પાણીમાં સરળતાથી ઓગળે છે કારણ કે તે અધ્રુવીય અણુ છે અને પાણી સાથે હાઇડ્રોજન બંધ રચે છે.", "એસિટોન અને ક્લોરોફોર્મ બંને પાણીમાં સરખી માત્રામાં ઓગળે છે કારણ કે બંને ધ્રુવીય અણુઓ છે.", "ક્લોરોફોર્મ પાણીમાં ઓગળતું નથી કારણ કે તે અધ્રુવીય છે અને પાણી સાથે હાઇડ્રોજન બંધ રચી શકતું નથી."], "ans": 0, "exp": "એસિટોન (CH₃COCH₃) ધ્રુવીય અણુ છે અને તે પાણી સાથે હાઇડ્રોજન બંધ રચી શકે છે, જેના કારણે તે પાણીમાં સરળતાથી ઓગળે છે. ક્લોરોફોર્મ (CHCl₃) અધ્રુવીય અણુ છે અને પાણી સાથે હાઇડ્રોજન બંધ રચી શકતું નથી, જેના કારણે તે પાણીમાં ઓગળતું નથી. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે ક્લોરોફોર્મ અધ્રુવીય છે અને હાઇડ્રોજન બંધ રચી શકતું નથી. વિકલ્પ C ખોટો છે કારણ કે ક્લોરોફોર્મ પાણીમાં ઓગળતું નથી. વિકલ્પ D ખોટો છે કારણ કે એસિટોન પાણીમાં ઓગળે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણ", "ch": ""}, {"q": "જ્યારે કોઈ દ્રાવ્ય પદાર્થને પાણીમાં ઓગાળવામાં આવે છે અને તે દ્રાવણની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે, તો નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["આ દ્રાવ્ય પદાર્થ ગેસ અવસ્થામાં હોઈ શકે છે", "આ દ્રાવ્ય પદાર્થની ઓગળવાની પ્રક્રિયા ઉષ્માશોષક (endothermic) હોઈ શકે છે", "આ દ્રાવ્ય પદાર્થની ઓગળવાની પ્રક્રિયા ઉષ્માક્ષેપક (exothermic) હોઈ શકે છે", "આ દ્રાવ્ય પદાર્થ પાણી સાથે હાઇડ્રોજન બંધ રચી શકે છે"], "ans": 1, "exp": "તાપમાન વધારવાથી દ્રાવ્યતા ઘટે તે દર્શાવે છે કે ઓગળવાની પ્રક્રિયા ઉષ્માક્ષેપક (exothermic) છે, કારણ કે લેચાટેલિયરના સિદ્ધાંત મુજબ તાપમાન વધારવાથી ઉષ્માક્ષેપક પ્રક્રિયાઓની દ્રાવ્યતા ઘટે છે. ગેસ દ્રાવ્ય પદાર્થોની દ્રાવ્યતા તાપમાન વધારવાથી ઘટે છે (A સાચું). ઉષ્માક્ષેપક પ્રક્રિયા હોવાથી (C સાચું). પાણી સાથે હાઇડ્રોજન બંધ રચવું એ દ્રાવ્યતાને અસર કરે છે (D સાચું). પરંતુ ઉષ્માશોષક પ્રક્રિયામાં તાપમાન વધારવાથી દ્રાવ્યતા વધે છે, તેથી B ખોટું છે.", "ref": "Std 11 - Chapter 2: દ્રાવણો (Solutions)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
