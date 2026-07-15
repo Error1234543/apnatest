@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે ક્લોરિન ગેસનો સંપર્ક પાણી સાથે થાય છે ત્યારે તેનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ મૂલ્યમાં શું ફેરફાર થાય છે?", "opts": ["પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવમાં વધારો થાય છે કારણ કે Cl₂ + H₂O → HCl + HOCl અભિક્રિયામાં Cl₂ ઓક્સીડેશન અવસ્થામાં છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવમાં ઘટાડો થાય છે કારણ કે પાણીના વાતાવરણમાં Cl₂નું રિડક્શન પોટેન્શિયલ ઘટે છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ અચળ રહે છે કારણ કે પાણી એ નિષ્ક્રિય માધ્યમ છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ શૂન્ય થઈ જાય છે કારણ કે પાણી સાથેની અભિક્રિયા પૂર્ણપણે ઉલટી દિશામાં વહન કરે છે."], "ans": 1, "exp": "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) એ સંકેતિત અવસ્થામાં ઇલેક્ટ્રોડની ક્ષમતા છે. ક્લોરિન ગેસ (Cl₂) પાણી સાથે પ્રક્રિયા કરે છે અને HOCl બનાવે છે, જેના કારણે Cl₂નું રિડક્શન પોટેન્શિયલ ઘટે છે. આથી, પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવમાં ઘટાડો થાય છે. વિકલ્પ A ખોટો છે કારણ કે Cl₂ ઓક્સીડેશન અવસ્થામાં નથી, પરંતુ રિડક્શન પામે છે. વિકલ્પ C ખોટો છે કારણ કે પાણી નિષ્ક્રિય નથી, અને વિકલ્પ D ખોટો છે કારણ કે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ શૂન્ય થતો નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયો ઇલેક્ટ્રોડ પ્રમાણભૂત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) સાથે સરખામણી કરતાં સૌથી ઓછો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ ધરાવે છે?", "opts": ["Li⁺/Li", "Na⁺/Na", "K⁺/K", "Mg²⁺/Mg"], "ans": 0, "exp": "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની ક્રમમાં, Li⁺/Li ઇલેક્ટ્રોડનો વિભવ સૌથી નીચો છે (-3.04 V), જે SHE કરતાં સૌથી ઓછો છે. Na⁺/Na (-2.71 V), K⁺/K (-2.93 V), અને Mg²⁺/Mg (-2.37 V) એ Li⁺/Li કરતાં ઉચ્ચ વિભવ ધરાવે છે. આથી, Li⁺/Li સૌથી ઓછો વિભવ ધરાવે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર", "ch": ""}, {"q": "જ્યારે કોપર ઇલેક્ટ્રોડને કોપર સલ્ફેટના જલીય દ્રાવણમાં મૂકવામાં આવે છે, ત્યારે તેનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ કયા પરિબળ પર આધાર રાખે છે?", "opts": ["દ્રાવણની સાંદ્રતા અને તાપમાન", "ઇલેક્ટ્રોડનું કદ અને આકાર", "દ્રાવણનો રંગ અને પારદર્શિતા", "દ્રાવણમાં ઓક્સીજનની હાજરી"], "ans": 0, "exp": "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) એ સાંદ્રતા અને તાપમાન પર આધાર રાખે છે, કારણ કે નર્નસ્ટ સમીકરણ (E = E° - (RT/nF) ln Q)માં આ પરિબળોનો સમાવેશ થાય છે. ઇલેક્ટ્રોડનું કદ અને આકાર (વિકલ્પ B), દ્રાવણનો રંગ અને પારદર્શિતા (વિકલ્પ C), અને ઓક્સીજનની હાજરી (વિકલ્પ D) એ પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ પર અસર કરતાં નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયો ઇલેક્ટ્રોડ પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની દ્રષ્ટિએ સૌથી સ્થિર છે?", "opts": ["કેલોમેલ ઇલેક્ટ્રોડ", "સિલ્વર-સિલ્વર ક્લોરાઇડ ઇલેક્ટ્રોડ", "હાઇડ્રોજન ઇલેક્ટ્રોડ", "કોપર-કોપર સલ્ફેટ ઇલેક્ટ્રોડ"], "ans": 0, "exp": "કેલોમેલ ઇલેક્ટ્રોડ (Hg/Hg₂Cl₂) એ પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની દ્રષ્ટિએ સૌથી સ્થિર છે કારણ કે તેનો વિભવ તાપમાન અને સાંદ્રતામાં થતાં ફેરફારો પ્રત્યે ઓછો સંવેદનશીલ હોય છે. સિલ્વર-સિલ્વર ક્લોરાઇડ ઇલેક્ટ્રોડ (વિકલ્પ B) પણ સ્થિર છે, પરંતુ કેલોમેલ ઇલેક્ટ્રોડ કરતાં ઓછો. હાઇડ્રોજન ઇલેક્ટ્રોડ (વિકલ્પ C) અને કોપર-કોપર સલ્ફેટ ઇલેક્ટ્રોડ (વિકલ્પ D) એ ઓછા સ્થિર છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર", "ch": ""}, {"q": "જ્યારે કોઈ ઇલેક્ટ્રોડની અભિક્રિયા ઉલટી દિશામાં વહન કરે છે, ત્યારે તેના પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ પર શું અસર થાય છે?", "opts": ["પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવનો ચિહ્ન બદલાય છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવનું મૂલ્ય શૂન્ય થઈ જાય છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવનું મૂલ્ય દોઢ ગણું થાય છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ પર કોઈ અસર થતી નથી."], "ans": 0, "exp": "જ્યારે અભિક્રિયા ઉલટી દિશામાં વહન કરે છે, ત્યારે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવનો ચિહ્ન બદલાય છે. ઉદાહરણ તરીકે, જો મૂળ અભિક્રિયા રિડક્શન છે (E° ધન), તો ઉલટી અભિક્રિયા ઓક્સીડેશન હશે (E° ઋણ). વિકલ્પ B, C, અને D ખોટા છે કારણ કે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ શૂન્ય થતો નથી, દોઢ ગણું થતો નથી, અને તેના પર અસર થાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયા ઇલેક્ટ્રોડ વિભવ યુગ્મ માટે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત સૌથી વધુ ધન હશે?", "opts": ["Zn²⁺/Zn", "Cu²⁺/Cu", "Ag⁺/Ag", "Mg²⁺/Mg"], "ans": 2, "exp": "Ag⁺/Ag ઇલેક્ટ્રોડ યુગ્મનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E° = +0.80 V) સૌથી વધુ ધન છે. Cu²⁺/Cu નો E° = +0.34 V, Zn²⁺/Zn નો E° = -0.76 V, અને Mg²⁺/Mg નો E° = -2.37 V છે. ધન કિંમત જેટલી વધુ હોય, ઇલેક્ટ્રોડ યુગ્મ એટલું વધુ ઓક્સિડાઇઝિંગ હોય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "જ્યારે ક્લોરાઇડ આયન (Cl⁻) નું ઓક્સિડેશન થાય છે ત્યારે તેનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ કયા સૂત્ર દ્વારા ગણી શકાય છે?", "opts": ["E°(Cl₂/Cl⁻) = -E°(Cl⁻/Cl₂)", "E°(Cl₂/Cl⁻) = E°(Cl⁻/Cl₂)", "E°(Cl₂/Cl⁻) = 2 × E°(Cl⁻/Cl₂)", "E°(Cl₂/Cl⁻) = 0.5 × E°(Cl⁻/Cl₂)"], "ans": 0, "exp": "ક્લોરાઇડ આયન (Cl⁻) નું ઓક્સિડેશન થાય ત્યારે તેનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ, રિડક્શન વિભવના વિરુદ્ધ ચિહ્નવાળો હોય છે. એટલે કે E°(Cl₂/Cl⁻) = -E°(Cl⁻/Cl₂). બાકીના વિકલ્પો સૂત્રની ગણિતીય રચના સાથે સુસંગત નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "જ્યારે કોઈ ગેલ્વેનિક કોષમાં, એનોડ પર Zn નું ઓક્સિડેશન અને કેથોડ પર Cu નું રિડક્શન થાય છે, ત્યારે કોષનો પ્રમાણભૂત કોષ વિભવ (E°cell) કયા સૂત્ર દ્વારા ગણી શકાય છે?", "opts": ["E°cell = E°(કેથોડ) - E°(એનોડ)", "E°cell = E°(એનોડ) + E°(કેથોડ)", "E°cell = E°(એનોડ) - E°(કેથોડ)", "E°cell = E°(કેથોડ) + E°(એનોડ)"], "ans": 0, "exp": "ગેલ્વેનિક કોષનો પ્રમાણભૂત કોષ વિભવ (E°cell) ની ગણતરી માટે સૂત્ર E°cell = E°(કેથોડ) - E°(એનોડ) વાપરવામાં આવે છે. અહીં, Zn એનોડ તરીકે અને Cu કેથોડ તરીકે કાર્ય કરે છે. બાકીના વિકલ્પો ગણિતીય રીતે અયોગ્ય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયા ઇલેક્ટ્રોડ યુગ્મ માટે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત શૂન્ય છે?", "opts": ["H⁺/H₂", "Cl₂/Cl⁻", "O₂/H₂O", "Fe³⁺/Fe²⁺"], "ans": 0, "exp": "પ્રમાણભૂત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) નો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) શૂન્ય (0 V) ગણવામાં આવે છે. આથી H⁺/H₂ યુગ્મનો E° = 0 V છે. બાકીના યુગ્મોના E° મૂલ્યો અલગ છે: Cl₂/Cl⁻ (E° = +1.36 V), O₂/H₂O (E° = +1.23 V), અને Fe³⁺/Fe²⁺ (E° = +0.77 V).", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "એક વિદ્યાર્થીએ Zn²⁺|Zn અને Cu²⁺|Cu ઇલેક્ટ્રોડ યુગ્મોનો ઉપયોગ કરીને ગેલ્વેનિક કોષ બનાવ્યો. પ્રમાણભૂત પરિસ્થિતિમાં કોષનો emf 1.10 V માપવામાં આવ્યો. જો હવે Cu²⁺|Cu ઇલેક્ટ્રોડને Ag⁺|Ag ઇલેક્ટ્રોડ વડે બદલવામાં આવે અને પ્રમાણભૂત પરિસ્થિતિઓ જાળવી રાખવામાં આવે, તો નવો કોષ emf કેટલો હશે? (Ag⁺|Ag માટે E° = +0.80 V, Zn²⁺|Zn માટે E° = −0.76 V)", "opts": ["0.04 V", "1.56 V", "2.36 V", "0.34 V"], "ans": 1, "exp": "પ્રથમ કોષ માટે: E°cell = E°Cu²⁺|Cu − E°Zn²⁺|Zn ⇒ 1.10 V = E°Cu²⁺|Cu − (−0.76 V) ⇒ E°Cu²⁺|Cu = +0.34 V. હવે Ag⁺|Ag સાથે નવો કોષ: E°cell = E°Ag⁺|Ag − E°Zn²⁺|Zn = 0.80 V − (−0.76 V) = 1.56 V. વિકલ્પ A ખોટો છે કારણ કે તે માત્ર બે ધાતુઓના E° નો તફાવત દર્શાવે છે. વિકલ્પ C ખોટો છે કારણ કે તેમાં બંને ધાતુઓના E° નો સરવાળો કરવામાં આવ્યો છે. વિકલ્પ D ખોટો છે કારણ કે તે Cu²⁺|Cu નો E° મૂલ્ય દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) માટે ખોટું છે?", "opts": ["પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની કિંમત તાપમાન પર આધારિત નથી.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની કિંમત દ્રાવણની સાંદ્રતા પર આધારિત છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની કિંમત ઇલેક્ટ્રોડની પ્રકૃતિ પર આધારિત છે.", "પ્રમાણભૂત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) નો E° મૂલ્ય શૂન્ય ગણવામાં આવે છે."], "ans": 0, "exp": "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત તાપમાન પર આધારિત હોય છે, કારણ કે તે નર્ન્સ્ટ સમીકરણમાં તાપમાનના પરિબળને ધ્યાનમાં લે છે. તેથી વિકલ્પ A ખોટું છે. વિકલ્પ B ખોટું નથી કારણ કે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવની વ્યાખ્યા 1 M સાંદ્રતા પર આધારિત છે, પરંતુ સામાન્ય રીતે તે સાંદ્રતા પર આધારિત હોય છે. વિકલ્પ C અને D સાચાં છે કારણ કે E° ઇલેક્ટ્રોડની પ્રકૃતિ પર આધારિત છે અને SHE નો E° શૂન્ય ગણવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ Ag⁺|Ag અને Fe³⁺|Fe²⁺ ઇલેક્ટ્રોડ યુગ્મોનો ઉપયોગ કરીને ગેલ્વેનિક કોષ બનાવ્યો. જો Ag⁺|Ag નો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ +0.80 V અને Fe³⁺|Fe²⁺ નો +0.77 V હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["Ag⁺|Ag ઇલેક્ટ્રોડ એનોડ તરીકે વર્તશે.", "Fe³⁺|Fe²⁺ ઇલેક્ટ્રોડ કેથોડ તરીકે વર્તશે.", "આ કોષનો પ્રમાણભૂત કોષ વિભવ (E°cell) 0.03 V હશે.", "આ કોષમાં Ag⁺ નું રિડક્શન થશે નહીં."], "ans": 2, "exp": "પ્રમાણભૂત કોષ વિભવ (E°cell) = E°cathode - E°anode. અહીં Ag⁺|Ag નો E° વધારે હોવાથી તે કેથોડ તરીકે અને Fe³⁺|Fe²⁺ એનોડ તરીકે વર્તશે. તેથી E°cell = 0.80 V - 0.77 V = 0.03 V. વિકલ્પ A ખોટું છે કારણ કે Ag⁺|Ag કેથોડ તરીકે વર્તશે. વિકલ્પ B ખોટું છે કારણ કે Fe³⁺|Fe²⁺ એનોડ તરીકે વર્તશે. વિકલ્પ D ખોટું છે કારણ કે Ag⁺ નું રિડક્શન થશે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત ઋણ હશે?", "opts": ["જ્યારે ધાતુ તેના આયનોથી વધુ સક્રિય હોય.", "જ્યારે ધાતુ તેના આયનોથી ઓછી સક્રિય હોય.", "જ્યારે ધાતુ હાઇડ્રોજન કરતાં ઓછી સક્રિય હોય.", "જ્યારે ધાતુ હાઇડ્રોજન સાથે પ્રતિક્રિયા ન કરતી હોય."], "ans": 0, "exp": "જ્યારે ધાતુ તેના આયનોથી વધુ સક્રિય હોય ત્યારે તેનું ઓક્સિડેશન થવાની વૃત્તિ વધારે હોય છે, જેના કારણે તેનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ઋણ હોય છે. વિકલ્પ B, C અને D ખોટાં છે કારણ કે તેમાં ધાતુ ઓછી સક્રિય હોય છે અથવા હાઇડ્રોજન સાથે પ્રતિક્રિયા ન કરતી હોય છે, જેના કારણે E° ધન અથવા શૂન્ય હોઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ Zn|Zn²⁺ (E° = -0.76 V) અને Cu|Cu²⁺ (E° = +0.34 V) ઇલેક્ટ્રોડ યુગ્મોનો ઉપયોગ કરીને ગેલ્વેનિક કોષ બનાવ્યો. જો Zn²⁺ ની સાંદ્રતા વધારવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું હશે?", "opts": ["કોષનો વિભવ (Ecell) વધશે.", "કોષનો વિભવ (Ecell) ઘટશે.", "કોષનો વિભવ (Ecell) અચળ રહેશે.", "Zn ઇલેક્ટ્રોડ કેથોડ તરીકે વર્તશે."], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, Ecell = E°cell - (RT/nF) ln(Q). જ્યારે Zn²⁺ ની સાંદ્રતા વધે છે, ત્યારે Q નું મૂલ્ય વધે છે, જેના કારણે Ecell ઘટે છે. વિકલ્પ A ખોટું છે કારણ કે Ecell ઘટશે. વિકલ્પ C ખોટું છે કારણ કે Ecell અચળ નહીં રહે. વિકલ્પ D ખોટું છે કારણ કે Zn ઇલેક્ટ્રોડ એનોડ તરીકે વર્તે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની વ્યાખ્યા માટે ખોટું છે?", "opts": ["પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ માપવા માટે દ્રાવણની સાંદ્રતા 1 M હોવી જોઈએ.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ માપવા માટે વાયુનું દબાણ 1 atm હોવું જોઈએ.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ માપવા માટે તાપમાન 25°C હોવું જોઈએ.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ માપવા માટે ઇલેક્ટ્રોડની સપાટીનું ક્ષેત્રફળ નિશ્ચિત હોવું જોઈએ."], "ans": 3, "exp": "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની વ્યાખ્યા માટે દ્રાવણની સાંદ્રતા 1 M, વાયુનું દબાણ 1 atm અને તાપમાન 25°C હોવું જરૂરી છે. ઇલેક્ટ્રોડની સપાટીનું ક્ષેત્રફળ E° ને અસર કરતું નથી, તેથી વિકલ્પ D ખોટું છે. બાકીના વિકલ્પો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "જ્યારે પ્રમાણભૂત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) ને કોઈ અજ્ઞાત ઇલેક્ટ્રોડ સાથે જોડવામાં આવે છે અને કોષ વિભવ +0.76 V મળે છે, તો અજ્ઞાત ઇલેક્ટ્રોડનો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) કયો હશે?", "opts": ["-0.76 V", "+0.76 V", "0 V", "+1.52 V"], "ans": 1, "exp": "SHE નો E° = 0 V હોય છે. જ્યારે કોષ વિભવ (E°_cell) = E°_cathode - E°_anode = +0.76 V મળે છે, ત્યારે અજ્ઞાત ઇલેક્ટ્રોડ કેથોડ તરીકે વર્તે છે અને તેનો E° = +0.76 V હશે. બાકીના વિકલ્પો (A, C, D) ગણિતી રીતે ખોટા છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની દ્રષ્ટિએ ખોટું છે?", "opts": ["પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત તાપમાન અને દબાણ પર આધાર રાખે છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત આયનની સાંદ્રતા 1 M અને ગેસ દબાણ 1 atm હોય ત્યારે માપવામાં આવે છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત હંમેશા ધન જ હોય છે.", "પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત ઇલેક્ટ્રોડ અભિક્રિયાની દિશા પર આધાર રાખે છે."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે, કારણ કે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત ઋણ પણ હોઈ શકે છે (ઉદા. Zn²⁺/Zn નો E° = -0.76 V). બાકીના વિકલ્પો (A, B, D) સાચા છે, કારણ કે E° તાપમાન અને દબાણ પર આધાર રાખે છે, 1 M સાંદ્રતા અને 1 atm દબાણે માપવામાં આવે છે, અને અભિક્રિયાની દિશા પર આધાર રાખે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "જ્યારે નીચેનામાંથી કયા ઇલેક્ટ્રોડ યુગ્મ માટે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત ઋણ હશે?", "opts": ["Cu²⁺ + 2e⁻ → Cu (E° = +0.34 V)", "2H⁺ + 2e⁻ → H₂ (E° = 0 V)", "Mg²⁺ + 2e⁻ → Mg (E° = -2.37 V)", "Ag⁺ + e⁻ → Ag (E° = +0.80 V)"], "ans": 2, "exp": "મેગ્નેશિયમ (Mg²⁺/Mg) નો પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) = -2.37 V છે, જે ઋણ છે. બાકીના વિકલ્પો (A, B, D) ના E° મૂલ્યો ધન અથવા શૂન્ય છે, જેથી તેઓ ખોટા છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયા કિસ્સામાં પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત શૂન્ય હશે?", "opts": ["Cl₂(g) + 2e⁻ → 2Cl⁻", "2H⁺ + 2e⁻ → H₂(g)", "Zn²⁺ + 2e⁻ → Zn", "Fe³⁺ + e⁻ → Fe²⁺"], "ans": 1, "exp": "પ્રમાણભૂત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) ની અભિક્રિયા 2H⁺ + 2e⁻ → H₂(g) માટે E° = 0 V છે. બાકીના વિકલ્પો (A, C, D) ના E° મૂલ્યો ક્રમશ: +1.36 V, -0.76 V, અને +0.77 V છે, જેથી તેઓ ખોટા છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નીચેના પૈકી કયા ઇલેક્ટ્રોડ યુગ્મ માટે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત +0.77 V છે અને તેનો ઉપયોગ ઓક્સિડેશન-રિડક્શન અભિક્રિયાઓમાં થાય છે?", "opts": ["Fe²⁺ | Fe³⁺", "Ag⁺ | Ag", "Zn²⁺ | Zn", "Cl₂ | 2Cl⁻"], "ans": 0, "exp": "Fe²⁺ | Fe³⁺ ઇલેક્ટ્રોડ યુગ્મ માટે પ્રમાણભૂત ઇલેક્ટ્રોડ વિભવ (E°) ની કિંમત +0.77 V છે, કારણ કે Fe³⁺ નું રિડક્શન Fe²⁺ માં થાય છે. Ag⁺ | Ag માટે E° = +0.80 V છે, Zn²⁺ | Zn માટે E° = -0.76 V છે, અને Cl₂ | 2Cl⁻ માટે E° = +1.36 V છે. આમ, Fe²⁺ | Fe³⁺ એ સૌથી યોગ્ય જવાબ છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
