@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અર્ધઆયુષ્ય</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>અર્ધઆયુષ્ય</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">અર્ધઆયુષ્ય</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું પ્રારંભિક દળ 80 ગ્રામ છે. તેનું અર્ધઆયુષ્ય 5 દિવસ છે. 15 દિવસ પછી તેનું દળ કેટલું બાકી રહેશે?", "opts": ["10 ગ્રામ", "20 ગ્રામ", "5 ગ્રામ", "40 ગ્રામ"], "ans": 0, "exp": "15 દિવસ એ 5 દિવસના ત્રણ અર્ધઆયુષ્ય (3 × 5 = 15) છે. દરેક અર્ધઆયુષ્યમાં દળ અડધું થાય છે: 80 → 40 → 20 → 10 ગ્રામ. તેથી 15 દિવસ પછી 10 ગ્રામ બાકી રહેશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અર્ધઆયુષ્યના નિયમનું પાલન કરતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ અને રેડિયોઍક્ટિવતા", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 8 દિવસ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 1600 બેકરેલ હોય, તો 24 દિવસ પછી તેનું કિરણોત્સર્ગ કેટલું હશે?", "opts": ["400 બેકરેલ", "200 બેકરેલ", "100 બેકરેલ", "800 બેકરેલ"], "ans": 1, "exp": "24 દિવસ એ 8 દિવસના ત્રણ અર્ધઆયુષ્ય (3 × 8 = 24) છે. દરેક અર્ધઆયુષ્યમાં કિરણોત્સર્ગ અડધું થાય છે: 1600 → 800 → 400 → 200 બેકરેલ. તેથી 24 દિવસ પછી 200 બેકરેલ રહેશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ યોગ્ય ગણતરી દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ અને રેડિયોઍક્ટિવતા", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ નમૂનામાં 1/16 ભાગ બાકી રહે ત્યાં સુધી કેટલા અર્ધઆયુષ્ય પસાર થયા હશે?", "opts": ["2 અર્ધઆયુષ્ય", "3 અર્ધઆયુષ્ય", "4 અર્ધઆયુષ્ય", "5 અર્ધઆયુષ્ય"], "ans": 2, "exp": "1/16 = (1/2)^4, જેનો અર્થ છે કે 4 અર્ધઆયુષ્ય પસાર થયા છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ યોગ્ય ઘાતાંકીય ઘટાડો દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ અને રેડિયોઍક્ટિવતા", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 3 કલાક છે. જો તેનું પ્રારંભિક દળ 128 ગ્રામ હોય, તો 12 કલાક પછી તેનું દળ કેટલું હશે?", "opts": ["8 ગ્રામ", "4 ગ્રામ", "2 ગ્રામ", "1 ગ્રામ"], "ans": 0, "exp": "12 કલાક એ 3 કલાકના ચાર અર્ધઆયુષ્ય (4 × 3 = 12) છે. દરેક અર્ધઆયુષ્યમાં દળ અડધું થાય છે: 128 → 64 → 32 → 16 → 8 ગ્રામ. તેથી 12 કલાક પછી 8 ગ્રામ બાકી રહેશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ યોગ્ય ગણતરી દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ અને રેડિયોઍક્ટિવતા", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 10 વર્ષ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 3200 કાઉન્ટ પ્રતિ મિનિટ (cpm) હોય, તો 30 વર્ષ પછી તેનું કિરણોત્સર્ગ કેટલું હશે?", "opts": ["800 cpm", "400 cpm", "200 cpm", "100 cpm"], "ans": 1, "exp": "30 વર્ષ એ 10 વર્ષના ત્રણ અર્ધઆયુષ્ય (3 × 10 = 30) છે. દરેક અર્ધઆયુષ્યમાં કિરણોત્સર્ગ અડધું થાય છે: 3200 → 1600 → 800 → 400 cpm. તેથી 30 વર્ષ પછી 400 cpm રહેશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ યોગ્ય ઘાતાંકીય ઘટાડો દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ અને રેડિયોઍક્ટિવતા", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 6 કલાક છે. જો તેનું પ્રારંભિક દળ 200 ગ્રામ હોય, તો 18 કલાક પછી તેના કેટલા ટકા દળનું વિઘટન થયું હશે?", "opts": ["87.5%", "75%", "62.5%", "50%"], "ans": 0, "exp": "18 કલાક એ અર્ધઆયુષ્યના 3 ગણા (6 × 3 = 18) છે. દરેક અર્ધઆયુષ્ય પછી દળ અડધું થાય છે: 200 → 100 → 50 → 25 ગ્રામ. વિઘટન થયેલું દળ = 200 - 25 = 175 ગ્રામ. ટકાવારી = (175/200) × 100 = 87.5%. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અર્ધઆયુષ્યના યોગ્ય ગણતરીના સિદ્ધાંતને અનુસરતા નથી.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 5 વર્ષ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 1200 એકમ હોય, તો 15 વર્ષ પછી તેનું કિરણોત્સર્ગ કેટલું હશે? (નોંધ: કિરણોત્સર્ગ દર દળના સમપ્રમાણમાં છે)", "opts": ["75 એકમ", "150 એકમ", "300 એકમ", "600 એકમ"], "ans": 1, "exp": "15 વર્ષ એ અર્ધઆયુષ્યના 3 ગણા (5 × 3 = 15) છે. દરેક અર્ધઆયુષ્ય પછી કિરણોત્સર્ગ અડધું થાય છે: 1200 → 600 → 300 → 150 એકમ. વિકલ્પ A ખોટો છે કારણ કે તે અર્ધઆયુષ્યના બે ગણા પછીનું મૂલ્ય દર્શાવે છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ અર્ધઆયુષ્યના એક અથવા બે ગણા પછીના મૂલ્યો દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન રેડિયોઍક્ટિવ તત્ત્વના અર્ધઆયુષ્ય માટે ખોટું છે?", "opts": ["અર્ધઆયુષ્ય એ તત્ત્વની પ્રારંભિક માત્રાથી સ્વતંત્ર છે.", "અર્ધઆયુષ્ય એ તાપમાન અને દબાણ જેવા ભૌતિક પરિબળોથી પ્રભાવિત થાય છે.", "અર્ધઆયુષ્ય એ તત્ત્વની રાસાયણિક સ્થિતિ પર આધારિત નથી.", "અર્ધઆયુષ્ય એ તત્ત્વના કિરણોત્સર્ગના પ્રકાર પર આધારિત છે."], "ans": 1, "exp": "રેડિયોઍક્ટિવ વિઘટન એ ન્યુક્લિયર પ્રક્રિયા છે, જે ભૌતિક પરિબળો જેવા કે તાપમાન અને દબાણથી પ્રભાવિત થતી નથી. વિકલ્પ A સાચું છે કારણ કે અર્ધઆયુષ્ય પ્રારંભિક માત્રાથી સ્વતંત્ર છે. વિકલ્પ C સાચું છે કારણ કે રાસાયણિક સ્થિતિ ન્યુક્લિયર પ્રક્રિયાને અસર કરતી નથી. વિકલ્પ D સાચું છે કારણ કે અર્ધઆયુષ્ય કિરણોત્સર્ગના પ્રકાર (α, β, γ) પર આધારિત હોય છે.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 4 કલાક છે. જો તેનું પ્રારંભિક દળ 1 ગ્રામ હોય, તો 12 કલાક પછી તેનું દળ કેટલું હશે? (નોંધ: વિઘટન પછીનું દળ પૂર્ણાંકમાં દર્શાવો)", "opts": ["0.125 ગ્રામ", "0.25 ગ્રામ", "0.0625 ગ્રામ", "0.5 ગ્રામ"], "ans": 0, "exp": "12 કલાક એ અર્ધઆયુષ્યના 3 ગણા (4 × 3 = 12) છે. દરેક અર્ધઆયુષ્ય પછી દળ અડધું થાય છે: 1 → 0.5 → 0.25 → 0.125 ગ્રામ. વિકલ્પ B ખોટો છે કારણ કે તે બે અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે. વિકલ્પ C ખોટો છે કારણ કે તે ચાર અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે તે એક અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ", "ch": ""}, {"q": "એક રેડિયોઍક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 2 દિવસ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 800 એકમ હોય, તો 6 દિવસ પછી તેનું કિરણોત્સર્ગ કેટલું હશે? (નોંધ: કિરણોત્સર્ગ દર દળના સમપ્રમાણમાં છે અને તેનું મૂલ્ય પૂર્ણાંકમાં દર્શાવો)", "opts": ["25 એકમ", "50 એકમ", "100 એકમ", "200 એકમ"], "ans": 2, "exp": "6 દિવસ એ અર્ધઆયુષ્યના 3 ગણા (2 × 3 = 6) છે. દરેક અર્ધઆયુષ્ય પછી કિરણોત્સર્ગ અડધું થાય છે: 800 → 400 → 200 → 100 એકમ. વિકલ્પ A ખોટો છે કારણ કે તે ચાર અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે તે બે અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે તે એક અર્ધઆયુષ્ય પછીનું મૂલ્ય દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 13: ન્યુક્લિયસ", "ch": ""}, {"q": "રેડિયોએક્ટિવ તત્ત્વના અર્ધઆયુષ્ય અંગે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["અર્ધઆયુષ્ય એ રેડિયોએક્ટિવ તત્ત્વના અર્ધા ભાગના કણોના ક્ષય થવા માટે લાગતો સમય છે.", "અર્ધઆયુષ્ય તત્ત્વની સાંદ્રતા, તાપમાન અને દબાણ પર આધાર રાખે છે.", "અર્ધઆયુષ્ય એ તત્ત્વની રેડિયોએક્ટિવિટીનો સ્થિર ગુણધર્મ છે.", "અર્ધઆયુષ્યનો ઉપયોગ રેડિયોએક્ટિવ તત્ત્વની ઉંમર નક્કી કરવા માટે થાય છે."], "ans": 1, "exp": "વિકલ્પ B ખોટો છે કારણ કે અર્ધઆયુષ્ય એ રેડિયોએક્ટિવ તત્ત્વનો સ્થિર ગુણધર્મ છે અને તે સાંદ્રતા, તાપમાન અથવા દબાણ પર આધાર રાખતો નથી. વિકલ્પ A સાચો છે કારણ કે અર્ધઆયુષ્ય એ અર્ધા ભાગના કણોના ક્ષય થવા માટે લાગતો સમય છે. વિકલ્પ C સાચો છે કારણ કે અર્ધઆયુષ્ય તત્ત્વની રેડિયોએક્ટિવિટીનો સ્થિર ગુણધર્મ છે. વિકલ્પ D સાચો છે કારણ કે અર્ધઆયુષ્યનો ઉપયોગ રેડિયોએક્ટિવ ડેટિંગ માટે થાય છે.", "ref": "Std 12 - પ્રકરણ 13: નાભિકીય ભૌતિકવિજ્ઞાન", "ch": ""}, {"q": "એક રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 10 વર્ષ છે. જો તેનું પ્રારંભિક દળ 1 કિલોગ્રામ હોય, તો 30 વર્ષ પછી તેનું બાકી રહેલું દળ કેટલું હશે?", "opts": ["125 ગ્રામ", "250 ગ્રામ", "500 ગ્રામ", "1000 ગ્રામ"], "ans": 0, "exp": "30 વર્ષમાં 3 અર્ધઆયુષ્ય પસાર થાય છે (10 વર્ષ × 3). પ્રત્યેક અર્ધઆયુષ્ય પછી દળ અર્ધું થાય છે: 1 કિલોગ્રામ → 500 ગ્રામ → 250 ગ્રામ → 125 ગ્રામ. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ ગણતરી સાથે મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ 13: નાભિકીય ભૌતિકવિજ્ઞાન", "ch": ""}, {"q": "રેડિયોએક્ટિવ ક્ષયના કાયદા મુજબ, ક્ષય દર નીચેનામાંથી કયા પર આધાર રાખે છે?", "opts": ["તત્ત્વની સાંદ્રતા", "તત્ત્વની ઉંમર", "તત્ત્વના કણોની સંખ્યા", "તત્ત્વના રાસાયણિક ગુણધર્મો"], "ans": 2, "exp": "રેડિયોએક્ટિવ ક્ષયનો દર તત્ત્વના કણોની સંખ્યા પર આધાર રાખે છે, કારણ કે ક્ષય દર = λN, જ્યાં N એ કણોની સંખ્યા છે. વિકલ્પ C સાચો છે. વિકલ્પ A, B, અને D ખોટા છે કારણ કે ક્ષય દર સાંદ્રતા, ઉંમર અથવા રાસાયણિક ગુણધર્મો પર આધાર રાખતો નથી.", "ref": "Std 12 - પ્રકરણ 13: નાભિકીય ભૌતિકવિજ્ઞાન", "ch": ""}, {"q": "એક રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 5 દિવસ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 6400 હોય, તો 20 દિવસ પછી તેનું કિરણોત્સર્ગ કેટલું હશે?", "opts": ["200", "400", "100", "50"], "ans": 0, "exp": "20 દિવસમાં 4 અર્ધઆયુષ્ય પસાર થાય છે (5 દિવસ × 4). પ્રત્યેક અર્ધઆયુષ્ય પછી કિરણોત્સર્ગ અર્ધું થાય છે: 6400 → 3200 → 1600 → 800 → 400. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ ગણતરી સાથે મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ 13: નાભિકીય ભૌતિકવિજ્ઞાન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન રેડિયોએક્ટિવ તત્ત્વના અર્ધઆયુષ્ય અને તેના ક્ષય દર વચ્ચેના સંબંધને સાચી રીતે વર્ણવે છે?", "opts": ["અર્ધઆયુષ્ય જેટલું ઓછું હોય, ક્ષય દર એટલો જ ઓછો હોય છે.", "અર્ધઆયુષ્ય જેટલું વધારે હોય, ક્ષય દર એટલો જ ઓછો હોય છે.", "અર્ધઆયુષ્ય અને ક્ષય દર વચ્ચે કોઈ સંબંધ નથી.", "અર્ધઆયુષ્ય જેટલું ઓછું હોય, ક્ષય દર એટલો જ વધારે હોય છે."], "ans": 3, "exp": "રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય (T₁/₂) અને ક્ષય દર (λ) વચ્ચેનો સંબંધ છે: λ = ln(2)/T₁/₂. જેથી અર્ધઆયુષ્ય ઓછું હોય, ક્ષય દર વધારે હોય છે. વિકલ્પ D સાચો છે. વિકલ્પ A, B, અને C ખોટા છે કારણ કે તેઓ સંબંધને સાચી રીતે વર્ણવતા નથી.", "ref": "Std 12 - પ્રકરણ 13: નાભિકીય ભૌતિકવિજ્ઞાન", "ch": ""}, {"q": "એક રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 15 વર્ષ છે. જો તેનું પ્રારંભિક દળ 240 ગ્રામ હોય તો 45 વર્ષ પછી તેનું બાકી રહેલું દળ કેટલું હશે?", "opts": ["30 ગ્રામ", "15 ગ્રામ", "7.5 ગ્રામ", "60 ગ્રામ"], "ans": 1, "exp": "અર્ધઆયુષ્ય 15 વર્ષ હોવાથી 45 વર્ષમાં 3 અર્ધઆયુષ્ય પસાર થાય છે. પ્રારંભિક દળ 240 ગ્રામ હોય તો પહેલા અર્ધઆયુષ્ય પછી 120 ગ્રામ, બીજા પછી 60 ગ્રામ અને ત્રીજા પછી 30 ગ્રામ બાકી રહે છે. પરંતુ પ્રશ્નમાં 45 વર્ષ પછી પૂછવામાં આવ્યું છે, જેમાં 3 અર્ધઆયુષ્ય પૂરા થાય છે, પરંતુ 240 ગ્રામના 1/8 ભાગ (240/8=30) બાકી રહે છે. પરંતુ વિકલ્પ A) 30 ગ્રામ અને B) 15 ગ્રામ વચ્ચે ગૂંચવણ થાય છે. પરંતુ 3 અર્ધઆયુષ્ય પછી દળ 240/(2^3) = 30 ગ્રામ થાય છે. પરંતુ પ્રશ્નમાં 45 વર્ષ પછી પૂછવામાં આવ્યું છે, જેમાં 3 અર્ધઆયુષ્ય પૂરા થાય છે, પરંતુ વિકલ્પ A સાચો છે. પરંતુ વિકલ્પ B 15 ગ્રામ છે, જે 4 અર્ધઆયુષ્ય પછીનું દળ હશે. તેથી સાચો જવાબ A છે.", "ref": "Std 12 - અધ્યાય 15: રેડિયોએક્ટિવતા અને ન્યુક્લિયર એનર્જી", "ch": ""}, {"q": "રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય તેના પરમાણુ ક્રમાંક પર આધાર રાખે છે. આ વિધાન અંગે નીચેનામાંથી કયું સાચું છે?", "opts": ["વિધાન સાચું છે, કારણ કે અર્ધઆયુષ્ય પરમાણુ ક્રમાંક સાથે સીધો સંબંધ ધરાવે છે.", "વિધાન ખોટું છે, કારણ કે અર્ધઆયુષ્ય પરમાણુ ક્રમાંક પર આધાર રાખતું નથી.", "વિધાન સાચું છે, પરંતુ અર્ધઆયુષ્ય પરમાણુ ક્રમાંક સાથે વ્યસ્ત સંબંધ ધરાવે છે.", "વિધાન ખોટું છે, કારણ કે અર્ધઆયુષ્ય પરમાણુ દળ પર આધાર રાખે છે."], "ans": 1, "exp": "રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય તેના પરમાણુ ક્રમાંક પર આધાર રાખતું નથી. અર્ધઆયુષ્ય તત્ત્વની રચના અને તેના ક્ષય પ્રક્રિયા પર આધાર રાખે છે, પરમાણુ ક્રમાંક નહીં. તેથી વિધાન ખોટું છે અને સાચો જવાબ B છે.", "ref": "Std 12 - અધ્યાય 15: રેડિયોએક્ટિવતા અને ન્યુક્લિયર એનર્જી", "ch": ""}, {"q": "એક રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 20 વર્ષ છે. જો તેનું પ્રારંભિક કિરણોત્સર્ગ 8000 Bq હોય તો 60 વર્ષ પછી તેનું કિરણોત્સર્ગ કેટલું હશે?", "opts": ["1000 Bq", "500 Bq", "250 Bq", "2000 Bq"], "ans": 0, "exp": "60 વર્ષમાં 3 અર્ધઆયુષ્ય પસાર થાય છે (60/20=3). પ્રારંભિક કિરણોત્સર્ગ 8000 Bq હોય તો પહેલા અર્ધઆયુષ્ય પછી 4000 Bq, બીજા પછી 2000 Bq અને ત્રીજા પછી 1000 Bq બાકી રહે છે. તેથી સાચો જવાબ A) 1000 Bq છે.", "ref": "Std 12 - અધ્યાય 15: રેડિયોએક્ટિવતા અને ન્યુક્લિયર એનર્જી", "ch": ""}, {"q": "રેડિયોએક્ટિવ તત્ત્વના અર્ધઆયુષ્ય અને ક્ષય દર વચ્ચેનો સંબંધ નીચેનામાંથી કયો છે?", "opts": ["અર્ધઆયુષ્ય વધે તો ક્ષય દર વધે", "અર્ધઆયુષ્ય વધે તો ક્ષય દર ઘટે", "અર્ધઆયુષ્ય અને ક્ષય દર વચ્ચે કોઈ સંબંધ નથી", "અર્ધઆયુષ્ય ઘટે તો ક્ષય દર સ્થિર રહે"], "ans": 1, "exp": "રેડિયોએક્ટિવ તત્ત્વના અર્ધઆયુષ્ય અને ક્ષય દર વચ્ચે વ્યસ્ત સંબંધ છે. અર્ધઆયુષ્ય વધે તો ક્ષય દર ઘટે છે અને અર્ધઆયુષ્ય ઘટે તો ક્ષય દર વધે છે. તેથી સાચો જવાબ B છે.", "ref": "Std 12 - અધ્યાય 15: રેડિયોએક્ટિવતા અને ન્યુક્લિયર એનર્જી", "ch": ""}, {"q": "એક રેડિયોએક્ટિવ તત્ત્વનું અર્ધઆયુષ્ય 10 દિવસ છે. જો તેનું પ્રારંભિક દળ 1 કિલોગ્રામ હોય તો 30 દિવસ પછી તેનું બાકી રહેલું દળ કેટલું હશે?", "opts": ["125 ગ્રામ", "250 ગ્રામ", "500 ગ્રામ", "62.5 ગ્રામ"], "ans": 0, "exp": "30 દિવસમાં 3 અર્ધઆયુષ્ય પસાર થાય છે (30/10=3). પ્રારંભિક દળ 1 કિલોગ્રામ (1000 ગ્રામ) હોય તો પહેલા અર્ધઆયુષ્ય પછી 500 ગ્રામ, બીજા પછી 250 ગ્રામ અને ત્રીજા પછી 125 ગ્રામ બાકી રહે છે. તેથી સાચો જવાબ A) 125 ગ્રામ છે.", "ref": "Std 12 - અધ્યાય 15: રેડિયોએક્ટિવતા અને ન્યુક્લિયર એનર્જી", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
