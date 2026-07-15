@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>રોગ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>રોગ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">રોગ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક દર્દીને લાંબા સમયથી તાવ, વજનમાં ઘટાડો અને રાત્રે પરસેવો આવવાની ફરિયાદ છે. તેના લોહીના નમૂનામાં ઍસિડ-ફાસ્ટ બૅસિલી જોવા મળે છે. આ રોગના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ રોગનું કારક બૅક્ટેરિયા *માયકોબૅક્ટેરિયમ ટ્યુબરક્યુલોસિસ* છે, જે ગ્રામ-પૉઝિટિવ છે", "આ રોગનો ફેલાવો મુખ્યત્વે હવાથી થતા ટીપાં દ્વારા થાય છે", "આ રોગમાં બૅક્ટેરિયા મેક્રોફેજ કોષોમાં જીવિત રહી શકે છે અને ગ્રેન્યુલોમા બનાવે છે", "આ રોગની સારવાર માટે *ડોટ્સ* (DOTS) પદ્ધતિનો ઉપયોગ થાય છે, જેમાં બહુવિધ ઍન્ટિબાયોટિક્સનો ઉપયોગ થાય છે"], "ans": 0, "exp": "સાચો જવાબ A છે કારણ કે *માયકોબૅક્ટેરિયમ ટ્યુબરક્યુલોસિસ* ગ્રામ-પૉઝિટિવ નહીં, પરંતુ ઍસિડ-ફાસ્ટ બૅસિલી છે અને તે ગ્રામ-રંગપદ્ધતિમાં રંગ પકડતું નથી. વિકલ્પ B, C અને D સાચાં છે કારણ કે ટીબી હવામાં ફેલાતો રોગ છે, બૅક્ટેરિયા મેક્રોફેજમાં જીવિત રહે છે અને ગ્રેન્યુલોમા બનાવે છે, તેમજ DOTS પદ્ધતિનો ઉપયોગ થાય છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *ઓટોઇમ્યુન* રોગ નથી, પરંતુ *પ્રતિરક્ષા-અપૂર્ણતા* રોગ છે?", "opts": ["રુમેટૉઇડ આર્થરાઇટિસ", "એઇડ્સ (AIDS)", "મલ્ટિપલ સ્ક્લેરોસિસ", "સિસ્ટમિક લ્યુપસ એરિથેમેટોસસ (SLE)"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે એઇડ્સ (AIDS) *HIV* વાઇરસને કારણે થતો પ્રતિરક્ષા-અપૂર્ણતા રોગ છે, જ્યારે A, C અને D ઓટોઇમ્યુન રોગો છે જેમાં શરીરની પ્રતિરક્ષા પોતાના કોષો પર હુમલો કરે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને પેટમાં તીવ્ર દુખાવો, ઉલટી અને પીળા રંગનું મૂત્ર આવે છે. લોહીની તપાસમાં *આલ્કલાઇન ફૉસ્ફેટેઝ* અને *બિલિરુબિન*નું પ્રમાણ વધેલું જોવા મળે છે. આ પરિસ્થિતિ કયા અંગના રોગ સાથે સંબંધિત છે?", "opts": ["યકૃત (Liver)", "સ્વાદુપિંડ (Pancreas)", "પિત્તાશય (Gallbladder)", "મૂત્રપિંડ (Kidney)"], "ans": 0, "exp": "સાચો જવાબ A છે કારણ કે *આલ્કલાઇન ફૉસ્ફેટેઝ* અને *બિલિરુબિન*નું વધેલું પ્રમાણ યકૃતના કાર્યમાં ખલેલ દર્શાવે છે. પીળું મૂત્ર અને પેટનો દુખાવો પણ યકૃતના રોગ (જેમ કે હિપેટાઇટિસ અથવા પિત્તાશયની પથરી) સાથે સુસંગત છે. વિકલ્પ B, C અને Dમાં આ બાયોકેમિકલ માર્કર્સ એટલા વિશિષ્ટ નથી.", "ref": "Std 11 - પ્રકરણ 19: ઉત્સર્જન તંત્ર અને તેના રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *પ્રાયોન* (Prion) દ્વારા થતો નથી?", "opts": ["ક્રૂટ્ઝફેલ્ડ-જેકોબ રોગ (CJD)", "કુરુ રોગ", "બોવાઇન સ્પોન્જિફોર્મ એન્સેફાલોપથી (BSE)", "હન્ટિંગ્ટન રોગ"], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે હન્ટિંગ્ટન રોગ *ઓટોસોમલ પ્રભાવી જનીન* (HTT જનીનમાં CAG પુનરાવર્તન)ને કારણે થાય છે, જ્યારે A, B અને C પ્રાયોન પ્રોટીન (PrP^Sc) દ્વારા થતા રોગો છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને વારંવાર ઝાડા, પેટમાં દુખાવો અને વજનમાં ઘટાડો થાય છે. આંતરડાની બાયોપ્સીમાં *વિલ્લીનું શોષણ* અને *ક્રિપ્ટ હાઇપરપ્લાસિયા* જોવા મળે છે. આ રોગનું નિદાન શું છે અને તેની સારવારમાં કયો આહાર ટાળવો જોઈએ?", "opts": ["અલ્સેરેટિવ કોલાઇટિસ - લેક્ટોઝયુક્ત આહાર", "સેલિયાક રોગ - ગ્લુટેનયુક્ત આહાર", "ક્રોન રોગ - ઉચ્ચ ફાઇબરયુક્ત આહાર", "ઇરિટેબલ બોવેલ સિન્ડ્રોમ (IBS) - ચરબીયુક્ત આહાર"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે *વિલ્લીનું શોષણ* અને *ક્રિપ્ટ હાઇપરપ્લાસિયા* સેલિયાક રોગના લક્ષણો છે, જે *ગ્લુટેન* પ્રત્યેની પ્રતિક્રિયાને કારણે થાય છે. તેથી ગ્લુટેનયુક્ત આહાર ટાળવો જોઈએ. વિકલ્પ A, C અને Dમાં આ લક્ષણો અને સારવાર યોગ્ય નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *વાયરસ* દ્વારા થતો નથી, પરંતુ *બેક્ટેરિયા* દ્વારા થાય છે, જ્યારે તેના લક્ષણો વાયરલ રોગ જેવા લાગે છે?", "opts": ["ડેંગ્યુ", "ટાયફોઈડ", "ઇન્ફ્લુએન્ઝા", "એડ્સ"], "ans": 1, "exp": "ટાયફોઈડ *સેલ્મોનેલા ટાયફી* નામના બેક્ટેરિયા દ્વારા થાય છે, પરંતુ તેના લક્ષણો (તાવ, થાક, પેટમાં દુખાવો) વાયરલ રોગ જેવા લાગે છે. ડેંગ્યુ, ઇન્ફ્લુએન્ઝા અને એડ્સ વાયરસ દ્વારા થાય છે. ડેંગ્યુ *ફ્લેવિવાયરસ*, ઇન્ફ્લુએન્ઝા *ઇન્ફ્લુએન્ઝા વાયરસ* અને એડ્સ *HIV* દ્વારા થાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને ચામડી પર લાલ ચકામા, ખંજવાળ અને સૂજણ આવે છે. ડોક્ટરે *ઇમ્યુનોગ્લોબ્યુલિન E (IgE)* નું સ્તર વધારેલું જણાય છે. આ રોગ કયા પ્રકારનો છે?", "opts": ["ઓટોઇમ્યુન રોગ", "એલર્જીક પ્રતિક્રિયા", "કર્કરોગ (કૅન્સર)", "જનનિક રોગ"], "ans": 1, "exp": "IgE નું વધારેલું સ્તર એલર્જીક પ્રતિક્રિયા (અતિસંવેદનશીલતા) નું લક્ષણ છે. ઓટોઇમ્યુન રોગમાં શરીરના પોતાના અંગો પર પ્રતિરક્ષા તંત્ર હુમલો કરે છે (ઉદા. રૂમેટોઈડ આર્થરાઇટિસ), કર્કરોગમાં કોષોનું અનિયંત્રિત વિભાજન થાય છે, અને જનનિક રોગ જનીનમાં ખામી દ્વારા થાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *માયકોપ્લાઝમા* દ્વારા થતો નથી?", "opts": ["ન્યૂમોનિયા", "ટ્યુબર્ક્યુલોસિસ", "વૉકિંગ ન્યૂમોનિયા", "બ્રોન્કાઇટિસ"], "ans": 1, "exp": "ટ્યુબર્ક્યુલોસિસ *માયકોબેક્ટેરિયમ ટ્યુબર્ક્યુલોસિસ* દ્વારા થાય છે, જ્યારે ન્યૂમોનિયા, વૉકિંગ ન્યૂમોનિયા અને બ્રોન્કાઇટિસ *માયકોપ્લાઝમા ન્યૂમોનિયા* દ્વારા થઈ શકે છે. માયકોપ્લાઝમા એક પ્રકારનું બેક્ટેરિયા છે, પરંતુ તેના કોષભિત્તિ વગરના હોવાથી તે અલગ પડે છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને લાંબા સમયથી ખાંસી, લોહીની ઉધરસ અને વજનમાં ઘટાડો થાય છે. તેના શ્વાસનળીના કફમાં *એસિડ-ફાસ્ટ બેક્ટેરિયા* મળી આવે છે. આ રોગ કયો છે?", "opts": ["ક્ષય (ટ્યુબર્ક્યુલોસિસ)", "કાલરા", "અસ્થમા", "કોપડ (Emphysema)"], "ans": 0, "exp": "એસિડ-ફાસ્ટ બેક્ટેરિયા (*માયકોબેક્ટેરિયમ ટ્યુબર્ક્યુલોસિસ*) ની હાજરી ક્ષય (ટ્યુબર્ક્યુલોસિસ) નું નિશ્ચિત લક્ષણ છે. કાલરા *વાયરસ* દ્વારા, અસ્થમા શ્વસનમાર્ગની અતિસંવેદનશીલતા દ્વારા, અને કોપડ ધૂમ્રપાન અથવા પ્રદૂષણ દ્વારા થાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *પરોપજીવી કૃમિ* દ્વારા થતો નથી?", "opts": ["એસ્કેરિયાસિસ", "ફાઇલેરિયાસિસ", "એમિબિયાસિસ", "ટેપવર્મ રોગ"], "ans": 2, "exp": "એમિબિયાસિસ *એન્ટામીબા હિસ્ટોલિટિકા* (પરોપજીવી પ્રોટોઝોઆ) દ્વારા થાય છે, જ્યારે એસ્કેરિયાસિસ (*એસ્કેરિસ લુંબ્રિકોઈડ્સ*), ફાઇલેરિયાસિસ (*વુચેરેરિયા બેન્ક્રોફ્ટી*), અને ટેપવર્મ રોગ (*ટીનિયા સોલિયમ*) પરોપજીવી કૃમિ દ્વારા થાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને વારંવાર તાવ આવે છે, યકૃત અને પ્લીહામાં સોજો આવે છે, અને રક્તપરીક્ષણમાં હિમોગ્લોબિનનું પ્રમાણ ઘટેલું જોવા મળે છે. આ લક્ષણો નીચેનામાંથી કયા રોગની સંભાવના સૂચવે છે?", "opts": ["મેલેરિયા (Malaria)", "ડેન્ગ્યુ (Dengue)", "કાલા-અઝાર (Kala-azar)", "ટાઇફોઇડ (Typhoid)"], "ans": 2, "exp": "કાલા-અઝાર (લીશ્માનિયાસિસ)માં *લીશ્માનિયા ડોનોવાની* પરોપજીવી દ્વારા યકૃત અને પ્લીહામાં સોજો આવે છે, હિમોગ્લોબિન ઘટે છે અને વારંવાર તાવ આવે છે. મેલેરિયામાં પ્લીહામાં સોજો તો આવે છે, પરંતુ યકૃતને અસર ઓછી થાય છે અને હિમોગ્લોબિન ઘટવાનું મુખ્ય કારણ રક્તકોષોનો નાશ છે. ડેન્ગ્યુમાં પ્લેટલેટ્સ ઘટે છે, પરંતુ યકૃત-પ્લીહામાં સોજો અને હિમોગ્લોબિન ઘટવું લાક્ષણિક નથી. ટાઇફોઇડમાં તાવ તો આવે છે, પરંતુ યકૃત-પ્લીહામાં સોજો અને હિમોગ્લોબિન ઘટવું સામાન્ય નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *પ્રતિરક્ષાતંત્રની અતિસક્રિયા*ને કારણે થતો નથી, પરંતુ *પ્રતિરક્ષાતંત્રની નિષ્ક્રિયતા*ને કારણે થાય છે?", "opts": ["સંધિવા (Rheumatoid Arthritis)", "એઇડ્સ (AIDS)", "અસ્થમા (Asthma)", "સિસ્ટમિક લ્યુપસ એરિથેમેટોસસ (SLE)"], "ans": 1, "exp": "એઇડ્સ (AIDS) *HIV વાયરસ* દ્વારા થાય છે, જે CD4+ T-કોષોનો નાશ કરી પ્રતિરક્ષાતંત્રને નિષ્ક્રિય બનાવે છે. સંધિવા, અસ્થમા અને SLE એ ઓટોઇમ્યુન રોગો છે, જેમાં પ્રતિરક્ષાતંત્ર શરીરના પોતાના કોષો પર હુમલો કરે છે (અતિસક્રિયા). આમ, એઇડ્સ એ પ્રતિરક્ષા-અપૂર્ણતા રોગ છે, જ્યારે અન્ય ત્રણ પ્રતિરક્ષા-અતિસક્રિયા રોગો છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને લાંબા સમયથી સાંધામાં દુખાવો, સોજો અને સવારે જડતા રહે છે. રક્તપરીક્ષણમાં *રુમેટોઇડ ફેક્ટર (RF)* પોઝિટિવ જોવા મળે છે. આ રોગમાં શરીરના કયા ભાગને પ્રાથમિક રીતે અસર થાય છે?", "opts": ["સ્નાયુ પેશી (Muscle Tissue)", "સાયનોવિયલ પટલ (Synovial Membrane)", "હાડકાંની સાંધા સપાટી (Articular Cartilage)", "રુધિરવાહિનીઓ (Blood Vessels)"], "ans": 1, "exp": "સંધિવા (Rheumatoid Arthritis)માં પ્રાથમિક રીતે *સાયનોવિયલ પટલ*ને અસર થાય છે, જે સાંધામાં સોજો અને દુખાવો ઉત્પન્ન કરે છે. સ્નાયુ પેશીને સીધી અસર થતી નથી, હાડકાંની સાંધા સપાટી પાછળથી નાશ પામે છે, અને રુધિરવાહિનીઓને અસર ગૌણ હોય છે. રુમેટોઇડ ફેક્ટર પોઝિટિવ હોવું એ સંધિવાનું લાક્ષણિક લક્ષણ છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેનામાંથી કયો રોગ *પ્રોટોઝોઆ* દ્વારા થતો નથી, પરંતુ *બેક્ટેરિયા* દ્વારા થાય છે?", "opts": ["અમીબીઆસિસ (Amoebiasis)", "જિયાર્ડિયાસિસ (Giardiasis)", "કોલેરા (Cholera)", "ટ્રાયપેનોસોમિયાસિસ (Trypanosomiasis)"], "ans": 2, "exp": "કોલેરા *વિબ્રિયો કોલેરે* બેક્ટેરિયા દ્વારા થાય છે. અમીબીઆસિસ (*એન્ટામીબા હિસ્ટોલિટિકા*), જિયાર્ડિયાસિસ (*જિયાર્ડિયા લેમ્બ્લિયા*), અને ટ્રાયપેનોસોમિયાસિસ (*ટ્રાયપેનોસોમા* પ્રજાતિ) એ પ્રોટોઝોઆ દ્વારા થતા રોગો છે. આ પ્રશ્નમાં બેક્ટેરિયા અને પ્રોટોઝોઆ વચ્ચેનો ભેદ સમજવો જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને ત્વચા પર નાના-નાના ફોલ્લીઓ, ખંજવાળ અને લસિકાગ્રંથિઓમાં સોજો આવે છે. બાયોપ્સીમાં *રીડ-સ્ટર્નબર્ગ કોષો* જોવા મળે છે. આ રોગનું નિદાન શું છે અને તે કયા પ્રકારનો રોગ છે?", "opts": ["સૉરાયસિસ - ઓટોઇમ્યુન રોગ", "હોડ્જકિન લિમ્ફોમા - કેન્સર", "લ્યુકેમિયા - રુધિરનું કેન્સર", "સ્ક્રબ ટાઇફસ - બેક્ટેરિયલ ચેપ"], "ans": 1, "exp": "હોડ્જકિન લિમ્ફોમા એક પ્રકારનું લસિકાતંત્રનું કેન્સર છે, જેમાં *રીડ-સ્ટર્નબર્ગ કોષો* લાક્ષણિક છે. સૉરાયસિસ ઓટોઇમ્યુન રોગ છે, પરંતુ તેમાં રીડ-સ્ટર્નબર્ગ કોષો જોવા મળતા નથી. લ્યુકેમિયા રુધિરનું કેન્સર છે, પરંતુ તેમાં લસિકાગ્રંથિઓમાં સોજો અને રીડ-સ્ટર્નબર્ગ કોષો હોતા નથી. સ્ક્રબ ટાઇફસ બેક્ટેરિયલ ચેપ છે, જેમાં ત્વચા પર ફોલ્લીઓ તો આવે છે, પરંતુ લસિકાગ્રંથિઓમાં સોજો અને રીડ-સ્ટર્નબર્ગ કોષો હોતા નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ *આનુવંશિક* હોવા છતાં *જનીનિક ખામી*ને કારણે નહીં, પરંતુ *વર્ણસૂત્રીય અસામાન્યતા*ને કારણે થાય છે?", "opts": ["સિકલ સેલ એનીમિયા", "ડાઉન સિન્ડ્રોમ", "હિમોફિલિયા", "થેલેસેમિયા"], "ans": 1, "exp": "ડાઉન સિન્ડ્રોમ *ટ્રાયસોમી ૨૧* (વર્ણસૂત્ર ૨૧નું ત્રણ ગણું હોવું)ને કારણે થાય છે, જે વર્ણસૂત્રીય અસામાન્યતા છે. બાકીના વિકલ્પો જનીનિક ખામી (જનીનમાં પરિવર્તન)ને કારણે થાય છે: સિકલ સેલ એનીમિયા (HBB જનીન), હિમોફિલિયા (F8 અથવા F9 જનીન), થેલેસેમિયા (HBA અથવા HBB જનીન).", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક દર્દીને લાંબા સમયથી *ઉધરસ, શ્વાસ લેવામાં તકલીફ અને છાતીમાં સતત દુખાવો* રહે છે. એક્સ-રેમાં ફેફસાંમાં *ગાંઠ જેવી રચના* જોવા મળે છે. નીચેના પૈકી કયું કારણ આ લક્ષણો માટે *સૌથી ઓછું સંભવિત* છે?", "opts": ["ફેફસાંનું ક્ષય રોગ (Tuberculosis)", "ફેફસાંનું કેન્સર (Lung Carcinoma)", "ફેફસાંનું ફંગલ ચેપ (Aspergillosis)", "ફેફસાંનું એમ્ફિસેમા (Emphysema)"], "ans": 3, "exp": "ફેફસાંનું એમ્ફિસેમા *આલ્વીઓલીની દીવાલોના નાશ*ને કારણે થાય છે, જેમાં ગાંઠ જેવી રચના જોવા મળતી નથી. બાકીના વિકલ્પોમાં ગાંઠ જેવી રચના જોવા મળી શકે છે: ક્ષય રોગ (ગ્રેન્યુલોમા), કેન્સર (ટ્યુમર), ફંગલ ચેપ (ફંગલ બોલ).", "ref": "Std 11 - પ્રકરણ 16: પાચન અને શોષણ, Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ *પ્રતિરક્ષાતંત્રની અતિસક્રિયા*ને કારણે થતો હોવા છતાં *ઓટોઇમ્યુન રોગ* નથી?", "opts": ["રુમેટોઇડ આર્થરાઇટિસ", "એલર્જિક અસ્થમા", "મલ્ટિપલ સ્ક્લેરોસિસ", "સિસ્ટેમિક લ્યુપસ એરિથેમેટોસસ (SLE)"], "ans": 1, "exp": "એલર્જિક અસ્થમા *પ્રતિરક્ષાતંત્રની અતિસક્રિયા*ને કારણે થાય છે, પરંતુ તે *ઓટોઇમ્યુન રોગ* નથી કારણ કે તેમાં શરીરના પોતાના કોષો પર હુમલો થતો નથી. બાકીના વિકલ્પો ઓટોઇમ્યુન રોગો છે જેમાં પ્રતિરક્ષાતંત્ર શરીરના પોતાના કોષો પર હુમલો કરે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને *ત્વચા પર નાના-નાના લાલ ચકામા, તાવ અને સાંધામાં દુખાવો* થાય છે. રક્ત પરીક્ષણમાં *પ્લેટલેટ્સની સંખ્યામાં ઘટાડો* જોવા મળે છે. નીચેના પૈકી કયો રોગ આ લક્ષણો સાથે *સુસંગત નથી*?", "opts": ["ડેન્ગ્યુ (Dengue)", "ચિકનગુનિયા (Chikungunya)", "થ્રોમ્બોટિક થ્રોમ્બોસાયટોપેનિક પર્પ્યુરા (TTP)", "લ્યુકેમિયા (Leukemia)"], "ans": 1, "exp": "ચિકનગુનિયામાં *સાંધામાં દુખાવો* તીવ્ર હોય છે, પરંતુ *પ્લેટલેટ્સની સંખ્યામાં ઘટાડો* સામાન્ય રીતે જોવા મળતો નથી. બાકીના વિકલ્પોમાં પ્લેટલેટ્સની સંખ્યામાં ઘટાડો જોવા મળે છે: ડેન્ગ્યુ (ડેન્ગ્યુ હેમરેજિક ફીવર), TTP (પ્લેટલેટ્સનો નાશ), લ્યુકેમિયા (અસ્થિમજ્જામાં અસામાન્ય કોષો).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ *પ્રોટોઝોઆ* દ્વારા થતો હોવા છતાં *પરોપજીવી કૃમિ* દ્વારા થતા રોગો સાથે *સમાન લક્ષણો* દર્શાવે છે?", "opts": ["અમીબીઆસિસ (Amoebiasis)", "જિયાર્ડીઆસિસ (Giardiasis)", "ફાઇલેરિયાસિસ (Filariasis)", "શિસ્ટોસોમિયાસિસ (Schistosomiasis)"], "ans": 1, "exp": "જિયાર્ડીઆસિસ *પ્રોટોઝોઆ (Giardia lamblia)* દ્વારા થાય છે અને તેના લક્ષણો (ઝાડા, પેટમાં દુખાવો) *શિસ્ટોસોમિયાસિસ* (પરોપજીવી કૃમિ દ્વારા થતો રોગ) સાથે સમાનતા ધરાવે છે. અમીબીઆસિસ પણ પ્રોટોઝોઆ દ્વારા થાય છે, પરંતુ તેના લક્ષણો શિસ્ટોસોમિયાસિસ સાથે ઓછા સુસંગત છે. ફાઇલેરિયાસિસ અને શિસ્ટોસોમિયાસિસ પરોપજીવી કૃમિ દ્વારા થાય છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
