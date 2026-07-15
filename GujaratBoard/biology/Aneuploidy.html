@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aneuploidy.</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Aneuploidy.</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Aneuploidy.</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક વ્યક્તિમાં ૪૭ વર્ણસૂત્રો જોવા મળે છે અને તેમાં ટ્રાયસોમી-૨૧ હાજર છે. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ પરિસ્થિતિને ડાઉન સિન્ડ્રોમ કહે છે", "આ પરિસ્થિતિ માત્ર માતાના અંડકોષમાં અસામાન્ય વિભાજનને કારણે થાય છે", "આ પરિસ્થિતિમાં બાળકમાં માનસિક મંદતા અને શારીરિક લક્ષણોમાં ફેરફાર જોવા મળે છે", "આ પરિસ્થિતિ વર્ણસૂત્રીય અનિયમિતતાને કારણે ઉદ્ભવે છે"], "ans": 1, "exp": "સાચો જવાબ B છે. ડાઉન સિન્ડ્રોમ (ટ્રાયસોમી-૨૧) માત્ર માતાના અંડકોષમાં અસામાન્ય વિભાજનને કારણે જ નહીં, પરંતુ પિતાના શુક્રકોષમાં પણ અસામાન્ય વિભાજનને કારણે થઈ શકે છે. બાકીના વિકલ્પો સાચા છે: A) ડાઉન સિન્ડ્રોમ ટ્રાયસોમી-૨૧ છે, C) તેમાં માનસિક મંદતા અને શારીરિક લક્ષણોમાં ફેરફાર જોવા મળે છે, D) આ વર્ણસૂત્રીય અનિયમિતતા છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ એન્યુપ્લોઇડીનું નથી?", "opts": ["ટર્નર સિન્ડ્રોમ (45, XO)", "ક્લાઇનફેલ્ટર સિન્ડ્રોમ (47, XXY)", "ડાઉન સિન્ડ્રોમ (47, +21)", "સિકલ સેલ એનીમિયા (ઓટોસોમલ રિસેસિવ ડિસઓર્ડર)"], "ans": 3, "exp": "સાચો જવાબ D છે. સિકલ સેલ એનીમિયા એ જનીનિક મ્યુટેશનને કારણે થતો રોગ છે, જે એન્યુપ્લોઇડી નથી. બાકીના વિકલ્પો એન્યુપ્લોઇડીના ઉદાહરણો છે: A) ટર્નર સિન્ડ્રોમ (મોનોસોમી), B) ક્લાઇનફેલ્ટર સિન્ડ્રોમ (ટ્રાયસોમી), C) ડાઉન સિન્ડ્રોમ (ટ્રાયસોમી).", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક સ્ત્રીમાં ૪૫ વર્ણસૂત્રો જોવા મળે છે અને તેમાં માત્ર એક X વર્ણસૂત્ર હાજર છે. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["આ પરિસ્થિતિને ટર્નર સિન્ડ્રોમ કહે છે", "આ સ્ત્રીઓમાં પ્રજનનક્ષમતા સામાન્ય હોય છે", "આ સ્ત્રીઓમાં કદમાં નાનપ અને ગરદનની પાછળની ચામડી જાડી જોવા મળે છે", "આ પરિસ્થિતિ વર્ણસૂત્રીય મોનોસોમીનું ઉદાહરણ છે"], "ans": 1, "exp": "સાચો જવાબ B છે. ટર્નર સિન્ડ્રોમ (45, XO) ધરાવતી સ્ત્રીઓમાં પ્રજનનક્ષમતા સામાન્ય હોતી નથી, તેમને વંધ્યત્વની સમસ્યા હોય છે. બાકીના વિકલ્પો સાચા છે: A) આ ટર્નર સિન્ડ્રોમ છે, C) તેમાં કદમાં નાનપ અને ગરદનની પાછળની ચામડી જાડી જોવા મળે છે, D) આ વર્ણસૂત્રીય મોનોસોમી છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્યુપ્લોઇડી માટે સાચું નથી?", "opts": ["એન્યુપ્લોઇડી વર્ણસૂત્રોની સંખ્યામાં ફેરફારને કારણે થાય છે", "એન્યુપ્લોઇડી માત્ર ઓટોસોમ્સમાં જ જોવા મળે છે", "ટ્રાયસોમી અને મોનોસોમી એન્યુપ્લોઇડીના પ્રકારો છે", "એન્યુપ્લોઇડી કોષવિભાજન દરમિયાન અસામાન્ય વિભાજનને કારણે થાય છે"], "ans": 1, "exp": "સાચો જવાબ B છે. એન્યુપ્લોઇડી માત્ર ઓટોસોમ્સમાં જ નહીં, પરંતુ લિંગી વર્ણસૂત્રોમાં પણ જોવા મળે છે (જેમ કે ટર્નર સિન્ડ્રોમ અને ક્લાઇનફેલ્ટર સિન્ડ્રોમ). બાકીના વિકલ્પો સાચા છે: A) એન્યુપ્લોઇડી વર્ણસૂત્રોની સંખ્યામાં ફેરફારને કારણે થાય છે, C) ટ્રાયસોમી અને મોનોસોમી એન્યુપ્લોઇડીના પ્રકારો છે, D) તે કોષવિભાજન દરમિયાન અસામાન્ય વિભાજનને કારણે થાય છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૭ વર્ણસૂત્રો છે અને તેમાં ત્રણ X વર્ણસૂત્રો હાજર છે (47, XXX). આ પરિસ્થિતિ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["આ પરિસ્થિતિને ટ્રિપલ X સિન્ડ્રોમ કહે છે", "આ વ્યક્તિઓમાં ગંભીર શારીરિક અને માનસિક વિકલાંગતા જોવા મળે છે", "આ પરિસ્થિતિ માત્ર પુરુષોમાં જ જોવા મળે છે", "આ પરિસ્થિતિ વર્ણસૂત્રીય ટ્રાયસોમીનું ઉદાહરણ નથી"], "ans": 0, "exp": "સાચો જવાબ A છે. 47, XXX પરિસ્થિતિને ટ્રિપલ X સિન્ડ્રોમ કહે છે. B) ખોટું છે કારણ કે આ વ્યક્તિઓમાં સામાન્ય રીતે ગંભીર વિકલાંગતા જોવા મળતી નથી, C) ખોટું છે કારણ કે આ પરિસ્થિતિ માત્ર સ્ત્રીઓમાં જ જોવા મળે છે, D) ખોટું છે કારણ કે આ વર્ણસૂત્રીય ટ્રાયસોમીનું ઉદાહરણ છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડાઉન સિન્ડ્રોમમાં જોવા મળતી ટ્રાયસોમી-૨૧ સાથે નીચેનામાંથી કયું લક્ષણ સંકળાયેલું નથી?", "opts": ["બૌદ્ધિક અપંગતા", "હૃદયના દોષો", "લોહીમાં હિમોગ્લોબિનની ઉણપ", "ચહેરાની રચનામાં ફેરફાર (જેવા કે તિરાડ વાળી આંખો)"], "ans": 2, "exp": "ડાઉન સિન્ડ્રોમ (ટ્રાયસોમી-૨૧)માં બૌદ્ધિક અપંગતા (A), હૃદયના દોષો (B), અને ચહેરાની રચનામાં ફેરફાર (D) સામાન્ય લક્ષણો છે. પરંતુ લોહીમાં હિમોગ્લોબિનની ઉણપ (C) એ એનિમિયાનું લક્ષણ છે, જે ડાઉન સિન્ડ્રોમ સાથે સીધું સંકળાયેલું નથી. હિમોગ્લોબિનની ઉણપ અન્ય રોગો જેવા કે થેલેસેમિયા અથવા લોહીની ઉણપ સાથે સંકળાયેલી છે.", "ref": "Std 12 - Chapter 5: વારસાગત રોગો અને જનુકીય વિકારો", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૫ વર્ણસૂત્રો હાજર છે અને તેમાં Y વર્ણસૂત્ર નથી. આ સ્થિતિ કયા રોગ સાથે સંકળાયેલી છે?", "opts": ["ટર્નર સિન્ડ્રોમ", "ક્લાઇનફેલ્ટર સિન્ડ્રોમ", "એડવર્ડ્સ સિન્ડ્રોમ", "પાટૌ સિન્ડ્રોમ"], "ans": 0, "exp": "ટર્નર સિન્ડ્રોમમાં વ્યક્તિમાં ૪૫ વર્ણસૂત્રો હાજર હોય છે, જેમાં એક X વર્ણસૂત્ર ગેરહાજર હોય છે (45,X). ક્લાઇનફેલ્ટર સિન્ડ્રોમ (B)માં ૪૭ વર્ણસૂત્રો હાજર હોય છે (47,XXY). એડવર્ડ્સ સિન્ડ્રોમ (C) ટ્રાયસોમી-૧૮ સાથે સંકળાયેલું છે, જ્યારે પાટૌ સિન્ડ્રોમ (D) ટ્રાયસોમી-૧૩ સાથે સંકળાયેલું છે.", "ref": "Std 12 - Chapter 5: વારસાગત રોગો અને જનુકીય વિકારો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્યુપ્લોઇડી માટે સાચું છે?", "opts": ["એન્યુપ્લોઇડી હંમેશા ઓટોસોમલ વર્ણસૂત્રો સાથે સંકળાયેલી હોય છે", "એન્યુપ્લોઇડી ફક્ત મનુષ્યમાં જોવા મળે છે", "એન્યુપ્લોઇડી વર્ણસૂત્રોની અસમાન્ય સંખ્યા ધરાવતી સ્થિતિ છે", "એન્યુપ્લોઇડી હંમેશા જીવલેણ હોય છે"], "ans": 2, "exp": "એન્યુપ્લોઇડી એ વર્ણસૂત્રોની અસમાન્ય સંખ્યા ધરાવતી સ્થિતિ છે (C). એન્યુપ્લોઇડી ઓટોસોમલ અથવા લિંગી વર્ણસૂત્રો સાથે સંકળાયેલી હોઈ શકે (A ખોટું). એન્યુપ્લોઇડી ફક્ત મનુષ્યમાં જ નહીં, પરંતુ અન્ય જીવોમાં પણ જોવા મળે છે (B ખોટું). એન્યુપ્લોઇડી હંમેશા જીવલેણ નથી, ઉદાહરણ તરીકે, ટ્રાયસોમી-૨૧ (ડાઉન સિન્ડ્રોમ) વ્યક્તિ જીવિત રહી શકે છે (D ખોટું).", "ref": "Std 12 - Chapter 5: વારસાગત રોગો અને જનુકીય વિકારો", "ch": ""}, {"q": "ક્લાઇનફેલ્ટર સિન્ડ્રોમ ધરાવતી વ્યક્તિમાં નીચેનામાંથી કયું લક્ષણ જોવા મળશે?", "opts": ["ઉચ્ચ કદ અને લાંબા હાથ-પગ", "સ્ત્રી જેવી શારીરિક રચના અને વંધ્યત્વ", "બૌદ્ધિક ક્ષમતામાં વિકાસ", "હૃદયના દોષો અને ચહેરાની અસામાન્યતા"], "ans": 1, "exp": "ક્લાઇનફેલ્ટર સિન્ડ્રોમ (47,XXY) ધરાવતી વ્યક્તિમાં સ્ત્રી જેવી શારીરિક રચના, વંધ્યત્વ (B), અને કેટલાક કિસ્સાઓમાં બૌદ્ધિક અપંગતા જોવા મળે છે. ઉચ્ચ કદ અને લાંબા હાથ-પગ (A) એ મેરફન સિન્ડ્રોમ સાથે સંકળાયેલું છે. બૌદ્ધિક ક્ષમતામાં વિકાસ (C) સામાન્ય રીતે જોવા મળતું નથી. હૃદયના દોષો અને ચહેરાની અસામાન્યતા (D) એ ડાઉન સિન્ડ્રોમ સાથે સંકળાયેલું છે.", "ref": "Std 12 - Chapter 5: વારસાગત રોગો અને જનુકીય વિકારો", "ch": ""}, {"q": "નીચેનામાંથી કયું એન્યુપ્લોઇડીનું કારણ નથી?", "opts": ["કોષવિભાજન દરમિયાન વર્ણસૂત્રોનું અસમાન વહેંચણ", "ગર્ભાધાન દરમિયાન વર્ણસૂત્રોની ગેરહાજરી અથવા અતિરિક્તતા", "DNA ની નકલ દરમિયાન મ્યુટેશન", "કોષવિભાજન દરમિયાન સ્પિન્ડલ ફાઇબરની ખામી"], "ans": 2, "exp": "એન્યુપ્લોઇડીનું મુખ્ય કારણ કોષવિભાજન દરમિયાન વર્ણસૂત્રોનું અસમાન વહેંચણ (A), ગર્ભાધાન દરમિયાન વર્ણસૂત્રોની ગેરહાજરી અથવા અતિરિક્તતા (B), અથવા કોષવિભાજન દરમિયાન સ્પિન્ડલ ફાઇબરની ખામી (D) હોઈ શકે છે. DNA ની નકલ દરમિયાન મ્યુટેશન (C) એ પોઈન્ટ મ્યુટેશન અથવા અન્ય પ્રકારના જનુકીય ફેરફારો તરફ દોરી શકે, પરંતુ એન્યુપ્લોઇડીનું કારણ નથી.", "ref": "Std 12 - Chapter 5: વારસાગત રોગો અને જનુકીય વિકારો", "ch": ""}, {"q": "ટર્નર સિન્ડ્રોમ ધરાવતી સ્ત્રીમાં નીચેનામાંથી કયું લક્ષણ જોવા મળશે નહીં?", "opts": ["લંબાઈમાં ટૂંકી વૃદ્ધિ", "ગળામાં વેબ્ડ નેક (Webbed neck) હાજર રહેવું", "સ્તનવિકાસનો અભાવ", "ઉચ્ચ બૌદ્ધિક ક્ષમતા (IQ)"], "ans": 3, "exp": "ટર્નર સિન્ડ્રોમ (45,X) ધરાવતી સ્ત્રીઓમાં લંબાઈમાં ટૂંકી વૃદ્ધિ (A), ગળામાં વેબ્ડ નેક (B), અને સ્તનવિકાસનો અભાવ (C) જેવા લક્ષણો જોવા મળે છે. પરંતુ ઉચ્ચ બૌદ્ધિક ક્ષમતા (D) આ સિન્ડ્રોમનું લક્ષણ નથી. વાસ્તવમાં, ટર્નર સિન્ડ્રોમ ધરાવતી વ્યક્તિઓમાં સામાન્ય કરતાં નીચી બૌદ્ધિક ક્ષમતા અથવા શીખવાની અશક્તિ જોવા મળી શકે છે.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને ભિન્નતા", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૪ ઓટોસોમ + XY વર્ણસૂત્રો હાજર છે, પરંતુ તેના શરીરમાં સ્ત્રી જેવા લક્ષણો જોવા મળે છે. આ સ્થિતિ કયા સિન્ડ્રોમ સાથે સંકળાયેલી હોઈ શકે?", "opts": ["ટર્નર સિન્ડ્રોમ", "ક્લાઇનફેલ્ટર સિન્ડ્રોમ", "એન્ડ્રોજન ઇન્સેન્સિટિવિટી સિન્ડ્રોમ (AIS)", "ડાઉન સિન્ડ્રોમ"], "ans": 2, "exp": "એન્ડ્રોજન ઇન્સેન્સિટિવિટી સિન્ડ્રોમ (AIS)માં વ્યક્તિ XY વર્ણસૂત્રો ધરાવે છે, પરંતુ ટેસ્ટોસ્ટેરોન પ્રત્યેના રિસેપ્ટરની અભાવને કારણે સ્ત્રી જેવા લક્ષણો વિકસે છે. ટર્નર સિન્ડ્રોમ (A)માં 45,X વર્ણસૂત્રો હોય છે, ક્લાઇનફેલ્ટર સિન્ડ્રોમ (B)માં 47,XXY હોય છે, અને ડાઉન સિન્ડ્રોમ (D)માં ટ્રાયસોમી-21 હોય છે.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને ભિન્નતા", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્યુપ્લોઇડીના મોસેઇકિઝમ (Mosaicism) વિશે સાચું છે?", "opts": ["મોસેઇકિઝમમાં શરીરના બધા કોષોમાં એકસરખી વર્ણસૂત્રી અસામાન્યતા હોય છે", "મોસેઇકિઝમ ફક્ત ઓટોસોમલ વર્ણસૂત્રોમાં જ જોવા મળે છે", "મોસેઇકિઝમમાં શરીરના વિવિધ પેશીઓમાં ભિન્ન વર્ણસૂત્રી સંરચના હોઈ શકે છે", "મોસેઇકિઝમ હંમેશા ગંભીર રોગો તરફ દોરી જાય છે"], "ans": 2, "exp": "મોસેઇકિઝમમાં શરીરના વિવિધ પેશીઓમાં ભિન્ન વર્ણસૂત્રી સંરચના હોઈ શકે છે (C). આ સ્થિતિ ફરજિયાતપણે બધા કોષોમાં એકસરખી અસામાન્યતા ધરાવતી નથી (A ખોટું), તે લિંગી વર્ણસૂત્રોમાં પણ જોવા મળી શકે છે (B ખોટું), અને તે હંમેશા ગંભીર રોગો તરફ દોરી જતું નથી (D ખોટું).", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને ભિન્નતા", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૬ વર્ણસૂત્રો હાજર છે, પરંતુ તેના કોષોમાં ૨૨ જોડી વર્ણસૂત્રો જોવા મળે છે, જેમાં એક વર્ણસૂત્રની નકલ અધૂરી છે. આ સ્થિતિને શું કહેવાય?", "opts": ["ટ્રાયસોમી", "મોનોસોમી", "ડિલીશન (Deletion)", "ડ્યુપ્લિકેશન (Duplication)"], "ans": 2, "exp": "વર્ણસૂત્રની અધૂરી નકલ અથવા વર્ણસૂત્રના ભાગનો ગુમાવો તે ડિલીશન (Deletion) કહેવાય છે (C). ટ્રાયસોમી (A)માં એક વર્ણસૂત્રની એક અધિક નકલ હોય છે, મોનોસોમી (B)માં એક વર્ણસૂત્રનો અભાવ હોય છે, અને ડ્યુપ્લિકેશન (D)માં વર્ણસૂત્રના ભાગની નકલ હોય છે.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને ભિન્નતા", "ch": ""}, {"q": "નીચેનામાંથી કયું એન્યુપ્લોઇડીનું કારણ નથી, પરંતુ તે ક્રોમોસોમલ એબનોર્મલિટી સાથે સંકળાયેલું હોઈ શકે?", "opts": ["નોન્ડિસ્જંકશન (Non-disjunction)", "એનાફેઝ લેગ (Anaphase lag)", "ક્રોસિંગ ઓવર (Crossing over)", "સેન્ટ્રોમિયરની ખામી"], "ans": 2, "exp": "ક્રોસિંગ ઓવર (C) એ વંશપરંપરામાં ભિન્નતાનું કારણ છે, પરંતુ તે એન્યુપ્લોઇડીનું કારણ નથી. નોન્ડિસ્જંકશન (A), એનાફેઝ લેગ (B), અને સેન્ટ્રોમિયરની ખામી (D) એ એન્યુપ્લોઇડીના કારણો છે.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને ભિન્નતા", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૬ વર્ણસૂત્રો હાજર છે, પરંતુ તેના કોષોમાં ૧૫મું વર્ણસૂત્ર ત્રણ વખત જોવા મળે છે અને બીજા એક વર્ણસૂત્રની ઉણપ જોવા મળે છે. આ સ્થિતિને કયા પ્રકારની એન્યુપ્લોઇડી તરીકે ઓળખવામાં આવે છે?", "opts": ["ડબલ ટ્રાયસોમી", "મોનોસોમી + ટ્રાયસોમી", "ટેટ્રાસોમી", "નલિસોમી"], "ans": 1, "exp": "જવાબ B) મોનોસોમી + ટ્રાયસોમી છે. આ સ્થિતિમાં એક વર્ણસૂત્રની ઉણપ (મોનોસોમી) અને બીજા વર્ણસૂત્રની અતિરેક (ટ્રાયસોમી) જોવા મળે છે. ડબલ ટ્રાયસોમી (A) એટલે બે અલગ વર્ણસૂત્રોની ટ્રાયસોમી, ટેટ્રાસોમી (C) એટલે એક વર્ણસૂત્રની ચાર પ્રતો, અને નલિસોમી (D) એટલે એક વર્ણસૂત્રની શૂન્ય પ્રતો. આમ, માત્ર B વિકલ્પ યોગ્ય છે.", "ref": "Std 12 - અધ્યાય ૫: વંશવિજ્ઞાન અને વિકાસ (વર્ણસૂત્રીય વિપથન)", "ch": ""}, {"q": "ટર્નર સિન્ડ્રોમ ધરાવતી સ્ત્રીમાં નીચેનામાંથી કયું જનીન-લિંગ સંકળિત લક્ષણ જોવા મળશે નહીં?", "opts": ["અલ્પ વૃદ્ધિ", "ગળાનું પાણી (વેબ્ડ નેક)", "બંધ્યાત્વ", "હેમોફિલિયા"], "ans": 3, "exp": "જવાબ D) હેમોફિલિયા છે. ટર્નર સિન્ડ્રોમ (45,X) ધરાવતી સ્ત્રીઓમાં અલ્પ વૃદ્ધિ (A), ગળાનું પાણી (B), અને બંધ્યાત્વ (C) જોવા મળે છે, પરંતુ હેમોફિલિયા (D) X-લિંક્ડ રિસેસિવ રોગ છે જે સ્ત્રીઓમાં અત્યંત દુર્લભ છે કારણ કે તેમને બે X વર્ણસૂત્રોની ઉણપ હોય છે. આમ, D વિકલ્પ યોગ્ય નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશવિજ્ઞાન અને વિકાસ (લિંગ-સંકળિત રોગો)", "ch": ""}, {"q": "એક વ્યક્તિમાં ૪૭ વર્ણસૂત્રો હાજર છે અને તેમાં ૯મું વર્ણસૂત્રની ટ્રાયસોમી જોવા મળે છે. આ સ્થિતિ સાથે નીચેનામાંથી કયું લક્ષણ સંકળાયેલું હોઈ શકે?", "opts": ["ડાઉન સિન્ડ્રોમ", "પાટૌ સિન્ડ્રોમ", "એડવર્ડ્સ સિન્ડ્રોમ", "ક્લાઇનફેલ્ટર સિન્ડ્રોમ"], "ans": 1, "exp": "જવાબ B) પાટૌ સિન્ડ્રોમ છે. ૯મું વર્ણસૂત્રની ટ્રાયસોમી પાટૌ સિન્ડ્રોમ (Trisomy 9) સાથે સંકળાયેલી છે. ડાઉન સિન્ડ્રોમ (A) ટ્રાયસોમી-21 સાથે, એડવર્ડ્સ સિન્ડ્રોમ (C) ટ્રાયસોમી-18 સાથે, અને ક્લાઇનફેલ્ટર સિન્ડ્રોમ (D) XXY સાથે સંકળાયેલ છે. આમ, માત્ર B વિકલ્પ યોગ્ય છે.", "ref": "Std 12 - અધ્યાય ૫: વંશવિજ્ઞાન અને વિકાસ (વર્ણસૂત્રીય વિપથન)", "ch": ""}, {"q": "એન્યુપ્લોઇડીના કિસ્સામાં, નીચેનામાંથી કયું વિધાન મોસેઇકિઝમ માટે સાચું નથી?", "opts": ["મોસેઇકિઝમમાં અલગ-અલગ કોષરસી લાઇનમાં અલગ વર્ણસૂત્ર સંખ્યા હોય છે", "મોસેઇકિઝમ ફક્ત મીટોસિસ દરમિયાન જ થાય છે", "મોસેઇકિઝમના કારણે કેટલાક કોષો સ્વસ્થ અને કેટલાક અસ્વસ્થ હોઈ શકે", "મોસેઇકિઝમ ટર્નર સિન્ડ્રોમમાં જોવા મળી શકે"], "ans": 1, "exp": "જવાબ B) મોસેઇકિઝમ ફક્ત મીટોસિસ દરમિયાન જ થાય છે. મોસેઇકિઝમ મીટોસિસ અથવા મિયોસિસ દરમિયાન થઈ શકે છે. A) સાચું છે કારણ કે મોસેઇકિઝમમાં અલગ-અલગ કોષરસી લાઇનમાં અલગ વર્ણસૂત્ર સંખ્યા હોય છે. C) સાચું છે કારણ કે મોસેઇકિઝમના કારણે કોષોના સ્વાસ્થ્યમાં ફરક પડી શકે. D) સાચું છે કારણ કે ટર્નર સિન્ડ્રોમમાં મોસેઇકિઝમ (45,X/46,XX) જોવા મળી શકે. આમ, B વિકલ્પ ખોટો છે.", "ref": "Std 12 - અધ્યાય ૫: વંશવિજ્ઞાન અને વિકાસ (વર્ણસૂત્રીય વિપથન)", "ch": ""}, {"q": "નીચેનામાંથી કયું એન્યુપ્લોઇડીનું કારણ નથી, પરંતુ તે કોષવિભાજન દરમિયાન થતી ત્રુટિ સાથે સંકળાયેલું છે?", "opts": ["નોન્ડિસજંકશન", "એનાફેઝ લેગિંગ", "સેન્ટ્રોમિયરની અસામાન્યતા", "જનીન મ્યુટેશન"], "ans": 3, "exp": "જવાબ D) જનીન મ્યુટેશન છે. નોન્ડિસજંકશન (A), એનાફેઝ લેગિંગ (B), અને સેન્ટ્રોમિયરની અસામાન્યતા (C) એ બધા કોષવિભાજન દરમિયાન થતી ત્રુટિઓ છે જે એન્યુપ્લોઇડીનું કારણ બની શકે. જનીન મ્યુટેશન (D) એન્યુપ્લોઇડીનું કારણ નથી, પરંતુ તે જનીન સ્તરે થતી ત્રુટિ છે. આમ, D વિકલ્પ યોગ્ય છે.", "ref": "Std 12 - અધ્યાય ૫: વંશવિજ્ઞાન અને વિકાસ (વર્ણસૂત્રીય વિપથન)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
