@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ફલન</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ફલન</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ફલન</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એકસદની વનસ્પતિમાં પુંકેસરના પરાગાશયમાંથી પરાગરજનું સ્ત્રીકેસરના પરાગાસન પર સ્થાપન થવાની ક્રિયાને શું કહે છે, પરંતુ આ ક્રિયા બીજ નિર્માણ માટે પૂરતી નથી?", "opts": ["પરાગનયન", "ફલન", "પરાગનલિકા વૃદ્ધિ", "બેવડું ફલન"], "ans": 0, "exp": "પરાગરજનું પરાગાસન પર સ્થાપન થવાની ક્રિયાને પરાગનયન કહે છે. ફલન ત્યારે થાય છે જ્યારે પરાગરજનું નર જનનકોષ સ્ત્રી જનનકોષ સાથે સંમિલન કરે છે. પરાગનલિકા વૃદ્ધિ અને બેવડું ફલન એ ફલન પછીની ક્રિયાઓ છે. તેથી સાચો જવાબ પરાગનયન છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "આવૃત બીજધારી વનસ્પતિઓમાં બેવડું ફલન થાય છે. આ પ્રક્રિયામાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["એક નર જનનકોષ અંડકોષ સાથે સંમિલન કરી યુગ્મનજ બનાવે છે", "બીજો નર જનનકોષ દ્વિતીય કોષકેન્દ્ર સાથે સંમિલન કરી પ્રાથમિક ભ્રૂણપોષ કોષ બનાવે છે", "પ્રાથમિક ભ્રૂણપોષ કોષ ત્રિકીય હોય છે અને તે ભ્રૂણના પોષણ માટે જવાબદાર છે", "બંને નર જનનકોષો અંડકોષ સાથે જ સંમિલન કરે છે"], "ans": 3, "exp": "બેવડા ફલનમાં એક નર જનનકોષ અંડકોષ સાથે અને બીજો નર જનનકોષ દ્વિતીય કોષકેન્દ્ર સાથે સંમિલન કરે છે. બંને નર જનનકોષો અંડકોષ સાથે સંમિલન કરતા નથી, તેથી વિકલ્પ D ખોટો છે. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક વિદ્યાર્થીએ ફલનની પ્રક્રિયા અભ્યાસ કરતી વખતે નોંધ્યું કે કેટલીક વનસ્પતિઓમાં ફલન પછી પણ બીજ નિર્માણ થતું નથી. આ ઘટનાનું કારણ શું હોઈ શકે?", "opts": ["પરાગનયન ન થયું હોવું", "પરાગનલિકા વૃદ્ધિ અવરોધાયેલી હોવી", "અસંગતતા (Incompatibility) પ્રક્રિયા", "ઉપરોક્ત તમામ કારણો શક્ય છે"], "ans": 3, "exp": "ફલન પછી બીજ નિર્માણ ન થવાના ઘણા કારણો હોઈ શકે છે, જેમ કે પરાગનયન ન થયું હોવું, પરાગનલિકા વૃદ્ધિ અવરોધાયેલી હોવી, અથવા અસંગતતા પ્રક્રિયા જે ફલનને અટકાવે છે. તેથી તમામ વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ફલનની પ્રક્રિયા માટે ખોટું છે?", "opts": ["ફલન પછી યુગ્મનજમાં કોષકેન્દ્રીય વિભાજન થાય છે અને ભ્રૂણ વિકાસ શરૂ થાય છે", "ફલન માત્ર લિંગી પ્રજનન ધરાવતી વનસ્પતિઓમાં જ થાય છે", "ફલન પછી અંડાશય ફળમાં રૂપાંતરિત થાય છે", "ફલન માટે હંમેશા પાણીની જરૂર પડે છે"], "ans": 3, "exp": "ફલન માટે હંમેશા પાણીની જરૂર પડતી નથી. આવૃત બીજધારી વનસ્પતિઓમાં પરાગનલિકા દ્વારા નર જનનકોષ સ્ત્રી જનનકોષ સુધી પહોંચે છે, જેમાં પાણીની જરૂર હોતી નથી. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક વનસ્પતિશાસ્ત્રીને એક એવી વનસ્પતિ મળી જેમાં ફલન પછી પણ ભ્રૂણપોષ વિકસિત થતો નથી. આ ઘટનાને શું કહે છે અને તેનું કારણ શું હોઈ શકે?", "opts": ["એપોમિક્સિસ - જનીનિક પરિવર્તન", "પાર્થેનોકાર્પી - હોર્મોનની અસંતુલિતતા", "એન્ડોસ્પર્મ નિષ્ફળતા - કોષકેન્દ્રીય વિભાજન ન થવું", "અસંગતતા - પરાગરજ અને પરાગાસન વચ્ચે રાસાયણિક અસંગતતા"], "ans": 2, "exp": "ફલન પછી ભ્રૂણપોષ ન વિકસવાની ઘટનાને એન્ડોસ્પર્મ નિષ્ફળતા કહે છે, જેનું કારણ કોષકેન્દ્રીય વિભાજન ન થવું હોઈ શકે છે. એપોમિક્સિસ અને પાર્થેનોકાર્પી ભ્રૂણ વિકાસ સાથે સંબંધિત છે, જ્યારે અસંગતતા ફલન પહેલાની પ્રક્રિયા છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "આવૃત બીજધારી વનસ્પતિમાં બેવડું ફલન થાય છે. જો પરાગરજના એક કોષમાં 8 વર્ણસૂત્રો હોય, તો ભ્રૂણપોષમાં કેટલા વર્ણસૂત્રો હશે?", "opts": ["8", "12", "24", "16"], "ans": 3, "exp": "બેવડું ફલનમાં, પરાગરજનો એક કોષ (n=8) સ્ત્રીકેસરના દ્વિતીય કોષ (2n=16) સાથે સંગલન પામે છે. ભ્રૂણપોષ ત્રિગુણિત (3n) હોય છે, જેથી 8 + 16 = 24 વર્ણસૂત્રો થાય, પરંતુ ત્રિગુણિત અવસ્થામાં 3n = 24/2 = 12 નહીં, પરંતુ 3 × 8 = 24. પરંતુ ભ્રૂણપોષમાં મૂળ કોષના 8 + સ્ત્રીકોષના 16 = 24 વર્ણસૂત્રો હોય છે. અહીં, પરાગરજનો કોષ n=8 હોવાથી ભ્રૂણપોષ 3n=24 થાય. શરત મુજબ, પરાગરજનો કોષ n=8 હોવાથી ભ્રૂણપોષ 3n=24 થાય. જવાબ D) 24 નહીં, પરંતુ 3n=24 થાય, પરંતુ પ્રશ્નમાં 8 વર્ણસૂત્રો હોવાથી 3×8=24 થાય. પરંતુ વિકલ્પ C) 24 સચોટ છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (Flowers, Fruits and Seeds)", "ch": ""}, {"q": "ફલન પછી ભ્રૂણપોષનો વિકાસ થતો નથી એવી વનસ્પતિ કઈ છે?", "opts": ["મકાઈ", "ઘઉં", "કેળા", "ઓરકિડ"], "ans": 3, "exp": "ઓરકિડ જેવી કેટલીક વનસ્પતિઓમાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી. આ વનસ્પતિઓમાં ભ્રૂણને પોષણ મેળવવા માટે અન્ય સ્રોતો ઉપલબ્ધ હોય છે. મકાઈ, ઘઉં અને કેળામાં ભ્રૂણપોષ વિકસિત થાય છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (Flowers, Fruits and Seeds)", "ch": ""}, {"q": "ફલનની પ્રક્રિયામાં નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પરાગરજનો એક કોષ જ સ્ત્રીકેસરના અંડકોષ સાથે સંગલન પામે છે.", "પરાગરજના બે કોષો સ્ત્રીકેસરના અંડકોષ અને દ્વિતીય કોષ સાથે સંગલન પામે છે.", "પરાગરજના ત્રણ કોષો સ્ત્રીકેસરના અંડકોષ સાથે સંગલન પામે છે.", "પરાગરજના સૌથી મોટો કોષ સ્ત્રીકેસરના અંડકોષ સાથે સંગલન પામે છે."], "ans": 1, "exp": "ફલનની પ્રક્રિયામાં, પરાગરજના બે કોષો સક્રિય ભૂમિકા ભજવે છે: એક કોષ અંડકોષ સાથે સંગલન પામી ભ્રૂણ બનાવે છે, જ્યારે બીજો કોષ દ્વિતીય કોષ સાથે સંગલન પામી ભ્રૂણપોષ બનાવે છે. આ પ્રક્રિયાને બેવડું ફલન કહેવાય છે. અહીં, વિધાન B સચોટ છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (Flowers, Fruits and Seeds)", "ch": ""}, {"q": "નીચેનામાંથી કયા પૌધામાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી, પરંતુ ભ્રૂણને પોષણ મળે છે?", "opts": ["મગફળી", "કપાસ", "સૂર્યમુખી", "કોફી"], "ans": 3, "exp": "કોફી જેવી કેટલીક વનસ્પતિઓમાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી, પરંતુ ભ્રૂણને પોષણ મેળવવા માટે અન્ય પેશીઓ દ્વારા પોષણ મળે છે. મગફળી, કપાસ અને સૂર્યમુખીમાં ભ્રૂણપોષ વિકસિત થાય છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (Flowers, Fruits and Seeds)", "ch": ""}, {"q": "ફલનની પ્રક્રિયામાં, પરાગરજનો કયો કોષ અંડકોષ સાથે સંગલન પામે છે?", "opts": ["પરાગરજનો વેજીટેટીવ કોષ", "પરાગરજનો જનન કોષ", "પરાગરજનો ટ્યુબ કોષ", "પરાગરજનો સહાયક કોષ"], "ans": 1, "exp": "ફલનની પ્રક્રિયામાં, પરાગરજનો જનન કોષ (Generative cell) અંડકોષ સાથે સંગલન પામે છે અને ભ્રૂણનો વિકાસ કરે છે. વેજીટેટીવ કોષ પરાગનળીનો વિકાસ કરે છે, ટ્યુબ કોષ પરાગનળી બનાવે છે, અને સહાયક કોષનો કોઈ અસ્તિત્વ જ નથી.", "ref": "Std 12 - પ્રકરણ 2: જનન (Flowers, Fruits and Seeds)", "ch": ""}, {"q": "આવૃત બીજધારી વનસ્પતિમાં બેવડું ફલન થાય છે. જો અંડાશયમાં ૭ કોષો ધરાવતો ભ્રૂણકોષ (embryo sac) હોય અને પરાગરજમાં ૨ પુત્રી કોષો હોય, તો ફલન પછી ભ્રૂણપોષમાં કેટલા કોષકેન્દ્ર (nuclei) હશે?", "opts": ["૩", "૫", "૬", "૯"], "ans": 3, "exp": "બેવડું ફલનમાં, એક પરાગરજ કોષ અંડકોષ સાથે સંગલન પામી ભ્રૂણ બનાવે છે, જ્યારે બીજો પરાગરજ કોષ દ્વિતીય કોષકેન્દ્ર (secondary nucleus) સાથે સંગલન પામી ભ્રૂણપોષ બનાવે છે. દ્વિતીય કોષકેન્દ્ર ૨ કોષકેન્દ્ર ધરાવે છે (અંડાશયના મધ્ય કોષોના સંગલનથી). પરાગરજનો કોષ પણ ૨ કોષકેન્દ્ર ધરાવે છે. સંગલન પછી ભ્રૂણપોષમાં ૨ + ૨ = ૪ કોષકેન્દ્ર થાય છે, પરંતુ ભ્રૂણપોષના વિકાસ દરમિયાન કોષવિભાજન થતાં કોષકેન્દ્રની સંખ્યા ૯ થાય છે. આથી સરનામું ૯ છે. A, B, C ખોટા છે કારણ કે તે ભ્રૂણપોષના અંતિમ કોષકેન્દ્રની સંખ્યા દર્શાવતાં નથી.", "ref": "Std 12 - પ્રકરણ ૨: જનન (Reproduction) - આવૃત બીજધારી વનસ્પતિઓમાં ફલન", "ch": ""}, {"q": "નીચેનામાંથી કયા વનસ્પતિ સમૂહમાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી, પરંતુ ભ્રૂણને પોષણ પૂરું પાડવા માટે અન્ય રચના અસ્તિત્વમાં હોય છે?", "opts": ["મકાઈ (Zea mays)", "કપાસ (Gossypium)", "નારિયેળ (Cocos nucifera)", "સરકો (Saccharum officinarum)"], "ans": 2, "exp": "નારિયેળ (Cocos nucifera)માં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી. તેની જગ્યાએ, ભ્રૂણને પોષણ પૂરું પાડવા માટે 'નારિયેળનું પાણી' (coconut water) તરીકે ઓળખાતી રચના અસ્તિત્વમાં હોય છે, જે એન્ડોસ્પર્મના કોષરસનું રૂપાંતર છે. મકાઈ, કપાસ અને સરકોમાં ભ્રૂણપોષ વિકસિત થાય છે. આથી સરનામું C છે.", "ref": "Std 12 - પ્રકરણ ૨: જનન - ફલન પછીના પોષણ સ્રોતો", "ch": ""}, {"q": "ફલનની પ્રક્રિયામાં, જો પરાગરજનો વૃદ્ધિ નળ (pollen tube) અંડાશયના મધ્ય ભાગમાં પ્રવેશે અને અંડકોષ સુધી પહોંચે, તો નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["પરાગરજનો વૃદ્ધિ નળ અંડવાહિની (style)માંથી પસાર થાય છે.", "વૃદ્ધિ નળનો વિકાસ પરાગરજના જીવદ્રવ્ય (cytoplasm) દ્વારા થાય છે.", "વૃદ્ધિ નળનો અગ્રભાગ (tip)માં રસાયણિક પદાર્થો મુક્ત થાય છે જે અંડકોષને આકર્ષે છે.", "વૃદ્ધિ નળનો વિકાસ પરાગાશય (anther)માં જ થાય છે."], "ans": 3, "exp": "વૃદ્ધિ નળનો વિકાસ પરાગરજના પરાગાશયમાં થતો નથી, પરંતુ પરાગરજ પરાગાસન પર પડ્યા પછી થાય છે. વૃદ્ધિ નળ અંડવાહિનીમાંથી પસાર થાય છે (A સત્ય), તેનો વિકાસ પરાગરજના જીવદ્રવ્ય દ્વારા થાય છે (B સત્ય), અને તેના અગ્રભાગમાં રસાયણિક પદાર્થો મુક્ત થાય છે જે અંડકોષને આકર્ષે છે (C સત્ય). આથી D ખોટું છે.", "ref": "Std 12 - પ્રકરણ ૨: જનન - પરાગરજનો વૃદ્ધિ નળ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ફલનની પ્રક્રિયા દરમિયાન થતી 'સિંગેમી' (syngamy) અને 'ત્રિપ્લોઇડી' (triploidy) બંને ઘટનાઓને સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["સિંગેમીમાં એક હેપ્લોઇડ પરાગરજ કોષ અને એક હેપ્લોઇડ અંડકોષ સંગલન પામે છે, જ્યારે ત્રિપ્લોઇડીમાં દ્વિતીય કોષકેન્દ્ર અને એક પરાગરજ કોષ સંગલન પામે છે.", "સિંગેમીમાં બે હેપ્લોઇડ કોષો સંગલન પામે છે, જ્યારે ત્રિપ્લોઇડીમાં ત્રણ હેપ્લોઇડ કોષો સંગલન પામે છે.", "સિંગેમી અને ત્રિપ્લોઇડી બંનેમાં કોષકેન્દ્રની સંખ્યા ડબલ થાય છે.", "સિંગેમી અને ત્રિપ્લોઇડી બંને ફલન પછી જ થાય છે."], "ans": 0, "exp": "સિંગેમીમાં એક હેપ્લોઇડ પરાગરજ કોષ અને એક હેપ્લોઇડ અંડકોષ સંગલન પામી ડિપ્લોઇડ ભ્રૂણ બનાવે છે. ત્રિપ્લોઇડીમાં, દ્વિતીય કોષકેન્દ્ર (જે ૨ હેપ્લોઇડ કોષકેન્દ્ર ધરાવે છે) અને એક હેપ્લોઇડ પરાગરજ કોષ સંગલન પામી ત્રિપ્લોઇડ ભ્રૂણપોષ બનાવે છે. A સરનામું છે. B, C, D ખોટા છે કારણ કે તે ઘટનાઓને યોગ્ય રીતે વર્ણવતાં નથી.", "ref": "Std 12 - પ્રકરણ ૨: જનન - બેવડું ફલન", "ch": ""}, {"q": "એક વનસ્પતિમાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી, પરંતુ ભ્રૂણને પોષણ પૂરું પાડવા માટે 'રૂપાંતરિત પર્ણ' (modified leaf) અસ્તિત્વમાં હોય છે. આ વનસ્પતિ કઈ હશે?", "opts": ["મગફળી (Arachis hypogaea)", "વટાણા (Pisum sativum)", "ઓર્કિડ (Orchid)", "કોફી (Coffea)"], "ans": 2, "exp": "ઓર્કિડ (Orchid) વનસ્પતિમાં ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી. તેની જગ્યાએ, ભ્રૂણને પોષણ પૂરું પાડવા માટે 'રૂપાંતરિત પર્ણ' (modified leaf) અસ્તિત્વમાં હોય છે, જેને 'પ્રોટોકોર્મ' (protocorm) કહેવાય છે. મગફળી, વટાણા અને કોફીમાં ભ્રૂણપોષ વિકસિત થાય છે. આથી સરનામું C છે.", "ref": "Std 12 - પ્રકરણ ૨: જનન - ફલન પછીના પોષણ સ્રોતો", "ch": ""}, {"q": "આવૃત બીજધારી વનસ્પતિમાં બેવડું ફલન થાય છે. જો પરાગરજના વૃદ્ધિ નળમાંથી નિકળેલા બે શુક્રકોષોમાંથી એક શુક્રકોષ અંડકોષ સાથે સંગલન પામે છે, તો બીજો શુક્રકોષ ક્યાં સંગલન પામે છે?", "opts": ["અંડાશયના ભિત્તિ કોષ સાથે", "દ્વિતીય કોષકેન્દ્ર સાથે", "પરાગાશયના કોષ સાથે", "ભ્રૂણકોષ સાથે"], "ans": 1, "exp": "બેવડું ફલનમાં, એક શુક્રકોષ અંડકોષ સાથે સંગલન પામી ભ્રૂણ બનાવે છે, જ્યારે બીજો શુક્રકોષ દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામી ત્રિપ્લોઇડ ભ્રૂણપોષ બનાવે છે. અંડાશયના ભિત્તિ કોષ, પરાગાશયના કોષ અને ભ્રૂણકોષ સાથે સંગલન થતું નથી.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ફલનની પ્રક્રિયામાં, જો પરાગરજનો વૃદ્ધિ નળ અંડાશયના મધ્ય ભાગમાં પ્રવેશે અને અંડકોષ સાથે સંગલન થાય, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ભ્રૂણપોષ ત્રિપ્લોઇડ હશે", "ભ્રૂણ ડિપ્લોઇડ હશે", "દ્વિતીય કોષકેન્દ્ર હાપ્લોઇડ હશે", "અંડાશયમાં ભ્રૂણ અને ભ્રૂણપોષ વિકસિત થશે"], "ans": 2, "exp": "ફલન પછી, ભ્રૂણ ડિપ્લોઇડ અને ભ્રૂણપોષ ત્રિપ્લોઇડ હશે. દ્વિતીય કોષકેન્દ્ર હાપ્લોઇડ નહીં પણ ડિપ્લોઇડ હશે, કારણ કે તે અંડકોષના વિકાસ દરમિયાન બનેલો હોય છે. અંડાશયમાં ભ્રૂણ અને ભ્રૂણપોષ વિકસિત થશે.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "એક વનસ્પતિશાસ્ત્રીને એક એવી આવૃત બીજધારી વનસ્પતિ મળી જેમાં ફલન પછી ભ્રૂણપોષનો વિકાસ તો થાય છે, પરંતુ તે ત્રિગુણિત (triploid) નથી. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["પરાગરજના બંને નર જનન કોષો અંડકોષ સાથે સંગલન પામ્યા છે", "પરાગરજનો એક નર જનન કોષ અંડકોષ સાથે અને બીજો દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામ્યો નથી", "પરાગરજનો એક નર જનન કોષ અંડકોષ સાથે સંગલન પામ્યો છે અને બીજો નર જનન કોષ દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામ્યો છે, પરંતુ દ્વિતીય કોષકેન્દ્ર પહેલેથી જ દ્વિગુણિત હતું", "પરાગરજનો વૃદ્ધિ નળ અંડાશયમાં પ્રવેશતા પહેલા જ નાશ પામ્યો છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે કારણ કે આવૃત બીજધારી વનસ્પતિમાં બેવડું ફલન થાય છે જેમાં એક નર જનન કોષ અંડકોષ સાથે અને બીજો નર જનન કોષ દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામે છે. સામાન્ય રીતે દ્વિતીય કોષકેન્દ્ર એકગુણિત હોય છે, પરંતુ જો તે પહેલેથી જ દ્વિગુણિત હોય તો ભ્રૂણપોષ ત્રિગુણિતને બદલે ચતુર્ગુણિત બને. વિકલ્પ A ખોટો છે કારણ કે બંને નર જનન કોષો અંડકોષ સાથે સંગલન પામે તો ત્રિગુણિત ભ્રૂણ બને, ભ્રૂણપોષ નહીં. વિકલ્પ B ખોટો છે કારણ કે જો દ્વિતીય કોષકેન્દ્ર સાથે સંગલન ન થાય તો ભ્રૂણપોષ વિકસિત જ ન થાય. વિકલ્પ D ખોટો છે કારણ કે જો વૃદ્ધિ નળ નાશ પામે તો ફલન જ ન થાય અને ભ્રૂણપોષ પણ ન વિકસે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક વિદ્યાર્થીએ અવલોકન કર્યું કે એક આવૃત બીજધારી વનસ્પતિમાં ફલન પછી ભ્રૂણપોષનો વિકાસ તો થાય છે, પરંતુ તેના કોષોમાં કોષકેન્દ્ર વિભાજન (karyokinesis) તો થાય છે પરંતુ કોષરસ વિભાજન (cytokinesis) થતું નથી. આ પરિસ્થિતિને કારણે નીચેનામાંથી કયું પરિણામ સંભવિત છે?", "opts": ["ભ્રૂણપોષના કોષો એકકોષકેન્દ્રીય (uninucleate) અને બહુકોષીય બનશે", "ભ્રૂણપોષના કોષો બહુકોષકેન્દ્રીય (multinucleate) અને એકકોષીય બનશે", "ભ્રૂણપોષનો વિકાસ અટકી જશે અને ભ્રૂણ નાશ પામશે", "ભ્રૂણપોષના કોષો સામાન્ય ત્રિગુણિત કોષો તરીકે વિકસિત થશે"], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે કારણ કે જો કોષકેન્દ્ર વિભાજન તો થાય પરંતુ કોષરસ વિભાજન ન થાય તો એક જ કોષમાં અનેક કોષકેન્દ્રો ઉત્પન્ન થશે, જેને બહુકોષકેન્દ્રીય અવસ્થા કહે છે. આ પરિસ્થિતિને 'સહકોષકેન્દ્રીય ભ્રૂણપોષ' (coenocytic endosperm) કહે છે. વિકલ્પ A ખોટો છે કારણ કે જો કોષરસ વિભાજન ન થાય તો કોષો બહુકોષીય ન બની શકે. વિકલ્પ C ખોટો છે કારણ કે ભ્રૂણપોષનો વિકાસ અટકતો નથી, માત્ર તેની રચના બદલાય છે. વિકલ્પ D ખોટો છે કારણ કે સામાન્ય ત્રિગુણિત કોષો માટે કોષરસ વિભાજન જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક આવૃત બીજધારી વનસ્પતિમાં ફલનની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન અપવાદરૂપ ગણી શકાય? (નોંધ: આ વનસ્પતિ સામાન્ય આવૃત બીજધારી વનસ્પતિની લાક્ષણિકતાઓ ધરાવે છે.)", "opts": ["પરાગરજના વૃદ્ધિ નળમાંથી બે નર જનનકોષો મુક્ત થાય છે, જેમાંથી એક અંડકોષ સાથે અને બીજો દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામે છે", "ફલન પછી ત્રિગુણિત (3n) ભ્રૂણપોષનું નિર્માણ થાય છે, જે ભ્રૂણના પોષણ માટે જવાબદાર છે", "ફલનની પ્રક્રિયા દરમિયાન પરાગરજનો વૃદ્ધિ નળ અંડાશયના બીજાંડ છિદ્ર (micropyle) દ્વારા પ્રવેશે છે અને અંડકોષ સુધી પહોંચે છે", "ફલન પછી અંડકોષમાંથી ભ્રૂણ વિકસિત થાય છે, જ્યારે દ્વિતીય કોષકેન્દ્રમાંથી ભ્રૂણપોષ વિકસિત થાય છે, પરંતુ કેટલીક વખત ભ્રૂણપોષ વિકસિત થયા વગર પણ ભ્રૂણનો વિકાસ થઈ શકે છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. સામાન્ય રીતે આવૃત બીજધારી વનસ્પતિઓમાં બેવડું ફલન થાય છે, જેમાં એક નર જનનકોષ અંડકોષ સાથે સંગલન પામી ભ્રૂણ બનાવે છે અને બીજો નર જનનકોષ દ્વિતીય કોષકેન્દ્ર સાથે સંગલન પામી ત્રિગુણિત ભ્રૂણપોષ બનાવે છે. ભ્રૂણપોષ ભ્રૂણના પોષણ માટે જરૂરી છે. પરંતુ અપવાદરૂપ કેટલીક વનસ્પતિઓમાં (જેમ કે ઓર્કિડેસી કુળની વનસ્પતિઓ) ફલન પછી ભ્રૂણપોષ વિકસિત થતો નથી, તેમ છતાં ભ્રૂણનો વિકાસ થાય છે. આ પ્રકારની વનસ્પતિઓમાં ભ્રૂણને પોષણ બીજાંડના અન્ય ભાગોમાંથી મળે છે. આ વિધાન અપવાદરૂપ ગણી શકાય. બાકીના વિકલ્પો સામાન્ય ફલનની પ્રક્રિયા દર્શાવે છે, જે આવૃત બીજધારી વનસ્પતિઓમાં સામાન્ય રીતે જોવા મળે છે.\n\nવિકલ્પ A: આ સામાન્ય બેવડા ફલનની પ્રક્રિયા દર્શાવે છે, તેથી ખોટો.\nવિકલ્પ B: ત્રિગુણિત ભ્રૂણપોષનું નિર્માણ સામાન્ય પ્રક્રિયા છે, તેથી ખોટો.\nવિકલ્પ C: પરાગરજનો વૃદ્ધિ નળ બીજાંડ છિદ્ર દ્વારા પ્રવેશે છે, જે સામાન્ય પ્રક્રિયા છે, તેથી ખોટો.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
