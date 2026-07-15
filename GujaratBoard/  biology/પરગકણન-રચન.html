@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પરાગકણની રચના</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પરાગકણની રચના</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પરાગકણની રચના</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એકસદની વનસ્પતિમાં પરાગરજનું નિર્માણ કયા પ્રકારની કોષવિભાજન પ્રક્રિયા દ્વારા થાય છે?", "opts": ["સમસૂત્રીભાજન (Mitosis) દ્વારા", "અર્ધસૂત્રીભાજન (Meiosis) દ્વારા", "અસમસૂત્રીભાજન (Amitosis) દ્વારા", "સમસૂત્રીભાજન અને અર્ધસૂત્રીભાજન બંને દ્વારા"], "ans": 1, "exp": "પરાગરજનું નિર્માણ પરાગાશયમાં થતું હોય છે, જ્યાં પરાગમાતૃકોષ અર્ધસૂત્રીભાજન દ્વારા ચાર અર્ધીકોષોમાં વિભાજિત થાય છે. આ અર્ધીકોષો પરાગરજમાં વિકસે છે. સમસૂત્રીભાજન સામાન્ય કોષવિભાજન છે જે વૃદ્ધિ માટે થાય છે, જ્યારે અસમસૂત્રીભાજન અમુક નિમ્ન કક્ષાની વનસ્પતિઓમાં જોવા મળે છે. તેથી સાચો જવાબ અર્ધસૂત્રીભાજન છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગરજની દીવાલમાં સ્પોરોપોલેનિન નામનું દ્રવ્ય જોવા મળે છે. આ દ્રવ્યની વિશેષતા શું છે?", "opts": ["તે પ્રકાશસંશ્લેષણ માટે જરૂરી ઉત્સેચક છે", "તે અત્યંત પ્રતિરોધક છે અને પરાગરજને સડવાથી બચાવે છે", "તે પરાગરજના અંકુરણ માટે જરૂરી હોર્મોન છે", "તે પરાગરજના કોષકેન્દ્રમાં જોવા મળતું જનીનિક દ્રવ્ય છે"], "ans": 1, "exp": "સ્પોરોપોલેનિન એ પરાગરજની બાહ્ય દીવાલ (એક્સાઇન)માં જોવા મળતું અત્યંત પ્રતિરોધક કાર્બનિક દ્રવ્ય છે, જે પરાગરજને ઉચ્ચ તાપમાન, રસાયણો અને સૂક્ષ્મજીવોના હુમલાથી સુરક્ષિત રાખે છે. તે ઉત્સેચક કે હોર્મોન નથી, અને તે કોષકેન્દ્રમાં હોતું નથી.", "ref": "Std 11 - પ્રકરણ 3: વનસ્પતિ સંરચના અને વિકાસ", "ch": ""}, {"q": "નીચેના પૈકી કઈ વનસ્પતિમાં પરાગરજની સપાટી ખરબચડી કે કાંટાળી હોતી નથી?", "opts": ["સૂર્યમુખી (Helianthus)", "ઘઉં (Triticum)", "ગુલાબ (Rosa)", "મકાઈ (Zea mays)"], "ans": 1, "exp": "પવન પરાગિત વનસ્પતિઓ જેમ કે ઘઉં અને મકાઈમાં પરાગરજની સપાટી સામાન્ય રીતે સપાટ અને હલકી હોય છે, જેથી તે હવામાં સરળતાથી ઉડી શકે. જ્યારે કીટક પરાગિત વનસ્પતિઓ જેમ કે સૂર્યમુખી અને ગુલાબમાં પરાગરજ ખરબચડી કે કાંટાળી હોય છે, જે કીટકોના શરીર સાથે ચોંટી રહે. તેથી ઘઉંમાં પરાગરજ ખરબચડી હોતી નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગરજમાં જોવા મળતા વાનસ્પતિક કોષ અને જનનકોષ વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["વાનસ્પતિક કોષ મોટો અને વધુ કોષરસ ધરાવે છે", "જનનકોષ નાનો અને ગોળાકાર હોય છે", "વાનસ્પતિક કોષમાં કોષકેન્દ્ર હોતું નથી", "જનનકોષ અર્ધસૂત્રીભાજન દ્વારા બે શુક્રકોષોમાં વિભાજિત થાય છે"], "ans": 2, "exp": "પરાગરજમાં બે કોષો હોય છે: વાનસ્પતિક કોષ અને જનનકોષ. વાનસ્પતિક કોષ મોટો, વધુ કોષરસ ધરાવતો અને કોષકેન્દ્ર ધરાવતો હોય છે, જે પરાગનલિકાના વિકાસ માટે જવાબદાર છે. જનનકોષ નાનો અને ગોળાકાર હોય છે, જે અર્ધસૂત્રીભાજન નહીં, પરંતુ સમસૂત્રીભાજન દ્વારા બે શુક્રકોષોમાં વિભાજિત થાય છે. તેથી વિકલ્પ C ખોટું છે કારણ કે વાનસ્પતિક કોષમાં કોષકેન્દ્ર હોય છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક વનસ્પતિમાં પરાગરજની સંખ્યા ખૂબ જ વધારે હોય છે, પરંતુ તેના પરાગાશય નાના અને સૂકા હોય છે. આ વનસ્પતિ કયા પ્રકારની પરાગનયન પદ્ધતિ ધરાવતી હોવાની શક્યતા સૌથી વધુ છે?", "opts": ["કીટક પરાગનયન (Entomophily)", "પક્ષી પરાગનયન (Ornithophily)", "પવન પરાગનયન (Anemophily)", "પાણી પરાગનયન (Hydrophily)"], "ans": 2, "exp": "પવન પરાગનયન ધરાવતી વનસ્પતિઓમાં પરાગરજની સંખ્યા ખૂબ જ વધારે હોય છે કારણ કે પવન દ્વારા પરાગનયનની સફળતા ઓછી હોય છે. આ વનસ્પતિઓના પરાગાશય નાના અને સૂકા હોય છે, જે પરાગરજને હવામાં છોડવામાં મદદ કરે છે. કીટક પરાગનયનમાં પરાગરજની સંખ્યા ઓછી અને ચીકણી હોય છે, જ્યારે પક્ષી અને પાણી પરાગનયનમાં પણ પરાગરજની લાક્ષણિકતાઓ અલગ હોય છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, માઈક્રોસ્પોર મધર સેલ (MMC) ની કોષવિભાજન પૂર્ણ થયા પછી બનતા ચાર કોષોમાંથી કયા કોષમાં સૌથી વધુ સાયટોપ્લાઝમ જોવા મળે છે?", "opts": ["જનન કોષ (Generative cell)", "વાનસ્પતિક કોષ (Vegetative cell)", "સહાયક કોષ (Synergids)", "નલિકા કોષ (Tube cell)"], "ans": 1, "exp": "પરાગકણની રચના દરમિયાન, માઈક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ કોષવિભાજન પછી બનતા ચાર હેપ્લોઈડ કોષોમાંથી, વાનસ્પતિક કોષ (Vegetative cell) સૌથી મોટો હોય છે અને તેની પાસે સૌથી વધુ સાયટોપ્લાઝમ હોય છે. જનન કોષ (Generative cell) નાનો અને ગોળાકાર હોય છે, જ્યારે સહાયક કોષ (Synergids) અને નલિકા કોષ (Tube cell) પરાગનલિકામાં જોવા મળે છે, પરંતુ તે પરાગકણના ભાગ નથી. અહીં, વાનસ્પતિક કોષ પરાગકણનો મુખ્ય ભાગ છે અને તે પરાગનલિકા બનાવે છે, જેમાં સાયટોપ્લાઝમની માત્રા સૌથી વધુ હોય છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "પરાગકણની બાહ્ય દીવાલ (એક્ઝાઇન) અને અંતર્ગત દીવાલ (ઇન્ટાઇન) ની રચના અને કાર્ય વિશે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["એક્ઝાઇન સ્પોરોપોલેનિનની બનેલી હોય છે અને તે પરાગકણને યાંત્રિક સુરક્ષા પૂરી પાડે છે.", "ઇન્ટાઇન સેલ્યુલોઝ અને પેક્ટિનની બનેલી હોય છે અને તે પરાગનલિકાના વિકાસમાં મદદ કરે છે.", "એક્ઝાઇન પરાગકણને પાણીના અવશોષણથી બચાવે છે, પરંતુ તે રાસાયણિક પ્રતિકારકતા પૂરી પાડતી નથી.", "ઇન્ટાઇન પરાગકણના અંકુરણ દરમિયાન પાણી અને પોષક તત્ત્વોના અવશોષણમાં મદદ કરે છે."], "ans": 2, "exp": "એક્ઝાઇન સ્પોરોપોલેનિનની બનેલી હોય છે અને તે પરાગકણને યાંત્રિક સુરક્ષા પૂરી પાડે છે તેમજ રાસાયણિક પ્રતિકારકતા પણ પૂરી પાડે છે. ઇન્ટાઇન સેલ્યુલોઝ અને પેક્ટિનની બનેલી હોય છે અને તે પરાગનલિકાના વિકાસમાં મદદ કરે છે, તેમજ પરાગકણના અંકુરણ દરમિયાન પાણી અને પોષક તત્ત્વોના અવશોષણમાં મદદ કરે છે. વિકલ્પ C ખોટો છે કારણ કે એક્ઝાઇન રાસાયણિક પ્રતિકારકતા પણ પૂરી પાડે છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "પરાગકણના અંકુરણ દરમિયાન, પરાગનલિકા કયા પેશીના કોષો વચ્ચે વિકાસ પામે છે?", "opts": ["બાહ્યત્વચા (Epidermis)", "મધ્યપટલ (Middle lamella)", "સ્ટાઇલર કૅનાલ (Stylar canal)", "એન્ડોથેલિયમ (Endothelium)"], "ans": 2, "exp": "પરાગકણના અંકુરણ દરમિયાન, પરાગનલિકા સ્ટાઇલ (શલાકા) ના સ્ટાઇલર કૅનાલ (Stylar canal) ના કોષો વચ્ચે વિકાસ પામે છે. બાહ્યત્વચા (Epidermis) પરાગકણના અંકુરણ માટે પ્રારંભિક સ્થળ હોઈ શકે, પરંતુ પરાગનલિકા સ્ટાઇલર કૅનાલમાંથી પસાર થાય છે. મધ્યપટલ (Middle lamella) કોષો વચ્ચેની સીમ છે, જ્યારે એન્ડોથેલિયમ (Endothelium) અંડાશયના ગર્ભકોષની આજુબાજુ જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "નીચેનામાંથી કયા પરાગકણમાં 'પરાગકણની દીવાલ પર કાંટા અથવા ખરબચડી રચના' ની હાજરી નથી, પરંતુ તે પાણી દ્વારા પરાગનયન કરતી વનસ્પતિઓમાં જોવા મળે છે?", "opts": ["લિલી (Lily)", "કમળ (Lotus)", "વટાણા (Pea)", "મકાઈ (Maize)"], "ans": 1, "exp": "કમળ (Lotus) પાણી દ્વારા પરાગનયન કરતી વનસ્પતિ છે અને તેના પરાગકણની સપાટી સરળ હોય છે, જ્યારે લિલી (Lily), વટાણા (Pea), અને મકાઈ (Maize) ના પરાગકણની સપાટી પર કાંટા અથવા ખરબચડી રચના જોવા મળે છે. પાણી દ્વારા પરાગનયન કરતી વનસ્પતિઓમાં પરાગકણની સપાટી સરળ હોય છે જેથી તે પાણીમાં સરળતાથી તરી શકે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, માઈક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ-II ની બીજી કોષવિભાજન પૂર્ણ થયા પછી, નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["ચાર હેપ્લોઇડ માઈક્રોસ્પોર તૈયાર થાય છે, જેમાંથી દરેક પરાગકણમાં વિકસે છે.", "ચાર હેપ્લોઇડ માઈક્રોસ્પોર તૈયાર થાય છે, પરંતુ માત્ર એક જ માઈક્રોસ્પોર પરાગકણમાં વિકસે છે.", "ચાર હેપ્લોઇડ માઈક્રોસ્પોર તૈયાર થાય છે, જેમાંથી ત્રણ નષ્ટ થાય છે અને એક જ પરાગકણમાં વિકસે છે.", "ચાર હેપ્લોઇડ માઈક્રોસ્પોર તૈયાર થાય છે, જેમાંથી દરેક એક મલ્ટીન્યુક્લિયેટ પરાગકણમાં વિકસે છે."], "ans": 0, "exp": "મિયોસિસ-II પૂર્ણ થયા પછી, MMC ની કોષવિભાજન દ્વારા ચાર હેપ્લોઇડ માઈક્રોસ્પોર તૈયાર થાય છે. આ દરેક માઈક્રોસ્પોર પછી એક પરાગકણમાં વિકસે છે. વિકલ્પ B ખોટો છે કારણ કે બધા જ માઈક્રોસ્પોર પરાગકણમાં વિકસે છે, માત્ર એક નહીં. વિકલ્પ C ખોટો છે કારણ કે કોઈપણ માઈક્રોસ્પોર નષ્ટ થતો નથી. વિકલ્પ D ખોટો છે કારણ કે પરાગકણ એકકોષીય અને એકકેન્દ્રીય હોય છે, મલ્ટીન્યુક્લિયેટ નહીં.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, ટેટ્રાડ સ્ટેજમાં કેટલા હેપ્લોઈડ કોષો રચાય છે અને તે કેવી રીતે ગોઠવાયેલા હોય છે?", "opts": ["ચાર હેપ્લોઈડ કોષો, જે સરળ રેખામાં ગોઠવાયેલા હોય છે", "ચાર હેપ્લોઈડ કોષો, જે ટેટ્રાહેડ્રલ આકારમાં ગોઠવાયેલા હોય છે", "બે હેપ્લોઈડ કોષો, જે એકબીજા સાથે જોડાયેલા હોય છે", "આઠ હેપ્લોઈડ કોષો, જે દ્વિસ્તરીય રચના ધરાવે છે"], "ans": 1, "exp": "ટેટ્રાડ સ્ટેજમાં માઈક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ-I પૂર્ણ થયા પછી, ચાર હેપ્લોઈડ કોષો રચાય છે, જે ટેટ્રાહેડ્રલ (ચતુર્ફલકીય) આકારમાં ગોઠવાયેલા હોય છે. A ખોટું છે કારણ કે તે સરળ રેખામાં ગોઠવાયેલા નથી. C ખોટું છે કારણ કે બે કોષો નહીં પરંતુ ચાર કોષો રચાય છે. D ખોટું છે કારણ કે આઠ કોષો રચાતા નથી અને દ્વિસ્તરીય રચના નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગકણની અંતર્ગત દીવાલ (ઇન્ટાઇન) ની રચના કયા પદાર્થ દ્વારા થાય છે અને તેનું મુખ્ય કાર્ય શું છે?", "opts": ["સેલ્યુલોઝ અને પેક્ટિન, પરાગનલિકા ની વૃદ્ધિ માટે પોષક પદાર્થો પૂરા પાડવા", "સ્પોરોપોલેનિન, પરાગકણને યાંત્રિક નુકસાનથી બચાવવા", "કિટિન, પરાગકણને રોગકારક સૂક્ષ્મજીવોથી બચાવવા", "લિગ્નિન, પરાગકણને પાણીના અવશોષણથી બચાવવા"], "ans": 0, "exp": "પરાગકણની અંતર્ગત દીવાલ (ઇન્ટાઇન) સેલ્યુલોઝ અને પેક્ટિન દ્વારા બનેલી હોય છે, અને તેનું મુખ્ય કાર્ય પરાગનલિકા ની વૃદ્ધિ માટે પોષક પદાર્થો પૂરા પાડવાનું છે. B ખોટું છે કારણ કે સ્પોરોપોલેનિન બાહ્ય દીવાલ (એક્ઝાઇન) ની રચના કરે છે. C ખોટું છે કારણ કે કિટિન પ્રાણીઓના બાહ્ય કંકાલમાં જોવા મળે છે. D ખોટું છે કારણ કે લિગ્નિન વનસ્પતિઓની દીવાલમાં જડતા માટે વપરાય છે, પરંતુ ઇન્ટાઇનમાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પરાગકણની રચના અને વિકાસ વિશે સાચું નથી?", "opts": ["પરાગકણની રચના દરમિયાન, માઈક્રોસ્પોર મધર સેલ (MMC) મિયોસિસ દ્વારા વિભાજિત થાય છે", "પરાગકણમાં જનન કોષ (Generative cell) અને નલિકા કોષ (Tube cell) હાજર હોય છે", "પરાગકણની બાહ્ય દીવાલ (એક્ઝાઇન) સ્પોરોપોલેનિન દ્વારા બનેલી હોય છે, જે પાણી પ્રતિરોધક હોય છે", "પરાગકણનું અંકુરણ પરાગાશયમાં જ થાય છે અને તે પછી પરાગનલિકા રચાય છે"], "ans": 3, "exp": "પરાગકણનું અંકુરણ પરાગાશયમાં નહીં પરંતુ પરાગવહન પછી પરાગાશય પર અથવા સ્ત્રીકેસર પર થાય છે. A સાચું છે કારણ કે MMC મિયોસિસ દ્વારા વિભાજિત થાય છે. B સાચું છે કારણ કે પરાગકણમાં જનન કોષ અને નલિકા કોષ હાજર હોય છે. C સાચું છે કારણ કે એક્ઝાઇન સ્પોરોપોલેનિન દ્વારા બનેલી હોય છે અને પાણી પ્રતિરોધક હોય છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, માઈક્રોસ્પોરમાંથી પરાગકણના વિકાસ માટે કયા હોર્મોનની મુખ્ય ભૂમિકા હોય છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "પરાગકણના વિકાસ માટે જિબરેલિન હોર્મોનની મુખ્ય ભૂમિકા હોય છે. ઓક્સિન (A) વનસ્પતિની વૃદ્ધિ અને વિકાસ માટે જવાબદાર હોય છે, પરંતુ પરાગકણના વિકાસમાં નહીં. સાયટોકાઇનિન (C) કોષવિભાજન અને વિકાસ માટે જવાબદાર હોય છે, પરંતુ પરાગકણના વિકાસમાં નહીં. એબ્સિસિક એસિડ (D) વનસ્પતિના તણાવ પ્રતિક્રિયા અને બીજના સુપ્તાવસ્થામાં મહત્વની ભૂમિકા ભજવે છે, પરંતુ પરાગકણના વિકાસમાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "એક વનસ્પતિમાં પરાગકણની રચના દરમિયાન નીચેના પૈકી કયું વિશિષ્ટ લક્ષણ જોવા મળતું નથી, જે અન્ય વનસ્પતિઓમાં સામાન્ય રીતે જોવા મળે છે?", "opts": ["માઇક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ પ્રક્રિયા દ્વારા ચાર હેપ્લોઇડ માઇક્રોસ્પોર્સનું નિર્માણ", "પરાગકણની બાહ્ય દીવાલ (એક્ઝાઇન) માં સ્પોરોપોલેનિન નામના અત્યંત પ્રતિરોધક દ્રવ્યની હાજરી", "પરાગકણના વિકાસ દરમિયાન વાનસ્પતિક કોષ અને જનનકોષમાં વિભાજન થતું નથી અને પરાગકણ એકકોષીય સ્વરૂપે જ રહે છે", "પરાગાશયમાં પરાગકણોની સંખ્યા ખૂબ જ વધારે હોય છે અને તે હવામાં સહેલાઈથી પ્રસરે છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. સામાન્ય રીતે પરાગકણની રચના દરમિયાન માઇક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ પ્રક્રિયા પછી મળતા હેપ્લોઇડ માઇક્રોસ્પોરમાંથી વાનસ્પતિક કોષ અને જનનકોષમાં વિભાજન થાય છે. પરંતુ કેટલીક અપવાદરૂપ વનસ્પતિઓમાં પરાગકણ એકકોષીય સ્વરૂપે જ રહે છે અને વિભાજન થતું નથી. આ એક અપવાદ છે જે સામાન્ય રીતે જોવા મળતું નથી. વિકલ્પ A, B અને D સામાન્ય લક્ષણો છે જે મોટાભાગની વનસ્પતિઓમાં જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પીય વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગકણની બાહ્ય દીવાલ (એક્ઝાઇન) ની રચના દરમિયાન, સ્પોરોપોલેનિન નામના પદાર્થની ભૂમિકા વિશે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["સ્પોરોપોલેનિન એક જટિલ લિપિડ યુક્ત પદાર્થ છે જે પરાગકણની દીવાલને કઠણ અને ટિકાઉ બનાવે છે.", "સ્પોરોપોલેનિન પરાગકણને પર્યાવરણીય પરિબળો જેવા કે UV કિરણો અને શુષ્કતાથી બચાવે છે.", "સ્પોરોપોલેનિન પરાગકણની અંતર્ગત દીવાલ (ઇન્ટાઇન) ની રચનામાં મુખ્ય ભૂમિકા ભજવે છે.", "સ્પોરોપોલેનિન પરાગકણને પાણી અને રસાયણોના પ્રવેશથી બચાવે છે."], "ans": 2, "exp": "સ્પોરોપોલેનિન પરાગકણની બાહ્ય દીવાલ (એક્ઝાઇન) ની રચનામાં મુખ્ય ભૂમિકા ભજવે છે, ન કે અંતર્ગત દીવાલ (ઇન્ટાઇન) ની. અંતર્ગત દીવાલ મુખ્યત્વે સેલ્યુલોઝ અને પેક્ટિન જેવા પદાર્થો દ્વારા બને છે. વિકલ્પ A, B, અને D સાચા છે કારણ કે સ્પોરોપોલેનિન પરાગકણને કઠણ, ટિકાઉ, અને પર્યાવરણીય પરિબળોથી બચાવે છે.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરાગકણના વિકાસ દરમિયાન, નીચેનામાંથી કયા તબક્કે પરાગકણમાં જનન કોષ (Generative cell) અને વાનસ્પતિક કોષ (Vegetative cell) ની રચના થાય છે?", "opts": ["માઈક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ-I પૂર્વે", "માઈક્રોસ્પોર મધર સેલ (MMC) ની મિયોસિસ-II પૂર્વે", "પરાગકણના પ્રથમ મિટોટિક વિભાજન પછી", "પરાગકણના અંકુરણ દરમિયાન"], "ans": 2, "exp": "પરાગકણના વિકાસ દરમિયાન, માઈક્રોસ્પોર (હેપ્લોઈડ) નું પ્રથમ મિટોટિક વિભાજન થાય છે, જેમાં એક મોટો વાનસ્પતિક કોષ અને એક નાનો જનન કોષ રચાય છે. વિકલ્પ A અને B ખોટા છે કારણ કે MMC ની મિયોસિસ પૂર્વે પરાગકણની રચના થતી નથી. વિકલ્પ D ખોટો છે કારણ કે અંકુરણ દરમિયાન જનન કોષ અને વાનસ્પતિક કોષ પહેલેથી જ અસ્તિત્વમાં હોય છે.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, નીચેનામાંથી કયું વિધાન ટેટ્રાડ સ્ટેજ વિશે સાચું નથી?", "opts": ["ટેટ્રાડ સ્ટેજમાં ચાર હેપ્લોઈડ માઈક્રોસ્પોર કોષો રચાય છે.", "ટેટ્રાડ સ્ટેજ MMC ની મિયોસિસ-II પછી રચાય છે.", "ટેટ્રાડ સ્ટેજમાં રચાયેલા કોષો સમાન આકારના હોય છે.", "ટેટ્રાડ સ્ટેજમાં રચાયેલા કોષો ડિપ્લોઈડ હોય છે."], "ans": 3, "exp": "ટેટ્રાડ સ્ટેજમાં MMC ની મિયોસિસ-II પછી ચાર હેપ્લોઈડ માઈક્રોસ્પોર કોષો રચાય છે, જે સમાન આકારના હોય છે. વિકલ્પ D ખોટો છે કારણ કે આ કોષો હેપ્લોઈડ હોય છે, ન કે ડિપ્લોઈડ. વિકલ્પ A, B, અને C સાચા છે.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરાગકણની રચના દરમિયાન, નીચેનામાંથી કયું વિધાન સ્પોરોજેનિયસ પેશી (Sporogenous tissue) વિશે સાચું છે?", "opts": ["સ્પોરોજેનિયસ પેશીના કોષો ડિપ્લોઈડ હોય છે અને તેઓ મિયોસિસ દ્વારા પરાગરજનું નિર્માણ કરે છે.", "સ્પોરોજેનિયસ પેશીના કોષો હેપ્લોઈડ હોય છે અને તેઓ મિટોસિસ દ્વારા પરાગરજનું નિર્માણ કરે છે.", "સ્પોરોજેનિયસ પેશીના કોષો ડિપ્લોઈડ હોય છે અને તેઓ મિટોસિસ દ્વારા પરાગરજનું નિર્માણ કરે છે.", "સ્પોરોજેનિયસ પેશીના કોષો હેપ્લોઈડ હોય છે અને તેઓ મિયોસિસ દ્વારા પરાગરજનું નિર્માણ કરે છે."], "ans": 0, "exp": "સ્પોરોજેનિયસ પેશીના કોષો ડિપ્લોઈડ (2n) હોય છે અને તેઓ મિયોસિસ કોષવિભાજન દ્વારા હેપ્લોઈડ (n) પરાગરજનું નિર્માણ કરે છે. આ પ્રક્રિયા દરમિયાન, માઈક્રોસ્પોર મધર સેલ (MMC) મિયોસિસ દ્વારા ચાર હેપ્લોઈડ માઈક્રોસ્પોર રચે છે, જે પછી પરાગકણમાં વિકસે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે સ્પોરોજેનિયસ પેશીના કોષો હેપ્લોઈડ નથી હોતા અને મિટોસિસ દ્વારા પરાગરજનું નિર્માણ થતું નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં વનસ્પતિઓ", "ch": ""}, {"q": "એક વનસ્પતિમાં પરાગરજની રચના દરમિયાન નીચેના પૈકી કયું વિશિષ્ટ લક્ષણ અપવાદરૂપ ગણી શકાય? જેમાં પરાગરજની રચના દરમિયાન માઇક્રોસ્પોર મધર કોષ (MMC) ની મિયોસિસ પ્રક્રિયા પૂર્ણ થયા બાદ પણ ટેટ્રાડ સ્વરૂપે અલગ ન થઈને એકસાથે જોડાયેલી રહે છે અને પરિણામે પરાગરજ ચતુષ્ક (પોલિનિયમ) સ્વરૂપે ઉત્પન્ન થાય છે.", "opts": ["મકાઈ (Zea mays) માં પરાગરજની રચના દરમિયાન ટેટ્રાડ સ્વરૂપે અલગ થાય છે પરંતુ પરાગરજ એકબીજા સાથે ચોંટેલી રહે છે.", "ઓર્કિડ (Orchidaceae) કુળની વનસ્પતિઓમાં પરાગરજ ચતુષ્ક (પોલિનિયમ) સ્વરૂપે ઉત્પન્ન થાય છે.", "ઘઉં (Triticum aestivum) માં પરાગરજની રચના દરમિયાન ટેટ્રાડ સ્વતંત્ર રીતે અલગ થાય છે અને પરાગરજ એકલી ઉત્પન્ન થાય છે.", "બટાટા (Solanum tuberosum) માં પરાગરજની રચના દરમિયાન ટેટ્રાડ સ્વરૂપે અલગ થાય છે પરંતુ પરાગરજની સપાટી ખરબચડી હોય છે."], "ans": 1, "exp": "ઓર્કિડ કુળની વનસ્પતિઓમાં પરાગરજની રચના દરમિયાન માઇક્રોસ્પોર મધર કોષ (MMC) ની મિયોસિસ પૂર્ણ થયા બાદ ટેટ્રાડ સ્વરૂપે અલગ ન થઈને એકસાથે જોડાયેલી રહે છે, જેને કારણે પરાગરજ ચતુષ્ક (પોલિનિયમ) સ્વરૂપે ઉત્પન્ન થાય છે. આ એક અપવાદરૂપ લક્ષણ છે. અન્ય વિકલ્પોમાં મકાઈ, ઘઉં અને બટાટામાં ટેટ્રાડ સ્વતંત્ર રીતે અલગ થાય છે અથવા પરાગરજની સપાટી ખરબચડી હોય છે, પરંતુ ચતુષ્ક સ્વરૂપે પરાગરજ ઉત્પન્ન થતી નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
