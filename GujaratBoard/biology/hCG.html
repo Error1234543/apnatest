@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hCG</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>hCG</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">hCG</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનનું સ્રાવ કયા અંગ દ્વારા થાય છે અને તેનો પ્રાથમિક કાર્ય કયો છે?", "opts": ["પીટ્યુટરી ગ્રંથિ દ્વારા સ્રાવ થાય છે અને તે ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન (FSH) નું સ્રાવ નિયંત્રિત કરે છે.", "ગર્ભાશયના એન્ડોમેટ્રિયમ દ્વારા સ્રાવ થાય છે અને તે ગર્ભાશયની દિવાલને મજબૂત બનાવે છે.", "ગર્ભપિંડના કોરિયોનિક વિલી દ્વારા સ્રાવ થાય છે અને તે કોર્પસ લ્યુટિયમને ટકાવી રાખે છે.", "પ્લેસેન્ટા દ્વારા સ્રાવ થાય છે અને તે ભ્રૂણના વિકાસ માટે ઓક્સિજન પૂરો પાડે છે."], "ans": 2, "exp": "hCG (હ્યુમન કોરિયોનિક ગોનાડોટ્રોપિન) હોર્મોન ગર્ભાવસ્થા દરમિયાન ગર્ભપિંડના કોરિયોનિક વિલી દ્વારા સ્રાવ થાય છે. તેનો પ્રાથમિક કાર્ય કોર્પસ લ્યુટિયમને ટકાવી રાખવાનો છે, જેથી પ્રોજેસ્ટેરોન હોર્મોનનું સ્રાવ ચાલુ રહે અને ગર્ભાવસ્થા ટકી રહે. A વિકલ્પ ખોટો છે કારણ કે hCG પીટ્યુટરી ગ્રંથિ દ્વારા સ્રાવ થતું નથી. B વિકલ્પ ખોટો છે કારણ કે hCG એન્ડોમેટ્રિયમ દ્વારા સ્રાવ થતું નથી. D વિકલ્પ ખોટો છે કારણ કે hCG ઓક્સિજન પૂરો પાડતું નથી, પ્લેસેન્ટા દ્વારા hCG સ્રાવ થાય છે પરંતુ તેનો પ્રાથમિક કાર્ય કોર્પસ લ્યુટિયમને ટકાવી રાખવાનો છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની રચના કયા સબયુનિટ્સના સંયોજનથી થાય છે અને તે કયા હોર્મોન સાથે સમાનતા ધરાવે છે?", "opts": ["અલ્ફા અને બીટા સબયુનિટ્સ, LH હોર્મોન સાથે સમાનતા", "ગ્લાઇકોપ્રોટીન અને લિપિડ, FSH હોર્મોન સાથે સમાનતા", "પેપ્ટાઇડ અને કાર્બોદિત, ટેસ્ટોસ્ટેરોન હોર્મોન સાથે સમાનતા", "સ્ટીરોઇડ અને પ્રોટીન, પ્રોજેસ્ટેરોન હોર્મોન સાથે સમાનતા"], "ans": 0, "exp": "hCG હોર્મોન અલ્ફા અને બીટા સબયુનિટ્સના સંયોજનથી બનેલું છે. અલ્ફા સબયુનિટ TSH, FSH, અને LH હોર્મોન સાથે સમાન હોય છે, જ્યારે બીટા સબયુનિટ અનન્ય હોય છે. hCG LH (લ્યુટિનાઇઝિંગ હોર્મોન) સાથે સમાનતા ધરાવે છે. B, C, અને D વિકલ્પો ખોટા છે કારણ કે hCG ગ્લાઇકોપ્રોટીન છે, પેપ્ટાઇડ અથવા સ્ટીરોઇડ નથી, અને તે ટેસ્ટોસ્ટેરોન અથવા પ્રોજેસ્ટેરોન સાથે સમાનતા ધરાવતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થાના પ્રારંભિક તબક્કામાં hCG હોર્મોનનું સ્તર ક્યારે સૌથી ઉચ્ચ હોય છે અને તેનો ઉપયોગ કયા પરીક્ષણમાં થાય છે?", "opts": ["ગર્ભાવસ્થાના 5મા મહિનામાં, અલ્ટ્રાસાઉન્ડ પરીક્ષણમાં", "ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન, ગર્ભાવસ્થા ટેસ્ટમાં", "પ્રસૂતિ પહેલા 24 કલાકમાં, એમ્નિયોસેન્ટેસિસ પરીક્ષણમાં", "ગર્ભાવસ્થાના બીજા ત્રિમાસિક દરમિયાન, બ્લડ ટેસ્ટમાં"], "ans": 1, "exp": "hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન સૌથી ઉચ્ચ હોય છે અને તેનો ઉપયોગ ગર્ભાવસ્થા ટેસ્ટ (પ્રેગ્નેન્સી ટેસ્ટ) માં થાય છે. A વિકલ્પ ખોટો છે કારણ કે hCG સ્તર 5મા મહિનામાં ઉચ્ચ નથી હોતું. C વિકલ્પ ખોટો છે કારણ કે hCG સ્તર પ્રસૂતિ પહેલા 24 કલાકમાં ઉચ્ચ નથી હોતું. D વિકલ્પ ખોટો છે કારણ કે hCG સ્તર બીજા ત્રિમાસિક દરમિયાન ઉચ્ચ નથી હોતું.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો ઉપયોગ કયા રોગના ઉપચારમાં થાય છે અને તે કયા અસરકારક પદાર્થ સાથે સંયોજનમાં આપવામાં આવે છે?", "opts": ["કેંસર, કીમોથેરાપી સાથે", "બંજહપન, FSH અને LH હોર્મોન સાથે", "મધુમેહ, ઇન્સ્યુલિન સાથે", "હાઇપોથાયરોઇડિઝમ, થાયરોક્સિન સાથે"], "ans": 1, "exp": "hCG હોર્મોનનો ઉપયોગ બંજહપન (infertility) ના ઉપચારમાં થાય છે, જ્યારે તે FSH (ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન) અને LH (લ્યુટિનાઇઝિંગ હોર્મોન) હોર્મોન સાથે સંયોજનમાં આપવામાં આવે છે. A, C, અને D વિકલ્પો ખોટા છે કારણ કે hCG કેંસર, મધુમેહ, અથવા હાઇપોથાયરોઇડિઝમના ઉપચારમાં વપરાતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની રાસાયણિક રચના અને કાર્ય પૈકી કયું વિધાન સાચું નથી?", "opts": ["hCG એક ગ્લાઇકોપ્રોટીન હોર્મોન છે.", "hCG ની અલ્ફા સબયુનિટ TSH, FSH, અને LH સાથે સમાન હોય છે.", "hCG નું સ્રાવ ગર્ભાવસ્થા દરમિયાન ઘટતું જાય છે.", "hCG કોર્પસ લ્યુટિયમને ઉત્તેજિત કરે છે."], "ans": 2, "exp": "hCG નું સ્રાવ ગર્ભાવસ્થા દરમિયાન પ્રથમ ત્રિમાસિકમાં વધે છે અને પછી ધીરે ધીરે ઘટતું જાય છે, પરંતુ તે સંપૂર્ણપણે ઘટતું નથી. A, B, અને D વિધાનો સાચા છે: hCG એક ગ્લાઇકોપ્રોટીન છે, તેની અલ્ફા સબયુનિટ TSH, FSH, અને LH સાથે સમાન હોય છે, અને તે કોર્પસ લ્યુટિયમને ઉત્તેજિત કરે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનનું સ્રાવ ક્યારે શરૂ થાય છે અને તેનું પ્રાથમિક કાર્ય શું છે?", "opts": ["ગર્ભાશયમાં ગર્ભના રોપાણ પછી તરત જ શરૂ થાય છે અને તે પીટ્યુટરી ગ્રંથિને પ્રેરિત કરે છે", "ગર્ભાશયમાં ગર્ભના રોપાણ પછી ૨૪ કલાકમાં શરૂ થાય છે અને તે કોર્પસ લ્યુટિયમને જાળવી રાખે છે", "ગર્ભાશયમાં ગર્ભના રોપાણ પહેલા જ શરૂ થાય છે અને તે ઓવ્યુલેશનને પ્રેરિત કરે છે", "ગર્ભાવસ્થાના ત્રીજા મહિનાથી શરૂ થાય છે અને તે ગર્ભાશયની વૃદ્ધિને પ્રેરિત કરે છે"], "ans": 1, "exp": "hCG હોર્મોનનું સ્રાવ ગર્ભાશયમાં ગર્ભના રોપાણ પછી લગભગ ૨૪ કલાકમાં શરૂ થાય છે. તેનું પ્રાથમિક કાર્ય કોર્પસ લ્યુટિયમને જાળવી રાખવાનું છે, જેથી પ્રોજેસ્ટેરોન હોર્મોનનું સ્રાવ ચાલુ રહે અને ગર્ભાવસ્થા જાળવી રાખવામાં મદદ મળે. વિકલ્પ Aમાં પીટ્યુટરી ગ્રંથિને પ્રેરિત કરવાનું કહેવામાં આવ્યું છે, જે સાચું નથી. વિકલ્પ Cમાં ગર્ભના રોપાણ પહેલા સ્રાવ શરૂ થવાનું કહેવામાં આવ્યું છે, જે ખોટું છે. વિકલ્પ Dમાં ત્રીજા મહિનાથી સ્રાવ શરૂ થવાનું કહેવામાં આવ્યું છે, જે પણ ખોટું છે.", "ref": "Std 12 - પ્રકરણ ૩: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો ઉપયોગ કયા પરીક્ષણમાં થાય છે અને તે કયા હેતુ માટે કરવામાં આવે છે?", "opts": ["રક્ત પરીક્ષણમાં, ગર્ભાવસ્થાની પુષ્ટિ માટે", "મૂત્ર પરીક્ષણમાં, ડાયાબિટીસની પુષ્ટિ માટે", "લાળ પરીક્ષણમાં, કૅન્સરની પુષ્ટિ માટે", "પેશાબ પરીક્ષણમાં, કિડની રોગની પુષ્ટિ માટે"], "ans": 0, "exp": "hCG હોર્મોનનો ઉપયોગ રક્ત અથવા મૂત્ર પરીક્ષણમાં ગર્ભાવસ્થાની પુષ્ટિ માટે થાય છે. વિકલ્પ B, C, અને Dમાં અલગ અલગ રોગોની પુષ્ટિ માટે કહેવામાં આવ્યું છે, જે ખોટું છે.", "ref": "Std 12 - પ્રકરણ ૩: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની રચના કયા કોષો દ્વારા થાય છે અને તે કયા અવસ્થામાં સૌથી વધુ સક્રિય હોય છે?", "opts": ["ગર્ભાશયના એપિથેલિયલ કોષો, ગર્ભાવસ્થાના પ્રથમ ત્રિમાસમાં", "સિનસિટિયોટ્રોફોબ્લાસ્ટ કોષો, ગર્ભાવસ્થાના પ્રથમ ત્રિમાસમાં", "કોર્પસ લ્યુટિયમ કોષો, ઓવ્યુલેશન પછી", "પીટ્યુટરી ગ્રંથિના કોષો, ગર્ભાવસ્થા દરમિયાન"], "ans": 1, "exp": "hCG હોર્મોનની રચના સિનસિટિયોટ્રોફોબ્લાસ્ટ કોષો દ્વારા થાય છે અને તે ગર્ભાવસ્થાના પ્રથમ ત્રિમાસમાં સૌથી વધુ સક્રિય હોય છે. વિકલ્પ Aમાં ગર્ભાશયના એપિથેલિયલ કોષો કહેવામાં આવ્યું છે, જે ખોટું છે. વિકલ્પ Cમાં કોર્પસ લ્યુટિયમ કોષો કહેવામાં આવ્યું છે, જે hCG ઉત્પન્ન કરતા નથી. વિકલ્પ Dમાં પીટ્યુટરી ગ્રંથિના કોષો કહેવામાં આવ્યું છે, જે પણ ખોટું છે.", "ref": "Std 12 - પ્રકરણ ૩: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો અભ્યાસ કયા ક્ષેત્રમાં મહત્વપૂર્ણ છે અને તે કયા રોગના નિદાનમાં મદદરૂપ થાય છે?", "opts": ["કૅન્સર સંશોધન, સ્તન કૅન્સરના નિદાનમાં", "પ્રજનન ચિકિત્સા, બાંઝપણાના નિદાનમાં", "ન્યુરોલોજી, અલ્ઝાઇમર રોગના નિદાનમાં", "કાર્ડિયોલોજી, હૃદય રોગના નિદાનમાં"], "ans": 1, "exp": "hCG હોર્મોનનો અભ્યાસ પ્રજનન ચિકિત્સા ક્ષેત્રમાં મહત્વપૂર્ણ છે અને તે બાંઝપણાના નિદાનમાં મદદરૂપ થાય છે. વિકલ્પ A, C, અને Dમાં અલગ ક્ષેત્રો અને રોગો કહેવામાં આવ્યા છે, જે ખોટા છે.", "ref": "Std 12 - પ્રકરણ ૩: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની રાસાયણિક રચના કયા હોર્મોન સાથે સમાનતા ધરાવે છે અને તે કયા કારણસર છે?", "opts": ["LH હોર્મોન સાથે, કારણ કે બંનેમાં સમાન અમીનો એસિડ અનુક્રમણિકા હોય છે", "FSH હોર્મોન સાથે, કારણ કે બંનેમાં સમાન કાર્બોહાઇડ્રેટ શૃંખલા હોય છે", "TSH હોર્મોન સાથે, કારણ કે બંનેમાં સમાન બીટા સબયુનિટ હોય છે", "પ્રોલેક્ટિન હોર્મોન સાથે, કારણ કે બંનેમાં સમાન અલ્ફા સબયુનિટ હોય છે"], "ans": 2, "exp": "hCG હોર્મોનની રાસાયણિક રચના TSH, LH, અને FSH હોર્મોન સાથે સમાનતા ધરાવે છે, કારણ કે બધામાં સમાન અલ્ફા સબયુનિટ હોય છે, પરંતુ hCG અને LH હોર્મોનમાં સમાન બીટા સબયુનિટ હોય છે. વિકલ્પ Aમાં સમાન અમીનો એસિડ અનુક્રમણિકા કહેવામાં આવ્યું છે, જે ખોટું છે. વિકલ્પ Bમાં સમાન કાર્બોહાઇડ્રેટ શૃંખલા કહેવામાં આવ્યું છે, જે ખોટું છે. વિકલ્પ Dમાં સમાન અલ્ફા સબયુનિટ કહેવામાં આવ્યું છે, પરંતુ hCG અને પ્રોલેક્ટિન વચ્ચે સમાનતા નથી.", "ref": "Std 12 - પ્રકરણ ૩: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનનું સ્રાવ થતું હોય ત્યારે નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["hCG હોર્મોન FSH અને LH હોર્મોનની જેમ પિટ્યુટરી ગ્રંથિમાંથી સ્રાવ પામે છે.", "hCG હોર્મોન ગર્ભાશયના સ્ટ્રોમલ કોષો દ્વારા સ્રાવ પામે છે.", "hCG હોર્મોન ગર્ભપૂછના સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષો દ્વારા સ્રાવ પામે છે અને તે પ્લેસેન્ટાની રચનામાં મહત્વની ભૂમિકા ભજવે છે.", "hCG હોર્મોન માત્ર ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન જ સ્રાવ પામે છે."], "ans": 2, "exp": "hCG હોર્મોન ગર્ભપૂછના સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષો દ્વારા સ્રાવ પામે છે અને તે પ્લેસેન્ટાની રચનામાં મહત્વની ભૂમિકા ભજવે છે. A) ખોટું છે કારણ કે hCG પિટ્યુટરી ગ્રંથિમાંથી સ્રાવ પામતું નથી. B) ખોટું છે કારણ કે hCG ગર્ભાશયના સ્ટ્રોમલ કોષો દ્વારા સ્રાવ પામતું નથી. D) ખોટું છે કારણ કે hCG ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક પછી પણ સ્રાવ પામે છે, પરંતુ તેનું સ્તર ધીમે ધીમે ઘટતું જાય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની ક્રિયા વિશે નીચેના પૈકી કયું વિધાન સાચું નથી?", "opts": ["hCG હોર્મોન કોર્પસ લ્યુટિયમને ટકાવી રાખવામાં મદદ કરે છે.", "hCG હોર્મોન પ્રોજેસ્ટેરોન અને ઇસ્ટ્રોજનના સ્રાવને ઉત્તેજિત કરે છે.", "hCG હોર્મોન ગર્ભાશયની દીવાલને પાતળી કરવામાં મદદ કરે છે.", "hCG હોર્મોન પુરુષ ભ્રૂણમાં ટેસ્ટોસ્ટેરોનના સ્રાવને ઉત્તેજિત કરે છે."], "ans": 2, "exp": "hCG હોર્મોન ગર્ભાશયની દીવાલને પાતળી કરતું નથી, ઉલટાનું તે ગર્ભાશયની દીવાલને જાડી કરવામાં મદદ કરે છે. A) સાચું છે કારણ કે hCG કોર્પસ લ્યુટિયમને ટકાવી રાખવામાં મદદ કરે છે. B) સાચું છે કારણ કે hCG પ્રોજેસ્ટેરોન અને ઇસ્ટ્રોજનના સ્રાવને ઉત્તેજિત કરે છે. D) સાચું છે કારણ કે hCG પુરુષ ભ્રૂણમાં ટેસ્ટોસ્ટેરોનના સ્રાવને ઉત્તેજિત કરે છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોન અને LH હોર્મોન વચ્ચેની સમાનતા વિશે નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["hCG અને LH બંને હોર્મોનની રચના એક જ જનીન દ્વારા થાય છે.", "hCG અને LH બંને હોર્મોનની રચના અલ્ફા અને બીટા સબયુનિટ્સના સંયોજનથી થાય છે, પરંતુ તેમની બીટા સબયુનિટ્સ અલગ હોય છે.", "hCG અને LH બંને હોર્મોનની ક્રિયા એકસરખી હોય છે અને તેઓ એકબીજા સાથે બદલી શકાય છે.", "hCG અને LH બંને હોર્મોનના સ્રાવનું નિયંત્રણ એક જ હોર્મોન દ્વારા થાય છે."], "ans": 1, "exp": "hCG અને LH બંને હોર્મોનની રચના અલ્ફા અને બીટા સબયુનિટ્સના સંયોજનથી થાય છે, પરંતુ તેમની બીટા સબયુનિટ્સ અલગ હોય છે. A) ખોટું છે કારણ કે hCG અને LH બંને હોર્મોનની રચના અલગ જનીન દ્વારા થાય છે. C) ખોટું છે કારણ કે hCG અને LH બંને હોર્મોનની ક્રિયા અલગ હોય છે અને તેઓ એકબીજા સાથે બદલી શકાતા નથી. D) ખોટું છે કારણ કે hCG અને LH બંને હોર્મોનના સ્રાવનું નિયંત્રણ અલગ હોર્મોન દ્વારા થાય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનના સ્તર વિશે નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન સતત વધતું રહે છે.", "hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના બીજા ત્રિમાસિક દરમિયાન સૌથી ઉચ્ચ હોય છે.", "hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ 8-10 અઠવાડિયામાં સૌથી ઉચ્ચ હોય છે અને પછી ધીમે ધીમે ઘટતું જાય છે.", "hCG હોર્મોનનું સ્તર ગર્ભાવસ્થા દરમિયાન સતત ઘટતું રહે છે."], "ans": 2, "exp": "hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ 8-10 અઠવાડિયામાં સૌથી ઉચ્ચ હોય છે અને પછી ધીમે ધીમે ઘટતું જાય છે. A) ખોટું છે કારણ કે hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન સતત વધતું નથી. B) ખોટું છે કારણ કે hCG હોર્મોનનું સ્તર ગર્ભાવસ્થાના બીજા ત્રિમાસિક દરમિયાન સૌથી ઉચ્ચ નથી. D) ખોટું છે કારણ કે hCG હોર્મોનનું સ્તર ગર્ભાવસ્થા દરમિયાન સતત ઘટતું નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો ઉપયોગ નીચેના પૈકી કયા રોગના નિદાનમાં થતો નથી?", "opts": ["ગર્ભાવસ્થા", "એક્ટોપિક ગર્ભાવસ્થા", "ટ્યુબરક્યુલોસિસ", "ટ્યુમર (કર્કરોગ)"], "ans": 2, "exp": "hCG હોર્મોનનો ઉપયોગ ટ્યુબરક્યુલોસિસના નિદાનમાં થતો નથી. A) સાચું છે કારણ કે hCG હોર્મોનનો ઉપયોગ ગર્ભાવસ્થાના નિદાનમાં થાય છે. B) સાચું છે કારણ કે hCG હોર્મોનનો ઉપયોગ એક્ટોપિક ગર્ભાવસ્થાના નિદાનમાં થાય છે. D) સાચું છે કારણ કે hCG હોર્મોનનો ઉપયોગ ટ્યુમર (કર્કરોગ)ના નિદાનમાં થાય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો ઉપયોગ કયા રોગના ઉપચારમાં થતો નથી, પરંતુ તેનું મૂલ્યાંકન (monitoring) રોગના નિદાનમાં મહત્વપૂર્ણ છે?", "opts": ["ગર્ભાશય બહારનો ગર્ભ (ectopic pregnancy)", "કોરિયોકાર્સિનોમા (choriocarcinoma)", "ડાયાબિટીસ મેલિટસ", "હાયપરટેનશન (high blood pressure)"], "ans": 2, "exp": "hCG હોર્મોનનું મૂલ્યાંકન ગર્ભાશય બહારના ગર્ભ (ectopic pregnancy) અને કોરિયોકાર્સિનોમા (choriocarcinoma) જેવા રોગોના નિદાનમાં મહત્વપૂર્ણ છે. પરંતુ ડાયાબિટીસ મેલિટસના ઉપચારમાં hCGનો ઉપયોગ થતો નથી. D) ખોટું છે કારણ કે hCG હાયપરટેનશનના ઉપચારમાં ઉપયોગી નથી, પરંતુ તેનું મૂલ્યાંકન કેટલાક કિસ્સાઓમાં થઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનની ક્રિયા વિશે નીચેના પૈકી કયું વિધાન સાચું છે, જ્યારે તે પુરુષોમાં આપવામાં આવે છે?", "opts": ["તે ટેસ્ટોસ્ટેરોનના સ્રાવને અટકાવે છે અને સ્તન વિકાસને પ્રેરે છે.", "તે LH હોર્મોનની જેમ ક્રિયા કરે છે અને ટેસ્ટોસ્ટેરોનના સ્રાવને ઉત્તેજે છે.", "તે FSH હોર્મોનની જેમ ક્રિયા કરે છે અને શુક્રાણુઓના ઉત્પાદનને ઉત્તેજે છે.", "તે પ્રોલેક્ટિન હોર્મોનના સ્રાવને ઉત્તેજે છે અને દૂધ ઉત્પાદનને પ્રેરે છે."], "ans": 1, "exp": "hCG હોર્મોન પુરુષોમાં LH હોર્મોનની જેમ ક્રિયા કરે છે અને ટેસ્ટોસ્ટેરોનના સ્રાવને ઉત્તેજે છે. A) ખોટું છે કારણ કે hCG ટેસ્ટોસ્ટેરોનના સ્રાવને અટકાવતું નથી. C) ખોટું છે કારણ કે hCG FSH હોર્મોનની જેમ ક્રિયા કરતું નથી. D) ખોટું છે કારણ કે hCG પ્રોલેક્ટિન હોર્મોનના સ્રાવને ઉત્તેજતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનનું સ્તર ક્યારે સૌથી ઓછું હોય છે અને તેનું કારણ શું છે?", "opts": ["ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન, કારણ કે ગર્ભાશયના કોષો હજી વિકસિત થયા નથી.", "ગર્ભાવસ્થાના બીજા ત્રિમાસિક દરમિયાન, કારણ કે પ્લેસેન્ટા પૂર્ણપણે વિકસિત થઈ જાય છે અને hCGનું સ્રાવ ઘટે છે.", "ગર્ભાવસ્થાના ત્રીજા ત્રિમાસિક દરમિયાન, કારણ કે ગર્ભનું વજન વધવાને લીધે hCGનું સ્રાવ અટકી જાય છે.", "પ્રસૂતિ પછી, કારણ કે ગર્ભાશયમાંથી પ્લેસેન્ટા બહાર નીકળી જાય છે."], "ans": 3, "exp": "hCG હોર્મોનનું સ્તર પ્રસૂતિ પછી સૌથી ઓછું હોય છે, કારણ કે ગર્ભાશયમાંથી પ્લેસેન્ટા બહાર નીકળી જાય છે અને hCGનું સ્રાવ અટકી જાય છે. A) ખોટું છે કારણ કે ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિક દરમિયાન hCGનું સ્તર સૌથી ઉચ્ચ હોય છે. B) ખોટું છે કારણ કે બીજા ત્રિમાસિક દરમિયાન hCGનું સ્તર ઘટે છે પરંતુ સૌથી ઓછું નથી. C) ખોટું છે કારણ કે ત્રીજા ત્રિમાસિક દરમિયાન hCGનું સ્તર ઘટે છે પરંતુ સૌથી ઓછું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "hCG હોર્મોનનો ઉપયોગ નીચેના પૈકી કયા રોગના નિદાનમાં થતો નથી, પરંતુ તેનું મૂલ્યાંકન (monitoring) કયા રોગમાં મહત્વપૂર્ણ છે?", "opts": ["ગર્ભાશય બહારનો ગર્ભ (ectopic pregnancy) - નિદાન માટે hCGનું સ્તર મહત્વપૂર્ણ છે, પરંતુ મૂલ્યાંકન માટે નહીં.", "ગર્ભપાત (miscarriage) - hCGનું સ્તર મૂલ્યાંકન કરવા માટે મહત્વપૂર્ણ છે, પરંતુ નિદાન માટે નહીં.", "ગર્ભાશયના કર્કરોગ (choriocarcinoma) - hCGનું સ્તર નિદાન અને મૂલ્યાંકન બંને માટે મહત્વપૂર્ણ છે.", "ડાયાબિટીસ મેલિટસ - hCGનું સ્તર ન તો નિદાન માટે ન તો મૂલ્યાંકન માટે મહત્વપૂર્ણ છે."], "ans": 1, "exp": "સાચો જવાબ B છે. ગર્ભપાતના કિસ્સામાં, hCGનું સ્તર મૂલ્યાંકન કરવા માટે મહત્વપૂર્ણ છે, પરંતુ તેનો ઉપયોગ નિદાન માટે થતો નથી. A ખોટું છે કારણ કે ગર્ભાશય બહારનો ગર્ભ નિદાન માટે hCGનું સ્તર મહત્વપૂર્ણ છે. C ખોટું છે કારણ કે ગર્ભાશયના કર્કરોગમાં hCGનું સ્તર નિદાન અને મૂલ્યાંકન બંને માટે મહત્વપૂર્ણ છે. D ખોટું છે કારણ કે ડાયાબિટીસ મેલિટસમાં hCGનું કોઈ જ સીધું મહત્વ નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hCG હોર્મોનનું સ્રાવ થાય છે, પરંતુ નીચેના પૈકી કયા પરિસ્થિતિમાં hCG હોર્મોનનું સ્તર અસામાન્ય રીતે ઉચ્ચ જોવા મળે છે, જે ગર્ભાવસ્થા સાથે સીધો સંબંધ ધરાવતું નથી?", "opts": ["બહુગર્ભાવસ્થા (Multiple pregnancy)", "મૂળ કોષોના કર્કરોગ (Choriocarcinoma)", "અંડાશયમાં ટ્યુમર (Ovarian tumor)", "પ્લેસેન્ટલ ઇન્સફિશિયન્સી (Placental insufficiency)"], "ans": 2, "exp": "hCG હોર્મોનનું સ્તર બહુગર્ભાવસ્થા (A) અને મૂળ કોષોના કર્કરોગ (B)માં ઉચ્ચ હોય છે, કારણ કે આ બંને સ્થિતિઓમાં hCG ઉત્પાદક કોષોની સંખ્યા વધુ હોય છે. પ્લેસેન્ટલ ઇન્સફિશિયન્સી (D)માં hCG સ્તર ઓછું હોય છે. અંડાશયમાં ટ્યુમર (C)માં hCG સ્તર ઉચ્ચ જોવા મળી શકે છે, પરંતુ તે ગર્ભાવસ્થા સાથે સીધો સંબંધ ધરાવતું નથી. આમ, C યોગ્ય જવાબ છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
