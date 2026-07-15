@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ART</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ART</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ART</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ART (Assisted Reproductive Technology)માં, ICSI પદ્ધતિમાં શુક્રાણુનો કયો ભાગ અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે?", "opts": ["શીર્ષ (Head)", "મધ્યભાગ (Midpiece)", "પૂંછડી (Tail)", "એક્રોઝોમ (Acrosome)"], "ans": 0, "exp": "ICSI (Intracytoplasmic Sperm Injection)માં શુક્રાણુનો શીર્ષ (Head) ભાગ અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે, કારણ કે શીર્ષમાં જનીન સામગ્રી (DNA) હોય છે. મધ્યભાગમાં મિટોકોન્ડ્રિયા હોય છે જે ઉર્જા પૂરી પાડે છે, પૂંછડી ગતિશીલતા માટે હોય છે, અને એક્રોઝોમ અંડકોષના બાહ્ય આવરણને ભેદવા માટે હોય છે, પરંતુ ICSIમાં અંડકોષના આવરણને ભેદવાની જરૂર નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા હોર્મોનનો ઉપયોગ અંડપિંડને ઉત્તેજિત કરવા અને બહુવિધ અંડકોષો ઉત્પન્ન કરવા માટે થાય છે?", "opts": ["પ્રોજેસ્ટેરોન", "FSH (Follicle Stimulating Hormone)", "ઓક્સિટોસિન", "એડ્રિનેલિન"], "ans": 1, "exp": "FSH (Follicle Stimulating Hormone)નો ઉપયોગ અંડપિંડને ઉત્તેજિત કરવા અને બહુવિધ અંડકોષો ઉત્પન્ન કરવા માટે થાય છે. પ્રોજેસ્ટેરોન ગર્ભાશયની દીવાલને તૈયાર કરે છે, ઓક્સિટોસિન પ્રસવ દરમિયાન ગર્ભાશયના સંકોચન માટે જવાબદાર છે, અને એડ્રિનેલિન તણાવ હોર્મોન છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "IVF (In Vitro Fertilization) દરમિયાન, અંડકોષ અને શુક્રાણુના ફલન પછી કયા તબક્કે ભ્રૂણ ગર્ભાશયમાં પ્રત્યારોપિત કરવામાં આવે છે?", "opts": ["જાઇગોટ તબક્કે", "2-4 કોષીય તબક્કે", "બ્લાસ્ટોસિસ્ટ તબક્કે", "ગેસ્ટ્રુલા તબક્કે"], "ans": 2, "exp": "IVF દરમિયાન, ભ્રૂણને બ્લાસ્ટોસિસ્ટ તબક્કે ગર્ભાશયમાં પ્રત્યારોપિત કરવામાં આવે છે, કારણ કે આ તબક્કે ભ્રૂણ ગર્ભાશયની દીવાલ સાથે જોડાઈ શકે છે. જાઇગોટ તબક્કે ભ્રૂણ અત્યંત નાનો હોય છે, 2-4 કોષીય તબક્કે તે પૂરતો વિકસિત નથી, અને ગેસ્ટ્રુલા તબક્કે ભ્રૂણ ગર્ભાશયમાં પ્રત્યારોપિત કરવા માટે ખૂબ મોટો હોય છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ARTમાં, કયા પદાર્થનો ઉપયોગ શુક્રાણુઓને સંગ્રહિત કરવા અને તેમની ગુણવત્તા જાળવવા માટે થાય છે?", "opts": ["ગ્લુકોઝ", "ગ્લિસરોલ", "ડાયમિથાઇલ સલ્ફોક્સાઇડ (DMSO)", "સોડિયમ ક્લોરાઇડ"], "ans": 2, "exp": "ડાયમિથાઇલ સલ્ફોક્સાઇડ (DMSO)નો ઉપયોગ શુક્રાણુઓને સંગ્રહિત કરવા અને તેમની ગુણવત્તા જાળવવા માટે થાય છે, કારણ કે તે એક ક્રાયોપ્રોટેક્ટન્ટ છે જે કોષોને હિમથી થતા નુકસાનથી બચાવે છે. ગ્લુકોઝ ઉર્જા સ્રોત છે, ગ્લિસરોલ પણ ક્રાયોપ્રોટેક્ટન્ટ છે પરંતુ શુક્રાણુઓ માટે DMSO વધુ અસરકારક છે, અને સોડિયમ ક્લોરાઇડ કોષીય દબાણ જાળવવા માટે વપરાય છે પરંતુ ક્રાયોપ્રોટેક્શન માટે નહીં.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા રોગના કારણે પુરુષમાં શુક્રાણુઓની ગુણવત્તા ઘટે છે અને તેના માટે ICSI પદ્ધતિનો ઉપયોગ કરવામાં આવે છે?", "opts": ["ડાયાબિટીસ", "ઓલિગોઝૂસ્પર્મિયા (Oligozoospermia)", "હાયપોથાયરોઇડિઝમ", "હાયપરટેન્શન"], "ans": 1, "exp": "ઓલિગોઝૂસ્પર્મિયા (Oligozoospermia)માં શુક્રાણુઓની સંખ્યા ખૂબ ઓછી હોય છે, જેના કારણે પુરુષમાં શુક્રાણુઓની ગુણવત્તા ઘટે છે અને તેના માટે ICSI પદ્ધતિનો ઉપયોગ કરવામાં આવે છે. ડાયાબિટીસ, હાયપોથાયરોઇડિઝમ, અને હાયપરટેન્શન શુક્રાણુઓની ગુણવત્તા પર અસર કરી શકે છે, પરંતુ ઓલિગોઝૂસ્પર્મિયા ICSI માટે સૌથી સામાન્ય કારણ છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, GIFT (Gamete Intrafallopian Transfer) અને ZIFT (Zygote Intrafallopian Transfer) વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["GIFTમાં ફલન અંડવાહિનીમાં થાય છે જ્યારે ZIFTમાં ફલન લેબોરેટરીમાં થાય છે", "GIFTમાં અંડકોષ અને શુક્રાણુને અંડવાહિનીમાં મૂકવામાં આવે છે જ્યારે ZIFTમાં ફલિત અંડકોષ (ઝાયગોટ)ને મૂકવામાં આવે છે", "GIFTમાં શુક્રાણુઓને સીધા ગર્ભાશયમાં મૂકવામાં આવે છે જ્યારે ZIFTમાં અંડકોષને અંડવાહિનીમાં મૂકવામાં આવે છે", "GIFT અને ZIFT બંનેમાં ફલન લેબોરેટરીમાં થાય છે પરંતુ GIFTમાં અંડકોષનો ઉપયોગ થાય છે જ્યારે ZIFTમાં શુક્રાણુઓનો ઉપયોગ થાય છે"], "ans": 1, "exp": "GIFT (Gamete Intrafallopian Transfer)માં અંડકોષ અને શુક્રાણુને અંડવાહિનીમાં મૂકવામાં આવે છે, જ્યાં ફલન નૈસર્ગિક રીતે થાય છે. ZIFT (Zygote Intrafallopian Transfer)માં ફલન લેબોરેટરીમાં થાય છે અને ત્યારબાદ ફલિત અંડકોષ (ઝાયગોટ)ને અંડવાહિનીમાં મૂકવામાં આવે છે. વિકલ્પ A ખોટો છે કારણ કે GIFTમાં ફલન અંડવાહિનીમાં થાય છે પરંતુ ZIFTમાં ફલન લેબોરેટરીમાં થાય છે, પરંતુ પ્રશ્ન મુખ્ય તફાવત વિશે છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ GIFT અને ZIFTની સાચી પ્રક્રિયાને વર્ણવતા નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં IUI (Intrauterine Insemination) પદ્ધતિનો ઉપયોગ સૌથી યોગ્ય ગણાય છે?", "opts": ["જ્યારે સ્ત્રીમાં અંડવાહિની બંધ હોય", "જ્યારે પુરુષમાં શુક્રાણુઓની સંખ્યા ઓછી હોય પરંતુ શુક્રાણુઓની ગતિશીલતા સારી હોય", "જ્યારે સ્ત્રીમાં અંડકોષ ઉત્પન્ન ન થતો હોય", "જ્યારે પુરુષમાં શુક્રાણુઓની ગુણવત્તા ખૂબ જ ખરાબ હોય"], "ans": 1, "exp": "IUI (Intrauterine Insemination) પદ્ધતિનો ઉપયોગ જ્યારે પુરુષમાં શુક્રાણુઓની સંખ્યા ઓછી હોય પરંતુ શુક્રાણુઓની ગતિશીલતા સારી હોય ત્યારે થાય છે. વિકલ્પ A ખોટો છે કારણ કે અંડવાહિની બંધ હોવાને કારણે IUI કામ કરશે નહીં. વિકલ્પ C ખોટો છે કારણ કે અંડકોષ ઉત્પન્ન ન થવાને કારણે IUI ઉપયોગી નથી. વિકલ્પ D ખોટો છે કારણ કે શુક્રાણુઓની ગુણવત્તા ખૂબ જ ખરાબ હોવાને કારણે IUI સફળ થશે નહીં.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા હોર્મોનનો ઉપયોગ અંડકોષના પરિપક્વતાને ઉત્તેજિત કરવા અને અંડોત્સર્ગને નિયંત્રિત કરવા માટે થાય છે?", "opts": ["FSH (Follicle Stimulating Hormone)", "LH (Luteinizing Hormone)", "hCG (Human Chorionic Gonadotropin)", "પ્રોલેક્ટિન (Prolactin)"], "ans": 2, "exp": "hCG (Human Chorionic Gonadotropin)નો ઉપયોગ અંડકોષના પરિપક્વતાને ઉત્તેજિત કરવા અને અંડોત્સર્ગને નિયંત્રિત કરવા માટે થાય છે. FSH અંડપિંડને ઉત્તેજિત કરે છે પરંતુ અંડોત્સર્ગને નિયંત્રિત કરતું નથી. LH અંડોત્સર્ગને ઉત્તેજિત કરે છે પરંતુ ARTમાં hCGનો ઉપયોગ વધુ સામાન્ય છે. પ્રોલેક્ટિન દૂધ ઉત્પાદન સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં સર્જિકલ સ્પર્મ રિટ્રીવલ (Surgical Sperm Retrieval) પદ્ધતિનો ઉપયોગ થાય છે?", "opts": ["જ્યારે પુરુષમાં શુક્રાણુઓની સંખ્યા ખૂબ જ ઓછી હોય", "જ્યારે પુરુષમાં શુક્રાણુઓ વીર્યમાં હાજર ન હોય પરંતુ શુક્રાણુ ઉત્પાદન થતું હોય", "જ્યારે સ્ત્રીમાં અંડકોષ ઉત્પન્ન ન થતો હોય", "જ્યારે સ્ત્રીમાં ગર્ભાશયમાં સમસ્યા હોય"], "ans": 1, "exp": "સર્જિકલ સ્પર્મ રિટ્રીવલ (Surgical Sperm Retrieval) પદ્ધતિનો ઉપયોગ જ્યારે પુરુષમાં શુક્રાણુઓ વીર્યમાં હાજર ન હોય પરંતુ શુક્રાણુ ઉત્પાદન થતું હોય ત્યારે થાય છે. વિકલ્પ A ખોટો છે કારણ કે શુક્રાણુઓની સંખ્યા ઓછી હોવાને કારણે સર્જિકલ પદ્ધતિની જરૂર પડતી નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ સ્ત્રી સાથે સંબંધિત સમસ્યાઓ છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા પદાર્થનો ઉપયોગ શુક્રાણુઓને સંગ્રહિત કરવા માટે થતો નથી?", "opts": ["દ્રવ્ય નાઇટ્રોજન (Liquid Nitrogen)", "ગ્લિસરોલ (Glycerol)", "ડાયમિથાઇલ સલ્ફોક્સાઇડ (DMSO)", "ઇથેનોલ (Ethanol)"], "ans": 3, "exp": "શુક્રાણુઓને સંગ્રહિત કરવા માટે દ્રવ્ય નાઇટ્રોજન, ગ્લિસરોલ અને ડાયમિથાઇલ સલ્ફોક્સાઇડનો ઉપયોગ થાય છે. ઇથેનોલ (Ethanol)નો ઉપયોગ શુક્રાણુઓને સંગ્રહિત કરવા માટે થતો નથી કારણ કે તે શુક્રાણુઓને નુકસાન પહોંચાડે છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં ટેસ્ટિક્યુલર સ્પર્મ એસ્પિરેશન (TESA) પદ્ધતિનો ઉપયોગ થાય છે?", "opts": ["જ્યારે પુરુષમાં અંડકોષોની અછત હોય છે", "જ્યારે પુરુષમાં શુક્રાણુઓની ગતિશીલતા ખૂબ ઓછી હોય છે", "જ્યારે પુરુષમાં શુક્રાણુ વાહિનીઓ (વાસ ડિફરન્સ) અવરોધિત હોય છે", "જ્યારે સ્ત્રીમાં અંડપિંડમાં અંડકોષો ઉત્પન્ન થતા નથી"], "ans": 2, "exp": "ટેસ્ટિક્યુલર સ્પર્મ એસ્પિરેશન (TESA) પદ્ધતિનો ઉપયોગ જ્યારે પુરુષમાં શુક્રાણુ વાહિનીઓ (વાસ ડિફરન્સ) અવરોધિત હોય છે ત્યારે થાય છે, કારણ કે આ સ્થિતિમાં શુક્રાણુઓ વીર્યમાં મળતા નથી પરંતુ વૃષણમાં હાજર હોય છે. A) અંડકોષોની અછત પુરુષમાં નહીં પણ સ્ત્રીમાં જોવા મળે છે. B) શુક્રાણુઓની ગતિશીલતા ઓછી હોવાનું IUI અથવા ICSI પદ્ધતિઓ માટે યોગ્ય કિસ્સો છે. D) સ્ત્રીમાં અંડકોષોની અછત માટે IVF અથવા ડોનર અંડકોષનો ઉપયોગ થાય છે.", "ref": "Std 12 - પ્રકરણ 4: જનન સ્વાસ્થ્ય અને સહાયક પ્રજનન તકનીકો", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા હોર્મોનનો ઉપયોગ અંડકોષના પરિપક્વતાને રોકવા અને અંડોત્સર્ગને વિલંબિત કરવા માટે થાય છે?", "opts": ["FSH (ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન)", "LH (લ્યુટિનાઇઝિંગ હોર્મોન)", "hCG (હ્યુમન કોરિયોનિક ગોનાડોટ્રોપિન)", "GnRH એન્ટાગોનિસ્ટ (ગોનાડોટ્રોપિન-રિલીઝિંગ હોર્મોન એન્ટાગોનિસ્ટ)"], "ans": 3, "exp": "GnRH એન્ટાગોનિસ્ટનો ઉપયોગ અંડકોષના પરિપક્વતાને રોકવા અને અંડોત્સર્ગને વિલંબિત કરવા માટે થાય છે, કારણ કે તે અંડપિંડને ઉત્તેજિત કરતા હોર્મોનના સ્રાવને અટકાવે છે. A) FSH અંડપિંડને ઉત્તેજિત કરવા માટે વપરાય છે. B) LH અંડોત્સર્ગને ઉત્તેજિત કરવા માટે વપરાય છે. C) hCG અંડોત્સર્ગને પ્રેરિત કરવા માટે વપરાય છે.", "ref": "Std 12 - પ્રકરણ 4: જનન સ્વાસ્થ્ય અને સહાયક પ્રજનન તકનીકો", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક ટેસ્ટિંગ (PGT)નો ઉપયોગ કરવામાં આવે છે?", "opts": ["જ્યારે સ્ત્રીમાં ગર્ભાશયમાં ફાઇબ્રોઇડ્સ હોય છે", "જ્યારે પુરુષમાં શુક્રાણુઓની સંખ્યા ખૂબ ઓછી હોય છે", "જ્યારે માતા-પિતામાં અનુવંશિક રોગનો ઇતિહાસ હોય છે", "જ્યારે સ્ત્રીમાં અંડપિંડમાં સિસ્ટ હોય છે"], "ans": 2, "exp": "પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક ટેસ્ટિંગ (PGT)નો ઉપયોગ જ્યારે માતા-પિતામાં અનુવંશિક રોગનો ઇતિહાસ હોય છે ત્યારે થાય છે, કારણ કે આ પદ્ધતિ દ્વારા ભ્રૂણમાં અનુવંશિક વિકૃતિઓની તપાસ કરવામાં આવે છે. A) ગર્ભાશયમાં ફાઇબ્રોઇડ્સ માટે સર્જિકલ હસ્તક્ષેપ અથવા અન્ય ઉપચાર વિકલ્પો વપરાય છે. B) શુક્રાણુઓની સંખ્યા ઓછી હોવાનું ICSI પદ્ધતિ માટે યોગ્ય કિસ્સો છે. D) અંડપિંડમાં સિસ્ટ માટે દવા અથવા સર્જિકલ ઉપચાર વપરાય છે.", "ref": "Std 12 - પ્રકરણ 4: જનન સ્વાસ્થ્ય અને સહાયક પ્રજનન તકનીકો", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા પદાર્થનો ઉપયોગ ક્રાયોપ્રિઝરવેશન દરમિયાન શુક્રાણુઓ અથવા અંડકોષોને હાનિ પહોંચાડતા નથી?", "opts": ["ડાયમિથાઇલ સલ્ફોક્સાઇડ (DMSO)", "ગ્લિસરોલ", "ઇથિલીન ગ્લાયકોલ", "ફોર્માલ્ડિહાઇડ"], "ans": 3, "exp": "ફોર્માલ્ડિહાઇડનો ઉપયોગ ક્રાયોપ્રિઝરવેશન દરમિયાન થતો નથી, કારણ કે તે કોષો માટે વિષાક્ત છે. A) ડાયમિથાઇલ સલ્ફોક્સાઇડ (DMSO) અને B) ગ્લિસરોલ ક્રાયોપ્રોટેક્ટન્ટ તરીકે વપરાય છે. C) ઇથિલીન ગ્લાયકોલ પણ ક્રાયોપ્રોટેક્ટન્ટ તરીકે વપરાય છે.", "ref": "Std 12 - પ્રકરણ 4: જનન સ્વાસ્થ્ય અને સહાયક પ્રજનન તકનીકો", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં સબઝોનલ ઇન્સેમિનેશન (SUZI) પદ્ધતિનો ઉપયોગ થાય છે?", "opts": ["જ્યારે શુક્રાણુઓની ગતિશીલતા ખૂબ ઓછી હોય છે", "જ્યારે શુક્રાણુઓની સંખ્યા ખૂબ ઓછી હોય છે", "જ્યારે શુક્રાણુઓ અંડકોષના કોષકવચ (ઝોના પેલ્યુસિડા)ને ભેદી શકતા નથી", "જ્યારે અંડકોષમાં કોષકેન્દ્ર અલગ પડી ગયું હોય છે"], "ans": 2, "exp": "સબઝોનલ ઇન્સેમિનેશન (SUZI) પદ્ધતિનો ઉપયોગ જ્યારે શુક્રાણુઓ અંડકોષના કોષકવચ (ઝોના પેલ્યુસિડા)ને ભેદી શકતા નથી ત્યારે થાય છે, કારણ કે આ પદ્ધતિમાં શુક્રાણુને સીધું અંડકોષના કોષકવચ નીચે ઇન્જેક્ટ કરવામાં આવે છે. A) શુક્રાણુઓની ગતિશીલતા ઓછી હોવાનું IUI અથવા ICSI પદ્ધતિ માટે યોગ્ય કિસ્સો છે. B) શુક્રાણુઓની સંખ્યા ઓછી હોવાનું ICSI પદ્ધતિ માટે યોગ્ય કિસ્સો છે. D) અંડકોષમાં કોષકેન્દ્ર અલગ પડી ગયું હોવાનું IVF પદ્ધતિ માટે અયોગ્ય કિસ્સો છે.", "ref": "Std 12 - પ્રકરણ 4: જનન સ્વાસ્થ્ય અને સહાયક પ્રજનન તકનીકો", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, કયા કિસ્સામાં 'સાયટોપ્લાઝમિક સ્પર્મ ઇન્જેક્શન (ROSI)' પદ્ધતિનો ઉપયોગ થાય છે?", "opts": ["જ્યારે શુક્રાણુઓમાં કોષકેન્દ્ર (ન્યુક્લિયસ) ગેરહાજર હોય", "જ્યારે શુક્રાણુઓમાં પૂંછડી (ટેલ) ગેરહાજર હોય", "જ્યારે શુક્રાણુઓમાં એક્રોસોમ ગેરહાજર હોય", "જ્યારે શુક્રાણુઓમાં મિટોકોન્ડ્રિયા ગેરહાજર હોય"], "ans": 0, "exp": "ROSI (Round Spermatid Injection) પદ્ધતિમાં, જ્યારે શુક્રાણુઓમાં કોષકેન્દ્ર (ન્યુક્લિયસ) ગેરહાજર હોય ત્યારે આ પદ્ધતિનો ઉપયોગ થાય છે. આ પદ્ધતિમાં, સાયટોપ્લાઝમમાં સીધું ઇન્જેક્શન કરવામાં આવે છે. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે ROSI પદ્ધતિ શુક્રાણુના કોષકેન્દ્રની ગેરહાજરીમાં જ ઉપયોગી છે.", "ref": "Std 12 - Chapter 4: જનન স্বાસ્થ્ય (Reproductive Health)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, 'પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક ડાયગ્નોસિસ (PGD)' અને 'પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક સ્ક્રીનિંગ (PGS)' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["PGDનો ઉપયોગ વંશાણુગત રોગોના નિદાન માટે થાય છે, જ્યારે PGSનો ઉપયોગ વર્ણસૂત્રીય અસામાન્યતાઓના નિદાન માટે થાય છે", "PGDનો ઉપયોગ વર્ણસૂત્રીય અસામાન્યતાઓના નિદાન માટે થાય છે, જ્યારે PGSનો ઉપયોગ વંશાણુગત રોગોના નિદાન માટે થાય છે", "PGD અને PGS બંનેનો ઉપયોગ વંશાણુગત રોગોના નિદાન માટે થાય છે", "PGD અને PGS બંનેનો ઉપયોગ વર્ણસૂત્રીય અસામાન્યતાઓના નિદાન માટે થાય છે"], "ans": 0, "exp": "PGD (પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક ડાયગ્નોસિસ)નો ઉપયોગ સ્પષ્ટ વંશાણુગત રોગો (જેમ કે સિકલ સેલ એનિમિયા, થેલેસેમિયા)ના નિદાન માટે થાય છે, જ્યારે PGS (પ્રી-ઇમ્પ્લાન્ટેશન જેનેટિક સ્ક્રીનિંગ)નો ઉપયોગ વર્ણસૂત્રીય અસામાન્યતાઓ (જેમ કે ડાઉન સિન્ડ્રોમ)ના નિદાન માટે થાય છે. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે તેઓ બંને પદ્ધતિઓના ઉપયોગને ગૂંચવી નાખે છે.", "ref": "Std 12 - Chapter 4: જનન સ્વાસ્થ્ય (Reproductive Health)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, 'ટેસ્ટિક્યુલર ટિશ્યુ કલ્ચર' પદ્ધતિનો ઉપયોગ કયા હેતુ માટે થાય છે?", "opts": ["અંડકોષોની ઉત્પત્તિ માટે", "શુક્રાણુઓની ઉત્પત્તિ માટે", "ભ્રૂણની ઉત્પત્તિ માટે", "હોર્મોનની ઉત્પત્તિ માટે"], "ans": 1, "exp": "ટેસ્ટિક્યુલર ટિશ્યુ કલ્ચર પદ્ધતિનો ઉપયોગ શુક્રાણુઓની ઉત્પત્તિ માટે થાય છે, ખાસ કરીને જ્યારે પુરુષમાં શુક્રાણુઓની ગેરહાજરી અથવા ઓછી સંખ્યામાં શુક્રાણુઓ હોય. બાકીના વિકલ્પો (A, C, D) અયોગ્ય છે કારણ કે આ પદ્ધતિ શુક્રાણુઓની ઉત્પત્તિ સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 4: જનન સ્વાસ્થ્ય (Reproductive Health)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, 'ઓસિટ ક્રાયોપ્રિઝરવેશન' પદ્ધતિનો ઉપયોગ કયા કિસ્સામાં થાય છે?", "opts": ["જ્યારે સ્ત્રીમાં અંડપિંડની કામગીરી બંધ થઈ ગઈ હોય", "જ્યારે સ્ત્રીમાં કેમોથેરાપી અથવા રેડિયેશન થેરાપી લેવાની હોય", "જ્યારે સ્ત્રીમાં હોર્મોનલ અસંતુલન હોય", "જ્યારે સ્ત્રીમાં ગર્ભાશયની સમસ્યા હોય"], "ans": 1, "exp": "ઓસિટ ક્રાયોપ્રિઝરવેશન (અંડકોષનું ક્રાયોપ્રિઝરવેશન) પદ્ધતિનો ઉપયોગ જ્યારે સ્ત્રીમાં કેમોથેરાપી અથવા રેડિયેશન થેરાપી લેવાની હોય ત્યારે થાય છે, કારણ કે આ થેરાપી અંડપિંડની કામગીરીને નુકસાન પહોંચાડી શકે છે. બાકીના વિકલ્પો (A, C, D) અયોગ્ય છે કારણ કે તેઓ આ પદ્ધતિના મુખ્ય હેતુને સ્પષ્ટ કરતા નથી.", "ref": "Std 12 - Chapter 4: જનન સ્વાસ્થ્ય (Reproductive Health)", "ch": ""}, {"q": "ART પદ્ધતિઓમાં, 'સબઝોનલ ઇન્સેમિનેશન (SUZI)' અને 'ઇન્ટ્રાસાયટોપ્લાઝમિક સ્પર્મ ઇન્જેક્શન (ICSI)' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["SUZIમાં શુક્રાણુને અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે, જ્યારે ICSIમાં શુક્રાણુને અંડકોષના કોષકેન્દ્રમાં ઇન્જેક્ટ કરવામાં આવે છે", "SUZIમાં શુક્રાણુને અંડકોષના કોષકેન્દ્રમાં ઇન્જેક્ટ કરવામાં આવે છે, જ્યારે ICSIમાં શુક્રાણુને અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે", "SUZI અને ICSI બંનેમાં શુક્રાણુને અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે", "SUZI અને ICSI બંનેમાં શુક્રાણુને અંડકોષના કોષકેન્દ્રમાં ઇન્જેક્ટ કરવામાં આવે છે"], "ans": 0, "exp": "SUZI (સબઝોનલ ઇન્સેમિનેશન)માં શુક્રાણુને અંડકોષના સાયટોપ્લાઝમમાં ઇન્જેક્ટ કરવામાં આવે છે, જ્યારે ICSI (ઇન્ટ્રાસાયટોપ્લાઝમિક સ્પર્મ ઇન્જેક્શન)માં શુક્રાણુને અંડકોષના કોષકેન્દ્રમાં ઇન્જેક્ટ કરવામાં આવે છે. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે તેઓ બંને પદ્ધતિઓના તફાવતને ગૂંચવી નાખે છે.", "ref": "Std 12 - Chapter 4: જનન સ્વાસ્થ્ય (Reproductive Health)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
