@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lac Operon</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Lac Operon</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Lac Operon</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "લેક ઓપેરોન મોડેલમાં, લેક્ટોઝની ગેરહાજરીમાં રિપ્રેસર પ્રોટીન કયા સ્થાને જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે?", "opts": ["પ્રમોટર સ્થાને", "ઓપરેટર સ્થાને", "સ્ટ્રક્ચરલ જનીન Zના પ્રારંભિક કોડોન પર", "રેગ્યુલેટર જનીનના પ્રમોટર પર"], "ans": 1, "exp": "લેક ઓપેરોનમાં રિપ્રેસર પ્રોટીન ઓપરેટર સ્થાને જોડાઈને RNA પોલિમરેઝને પ્રમોટરથી સ્ટ્રક્ચરલ જનીન તરફ આગળ વધતા અટકાવે છે, જે ટ્રાન્સક્રિપ્શનને અવરોધે છે. પ્રમોટર સ્થાને RNA પોલિમરેઝ જોડાય છે, સ્ટ્રક્ચરલ જનીનના કોડોન પર રિપ્રેસર જોડાતું નથી, અને રેગ્યુલેટર જનીનનો પ્રમોટર રિપ્રેસરના સંશ્લેષણ માટે જવાબદાર છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના આણ્વિક આધાર", "ch": ""}, {"q": "લેક ઓપેરોનમાં લેક્ટોઝની હાજરીમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["લેક્ટોઝ રિપ્રેસર પ્રોટીન સાથે જોડાઈને તેને નિષ્ક્રિય બનાવે છે", "RNA પોલિમરેઝ ઓપરેટર સ્થાને જોડાઈને ટ્રાન્સક્રિપ્શન શરૂ કરે છે", "β-ગેલેક્ટોસાઇડેઝ ઉત્સેચકનું સંશ્લેષણ થાય છે", "લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં વિઘટન કરતું ઉત્સેચક ઉત્પન્ન થાય છે"], "ans": 1, "exp": "લેક્ટોઝની હાજરીમાં રિપ્રેસર નિષ્ક્રિય બને છે અને ઓપરેટર સ્થાન મુક્ત થાય છે, પરંતુ RNA પોલિમરેઝ ઓપરેટર પર નહીં, પ્રમોટર પર જોડાઈને ટ્રાન્સક્રિપ્શન શરૂ કરે છે. બાકીના વિધાનો સાચાં છે: લેક્ટોઝ રિપ્રેસરને નિષ્ક્રિય કરે છે, β-ગેલેક્ટોસાઇડેઝ ઉત્પન્ન થાય છે, અને લેક્ટોઝનું વિઘટન થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના આણ્વિક આધાર", "ch": ""}, {"q": "લેક ઓપેરોનના સંદર્ભમાં, CAP (Catabolite Activator Protein) વિશે નીચેનામાંથી કયું વિધાન યોગ્ય નથી?", "opts": ["CAP cAMP સાથે જોડાઈને સક્રિય સ્વરૂપ પ્રાપ્ત કરે છે", "સક્રિય CAP પ્રમોટર સાથે જોડાઈને RNA પોલિમરેઝની પ્રવૃત્તિ વધારે છે", "ગ્લુકોઝની હાજરીમાં cAMPનું પ્રમાણ વધે છે, જે CAPને સક્રિય કરે છે", "CAPની ગેરહાજરીમાં લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ખૂબ જ ધીમું થાય છે"], "ans": 2, "exp": "CAP cAMP સાથે જોડાઈને સક્રિય બને છે અને પ્રમોટર સાથે જોડાઈને RNA પોલિમરેઝની પ્રવૃત્તિ વધારે છે. પરંતુ ગ્લુકોઝની હાજરીમાં cAMPનું પ્રમાણ ઘટે છે, જે CAPને નિષ્ક્રિય બનાવે છે. CAPની ગેરહાજરીમાં લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ખૂબ જ ધીમું થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના આણ્વિક આધાર", "ch": ""}, {"q": "એક પ્રયોગમાં E. coli બેક્ટેરિયાને લેક્ટોઝ અને ગ્લુકોઝ બંને ધરાવતા માધ્યમમાં ઉછેરવામાં આવે છે. આ પરિસ્થિતિમાં લેક ઓપેરોનની પ્રવૃત્તિ વિશે શું કહી શકાય?", "opts": ["લેક ઓપેરોન સંપૂર્ણપણે સક્રિય થશે કારણ કે લેક્ટોઝ હાજર છે", "લેક ઓપેરોન નિષ્ક્રિય રહેશે કારણ કે ગ્લુકોઝની હાજરી CAPને નિષ્ક્રિય કરે છે", "લેક ઓપેરોન આંશિક રીતે સક્રિય થશે કારણ કે રિપ્રેસર નિષ્ક્રિય છે પરંતુ CAP પણ નિષ્ક્રિય છે", "લેક ઓપેરોનની પ્રવૃત્તિ માત્ર β-ગેલેક્ટોસાઇડેઝ ઉત્સેચકના પ્રમાણ પર આધારિત હશે"], "ans": 2, "exp": "લેક્ટોઝ હાજર હોવાથી રિપ્રેસર નિષ્ક્રિય બનશે, પરંતુ ગ્લુકોઝની હાજરીમાં cAMPનું પ્રમાણ ઘટે છે, જે CAPને નિષ્ક્રિય બનાવે છે. CAPની ગેરહાજરીમાં RNA પોલિમરેઝની પ્રવૃત્તિ ખૂબ જ ઓછી હોય છે, તેથી લેક ઓપેરન આંશિક રીતે જ સક્રિય થશે. લેક ઓપેરનની પ્રવૃત્તિ માત્ર β-ગેલેક્ટોસાઇડેઝના પ્રમાણ પર આધારિત નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના આણ્વિક આધાર", "ch": ""}, {"q": "લેક ઓપેરોનમાં સ્ટ્રક્ચરલ જનીન Z, Y અને A અનુક્રમે કયા ઉત્સેચકોનું સંશ્લેષણ કરે છે?", "opts": ["β-ગેલેક્ટોસાઇડેઝ, પર્મીએઝ, ટ્રાન્સએસિટાઇલેઝ", "પર્મીએઝ, β-ગેલેક્ટોસાઇડેઝ, ટ્રાન્સએસિટાઇલેઝ", "ટ્રાન્સએસિટાઇલેઝ, β-ગેલેક્ટોસાઇડેઝ, પર્મીએઝ", "β-ગેલેક્ટોસાઇડેઝ, ટ્રાન્સએસિટાઇલેઝ, પર્મીએઝ"], "ans": 0, "exp": "લેક ઓપેરનમાં સ્ટ્રક્ચરલ જનીન Z β-ગેલેક્ટોસાઇડેઝ (લેક્ટોઝનું વિઘટન), જનીન Y પર્મીએઝ (લેક્ટોઝના કોષમાં પ્રવેશ માટે), અને જનીન A ટ્રાન્સએસિટાઇલેઝ (ઉપાપચયમાં સહાયક) ઉત્સેચકોનું સંશ્લેષણ કરે છે. અન્ય વિકલ્પોમાં ઉત્સેચકોનો ક્રમ ખોટો છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના આણ્વિક આધાર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, કયા પરિસ્થિતિમાં cAMPનું સ્તર સૌથી ઓછું હોય છે અને તેના કારણે CAP પ્રોટીન અક્રિય રહે છે?", "opts": ["લેક્ટોઝની ગેરહાજરીમાં અને ગ્લુકોઝની હાજરીમાં", "લેક્ટોઝની હાજરીમાં અને ગ્લુકોઝની ગેરહાજરીમાં", "લેક્ટોઝ અને ગ્લુકોઝ બંનેમાંની ગેરહાજરીમાં", "લેક્ટોઝ અને ગ્લુકોઝ બંનેમાંની હાજરીમાં"], "ans": 0, "exp": "cAMPનું સ્તર ગ્લુકોઝની હાજરીમાં ઓછું હોય છે કારણ કે ગ્લુકોઝ એડેનિલેટ સાયક્લેઝ ઉત્સેચકને અવરોધે છે, જેના કારણે cAMPનું સંશ્લેષણ ઘટે છે. CAP પ્રોટીનને સક્રિય થવા માટે cAMPની જરૂર હોય છે, તેથી ગ્લુકોઝની હાજરીમાં CAP અક્રિય રહે છે. લેક્ટોઝની ગેરહાજરીમાં રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે, પરંતુ cAMPનું સ્તર ગ્લુકોઝ પર નિર્ભર રહે છે. બાકીના વિકલ્પોમાં cAMPનું સ્તર ઉચ્ચ હોય છે અથવા CAP સક્રિય હોય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન લેક Z જનીન વિશે ખોટું છે?", "opts": ["તે β-ગેલેક્ટોઝિડેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે", "તે લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં તોડે છે", "તે લેક ઓપેરોનના રેગ્યુલેટરી જનીન તરીકે કામ કરે છે", "તે લેક્ટોઝના ચયાપચયમાં સામેલ છે"], "ans": 2, "exp": "લેક Z જનીન β-ગેલેક્ટોઝિડેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે, જે લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં તોડે છે, અને તે લેક્ટોઝના ચયાપચયમાં સામેલ છે. પરંતુ તે રેગ્યુલેટરી જનીન નથી; રેગ્યુલેટરી જનીન લેક I (રિપ્રેસર જનીન) છે. તેથી વિકલ્પ C ખોટો છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયા પરિસ્થિતિમાં લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સૌથી ઓછું થશે?", "opts": ["લેક્ટોઝની હાજરીમાં અને ગ્લુકોઝની ગેરહાજરીમાં", "લેક્ટોઝની ગેરહાજરીમાં અને ગ્લુકોઝની હાજરીમાં", "લેક્ટોઝ અને ગ્લુકોઝ બંનેમાંની હાજરીમાં", "લેક્ટોઝ અને ગ્લુકોઝ બંનેમાંની ગેરહાજરીમાં"], "ans": 1, "exp": "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની ગેરહાજરીમાં અને ગ્લુકોઝની હાજરીમાં સૌથી ઓછું થશે કારણ કે: 1) લેક્ટોઝની ગેરહાજરીમાં રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે, અને 2) ગ્લુકોઝની હાજરીમાં cAMPનું સ્તર ઓછું હોય છે, જેના કારણે CAP પ્રોટીન અક્રિય રહે છે. બાકીના વિકલ્પોમાં ટ્રાન્સક્રિપ્શન વધુ અથવા ઓછું હોઈ શકે, પરંતુ સૌથી ઓછું વિકલ્પ Bમાં જ થશે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન CAP-cAMP કોમ્પ્લેક્સ વિશે સાચું નથી?", "opts": ["તે પ્રમોટર સ્થાન સાથે જોડાઈને RNA પોલિમરેઝની બંધન ક્ષમતા વધારે છે", "તે લેક્ટોઝની હાજરીમાં જ બને છે", "તે રિપ્રેસર પ્રોટીનને ઓપેરેટર સ્થાનથી દૂર કરે છે", "તે cAMP સાથે જોડાઈને સક્રિય થાય છે"], "ans": 2, "exp": "CAP-cAMP કોમ્પ્લેક્સ પ્રમોટર સ્થાન સાથે જોડાઈને RNA પોલિમરેઝની બંધન ક્ષમતા વધારે છે, અને તે cAMP સાથે જોડાઈને સક્રિય થાય છે. તે લેક્ટોઝની હાજરીમાં બનતું નથી, પરંતુ ગ્લુકોઝની ગેરહાજરીમાં cAMPનું સ્તર ઉચ્ચ હોય છે, જેના કારણે CAP-cAMP કોમ્પ્લેક્સ બને છે. રિપ્રેસર પ્રોટીનને ઓપેરેટર સ્થાનથી દૂર કરવું તે લેક્ટોઝ (ઇન્ડ્યુસર)નું કામ છે, CAP-cAMP કોમ્પ્લેક્સનું નહીં. તેથી વિકલ્પ C ખોટો છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયા જનીનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરીમાં પણ અવરોધાયેલું રહે છે જ્યારે ગ્લુકોઝ હાજર હોય?", "opts": ["લેક Z", "લેક Y", "લેક A", "બધા જ લેક સ્ટ્રક્ચરલ જનીન"], "ans": 3, "exp": "લેક ઓપેરોનમાં, લેક Z, Y, અને A સ્ટ્રક્ચરલ જનીનોનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરીમાં પણ અવરોધાયેલું રહે છે જ્યારે ગ્લુકોઝ હાજર હોય, કારણ કે ગ્લુકોઝની હાજરીમાં cAMPનું સ્તર ઓછું હોય છે, જેના કારણે CAP-cAMP કોમ્પ્લેક્સ બનતું નથી, અને RNA પોલિમરેઝ પ્રમોટર સાથે યોગ્ય રીતે જોડાઈ શકતું નથી. તેથી બધા જ લેક સ્ટ્રક્ચરલ જનીનોનું ટ્રાન્સક્રિપ્શન અવરોધાયેલું રહે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો I^s મ્યુટેશન (સુપર-રિપ્રેસર) હાજર હોય અને લેક્ટોઝ પણ હાજર હોય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["લેક Z, Y, A જનીનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણ રીતે અવરોધાયેલું રહેશે", "લેક Z, Y, A જનીનનું ટ્રાન્સક્રિપ્શન સ્વાભાવિક રીતે થશે", "લેક્ટોઝ રિપ્રેસર સાથે જોડાઈ શકશે નહીં, પરંતુ ટ્રાન્સક્રિપ્શન થશે", "રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે જોડાઈ રહેશે, પરંતુ લેક્ટોઝ તેને અલગ કરશે"], "ans": 0, "exp": "I^s મ્યુટેશનમાં રિપ્રેસર પ્રોટીન તેની સંરચના બદલાય છે, જેથી લેક્ટોઝ તેની સાથે જોડાઈ શકતું નથી. આથી, રિપ્રેસર ઓપેરેટર સાથે જોડાઈ રહે છે અને ટ્રાન્સક્રિપ્શન સંપૂર્ણ રીતે અવરોધાયેલું રહે છે. વિકલ્પ B, C, D ખોટા છે કારણ કે I^s મ્યુટેશનમાં લેક્ટોઝ રિપ્રેસરને અસર કરતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો CAP-cAMP કોમ્પ્લેક્સ બનવાનું અવરોધાય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ગ્લુકોઝની હાજરીમાં પણ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરીમાં પણ ઓછું થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણ રીતે બંધ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ગ્લુકોઝની ગેરહાજરીમાં પણ ઓછું થશે"], "ans": 1, "exp": "CAP-cAMP કોમ્પ્લેક્સ લેક ઓપેરોનના પ્રમોટર પ્રદેશ સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને ઉત્તેજિત કરે છે. જો આ કોમ્પ્લેક્સ બનવાનું અવરોધાય, તો લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરીમાં પણ ઓછું થશે. વિકલ્પ A, C, D ખોટા છે કારણ કે CAP-cAMP કોમ્પ્લેક્સ વગર ટ્રાન્સક્રિપ્શન સંપૂર્ણ રીતે બંધ થતું નથી, પરંતુ ઓછું થાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો O^c મ્યુટેશન (ઓપેરેટર કોન્સ્ટિટ્યુટિવ) હાજર હોય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["લેક Z, Y, A જનીનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણ રીતે બંધ થશે", "લેક Z, Y, A જનીનનું ટ્રાન્સક્રિપ્શન સતત થતું રહેશે", "લેક્ટોઝની હાજરીમાં જ ટ્રાન્સક્રિપ્શન થશે", "રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે જોડાઈ શકશે નહીં"], "ans": 1, "exp": "O^c મ્યુટેશનમાં ઓપેરેટર પ્રદેશ તેની સંરચના બદલાય છે, જેથી રિપ્રેસર પ્રોટીન તેની સાથે જોડાઈ શકતું નથી. આથી, લેક Z, Y, A જનીનનું ટ્રાન્સક્રિપ્શન સતત થતું રહે છે. વિકલ્પ A, C, D ખોટા છે કારણ કે O^c મ્યુટેશનમાં રિપ્રેસર ઓપેરેટર સાથે જોડાઈ શકતું નથી, પરંતુ ટ્રાન્સક્રિપ્શન સતત થતું રહે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન લેક Y જનીન વિશે સાચું છે?", "opts": ["તે પર્મિયેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે", "તે બીટા-ગેલેક્ટોઝિડેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે", "તે થાયોગેલેક્ટોઝ ટ્રાન્સએસિલેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે", "તે લેક્ટોઝ પર્મિયેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે"], "ans": 0, "exp": "લેક Y જનીન પર્મિયેઝ ઉત્સેચકનું સંશ્લેષણ કરે છે, જે લેક્ટોઝને કોષમાં પ્રવેશ કરવામાં મદદ કરે છે. વિકલ્પ B ખોટો છે કારણ કે બીટા-ગેલેક્ટોઝિડેઝ લેક Z જનીન દ્વારા સંશ્લેષિત થાય છે. વિકલ્પ C ખોટો છે કારણ કે થાયોગેલેક્ટોઝ ટ્રાન્સએસિલેઝ લેક A જનીન દ્વારા સંશ્લેષિત થાય છે. વિકલ્પ D ખોટો છે કારણ કે લેક્ટોઝ પર્મિયેઝ એ જ લેક Y જનીન દ્વારા સંશ્લેષિત થતું ઉત્સેચક છે, પરંતુ વિકલ્પ A પણ સાચું છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રયોગમાં, E. coli બેક્ટેરિયામાં લેક ઓપેરોનના નિયંત્રણમાં નીચેનામાંથી કયું પરિવર્તન લેક્ટોઝની ગેરહાજરીમાં પણ સતત ટ્રાન્સક્રિપ્શન તરફ દોરી જશે, પરંતુ ગ્લુકોઝની હાજરીમાં તેનું પ્રમાણ નોંધપાત્ર રીતે ઘટી જશે?", "opts": ["રિપ્રેસર પ્રોટીનનું I જનીનમાં નોનસેન્સ મ્યુટેશન", "ઓપેરેટર સ્થાન (O) પર O^c મ્યુટેશન જે રિપ્રેસરને જોડાવા દેતું નથી", "CAP બાઈન્ડિંગ સાઈટ પર મ્યુટેશન જે CAP-cAMP કોમ્પ્લેક્સને જોડાવા દેતું નથી", "લેક Z જનીનમાં મિસસેન્સ મ્યુટેશન જે β-ગેલેક્ટોસાઈડેઝ ઉત્સેચકને નિષ્ક્રિય બનાવે છે"], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. ઓપેરેટર સ્થાન (O) પર O^c મ્યુટેશન રિપ્રેસર પ્રોટીનને ઓપેરેટર સાથે જોડાવા દેતું નથી, જેના કારણે લેક્ટોઝની ગેરહાજરીમાં પણ ટ્રાન્સક્રિપ્શન સતત થતું રહે છે. જોકે, ગ્લુકોઝની હાજરીમાં cAMPનું સ્તર ઘટી જાય છે, જે CAP-cAMP કોમ્પ્લેક્સના નિર્માણને અવરોધે છે, તેથી ટ્રાન્સક્રિપ્શનનું પ્રમાણ નોંધપાત્ર રીતે ઘટી જાય છે.\n\nવિકલ્પ A ખોટો છે કારણ કે I જનીનમાં નોનસેન્સ મ્યુટેશન રિપ્રેસર પ્રોટીનનું સંશ્લેષણ અટકાવે છે, પરંતુ તે ગ્લુકોઝની હાજરીમાં ટ્રાન્સક્રિપ્શનને અસર કરતું નથી.\n\nવિકલ્પ C ખોટો છે કારણ કે CAP બાઈન્ડિંગ સાઈટ પર મ્યુટેશન CAP-cAMP કોમ્પ્લેક્સને જોડાવા દેતું નથી, જેના કારણે ગ્લુકોઝની ગેરહાજરીમાં પણ ટ્રાન્સક્રિપ્શન ઓછું થાય છે, પરંતુ લેક્ટોઝની ગેરહાજરીમાં રિપ્રેસર હાજર હોય તો ટ્રાન્સક્રિપ્શન અવરોધાય છે.\n\nવિકલ્પ D ખોટો છે કારણ કે લેક Z જનીનમાં મિસસેન્સ મ્યુટેશન માત્ર β-ગેલેક્ટોસાઈડેઝ ઉત્સેચકને અસર કરે છે, પરંતુ તે ટ્રાન્સક્રિપ્શનના નિયંત્રણને અસર કરતું નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ (લેક ઓપેરોન મોડેલ)", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો I^- મ્યુટેશન (રિપ્રેસર પ્રોટીનનું નિષ્ક્રિયીકરણ) અને O^c મ્યુટેશન (ઓપેરેટરનું કોન્સ્ટિટ્યુટિવ રૂપ) બંને હાજર હોય, તો લેક Z, Y અને A જનીનોનું ટ્રાન્સક્રિપ્શન કેવું રહેશે?", "opts": ["લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત ઉચ્ચ સ્તરે ટ્રાન્સક્રિપ્શન થશે", "લેક્ટોઝની હાજરીમાં જ ટ્રાન્સક્રિપ્શન થશે, ગેરહાજરીમાં નહીં", "ગ્લુકોઝની હાજરીમાં ટ્રાન્સક્રિપ્શન અવરોધાશે", "લેક્ટોઝ અને ગ્લુકોઝ બંનેમાં ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે"], "ans": 0, "exp": "I^- મ્યુટેશનને કારણે રિપ્રેસર પ્રોટીન નિષ્ક્રિય થાય છે, જ્યારે O^c મ્યુટેશનને કારણે ઓપેરેટર સ્થાન પર રિપ્રેસર બાંધી શકાતું નથી. આથી, લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત ઉચ્ચ સ્તરે થશે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) I^- મ્યુટેશનને કારણે લેક્ટોઝની ગેરહાજરીમાં પણ ટ્રાન્સક્રિપ્શન થશે, C) O^c મ્યુટેશનને કારણે ગ્લુકોઝની હાજરીનો પ્રભાવ રહેતો નથી, D) ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો cAMPનું સ્તર ઓછું હોય અને લેક્ટોઝ હાજર હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ઓછું થશે પરંતુ સંપૂર્ણપણે બંધ નહીં થાય", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે ચાલુ રહેશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ગ્લુકોઝની હાજરીમાં વધશે"], "ans": 1, "exp": "cAMPનું ઓછું સ્તર એટલે CAP-cAMP કોમ્પ્લેક્સ બનશે નહીં, પરિણામે ટ્રાન્સક્રિપ્શનની કાર્યક્ષમતા ઘટશે. પરંતુ લેક્ટોઝની હાજરીમાં રિપ્રેસર પ્રોટીન નિષ્ક્રિય થાય છે, આથી ટ્રાન્સક્રિપ્શન ઓછું થશે પરંતુ સંપૂર્ણપણે બંધ નહીં થાય. A) ખોટું છે કારણ કે રિપ્રેસર નિષ્ક્રિય હોવાથી ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ નહીં થાય, C) ખોટું છે કારણ કે cAMPની ગેરહાજરીમાં ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે ચાલુ રહેતું નથી, D) ખોટું છે કારણ કે ગ્લુકોઝની હાજરીમાં cAMPનું સ્તર ઓછું રહે છે, જે ટ્રાન્સક્રિપ્શનને ઘટાડે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો P^c મ્યુટેશન (પ્રમોટરનું કોન્સ્ટિટ્યુટિવ રૂપ) હાજર હોય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત ઉચ્ચ સ્તરે થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ફક્ત લેક્ટોઝની હાજરીમાં જ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ફક્ત ગ્લુકોઝની ગેરહાજરીમાં જ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે"], "ans": 0, "exp": "P^c મ્યુટેશનને કારણે પ્રમોટર સ્થાન એવું બદલાય છે કે RNA પોલિમરેઝ તેના સાથે સતત જોડાઈ રહે છે, આથી લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન લેક્ટોઝની હાજરી અથવા ગેરહાજરીમાં સતત ઉચ્ચ સ્તરે થશે. B) ખોટું છે કારણ કે લેક્ટોઝની ગેરહાજરીમાં પણ ટ્રાન્સક્રિપ્શન થશે, C) ખોટું છે કારણ કે ગ્લુકોઝની હાજરી અથવા ગેરહાજરીનો પ્રભાવ રહેતો નથી, D) ખોટું છે કારણ કે ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો I^q મ્યુટેશન (રિપ્રેસર પ્રોટીનનું સુપર-રિપ્રેસર રૂપ) હાજર હોય અને લેક્ટોઝ પણ હાજર હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ઓછું થશે પરંતુ સંપૂર્ણપણે બંધ નહીં થાય", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે ચાલુ રહેશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ફક્ત CAP-cAMP કોમ્પ્લેક્સની હાજરીમાં જ થશે"], "ans": 0, "exp": "I^q મ્યુટેશનને કારણે રિપ્રેસર પ્રોટીન એવું બદલાય છે કે તે લેક્ટોઝની હાજરીમાં પણ ઓપેરેટર સાથે જોડાઈ રહે છે, આથી લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે. B) ખોટું છે કારણ કે ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થાય છે, C) ખોટું છે કારણ કે ટ્રાન્સક્રિપ્શન ચાલુ રહેતું નથી, D) ખોટું છે કારણ કે CAP-cAMP કોમ્પ્લેક્સની હાજરી અથવા ગેરહાજરીનો પ્રભાવ રહેતો નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જો લેક્ટોઝ અને ગ્લુકોઝ બંને હાજર હોય અને cAMPનું સ્તર ઓછું હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ થશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ઓછું થશે પરંતુ સંપૂર્ણપણે બંધ નહીં થાય", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે ચાલુ રહેશે", "લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ફક્ત લેક્ટોઝની હાજરીમાં જ થશે"], "ans": 1, "exp": "લેક્ટોઝની હાજરીમાં રિપ્રેસર પ્રોટીન નિષ્ક્રિય થાય છે, પરંતુ cAMPનું ઓછું સ્તર એટલે CAP-cAMP કોમ્પ્લેક્સ બનશે નહીં, પરિણામે ટ્રાન્સક્રિપ્શનની કાર્યક્ષમતા ઘટશે. આથી લેક ઓપેરોનનું ટ્રાન્સક્રિપ્શન ઓછું થશે પરંતુ સંપૂર્ણપણે બંધ નહીં થાય. A) ખોટું છે કારણ કે રિપ્રેસર નિષ્ક્રિય હોવાથી ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે બંધ નહીં થાય, C) ખોટું છે કારણ કે cAMPની ગેરહાજરીમાં ટ્રાન્સક્રિપ્શન સંપૂર્ણપણે ચાલુ રહેતું નથી, D) ખોટું છે કારણ કે લેક્ટોઝની હાજરીમાં પણ ટ્રાન્સક્રિપ્શન ઓછું થશે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
