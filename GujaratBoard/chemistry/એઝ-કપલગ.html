@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>એઝો કપલિંગ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>એઝો કપલિંગ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">એઝો કપલિંગ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષાર સાથે કયા પ્રકારના સંયોજનનું યુગ્મન થાય છે જેના પરિણામે એઝો રંગકો બને છે?", "opts": ["ફિનોલિક સંયોજનો અથવા એરોમેટિક એમાઇન સંયોજનો", "એલિફેટિક આલ્કોહોલ સંયોજનો", "કાર્બોક્સિલિક એસિડ સંયોજનો", "એલિફેટિક એમાઇન સંયોજનો"], "ans": 0, "exp": "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષારનું યુગ્મન ફિનોલિક સંયોજનો અથવા એરોમેટિક એમાઇન સંયોજનો સાથે થાય છે, જેના પરિણામે એઝો રંગકો બને છે. આ પ્રક્રિયા ઇલેક્ટ્રોન-સમૃદ્ધ એરોમેટિક વલયો સાથે થાય છે, જે ફિનોલ અને એનિલિન જેવા સંયોજનોમાં હોય છે. એલિફેટિક આલ્કોહોલ, કાર્બોક્સિલિક એસિડ અને એલિફેટિક એમાઇન સંયોજનોમાં આવા ઇલેક્ટ્રોન-સમૃદ્ધ વલયો હોતા નથી, તેથી તેઓ એઝો કપલિંગમાં ભાગ લેતા નથી.", "ref": "Std 12 - પ્રકરણ 13: કાર્બનિક રસાયણવિજ્ઞાનમાં મહત્વની પ્રક્રિયાઓ", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષારની પ્રતિક્રિયા કયા સ્થાને થાય છે જ્યારે ફિનોલનો ઉપયોગ કરવામાં આવે છે?", "opts": ["ઓર્થો અને પેરા સ્થાને", "માત્ર ઓર્થો સ્થાને", "માત્ર પેરા સ્થાને", "મેટા સ્થાને"], "ans": 0, "exp": "ફિનોલમાં હાઇડ્રોક્સિલ સમૂહ (-OH) ઇલેક્ટ્રોન-દાતા સમૂહ હોવાથી તે ઓર્થો અને પેરા સ્થાને ઇલેક્ટ્રોન ઘનતા વધારે છે. તેથી ડાયએઝોનિયમ ક્ષારનું યુગ્મન આ બંને સ્થાને થાય છે. મેટા સ્થાને ઇલેક્ટ્રોન ઘનતા ઓછી હોવાથી ત્યાં પ્રતિક્રિયા થતી નથી.", "ref": "Std 12 - પ્રકરણ 13: કાર્બનિક રસાયણવિજ્ઞાનમાં મહત્વની પ્રક્રિયાઓ", "ch": ""}, {"q": "નીચેનામાંથી કયું સંયોજન એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષાર સાથે પ્રતિક્રિયા કરી શકે નહીં?", "opts": ["નાઇટ્રોબેન્ઝિન", "એનિલિન", "ફિનોલ", "ડાયમિથાઇલએનિલિન"], "ans": 0, "exp": "નાઇટ્રોબેન્ઝિનમાં નાઇટ્રો સમૂહ (-NO₂) પ્રબળ ઇલેક્ટ્રોન-અકર્ષક સમૂહ છે, જે એરોમેટિક વલયની ઇલેક્ટ્રોન ઘનતા ઘટાડે છે. તેથી તે ડાયએઝોનિયમ ક્ષાર સાથે એઝો કપલિંગ પ્રક્રિયા કરી શકતું નથી. એનિલિન, ફિનોલ અને ડાયમિથાઇલએનિલિન ઇલેક્ટ્રોન-સમૃદ્ધ વલયો ધરાવે છે, તેથી તેઓ આ પ્રક્રિયામાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 13: કાર્બનિક રસાયણવિજ્ઞાનમાં મહત્વની પ્રક્રિયાઓ", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષારની સ્થિરતા માટે કયું પરિબળ મહત્વનું છે?", "opts": ["નીચું તાપમાન (0-5°C)", "ઊંચું તાપમાન (50°Cથી વધુ)", "તટસ્થ pH (7)", "પ્રકાશની હાજરી"], "ans": 0, "exp": "ડાયએઝોનિયમ ક્ષાર અત્યંત અસ્થિર હોય છે અને ઊંચા તાપમાને વિઘટિત થઈ જાય છે. તેથી એઝો કપલિંગ પ્રક્રિયા નીચા તાપમાને (0-5°C) કરવામાં આવે છે જેથી ડાયએઝોનિયમ ક્ષારની સ્થિરતા જળવાઈ રહે. ઊંચું તાપમાન, તટસ્થ pH કે પ્રકાશની હાજરી ડાયએઝોનિયમ ક્ષારની સ્થિરતા માટે અનુકૂળ નથી.", "ref": "Std 12 - પ્રકરણ 13: કાર્બનિક રસાયણવિજ્ઞાનમાં મહત્વની પ્રક્રિયાઓ", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં બનતા એઝો રંગકોનો મુખ્ય ઉપયોગ શું છે?", "opts": ["કાપડ ઉદ્યોગમાં રંગક તરીકે", "ખાદ્ય પદાર્થોમાં સ્વાદ વધારવા", "દવાઓમાં સક્રિય ઘટક તરીકે", "પ્લાસ્ટિક ઉદ્યોગમાં સ્થિરીકરણ માટે"], "ans": 0, "exp": "એઝો રંગકો તેમની તેજસ્વી રંગછટા અને સ્થિરતા માટે જાણીતા છે, જે તેમને કાપડ ઉદ્યોગમાં રંગક તરીકે ઉપયોગી બનાવે છે. ખાદ્ય પદાર્થોમાં સ્વાદ વધારવા, દવાઓમાં સક્રિય ઘટક તરીકે કે પ્લાસ્ટિક ઉદ્યોગમાં સ્થિરીકરણ માટે એઝો રંગકોનો ઉપયોગ થતો નથી, કારણ કે તેઓ ખાદ્ય સુરક્ષા અને જૈવિક પ્રણાલીઓ માટે યોગ્ય નથી.", "ref": "Std 12 - પ્રકરણ 13: કાર્બનિક રસાયણવિજ્ઞાનમાં મહત્વની પ્રક્રિયાઓ", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જો બેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડની જગ્યાએ નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડનો ઉપયોગ કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પ્રતિક્રિયા વેગ વધે છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-આકર્ષક છે અને ડાયએઝોનિયમ આયનને વધુ સક્રિય બનાવે છે.", "પ્રતિક્રિયા વેગ ઘટે છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-દાતા છે અને ડાયએઝોનિયમ આયનને અસ્થિર બનાવે છે.", "પ્રતિક્રિયા વેગ પર કોઈ ફરક પડતો નથી કારણ કે નાઇટ્રો સમૂહ ડાયએઝોનિયમ કપલિંગ પર અસર કરતો નથી.", "પ્રતિક્રિયા વેગ ઘટે છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-આકર્ષક છે અને ડાયએઝોનિયમ આયનને ઓછો સક્રિય બનાવે છે."], "ans": 3, "exp": "નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-આકર્ષક છે, જે ડાયએઝોનિયમ આયનની ઇલેક્ટ્રોન ઘનતાને ઘટાડે છે, પરિણામે તે ઓછો સક્રિય બને છે અને પ્રતિક્રિયા વેગ ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે ઇલેક્ટ્રોન-આકર્ષક સમૂહ પ્રતિક્રિયા વેગ ઘટાડે છે, નહીં કે વધારે. વિકલ્પ B ખોટો છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-દાતા નથી. વિકલ્પ C ખોટો છે કારણ કે નાઇટ્રો સમૂહની અસર પ્રતિક્રિયા વેગ પર પડે છે.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - ડાયએઝોનિયમ ક્ષાર અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જ્યારે ફિનોલ સાથે પ્રતિક્રિયા કરવામાં આવે છે, તો નીચેનામાંથી કયું પરિણામી ઉત્પાદન બને છે?", "opts": ["ઓ-હાઇડ્રોક્સીએઝોબેન્ઝીન", "પેરા-હાઇડ્રોક્સીએઝોબેન્ઝીન", "ઓર્થો અને પેરા-હાઇડ્રોક્સીએઝોબેન્ઝીનનો મિશ્રણ", "મેટા-હાઇડ્રોક્સીએઝોબેન્ઝીન"], "ans": 2, "exp": "ફિનોલ એઝો કપલિંગ પ્રક્રિયામાં ઓર્થો અને પેરા સ્થાને પ્રતિક્રિયા કરે છે, પરિણામે ઓ-હાઇડ્રોક્સીએઝોબેન્ઝીન અને પેરા-હાઇડ્રોક્સીએઝોબેન્ઝીનનો મિશ્રણ બને છે. વિકલ્પ A અને B અધૂરા છે કારણ કે તેઓ ફક્ત એક જ સ્થાનને ધ્યાનમાં લે છે. વિકલ્પ D ખોટો છે કારણ કે મેટા સ્થાને પ્રતિક્રિયા થતી નથી.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - ડાયએઝોનિયમ ક્ષાર અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, નીચેનામાંથી કયું સંયોજન ડાયએઝોનિયમ ક્ષાર સાથે પ્રતિક્રિયા કરશે નહીં?", "opts": ["એનિલિન", "ફિનોલ", "બેન્ઝીન", "નેફ્થોલ"], "ans": 2, "exp": "બેન્ઝીન એઝો કપલિંગ પ્રક્રિયામાં પ્રતિક્રિયા કરતું નથી કારણ કે તે પાસે ઇલેક્ટ્રોન-દાતા સમૂહ નથી, જે પ્રતિક્રિયા માટે આવશ્યક છે. એનિલિન, ફિનોલ અને નેફ્થોલ ઇલેક્ટ્રોન-દાતા સમૂહ ધરાવે છે અને પ્રતિક્રિયા કરે છે.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - ડાયએઝોનિયમ ક્ષાર અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જો ડાયએઝોનિયમ ક્ષારની સાંદ્રતા ખૂબ જ ઓછી હોય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["પ્રતિક્રિયા વેગ વધશે કારણ કે ઓછી સાંદ્રતામાં પ્રતિક્રિયા વધુ સરળતાથી થાય છે.", "પ્રતિક્રિયા વેગ ઘટશે કારણ કે ડાયએઝોનિયમ આયનની અછત હશે.", "પ્રતિક્રિયા વેગ પર કોઈ અસર થશે નહીં.", "પ્રતિક્રિયા ઉલટી દિશામાં થશે."], "ans": 1, "exp": "ડાયએઝોનિયમ ક્ષારની ઓછી સાંદ્રતામાં, ડાયએઝોનિયમ આયનની અછત હશે, જેના કારણે પ્રતિક્રિયા વેગ ઘટશે. વિકલ્પ A ખોટો છે કારણ કે ઓછી સાંદ્રતામાં પ્રતિક્રિયા વેગ ઘટે છે, નહીં કે વધે. વિકલ્પ C ખોટો છે કારણ કે સાંદ્રતાની અસર પ્રતિક્રિયા વેગ પર પડે છે. વિકલ્પ D ખોટો છે કારણ કે પ્રતિક્રિયા ઉલટી દિશામાં થતી નથી.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - ડાયએઝોનિયમ ક્ષાર અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, નીચેનામાંથી કયું પરિબળ એઝો રંગકની રંગીનતાને અસર કરશે નહીં?", "opts": ["કપલિંગ એજન્ટની પ્રકૃતિ", "તાપમાન", "પ્રકાશની તીવ્રતા", "pH"], "ans": 2, "exp": "એઝો રંગકની રંગીનતા કપલિંગ એજન્ટની પ્રકૃતિ, તાપમાન અને pH પર આધાર રાખે છે. પ્રકાશની તીવ્રતા એઝો રંગકની રંગીનતાને અસર કરતી નથી. વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ રંગીનતાને અસર કરે છે.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - ડાયએઝોનિયમ ક્ષાર અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જ્યારે એનિલિન સાથે પ્રતિક્રિયા કરવામાં આવે છે, તો નીચેનામાંથી કયો રંગક બનશે?", "opts": ["પી-એમિનોએઝોબેન્ઝીન", "ઓ-એમિનોએઝોબેન્ઝીન", "એમિનોએઝોબેન્ઝીનનો મિશ્રણ (પી- અને ઓ-)", "ફિનોલ સાથે પ્રતિક્રિયા થશે અને એઝો રંગક બનશે નહીં"], "ans": 0, "exp": "એનિલિન સાથે એઝો કપલિંગ પ્રક્રિયામાં મુખ્યત્વે પી-સ્થાને કપલિંગ થાય છે, કારણ કે એનિલિનમાં એમિનો સમૂહ ઇલેક્ટ્રોન-દાતા છે, જે પી-સ્થાનને વધુ સક્રિય બનાવે છે. વિકલ્પ B ખોટો છે કારણ કે ઓ-સ્થાને કપલિંગ થવું શક્ય છે, પરંતુ તે મુખ્ય ઉત્પાદન નથી. વિકલ્પ C ખોટો છે કારણ કે મિશ્રણ બનતું નથી, પી-ઉત્પાદન પ્રભાવી હોય છે. વિકલ્પ D ખોટો છે કારણ કે એનિલિન સાથે પ્રતિક્રિયા થાય છે અને એઝો રંગક બનશે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ ૧૨: એરોમેટિક એમિન", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જો ડાયએઝોનિયમ ક્ષાર તાપમાન ૫-૧૦°C થી ઉપર ગરમ કરવામાં આવે, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["ડાયએઝોનિયમ ક્ષાર વધુ સ્થિર બનશે અને કપલિંગ પ્રક્રિયા ઝડપી થશે.", "ડાયએઝોનિયમ ક્ષાર વિઘટન પામશે અને નાઇટ્રોજન વાયુ મુક્ત થશે.", "કપલિંગ પ્રક્રિયા ધીમી પડશે પરંતુ ડાયએઝોનિયમ ક્ષાર સ્થિર રહેશે.", "ડાયએઝોનિયમ ક્ષાર પાણીમાં દ્રાવ્ય બનશે અને પ્રક્રિયા સરળતાથી પૂર્ણ થશે."], "ans": 1, "exp": "ડાયએઝોનિયમ ક્ષાર ૫-૧૦°C થી ઉપર ગરમ કરવામાં આવે તો તે વિઘટન પામે છે અને નાઇટ્રોજન વાયુ મુક્ત થાય છે. વિકલ્પ A ખોટો છે કારણ કે ઉચ્ચ તાપમાને ડાયએઝોનિયમ ક્ષાર અસ્થિર બને છે. વિકલ્પ C ખોટો છે કારણ કે ડાયએઝોનિયમ ક્ષાર વિઘટન પામે છે, પ્રક્રિયા ધીમી પડતી નથી. વિકલ્પ D ખોટો છે કારણ કે ડાયએઝોનિયમ ક્ષાર પાણીમાં દ્રાવ્ય બનતું નથી, પરંતુ વિઘટન પામે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ ૧૨: એરોમેટિક એમિન", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, ડાયએઝોનિયમ ક્ષાર સાથે ફિનોલના યુગ્મન દરમિયાન નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ફિનોલનું યુગ્મન મુખ્યત્વે પેરા સ્થાને થાય છે, પરંતુ ઓર્થો સ્થાને પણ થઈ શકે છે", "પ્રક્રિયા મંદ આલ્કલાઇન માધ્યમમાં કરવામાં આવે તો ફિનોલનું યુગ્મન ઝડપી બને છે", "ફિનોલના ઓર્થો સ્થાને યુગ્મન થાય તો બનતું સંયોજન સ્થિર હોતું નથી અને વિઘટન પામે છે", "ફિનોલનું યુગ્મન એસિડિક માધ્યમમાં વધુ સરળતાથી થાય છે કારણ કે ડાયએઝોનિયમ આયનની સાંદ્રતા વધે છે"], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે એઝો કપલિંગ પ્રક્રિયા મંદ આલ્કલાઇન માધ્યમમાં વધુ સરળતાથી થાય છે, કારણ કે ફિનોલ આલ્કલાઇન માધ્યમમાં ફિનોક્સાઇડ આયન બનાવે છે જે વધુ પ્રતિક્રિયાશીલ હોય છે. ડાયએઝોનિયમ ક્ષાર એસિડિક માધ્યમમાં સ્થિર હોય છે, પરંતુ ફિનોલ સાથેની પ્રતિક્રિયા માટે આલ્કલાઇન માધ્યમ વધુ અનુકૂળ છે. વિકલ્પ A, B અને C સાચાં છે કારણ કે ફિનોલનું યુગ્મન મુખ્યત્વે પેરા સ્થાને થાય છે, ઓર્થો સ્થાને પણ થઈ શકે છે પરંતુ ઓર્થો ઉત્પાદન અસ્થિર હોય છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "એક વિદ્યાર્થીએ એઝો કપલિંગ પ્રક્રિયા દરમિયાન ડાયએઝોનિયમ ક્ષાર સાથે નેપ્થોલનો ઉપયોગ કર્યો. નીચેનામાંથી કયું વિધાન આ પ્રક્રિયા માટે યોગ્ય નથી?", "opts": ["α-નેપ્થોલ સાથે યુગ્મન મુખ્યત્વે ૪-સ્થાને થાય છે", "β-નેપ્થોલ સાથે યુગ્મન મુખ્યત્વે ૧-સ્થાને થાય છે", "નેપ્થોલનું યુગ્મન ફિનોલ કરતાં વધુ ઝડપી થાય છે કારણ કે તે વધુ પ્રતિક્રિયાશીલ છે", "નેપ્થોલનું યુગ્મન મંદ આલ્કલાઇન માધ્યમમાં થાય છે અને બનતું એઝો રંગક વધુ સ્થિર હોય છે"], "ans": 2, "exp": "સાચો જવાબ C છે કારણ કે નેપ્થોલનું યુગ્મન ફિનોલ કરતાં વધુ ઝડપી થતું નથી. વાસ્તવમાં, નેપ્થોલ અને ફિનોલ બંને મંદ આલ્કલાઇન માધ્યમમાં યુગ્મન માટે સમાન પ્રકારની પ્રતિક્રિયાશીલતા દર્શાવે છે. વિકલ્પ A અને B સાચાં છે કારણ કે α-નેપ્થોલ મુખ્યત્વે ૪-સ્થાને અને β-નેપ્થોલ મુખ્યત્વે ૧-સ્થાને યુગ્મન કરે છે. વિકલ્પ D પણ સાચું છે કારણ કે નેપ્થોલનું યુગ્મન મંદ આલ્કલાઇન માધ્યમમાં થાય છે અને બનતું એઝો રંગક સ્થિર હોય છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જો ડાયએઝોનિયમ ક્ષાર તરીકે p-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડનો ઉપયોગ કરવામાં આવે અને તેને ડાયમિથાઇલએનિલિન સાથે પ્રતિક્રિયા કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["પ્રક્રિયા મંદ એસિડિક માધ્યમમાં કરવામાં આવે તો યુગ્મન ઝડપી થાય છે", "p-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્ષાર વધુ પ્રતિક્રિયાશીલ હોય છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન આકર્ષક છે", "ડાયમિથાઇલએનિલિનનું યુગ્મન મુખ્યત્વે પેરા સ્થાને થાય છે", "બનતું એઝો સંયોજન ઘેરો રંગ ધરાવે છે અને તેનો ઉપયોગ રંગક તરીકે થાય છે"], "ans": 0, "exp": "સાચો જવાબ A છે કારણ કે એઝો કપલિંગ પ્રક્રિયા મંદ આલ્કલાઇન માધ્યમમાં વધુ સરળતાથી થાય છે, ખાસ કરીને જ્યારે એનિલિન અથવા તેના વ્યુત્પન્નો સાથે પ્રતિક્રિયા થતી હોય. ડાયમિથાઇલએનિલિન એસિડિક માધ્યમમાં પ્રોટોનિત થઈને ઓછું પ્રતિક્રિયાશીલ બને છે, તેથી યુગ્મન મંદ આલ્કલાઇન માધ્યમમાં વધુ સરળતાથી થાય છે. વિકલ્પ B, C અને D સાચાં છે કારણ કે p-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્ષાર વધુ પ્રતિક્રિયાશીલ હોય છે, ડાયમિથાઇલએનિલિનનું યુગ્મન પેરા સ્થાને થાય છે અને બનતું એઝો સંયોજન રંગક તરીકે ઉપયોગી છે.", "ref": "Std 12 - પ્રકરણ 13: એમાઇન", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જ્યારે બેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડ સાથે ૨-નેફ્થોલની પ્રતિક્રિયા કરવામાં આવે છે, તો બનતું એઝો રંગક કયા રંગનું હોય છે?", "opts": ["પીળો", "લાલ-નારંગી", "વાદળી", "લીલો"], "ans": 1, "exp": "બેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડ સાથે ૨-નેફ્થોલની એઝો કપલિંગ પ્રતિક્રિયાથી બનતું એઝો રંગક 'લાલ-નારંગી' રંગનું હોય છે. આ રંગકને '૨-હાઇડ્રોક્સી-૧-ફિનાઇલએઝો-નેફ્થોલ' તરીકે ઓળખવામાં આવે છે. અહીં, ૨-નેફ્થોલ એ કપલિંગ એજન્ટ તરીકે કાર્ય કરે છે, અને ડાયએઝોનિયમ ક્ષાર સાથે તે પેરા-સ્થાને કપલિંગ કરે છે. બાકીના વિકલ્પો (પીળો, વાદળી, લીલો) એઝો કપલિંગ દ્વારા બનતા રંગકોના રંગો નથી.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - એમિન, ડાયએઝો અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["એઝો કપલિંગ પ્રક્રિયા એલ્કલાઇન માધ્યમમાં થાય છે.", "ડાયએઝોનિયમ ક્ષારની સ્થિરતા તાપમાન પર આધાર રાખે છે.", "ફિનોલ અને એનિલિન બંને એઝો કપલિંગ માટે સક્રિય કપલિંગ એજન્ટ છે.", "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષારનું ડાયએઝો હાઇડ્રોક્સાઇડમાં રૂપાંતર થાય છે."], "ans": 3, "exp": "એઝો કપલિંગ પ્રક્રિયામાં ડાયએઝોનિયમ ક્ષારનું ડાયએઝો હાઇડ્રોક્સાઇડમાં રૂપાંતર થતું નથી. ડાયએઝોનિયમ ક્ષાર એ કપલિંગ એજન્ટ સાથે પ્રતિક્રિયા કરીને એઝો સંયોજન બનાવે છે. એલ્કલાઇન માધ્યમ (A), તાપમાન પર સ્થિરતા (B), અને ફિનોલ/એનિલિન કપલિંગ એજન્ટ તરીકે (C) બધા સત્ય વિધાનો છે.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - એમિન, ડાયએઝો અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જ્યારે p-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડનો ઉપયોગ કરવામાં આવે છે, તો નીચેનામાંથી કયું પરિણામ અપેક્ષિત છે?", "opts": ["કપલિંગ પ્રક્રિયા ધીમી પડે છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-આકર્ષક છે.", "કપલિંગ પ્રક્રિયા વેગવંતી થાય છે કારણ કે નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-દાતા છે.", "કપલિંગ પ્રક્રિયા સંપૂર્ણ રીતે અટકી જાય છે.", "બનતું એઝો રંગક પીળા રંગનું હોય છે."], "ans": 0, "exp": "p-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડમાં નાઇટ્રો સમૂહ (-NO₂) ઇલેક્ટ્રોન-આકર્ષક છે, જે ડાયએઝોનિયમ ક્ષારની ઇલેક્ટ્રોન ઘનતા ઘટાડે છે. આથી કપલિંગ પ્રક્રિયા ધીમી પડે છે. નાઇટ્રો સમૂહ ઇલેક્ટ્રોન-દાતા નથી (B ખોટું), પ્રક્રિયા સંપૂર્ણ અટકતી નથી (C ખોટું), અને બનતું એઝો રંગક લાલ-નારંગી રંગનું હોય છે, પીળું નહીં (D ખોટું).", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - એમિન, ડાયએઝો અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, જો ડાયએઝોનિયમ ક્ષાર તરીકે m-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડનો ઉપયોગ કરવામાં આવે અને કપલિંગ એજન્ટ તરીકે એનિલિન લેવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["કપલિંગ મુખ્યત્વે ઓર્થો સ્થાને થાય છે.", "કપલિંગ મુખ્યત્વે પેરા સ્થાને થાય છે.", "કપલિંગ મુખ્યત્વે મેટા સ્થાને થાય છે.", "કપલિંગ થતું નથી."], "ans": 2, "exp": "m-નાઇટ્રોબેન્ઝીન ડાયએઝોનિયમ ક્લોરાઇડમાં નાઇટ્રો સમૂહ મેટા સ્થાને હોવાથી, ડાયએઝોનિયમ ક્ષારની ઇલેક્ટ્રોન ઘનતા ઓછી હોય છે. એનિલિન સાથે કપલિંગ થતી વખતે, મેટા સ્થાને કપલિંગ થવાની શક્યતા વધુ હોય છે કારણ કે ઓર્થો અને પેરા સ્થાનો પર નાઇટ્રો સમૂહનો ઇલેક્ટ્રોન-આકર્ષક પ્રભાવ વધુ પ્રબળ હોય છે. આથી કપલિંગ મુખ્યત્વે મેટા સ્થાને થાય છે.", "ref": "Std 12 - Chapter 13: કાર્બનિક રસાયણશાસ્ત્ર - એમિન, ડાયએઝો અને એઝો સંયોજનો", "ch": ""}, {"q": "એઝો કપલિંગ પ્રક્રિયામાં, ડાયએઝોનિયમ ક્ષાર સાથે પ્રતિક્રિયા કરતી વખતે નેપ્થોલના કયા સ્થાને યુગ્મન પ્રાધાન્યપૂર્વક થાય છે અને તેનું મુખ્ય કારણ શું છે?", "opts": ["α-સ્થાને, કારણ કે આ સ્થાન પર ઇલેક્ટ્રોન ઘનતા વધુ હોય છે", "β-સ્થાને, કારણ કે આ સ્થાન પર સ્ટેરિક અવરોધ ઓછો હોય છે", "α-સ્થાને, કારણ કે ડાયએઝોનિયમ આયન આ સ્થાન પર વધુ સ્થિર કાર્બોકેશન બનાવે છે", "β-સ્થાને, કારણ કે આ સ્થાન પર હાઇડ્રોક્સિલ સમૂહની ઇલેક્ટ્રોન આકર્ષક અસર વધુ પ્રબળ હોય છે"], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. એઝો કપલિંગ પ્રક્રિયામાં, નેપ્થોલ સાથે ડાયએઝોનિયમ ક્ષારનું યુગ્મન મુખ્યત્વે β-સ્થાને થાય છે કારણ કે આ સ્થાન પર સ્ટેરિક અવરોધ ઓછો હોય છે અને ઇલેક્ટ્રોન ઘનતા પણ યોગ્ય રીતે વિતરિત થાય છે. α-સ્થાન પર ઇલેક્ટ્રોન ઘનતા વધુ હોવા છતાં, સ્ટેરિક અવરોધને કારણે યુગ્મન મુશ્કેલ બને છે. વિકલ્પ A ખોટો છે કારણ કે α-સ્થાન પર સ્ટેરિક અવરોધ વધુ હોય છે. વિકલ્પ C ખોટો છે કારણ કે ડાયએઝોનિયમ આયન કાર્બોકેશન બનાવતો નથી. વિકલ્પ D ખોટો છે કારણ કે β-સ્થાન પર હાઇડ્રોક્સિલ સમૂહની ઇલેક્ટ્રોન આકર્ષક અસર પ્રબળ હોતી નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહૉલ, ફિનોલ અને ઇથર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
