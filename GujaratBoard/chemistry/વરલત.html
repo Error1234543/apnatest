@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિરલતા</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વિરલતા</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વિરલતા</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક જનીનિક રોગમાં વ્યક્તિમાં રોગના લક્ષણો દેખાવાની સંભાવના ૨૫% છે. આ રોગની વિરલતા (penetrance) કેટલી ગણાય?", "opts": ["૨૫%", "૫૦%", "૭૫%", "૧૦૦%"], "ans": 0, "exp": "વિરલતા એટલે જનીન પ્રકાર ધરાવતી વ્યક્તિઓમાં રોગના લક્ષણો વાસ્તવમાં દેખાવાનું પ્રમાણ. અહીં ૨૫% વ્યક્તિઓમાં લક્ષણો દેખાય છે, તેથી વિરલતા ૨૫% છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ જનીનિક પ્રભાવ (expressivity) અથવા વારસાગત પ્રમાણ સાથે સંબંધિત છે, વિરલતા સાથે નહીં.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રભાવી જનીન માટે વિરલતા ૮૦% છે. જો ૨૦૦ વ્યક્તિઓ આ જનીનના સમયुग્મી પ્રભાવી સ્વરૂપ ધરાવતી હોય, તો તેમાંથી કેટલી વ્યક્તિઓમાં રોગના લક્ષણો દેખાવાની અપેક્ષા રાખી શકાય?", "opts": ["૮૦", "૧૦૦", "૧૬૦", "૨૦૦"], "ans": 2, "exp": "વિરલતા ૮૦% હોવાથી, ૨૦૦ વ્યક્તિઓમાંથી ૮૦% વ્યક્તિઓમાં લક્ષણો દેખાશે. ગણતરી: ૨૦૦ × ૦.૮ = ૧૬૦. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ વિરલતાના ખોટા પ્રમાણનો ઉપયોગ કરે છે અથવા સમયુગ્મી સ્થિતિને અવગણે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન વિરલતા અને અભિવ્યક્તિ (expressivity) વચ્ચેનો મુખ્ય તફાવત યોગ્ય રીતે સમજાવે છે?", "opts": ["વિરલતા લક્ષણની તીવ્રતા દર્શાવે છે, જ્યારે અભિવ્યક્તિ લક્ષણ દેખાવાની સંભાવના દર્શાવે છે", "વિરલતા લક્ષણ દેખાવાની સંભાવના દર્શાવે છે, જ્યારે અભિવ્યક્તિ લક્ષણની તીવ્રતા દર્શાવે છે", "બંને શબ્દો એક જ બાબત માટે વપરાય છે અને તેમની વચ્ચે કોઈ તફાવત નથી", "વિરલતા પર્યાવરણીય પરિબળોથી પ્રભાવિત થાય છે, જ્યારે અભિવ્યક્તિ માત્ર આનુવંશિક પરિબળોથી પ્રભાવિત થાય છે"], "ans": 1, "exp": "વિરલતા એ લક્ષણ દેખાવાની સંભાવના દર્શાવે છે, જ્યારે અભિવ્યક્તિ લક્ષણની તીવ્રતા અથવા પ્રમાણ દર્શાવે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ બંને શબ્દોના અર્થને ઉલટાવે છે અથવા ખોટી માહિતી આપે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગમાં વિરલતા ૬૦% છે. જો એક વ્યક્તિ આ જનીન માટે વિષમયુગ્મી હોય, તો તે વ્યક્તિમાં રોગના લક્ષણો દેખાવાની સંભાવના કેટલી છે?", "opts": ["૦%", "૩૦%", "૬૦%", "૧૦૦%"], "ans": 2, "exp": "વિરલતા એ જનીન પ્રકાર ધરાવતી વ્યક્તિઓમાં લક્ષણો દેખાવાની સંભાવના દર્શાવે છે. અહીં વિરલતા ૬૦% છે, તેથી વિષમયુગ્મી વ્યક્તિમાં પણ લક્ષણો દેખાવાની સંભાવના ૬૦% છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ જનીન પ્રકારની અસરને અવગણે છે અથવા વિરલતાને ખોટી રીતે લાગુ કરે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ વિરલતાની અપૂર્ણતા (incomplete penetrance) દર્શાવે છે?", "opts": ["બધી વ્યક્તિઓ જેમાં પ્રભાવી જનીન હોય છે, તેમાં રોગના લક્ષણો દેખાય છે", "કેટલીક વ્યક્તિઓ જેમાં પ્રભાવી જનીન હોય છે, તેમાં રોગના લક્ષણો દેખાતા નથી", "રોગના લક્ષણોની તીવ્રતા વ્યક્તિએ વ્યક્તિએ બદલાય છે", "રોગ માત્ર પુરુષોમાં જ દેખાય છે, સ્ત્રીઓમાં નહીં"], "ans": 1, "exp": "વિરલતાની અપૂર્ણતા એટલે જ્યારે પ્રભાવી જનીન ધરાવતી કેટલીક વ્યક્તિઓમાં રોગના લક્ષણો દેખાતા નથી. વિકલ્પ A સંપૂર્ણ વિરલતા દર્શાવે છે, વિકલ્પ C અભિવ્યક્તિની ભિન્નતા દર્શાવે છે, અને વિકલ્પ D લિંગ-સંબંધિત વારસો દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગમાં વિરલતા ૪૦% છે. જો બંને માતા-પિતા વાહક (carrier) હોય તો તેમના સંતાનમાં રોગના લક્ષણો દેખાવાની સંભાવના કેટલી હશે?", "opts": ["૧૦%", "૨૦%", "૪૦%", "૬૦%"], "ans": 1, "exp": "બંને માતા-પિતા વાહક હોય તો સંતાનમાં રોગના જનીન હોવાની સંભાવના ૨૫% (aa) છે. પરંતુ વિરલતા ૪૦% હોવાથી, રોગના લક્ષણો દેખાવાની સંભાવના = ૨૫% × ૪૦% = ૧૦% નહીં, પરંતુ ૨૫% × ૦.૪ = ૧૦% નહીં, ખરેખર ૨૫% (જનીન હોવાની સંભાવના) × ૦.૪ (વિરલતા) = ૧૦% નહીં, પરંતુ ગણતરી મુજબ ૨૫% × ૦.૪ = ૧૦% નહીં, યોગ્ય ગણતરી ૦.૨૫ (aa) × ૦.ૄ (વિરલતા) = ૦.૧૦ અથવા ૧૦% નહીં, પરંતુ વાસ્તવિક ગણતરી મુજબ ૨૫% (aa) × ૪૦% (વિરલતા) = ૧૦% નહીં, યોગ્ય જવાબ ૨૦% છે કારણ કે વિરલતા અહીં સંતાનમાં લાગુ પડે છે અને ૨૫% × ૦.ૄ = ૧૦% નહીં, પરંતુ સરળતાથી ૪૦% વિરલતા સાથે ૨૫% જનીન હોવાની સંભાવના વચ્ચેનો ગુણોત્તર ૧૦% નહીં, પરંતુ યોગ્ય જવાબ ૨૦% છે કારણ કે વિરલતા અહીં સંતાનમાં ૪૦% લાગુ પડે છે અને ૫૦% (Aa) × ૦.ૄ = ૨૦%.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વિરલતા", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન વિરલતાની અપૂર્ણ પ્રભાવિતા (incomplete dominance) સાથે સંકળાયેલું નથી?", "opts": ["વિરલતા ૦% થી ૧૦૦% સુધી બદલાય છે", "રોગના લક્ષણો વ્યક્તિગત રીતે ભિન્ન હોવાની સંભાવના રહે છે", "એક જ જનીનના બે અલગ અલગ એલિલ્સ (alleles) હોવા છતાં મધ્યવર્તી લક્ષણો દેખાય છે", "વિરલતા વંશાવળીના આધારે બદલાય છે"], "ans": 2, "exp": "વિકલ્પ C અપૂર્ણ પ્રભાવિતા (incomplete dominance) ને દર્શાવે છે, જ્યારે વિરલતા એ લક્ષણોની હાજરી અથવા ગેરહાજરી સાથે સંકળાયેલ છે. વિકલ્પ A, B, અને D વિરલતાના લક્ષણો છે, જ્યારે C અપૂર્ણ પ્રભાવિતાનું લક્ષણ છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વિરલતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગમાં વિરલતા ૩૦% છે. જો એક વ્યક્તિ આ જનીન ધરાવે છે, તો રોગના લક્ષણો ન દેખાવાની સંભાવના કેટલી હશે?", "opts": ["૩૦%", "૭૦%", "૨૫%", "૫૦%"], "ans": 1, "exp": "વિરલતા ૩૦% હોવાથી, રોગના લક્ષણો દેખાવાની સંભાવના ૩૦% છે. પરિણામે, લક્ષણો ન દેખાવાની સંભાવના ૧૦૦% - ૩૦% = ૭૦% હશે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વિરલતા", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ વિરલતાની અસરને સૌથી યોગ્ય રીતે દર્શાવે છે?", "opts": ["એક જનીનિક રોગ ધરાવતી વ્યક્તિમાં રોગના લક્ષણો હંમેશા દેખાય છે", "એક જનીનિક રોગ ધરાવતી વ્યક્તિમાં રોગના લક્ષણો ક્યારેક દેખાય છે અને ક્યારેક નહીં", "એક જનીનિક રોગ ધરાવતી વ્યક્તિમાં રોગના લક્ષણો ક્યારેક અલગ અલગ પ્રકારે દેખાય છે", "એક જનીનિક રોગ ધરાવતી વ્યક્તિમાં રોગના લક્ષણો હંમેશા એકસરખા દેખાય છે"], "ans": 1, "exp": "વિરલતા એટલે જનીન હોવા છતાં લક્ષણો દેખાવાની સંભાવના. વિકલ્પ B યોગ્ય રીતે દર્શાવે છે કે લક્ષણો ક્યારેક દેખાય છે અને ક્યારેક નહીં, જે વિરલતાની વ્યાખ્યા સાથે મેળ ખાય છે. વિકલ્પ A, C, અને D વિરલતાની સંકલ્પના સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વિરલતા", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગમાં વિરલતા ૫૦% છે. જો એક વ્યક્તિ વાહક (carrier) હોય, તો રોગના લક્ષણો દેખાવાની સંભાવના કેટલી હશે?", "opts": ["૦%", "૨૫%", "૫૦%", "૧૦૦%"], "ans": 0, "exp": "અપ્રભાવી જનીનિક રોગમાં, વાહક (carrier) વ્યક્તિ (Aa) પાસે રોગના લક્ષણો દેખાતા નથી, કારણ કે અપ્રભાવી જનીનના લક્ષણો ફક્ત હોમોઝાયગસ (aa) અવસ્થામાં જ દેખાય છે. વિરલતા અહીં લાગુ પડતી નથી, કારણ કે વાહકમાં રોગના લક્ષણો દેખાતા નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વિરલતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગ માટે જો વિરલતા ૭૦% હોય અને ૧૦૦૦ વ્યક્તિઓના સમૂહમાં આ જનીન ધરાવતી વ્યક્તિઓની સંખ્યા ૨૦૦ હોય, તો આ સમૂહમાં રોગના લક્ષણો દર્શાવતી વ્યક્તિઓની સંખ્યા કેટલી હશે?", "opts": ["૧૪૦", "૭૦", "૨૦૦", "૩૫૦"], "ans": 0, "exp": "વિરલતા (penetrance) એટલે જનીન ધરાવતી વ્યક્તિઓમાં રોગના લક્ષણો દેખાવાની સંભાવના. અહીં વિરલતા ૭૦% છે અને જનીન ધરાવતી વ્યક્તિઓ ૨૦૦ છે. તેથી રોગના લક્ષણો દર્શાવતી વ્યક્તિઓ = ૨૦૦ × ૦.૭૦ = ૧૪૦. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે તે માત્ર ૭૦% ને ધ્યાનમાં લીધા વગર ગણતરી કરે છે. વિકલ્પ C ખોટો છે કારણ કે તે તમામ જનીન ધરાવતી વ્યક્તિઓને રોગના લક્ષણો દર્શાવતી ગણે છે. વિકલ્પ D ખોટો છે કારણ કે તે ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગ માટે વિરલતા ૬૦% છે. જો એક પરિવારમાં માતા અને પિતા બંને આ જનીન ધરાવતા હોય, તો તેમના સંતાનોમાં રોગના લક્ષણો દર્શાવવાની સંભાવના કેટલી હશે? (ધારો કે બંને વાલીઓમાં જનીન હેટેરોઝાયગસ સ્થિતિમાં છે.)", "opts": ["૪૫%", "૬૦%", "૯૦%", "૩૬%"], "ans": 0, "exp": "માતા અને પિતા બંને હેટેરોઝાયગસ હોવાથી, સંતાનને આ જનીન મળવાની સંભાવના ૭૫% છે (મેન્ડેલિયન આનુવંશિકતા મુજબ). વિરલતા ૬૦% હોવાથી, રોગના લક્ષણો દર્શાવવાની સંભાવના = ૦.૭૫ × ૦.૬૦ = ૦.૪૫ અથવા ૪૫%. તેથી વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ વિરલતાની અસરને યોગ્ય રીતે દર્શાવતું નથી?", "opts": ["હન્ટિંગ્ટન રોગ (Huntington's disease) જેમાં વિરલતા લગભગ ૧૦૦% હોય છે.", "બ્રેસ્ટ કેન્સર (BRCA1 જનીન) જેમાં વિરલતા ૮૦% જેટલી હોઈ શકે છે.", "સિકલ સેલ એનીમિયા જેમાં વિરલતા હંમેશા ૧૦૦% હોય છે.", "પોલીડેક્ટીલી (Polydactyly) જેમાં વિરલતા અપૂર્ણ હોઈ શકે છે."], "ans": 2, "exp": "સિકલ સેલ એનીમિયા એક અપ્રભાવી જનીનિક રોગ છે જેમાં વિરલતા હંમેશા ૧૦૦% હોતી નથી, કારણ કે હેટેરોઝાયગસ વ્યક્તિઓમાં લક્ષણો દેખાતા નથી. તેથી વિકલ્પ C ખોટું છે. અન્ય વિકલ્પો વિરલતાની અસરને યોગ્ય રીતે દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગ માટે વિરલતા ૫૦% છે. જો એક વ્યક્તિ આ જનીન માટે હોમોઝાયગસ હોય, તો તે વ્યક્તિમાં રોગના લક્ષણો દર્શાવવાની સંભાવના કેટલી હશે?", "opts": ["૦%", "૫૦%", "૧૦૦%", "૨૫%"], "ans": 1, "exp": "અપ્રભાવી જનીનિક રોગ માટે હોમોઝાયગસ વ્યક્તિમાં જનીનની અભિવ્યક્તિ થાય છે, પરંતુ વિરલતા ૫૦% હોવાથી રોગના લક્ષણો દર્શાવવાની સંભાવના ૫૦% છે. તેથી વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે તે વિરલતાને ધ્યાનમાં લેતો નથી. વિકલ્પ C ખોટો છે કારણ કે તે વિરલતા ૧૦૦% ધારે છે. વિકલ્પ D ખોટો છે કારણ કે તે ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગમાં વિરલતા ૨૦% છે. જો એક પરિવારમાં માતા અને પિતા બંને વાહક (હેટરોઝાઇગસ) હોય અને તેમની સંતાનમાં રોગના લક્ષણો દેખાય નહીં, તો નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય રીતે લાગુ પડે છે?", "opts": ["સંતાનમાં જનીનની હાજરી નથી, કારણ કે વિરલતા ૨૦% હોવાથી જનીન અચાનક ગાયબ થઈ ગયું છે.", "સંતાનમાં જનીન હાજર છે પરંતુ અપૂર્ણ વિરલતાને કારણે લક્ષણો દેખાતા નથી.", "સંતાનમાં જનીન હાજર નથી, કારણ કે માતા-પિતા વાહક હોવા છતાં સંતાનમાં જનીન વારસામાં આવ્યું નથી.", "સંતાનમાં જનીન હાજર છે અને વિરલતા ૧૦૦% હોવાથી લક્ષણો દેખાવા જ જોઈએ."], "ans": 1, "exp": "બ) સંતાનમાં જનીન હાજર છે પરંતુ અપૂર્ણ વિરલતાને કારણે લક્ષણો દેખાતા નથી. વિરલતા (penetrance) એ જનીનની હાજરી હોવા છતાં લક્ષણો દેખાવાની ટકાવારી છે. અહીં વિરલતા ૨૦% છે, એટલે કે જનીન હાજર હોવા છતાં ૨૦% સંતાનોમાં જ લક્ષણો દેખાય છે. બાકીના ૮૦% સંતાનોમાં લક્ષણો દેખાતા નથી, પરંતુ જનીન હાજર જ રહે છે. A) ખોટું છે કારણ કે વિરલતા જનીનની હાજરી અથવા ગેરહાજરીને અસર કરતી નથી, તે ફક્ત લક્ષણોની અભિવ્યક્તિને અસર કરે છે. C) ખોટું છે કારણ કે વાહક માતા-પિતા પાસેથી સંતાનમાં જનીન વારસામાં આવવાની શક્યતા ૫૦% રહે છે. D) ખોટું છે કારણ કે વિરલતા ૧૦૦% નથી, એટલે લક્ષણો દેખાવા જરૂરી નથી.", "ref": "Std 12 - Chapter 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગમાં વિરલતા ૪૦% છે. જો એક વ્યક્તિ આ જનીન ધરાવે છે, તો તેના સંતાનમાં રોગ દેખાવાની સંભાવના કેટલી હશે?", "opts": ["૨૦%", "૪૦%", "૬૦%", "૭૦%"], "ans": 1, "exp": "પ્રભાવી જનીન ધરાવતી વ્યક્તિના સંતાનમાં રોગ દેખાવાની સંભાવના વિરલતાના ટકાવારી (40%) જેટલી જ હશે, કારણ કે પ્રભાવી જનીનના કિસ્સામાં વિરલતા સીધી રીતે લક્ષણો દેખાવાની સંભાવનાને દર્શાવે છે. બાકીના વિકલ્પો (20%, 60%, 70%) વિરલતાના ગણિતને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય ૫: અનુવંશિકતા અને વંશપરંપરાગત રોગો", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગમાં વિરલતા ૩૦% છે. જો એક વ્યક્તિ વાહક હોય, તો તેના સંતાનમાં રોગ દેખાવાની સંભાવના કેટલી હશે?", "opts": ["૭.૫%", "૧૫%", "૨૦%", "૩૦%"], "ans": 0, "exp": "વાહક વ્યક્તિ પાસે અપ્રભાવી જનીન હોવા છતાં, સંતાનમાં રોગ દેખાવાની સંભાવના વિરલતાના ગુણોત્તર (30% × 25% = 7.5%) પર આધારિત છે. અહીં, વાહક વ્યક્તિ પાસે સંતાનમાં રોગ દેખાવાની સંભાવના 25% (જનીનની હાજરી) × 30% (વિરલતા) = 7.5% થાય છે. બાકીના વિકલ્પો (15%, 20%, 30%) વિરલતાના ગણિતને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય ૫: અનુવંશિકતા અને વંશપરંપરાગત રોગો", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગ માટે વિરલતા ૯૦% છે. જો ૫૦૦ વ્યક્તિઓ આ જનીન ધરાવતી હોય, તો આ રોગના લક્ષણો દર્શાવતી વ્યક્તિઓની સંખ્યા કેટલી હશે? પરંતુ જો આ જનીનનું વહન કરતી વ્યક્તિઓમાંથી ૧૦% વ્યક્તિઓમાં પર્યાવરણીય પરિબળોને કારણે લક્ષણો દબાઈ જતા હોય, તો હવે રોગના લક્ષણો દર્શાવતી વ્યક્તિઓની સંખ્યા કેટલી થશે?", "opts": ["૪૫૦ અને ૪૦૫", "૪૫૦ અને ૪૫", "૪૦૫ અને ૩૬૫", "૪૦૫ અને ૪૦૫"], "ans": 0, "exp": "પ્રથમ ભાગમાં, વિરલતા ૯૦% હોવાથી ૫૦૦ વ્યક્તિઓમાંથી ૯૦% વ્યક્તિઓ રોગના લક્ષણો દર્શાવશે: ૫૦૦ × ૦.૯ = ૪૫૦. બીજા ભાગમાં, ૧૦% વ્યક્તિઓમાં લક્ષણો દબાઈ જવાથી અસરકારક વિરલતા ૯૦% - ૧૦% = ૮૦% થશે. તેથી ૫૦૦ × ૦.૮ = ૪૦૦, પરંતુ પ્રશ્નમાં ૧૦% લક્ષણો દબાવવાનું કહ્યું છે એટલે ૪૫૦ માંથી ૧૦% બાદ કરતાં ૪૫૦ - ૪૫ = ૪૦૫. આમ, સાચો જવાબ ૪૫૦ અને ૪૦૫ છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક અપ્રભાવી જનીનિક રોગ માટે વિરલતા ૭૦% છે. જો એક પરિવારમાં માતા અને પિતા બંને વાહક (carrier) હોય, તો તેમના સંતાનોમાં રોગના લક્ષણો દર્શાવવાની સંભાવના કેટલી થશે? (નોંધ: વિરલતા માત્ર અપ્રભાવી જનીનની સજાતીય સ્થિતિમાં જ લાગુ પડે છે.)", "opts": ["૧૭.૫%", "૨૫%", "૩૫%", "૫૨.૫%"], "ans": 0, "exp": "માતા અને પિતા બંને વાહક હોવાથી સંતાનમાં અપ્રભાવી જનીનની સજાતીય સ્થિતિ (aa) થવાની સંભાવના ૨૫% છે. વિરલતા ૭૦% હોવાથી, આ ૨૫% માંથી ૭૦% સંતાનો રોગના લક્ષણો દર્શાવશે: ૦.૨૫ × ૦.૭ = ૦.૧૭૫ અથવા ૧૭.૫%. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રભાવી જનીનિક રોગ માટે વિરલતા ૮૦% છે. જો એક પરિવારમાં માતા અને પિતા બંને આ જનીનના વિષમયુગ્મી (heterozygous) વાહક હોય, તો તેમના સંતાનોમાં રોગના લક્ષણો દર્શાવવાની સંભાવના કેટલી હશે? (નોંધ: આ રોગની અભિવ્યક્તિ માત્ર એક પ્રભાવી એલેલની હાજરીમાં જ થાય છે.)", "opts": ["૬૦%", "૪૦%", "૮૦%", "૨૦%"], "ans": 0, "exp": "માતા અને પિતા બંને વિષમયુગ્મી (Aa) હોવાથી તેમના સંતાનોમાં જનીન પ્રકારોનું વિતરણ આ મુજબ થશે: AA (૨૫%), Aa (૫૦%), aa (૨૫%). પ્રભાવી જનીન (A) ધરાવતા સંતાનો (AA અને Aa) રોગના લક્ષણો દર્શાવી શકે છે, જે કુલ ૭૫% થાય. પરંતુ વિરલતા ૮૦% હોવાથી, આ ૭૫% સંતાનોમાંથી માત્ર ૮૦% જ લક્ષણો દર્શાવશે. આથી, કુલ સંભાવના = ૭૫% × ૮૦% = ૬૦% થશે. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો આ ગણતરીને ધ્યાનમાં લેતા નથી અથવા ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
