@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પરપરાગણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પરપરાગણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પરપરાગણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "પરપરાગણની ક્રિયામાં નર યુગ્મક (પરાગરજ) અને માદા યુગ્મક (અંડકોષ) વચ્ચેના સંપર્કને રોકવા માટે કયો ભૌતિક અવરોધ સૌથી અસરકારક છે?", "opts": ["પુષ્પના પુંકેસર અને સ્ત્રીકેસર વચ્ચેનું અંતર વધારવું", "પુષ્પના પાંખડીઓને કાપી નાખવી", "પુષ્પને પ્લાસ્ટિકના થેલામાં બંધ કરવું", "પુષ્પને ઉચ્ચ તાપમાને ઉજાગર કરવું"], "ans": 0, "exp": "પરપરાગણ રોકવા માટે પુંકેસર અને સ્ત્રીકેસર વચ્ચેનું ભૌતિક અંતર વધારવું એ સૌથી અસરકારક પદ્ધતિ છે, કારણ કે તે નર અને માદા યુગ્મકો વચ્ચેના સંપર્કને શારીરિક રીતે અટકાવે છે. બાકીના વિકલ્પો (B, C, D) પરાગણ ક્રિયા પર અસર કરતાં નથી અથવા તો અપૂર્ણ અવરોધ પૂરો પાડે છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (પરપરાગણ અને સ્વપરાગણ)", "ch": ""}, {"q": "એક પૌધામાં પરપરાગણ થવાનું મુખ્ય કારણ કયું છે જ્યારે તેના પુષ્પો સ્વપરાગણ માટે અનુકૂળ હોય છે?", "opts": ["પવન દ્વારા પરાગરજનું વહન", "કીટકો દ્વારા પરાગરજનું વહન", "પુષ્પના સ્ત્રીકેસરનું પુંકેસર કરતાં લાંબું હોવું", "પુષ્પમાં પુંકેસર અને સ્ત્રીકેસરની ગેરહાજરી"], "ans": 2, "exp": "જ્યારે પુષ્પમાં સ્ત્રીકેસર (ગર્ભક) પુંકેસર કરતાં લાંબું હોય છે, ત્યારે પરાગરજ સ્ત્રીકેસર પર પહોંચી શકે છે, જે પરપરાગણ તરફ દોરી જાય છે. પવન (A) અને કીટકો (B) પરાગણના માધ્યમ છે, પરંતુ તે સ્વપરાગણ માટે અનુકૂળ પુષ્પોમાં પરપરાગણનું કારણ બનતાં નથી. વિકલ્પ D અશક્ય છે, કારણ કે પુંકેસર અને સ્ત્રીકેસરની હાજરી જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (પરપરાગણની યાંત્રિકતા)", "ch": ""}, {"q": "પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં જનુકીય વૈવિધ્ય વધારે હોય છે. આ કથન કયા સિદ્ધાંત પર આધારિત છે?", "opts": ["મેન્ડલનો પ્રભાવીતાનો નિયમ", "મેન્ડલનો સ્વતંત્ર વિતરણનો નિયમ", "ડાર્વિનનો પ્રાકૃતિક પસંદગીનો સિદ્ધાંત", "હાર્ડી-વાઇનબર્ગ સંતુલન"], "ans": 1, "exp": "પરપરાગણ દ્વારા જનુકીય વૈવિધ્ય વધારે થવાનું કારણ મેન્ડલના સ્વતંત્ર વિતરણના નિયમ પર આધારિત છે, જેમાં વંશાવળીના લક્ષણો સ્વતંત્ર રીતે વિતરિત થાય છે. પ્રભાવીતા (A) અને પ્રાકૃતિક પસંદગી (C) વૈવિધ્યના કારણો નથી, જ્યારે હાર્ડી-વાઇનબર્ગ (D) જનુકીય સંતુલન સાથે સંબંધિત છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (અનુવંશિકતા અને વૈવિધ્ય)", "ch": ""}, {"q": "કયા પૌધામાં પરપરાગણ રોકવા માટે કૃત્રિમ રીતે સ્વપરાગણ કરાવવી પડે છે, કારણ કે તેના પુષ્પો એકલિંગી હોય છે?", "opts": ["મકાઈ", "કપાસ", "પપૈયા", "ગાજર"], "ans": 2, "exp": "પપૈયા એકલિંગી પૌધો છે, જેમાં નર અને માદા પુષ્પો અલગ અલગ વિકસે છે. તેથી, પરપરાગણ રોકવા માટે કૃત્રિમ સ્વપરાગણ કરાવવી પડે છે. મકાઈ (A), કપાસ (B), અને ગાજર (D) દ્વિલિંગી પૌધા છે, જેમાં સ્વપરાગણ સહજ રીતે થઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 2: જનન (પૌધોમાં લિંગ વિતરણ)", "ch": ""}, {"q": "પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં રોગપ્રતિકારક શક્તિ વધારે હોય છે. આ કયા કારણસર થાય છે?", "opts": ["જનુકીય એકસમાનતા વધારે હોવી", "જનુકીય વૈવિધ્ય વધારે હોવું", "પોષક તત્ત્વોની ઉણપ હોવી", "હોર્મોનલ અસંતુલન હોવું"], "ans": 1, "exp": "પરપરાગણ દ્વારા જનુકીય વૈવિધ્ય વધારે થવાને કારણે સંતતિઓમાં રોગપ્રતિકારક શક્તિ વધારે હોય છે. જનુકીય એકસમાનતા (A) રોગપ્રતિકારક શક્તિ ઘટાડે છે, જ્યારે પોષક તત્ત્વોની ઉણપ (C) અને હોર્મોનલ અસંતુલન (D) આ સાથે સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 2: જનન (પરપરાગણના ફાયદા)", "ch": ""}, {"q": "પરપરાગણ દરમિયાન, પરાગરજના અંકુરણ માટે જરૂરી ઉત્સેચક કયું છે, જે માદા પુષ્પના સ્ત્રીકેસર પર ઉત્પન્ન થાય છે?", "opts": ["એમાઇલેઝ", "સેલ્યુલેઝ", "પ્રોટીએઝ", "ઇનવર્ટેઝ"], "ans": 1, "exp": "પરપરાગણ દરમિયાન, પરાગરજના અંકુરણ માટે સ્ત્રીકેસર પર સેલ્યુલેઝ ઉત્સેચક ઉત્પન્ન થાય છે, જે પરાગરજની કોષભિત્તિના સેલ્યુલોઝને તોડીને અંકુરણમાં મદદ કરે છે. એમાઇલેઝ કાર્બોદિતના પાચનમાં, પ્રોટીએઝ પ્રોટીનના પાચનમાં, અને ઇનવર્ટેઝ સુક્રોઝના પાચનમાં મદદ કરે છે, પરંતુ પરાગરજના અંકુરણમાં નહીં.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "જ્યારે એક પૌધામાં પરપરાગણ થાય છે, ત્યારે નીચેનામાંથી કયું પરિબળ પરાગરજના સફળ સંક્રમણને રોકી શકે છે?", "opts": ["ઉચ્ચ તાપમાન", "ઓછી આર્દ્રતા", "સ્ત્રીકેસરની અપરિપક્વતા", "પ્રકાશની તીવ્રતા"], "ans": 2, "exp": "સ્ત્રીકેસરની અપરિપક્વતા પરાગરજના સફળ સંક્રમણને રોકી શકે છે, કારણ કે અપરિપક્વ સ્ત્રીકેસર પરાગરજને ગ્રહણ કરવા સક્ષમ નથી. ઉચ્ચ તાપમાન, ઓછી આર્દ્રતા, અને પ્રકાશની તીવ્રતા પરાગરજના અંકુરણ અને સંક્રમણને અસર કરી શકે છે, પરંતુ સ્ત્રીકેસરની અપરિપક્વતા એ સીધું કારણ છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "નીચેનામાંથી કયું પૌધું પરપરાગણ માટે પવન પર આધાર રાખતું નથી, પરંતુ જીવડો પર આધાર રાખે છે?", "opts": ["મકાઈ", "ઘઉં", "સૂર્યમુખી", "કપાસ"], "ans": 2, "exp": "સૂર્યમુખી પરપરાગણ માટે જીવડો (મધમાખી) પર આધાર રાખે છે, જ્યારે મકાઈ, ઘઉં, અને કપાસ પવન દ્વારા પરપરાગણ કરે છે. સૂર્યમુખીના પુષ્પો રંગીન અને સુગંધિત હોય છે, જે મધમાખીઓને આકર્ષે છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "પરપરાગણ દરમિયાન, પરાગરજના અંકુરણ પછી, પરાગનલિકા ક્યાં તરફ વૃદ્ધિ પામે છે?", "opts": ["પુષ્પના પાંદડા તરફ", "અંડાશય તરફ", "પુષ્પના દાંડી તરફ", "પરાગકોષ તરફ"], "ans": 1, "exp": "પરપરાગણ દરમિયાન, પરાગરજના અંકુરણ પછી, પરાગનલિકા અંડાશય તરફ વૃદ્ધિ પામે છે, જ્યાં તે અંડકોષ સાથે સંપર્ક સાધે છે. પુષ્પના પાંદડા, દાંડી, અને પરાગકોષ તરફ વૃદ્ધિ પામવી એ પરાગનલિકાની ક્રિયા નથી.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન પરપરાગણ વિશે ખોટું છે?", "opts": ["પરપરાગણ દ્વારા જનુકીય વૈવિધ્ય વધારે છે.", "પરપરાગણ માટે પવન અથવા જીવડો જરૂરી છે.", "પરપરાગણ દરમિયાન, પરાગરજ અને અંડકોષ એક જ પૌધામાંથી આવે છે.", "પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં રોગપ્રતિકારક શક્તિ વધારે હોય છે."], "ans": 2, "exp": "પરપરાગણ દરમિયાન, પરાગરજ અને અંડકોષ વિવિધ પૌધામાંથી આવે છે, ન કે એક જ પૌધામાંથી. બાકીના કથનો સાચાં છે: પરપરાગણ દ્વારા જનુકીય વૈવિધ્ય વધારે છે, પરપરાગણ માટે પવન અથવા જીવડો જરૂરી છે, અને પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં રોગપ્રતિકારક શક્તિ વધારે હોય છે.", "ref": "Std 12 - પ્રકરણ 2: લૈંગિક પ્રજનનમાં પુષ્પો", "ch": ""}, {"q": "એક પુષ્પમાં પરાગાસન (stigma) પર પરાગરજનું સ્થાપન થયા બાદ, પરાગનલિકા (pollen tube) ની વૃદ્ધિ માટે જરૂરી પ્રાથમિક ઉત્તેજના કયા હોર્મોન દ્વારા પ્રદાન થાય છે?", "opts": ["ઑક્ઝિન (Auxin)", "જીબરેલિન (Gibberellin)", "સાયટોકાઇનિન (Cytokinin)", "ઇથિલિન (Ethylene)"], "ans": 0, "exp": "પરાગનલિકાની વૃદ્ધિ માટે ઑક્ઝિન હોર્મોન જવાબદાર છે, કારણ કે તે કોષવિભાજન અને કોષવૃદ્ધિને ઉત્તેજિત કરે છે. જ્યારે જીબરેલિન મુખ્યત્વે બીજાંકુરણ અને તંતુવૃદ્ધિ માટે, સાયટોકાઇનિન કોષવિભાજન માટે અને ઇથિલિન ફળપાકવવા માટે જવાબદાર છે. પરાગનલિકાની દિશાસૂચક વૃદ્ધિ માટે ઑક્ઝિન જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પીય વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું પુષ્પ પરપરાગણ માટે 'પ્રોટેન્ડ્રી' (protandry) નામની યુક્તિનો ઉપયોગ કરે છે, જેમાં નર પ્રજનન અંગો (પુંકેસર) માદા પ્રજનન અંગો (સ્ત્રીકેસર) કરતાં વહેલા પરિપક્વ થાય છે?", "opts": ["સૂર્યમુખી (Sunflower)", "સલગમ (Radish)", "મકાઈ (Maize)", "ગુલાબ (Rose)"], "ans": 1, "exp": "સલગમમાં 'પ્રોટેન્ડ્રી' જોવા મળે છે, જેમાં પુંકેસર સ્ત્રીકેસર કરતાં વહેલા પરિપક્વ થાય છે, જે સ્વપરાગણને અટકાવી પરપરાગણને પ્રોત્સાહન આપે છે. સૂર્યમુખીમાં 'પ્રોટોજાઇની' (protogyny) જોવા મળે છે, મકાઈ પવન દ્વારા પરાગિત થાય છે, અને ગુલાબમાં સામાન્ય રીતે જીવડાં દ્વારા પરાગણ થાય છે.", "ref": "Std 11 - પ્રકરણ 5: પુષ્પીય વનસ્પતિઓની બાહ્યકારવિદ્યા", "ch": ""}, {"q": "પરપરાગણ દરમિયાન, પરાગરજમાં રહેલું કયું દ્રવ્ય પરાગાસન (stigma) પર અંકુરણ માટે જરૂરી ઉત્સેચકોને સક્રિય કરે છે, જે પરાગનલિકાની વૃદ્ધિ માટે જરૂરી છે?", "opts": ["કેલ્શિયમ આયન (Ca²⁺)", "પોટેશિયમ આયન (K⁺)", "મેગ્નેશિયમ આયન (Mg²⁺)", "ક્લોરાઇડ આયન (Cl⁻)"], "ans": 0, "exp": "પરાગરજના અંકુરણ માટે કેલ્શિયમ આયન (Ca²⁺) જરૂરી છે, કારણ કે તે પરાગાસન પર રહેલા ઉત્સેચકોને સક્રિય કરે છે અને પરાગનલિકાની વૃદ્ધિ માટે જરૂરી સંકેતો પ્રદાન કરે છે. પોટેશિયમ, મેગ્નેશિયમ અને ક્લોરાઇડ આયનો આ પ્રક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પીય વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું પુષ્પ પરપરાગણ માટે 'હેરકોગેમી' (herkogamy) નામની યુક્તિનો ઉપયોગ કરે છે, જેમાં પુંકેસર અને સ્ત્રીકેસરની ભૌતિક ગોઠવણી એવી હોય છે કે સ્વપરાગણ અશક્ય બને છે?", "opts": ["કમળ (Lotus)", "ગલગોટા (Marigold)", "જાસૂદ (Hibiscus)", "ઓર્કિડ (Orchid)"], "ans": 3, "exp": "ઓર્કિડમાં 'હેરકોગેમી' જોવા મળે છે, જેમાં પુંકેસર અને સ્ત્રીકેસરની ભૌતિક ગોઠવણી એવી હોય છે કે સ્વપરાગણ અશક્ય બને છે અને પરપરાગણને પ્રોત્સાહન મળે છે. કમળ, ગલગોટા અને જાસૂદમાં આ પ્રકારની યુક્તિ જોવા મળતી નથી.", "ref": "Std 11 - પ્રકરણ 5: પુષ્પીય વનસ્પતિઓની બાહ્યકારવિદ્યા", "ch": ""}, {"q": "પરપરાગણ દરમિયાન, પરાગરજમાં રહેલું કયું દ્રવ્ય પરાગાસન પર રાસાયણિક સંકેતો મોકલે છે, જે પરાગનલિકાને અંડાશય તરફ દોરી જાય છે?", "opts": ["ગ્લાયકોપ્રોટીન (Glycoprotein)", "લિપોપ્રોટીન (Lipoprotein)", "ફોસ્ફોલિપિડ (Phospholipid)", "સેલ્યુલોઝ (Cellulose)"], "ans": 0, "exp": "પરાગરજમાં રહેલું ગ્લાયકોપ્રોટીન પરાગાસન પર રાસાયણિક સંકેતો મોકલે છે, જે પરાગનલિકાને અંડાશય તરફ દોરી જવામાં મદદ કરે છે. લિપોપ્રોટીન અને ફોસ્ફોલિપિડ કોષપટલના ઘટકો છે, જ્યારે સેલ્યુલોઝ કોષદીવાલનો મુખ્ય ઘટક છે, જે આ પ્રક્રિયામાં ભાગ લેતા નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પીય વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરપરાગણ દરમ્યાન, પરાગરજના અંકુરણ પછી, પરાગનલિકા વૃદ્ધિ પામીને અંડાશય સુધી પહોંચે છે. આ પ્રક્રિયામાં નીચેનામાંથી કયું પરિબળ પરાગનલિકાની દિશા નક્કી કરવામાં મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["પરાગાસન પરના રાસાયણિક સંકેતો (કેમિકલ સિગ્નલ્સ)", "ગુરુત્વાકર્ષણ બળ", "પવનની દિશા", "પ્રકાશની તીવ્રતા"], "ans": 0, "exp": "પરાગનલિકાની વૃદ્ધિ દિશા પરાગાસન પરના રાસાયણિક સંકેતો દ્વારા નિયંત્રિત થાય છે, જે અંડકોષ તરફ દિશા દર્શાવે છે. ગુરુત્વાકર્ષણ, પવન અથવા પ્રકાશની તીવ્રતા આ પ્રક્રિયામાં મુખ્ય ભૂમિકા ભજવતી નથી. પરાગાસન પરના રાસાયણિક સંકેતો (જેમ કે કેલ્શિયમ આયન) પરાગનલિકાની વૃદ્ધિને અંડાશય તરફ માર્ગદર્શન આપે છે.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી પૌધાઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું પૌધું પરપરાગણ રોકવા માટે 'ડાયોકેશી' (dioecy) નામની યુક્તિનો ઉપયોગ કરે છે, જ્યાં નર અને માદા પુષ્પો અલગ અલગ પૌધા પર હોય છે?", "opts": ["મકાઈ", "પપૈયા", "કેળા", "ગવત"], "ans": 1, "exp": "પપૈયા (Papaya) પૌધામાં 'ડાયોકેશી' જોવા મળે છે, જ્યાં નર અને માદા પુષ્પો અલગ અલગ પૌધા પર હોય છે, જે પરપરાગણને પ્રોત્સાહન આપે છે. મકાઈ, કેળા અને ગવતમાં આ યુક્તિ જોવા મળતી નથી. મકાઈ અને ગવતમાં પવન દ્વારા પરપરાગણ થાય છે, જ્યારે કેળામાં સ્વપરાગણ થાય છે.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી પૌધાઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "પરપરાગણ દરમ્યાન, પરાગરજના અંકુરણ માટે જરૂરી ઉત્સેચક 'પેક્ટિનેઝ' ની ભૂમિકા શું છે?", "opts": ["પરાગાસન પરના પેક્ટિન યુક્ત કોષભિત્તિને તોડીને પરાગનલિકાની વૃદ્ધિને સહાય કરે છે", "પરાગરજમાં રહેલા DNA ને વિભાજિત કરે છે", "પરાગાસન પરના શર્કરાને તોડીને ઊર્જા ઉત્પન્ન કરે છે", "પરાગનલિકાની કોષભિત્તિને મજબૂત બનાવે છે"], "ans": 0, "exp": "પેક્ટિનેઝ ઉત્સેચક પરાગાસન પરના પેક્ટિન યુક્ત કોષભિત્તિને તોડીને પરાગનલિકાની વૃદ્ધિને સહાય કરે છે. આ ઉત્સેચક પરાગરજના અંકુરણ અને પરાગનલિકાની વૃદ્ધિમાં મહત્વની ભૂમિકા ભજવે છે. બાકીના વિકલ્પો (B, C, D) આ ઉત્સેચકની ભૂમિકા સાથે સંકળાયેલા નથી.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી પૌધાઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન પરપરાગણ અને સ્વપરાગણ વચ્ચેના તફાવત વિશે ખોટું છે?", "opts": ["પરપરાગણ દરમ્યાન, પરાગરજ એક પૌધાના પુષ્પથી બીજા પૌધાના પુષ્પ પર સ્થળાંતર પામે છે", "સ્વપરાગણ દરમ્યાન, પરાગરજ અને અંડકોષ એક જ પૌધાના પુષ્પમાંથી આવે છે", "પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં જનુકીય વૈવિધ્ય ઓછું હોય છે", "સ્વપરાગણ દરમ્યાન, પરાગરજ અને અંડકોષ વચ્ચેના સંપર્કની શક્યતા વધારે હોય છે"], "ans": 2, "exp": "પરપરાગણ દ્વારા ઉત્પન્ન થતી સંતતિઓમાં જનુકીય વૈવિધ્ય વધારે હોય છે, કારણ કે તે બે અલગ પૌધાઓના જનીનનો સંમિલન કરે છે. વિકલ્પ C ખોટો છે, કારણ કે પરપરાગણ દ્વારા જનુકીય વૈવિધ્ય વધારે જ હોય છે. બાકીના વિકલ્પો (A, B, D) સાચા છે.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી પૌધાઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું પૌધું પરપરાગણ માટે 'ક્લીસ્ટોગેમી' (cleistogamy) નામની યુક્તિનો ઉપયોગ કરતું નથી, જ્યાં પુષ્પો બંધ રહે છે અને સ્વપરાગણ થાય છે?", "opts": ["મગફળી", "કોમલ (Lotus)", "બટાટા", "વાયોલા (Viola)"], "ans": 1, "exp": "કોમલ (Lotus) પુષ્પો ખુલ્લા હોય છે અને પરપરાગણ દ્વારા પ્રજનન કરે છે. મગફળી, બટાટા અને વાયોલા પૌધાઓમાં 'ક્લીસ્ટોગેમી' જોવા મળે છે, જ્યાં પુષ્પો બંધ રહે છે અને સ્વપરાગણ થાય છે. આમ, કોમલ (Lotus) આ યુક્તિનો ઉપયોગ કરતું નથી.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી પૌધાઓમાં લૈંગિક પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
