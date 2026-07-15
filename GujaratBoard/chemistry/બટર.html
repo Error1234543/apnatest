@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>બૅટરી</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>બૅટરી</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">બૅટરી</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે લેડ-એસિડ બૅટરીમાં વીજળીનો ઉપયોગ કરવામાં આવે છે, ત્યારે એનોડ પર થતી પ્રક્રિયામાં કયો પદાર્થ ઉત્પન્ન થાય છે?", "opts": ["લેડ સલ્ફેટ (PbSO₄)", "લેડ ડાયોક્સાઇડ (PbO₂)", "સલ્ફ્યુરિક એસિડ (H₂SO₄)", "હાઇડ્રોજન ગેસ (H₂)"], "ans": 0, "exp": "લેડ-એસિડ બૅટરીમાં ડિસ્ચાર્જ દરમિયાન એનોડ (PbO₂) પર લેડ સલ્ફેટ (PbSO₄) ઉત્પન્ન થાય છે. લેડ ડાયોક્સાઇડ (PbO₂) એ એનોડનું મૂળ સ્વરૂપ છે, જે પ્રક્રિયા દરમિયાન ખર્ચાય છે. સલ્ફ્યુરિક એસિડ (H₂SO₄) એ ઇલેક્ટ્રોલાઇટ છે, જે પ્રક્રિયામાં વપરાય છે પરંતુ ઉત્પન્ન થતું નથી. હાઇડ્રોજન ગેસ (H₂) એ કેથોડ પર ઉત્પન્ન થતો પદાર્થ નથી, પરંતુ લેડ-એસિડ બૅટરીમાં તે ઉત્પન્ન થતું નથી.", "ref": "Std 12 - અધ્યાય 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયી બૅટરી પ્રકારની બૅટરી છે જેમાં ઇલેક્ટ્રોલાઇટ તરીકે ક્ષારીય દ્રાવણ વપરાય છે અને તે પુનઃભરણીય (rechargeable) નથી?", "opts": ["લેડ-એસિડ બૅટરી", "લિથિયમ-આયન બૅટરી", "શુષ્ક કોષ (Dry Cell)", "નિકેલ-કેડમિયમ બૅટરી"], "ans": 2, "exp": "શુષ્ક કોષ (Dry Cell) એ એક પ્રકારની બૅટરી છે જેમાં ઇલેક્ટ્રોલાઇટ તરીકે ક્ષારીય દ્રાવણ (અમોનિયમ ક્લોરાઇડ અને ઝિંક ક્લોરાઇડ) વપરાય છે અને તે પુનઃભરણીય નથી. લેડ-એસિડ બૅટરી, લિથિયમ-આયન બૅટરી, અને નિકેલ-કેડમિયમ બૅટરી બધી પુનઃભરણીય છે.", "ref": "Std 12 - અધ્યાય 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "બૅટરીના આંતરિક પ્રતિરોધને અસર કરતા પારિબળિકો પૈકી કયો પારિબળિક સૌથી વધુ અસર કરે છે?", "opts": ["બૅટરીનું તાપમાન", "બૅટરીની ઉંમર", "ઇલેક્ટ્રોલાઇટની સાંદ્રતા", "બૅટરીના ટર્મિનલ્સની સાફસૂફી"], "ans": 1, "exp": "બૅટરીની ઉંમર એ સૌથી વધુ અસર કરતું પારિબળિક છે કારણ કે જેમ જેમ બૅટરી જૂની થાય છે, તેમ તેમ તેના આંતરિક રચનામાં ફેરફાર થાય છે, જે આંતરિક પ્રતિરોધમાં વધારો કરે છે. તાપમાન, ઇલેક્ટ્રોલાઇટની સાંદ્રતા, અને ટર્મિનલ્સની સાફસૂફી પણ અસર કરે છે, પરંતુ ઉંમરની અસર સૌથી મહત્વપૂર્ણ છે.", "ref": "Std 12 - અધ્યાય 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયી બૅટરી પ્રકારની બૅટરી છે જેમાં એનોડ અને કેથોડ બંને સક્રિય પદાર્થો છે અને ઇલેક્ટ્રોલાઇટ તરીકે ક્ષારીય દ્રાવણ વપરાય છે?", "opts": ["લેડ-એસિડ બૅટરી", "લિથિયમ-આયન બૅટરી", "શુષ્ક કોષ (Dry Cell)", "નિકેલ-મેટલ હાઇડ્રાઇડ બૅટરી"], "ans": 2, "exp": "શુષ્ક કોષ (Dry Cell) એ એકમાત્ર બૅટરી છે જેમાં એનોડ (ઝિંક) અને કેથોડ (મેંગેનીઝ ડાયોક્સાઇડ) બંને સક્રિય પદાર્થો છે અને ઇલેક્ટ્રોલાઇડ તરીકે ક્ષારીય દ્રાવણ (અમોનિયમ ક્લોરાઇડ અને ઝિંક ક્લોરાઇડ) વપરાય છે. લેડ-એસિડ બૅટરીમાં એસિડિક ઇલેક્ટ્રોલાઇટ વપરાય છે, લિથિયમ-આયન બૅટરીમાં લિથિયમ સોલ્ટ્સ વપરાય છે, અને નિકેલ-મેટલ હાઇડ્રાઇડ બૅટરીમાં ક્ષારીય ઇલેક્ટ્રોલાઇટ વપરાય છે પરંતુ એનોડ અને કેથોડ સક્રિય પદાર્થો નથી.", "ref": "Std 12 - અધ્યાય 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "જ્યારે બૅટરીને ચાર્જ કરવામાં આવે છે, ત્યારે કયી પ્રક્રિયા થાય છે?", "opts": ["વિદ્યુતરાસાયણિક કોષમાં રેડોક્સ પ્રક્રિયા ઉલટી દિશામાં થાય છે", "વિદ્યુતરાસાયણિક કોષમાં રેડોક્સ પ્રક્રિયા સમાન દિશામાં થાય છે", "બૅટરીમાંથી વિદ્યુત પ્રવાહ બહાર નીકળે છે", "બૅટરીમાં ઇલેક્ટ્રોલાઇટની સાંદ્રતા ઘટે છે"], "ans": 0, "exp": "બૅટરીને ચાર્જ કરતી વખતે, વિદ્યુતરાસાયણિક કોષમાં રેડોક્સ પ્રક્રિયા ઉલટી દિશામાં થાય છે. ડિસ્ચાર્જ દરમિયાન થતી પ્રક્રિયાઓ ચાર્જિંગ દરમિયાન ઉલટી થાય છે. વિદ્યુત પ્રવાહ બૅટરીમાં પ્રવેશે છે, ઇલેક્ટ્રોલાઇટની સાંદ્રતા વધે છે, અને રેડોક્સ પ્રક્રિયા ઉલટી દિશામાં થાય છે.", "ref": "Std 12 - અધ્યાય 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "લિથિયમ-આયન બૅટરીમાં, ચાર્જિંગ દરમિયાન લિથિયમ આયનની ગતિ ક્યાંથી ક્યાં તરફ થાય છે?", "opts": ["એનોડથી કેથોડ તરફ", "કેથોડથી એનોડ તરફ", "ઇલેક્ટ્રોલાઇટમાંથી એનોડ તરફ", "કેથોડમાંથી ઇલેક્ટ્રોલાઇટ તરફ"], "ans": 1, "exp": "લિથિયમ-આયન બૅટરીમાં ચાર્જિંગ દરમિયાન લિથિયમ આયન (Li⁺) કેથોડથી એનોડ તરફ ગતિ કરે છે. ચાર્જિંગ દરમિયાન, લિથિયમ આયનો કેથોડમાંથી બહાર નીકળીને ઇલેક્ટ્રોલાઇટ દ્વારા એનોડ તરફ જાય છે અને એનોડમાં સંગ્રહ પામે છે. A) ખોટું છે કારણ કે ડિસ્ચાર્જ દરમિયાન લિથિયમ આયન એનોડથી કેથોડ તરફ જાય છે. C) અને D) ખોટાં છે કારણ કે લિથિયમ આયન ઇલેક્ટ્રોલાઇટમાંથી પસાર થાય છે, પરંતુ તેની ગતિ કેથોડથી એનોડ તરફ હોય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયી બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન એનોડ પર ઓક્સિડેશન થતું નથી?", "opts": ["લેડ-એસિડ બૅટરી", "નિકેલ-કેડમિયમ બૅટરી", "લિથિયમ-આયન બૅટરી", "ફ્યુઅલ સેલ"], "ans": 3, "exp": "ફ્યુઅલ સેલમાં, એનોડ પર હાઇડ્રોજન ગેસનું ઓક્સિડેશન થાય છે, પરંતુ તેને બૅટરી ગણવામાં આવતી નથી કારણ કે તે પુનર્ભરણીય નથી અને તેની રચના અન્ય બૅટરી કરતાં ભિન્ન છે. લેડ-એસિડ, નિકેલ-કેડમિયમ, અને લિથિયમ-આયન બૅટરીમાં ડિસ્ચાર્જ દરમિયાન એનોડ પર ઓક્સિડેશન થાય છે. A, B, અને C ખોટાં છે કારણ કે તેમાં એનોડ પર ઓક્સિડેશન થાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "બૅટરીના આંતરિક પ્રતિરોધને ઘટાડવા માટે નીચેનામાંથી કયો પગલો સૌથી અસરકારક છે?", "opts": ["ઇલેક્ટ્રોલાઇટની સાંદ્રતા ઘટાડવી", "ઇલેક્ટ્રોડની સપાટીનું ક્ષેત્રફળ ઘટાડવું", "ઇલેક્ટ્રોડ વચ્ચેનું અંતર ઘટાડવું", "બૅટરીનું તાપમાન ઘટાડવું"], "ans": 2, "exp": "બૅટરીના આંતરિક પ્રતિરોધને ઘટાડવા માટે ઇલેક્ટ્રોડ વચ્ચેનું અંતર ઘટાડવું સૌથી અસરકારક પગલો છે. આંતરિક પ્રતિરોધ ઇલેક્ટ્રોડ વચ્ચેના અંતરના સમપ્રમાણમાં હોય છે. A) ખોટું છે કારણ કે ઇલેક્ટ્રોલાઇટની સાંદ્રતા ઘટાડવાથી પ્રતિરોધ વધે છે. B) ખોટું છે કારણ કે ઇલેક્ટ્રોડની સપાટીનું ક્ષેત્રફળ ઘટાડવાથી પ્રતિરોધ વધે છે. D) ખોટું છે કારણ કે તાપમાન ઘટાડવાથી ઇલેક્ટ્રોલાઇટની ચાલકતા ઘટે છે, જે પ્રતિરોધ વધારે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નીચેનામાંથી કયી બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન ઇલેક્ટ્રોલાઇટની સાંદ્રતા બદલાતી નથી?", "opts": ["લેડ-એસિડ બૅટરી", "ડેનિયલ સેલ", "લિથિયમ-આયન બૅટરી", "નિકેલ-મેટલ હાઇડ્રાઇડ બૅટરી"], "ans": 2, "exp": "લિથિયમ-આયન બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન ઇલેક્ટ્રોલાઇટની સાંદ્રતા બદલાતી નથી કારણ કે લિથિયમ આયન માત્ર એક ઇલેક્ટ્રોડથી બીજા ઇલેક્ટ્રોડ તરફ સ્થળાંતર કરે છે. A) ખોટું છે કારણ કે લેડ-એસિડ બૅટરીમાં ડિસ્ચાર્જ દરમિયાન સલ્ફ્યુરિક એસિડની સાંદ્રતા ઘટે છે. B) ખોટું છે કારણ કે ડેનિયલ સેલમાં ડિસ્ચાર્જ દરમિયાન ઇલેક્ટ્રોલાઇટની સાંદ્રતા બદલાય છે. D) ખોટું છે કારણ કે નિકેલ-મેટલ હાઇડ્રાઇડ બૅટરીમાં ઇલેક્ટ્રોલાઇટની સાંદ્રતા બદલાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "જ્યારે બૅટરીને શોર્ટ સર્કિટ કરવામાં આવે છે, ત્યારે તેના ટર્મિનલ વોલ્ટેજ શું થાય છે?", "opts": ["શૂન્ય થાય છે", "બૅટરીના EMF જેટલું થાય છે", "બૅટરીના આંતરિક પ્રતિરોધના મૂલ્ય જેટલું થાય છે", "અસીમિત થાય છે"], "ans": 0, "exp": "જ્યારે બૅટરીને શોર્ટ સર્કિટ કરવામાં આવે છે, ત્યારે ટર્મિનલ વોલ્ટેજ શૂન્ય થાય છે કારણ કે બાહ્ય પ્રતિરોધ શૂન્ય હોય છે અને V = EMF - Ir, જ્યાં R=0, ત્યારે V=0. B) ખોટું છે કારણ કે EMF અને ટર્મિનલ વોલ્ટેજ અલગ છે. C) ખોટું છે કારણ કે ટર્મિનલ વોલ્ટેજ આંતરિક પ્રતિરોધના મૂલ્ય જેટલું નથી થતું. D) ખોટું છે કારણ કે અસીમિત વોલ્ટેજ શક્ય નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}, {"q": "નિકલ-મેટલ હાઇડ્રાઇડ (Ni-MH) બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન નીચેનામાંથી કઈ પ્રક્રિયા કેથોડ પર થાય છે?", "opts": ["NiOOH નું Ni(OH)₂ માં રિડક્શન", "H₂O નું H₂ માં રિડક્શન", "MH નું M માં ઓક્સિડેશન", "Ni(OH)₂ નું NiOOH માં ઓક્સિડેશન"], "ans": 0, "exp": "Ni-MH બૅટરીમાં ડિસ્ચાર્જ દરમિયાન કેથોડ પર NiOOH નું Ni(OH)₂ માં રિડક્શન થાય છે. વિકલ્પ B ખોટો છે કારણ કે H₂O નું રિડક્શન એનોડ પર થાય છે. વિકલ્પ C ખોટો છે કારણ કે MH નું ઓક્સિડેશન એનોડ પર થાય છે. વિકલ્પ D ખોટો છે કારણ કે Ni(OH)₂ નું NiOOH માં ઓક્સિડેશન ચાર્જિંગ દરમિયાન થાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેનામાંથી કઈ બૅટરી પ્રકારમાં, ઇલેક્ટ્રોલાઇટ તરીકે ઘન પદાર્થનો ઉપયોગ થાય છે અને તેને 'સોલિડ-સ્ટેટ બૅટરી' તરીકે ઓળખવામાં આવે છે?", "opts": ["લિથિયમ-આયન બૅટરી", "લિથિયમ-પોલિમર બૅટરી", "સિલ્વર-ઝિંક બૅટરી", "નિકલ-કેડમિયમ બૅટરી"], "ans": 1, "exp": "લિથિયમ-પોલિમર બૅટરીમાં ઇલેક્ટ્રોલાઇટ તરીકે ઘન પોલિમરનો ઉપયોગ થાય છે, જેને 'સોલિડ-સ્ટેટ બૅટરી' તરીકે ઓળખવામાં આવે છે. વિકલ્પ A ખોટો છે કારણ કે લિથિયમ-આયન બૅટરીમાં પ્રવાહી ઇલેક્ટ્રોલાઇટ હોય છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં પ્રવાહી ઇલેક્ટ્રોલાઇટનો ઉપયોગ થાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક લેડ-એસિડ બૅટરીને 10 A ના પ્રવાહથી 5 કલાક સુધી ચાર્જ કરવામાં આવે છે. જો બૅટરીની ક્ષમતા 50 Ah હોય, તો ચાર્જિંગ બાદ બૅટરીની સ્થિતિ શું હશે? (ધારો કે ચાર્જિંગ કાર્યક્ષમતા 80% છે)", "opts": ["સંપૂર્ણ ચાર્જ થયેલી", "80% ચાર્જ થયેલી", "64% ચાર્જ થયેલી", "50% ચાર્જ થયેલી"], "ans": 2, "exp": "ચાર્જિંગ દરમિયાન આપવામાં આવેલ કુલ વિદ્યુત = 10 A × 5 h = 50 Ah. કાર્યક્ષમતા 80% હોવાથી, વાસ્તવિક ચાર્જ = 50 Ah × 0.8 = 40 Ah. બૅટરીની ક્ષમતા 50 Ah હોવાથી, ચાર્જિંગ બાદ બૅટરી 40/50 = 80% ચાર્જ થયેલી ગણાય, પરંતુ કાર્યક્ષમતા ધ્યાનમાં લેતા તે 64% ચાર્જ થયેલી ગણાશે (કારણ કે 40 Ah એ 50 Ah ના 80% છે, પરંતુ પ્રશ્નમાં કાર્યક્ષમતા પહેલેથી જ ધ્યાનમાં લેવાઈ છે). આથી સાચો જવાબ 64% છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેનામાંથી કઈ બૅટરી પ્રકારમાં, ડિસ્ચાર્જ દરમિયાન એનોડ અને કેથોડ બંને પર સમાન પ્રકારની રાસાયણિક પ્રક્રિયા થાય છે, પરંતુ વિપરીત દિશામાં?", "opts": ["લિથિયમ-આયન બૅટરી", "ફ્લો બૅટરી", "રેડોક્સ ફ્લો બૅટરી", "ઝિંક-કાર્બન બૅટરી"], "ans": 2, "exp": "રેડોક્સ ફ્લો બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન એનોડ અને કેથોડ બંને પર રેડોક્સ પ્રક્રિયાઓ થાય છે, જે એકબીજાની વિપરીત દિશામાં હોય છે. વિકલ્પ A ખોટો છે કારણ કે લિથિયમ-આયન બૅટરીમાં એનોડ અને કેથોડ પર અલગ પ્રકારની પ્રક્રિયાઓ થાય છે. વિકલ્પ B અને D ખોટા છે કારણ કે તેમાં આવી સમાન પ્રક્રિયાઓ થતી નથી.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક લિથિયમ-આયન બૅટરીને 4.2 V ના વોલ્ટેજ પર ચાર્જ કરવામાં આવે છે. જો બૅટરીનો આંતરિક પ્રતિરોધ 0.1 Ω હોય અને ચાર્જિંગ પ્રવાહ 2 A હોય, તો બૅટરીના ટર્મિનલ વોલ્ટેજ અને ઇલેક્ટ્રોડ્સ પર લાગુ પડતા વોલ્ટેજ વચ્ચેનો તફાવત કેટલો હશે?", "opts": ["0.1 V", "0.2 V", "0.4 V", "0.5 V"], "ans": 1, "exp": "આંતરિક પ્રતિરોધને કારણે વોલ્ટેજ ડ્રોપ = I × R = 2 A × 0.1 Ω = 0.2 V. આથી, બૅટરીના ટર્મિનલ વોલ્ટેજ અને ઇલેક્ટ્રોડ્સ પર લાગુ પડતા વોલ્ટેજ વચ્ચેનો તફાવત 0.2 V હશે. વિકલ્પ A, C અને D ખોટા છે કારણ કે ગણતરી મુજબ તફાવત 0.2 V છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેનામાંથી કયા પ્રકારની બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન ઇલેક્ટ્રોલાઇટની રાસાયણિક પ્રકૃતિ બદલાતી નથી, પરંતુ તેની ભૌતિક સ્થિતિ બદલાય છે?", "opts": ["લેડ-એસિડ બૅટરી", "લિથિયમ-આયન બૅટરી", "નિકલ-કેડમિયમ બૅટરી", "ઝિંક-કાર્બન બૅટરી"], "ans": 1, "exp": "લિથિયમ-આયન બૅટરીમાં ડિસ્ચાર્જ દરમિયાન ઇલેક્ટ્રોલાઇટ (સામાન્ય રીતે લિથિયમ ક્ષારનું કાર્બનિક દ્રાવણ) રાસાયણિક રીતે બદલાતું નથી, પરંતુ લિથિયમ આયનની ગતિને કારણે તેની ભૌતિક સ્થિતિ (સાંદ્રતા વિતરણ) બદલાય છે. લેડ-એસિડ બૅટરીમાં H₂SO₄ની સાંદ્રતા બદલાય છે, નિકલ-કેડમિયમમાં KOHની સાંદ્રતા થોડી બદલાય છે, અને ઝિંક-કાર્બનમાં NH₄Cl અને ZnCl₂ની સાંદ્રતા બદલાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક બૅટરીના ટર્મિનલ વોલ્ટેજ (V) અને આંતરિક પ્રતિરોધ (r) વચ્ચેનો સંબંધ V = E - Ir છે, જ્યાં E એ ઇલેક્ટ્રોમોટિવ બળ છે અને I એ પ્રવાહ છે. જો બૅટરીને શોર્ટ સર્કિટ કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ટર્મિનલ વોલ્ટેજ શૂન્ય થશે", "આંતરિક પ્રતિરોધ પરનો વોલ્ટેજ ડ્રોપ E જેટલો થશે", "બૅટરીનો પ્રવાહ મહત્તમ થશે અને તેનું મૂલ્ય E/r હશે", "બૅટરીનું ઇલેક્ટ્રોમોટિવ બળ (E) શૂન્ય થઈ જશે"], "ans": 3, "exp": "શોર્ટ સર્કિટ દરમિયાન ટર્મિનલ વોલ્ટેજ V = 0 થાય છે, આંતરિક પ્રતિરોધ પરનો વોલ્ટેજ ડ્રોપ Ir = E થાય છે, અને પ્રવાહ I = E/r મહત્તમ થાય છે. પરંતુ ઇલેક્ટ્રોમોટિવ બળ (E) બૅટરીની આંતરિક રાસાયણિક પ્રક્રિયાને કારણે જળવાઈ રહે છે અને શૂન્ય થતું નથી.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નિકલ-મેટલ હાઇડ્રાઇડ (Ni-MH) બૅટરીમાં, ચાર્જિંગ દરમિયાન નીચેનામાંથી કઈ પ્રક્રિયા કેથોડ પર થાય છે?", "opts": ["Ni(OH)₂ + OH⁻ → NiOOH + H₂O + e⁻", "M + H₂O + e⁻ → MH + OH⁻", "NiOOH + H₂O + e⁻ → Ni(OH)₂ + OH⁻", "2H₂O + 2e⁻ → H₂ + 2OH⁻"], "ans": 0, "exp": "Ni-MH બૅટરીમાં ચાર્જિંગ દરમિયાન કેથોડ પર Ni(OH)₂નું NiOOHમાં ઓક્સિડેશન થાય છે: Ni(OH)₂ + OH⁻ → NiOOH + H₂O + e⁻. વિકલ્પ B એ એનોડ પરની પ્રક્રિયા છે, વિકલ્પ C એ ડિસ્ચાર્જ દરમિયાનની કેથોડ પ્રક્રિયા છે, અને વિકલ્પ D એ પાણીનું વિઘટન છે જે બાજુની પ્રક્રિયા છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક લિથિયમ-આયન બૅટરીને 4.2 V પર ચાર્જ કરવામાં આવે છે. જો બૅટરીનો આંતરિક પ્રતિરોધ 0.1 Ω હોય અને ચાર્જિંગ પ્રવાહ 2 A હોય, તો બૅટરીનું ઇલેક્ટ્રોમોટિવ બળ (EMF) કેટલું હશે? (નોંધ: ચાર્જિંગ દરમિયાન EMF એ ટર્મિનલ વોલ્ટેજ કરતાં ઓછું હોય છે)", "opts": ["4.0 V", "4.2 V", "4.4 V", "3.8 V"], "ans": 0, "exp": "ચાર્જિંગ દરમિયાન સંબંધ V = E + Ir લાગુ પડે છે, જ્યાં V એ ટર્મિનલ વોલ્ટેજ છે, E એ EMF છે, I એ પ્રવાહ છે, અને r એ આંતરિક પ્રતિરોધ છે. અહીં V = 4.2 V, I = 2 A, r = 0.1 Ω. તેથી, E = V - Ir = 4.2 - (2 × 0.1) = 4.2 - 0.2 = 4.0 V. આથી EMF 4.0 V છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "લેડ-એસિડ બૅટરીમાં, ડિસ્ચાર્જ દરમિયાન એનોડ પર થતી પ્રક્રિયા અને કેથોડ પર થતી પ્રક્રિયા વચ્ચેનો તફાવત શું છે, જ્યારે બૅટરીને 20°C તાપમાને અને 1 M H₂SO₄ ઇલેક્ટ્રોલાઇટ સાથે વાપરવામાં આવે છે?", "opts": ["એનોડ પર Pb → Pb²⁺ + 2e⁻ થાય છે, જ્યારે કેથોડ પર PbO₂ + 4H⁺ + 2e⁻ → Pb²⁺ + 2H₂O થાય છે", "એનોડ પર PbSO₄ ની રચના થાય છે, જ્યારે કેથોડ પર H₂SO₄ ની સાંદ્રતા ઘટે છે", "એનોડ પર PbO₂ → Pb²⁺ + 2O²⁻ થાય છે, જ્યારે કેથોડ પર Pb²⁺ + SO₄²⁻ → PbSO₄ થાય છે", "એનોડ પર Pb + SO₄²⁻ → PbSO₄ + 2e⁻ થાય છે, જ્યારે કેથોડ પર PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O થાય છે"], "ans": 3, "exp": "લેડ-એસિડ બૅટરીમાં ડિસ્ચાર્જ દરમિયાન એનોડ (Pb) પર ઓક્સિડેશન થાય છે: Pb + SO₄²⁻ → PbSO₄ + 2e⁻. કેથોડ (PbO₂) પર રિડક્શન થાય છે: PbO₂ + 4H⁺ + SO₄²⁻ + 2e⁻ → PbSO₄ + 2H₂O. આમ, વિકલ્પ D સંપૂર્ણ અને યોગ્ય રાસાયણિક પ્રક્રિયાઓ દર્શાવે છે. વિકલ્પ A એનોડ પરની પ્રક્રિયા અપૂર્ણ છે અને કેથોડ પરની પ્રક્રિયા સંપૂર્ણ નથી. વિકલ્પ B એનોડ પરની પ્રક્રિયા યોગ્ય છે પરંતુ કેથોડ પરની પ્રક્રિયા અયોગ્ય રીતે વર્ણવેલ છે. વિકલ્પ C એનોડ અને કેથોડ પરની પ્રક્રિયાઓ બંને અયોગ્ય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરસાયણ (Electrochemistry)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
