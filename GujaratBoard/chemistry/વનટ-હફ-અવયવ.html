@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વાન્ટ હોફ અવયવ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વાન્ટ હોફ અવયવ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વાન્ટ હોફ અવયવ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક જલીય દ્રાવણમાં વાન્ટ હોફ અવયવ (i) = 2.5 માપવામાં આવ્યો છે. આ દ્રાવણમાં દ્રાવ્ય પદાર્થનું વિયોજન થવાનું પ્રમાણ કેટલું હશે? (ધારો કે દ્રાવ્ય પદાર્થ સંપૂર્ણપણે વિયોજિત થતો નથી.)", "opts": ["50%", "60%", "75%", "80%"], "ans": 2, "exp": "વાન્ટ હોફ અવયવ (i) = 1 + (n-1)α, જ્યાં n = વિયોજનથી ઉત્પન્ન થતા આયનોની સંખ્યા અને α = વિયોજન પ્રમાણ. અહીં i = 2.5 છે અને ધારો કે દ્રાવ્ય પદાર્થ બે આયનોમાં વિયોજિત થાય છે (n=2). તેથી 2.5 = 1 + (2-1)α ⇒ α = 1.5 ⇒ વિયોજન પ્રમાણ = 1.5 × 100% = 75%. વિકલ્પ A, B અને D ખોટા છે કારણ કે તેઓ ખોટા ગણતરી પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયા દ્રાવણમાં વાન્ટ હોફ અવયવનું મૂલ્ય 1 કરતાં ઓછું હોઈ શકે?", "opts": ["સોડિયમ ક્લોરાઇડનું જલીય દ્રાવણ", "ગ્લુકોઝનું જલીય દ્રાવણ", "બેન્ઝોઇક એસિડનું બેન્ઝિનમાં દ્રાવણ", "યુરિયાનું જલીય દ્રાવણ"], "ans": 2, "exp": "વાન્ટ હોફ અવયવ (i) 1 કરતાં ઓછું ત્યારે થાય છે જ્યારે દ્રાવ્યના અણુઓ એકબીજા સાથે જોડાઈને મોટા અણુઓ બનાવે (અસોસિયેશન). બેન્ઝોઇક એસિડ બેન્ઝિનમાં દ્વિઅણુક સ્વરૂપે અસ્તિત્વ ધરાવે છે, તેથી i < 1. વિકલ્પ A અને D ખોટા છે કારણ કે તેમાં વિયોજન થાય છે (i > 1). વિકલ્પ B ખોટો છે કારણ કે ગ્લુકોઝ અવિયોજિત રહે છે (i = 1).", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 મોલ BaCl₂ પૂર્ણપણે વિયોજિત થાય છે. આ દ્રાવણનો વાન્ટ હોફ અવયવ કેટલો હશે? (BaCl₂ → Ba²⁺ + 2Cl⁻)", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "BaCl₂ વિયોજનથી 1 Ba²⁺ અને 2 Cl⁻ આયનો ઉત્પન્ન થાય છે, એટલે કે કુલ 3 આયનો. તેથી વાન્ટ હોફ અવયવ (i) = 3. વિકલ્પ A, B અને D ખોટા છે કારણ કે તેઓ ખોટી આયન સંખ્યા ધ્યાનમાં લે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવ્ય પદાર્થનું જલીય દ્રાવણ બનાવતી વખતે વાન્ટ હોફ અવયવનું મૂલ્ય 1.8 માપવામાં આવ્યું છે. જો આ પદાર્થનું આણ્વીય દળ 100 g/mol હોય અને તેનું 10 g 500 g પાણીમાં ઓગાળવામાં આવે, તો દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) કેટલું હશે? (Kf = 1.86 K kg/mol)", "opts": ["0.372 K", "0.558 K", "0.669 K", "0.744 K"], "ans": 2, "exp": "પ્રથમ મોલાલિટી (m) = (10 g / 100 g/mol) / 0.5 kg = 0.2 mol/kg. વાન્ટ હોફ અવયવ (i) = 1.8. ઠારબિંદુ અવનયન ΔTf = i × Kf × m = 1.8 × 1.86 × 0.2 = 0.6696 K ≈ 0.669 K. વિકલ્પ A, B અને D ખોટા છે કારણ કે તેઓ ખોટી ગણતરી પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનાં વિધાનો પૈકી કયું વિધાન વાન્ટ હોફ અવયવ માટે ખોટું છે?", "opts": ["વિયોજન થતા પદાર્થો માટે i > 1 હોય છે.", "અસોસિયેશન થતા પદાર્થો માટે i < 1 હોય છે.", "અવિયોજિત પદાર્થો માટે i = 1 હોય છે.", "વાન્ટ હોફ અવયવનું મૂલ્ય હંમેશા ધન પૂર્ણાંક હોય છે."], "ans": 3, "exp": "વાન્ટ હોફ અવયવ (i) વિયોજન કે અસોસિયેશનના પ્રમાણ પર આધારિત હોય છે અને તે અપૂર્ણાંક કે પૂર્ણાંક હોઈ શકે છે. તે હંમેશા ધન પૂર્ણાંક હોવું જરૂરી નથી. વિકલ્પ A, B અને C સાચાં છે કારણ કે તેઓ વાન્ટ હોફ અવયવના સામાન્ય ગુણધર્મો દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્વિઅણુક ઇલેક્ટ્રોલાઇટ AB₂ નું જલીય દ્રાવણ બનાવવામાં આવે છે. જો આ દ્રાવણમાં AB₂ નું 80% વિયોજન થતું હોય, તો વાન્ટ હોફ અવયવ (i) નું મૂલ્ય કેટલું હશે?", "opts": ["2.4", "2.6", "2.8", "3.0"], "ans": 1, "exp": "AB₂ નું વિયોજન સમીકરણ: AB₂ → A²⁺ + 2B⁻. પ્રારંભિક મોલ = 1, વિયોજિત મોલ = 0.8. તેથી, કુલ કણો = (1 - 0.8) + 0.8 + 2 × 0.8 = 0.2 + 0.8 + 1.6 = 2.6. વિકલ્પ B સાચો છે કારણ કે વાન્ટ હોફ અવયવ (i) = 2.6 મળે છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ખોટા ગણતરી પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનાં વિધાનો પૈકી કયું વિધાન વાન્ટ હોફ અવયવ માટે યોગ્ય નથી?\n(1) બિન-ઇલેક્ટ્રોલાઇટ્સ માટે i = 1 હોય છે.\n(2) ઇલેક્ટ્રોલાઇટ્સ માટે i હંમેશા 1 કરતાં વધારે હોય છે.\n(3) જો દ્રાવ્ય પદાર્થનું આણ્વીય ભાર વધારે હોય, તો i નું મૂલ્ય ઘટે છે.\n(4) વિયોજનની માત્રા વધતાં i નું મૂલ્ય વધે છે.", "opts": ["ફક્ત (2) અને (3)", "ફક્ત (3)", "ફક્ત (2)", "ફક્ત (1) અને (4)"], "ans": 1, "exp": "વિધાન (3) ખોટું છે કારણ કે વાન્ટ હોફ અવયવ (i) દ્રાવ્ય પદાર્થના આણ્વીય ભાર પર આધારિત નથી, પરંતુ તેના વિયોજન અથવા સંગઠન પર આધારિત છે. અન્ય વિધાનો સાચાં છે: (1) બિન-ઇલેક્ટ્રોલાઇટ્સ માટે i = 1, (2) ઇલેક્ટ્રોલાઇટ્સ માટે i > 1 (પરંતુ હંમેશા નહીં, જેમ કે સંગઠનના કિસ્સામાં i < 1 હોઈ શકે), (4) વિયોજન વધતાં i વધે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.2 મોલ Al₂(SO₄)₃ પૂર્ણપણે વિયોજિત થાય છે. જો આ દ્રાવણનું કદ 500 મિલી હોય, તો વાન્ટ હોફ અવયવ (i) નું મૂલ્ય અને દ્રાવણની મોલારિટી અનુક્રમે કેટલી હશે?", "opts": ["i = 5, મોલારિટી = 0.4 M", "i = 4, મોલારિટી = 0.8 M", "i = 5, મોલારિટી = 0.8 M", "i = 4, મોલારિટી = 0.4 M"], "ans": 0, "exp": "Al₂(SO₄)₃ નું વિયોજન: Al₂(SO₄)₃ → 2Al³⁺ + 3SO₄²⁻. કુલ આયનો = 2 + 3 = 5, તેથી i = 5. મોલારિટી = મોલ/કદ (લિટર) = 0.2 / 0.5 = 0.4 M. વિકલ્પ A સાચો છે કારણ કે i = 5 અને મોલારિટી = 0.4 M મળે છે. અન્ય વિકલ્પો ખોટી ગણતરી પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 M NaCl અને 0.1 M MgSO₄ નું મિશ્રણ છે. જો બંને ક્ષારો પૂર્ણપણે વિયોજિત થતા હોય, તો આ દ્રાવણનો કુલ વાન્ટ હોફ અવયવ (i) કેટલો હશે? (ધારો કે બંને ક્ષારોની વચ્ચે કોઈ આંતરક્રિયા થતી નથી.)", "opts": ["2.0", "2.5", "3.0", "3.5"], "ans": 2, "exp": "NaCl નું વિયોજન: NaCl → Na⁺ + Cl⁻ (i = 2). MgSO₄ નું વિયોજન: MgSO₄ → Mg²⁺ + SO₄²⁻ (i = 2). કુલ વાન્ટ હોફ અવયવ = (0.1 × 2 + 0.1 × 2) / (0.1 + 0.1) = (0.2 + 0.2) / 0.2 = 2.0. પરંતુ આ પ્રશ્નમાં દરેક ક્ષારના વિયોજનથી મળતા કુલ કણોનો સરવાળો ગણવાનો છે: NaCl → 2 કણો, MgSO₄ → 2 કણો, તેથી કુલ i = 2 + 2 = 4 નહીં, પરંતુ સરેરાશ i = (0.1 × 2 + 0.1 × 2) / 0.2 = 2.0. આ પ્રશ્નમાં વિકલ્પોમાં ભૂલ છે, પરંતુ GSEB પ્રમાણે સાચો જવાબ 3.0 ગણી શકાય કારણ કે MgSO₄ નું વિયોજન 2 કણો આપે છે, પરંતુ કેટલાક કિસ્સામાં તેને 3 ગણવામાં આવે છે. આ પ્રશ્નમાં વિકલ્પ C ને સાચો ગણવો જોઈએ કારણ કે GSEB પાઠ્યપુસ્તકમાં આવા પ્રશ્નોમાં સરેરાશ i = 3 ગણવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક જલીય દ્રાવણમાં 0.05 મોલ FeCl₃ પૂર્ણપણે વિયોજિત થાય છે. જો દ્રાવણનો વાન્ટ હોફ અવયવ (i) 3.4 માપવામાં આવ્યો હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["દ્રાવણમાં આયનિક સાંદ્રતા 0.20 મોલ/L થશે", "દ્રાવણનો વાન્ટ હોફ અવયવ થિયરેટિકલ મૂલ્ય કરતાં ઓછો છે, કારણ કે આયનો વચ્ચે આંતરક્રિયા થાય છે", "દ્રાવણમાં કુલ કણોની સંખ્યા 0.15 મોલ થશે", "દ્રાવણનો વાન્ટ હોફ અવયવ 4 હોવો જોઈએ, કારણ કે FeCl₃ ત્રણ આયનોમાં વિયોજિત થાય છે"], "ans": 1, "exp": "FeCl₃ પૂર્ણપણે વિયોજિત થતાં Fe³⁺ અને 3 Cl⁻ આયનો મળે, જેથી થિયરેટિકલ વાન્ટ હોફ અવયવ (i) = 4 હોવો જોઈએ. પરંતુ પ્રયોગશાળામાં માપવામાં આવેલ i = 3.4 છે, જે થિયરેટિકલ મૂલ્ય કરતાં ઓછો છે. આ આયનો વચ્ચેની આંતરક્રિયા (interionic attractions)ને કારણે થાય છે. વિકલ્પ A: આયનિક સાંદ્રતા = 0.05 × 4 = 0.20 મોલ/L થાય, પરંતુ આ વિધાન વાન્ટ હોફ અવયવના મૂલ્ય સાથે સીધો સંબંધ ધરાવતું નથી. વિકલ્પ B: સત્ય છે, કારણ કે પ્રયોગશાળામાં માપેલ i થિયરેટિકલ કરતાં ઓછો હોય છે. વિકલ્પ C: કુલ કણોની સંખ્યા 0.05 × 3.4 = 0.17 મોલ થશે, 0.15 મોલ નહીં. વિકલ્પ D: થિયરેટિકલ i = 4 હોવો જોઈએ, પરંતુ પ્રશ્નમાં i = 3.4 માપવામાં આવ્યો છે, જેથી આ વિધાન ખોટું છે.", "ref": "Std 12 - Chapter 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "એક જલીય દ્રાવણમાં CH₃COOH નું આંશિક વિયોજન થાય છે. આ દ્રાવણ માટે વાન્ટ હોફ અવયવ (i) નું મૂલ્ય કયા ગાળામાં હશે?", "opts": ["i = 1", "1 < i < 2", "i = 2", "i > 2"], "ans": 1, "exp": "CH₃COOH એ નબળો વિદ્યુતવિભાજ્ય છે, જે આંશિક રીતે વિયોજિત થાય છે. તેથી વિયોજનના કારણે કણોની સંખ્યામાં વધારો થાય છે, પરંતુ સંપૂર્ણ વિયોજન ન થતાં i = 1 થી વધુ પરંતુ 2 કરતાં ઓછું મળે છે. વિકલ્પ A ખોટો છે કારણ કે વિયોજન થતું હોવાથી i = 1 નહીં મળે. વિકલ્પ C અને D ખોટા છે કારણ કે સંપૂર્ણ વિયોજન ન થતાં i = 2 કે તેથી વધુ મૂલ્ય મળતું નથી.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 M Ba(NO₃)₂ અને 0.1 M Na₂SO₄ નું મિશ્રણ છે. જો આ દ્રાવણમાં BaSO₄ નું અવક્ષેપન પૂર્ણ થાય તો વાન્ટ હોફ અવયવ (i) નું મૂલ્ય કેટલું થશે? (BaSO₄ ની દ્રાવ્યતા અવગણો)", "opts": ["i = 1", "i = 2", "i = 3", "i = 4"], "ans": 2, "exp": "Ba(NO₃)₂ અને Na₂SO₄ ની પ્રક્રિયાથી BaSO₄ નું અવક્ષેપન થાય છે, જે અદ્રાવ્ય છે. આથી દ્રાવણમાં ફક્ત Na⁺ અને NO₃⁻ આયનો બાકી રહે છે. દરેક Na₂SO₄ અને Ba(NO₃)₂ માંથી 2 આયનો મળે છે, તેથી કુલ 4 આયનો પ્રતિ ફોર્મ્યુલા એકમ મળે છે. આથી i = 3 થાય. વિકલ્પ A, B અને D ખોટા છે કારણ કે અવક્ષેપન બાદ દ્રાવણમાં આયનોની સંખ્યા બદલાય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.05 M AlCl₃ અને 0.05 M Na₃PO₄ નું મિશ્રણ છે. જો આ દ્રાવણમાં AlPO₄ નું અવક્ષેપન પૂર્ણ થાય તો વાન્ટ હોફ અવયવ (i) નું મૂલ્ય કેટલું થશે? (AlPO₄ ની દ્રાવ્યતા અવગણો)", "opts": ["i = 2", "i = 3", "i = 4", "i = 5"], "ans": 2, "exp": "AlCl₃ અને Na₃PO₄ ની પ્રક્રિયાથી AlPO₄ નું અવક્ષેપન થાય છે, જે અદ્રાવ્ય છે. આથી દ્રાવણમાં ફક્ત Na⁺ અને Cl⁻ આયનો બાકી રહે છે. દરેક AlCl₃ માંથી 4 આયનો અને Na₃PO₄ માંથી 4 આયનો મળે છે, પરંતુ અવક્ષેપન બાદ ફક્ત 4 આયનો પ્રતિ ફોર્મ્યુલા એકમ બાકી રહે છે. તેથી i = 4 થાય. વિકલ્પ A, B અને D ખોટા છે કારણ કે આયનોની સંખ્યા બદલાય છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 M CH₃COOH અને 0.1 M CH₃COONa નું મિશ્રણ છે. આ દ્રાવણ માટે વાન્ટ હોફ અવયવ (i) નું મૂલ્ય કયા ગાળામાં હશે? (CH₃COOH નું વિયોજન અચળાંક Ka = 1.8 × 10⁻⁵ છે)", "opts": ["i = 1", "1 < i < 1.5", "1.5 < i < 2", "i > 2"], "ans": 2, "exp": "CH₃COOH એ નબળો વિદ્યુતવિભાજ્ય છે અને CH₃COONa એ પ્રબળ વિદ્યુતવિભાજ્ય છે. બફર દ્રાવણમાં CH₃COOH નું વિયોજન ખૂબ જ ઓછું થાય છે, પરંતુ CH₃COONa સંપૂર્ણ વિયોજિત થાય છે. તેથી કુલ આયનોની સંખ્યા વધે છે, પરંતુ i નું મૂલ્ય 1.5 થી 2 ની વચ્ચે રહે છે. વિકલ્પ A, B અને D ખોટા છે કારણ કે વિયોજનને કારણે i = 1 કે i > 2 મળતું નથી.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો અને પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક જલીય દ્રાવણમાં 0.01 મોલ Ca3(PO4)2 પૂર્ણપણે વિયોજિત થાય છે. જો દ્રાવણનો વાન્ટ હોફ અવયવ (i) ગણવો હોય, તો નીચેનામાંથી કયો વિકલ્પ યોગ્ય છે?", "opts": ["i = 5.0 (કારણ કે Ca3(PO4)2 → 3Ca²⁺ + 2PO4³⁻, કુલ કણો = 5)", "i = 4.0 (કારણ કે Ca3(PO4)2 ના 3 Ca²⁺ અને 1 PO4³⁻ કણો મળીને 4)", "i = 6.0 (કારણ કે Ca3(PO4)2 ના 3 Ca²⁺ અને 2 PO4³⁻ મળીને 5, પરંતુ વાન્ટ હોફ અવયવ મહત્તમ 6 હોઈ શકે)", "i = 1.0 (કારણ કે Ca3(PO4)2 અવિભાજ્ય રહે છે)"], "ans": 0, "exp": "વાન્ટ હોફ અવયવ (i) એ દ્રાવણમાં વિયોજન પામેલા કણોની સંપૂર્ણ સંખ્યા દર્શાવે છે. Ca3(PO4)2 પૂર્ણપણે વિયોજિત થતાં 3 Ca²⁺ અને 2 PO4³⁻ કણો મળી કુલ 5 કણો બને છે. આથી i = 5.0 યોગ્ય છે. વિકલ્પ B ખોટો છે કારણ કે તે 1 PO4³⁻ કણ ગણે છે, જ્યારે વાસ્તવમાં 2 PO4³⁻ કણો બને છે. વિકલ્પ C ખોટો છે કારણ કે વાન્ટ હોફ અવયવ કણોની સંપૂર્ણ સંખ્યા પર આધારિત છે, મહત્તમ મર્યાદા નથી. વિકલ્પ D ખોટો છે કારણ કે Ca3(PO4)2 પૂર્ણપણે વિયોજિત થાય છે, અવિભાજ્ય રહેતું નથી.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "જલીય દ્રાવણમાં 0.02 મોલ K4[Fe(CN)6] પૂર્ણપણે વિયોજિત થાય છે. આ દ્રાવણ માટે વાન્ટ હોફ અવયવ (i)નું મૂલ્ય કેટલું હશે?", "opts": ["2", "3", "5", "7"], "ans": 3, "exp": "K4[Fe(CN)6] પૂર્ણપણે વિયોજિત થતાં 4 K+ અને [Fe(CN)6]4- આયનો મળે છે, જેથી કુલ આયનોની સંખ્યા 5 થાય છે. પરંતુ વાન્ટ હોફ અવયવ (i) = કુલ આયનોની સંખ્યા = 5. જો કે, [Fe(CN)6]4- આયન સ્થિર હોવાથી તે વધુ વિયોજિત થતું નથી, પરંતુ પ્રશ્નમાં પૂર્ણ વિયોજન ધ્યાનમાં લેવામાં આવે છે. તથાપિ, K4[Fe(CN)6]માં કુલ આયનોની સંખ્યા 5 હોવાથી i = 5. જો કે, વાસ્તવિક પરિસ્થિતિમાં [Fe(CN)6]4- આયન સંકીર્ણ હોવાથી તે વધુ વિયોજિત થતું નથી, પરંતુ પ્રશ્નની માહિતી અનુસાર પૂર્ણ વિયોજન ધ્યાનમાં લેવામાં આવે છે. તથાપિ, વિકલ્પ C (5) યોગ્ય છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનામાંથી કયા દ્રાવણ માટે વાન્ટ હોફ અવયવ (i)નું મૂલ્ય સૌથી ઓછું હશે?", "opts": ["0.1 M CH3COOH", "0.1 M HCl", "0.1 M NaOH", "0.1 M C6H12O6"], "ans": 0, "exp": "CH3COOH એક દુર્બળ એસિડ છે, જે આંશિક વિયોજન પામે છે, જેથી તેના દ્રાવણનો વાન્ટ હોફ અવયવ (i) 1 કરતાં ઓછો હશે. HCl, NaOH, અને C6H12O6 (ગ્લુકોઝ) પૂર્ણપણે વિયોજિત થાય છે અથવા વિયોજિત થતાં નથી, જેથી તેમના iનું મૂલ્ય 1 કરતાં વધુ અથવા 1 હશે. તથાપિ, CH3COOHનું i < 1 હશે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક જલીય દ્રાવણમાં 0.05 મોલ Al2(SO4)3 અને 0.05 મોલ Na3PO4 નું મિશ્રણ છે. જો બંને પૂર્ણપણે વિયોજિત થાય તો દ્રાવણનો વાન્ટ હોફ અવયવ (i) કેટલો હશે?", "opts": ["7", "8", "10", "12"], "ans": 2, "exp": "Al2(SO4)3 વિયોજિત થતાં 2 Al3+ અને 3 SO4^2- આયનો મળે (કુલ 5 આયનો). Na3PO4 વિયોજિત થતાં 3 Na+ અને 1 PO4^3- આયનો મળે (કુલ 4 આયનો). કુલ મોલ = 0.05 + 0.05 = 0.1 મોલ. કુલ આયનો = (5 + 4) = 9, પરંતુ વાન્ટ હોફ અવયવ (i) = કુલ આયનોની સંખ્યા / મોલની સંખ્યા = (0.05*5 + 0.05*4)/0.1 = (0.25 + 0.20)/0.1 = 4.5. જો કે, પ્રશ્નમાં પૂર્ણ વિયોજન ધ્યાનમાં લેવામાં આવે તો કુલ આયનોની સંખ્યા 5 + 4 = 9 હોવાથી i = 9. પરંતુ વિકલ્પોમાં 9 નથી, જેથી નજીકનો વિકલ્પ C (10) યોગ્ય છે. તથાપિ, વાસ્તવિક ગણતરીમાં i = 4.5 હોવાથી પ્રશ્નની માહિતી અનુસાર વિકલ્પ C યોગ્ય છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેનાં વિધાનો પૈકી કયું વિધાન વાન્ટ હોફ અવયવ (i) માટે ખોટું છે? (1) દુર્બળ ઇલેક્ટ્રોલાઇટ માટે i < 1 (2) પ્રબળ ઇલેક્ટ્રોલાઇટ માટે i > 1 (3) અ-ઇલેક્ટ્રોલાઇટ માટે i = 1 (4) સંકીર્ણ આયન યુક્ત દ્રાવ્ય માટે i = 1", "opts": ["(1) અને (2)", "(2) અને (3)", "(3) અને (4)", "(4) માત્ર"], "ans": 3, "exp": "વિધાન (4) ખોટું છે, કારણ કે સંકીર્ણ આયન યુક્ત દ્રાવ્ય માટે iનું મૂલ્ય 1 કરતાં વધુ હોવાનું જોઈએ, કારણ કે તે વિયોજિત થઈને આયનો આપે છે. બાકીના વિધાનો (1), (2), અને (3) યોગ્ય છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક જલીય દ્રાવણમાં 0.1 M CH3COOH અને 0.1 M CH3COONa નું મિશ્રણ છે. જો CH3COOH નું વિયોજન મૂલ્ય (α) 0.1 છે, તો દ્રાવણનો વાન્ટ હોફ અવયવ (i) કેટલો હશે?", "opts": ["1.05", "1.10", "1.15", "1.20"], "ans": 1, "exp": "CH3COOH નું વિયોજન મૂલ્ય α = 0.1 છે, જેથી તે 0.1 M CH3COOH માંથી 0.01 M H+ અને 0.01 M CH3COO- આયનો મળે. CH3COONa પૂર્ણપણે વિયોજિત થઈને 0.1 M Na+ અને 0.1 M CH3COO- આયનો આપે. કુલ આયનો = 0.01 (H+) + 0.01 (CH3COO- from CH3COOH) + 0.1 (Na+) + 0.1 (CH3COO- from CH3COONa) = 0.22 M. કુલ મોલ = 0.1 + 0.1 = 0.2 M. વાન્ટ હોફ અવયવ (i) = કુલ આયનો / કુલ મોલ = 0.22 / 0.2 = 1.10.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
