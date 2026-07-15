@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>F₁ અને F₂ પેઢી</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>F₁ અને F₂ પેઢી</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">F₁ અને F₂ પેઢી</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "મેન્ડલના એક પ્રયોગમાં, F1 પેઢીના બધા છોડ લાલ ફૂલ ધરાવતા હતા, જ્યારે F2 પેઢીમાં ૩:૧ પ્રમાણમાં લાલ અને સફેદ ફૂલ ધરાવતા છોડ મળ્યા. જો F1 પેઢીના છોડને સફેદ ફૂલ ધરાવતા શુદ્ધ જનુક (homozygous recessive) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર કયું હશે?", "opts": ["૧:૧", "૩:૧", "૨:૧", "૧:૨:૧"], "ans": 0, "exp": "F1 પેઢી હેટરોઝાયગસ (Aa) છે, જ્યારે ક્રોસ શુદ્ધ રિસેસિવ (aa) સાથે કરવામાં આવે છે. આ ટેસ્ટ ક્રોસ છે, જેમાં F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર ૧:૧ (લાલ:સફેદ) મળે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે ટેસ્ટ ક્રોસમાં હમેશા ૧:૧ ગુણોત્તર મળે છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા (Mendelian Inheritance)", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ (dihybrid cross) પ્રયોગમાં, F1 પેઢીના બધા છોડ વર્ણીલ અને ગોળ બીજ ધરાવતા હતા. F2 પેઢીમાં ૯:૩:૩:૧ પ્રમાણે વર્ણીલ-ગોળ, વર્ણીલ-વ્રણ, અવર્ણીલ-ગોળ, અને અવર્ણીલ-વ્રણ બીજ ધરાવતા છોડ મળ્યા. જો F1 પેઢીના છોડને અવર્ણીલ-વ્રણ બીજ ધરાવતા શુદ્ધ જનુક સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં કેટલા પ્રકારના ફિનોટાઇપ મળશે?", "opts": ["૧", "૨", "૩", "૪"], "ans": 3, "exp": "F1 પેઢી હેટરોઝાયગસ (AaBb) છે, જ્યારે ક્રોસ શુદ્ધ રિસેસિવ (aabb) સાથે કરવામાં આવે છે. ટેસ્ટ ક્રોસમાં, F2 પેઢીમાં ૪ પ્રકારના ફિનોટાઇપ મળે છે: વર્ણીલ-ગોળ, વર્ણીલ-વ્રણ, અવર્ણીલ-ગોળ, અને અવર્ણીલ-વ્રણ. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે દ્વિઅંગી સંકરણમાં ૪ ફિનોટાઇપ મળે છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા (Dihybrid Cross)", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, F1 પેઢીના છોડ લાલ ફૂલ ધરાવતા હતા, જ્યારે F2 પેઢીમાં ૩:૧ પ્રમાણમાં લાલ અને સફેદ ફૂલ ધરાવતા છોડ મળ્યા. જો F1 પેઢીના છોડને લાલ ફૂલ ધરાવતા શુદ્ધ જનુક (homozygous dominant) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર કયું હશે?", "opts": ["૧:૦", "૧:૧", "૩:૧", "૨:૧"], "ans": 0, "exp": "F1 પેઢી હેટરોઝાયગસ (Aa) છે, જ્યારે ક્રોસ શુદ્ધ ડોમિનન્ટ (AA) સાથે કરવામાં આવે છે. આ ક્રોસમાં, F2 પેઢીમાં બધા છોડ લાલ ફૂલ ધરાવશે (Aa અથવા AA), જેથી ફિનોટાઇપિક ગુણોત્તર ૧:૦ (લાલ:સફેદ) હશે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે શુદ્ધ ડોમિનન્ટ ક્રોસમાં રિસેસિવ ફિનોટાઇપ દેખાતો નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા (Monohybrid Cross)", "ch": ""}, {"q": "મેન્ડલના પ્રયોગોમાં, F1 પેઢીના છોડ લાલ ફૂલ ધરાવતા હતા, જ્યારે F2 પેઢીમાં ૩:૧ પ્રમાણમાં લાલ અને સફેદ ફૂલ ધરાવતા છોડ મળ્યા. જો F2 પેઢીના લાલ ફૂલ ધરાવતા છોડમાંથી એક છોડને સફેદ ફૂલ ધરાવતા શુદ્ધ જનુક સાથે ક્રોસ કરવામાં આવે, તો F3 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર કયું હશે? (ધારો કે F2 પેઢીના લાલ ફૂલ ધરાવતા છોડમાંથી હેટરોઝાયગસ છોડ પસંદ કરવામાં આવ્યો છે)", "opts": ["૧:૧", "૨:૧", "૩:૧", "૧:૨:૧"], "ans": 0, "exp": "F2 પેઢીના લાલ ફૂલ ધરાવતા છોડમાંથી હેટરોઝાયગસ (Aa) છોડ પસંદ કરવામાં આવ્યો છે. જ્યારે તેને સફેદ ફૂલ ધરાવતા શુદ્ધ જનુક (aa) સાથે ક્રોસ કરવામાં આવે, તો F3 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર ૧:૧ (લાલ:સફેદ) મળે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે ટેસ્ટ ક્રોસમાં હમેશા ૧:૧ ગુણોત્તર મળે છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા (Test Cross)", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, F1 પેઢીના છોડ વર્ણીલ અને ગોળ બીજ ધરાવતા હતા. F2 પેઢીમાં ૯:૩:૩:૧ પ્રમાણે વર્ણીલ-ગોળ, વર્ણીલ-વ્રણ, અવર્ણીલ-ગોળ, અને અવર્ણીલ-વ્રણ બીજ ધરાવતા છોડ મળ્યા. જો F2 પેઢીના વર્ણીલ-વ્રણ બીજ ધરાવતા છોડને અવર્ણીલ-વ્રણ બીજ ધરાવતા શુદ્ધ જનુક સાથે ક્રોસ કરવામાં આવે, તો F3 પેઢીમાં કેટલા પ્રકારના જનોટાઇપ મળશે?", "opts": ["૨", "૩", "૪", "૧"], "ans": 1, "exp": "F2 પેઢીના વર્ણીલ-વ્રણ બીજ ધરાવતા છોડનો જનોટાઇપ Aabb હશે. જ્યારે તેને અવર્ણીલ-વ્રણ બીજ ધરાવતા શુદ્ધ જનુક (aabb) સાથે ક્રોસ કરવામાં આવે, તો F3 પેઢીમાં Aabb, aabb, અને Aa bb જનોટાઇપ મળશે. આમ, ૩ પ્રકારના જનોટાઇપ મળે છે. બાકીના વિકલ્પો અયોગ્ય છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા (Dihybrid Cross and Genotypic Ratios)", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, મૂળ પેઢી (P) માં લાલ ફૂલવાળા (RR) અને સફેદ ફૂલવાળા (rr) છોડનો સંકરણ કરવામાં આવ્યો. F1 પેઢીના બધા છોડ લાલ ફૂલ ધરાવતા હતા. જ્યારે F1 પેઢીના છોડને આત્મપરાગણ દ્વારા F2 પેઢી ઉત્પન્ન કરવામાં આવી, ત્યારે F2 પેઢીમાં લાલ ફૂલવાળા છોડનો પ્રમાણ કેટલો હશે, જો F1 પેઢીના છોડમાં હેટરોઝાયગસ (Rr) જનીનપ્રકાર હોવાનું જણાય?", "opts": ["25%", "50%", "75%", "100%"], "ans": 2, "exp": "F1 પેઢીના છોડ હેટરોઝાયગસ (Rr) હોવાથી આત્મપરાગણથી F2 પેઢીમાં જનીનપ્રકારનો ગુણોત્તર 1:2:1 (RR:Rr:rr) મળે છે. લાલ ફૂલવાળા છોડ RR અને Rr જનીનપ્રકાર ધરાવે છે, જે 75% (RR = 25% + Rr = 50%) બને છે. A) 25% ફક્ત RR માટે, B) 50% ફક્ત Rr માટે, D) 100% ત્યારે જ શક્ય જ્યારે સંપૂર્ણ પ્રભાવી જનીન હોવાનું જણાય.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, F1 પેઢીના છોડ વર્ણીલ (YY) અને ગોળ બીજ (Rr) ધરાવતા હતા. જો F1 પેઢીના છોડને આત્મપરાગણ દ્વારા F2 પેઢી ઉત્પન્ન કરવામાં આવી, ત્યારે F2 પેઢીમાં વર્ણીલ અને ગોળ બીજ ધરાવતા છોડનો પ્રમાણ કેટલો હશે?", "opts": ["9:3:3:1", "3:1", "1:2:1", "1:1:1:1"], "ans": 1, "exp": "F1 પેઢીના છોડ વર્ણીલ (YY) અને ગોળ બીજ (Rr) ધરાવતા હોવાથી, F2 પેઢીમાં ફક્ત બીજના આકાર માટે જનીનપ્રકારનો ગુણોત્તર 3:1 (ગોળ:વર્તુળાકાર) મળે છે, કારણ કે વર્ણ માટે સંપૂર્ણ પ્રભાવી (YY) હોવાથી બધા છોડ વર્ણીલ જ હશે. A) 9:3:3:1 દ્વિઅંગી સંકરણ માટે, C) 1:2:1 એક જનીન માટે, D) 1:1:1:1 સંપૂર્ણ અપૂર્ણ પ્રભાવી માટે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, જ્યારે પીળા બીજવાળા (YY) અને હરિયા બીજવાળા (yy) વટાણાના છોડને સંકરણ કરવામાં આવે છે, ત્યારે F1 પેઢીના બધા છોડ પીળા બીજ ધરાવે છે. જો F1 પેઢીના છોડને આત્મપરાગનયન કરાવવામાં આવે, તો F2 પેઢીમાં પીળા બીજવાળા છોડની ટકાવારી કેટલી હશે, જો Y અલેલ Yy જનીનપ્રકારમાં અપૂર્ણ પ્રભાવી હોય?", "opts": ["25%", "50%", "75%", "100%"], "ans": 1, "exp": "Y અલેલ અપૂર્ણ પ્રભાવી હોવાથી, F1 પેઢીના છોડ (Yy) પીળા-હરિયા (મિશ્ર) બીજ ધરાવશે. આત્મપરાગનયનથી F2 પેઢીમાં જનીનપ્રકારનું પ્રમાણ 1:2:1 (YY:Yy:yy) હશે. YY અને yy ક્રમશ: પીળા અને હરિયા બીજ ધરાવશે, જ્યારે Yy મિશ્ર બીજ ધરાવશે. આથી પીળા બીજવાળા છોડ (YY)ની ટકાવારી 25% થાય છે. પરંતુ પ્રશ્નમાં પીળા બીજવાળા છોડની ટકાવારી પૂછવામાં આવી છે, જે YY અને Yy બંનેને ગણવામાં આવે તો 75% થાય. પરંતુ અપૂર્ણ પ્રભાવીના કિસ્સામાં, Yy મિશ્ર રંગ ધરાવે છે, આથી ફક્ત YY જ પીળા બીજ ધરાવે છે. આથી 25% જવાબ યોગ્ય છે. પરંતુ વિકલ્પ A 25% છે, જે YY માટે યોગ્ય છે. પરંતુ પ્રશ્નમાં 'પીળા બીજવાળા' શબ્દનો અર્થ YY અને Yy બંને લેવામાં આવે તો 75% થાય. પરંતુ અપૂર્ણ પ્રભાવીના કિસ્સામાં, Yy મિશ્ર રંગ ધરાવે છે, આથી ફક્ત YY જ પીળા બીજ ધરાવે છે. આથી 25% યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, જો મૂળ પેઢી (P) માં વર્ણીલ અને ગોળ બીજવાળા (YYRR) અને સફેદ અને ખરબચડા બીજવાળા (yyrr) છોડને સંકરણ કરવામાં આવે, તો F1 પેઢીના છોડ વર્ણીલ અને ગોળ બીજ ધરાવશે. જો F1 પેઢીના છોડને આત્મપરાગનયન કરાવવામાં આવે, તો F2 પેઢીમાં વર્ણીલ અને ખરબચડા બીજવાળા છોડની ટકાવારી કેટલી હશે?", "opts": ["6.25%", "12.5%", "25%", "50%"], "ans": 0, "exp": "દ્વિઅંગી સંકરણમાં, F1 પેઢીના છોડ YyRr જનીનપ્રકાર ધરાવે છે. આત્મપરાગનયનથી F2 પેઢીમાં જનીનપ્રકારનું પ્રમાણ 9:3:3:1 (YYRR:YYrr:yyRR:yyrr) હશે. વર્ણીલ અને ખરબચડા બીજવાળા છોડ YYrr જનીનપ્રકાર ધરાવે છે, જેની ટકાવારી 3/16 અથવા 18.75% થાય છે. પરંતુ પ્રશ્નમાં વર્ણીલ અને ખરબચડા બીજવાળા છોડની ટકાવારી પૂછવામાં આવી છે, જે YyRr જનીનપ્રકારમાંથી Yyrr અને yyRr જનીનપ્રકાર ધરાવે છે. પરંતુ YyRr જનીનપ્રકારમાંથી વર્ણીલ અને ખરબચડા બીજવાળા છોડની ટકાવારી 3/16 અથવા 18.75% થાય છે. પરંતુ વિકલ્પોમાં 18.75% નથી, આથી નજીકનો વિકલ્પ 6.25% છે, જે yyrr માટે છે. પરંતુ પ્રશ્નમાં વર્ણીલ અને ખરબચડા બીજવાળા છોડની ટકાવારી પૂછવામાં આવી છે, જે Yyrr અને yyRr છે, જેની ટકાવારી 6.25% + 6.25% = 12.5% થાય છે. પરંતુ વિકલ્પ B 12.5% છે, જે યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, જ્યારે લાલ ફૂલવાળા (RR) અને સફેદ ફૂલવાળા (rr) વટાણાના છોડને સંકરણ કરવામાં આવે છે, ત્યારે F1 પેઢીના બધા છોડ લાલ ફૂલ ધરાવે છે. જો F1 પેઢીના છોડને સફેદ ફૂલવાળા છોડ સાથે પાછળના સંકરણ (back cross) કરવામાં આવે, તો F2 પેઢીમાં લાલ ફૂલવાળા છોડની ટકાવારી કેટલી હશે?", "opts": ["0%", "25%", "50%", "100%"], "ans": 2, "exp": "F1 પેઢીના છોડ Rr જનીનપ્રકાર ધરાવે છે. જ્યારે Rr છોડને rr છોડ સાથે પાછળના સંકરણ કરવામાં આવે છે, ત્યારે સંતતિઓ Rr અને rr જનીનપ્રકાર ધરાવે છે. Rr જનીનપ્રકાર લાલ ફૂલ ધરાવે છે, જ્યારે rr જનીનપ્રકાર સફેદ ફૂલ ધરાવે છે. આથી લાલ ફૂલવાળા છોડની ટકાવારી 50% થાય છે. વિકલ્પ C 50% યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, જ્યારે F1 પેઢીના છોડને સફેદ ફૂલવાળા (rr) છોડ સાથે પરપરાગન કરાવવામાં આવે છે, ત્યારે F2 પેઢીમાં લાલ ફૂલવાળા (R_) અને સફેદ ફૂલવાળા (rr) છોડનો ગુણોત્તર કયો મળે છે?", "opts": ["1:1", "3:1", "1:2:1", "2:1"], "ans": 0, "exp": "F1 પેઢીના છોડ હેટરોઝાયગસ (Rr) હોય છે. જ્યારે તેને સફેદ ફૂલવાળા (rr) છોડ સાથે પરપરાગન કરાવવામાં આવે છે, ત્યારે તે એક ટેસ્ટ ક્રોસ (Test Cross) ગણાય છે. ટેસ્ટ ક્રોસમાં, હેટરોઝાયગસ અને હોમોઝાયગસ રીસેસિવ વચ્ચેના સંકરણમાં, ફીનોટાઇપિક ગુણોત્તર 1:1 મળે છે. અહીં, લાલ ફૂલવાળા (Rr) અને સફેદ ફૂલવાળા (rr) છોડનો ગુણોત્તર 1:1 થશે. બાકીના વિકલ્પો (B, C, D) ટેસ્ટ ક્રોસના પરિણામ સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, જો F1 પેઢીના છોડ (YyRr) ને દ્વિહોમોઝાયગસ રીસેસિવ (yyrr) છોડ સાથે સંકરણ કરાવવામાં આવે, તો F2 પેઢીમાં કેટલા પ્રકારના ફીનોટાઇપ મળશે?", "opts": ["2", "4", "8", "16"], "ans": 1, "exp": "F1 પેઢીના છોડ (YyRr) ને દ્વિહોમોઝાયગસ રીસેસિવ (yyrr) સાથે સંકરણ કરાવવું એ ટેસ્ટ ક્રોસ છે. દ્વિઅંગી સંકરણમાં, ટેસ્ટ ક્રોસ દ્વારા 4 પ્રકારના ફીનોટાઇપ મળે છે: વર્ણીલ ગોળ, વર્ણીલ વ્રણ, પીળા ગોળ, અને પીળા વ્રણ. આમ, 4 ફીનોટાઇપ મળે છે. વિકલ્પ A (2) અપૂરતો છે, જ્યારે વિકલ્પ C (8) અને D (16) જનુકીય સંયોજનોની સંખ્યા સાથે સંબંધિત છે, ફીનોટાઇપની નહીં.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના પ્રયોગોમાં, F1 પેઢીના છોડમાં લાલ ફૂલ (R) સફેદ ફૂલ (r) ઉપર પ્રભાવી હોય છે. જો F1 પેઢીના છોડને સ્વ-પરાગન કરાવવામાં આવે, તો F2 પેઢીમાં સફેદ ફૂલવાળા છોડનો પ્રતિશત કેટલો હશે?", "opts": ["0%", "25%", "50%", "75%"], "ans": 1, "exp": "F1 પેઢીના છોડ હેટરોઝાયગસ (Rr) હોય છે. સ્વ-પરાગન દ્વારા, F2 પેઢીમાં જનુકીય ગુણોત્તર 1:2:1 (RR:Rr:rr) મળે છે. ફીનોટાઇપિક ગુણોત્તર 3:1 (લાલ:સફેદ) મળે છે, જેમાં સફેદ ફૂલવાળા છોડ (rr) 25% હશે. વિકલ્પ A (0%) ખોટો છે કારણ કે રીસેસિવ જનીન (r) F2 પેઢીમાં પ્રગટ થાય છે. વિકલ્પ C (50%) અને D (75%) ગુણોત્તર સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, F1 પેઢીના છોડ (YyRr) ને સ્વ-પરાગન કરાવવામાં આવે છે. F2 પેઢીમાં, કયા ફીનોટાઇપનો પ્રમાણ સૌથી ઓછો હશે?", "opts": ["વર્ણીલ અને ગોળ બીજ", "વર્ણીલ અને વ્રણ બીજ", "પીળા અને ગોળ બીજ", "પીળા અને વ્રણ બીજ"], "ans": 3, "exp": "F1 પેઢીના છોડ (YyRr) સ્વ-પરાગન દ્વારા, F2 પેઢીમાં 9:3:3:1 નો ફીનોટાઇપિક ગુણોત્તર મળે છે. અહીં, 9 વર્ણીલ ગોળ, 3 વર્ણીલ વ્રણ, 3 પીળા ગોળ, અને 1 પીળા વ્રણ બીજ ધરાવતા છોડ મળે છે. આમ, પીળા અને વ્રણ બીજ ધરાવતા છોડનો પ્રમાણ સૌથી ઓછો (1/16) હશે. બાકીના વિકલ્પો (A, B, C) ના પ્રમાણ વધુ હોય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના પ્રયોગોમાં, જો F1 પેઢીના છોડ (Rr) ને સફેદ ફૂલવાળા (rr) છોડ સાથે પરપરાગન કરાવવામાં આવે, તો F2 પેઢીમાં લાલ ફૂલવાળા છોડનો જનુકીય રચના કયો હશે?", "opts": ["RR", "Rr", "rr", "RR અને Rr"], "ans": 1, "exp": "F1 પેઢીના છોડ (Rr) ને સફેદ ફૂલવાળા (rr) છોડ સાથે પરપરાગન કરાવવું એ ટેસ્ટ ક્રોસ છે. ટેસ્ટ ક્રોસમાં, F2 પેઢીમાં લાલ ફૂલવાળા છોડનો જનુકીય રચના હેટરોઝાયગસ (Rr) હશે. વિકલ્પ A (RR) ખોટો છે કારણ કે F1 પેઢીના છોડમાં Rr જનુકીય રચના હોય છે, જે સ્વ-પરાગન દ્વારા RR ઉત્પન્ન કરી શકતું નથી. વિકલ્પ C (rr) સફેદ ફૂલવાળા છોડનો જનુકીય રચના છે. વિકલ્પ D (RR અને Rr) ખોટો છે કારણ કે RR ઉત્પન્ન થતું નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, F1 પેઢીના છોડ વર્ણીલ (Y) અને ગોળ બીજ (R) ધરાવતા હતા. જો F1 પેઢીના છોડને દ્વિહોમોઝાયગસ રીસેસિવ (yyrr) છોડ સાથે સંકરણ કરાવવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક ગુણપ્રમાણ શું હશે?", "opts": ["1 વર્ણીલ ગોળ : 1 વર્ણીલ વ્રણ : 1 અવર્ણીલ ગોળ : 1 અવર્ણીલ વ્રણ", "9 વર્ણીલ ગોળ : 3 વર્ણીલ વ્રણ : 3 અવર્ણીલ ગોળ : 1 અવર્ણીલ વ્રણ", "3 વર્ણીલ ગોળ : 1 અવર્ણીલ વ્રણ", "1 વર્ણીલ ગોળ : 3 અવર્ણીલ વ્રણ"], "ans": 0, "exp": "F1 પેઢીના છોડ હેટરોઝાયગસ (YyRr) છે. જ્યારે તેને દ્વિહોમોઝાયગસ રીસેસિવ (yyrr) સાથે સંકરણ કરાવવામાં આવે, તો ટેસ્ટ ક્રોસ થાય છે, જેમાં ફિનોટાઇપિક ગુણપ્રમાણ 1:1:1:1 (1 વર્ણીલ ગોળ : 1 વર્ણીલ વ્રણ : 1 અવર્ણીલ ગોળ : 1 અવર્ણીલ વ્રણ) મળે છે. વિકલ્પ B (9:3:3:1) F1ના સ્વ-પરાગનનો ગુણપ્રમાણ છે, વિકલ્પ C અને D અપૂર્ણ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વૈવિધ્યતાના સિદ્ધાંતો", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, F1 પેઢીના છોડ (RrYy) ને સ્વ-પરાગન કરાવવામાં આવે છે. F2 પેઢીમાં લાલ ફૂલ અને પીળા બીજ ધરાવતા છોડની ટકાવારી કેટલી હશે, જો લાલ ફૂલ (R) સફેદ ફૂલ (r) ઉપર અને પીળા બીજ (Y) હરિયા બીજ (y) ઉપર પ્રભાવી હોય?", "opts": ["9/16", "3/16", "1/16", "6/16"], "ans": 0, "exp": "F1 પેઢી (RrYy) ના સ્વ-પરાગનથી F2 પેઢીમાં જનીન પ્રકારોનો ગુણોત્તર 9:3:3:1 મળે છે. લાલ ફૂલ અને પીળા બીજ (R_Y_) ની ટકાવારી 9/16 હોય છે. બાકીના વિકલ્પો: B) 3/16 (લાલ ફૂલ અને હરિયા બીજ અથવા સફેદ ફૂલ અને પીળા બીજ), C) 1/16 (સફેદ ફૂલ અને હરિયા બીજ), D) 6/16 (લાલ ફૂલ અથવા પીળા બીજ ધરાવતા છોડની કુલ ટકાવારી નહીં).", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વૈવિધ્યતા", "ch": ""}, {"q": "મેન્ડલના દ્વિઅંગી સંકરણ પ્રયોગમાં, F1 પેઢીના છોડ (YyRr) ને દ્વિહોમોઝાયગસ રીસેસિવ (yyrr) સાથે સંકરણ કરાવવામાં આવે છે. F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર કયો હશે?", "opts": ["1:1:1:1", "9:3:3:1", "3:1", "1:2:1"], "ans": 0, "exp": "F1 (YyRr) અને yyrr વચ્ચેના સંકરણને ટેસ્ટ ક્રોસ કહેવાય છે. ટેસ્ટ ક્રોસમાં ફીનોટાઇપિક ગુણોત્તર 1:1:1:1 મળે છે, કારણ કે દરેક જનીન સ્વતંત્ર રીતે વહેંચાય છે. બાકીના વિકલ્પો: B) 9:3:3:1 (F1 ના સ્વ-પરાગનનો ગુણોત્તર), C) 3:1 (એક જનીનના સંકરણનો ગુણોત્તર), D) 1:2:1 (જનીન પ્રકારનો ગુણોત્તર).", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વૈવિધ્યતા", "ch": ""}, {"q": "મેન્ડલના પ્રયોગોમાં, F1 પેઢીના છોડ (Rr) ને સફેદ ફૂલવાળા (rr) છોડ સાથે સંકરણ કરાવવામાં આવે છે. F2 પેઢીમાં લાલ ફૂલ અને સફેદ ફૂલ ધરાવતા છોડનો ગુણોત્તર કયો હશે?", "opts": ["1:1", "3:1", "1:2:1", "2:1"], "ans": 0, "exp": "F1 (Rr) અને rr વચ્ચેના સંકરણને ટેસ્ટ ક્રોસ કહેવાય છે. ટેસ્ટ ક્રોસમાં ફીનોટાઇપિક ગુણોત્તર 1:1 મળે છે, કારણ કે R અને r એલિલ્સ સમાન પ્રમાણમાં વહેંચાય છે. બાકીના વિકલ્પો: B) 3:1 (F1 ના સ્વ-પરાગનનો ગુણોત્તર), C) 1:2:1 (જનીન પ્રકારનો ગુણોત્તર), D) 2:1 (અસાધારણ ગુણોત્તર).", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વૈવિધ્યતા", "ch": ""}, {"q": "એક વૈજ્ઞાનિકે વટાણાના છોડ પર પ્રયોગ કર્યો જેમાં એક લક્ષણ માટે F₁ પેઢીના બધા છોડ એકસરખા દેખાતા હતા, પરંતુ F₂ પેઢીમાં ૩:૧ નું પ્રમાણ મળ્યું નહીં. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ યોગ્ય છે?", "opts": ["અપૂર્ણ પ્રભુતા (Incomplete dominance) ની હાજરી", "સહપ્રભુતા (Co-dominance) ની હાજરી", "મેન્ડલના નિયમોનું પાલન ન થવું", "જનીનોનું સંલગ્નતા (Gene linkage)"], "ans": 3, "exp": "સાચો જવાબ D) જનીનોનું સંલગ્નતા (Gene linkage) છે. મેન્ડલના નિયમો મુજબ, જો જનીનો અલગ અલગ વર્ણસૂત્રો પર હોય તો જ ૩:૧ નું પ્રમાણ મળે છે. પરંતુ જો જનીનો એક જ વર્ણસૂત્ર પર નજીક હોય (સંલગ્નતા), તો તેઓ સાથે વારસામાં મળે છે અને ૩:૧ નું પ્રમાણ મળતું નથી. વિકલ્પ A અને B પણ ૩:૧ ના પ્રમાણને બદલી શકે છે, પરંતુ પ્રશ્નમાં 'એક લક્ષણ' નો ઉલ્લેખ છે, જે સૂચવે છે કે બહુજનીનિક અસર નથી. વિકલ્પ C ખોટો છે કારણ કે મેન્ડલના નિયમો હંમેશા લાગુ પડે છે, પરંતુ સંલગ્નતા જેવી પરિસ્થિતિઓમાં તેમનું પ્રમાણ બદલાઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
