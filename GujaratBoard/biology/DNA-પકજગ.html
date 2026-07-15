@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DNA પેકેજિંગ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>DNA પેકેજિંગ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">DNA પેકેજિંગ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "માનવ કોષકેન્દ્રમાં રહેલા DNA ને સંપૂર્ણ રીતે ખોલીને સીધી રેખામાં ગોઠવવામાં આવે તો તેની લંબાઈ આશરે કેટલી થશે?", "opts": ["૨ મીટર", "૨૦ સેન્ટીમીટર", "૨ મિલીમીટર", "૨ માઈક્રોમીટર"], "ans": 0, "exp": "માનવ કોષકેન્દ્રમાં રહેલા DNA ની કુલ લંબાઈ આશરે ૨ મીટર જેટલી હોય છે, જેને ન્યુક્લિઓસોમ અને સુપરકોઈલિંગ દ્વારા સંકોચીને કોષકેન્દ્રમાં સમાવવામાં આવે છે. બાકીના વિકલ્પો ખૂબ જ નાના છે અને DNA ની વાસ્તવિક લંબાઈ સાથે મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ ૬: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "ન્યુક્લિઓસોમની રચનામાં હિસ્ટોન પ્રોટીનના કયા પ્રકારનો સમાવેશ થતો નથી?", "opts": ["H1", "H2A", "H3", "H5"], "ans": 3, "exp": "ન્યુક્લિઓસોમની મૂળભૂત રચનામાં H2A, H2B, H3 અને H4 હિસ્ટોન પ્રોટીનનો સમાવેશ થાય છે. H1 હિસ્ટોન ન્યુક્લિઓસોમ વચ્ચેના લિંકર DNA સાથે જોડાય છે, પરંતુ H5 હિસ્ટોન માત્ર પક્ષીઓ અને કેટલાક સરીસૃપોમાં જોવા મળે છે, માનવ કે અન્ય સસ્તનોમાં નહીં.", "ref": "Std 12 - પ્રકરણ ૬: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન DNA પેકેજિંગના સુપરકોઈલિંગ માટે ખોટું છે?", "opts": ["ટોપોઆઈસોમરેઝ ઉત્સેચક સુપરકોઈલિંગમાં મદદ કરે છે", "સુપરકોઈલિંગ માત્ર પ્રોકેરિયોટ્સમાં જોવા મળે છે", "સુપરકોઈલિંગ DNA ની લંબાઈ ઘટાડવામાં મદદ કરે છે", "નકારાત્મક સુપરકોઈલિંગ DNA ના ખુલ્લા રૂપને સરળ બનાવે છે"], "ans": 1, "exp": "સુપરકોઈલિંગ પ્રોકેરિયોટ્સ અને યુકેરિયોટ્સ બંનેમાં જોવા મળે છે. ટોપોઆઈસોમરેઝ ઉત્સેચક DNA ના સુપરકોઈલિંગમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. નકારાત્મક સુપરકોઈલિંગ DNA ને ખોલવામાં મદદ કરે છે, જ્યારે સકારાત્મક સુપરકોઈલિંગ તેને વધુ સંકોચે છે. વિકલ્પ B ખોટો છે કારણ કે સુપરકોઈલિંગ યુકેરિયોટ્સમાં પણ જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ ૬: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "એક વિદ્યાર્થીએ કોષકેન્દ્રમાંથી અલગ કરેલા વર્ણસૂત્રોનું અવલોકન કર્યું. તેણે જોયું કે વર્ણસૂત્રોના અમુક ભાગો ખૂબ જ ઘટ્ટ અને કાળા રંગના હતા, જ્યારે અમુક ભાગો હળવા રંગના હતા. આ ઘટનાને શું કહેવાય છે અને તેનું મહત્વ શું છે?", "opts": ["હેટરોક્રોમેટિન અને યુક્રોમેટિન - જનીન અભિવ્યક્તિનું નિયંત્રણ", "ન્યુક્લિઓસોમ અને લિંકર DNA - DNA પેકેજિંગનું પ્રથમ સ્તર", "સેન્ટ્રોમિયર અને ટેલોમિયર - વર્ણસૂત્રની સ્થિરતા", "સુપરકોઈલિંગ અને રિલેક્સ્ડ DNA - પ્રતિકૃતિનું નિયંત્રણ"], "ans": 0, "exp": "વર્ણસૂત્રના ઘટ્ટ અને કાળા રંગના ભાગોને હેટરોક્રોમેટિન કહે છે, જે જનીન અભિવ્યક્તિ માટે નિષ્ક્રિય હોય છે. હળવા રંગના ભાગોને યુક્રોમેટિન કહે છે, જ્યાં જનીન અભિવ્યક્તિ સક્રિય હોય છે. આ રચના જનીન અભિવ્યક્તિના નિયંત્રણમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. બાકીના વિકલ્પો આ ઘટનાનું યોગ્ય વર્ણન કરતા નથી.", "ref": "Std 12 - પ્રકરણ ૬: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "DNA પેકેજિંગના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["હિસ્ટોન પ્રોટીન બેઝિક (આલ્કલાઈન) પ્રકૃતિ ધરાવે છે", "ન્યુક્લિઓસોમમાં DNA લગભગ ૧.૬૫ વખત હિસ્ટોન ઓક્ટામરની આસપાસ વીંટળાયેલું હોય છે", "સુપરકોઈલિંગ માત્ર પ્રોકેરિયોટ્સમાં જોવા મળે છે અને યુકેરિયોટ્સમાં હિસ્ટોન પ્રોટીન દ્વારા પેકેજિંગ થાય છે", "હિસ્ટોન પ્રોટીનના એસિટાઈલેશનથી જનીન અભિવ્યક્તિ વધે છે"], "ans": 2, "exp": "સુપરકોઈલિંગ પ્રોકેરિયોટ્સ અને યુકેરિયોટ્સ બંનેમાં જોવા મળે છે. હિસ્ટોન પ્રોટીન બેઝિક પ્રકૃતિ ધરાવે છે અને DNA ને ન્યુક્લિઓસોમમાં વીંટળવામાં મદદ કરે છે. હિસ્ટોનના એસિટાઈલેશનથી ક્રોમેટિનનું બંધારણ ઢીલું થાય છે, જે જનીન અભિવ્યક્તિને વધારે છે. વિકલ્પ C ખોટો છે કારણ કે સુપરકોઈલિંગ યુકેરિયોટ્સમાં પણ જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ ૬: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "DNA પેકેજિંગ દરમિયાન, 30 nm ફાઇબરની રચના માટે ન્યુક્લિઓસોમની વ્યવસ્થા કેવી રીતે થાય છે?", "opts": ["ન્યુક્લિઓસોમ સોલેનોઇડ (solenoid) રચના બનાવે છે જેમાં હિસ્ટોન H1 પ્રોટીન મહત્ત્વની ભૂમિકા ભજવે છે.", "ન્યુક્લિઓસોમ એકબીજા સાથે સીધી રેખામાં જોડાઈને 30 nm ફાઇબર બનાવે છે.", "ન્યુક્લિઓસોમની રચના દરમિયાન H2A અને H2B હિસ્ટોન પ્રોટીન વિના 30 nm ફાઇબર બનાવી શકાય છે.", "30 nm ફાઇબરની રચના માટે DNA ને સંપૂર્ણ રીતે વિકૃત કરવું પડે છે."], "ans": 0, "exp": "30 nm ફાઇબરની રચના સોલેનોઇડ મોડેલ દ્વારા થાય છે, જેમાં હિસ્ટોન H1 પ્રોટીન ન્યુક્લિઓસોમને સ્થિર કરવામાં મદદ કરે છે. ઓપ્શન B ખોટું છે કારણ કે ન્યુક્લિઓસોમ એકબીજા સાથે સોલેનોઇડ રચના બનાવે છે, સીધી રેખામાં નહીં. ઓપ્શન C ખોટું છે કારણ કે H2A અને H2B હિસ્ટોન પ્રોટીન ન્યુક્લિઓસોમની રચનામાં મહત્ત્વની ભૂમિકા ભજવે છે. ઓપ્શન D ખોટું છે કારણ કે DNA ને વિકૃત કરવું પડતું નથી, પરંતુ તેને વ્યવસ્થિત રીતે ગોઠવવામાં આવે છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન DNA પેકેજિંગના સુપરકોઈલિંગ (supercoiling) વિશે સાચું નથી?", "opts": ["સુપરકોઈલિંગ DNA ને કોમ્પેક્ટ બનાવવામાં મદદ કરે છે.", "ટોપોઆઇસોમેરેઝ ઉત્સેચક સુપરકોઈલિંગને નિયંત્રિત કરે છે.", "સુપરકોઈલિંગ માત્ર પ્રોકેરિયોટિક કોષોમાં જ જોવા મળે છે.", "સુપરકોઈલિંગ DNA ની લંબાઈ ઘટાડવામાં મદદ કરે છે."], "ans": 2, "exp": "સુપરકોઈલિંગ યુકેરિયોટિક અને પ્રોકેરિયોટિક બંને કોષોમાં જોવા મળે છે, તેથી ઓપ્શન C ખોટું છે. ઓપ્શન A સાચું છે કારણ કે સુપરકોઈલિંગ DNA ને કોમ્પેક્ટ બનાવે છે. ઓપ્શન B સાચું છે કારણ કે ટોપોઆઇસોમેરેઝ ઉત્સેચક સુપરકોઈલિંગને નિયંત્રિત કરે છે. ઓપ્શન D સાચું છે કારણ કે સુપરકોઈલિંગ DNA ની લંબાઈ ઘટાડે છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "DNA પેકેજિંગ દરમિયાન, હિસ્ટોન પ્રોટીનના કયા જૂથને કોર હિસ્ટોન કહેવામાં આવે છે?", "opts": ["H1, H2A, H2B, H3", "H2A, H2B, H3, H4", "H1, H3, H4, H5", "H2A, H2B, H4, H5"], "ans": 1, "exp": "કોર હિસ્ટોનમાં H2A, H2B, H3, અને H4 હિસ્ટોન પ્રોટીનનો સમાવેશ થાય છે. ઓપ્શન A ખોટું છે કારણ કે H1 કોર હિસ્ટોનમાં સમાવેશ થતો નથી. ઓપ્શન C અને D ખોટા છે કારણ કે H5 હિસ્ટોન પ્રોટીન કોર હિસ્ટોનમાં સમાવેશ થતો નથી.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "DNA પેકેજિંગના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["ન્યુક્લિઓસોમમાં DNA ની લગભગ 146 જોડી બેઇઝ હોાય છે.", "હિસ્ટોન પ્રોટીન DNA ને નકારાત્મક ચાર્જ ધરાવતા અણુ સાથે બાંધી રાખે છે.", "30 nm ફાઇબરની રચના પછી, DNA ને વધુ કોમ્પેક્ટ બનાવવા માટે લૂપ ડોમેન બનાવવામાં આવે છે.", "હિસ્ટોન પ્રોટીન વિના DNA કોષકેન્દ્રમાં સંપૂર્ણ રીતે પેક થઈ શકે છે."], "ans": 3, "exp": "DNA ને કોષકેન્દ્રમાં પેક કરવા માટે હિસ્ટોન પ્રોટીનની જરૂર પડે છે, તેથી ઓપ્શન D ખોટું છે. ઓપ્શન A સાચું છે કારણ કે ન્યુક્લિઓસોમમાં DNA ની લગભગ 146 જોડી બેઇઝ હોાય છે. ઓપ્શન B સાચું છે કારણ કે હિસ્ટોન પ્રોટીન DNA ને નકારાત્મક ચાર્જ ધરાવતા અણુ સાથે બાંધી રાખે છે. ઓપ્શન C સાચું છે કારણ કે 30 nm ફાઇબર પછી લૂપ ડોમેન બનાવવામાં આવે છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "DNA પેકેજિંગ દરમિયાન, નીચેનામાંથી કયા પગલામાં DNA ને સૌથી વધુ કોમ્પેક્ટ બનાવવામાં આવે છે?", "opts": ["ન્યુક્લિઓસોમની રચના", "30 nm ફાઇબરની રચના", "લૂપ ડોમેનની રચના", "વર્ણસૂત્રની રચના"], "ans": 3, "exp": "DNA ને સૌથી વધુ કોમ્પેક્ટ બનાવવા માટે વર્ણસૂત્રની રચના દરમિયાન થાય છે. ઓપ્શન A, B, અને C એ DNA પેકેજિંગના પગલાં છે, પરંતુ વર્ણસૂત્રની રચના સૌથી અંતિમ અને કોમ્પેક્ટ પગલું છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "કોષવિભાજનના મેટાફેઝ તબક્કા દરમિયાન, વર્ણસૂત્રોની સંરચનામાં DNA પેકેજિંગનો સૌથી વધુ સંકુચિત સ્વરૂપ કયું હોય છે?", "opts": ["ન્યુક્લિઓસોમ ફાઇબર", "30 nm સોલેનોઇડ ફાઇબર", "મેટાફેઝ ક્રોમેટિડ", "લૂપ્ડ ડોમેન (looped domain)"], "ans": 2, "exp": "મેટાફેઝ દરમિયાન વર્ણસૂત્રો સૌથી વધુ સંકુચિત સ્વરૂપ ધારણ કરે છે, જેને મેટાફેઝ ક્રોમેટિડ કહેવાય છે. ન્યુક્લિઓસોમ ફાઇબર અને 30 nm સોલેનોઇડ ફાઇબર એ DNA પેકેજિંગના પ્રારંભિક તબક્કા છે, જ્યારે લૂપ્ડ ડોમેન એ મધ્યવર્તી સંરચના છે. મેટાફેઝ ક્રોમેટિડમાં DNA સૌથી વધુ કોમ્પેક્ટ હોય છે, જે કોષવિભાજન માટે જરૂરી છે.", "ref": "Std 11 - પ્રકરણ 8: કોષ - જીવનનો એકમ", "ch": ""}, {"q": "DNA પેકેજિંગમાં હિસ્ટોન પ્રોટીન H1 ની ભૂમિકા શું છે?", "opts": ["તે ન્યુક્લિઓસોમના કોર હિસ્ટોન સાથે જોડાઈને DNA ને સ્થિર કરે છે", "તે DNA ને ન્યુક્લિઓસોમની આસપાસ વીંટળાવવામાં મદદ કરે છે", "તે ન્યુક્લિઓસોમ વચ્ચેના લિંકર DNA ને જોડીને 30 nm ફાઇબરની રચના કરે છે", "તે DNA ના સુપરકોઈલિંગ માટે જવાબદાર ઉત્સેચક તરીકે કાર્ય કરે છે"], "ans": 2, "exp": "હિસ્ટોન પ્રોટીન H1 ન્યુક્લિઓસોમ વચ્ચેના લિંકર DNA સાથે જોડાઈને 30 nm સોલેનોઇડ ફાઇબરની રચનામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. તે ન્યુક્લિઓસોમના કોર હિસ્ટોન સાથે સીધું જોડાતું નથી કે DNA ને વીંટળાવવામાં મદદ કરતું નથી. DNA નું સુપરકોઈલિંગ ટોપોઆઇસોમરેઝ ઉત્સેચક દ્વારા થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન DNA પેકેજિંગના 'સોલેનોઇડ મોડેલ' માટે ખોટું છે?", "opts": ["આ મોડેલમાં ન્યુક્લિઓસોમ એક સર્પિલાકાર રચનામાં ગોઠવાય છે", "આ મોડેલમાં લગભગ 6 ન્યુક્લિઓસોમ પ્રતિ વળાંક હોય છે", "આ મોડેલમાં H1 હિસ્ટોનની હાજરી જરૂરી નથી", "આ મોડેલ 30 nm ફાઇબરની રચના સમજાવે છે"], "ans": 2, "exp": "સોલેનોઇડ મોડેલમાં H1 હિસ્ટોનની હાજરી જરૂરી છે, કારણ કે તે ન્યુક્લિઓસોમ વચ્ચેના લિંકર DNA સાથે જોડાઈને સર્પિલાકાર રચના બનાવવામાં મદદ કરે છે. આ મોડેલમાં લગભગ 6 ન્યુક્લિઓસોમ પ્રતિ વળાંક હોય છે અને તે 30 nm ફાઇબરની રચના સમજાવે છે. H1 હિસ્ટોનની ગેરહાજરીમાં સોલેનોઇડ રચના શક્ય નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "DNA પેકેજિંગના સંદર્ભમાં, 'સ્કેફોલ્ડ પ્રોટીન' ની ભૂમિકા શું છે?", "opts": ["તે ન્યુક્લિઓસોમની રચનામાં હિસ્ટોન પ્રોટીન સાથે જોડાય છે", "તે 30 nm ફાઇબરને વધુ સંકુચિત કરીને મેટાફેઝ ક્રોમેટિડ બનાવે છે", "તે DNA ને સુપરકોઈલિંગ માટે જરૂરી ઉત્સેચક તરીકે કાર્ય કરે છે", "તે વર્ણસૂત્રના માળખાકીય આધાર તરીકે કાર્ય કરીને લૂપ્ડ ડોમેનને આધાર આપે છે"], "ans": 3, "exp": "સ્કેફોલ્ડ પ્રોટીન વર્ણસૂત્રના માળખાકીય આધાર તરીકે કાર્ય કરે છે અને લૂપ્ડ ડોમેનને આધાર આપે છે. તે ન્યુક્લિઓસોમની રચનામાં ભાગ લેતું નથી કે DNA ને સુપરકોઈલિંગ માટે ઉત્સેચક તરીકે કાર્ય કરતું નથી. 30 nm ફાઇબરને વધુ સંકુચિત કરવામાં તે પરોક્ષ રીતે મદદ કરે છે, પરંતુ તે સીધું મેટાફેઝ ક્રોમેટિડ બનાવતું નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક સંશોધકે જોયું કે કોઈ એક કોષમાં DNA પેકેજિંગ દરમિયાન 30 nm ફાઇબર બનતું નથી. આ અસામાન્યતાનું સંભવિત કારણ શું હોઈ શકે?", "opts": ["હિસ્ટોન પ્રોટીન H1 ની ગેરહાજરી", "ટોપોઆઇસોમરેઝ ઉત્સેચકની વધુ પડતી પ્રવૃત્તિ", "ન્યુક્લિઓસોમની રચનામાં ખામી", "સ્કેફોલ્ડ પ્રોટીનનું અતિશય ઉત્પાદન"], "ans": 0, "exp": "30 nm ફાઇબરની રચના માટે હિસ્ટોન પ્રોટીન H1 ની હાજરી જરૂરી છે. H1 ની ગેરહાજરીમાં ન્યુક્લિઓસોમ વચ્ચેનું લિંકર DNA યોગ્ય રીતે ગોઠવાઈ શકતું નથી, જેના કારણે 30 nm ફાઇબર બનતું નથી. ટોપોઆઇસોમરેઝ ઉત્સેચક DNA ના સુપરકોઈલિંગ માટે જવાબદાર છે, ન્યુક્લિઓસોમની રચનામાં ખામી 30 nm ફાઇબર પહેલાના તબક્કાને અસર કરશે, અને સ્કેફોલ્ડ પ્રોટીનનું અતિશય ઉત્પાદન 30 nm ફાઇબરની રચનાને અસર કરતું નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "DNA પેકેજિંગ દરમિયાન, 30 nm ફાઇબરની રચના પછી, નીચેનામાંથી કયું પગલું સૌથી પહેલા થાય છે?", "opts": ["સોલેનોઇડ સંરચનાની રચના", "ક્રોમેટિન લૂપ્સની રચના સ્કેફોલ્ડ પ્રોટીન સાથે", "હેટરોક્રોમેટિન અને યુક્રોમેટિનમાં વિભાજન", "સુપરકોઈલિંગ દ્વારા કોમ્પેક્ટેશન"], "ans": 1, "exp": "30 nm ફાઇબર પછી, DNA ની આગળની પેકેજિંગમાં સ્કેફોલ્ડ પ્રોટીન સાથે ક્રોમેટિન લૂપ્સની રચના થાય છે. સોલેનોઇડ મોડેલ તો 30 nm ફાઇબરની જ રચનાનું વર્ણન કરે છે, પરંતુ તે પછીના પગલાં તરીકે ક્રોમેટિન લૂપ્સ બને છે. હેટરોક્રોમેટિન અને યુક્રોમેટિનમાં વિભાજન તો પેકેજિંગના અંતિમ તબક્કામાં થાય છે, જ્યારે સુપરકોઈલિંગ તો 30 nm ફાઇબરની રચના પહેલા જ થઈ ચૂક્યું હોય છે.", "ref": "Std 12 - અધ્યાય 4: વારસાગતી અને જનીનિકી", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન હિસ્ટોન પ્રોટીન H2A વિશે ખોટું છે?", "opts": ["તે કોર હિસ્ટોન ઓક્ટામરનો ભાગ છે", "તે DNA સાથે સીધો સંપર્ક ધરાવે છે", "તે H2B સાથે ડાયમર બનાવે છે", "તે H1 પ્રોટીન જેવી જ ભૂમિકા ભજવે છે"], "ans": 3, "exp": "H2A કોર હિસ્ટોન ઓક્ટામરનો ભાગ છે અને DNA સાથે સીધો સંપર્ક ધરાવે છે. તે H2B સાથે ડાયમર બનાવે છે, પરંતુ H1 પ્રોટીનની ભૂમિકા અલગ છે. H1 પ્રોટીન ન્યુક્લિઓસોમની બહાર રહે છે અને DNA ને સ્થિર કરવામાં મદદ કરે છે, જ્યારે H2A કોર હિસ્ટોનનો ભાગ છે.", "ref": "Std 12 - અધ્યાય 4: વારસાગતી અને જનીનિકી", "ch": ""}, {"q": "DNA પેકેજિંગ દરમિયાન, નીચેનામાંથી કયું પગલું 'ક્રોમેટિન ફાઇબર' ની રચનામાં સીધો યોગદાન આપતું નથી?", "opts": ["ન્યુક્લિઓસોમની રચના", "30 nm ફાઇબરની રચના", "સુપરકોઈલિંગ", "સ્કેફોલ્ડ પ્રોટીન સાથે જોડાણ"], "ans": 2, "exp": "સુપરકોઈલિંગ એ DNA ની પ્રાથમિક સંરચનામાં થતું પગલું છે, પરંતુ ક્રોમેટિન ફાઇબરની રચનામાં સીધો યોગદાન આપતું નથી. ન્યુક્લિઓસોમ, 30 nm ફાઇબર અને સ્કેફોલ્ડ પ્રોટીન સાથે જોડાણ એ ક્રોમેટિન ફાઇબરની રચનાના મુખ્ય પગલાં છે.", "ref": "Std 12 - અધ્યાય 4: વારસાગતી અને જનીનિકી", "ch": ""}, {"q": "એક કોષમાં, જ્યારે DNA પેકેજિંગ દરમિયાન હેટરોક્રોમેટિન બને છે, ત્યારે નીચેનામાંથી કયું પરિવર્તન થતું નથી?", "opts": ["જનીન અભિવ્યક્તિમાં ઘટાડો", "DNA ની ટ્રાન્સક્રિપ્શન ક્ષમતામાં ઘટાડો", "ક્રોમેટિનની સંકુચિતતામાં વધારો", "હિસ્ટોન એસિટાઇલેશનમાં વધારો"], "ans": 3, "exp": "હેટરોક્રોમેટિન બનવાને લીધે જનીન અભિવ્યક્તિ અને ટ્રાન્સક્રિપ્શન ક્ષમતામાં ઘટાડો થાય છે, અને ક્રોમેટિન વધુ સંકુચિત બને છે. પરંતુ હિસ્ટોન એસિટાઇલેશન એ યુક્રોમેટિન સાથે સંકળાયેલું છે, જ્યારે હેટરોક્રોમેટિનમાં હિસ્ટોન ડીએસિટાઇલેશન થાય છે.", "ref": "Std 12 - અધ્યાય 4: વારસાગતી અને જનીનિકી", "ch": ""}, {"q": "DNA પેકેજિંગના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન 'ટોપોલોજિકલી એસોસિયેટેડ ડોમેઇન (TAD)' વિશે સાચું છે?", "opts": ["TAD એ DNA ની સંપૂર્ણ લંબાઈ પર ફેલાયેલું હોય છે", "TAD ની રચના સ્કેફોલ્ડ પ્રોટીન પર આધારિત નથી", "TAD ક્રોમેટિનની સ્થાનિક સંરચનામાં મહત્વની ભૂમિકા ભજવે છે", "TAD ફક્ત પ્રોકેરિયોટ્સમાં જોવા મળે છે"], "ans": 2, "exp": "TAD (ટોપોલોજિકલી એસોસિયેટેડ ડોમેઇન) ક્રોમેટિનની સ્થાનિક સંરચનામાં મહત્વની ભૂમિકા ભજવે છે અને તે યુકેરિયોટિક કોષોમાં જોવા મળે છે. TAD એ DNA ની સંપૂર્ણ લંબાઈ પર ફેલાયેલું નથી, પરંતુ તે સ્કેફોલ્ડ પ્રોટીન સાથે સંકળાયેલું હોઈ શકે છે.", "ref": "Std 12 - અધ્યાય 4: વારસાગતી અને જનીનિકી", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
