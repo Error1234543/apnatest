@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સ્ટાર્ચ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>સ્ટાર્ચ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">સ્ટાર્ચ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "સ્ટાર્ચના જલીય દ્રાવણમાં આયોડિન દ્રાવણ ઉમેરતાં કયો રંગ પ્રાપ્ત થાય છે અને તેનું કારણ શું છે?", "opts": ["નીલો રંગ, કારણ કે સ્ટાર્ચ આયોડિન સાથે સંકીર્ણ બનાવે છે", "જાંબલી રંગ, કારણ કે આયોડિન સ્ટાર્ચના ગ્લુકોઝ એકમો સાથે પ્રક્રિયા કરે છે", "પીળો રંગ, કારણ કે સ્ટાર્ચમાં ફ્રક્ટોઝ હોય છે", "લાલ રંગ, કારણ કે સ્ટાર્ચમાં એમાઇલોઝ અને એમિલોપેક્ટિન હોય છે"], "ans": 0, "exp": "સ્ટાર્ચના જલીય દ્રાવણમાં આયોડિન દ્રાવણ ઉમેરતાં નીલો રંગ પ્રાપ્ત થાય છે, કારણ કે સ્ટાર્ચ આયોડિન સાથે સંકીર્ણ (કોમ્પ્લેક્સ) બનાવે છે. આ સંકીર્ણ બનવાનું કારણ એમાઇલોઝ અને એમિલોપેક્ટિનની હેલિકલ સ્ટ્રક્ચર છે, જેમાં આયોડિન અણુઓ સમાવિષ્ટ થાય છે. બાકીના વિકલ્પો અયોગ્ય છે: જાંબલી રંગ આયોડિનના પોતાના દ્રાવણનો રંગ છે, પીળો રંગ સ્ટાર્ચમાં ફ્રક્ટોઝ ન હોવાને લીધે અયોગ્ય છે, અને લાલ રંગ સ્ટાર્ચના ઘટકો સાથે સીધો સંબંધ ધરાવતો નથી.", "ref": "Std 11 - પ્રકરણ ૯: પોષણ અને શ્વસન (કાર્બોદિત)", "ch": ""}, {"q": "સ્ટાર્ચનું પાચન કયા ઉત્સેચક દ્વારા થાય છે અને તેનું અંતિમ ઉત્પાદન શું હોય છે?", "opts": ["એમિલેઝ, ગ્લુકોઝ", "લાઇપેઝ, ફ્રક્ટોઝ", "પ્રોટિયેઝ, એમિનો એસિડ", "સુક્રેઝ, સુક્રોઝ"], "ans": 0, "exp": "સ્ટાર્ચનું પાચન એમિલેઝ ઉત્સેચક દ્વારા થાય છે, જેમાં સ્ટાર્ચનો વિઘટન થઈને ગ્લુકોઝ બને છે. લાઇપેઝ ચરબીના પાચન માટે, પ્રોટિયેઝ પ્રોટીનના પાચન માટે, અને સુક્રેઝ સુક્રોઝના પાચન માટે જવાબદાર છે. આથી, કેવળ વિકલ્પ A સચોટ છે.", "ref": "Std 11 - પ્રકરણ ૧૬: પાચન અને શોષણ", "ch": ""}, {"q": "સ્ટાર્ચના સંગ્રહ માટે કયા અંગમાં કોષરસમાં રહેલા લીપિડના ટીપાં જોવા મળે છે?", "opts": ["પર્ણ", "મૂળ", "કંદ", "બીજ"], "ans": 3, "exp": "સ્ટાર્ચના સંગ્રહ માટે બીજમાં કોષરસમાં રહેલા લીપિડના ટીપાં (એલિયોપ્લાસ્ટ) જોવા મળે છે. પર્ણ, મૂળ, અને કંદમાં સ્ટાર્ચ સંગ્રહ થાય છે, પરંતુ લીપિડના ટીપાં બીજમાં જોવા મળે છે. આથી, વિકલ્પ D સચોટ છે.", "ref": "Std 11 - પ્રકરણ ૭: વનસ્પતિ શરીરક્રિયા (પોષણ)", "ch": ""}, {"q": "સ્ટાર્ચ અને સેલ્યુલોઝ બંને પોલિસેકેરાઇડ છે, પરંતુ સ્ટાર્ચ વનસ્પતિમાં સંગ્રહ પદાર્થ તરીકે કામ કરે છે જ્યારે સેલ્યુલોઝ કોષભિત્તિનું બંધારણ તૈયાર કરે છે. આ તફાવતનું કારણ કયું છે?", "opts": ["સ્ટાર્ચમાં આલ્ફા-ગ્લાયકોસિડિક બંધ હોય છે જ્યારે સેલ્યુલોઝમાં બીટા-ગ્લાયકોસિડિક બંધ હોય છે", "સ્ટાર્ચમાં બીટા-ગ્લાયકોસિડિક બંધ હોય છે જ્યારે સેલ્યુલોઝમાં આલ્ફા-ગ્લાયકોસિડિક બંધ હોય છે", "સ્ટાર્ચ અને સેલ્યુલોઝ બંનેમાં આલ્ફા-ગ્લાયકોસિડિક બંધ હોય છે", "સ્ટાર્ચ અને સેલ્યુલોઝ બંનેમાં બીટા-ગ્લાયકોસિડિક બંધ હોય છે"], "ans": 0, "exp": "સ્ટાર્ચ અને સેલ્યુલોઝ વચ્ચેનો મુખ્ય તફાવત એ છે કે સ્ટાર્ચમાં આલ્ફા-ગ્લાયકોસિડિક બંધ હોય છે, જ્યારે સેલ્યુલોઝમાં બીટા-ગ્લાયકોસિડિક બંધ હોય છે. આ બંધોના કારણે સ્ટાર્ચ સંગ્રહ પદાર્થ તરીકે કામ કરે છે અને સેલ્યુલોઝ કોષભિત્તિનું બંધારણ તૈયાર કરે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે તેઓ બંધોની પ્રકારને ખોટી રીતે દર્શાવે છે.", "ref": "Std 11 - પ્રકરણ ૯: કાર્બોદિત (બહુશર્કરા)", "ch": ""}, {"q": "સ્ટાર્ચના હાઇડ્રોલિસિસથી કયા ક્રમમાં ઉત્પાદનો મેળવી શકાય છે?", "opts": ["ડેક્સ્ટ્રિન → મોલ્ટોઝ → ગ્લુકોઝ", "ગ્લુકોઝ → મોલ્ટોઝ → ડેક્સ્ટ્રિન", "મોલ્ટોઝ → ડેક્સ્ટ્રિન → ગ્લુકોઝ", "ડેક્સ્ટ્રિન → ગ્લુકોઝ → મોલ્ટોઝ"], "ans": 0, "exp": "સ્ટાર્ચના હાઇડ્રોલિસિસ દરમિયાન, પ્રથમ ડેક્સ્ટ્રિન બને છે, ત્યારબાદ મોલ્ટોઝ, અને અંતે ગ્લુકોઝ મેળવી શકાય છે. આ ક્રમ એમિલેઝ ઉત્સેચકની ક્રિયા દ્વારા થાય છે. બાકીના વિકલ્પો ક્રમને ખોટી રીતે દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૪: જૈવ-અણુઓ (કાર્બોદિતના પાચન ક્રમ)", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ માટે જવાબદાર અંગકો ક્યાં જોવા મળે છે?", "opts": ["મૂળની પરિધિમાં", "પર્ણની મધ્યશિરામાં", "બીજાંડ (ઓવ્યુલ) અને પરાગકણોમાં", "ફલિત પુષ્પના દળપત્રોમાં"], "ans": 2, "exp": "સ્ટાર્ચનો સંગ્રહ વનસ્પતિમાં મુખ્યત્વે સંગ્રહ અંગકો જેવા કે બીજાંડ (ઓવ્યુલ), પરાગકણો, કંદ, કાંદા અને બીજમાં થાય છે. મૂળની પરિધિ, પર્ણની મધ્યશિરા અને દળપત્રો સંગ્રહ માટે જવાબદાર નથી, પરંતુ અન્ય કાર્યો માટે જવાબદાર છે. બીજાંડ અને પરાગકણો સ્ટાર્ચનો સંગ્રહ કરે છે કારણ કે તેઓ વિકાસ પામતા ભ્રૂણ અને પરાગનલિકા માટે ઉર્જાનો સ્રોત પૂરો પાડે છે.", "ref": "Std 11 - પ્રકરણ 12: વનસ્પતિશાસ્ત્ર - પોષણ અને સંગ્રહ", "ch": ""}, {"q": "સ્ટાર્ચના અણુમાં આલ્ફા-ગ્લૂકોઝ યુનિટો ક્યાં પ્રકારની ગ્લાયકોસિડિક બંધ દ્વારા જોડાયેલા હોય છે?", "opts": ["આલ્ફા-1,4 અને આલ્ફા-1,6 ગ્લાયકોસિડિક બંધ", "બીટા-1,4 અને બીટા-1,6 ગ્લાયકોસિડિક બંધ", "આલ્ફા-1,4 અને બીટા-1,4 ગ્લાયકોસિડિક બંધ", "આલ્ફા-1,2 અને આલ્ફા-1,4 ગ્લાયકોસિડિક બંધ"], "ans": 0, "exp": "સ્ટાર્ચમાં આલ્ફા-ગ્લૂકોઝ યુનિટો આલ્ફા-1,4 ગ્લાયકોસિડિક બંધ દ્વારા જોડાયેલા હોય છે, જ્યારે શાખાઓ માટે આલ્ફા-1,6 ગ્લાયકોસિડિક બંધ વપરાય છે. બીટા-ગ્લાયકોસિડિક બંધ સેલ્યુલોઝમાં જોવા મળે છે. આલ્ફા-1,2 બંધ સ્ટાર્ચમાં હાજર નથી, અને બીટા-1,4 બંધ સેલ્યુલોઝમાં જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 5: જૈવ અણુઓ - કાર્બોદિતો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન સ્ટાર્ચ વિશે ખોટું છે?", "opts": ["એમિલોપેક્ટિન સ્ટાર્ચનો એક ઘટક છે જે શાખિત રચના ધરાવે છે.", "એમિલોઝ સ્ટાર્ચનો એક ઘટક છે જે રેખીય રચના ધરાવે છે.", "સ્ટાર્ચ પાણીમાં દ્રાવ્ય હોય છે અને તેનું દ્રાવણ કોલોઇડલ હોય છે.", "સ્ટાર્ચનો હાઇડ્રોલિસિસ થતાં માત્ર ગ્લૂકોઝ જ મળે છે."], "ans": 3, "exp": "સ્ટાર્ચનો હાઇડ્રોલિસિસ થતાં ગ્લૂકોઝ સિવાય મોલ્ટોઝ અને ડેક્સ્ટ્રિન જેવા મધ્યવર્તી ઉત્પાદનો પણ મળે છે. એમિલોપેક્ટિન શાખિત રચના ધરાવે છે, એમિલોઝ રેખીય રચના ધરાવે છે, અને સ્ટાર્ચ પાણીમાં અલ્પ દ્રાવ્ય હોય છે જ્યારે તેનું દ્રાવણ કોલોઇડલ હોય છે.", "ref": "Std 12 - પ્રકરણ 5: જૈવ અણુઓ - કાર્બોદિતો", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ માટે કયા હોર્મોનની ભૂમિકા મહત્વપૂર્ણ છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "જિબરેલિન હોર્મોન વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ અને તેના હાઇડ્રોલિસિસમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. ઓક્સિન વૃદ્ધિ અને વિકાસ માટે, સાયટોકાઇનિન કોષવિભાજન માટે, અને એબ્સિસિક એસિડ પાણીના તણાવ અને પર્ણપાત માટે જવાબદાર છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "સ્ટાર્ચ અને ગ્લાયકોજન વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["સ્ટાર્ચમાં આલ્ફા-1,4 અને આલ્ફા-1,6 બંધ હોય છે જ્યારે ગ્લાયકોજનમાં ફક્ત આલ્ફા-1,4 બંધ હોય છે.", "સ્ટાર્ચ વનસ્પતિમાં જોવા મળે છે જ્યારે ગ્લાયકોજન પ્રાણીઓમાં જોવા મળે છે.", "ગ્લાયકોજનમાં વધુ શાખાઓ હોય છે જ્યારે સ્ટાર્ચમાં ઓછી શાખાઓ હોય છે.", "સ્ટાર્ચનો અણુભાર ગ્લાયકોજન કરતાં ઓછો હોય છે."], "ans": 2, "exp": "ગ્લાયકોજનમાં સ્ટાર્ચ કરતાં વધુ શાખાઓ હોય છે, જે તેને પ્રાણીઓમાં ઝડપી ઉર્જા મુક્ત કરવા માટે અનુકૂળ બનાવે છે. સ્ટાર્ચ અને ગ્લાયકોજન બંનેમાં આલ્ફા-1,4 અને આલ્ફા-1,6 બંધ હોય છે. સ્ટાર્ચ વનસ્પતિમાં અને ગ્લાયકોજન પ્રાણીઓમાં જોવા મળે છે, પરંતુ આ તફાવત મુખ્ય નથી. સ્ટાર્ચનો અણુભાર ગ્લાયકોજન કરતાં વધુ હોઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 5: જૈવ અણુઓ - કાર્બોદિતો", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ દરમિયાન, ક્યાં પ્રકારના કોષરસીય કણો (plastids) સક્રિય રીતે ભાગ લે છે અને તેની ભૂમિકા શું છે?", "opts": ["લ્યુકોપ્લાસ્ટ - સ્ટાર્ચના સંગ્રહ અને રૂપાંતરણ માટે જવાબદાર", "ક્લોરોપ્લાસ્ટ - પ્રકાશસંશ્લેષણ દરમિયાન સ્ટાર્ચનો સંગ્રહ કરે છે", "ક્રોમોપ્લાસ્ટ - સ્ટાર્ચને રંગદ્રવ્યમાં રૂપાંતરિત કરે છે", "એમાઇલોપ્લાસ્ટ - સ્ટાર્ચના સંગ્રહ અને હાઇડ્રોલિસિસ માટે વિશિષ્ટ"], "ans": 3, "exp": "સ્ટાર્ચના સંગ્રહ માટે એમાઇલોપ્લાસ્ટ વિશિષ્ટ કોષરસીય કણ છે. લ્યુકોપ્લાસ્ટ સ્ટાર્ચ, તેલ અથવા પ્રોટીન સંગ્રહી શકે છે, પરંતુ એમાઇલોપ્લાસ્ટ સ્ટાર્ચના સંગ્રહ અને હાઇડ્રોલિસિસ માટે વિશેષ છે. ક્લોરોપ્લાસ્ટ પ્રકાશસંશ્લેષણમાં સ્ટાર્ચ સંગ્રહે છે, પરંતુ તે મુખ્યત્વે પ્રકાશસંશ્લેષણ સાથે સંકળાયેલ છે. ક્રોમોપ્લાસ્ટ રંગદ્રવ્ય સંગ્રહે છે, સ્ટાર્ચ નહીં.", "ref": "Std 11 - પ્રકરણ 8: વનસ્પતિ શરીરક્રિયા (Plant Physiology)", "ch": ""}, {"q": "સ્ટાર્ચના અણુમાં એમિલોઝ અને એમિલોપેક્ટિનના પ્રમાણ વિશે કયું વિધાન સત્ય છે?", "opts": ["એમિલોઝ 20-30% અને એમિલોપેક્ટિન 70-80% હોય છે", "એમિલોઝ 50% અને એમિલોપેક્ટિન 50% હોય છે", "એમિલોઝ 70-80% અને એમિલોપેક્ટિન 20-30% હોય છે", "એમિલોઝ અને એમિલોપેક્ટિનનું પ્રમાણ વનસ્પતિ પ્રજાતિ અનુસાર બદલાય છે, પરંતુ એમિલોપેક્ટિન હંમેશા વધુ હોય છે"], "ans": 0, "exp": "સ્ટાર્ચમાં સામાન્ય રીતે એમિલોઝ 20-30% અને એમિલોપેક્ટિન 70-80% હોય છે. એમિલોઝ રેખીય અને એમિલોપેક્ટિન શાખાયુક્ત હોય છે. વિકલ્પ B અને C પ્રમાણમાં ખોટા છે. વિકલ્પ D અંશતઃ સત્ય છે, પરંતુ એમિલોપેક્ટિન હંમેશા વધુ હોય છે એવું કહેવું ચોક્કસ નથી, કારણ કે કેટલીક પ્રજાતિઓમાં પ્રમાણ બદલાઈ શકે છે, પરંતુ સામાન્ય રીતે એમિલોપેક્ટિન વધુ હોય છે.", "ref": "Std 11 - પ્રકરણ 4: જૈવ અણુઓ (Biomolecules)", "ch": ""}, {"q": "સ્ટાર્ચના હાઇડ્રોલિસિસ દરમિયાન, કયા ઉત્સેચક સિવાયના ઉત્સેચક દ્વારા સ્ટાર્ચને મોલ્ટોઝમાં રૂપાંતરિત કરવામાં આવે છે?", "opts": ["એમિલેઝ", "મોલ્ટેઝ", "આઇસોમોલ્ટેઝ", "સુક્રેઝ"], "ans": 2, "exp": "સ્ટાર્ચને મોલ્ટોઝમાં રૂપાંતરિત કરવા માટે આઇસોમોલ્ટેઝ ઉત્સેચક જવાબદાર છે. એમિલેઝ સ્ટાર્ચને મોલ્ટોઝ અને મોલ્ટોટ્રાયોઝમાં તોડે છે, મોલ્ટેઝ મોલ્ટોઝને ગ્લૂકોઝમાં તોડે છે, અને સુક્રેઝ સુક્રોઝને ગ્લૂકોઝ અને ફ્રક્ટોઝમાં તોડે છે.", "ref": "Std 12 - પ્રકરણ 3: ઉત્સેચક (Enzymes)", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ દરમિયાન, કયા હોર્મોનની ઉણપથી સ્ટાર્ચનો સંગ્રહ ઘટે છે અને તેના બદલે શર્કરાનું પ્રમાણ વધે છે?", "opts": ["ઓક્સિન", "જિબ્રેલિન", "ઇથિલીન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "જિબ્રેલિન હોર્મોનની ઉણપથી સ્ટાર્ચનો સંગ્રહ ઘટે છે અને શર્કરાનું પ્રમાણ વધે છે. ઓક્સિન વૃદ્ધિ અને કોષ વિભાજન સાથે સંકળાયેલ છે, ઇથિલીન પાકવાને પ્રોત્સાહન આપે છે, અને એબ્સિસિક એસિડ પાણીના તણાવ અને પર્ણપાત સાથે સંકળાયેલ છે.", "ref": "Std 12 - પ્રકરણ 7: વનસ્પતિ વૃદ્ધિ અને વિકાસ (Plant Growth and Development)", "ch": ""}, {"q": "સ્ટાર્ચના અણુમાં, એમિલોપેક્ટિનની શાખાઓ ક્યાં પ્રકારની બંધ દ્વારા જોડાયેલી હોય છે?", "opts": ["આલ્ફા-1,4-ગ્લાયકોસિડિક બંધ", "આલ્ફા-1,6-ગ્લાયકોસિડિક બંધ", "બીટા-1,4-ગ્લાયકોસિડિક બંધ", "બીટા-1,6-ગ્લાયકોસિડિક બંધ"], "ans": 1, "exp": "એમિલોપેક્ટિનની શાખાઓ આલ્ફા-1,6-ગ્લાયકોસિડિક બંધ દ્વારા જોડાયેલી હોય છે. એમિલોઝમાં આલ્ફા-1,4-ગ્લાયકોસિડિક બંધ હોય છે. બીટા-1,4 અને બીટા-1,6 બંધ સેલ્યુલોઝ અને અન્ય પોલિસેકેરાઇડમાં જોવા મળે છે.", "ref": "Std 11 - પ્રકરણ 4: જૈવ અણુઓ (Biomolecules)", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ દરમિયાન, ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચના કણોનું નિર્માણ કયા પ્રક્રિયાના પરિણામે થાય છે, જ્યારે પ્રકાશસંશ્લેષણની ક્રિયા સક્રિય હોય છે?", "opts": ["કેલ્વિન ચક્ર દરમિયાન ગ્લૂકોઝ-6-ફોસ્ફેટના હાઇડ્રોલિસિસથી", "પ્રકાશસંશ્લેષણના પ્રકાશ-સ્વતંત્ર તબક્કામાં રૂબિસ્કો ઉત્સેચકની ક્રિયાથી", "પ્રકાશસંશ્લેષણના પ્રકાશ-નિર્ભર તબક્કામાં ATP અને NADPHની મદદથી ગ્લૂકોઝના સંશ્લેષણથી", "સ્ટાર્ચ સિંથેઝ ઉત્સેચક દ્વારા ADP-gલૂકોઝના પોલિમરાઇઝેશનથી"], "ans": 3, "exp": "સ્ટાર્ચના કણોનું નિર્માણ સ્ટાર્ચ સિંથેઝ ઉત્સેચક દ્વારા ADP-gલૂકોઝના પોલિમરાઇઝેશનથી થાય છે. કેલ્વિન ચક્ર ગ્લૂકોઝ-6-ફોસ્ફેટ ઉત્પન્ન કરે છે, પરંતુ સ્ટાર્ચના કણોનું નિર્માણ ADP-gલૂકોઝના પોલિમરાઇઝેશનથી થાય છે. રૂબિસ્કો ઉત્સેચક CO2 ફિક્સેશનમાં ભાગ લે છે, પરંતુ સ્ટાર્ચના સંશ્લેષણમાં નહીં. પ્રકાશ-નિર્ભર તબક્કામાં ATP અને NADPH ઉત્પન્ન થાય છે, પરંતુ સ્ટાર્ચનું સંશ્લેષણ પ્રકાશ-સ્વતંત્ર તબક્કામાં થાય છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સ્ટાર્ચના અણુમાં એમિલોપેક્ટિનની શાખાઓ વચ્ચેના અંતર વિશે કયું વિધાન સત્ય છે?", "opts": ["શાખાઓ વચ્ચેનું અંતર 24-30 ગ્લૂકોઝ યુનિટ્સ જેટલું હોય છે", "શાખાઓ વચ્ચેનું અંતર 10-12 ગ્લૂકોઝ યુનિટ્સ જેટલું હોય છે", "શાખાઓ વચ્ચેનું અંતર 40-50 ગ્લૂકોઝ યુનિટ્સ જેટલું હોય છે", "શાખાઓ વચ્ચેનું અંતર નિયમિત નથી અને તે 5-100 ગ્લૂકોઝ યુનિટ્સ સુધી બદલાય છે"], "ans": 0, "exp": "એમિલોપેક્ટિનની શાખાઓ વચ્ચેનું અંતર સામાન્ય રીતે 24-30 ગ્લૂકોઝ યુનિટ્સ જેટલું હોય છે. આ અંતર એમિલોપેક્ટિનની રચનાનું મહત્વપૂર્ણ લક્ષણ છે. બાકીના વિકલ્પો આ અંતરને યોગ્ય રીતે દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 5: જૈવ અણુઓ અને પોલિમર", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ દરમિયાન, ક્લોરોપ્લાસ્ટ અને એમિલોપ્લાસ્ટ વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ ફક્ત પ્રકાશસંશ્લેષણ દરમિયાન થાય છે, જ્યારે એમિલોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ સતત થાય છે", "ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ રાત્રે થાય છે, જ્યારે એમિલોપ્લાસ્ટમાં દિવસ દરમિયાન થાય છે", "ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ ફક્ત પાનમાં થાય છે, જ્યારે એમિલોપ્લાસ્ટમાં મૂળ, કાંદા અને બીજમાં થાય છે", "ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ ફક્ત એમિલોઝ રૂપે થાય છે, જ્યારે એમિલોપ્લાસ્ટમાં ફક્ત એમિલોપેક્ટિન રૂપે થાય છે"], "ans": 0, "exp": "ક્લોરોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ ફક્ત પ્રકાશસંશ્લેષણ દરમિયાન થાય છે, જ્યારે એમિલોપ્લાસ્ટમાં સ્ટાર્ચનો સંગ્રહ સતત થાય છે. બાકીના વિકલ્પો સ્ટાર્ચના સંગ્રહના સમય અથવા સ્થાન વિશે ખોટી માહિતી આપે છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "સ્ટાર્ચના હાઇડ્રોલિસિસ દરમિયાન, ક્યાં ઉત્સેચકોની ક્રિયા દ્વારા સ્ટાર્ચને ગ્લૂકોઝમાં રૂપાંતરિત કરવામાં આવે છે?", "opts": ["એમિલેઝ અને મોલ્ટેઝ", "એમિલેઝ અને સુક્રેઝ", "એમિલેઝ, મોલ્ટેઝ અને આલ્ફા-ગ્લૂકોસિડેઝ", "એમિલેઝ, મોલ્ટેઝ અને લેક્ટેઝ"], "ans": 2, "exp": "સ્ટાર્ચને ગ્લૂકોઝમાં રૂપાંતરિત કરવા માટે એમિલેઝ, મોલ્ટેઝ અને આલ્ફા-ગ્લૂકોસિડેઝ ઉત્સેચકોની ક્રિયા જરૂરી છે. એમિલેઝ સ્ટાર્ચને મોલ્ટોઝ અને મોલ્ટોટ્રાયોઝમાં તોડે છે, મોલ્ટેઝ મોલ્ટોઝને ગ્લૂકોઝમાં તોડે છે, અને આલ્ફા-ગ્લૂકોસિડેઝ મોલ્ટોટ્રાયોઝને ગ્લૂકોઝમાં તોડે છે. સુક્રેઝ અને લેક્ટેઝ સ્ટાર્ચના હાઇડ્રોલિસિસમાં ભાગ લેતા નથી.", "ref": "Std 12 - પ્રકરણ 4: પાચન અને શોષણ", "ch": ""}, {"q": "વનસ્પતિમાં સ્ટાર્ચના સંગ્રહ દરમિયાન, ક્યાં હોર્મોનની ઉણપથી સ્ટાર્ચનો સંગ્રહ ઘટે છે અને વનસ્પતિના વૃદ્ધિ દરમાં ઘટાડો થાય છે?", "opts": ["ઓક્સિન", "જિબ્બરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "જિબ્બરેલિન હોર્મોનની ઉણપથી સ્ટાર્ચનો સંગ્રહ ઘટે છે અને વનસ્પતિના વૃદ્ધિ દરમાં ઘટાડો થાય છે. ઓક્સિન અને સાયટોકાઇનિન સ્ટાર્ચના સંગ્રહને પ્રભાવિત કરતા નથી, જ્યારે એબ્સિસિક એસિડ સ્ટાર્ચના સંગ્રહને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
