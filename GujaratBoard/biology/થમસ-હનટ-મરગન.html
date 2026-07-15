@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>થોમસ હન્ટ મોર્ગન</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>થોમસ હન્ટ મોર્ગન</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">થોમસ હન્ટ મોર્ગન</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં ડ્રોસોફિલા મેલાનોગેસ્ટરના વર્ણસૂત્રોની ખાસિયત કઈ હતી જેનાથી તેમણે જનીન અને વર્ણસૂત્ર વચ્ચેનો સંબંધ સિદ્ધ કર્યો?", "opts": ["ડ્રોસોફિલામાં મહિલા અને પુરુષ બંનેમાં એકસરખા વર્ણસૂત્રો હોય છે", "ડ્રોસોફિલામાં લિંગ-નિર્ધારણ વર્ણસૂત્ર (X-Y) હોય છે અને તેની સાથે જનીનનો સંબંધ જોવા મળ્યો", "ડ્રોસોફિલામાં વર્ણસૂત્રોની સંખ્યા ખૂબ ઓછી હોય છે અને તે સરળતાથી દેખાય છે", "ડ્રોસોફિલામાં વર્ણસૂત્રો પર જનીનની સ્થિતિ સ્થિર હોય છે અને કોઈ પણ પરિવર્તન થતું નથી"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગને ડ્રોસોફિલા મેલાનોગેસ્ટર પરના પ્રયોગોમાં જોયું કે લિંગ-નિર્ધારણ વર્ણસૂત્ર (X-Y) પર જનીન સ્થિત હોય છે અને તેના આધારે અનુવંશિક લક્ષણો પેઢી દર પેઢી પસાર થાય છે. અહીં, વર્ણસૂત્ર અને જનીન વચ્ચેનો સંબંધ સ્પષ્ટ થયો. A ગળતર છે કારણ કે ડ્રોસોફિલામાં લિંગ અનુસાર વર્ણસૂત્રો અલગ હોય છે (XX મહિલા, XY પુરુષ). C અંશતઃ સાચું છે પરંતુ મુખ્ય કારણ લિંગ-વર્ણસૂત્ર નથી. D ખોટું છે કારણ કે જનીનમાં પરિવર્તન (મ્યુટેશન) થઈ શકે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને પરિવર્તન", "ch": ""}, {"q": "મોર્ગનના પ્રયોગમાં, જ્યારે તેમણે સફેદ આંખવાળા ડ્રોસોફિલા (વાઇટ આઈ) નરને લાલ આંખવાળી માદા સાથે સંકરણ કર્યું, ત્યારે F1 પેઢીમાં સફેદ આંખવાળા ડ્રોસોફિલા કેટલા પ્રમાણમાં મળ્યા?", "opts": ["0%", "25%", "50%", "100%"], "ans": 0, "exp": "મોર્ગનના પ્રયોગમાં, સફેદ આંખનો જનીન X વર્ણસૂત્ર પર સ્થિત હતો. નર (XY) પાસે સફેદ આંખનો જનીન X વર્ણસૂત્ર પર હતો, જ્યારે માદા (XX) પાસે લાલ આંખનો જનીન હતો. F1 પેઢીમાં બધા જ ડ્રોસોફિલા (નર અને માદા) લાલ આંખવાળા હતા કારણ કે સફેદ આંખનો જનીન પ્રભાવી નહોતો. આથી 0% સફેદ આંખવાળા ડ્રોસોફિલા મળ્યા. B, C, અને D ગળતર છે કારણ કે સફેદ આંખનો લક્ષણ પ્રગટ થયું નહીં.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને પરિવર્તન", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના કામનો નીચેનામાંથી કયો સિદ્ધાંત સૌથી મહત્વપૂર્ણ યોગદાન ગણાય છે?", "opts": ["પ્રકાશસંશ્લેષણની પ્રક્રિયા સમજાવી", "વર્ણસૂત્રીય અનુવંશિકતાનો સિદ્ધાંત સ્થાપિત કર્યો", "ઉત્ક્રાંતિની પ્રક્રિયા સમજાવી", "DNAની રચના શોધી કાઢી"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગને ડ્રોસોફિલા પરના પ્રયોગો દ્વારા સિદ્ધ કર્યું કે જનીન વર્ણસૂત્ર પર સ્થિત હોય છે અને અનુવંશિકતામાં વર્ણસૂત્રની ભૂમિકા મહત્વપૂર્ણ છે. આથી વર્ણસૂત્રીય અનુવંશિકતાનો સિદ્ધાંત તેમનો મહત્વપૂર્ણ યોગદાન છે. A, C, અને D ગળતર છે કારણ કે આ સિદ્ધાંતો મોર્ગનના કામ સાથે સંકળાયેલા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને પરિવર્તન", "ch": ""}, {"q": "મોર્ગનના પ્રયોગમાં, જ્યારે F1 પેઢીના લાલ આંખવાળા ડ્રોસોફિલાને પરસ્પર સંકરણ કરાવવામાં આવ્યા, ત્યારે F2 પેઢીમાં સફેદ આંખવાળા ડ્રોસોફિલા કેટલા પ્રમાણમાં મળ્યા?", "opts": ["0%", "25%", "50%", "100%"], "ans": 1, "exp": "F1 પેઢીમાં બધા જ ડ્રોસોફિલા લાલ આંખવાળા હતા, પરંતુ તેઓ વાહક (કેરિયર) હતા. F1 પેઢીના લાલ આંખવાળા ડ્રોસોફિલા પરસ્પર સંકરણ કરતાં, F2 પેઢીમાં સફેદ આંખનો જનીન પ્રગટ થયો. કારણ કે સફેદ આંખનો જનીન X વર્ણસૂત્ર પર સ્થિત હતો, તે માદામાં પ્રગટ થયો (XX) અને નરમાં (XY) પણ મળ્યો. આથી F2 પેઢીમાં 25% સફેદ આંખવાળા ડ્રોસોફિલા મળ્યા. A, C, અને D ગળતર છે કારણ કે સફેદ આંખનો લક્ષણ પ્રગટ થયું હતું.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને પરિવર્તન", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, જનીન અને વર્ણસૂત્ર વચ્ચેનો સંબંધ સિદ્ધ કરવા માટે તેમણે કયા સિદ્ધાંતનો ઉપયોગ કર્યો?", "opts": ["મેન્ડલના અનુવંશિકતાના નિયમો", "ક્રોસિંગ ઓવરનો સિદ્ધાંત", "વર્ણસૂત્રીય સિદ્ધાંત", "પ્રાકૃતિક પસંદગીનો સિદ્ધાંત"], "ans": 2, "exp": "થોમસ હન્ટ મોર્ગને વર્ણસૂત્રીય અનુવંશિકતાનો સિદ્ધાંત સ્થાપિત કર્યો, જે અનુસાર જનીન વર્ણસૂત્ર પર સ્થિત હોય છે અને અનુવંશિકતામાં વર્ણસૂત્રની ભૂમિકા મહત્વપૂર્ણ છે. A ગળતર છે કારણ કે મેન્ડલના નિયમો જનીનના વિતરણ વિશે છે, પરંતુ વર્ણસૂત્ર સાથેનો સંબંધ મોર્ગનના કામથી સિદ્ધ થયો. B અને D ગળતર છે કારણ કે તે મોર્ગનના કામ સાથે સીધો સંબંધ ધરાવતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને પરિવર્તન", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, સફેદ આંખના જનીન (w) અને લાલ આંખના જનીન (w+) વચ્ચેનો સંબંધ કયા પ્રકારનો હતો, જ્યારે તેમણે X-વર્ણસૂત્ર સાથે તેનું સ્થાન નક્કી કર્યું?", "opts": ["સહપ્રભાવી (Co-dominant)", "અપૂર્ણ પ્રભાવી (Incomplete dominant)", "પ્રભાવી-પ્રતિભાવી (Dominant-recessive)", "બહુ-એલિલી (Multiple allelic)"], "ans": 2, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, લાલ આંખના જનીન (w+) પ્રભાવી (dominant) હતું, જ્યારે સફેદ આંખના જનીન (w) પ્રતિભાવી (recessive) હતું. આ જનીનો X-વર્ણસૂત્ર પર સ્થિત હોવાથી, નર ડ્રોસોફિલામાં સફેદ આંખની લાક્ષણિકતા પ્રગટ થતી હતી, કારણ કે નરમાં એક જ X-વર્ણસૂત્ર હોય છે. સહપ્રભાવી, અપૂર્ણ પ્રભાવી, અને બહુ-એલિલી સંબંધો આ કિસ્સામાં લાગુ પડતા નથી, કારણ કે અહીં સ્પષ્ટ પ્રભાવી-પ્રતિભાવી સંબંધ જોવા મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાગતી અને વિકાસ", "ch": ""}, {"q": "મોર્ગનના પ્રયોગોમાં, જ્યારે સફેદ આંખવાળા નર ડ્રોસોફિલાને લાલ આંખવાળી માદા સાથે સંકરણ કરાવવામાં આવ્યું, ત્યારે F1 પેઢીમાં નર અને માદા બંનેમાં લાલ આંખ જોવા મળી. પરંતુ F2 પેઢીમાં સફેદ આંખવાળા ડ્રોસોફિલા ફક્ત કયા લિંગમાં જોવા મળ્યા?", "opts": ["માદા", "નર", "નર અને માદા બંનેમાં સરખા પ્રમાણમાં", "ફક્ત હેમિઝાઇગસ નરમાં"], "ans": 1, "exp": "F2 પેઢીમાં સફેદ આંખવાળા ડ્રોસોફિલા ફક્ત નરમાં જોવા મળ્યા, કારણ કે સફેદ આંખના જનીન (w) X-વર્ણસૂત્ર પર સ્થિત છે. નરમાં એક X અને એક Y વર્ણસૂત્ર હોય છે, જ્યારે માદામાં બે X વર્ણસૂત્ર હોય છે. જો નરને પ્રતિભાવી જનીન (w) મળે, તો તે સફેદ આંખ ધરાવે છે, જ્યારે માદાને બે પ્રતિભાવી જનીન (w) મળે ત્યારે જ સફેદ આંખ પ્રગટ થાય. હેમિઝાઇગસ શબ્દ નર માટે યોગ્ય છે, પરંતુ વિકલ્પ D અપૂર્ણ છે કારણ કે તે ફક્ત નરને જ સૂચવે છે, પરંતુ વિકલ્પ B સ્પષ્ટ અને સચોટ છે.", "ref": "Std 12 - અધ્યાય 5: વંશાગતી અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના કામથી કયો નવો શબ્દ અસ્તિત્વમાં આવ્યો, જે વર્ણસૂત્ર પર જનીનના સ્થાનને દર્શાવે છે?", "opts": ["જનીન મેપિંગ (Gene mapping)", "લિંકેજ (Linkage)", "ક્રોસિંગ ઓવર (Crossing over)", "સિંગલ ન્યુક્લિયોટાઇડ પોલિમોર્ફિઝમ (SNP)"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોથી 'લિંકેજ' (Linkage) શબ્દ અસ્તિત્વમાં આવ્યો, જે વર્ણસૂત્ર પર જનીનોના સ્થાન અને તેમના સહ-વંશાગતી (co-inheritance)ને દર્શાવે છે. જનીન મેપિંગ અને ક્રોસિંગ ઓવર પણ મોર્ગનના કામ સાથે સંબંધિત છે, પરંતુ 'લિંકેજ' એ મૂળભૂત નવી સંકલ્પના છે. SNP આધુનિક જીનોમિક્સ સાથે સંબંધિત છે અને મોર્ગનના સમયમાં અસ્તિત્વમાં નહોતો.", "ref": "Std 12 - અધ્યાય 5: વંશાગતી અને વિકાસ", "ch": ""}, {"q": "મોર્ગનના પ્રયોગોમાં, જ્યારે તેમણે ડ્રોસોફિલામાં બે જનીનો (જેમ કે ગ્રે શરીર અને લાલ આંખ) વચ્ચેનો લિંકેજ અભ્યાસ કર્યો, ત્યારે તેમને કયા નિયમનો ભંગ જોવા મળ્યો?", "opts": ["મેન્ડલનો પ્રભાવીતાનો નિયમ", "મેન્ડલનો સ્વતંત્ર વિતરણનો નિયમ", "મેન્ડલનો પૃથક્કરણનો નિયમ", "હાર્ડી-વાઇનબર્ગનો નિયમ"], "ans": 1, "exp": "મોર્ગનના પ્રયોગોમાં, બે જનીનો (જેમ કે ગ્રે શરીર અને લાલ આંખ) એક જ વર્ણસૂત્ર પર સ્થિત હોવાથી, તેમનો સ્વતંત્ર વિતરણ થતો નહીં, જે મેન્ડલના સ્વતંત્ર વિતરણના નિયમનો ભંગ દર્શાવે છે. પ્રભાવીતા અને પૃથક્કરણના નિયમો અહીં લાગુ પડતા નથી, કારણ કે તે એક જ જનીનની લાક્ષણિકતાઓ સાથે સંબંધિત છે. હાર્ડી-વાઇનબર્ગનો નિયમ જનસંખ્યા જનેટિક્સ સાથે સંબંધિત છે.", "ref": "Std 12 - અધ્યાય 5: વંશાગતી અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ક્રોસિંગ ઓવરની ઘટના શા માટે મહત્વપૂર્ણ હતી?", "opts": ["તે વર્ણસૂત્ર પર જનીનોના સ્થાનને નક્કી કરવા માટે ઉપયોગી હતી", "તે જનીનોના નવા સંયોજનો ઉત્પન્ન કરવા માટે જવાબદાર હતી", "તે લિંકેજના ભંગને દર્શાવતી હતી", "ઉપરોક્ત બધા"], "ans": 3, "exp": "ક્રોસિંગ ઓવરની ઘટના મોર્ગનના પ્રયોગોમાં મહત્વપૂર્ણ હતી કારણ કે તે વર્ણસૂત્ર પર જનીનોના સ્થાનને નક્કી કરવા (જનીન મેપિંગ), જનીનોના નવા સંયોજનો ઉત્પન્ન કરવા, અને લિંકેજના ભંગને દર્શાવવા માટે ઉપયોગી હતી. આમ, ઉપરોક્ત તમામ વિકલ્પો સચોટ છે.", "ref": "Std 12 - અધ્યાય 5: વંશાગતી અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, જ્યારે તેમણે ડ્રોસોફિલામાં X-વર્ણસૂત્ર સાથે સંકળાયેલા જનીનનો અભ્યાસ કર્યો, ત્યારે નીચેનામાંથી કયું નિરીક્ષણ તેમને 'ક્રોસિંગ ઓવર'ની ઘટનાને સમજવામાં મદદરૂપ થયું નહીં?", "opts": ["F2 પેઢીમાં પુનરાવર્તિત ફિનોટાઇપનું પ્રમાણ મેન્ડેલિયન પ્રમાણ કરતાં ઓછું હતું", "નર અને માદા ડ્રોસોફિલામાં સફેદ આંખના જનીનનું વિતરણ સમાન હતું", "સંકરણના પરિણામે નવા જનીન સંયોજનો પ્રાપ્ત થયા હતા", "X-વર્ણસૂત્ર પર સ્થિત જનીનોનું વંશવેલું અલગ પડતું હતું"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, X-વર્ણસૂત્ર સાથે સંકળાયેલા જનીન (જેમ કે સફેદ આંખનું જનીન)નું વિતરણ નર અને માદામાં સમાન નહોતું. નરમાં X-વર્ણસૂત્ર એક જ હોય છે, જ્યારે માદામાં બે X-વર્ણસૂત્ર હોય છે, જેથી સફેદ આંખનું જનીન નરમાં વધુ પ્રભાવી રીતે દેખાય છે. આથી, વિકલ્પ B ખોટો છે. ક્રોસિંગ ઓવરના કારણે F2 પેઢીમાં પુનરાવર્તિત ફિનોટાઇપનું પ્રમાણ મેન્ડેલિયન પ્રમાણ કરતાં ઓછું થાય છે (A), નવા જનીન સંયોજનો પ્રાપ્ત થાય છે (C), અને X-વર્ણસૂત્ર પર સ્થિત જનીનોનું વંશવેલું અલગ પડે છે (D).", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, જ્યારે તેમણે ડ્રોસોફિલામાં 'વાઇટ આઈ' (સફેદ આંખ) અને 'યેલો બોડી' (પીળું શરીર) જનીનોનો અભ્યાસ કર્યો, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["આ જનીનો વર્ણસૂત્ર પર સ્થિત છે અને સહસંકળન દર્શાવે છે", "આ જનીનો વચ્ચે ક્રોસિંગ ઓવર થવાનું પ્રમાણ 100% હોય છે", "આ જનીનો વચ્ચેનો અંતર જેટલો ઓછો, ક્રોસિંગ ઓવરનું પ્રમાણ એટલું જ ઓછું", "આ જનીનોના સંકરણના પરિણામે પેઢીના ફિનોટાઇપમાં ફેરફાર જોવા મળે છે"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, 'વાઇટ આઈ' અને 'યેલો બોડી' જનીનો વર્ણસૂત્ર પર સ્થિત છે અને સહસંકળન દર્શાવે છે (A). આ જનીનો વચ્ચે ક્રોસિંગ ઓવર થવાનું પ્રમાણ 100% નહીં પણ અંતર પર આધારિત હોય છે (B ખોટું). જનીનો વચ્ચેનો અંતર જેટલો ઓછો, ક્રોસિંગ ઓવરનું પ્રમાણ એટલું જ ઓછું (C), અને સંકરણના પરિણામે પેઢીના ફિનોટાઇપમાં ફેરફાર જોવા મળે છે (D).", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના કામને આધારે, નીચેનામાંથી કયું વિધાન 'જનીન મેપિંગ'ના સિદ્ધાંતને સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["વર્ણસૂત્ર પર જનીનોની સ્થિતિ નક્કી કરવા માટે ક્રોસિંગ ઓવરના પ્રમાણનો ઉપયોગ થાય છે", "જનીનોની સ્થિતિ નક્કી કરવા માટે ફિનોટાઇપિક ગુણધર્મોનો ઉપયોગ થાય છે", "વર્ણસૂત્ર પર જનીનોની સ્થિતિ નક્કી કરવા માટે DNA અનુક્રમણનો ઉપયોગ થાય છે", "જનીનોની સ્થિતિ નક્કી કરવા માટે પ્રોટીન સંશ્લેષણનો અભ્યાસ થાય છે"], "ans": 0, "exp": "થોમસ હન્ટ મોર્ગનના કામને આધારે, 'જનીન મેપિંગ'માં વર્ણસૂત્ર પર જનીનોની સ્થિતિ નક્કી કરવા માટે ક્રોસિંગ ઓવરના પ્રમાણનો ઉપયોગ થાય છે (A). ફિનોટાઇપિક ગુણધર્મો (B), DNA અનુક્રમણ (C), અને પ્રોટીન સંશ્લેષણ (D) જનીન મેપિંગના સીધા પગલા નથી, પરંતુ આધુનિક તકનીકો છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, જ્યારે તેમણે ડ્રોસોફિલામાં 'ક્રોસિંગ ઓવર'ની ઘટનાનો અભ્યાસ કર્યો, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["ક્રોસિંગ ઓવર માત્ર માદા ડ્રોસોફિલામાં જ થાય છે", "ક્રોસિંગ ઓવર નર અને માદા બંનેમાં થાય છે, પરંતુ માદામાં વધુ પ્રમાણમાં", "ક્રોસિંગ ઓવર માત્ર નર ડ્રોસોફિલામાં જ થાય છે", "ક્રોસિંગ ઓવર નર અને માદા બંનેમાં સમાન પ્રમાણમાં થાય છે"], "ans": 1, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ક્રોસિંગ ઓવર નર અને માદા બંનેમાં થાય છે, પરંતુ માદામાં વધુ પ્રમાણમાં થાય છે (B સાચું). ક્રોસિંગ ઓવર માત્ર માદામાં (A ખોટું) અથવા માત્ર નરમાં (C ખોટું) થતું નથી, અને તે સમાન પ્રમાણમાં પણ થતું નથી (D ખોટું).", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગને ડ્રોસોફિલા મેલાનોગેસ્ટર પરના તેમના પ્રયોગોમાં જનીનોની 'લિન્કેજ' અને 'ક્રોસિંગ ઓવર'ની ઘટનાનો અભ્યાસ કર્યો હતો. આ સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["બે જનીનો વચ્ચેનું અંતર જેટલું વધારે હોય, તેટલી ક્રોસિંગ ઓવરની સંભાવના વધારે હોય છે", "એક જ વર્ણસૂત્ર પર આવેલા બે જનીનો વચ્ચે ક્રોસિંગ ઓવર થાય તો તેમની વચ્ચેનું લિન્કેજ તૂટી જાય છે", "જો બે જનીનો એક જ વર્ણસૂત્ર પર ખૂબ નજીક આવેલા હોય, તો તેમની વચ્ચે ક્રોસિંગ ઓવરની સંભાવના લગભગ શૂન્ય હોય છે", "ક્રોસિંગ ઓવરની ઘટના માત્ર અર્ધસૂત્રીભાજન (Meiosis)ના પ્રોફેઝ-Iમાં જ થાય છે, અને તે માત્ર સજીવોના જાતીય પ્રજનનમાં જ જોવા મળે છે"], "ans": 3, "exp": "સાચો જવાબ D છે. ક્રોસિંગ ઓવરની ઘટના અર્ધસૂત્રીભાજન (Meiosis)ના પ્રોફેઝ-Iમાં થાય છે, પરંતુ તે માત્ર જાતીય પ્રજનનમાં જ મર્યાદિત નથી. અમુક અપવાદરૂપ કિસ્સાઓમાં અલિંગી પ્રજનન ધરાવતા સજીવોમાં પણ ક્રોસિંગ ઓવર જોવા મળી શકે છે, જેમ કે ફૂગ અને કેટલાક એકકોષીય સજીવોમાં. વિકલ્પ A, B અને C એ મોર્ગનના પ્રયોગો અને લિન્કેજના સિદ્ધાંતોને સંપૂર્ણપણે અનુરૂપ છે. વિકલ્પ Aમાં જનીનો વચ્ચેનું અંતર અને ક્રોસિંગ ઓવરની સંભાવના વચ્ચેનો સંબંધ સાચો છે. વિકલ્પ Bમાં લિન્કેજ તૂટવાની ઘટના યોગ્ય રીતે વર્ણવેલ છે. વિકલ્પ Cમાં નજીકના જનીનો વચ્ચે ક્રોસિંગ ઓવરની સંભાવના ઓછી હોવાની વાત પણ સાચી છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ક્રોસિંગ ઓવરની ઘટના દરમિયાન, જનીનોના વિનિમયની શક્યતા નીચેનામાંથી કયા પરિબળ પર આધાર રાખે છે?", "opts": ["જનીનો વચ્ચેનું અંતર", "વર્ણસૂત્રની લંબાઈ", "ડ્રોસોફિલાની ઉંમર", "પર્યાવરણીય પરિબળો જેવા કે તાપમાન"], "ans": 0, "exp": "ક્રોસિંગ ઓવરની ઘટના દરમિયાન, જનીનોના વિનિમયની શક્યતા જનીનો વચ્ચેના અંતર પર આધાર રાખે છે. જેમ જનીનો વચ્ચેનું અંતર વધુ હોય, તેમ ક્રોસિંગ ઓવર થવાની શક્યતા ઓછી હોય છે. વર્ણસૂત્રની લંબાઈ, ડ્રોસોફિલાની ઉંમર, અને પર્યાવરણીય પરિબળો આ ઘટનાને પ્રભાવિત કરતા નથી.", "ref": "Std 12 - અધ્યાય 5: વર્ણસૂત્ર અને DNA", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, જ્યારે તેમણે ડ્રોસોફિલામાં 'લિન્કેજ' અને 'ક્રોસિંગ ઓવર'નો અભ્યાસ કર્યો, ત્યારે તેમણે શોધ્યું કે કયા જનીનો એકબીજા સાથે સંકળાયેલા નથી?", "opts": ["ગ્રે શરીર અને લાલ આંખ", "ગ્રે શરીર અને સફેદ આંખ", "કાળા શરીર અને લાલ આંખ", "કાળા શરીર અને સફેદ આંખ"], "ans": 1, "exp": "મોર્ગનના પ્રયોગોમાં, ગ્રે શરીર અને સફેદ આંખવાળા જનીનો એકબીજા સાથે સંકળાયેલા નહોતા, કારણ કે તે અલગ વર્ણસૂત્રો પર સ્થિત હતા. જ્યારે ગ્રે શરીર અને લાલ આંખ, કાળા શરીર અને લાલ આંખ, તેમજ કાળા શરીર અને સફેદ આંખવાળા જનીનો એક જ વર્ણસૂત્ર પર સ્થિત હોવાથી સંકળાયેલા હતા.", "ref": "Std 12 - અધ્યાય 5: વર્ણસૂત્ર અને DNA", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ડ્રોસોફિલા મેલાનોગેસ્ટરમાં જોવા મળતા 'બાર આઈ' (Bar eye) જનીનની વિશેષતા શું હતી જે અન્ય જનીનો કરતાં અલગ હતી?", "opts": ["આ જનીન માત્ર X-વર્ણસૂત્ર પર જોવા મળતું હતું અને તેનું વારસાગમન લિંગ-સંકળાયેલ હતું.", "આ જનીન Y-વર્ણસૂત્ર પર હાજર હતું અને માત્ર નરમાં જ અભિવ્યક્ત થતું હતું.", "આ જનીન ઓટોસોમલ વર્ણસૂત્ર પર હતું, પરંતુ તેની અભિવ્યક્તિ માત્ર માદામાં જ થતી હતી.", "આ જનીન X-વર્ણસૂત્ર પર ડોમિનન્ટ હતું અને તેની અભિવ્યક્તિ માત્ર હેટેરોઝાયગસ સ્થિતિમાં જ થતી હતી."], "ans": 0, "exp": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં 'બાર આઈ' (Bar eye) જનીન X-વર્ણસૂત્ર પર સ્થિત હતું અને તેનું વારસાગમન લિંગ-સંકળાયેલ હતું. આ જનીન ડોમિનન્ટ હતું અને તેની અભિવ્યક્તિ હેટેરોઝાયગસ માદા તેમજ હેમીઝાયગસ નરમાં પણ જોવા મળતી હતી. વિકલ્પ B ખોટો છે કારણ કે આ જનીન Y-વર્ણસૂત્ર પર ન હતું. વિકલ્પ C ખોટો છે કારણ કે આ જનીન ઓટોસોમલ ન હતું. વિકલ્પ D ખોટો છે કારણ કે આ જનીનની અભિવ્યક્તિ હેમીઝાયગસ નરમાં પણ થતી હતી, માત્ર હેટેરોઝાયગસ સ્થિતિમાં જ નહીં.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ડ્રોસોફિલામાં જોવા મળતી 'લિન્કેજ' અને 'ક્રોસિંગ ઓવર'ની ઘટનાઓને આધારે, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["બે જનીનો વચ્ચેનું અંતર વધુ હોય તો ક્રોસિંગ ઓવરની સંભાવના વધુ હોય છે.", "જો બે જનીનો એક જ વર્ણસૂત્ર પર ખૂબ નજીક સ્થિત હોય, તો તેમની વચ્ચે ક્રોસિંગ ઓવરની સંભાવના લગભગ શૂન્ય હોય છે.", "લિન્કેજની ઘટના માત્ર સજીવોના લિંગી પ્રજનનમાં જ જોવા મળે છે, અલિંગી પ્રજનનમાં નહીં.", "ક્રોસિંગ ઓવરની ઘટના દરમિયાન, જનીનોના વિનિમયથી નવા જનીન સંયોજનો ઉત્પન્ન થાય છે."], "ans": 2, "exp": "લિન્કેજની ઘટના માત્ર લિંગી પ્રજનનમાં જ નહીં, પરંતુ અલિંગી પ્રજનનમાં પણ જોવા મળી શકે છે, કારણ કે તે વર્ણસૂત્ર પર જનીનોની ભૌતિક નિકટતાને આધારે હોય છે. વિકલ્પ A સાચો છે કારણ કે બે જનીનો વચ્ચેનું અંતર વધુ હોય તો ક્રોસિંગ ઓવરની સંભાવના વધે છે. વિકલ્પ B સાચો છે કારણ કે નજીકના જનીનો વચ્ચે ક્રોસિંગ ઓવરની સંભાવના ખૂબ ઓછી હોય છે. વિકલ્પ D સાચો છે કારણ કે ક્રોસિંગ ઓવરથી નવા જનીન સંયોજનો ઉત્પન્ન થાય છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "થોમસ હન્ટ મોર્ગનના પ્રયોગોમાં, ડ્રોસોફિલામાં જોવા મળતા 'સેક્સ-લિમિટેડ' અને 'સેક્સ-ઇન્ફ્લુએન્સ્ડ' જનીનોની લાક્ષણિકતાઓને આધારે, નીચેનામાંથી કયું ઉદાહરણ 'સેક્સ-લિમિટેડ' જનીનનું છે?", "opts": ["માનવમાં દાઢીની વૃદ્ધિનું જનીન, જે માત્ર પુરુષોમાં અભિવ્યક્ત થાય છે.", "ડ્રોસોફિલામાં 'વાઇટ આઈ' જનીન, જે X-વર્ણસૂત્ર પર સ્થિત છે અને નરમાં વધુ પ્રમાણમાં અભિવ્યક્ત થાય છે.", "માનવમાં ટાલ પડવાનું જનીન, જે પુરુષોમાં ડોમિનન્ટ અને સ્ત્રીઓમાં રિસેસિવ હોય છે.", "ડ્રોસોફિલામાં 'બાર આઈ' જનીન, જે X-વર્ણસૂત્ર પર સ્થિત છે અને માદામાં પણ અભિવ્યક્ત થાય છે."], "ans": 0, "exp": "'સેક્સ-લિમિટેડ' જનીનો એવા જનીનો છે જે માત્ર એક જ લિંગમાં અભિવ્યક્ત થાય છે, ભલે તે ઓટોસોમલ વર્ણસૂત્ર પર હોય. માનવમાં દાઢીની વૃદ્ધિનું જનીન માત્ર પુરુષોમાં અભિવ્યક્ત થાય છે, તેથી તે 'સેક્સ-લિમિટેડ' જનીનનું ઉદાહરણ છે. વિકલ્પ B ખોટો છે કારણ કે 'વાઇટ આઇ' જનીન લિંગ-સંકળાયેલ છે, 'સેક્સ-લિમિટેડ' નહીં. વિકલ્પ C ખોટો છે કારણ કે ટાલ પડવાનું જનીન 'સેક્સ-ઇન્ફ્લુએન્સ્ડ' છે. વિકલ્પ D ખોટો છે કારણ કે 'બાર આઇ' જનીન લિંગ-સંકળાયેલ છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
