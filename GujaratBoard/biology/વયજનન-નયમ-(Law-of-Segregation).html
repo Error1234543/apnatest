@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિયોજનનો નિયમ (Law of Segregation)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વિયોજનનો નિયમ (Law of Segregation)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વિયોજનનો નિયમ (Law of Segregation)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "મેન્ડલના વિયોજનના નિયમ પ્રમાણે, એક સંકર (F1) પીળા બીજવાળા મટરના છોડ (Yy) ને સ્વ-પરાગનયન કરાવતાં F2 પેઢીમાં પીળા બીજવાળા છોડનો ગુણોત્તર કેટલો મળે છે ?", "opts": ["1:1", "3:1", "1:2:1", "9:3:3:1"], "ans": 1, "exp": "વિયોજનના નિયમ મુજબ, F1 પેઢીના Yy જનીનપ્રકારના છોડમાં Y અને y એલિલ્સ વિયોજિત થાય છે. સ્વ-પરાગનયનથી F2 પેઢીમાં YY, Yy, yY, yy જનીનપ્રકારો મળે છે, જેમાં પીળા બીજ (Y_) નો ગુણોત્તર 3:1 (YY:Yy:yy = 1:2:1, પરંતુ ફિનોટાઇપિક ગુણોત્તર 3 પીળા:1 લીલા) થાય છે. A) 1:1 એ એક જનીનપ્રકારના વિયોજનનો ગુણોત્તર નથી. C) 1:2:1 એ જનીનપ્રકારનો ગુણોત્તર છે, ફિનોટાઇપિક નહીં. D) 9:3:3:1 એ દ્વિ-સંકર ક્રોસનો ગુણોત્તર છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "મેન્ડલના પ્રયોગોમાં, વિયોજનના નિયમનો અપવાદ કયો પાડોશી જનીનો દર્શાવે છે ?", "opts": ["સહપ્રભાવિતા (Co-dominance)", "અપૂર્ણ પ્રભાવિતા (Incomplete dominance)", "જનીન સંયોજન (Gene linkage)", "મલ્ટિપલ એલિલિઝમ (Multiple allelism)"], "ans": 2, "exp": "વિયોજનના નિયમ મુજબ, એલિલ્સ પરસ્પર સ્વતંત્ર રીતે વિયોજિત થાય છે, પરંતુ જનીન સંયોજન (Gene linkage) માં પાડોશી જનીનો એકબીજા સાથે જોડાયેલા હોય છે અને સ્વતંત્ર રીતે વિયોજિત થતાં નથી. A) સહપ્રભાવિતા અને B) અપૂર્ણ પ્રભાવિતા એ ફિનોટાઇપિક અભિવ્યક્તિના પ્રકારો છે, જ્યારે D) મલ્ટિપલ એલિલિઝમ એ એક જ જનીનના બહુ એલિલ્સના અસ્તિત્વને દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક છોડમાં લાલ ફૂલોનો રંગ (R) પ્રભાવી છે અને સફેદ ફૂલોનો રંગ (r) અપ્રભાવી છે. જો Rr જનીનપ્રકારના છોડને સફેદ ફૂલવાળા છોડ (rr) સાથે ક્રોસ કરવામાં આવે, તો સંતતિમાં કેટલા ટકા છોડ લાલ ફૂલ ધરાવશે ?", "opts": ["0%", "25%", "50%", "100%"], "ans": 2, "exp": "Rr × rr ક્રોસમાં, ગેમેટ્સ R, r (Rr છોડથી) અને r, r (rr છોડથી) મળે છે. સંતતિમાં Rr અને rr જનીનપ્રકારો 1:1 ગુણોત્તરમાં મળે છે. Rr લાલ ફૂલ ધરાવે છે, જ્યારે rr સફેદ ફૂલ ધરાવે છે. આથી 50% સંતતિમાં લાલ ફૂલ હશે. A) 0% ખોટું છે કારણ કે Rr છોડ લાલ ફૂલ ધરાવે છે. B) 25% અને D) 100% ગુણોત્તર સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "વિયોજનના નિયમને સૌપ્રથમ કોણે પ્રસ્તાવિત કર્યો હતો અને તે કયા પ્રયોગ દ્વારા સિદ્ધ કર્યો હતો ?", "opts": ["ચાર્લ્સ ડાર્વિન - કૃત્રિમ પસંદગીના પ્રયોગ દ્વારા", "ગ્રેગર મેન્ડલ - મટરના છોડ પરના પ્રયોગ દ્વારા", "થોમસ હન્ટ મોર્ગન - ડ્રોસોફિલા પરના પ્રયોગ દ્વારા", "જેમ્સ વોટસન - DNA ની રચના શોધીને"], "ans": 1, "exp": "ગ્રેગર મેન્ડલે વિયોજનના નિયમને સૌપ્રથમ પ્રસ્તાવિત કર્યો હતો અને તે મટરના છોડ (Pisum sativum) પરના પ્રયોગ દ્વારા સિદ્ધ કર્યો હતો. A) ચાર્લ્સ ડાર્વિનએ કૃત્રિમ પસંદગી પર કામ કર્યું હતું, પરંતુ વિયોજનના નિયમ સાથે સંબંધ નથી. C) થોમસ હન્ટ મોર્ગને જનીન સંયોજન અને વર્ણસૂત્રીય અનુવંશિકતાનો અભ્યાસ કર્યો હતો. D) જેમ્સ વોટસને DNA ની ડબલ હેલિક્સ રચના શોધી હતી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "વિયોજનના નિયમ અનુસાર, એક દંપતી જેમાં પિતા A રક્તવર્ગનો (IAi) અને માતા B રક્તવર્ગની (IBi) છે, તેમના સંતાનમાં O રક્તવર્ગનો જનીનપ્રકાર (ii) મળવાની શક્યતા કેટલી છે ?", "opts": ["0%", "25%", "50%", "75%"], "ans": 1, "exp": "પિતા (IAi) ના ગેમેટ્સ IA અથવા i હોય છે, જ્યારે માતા (IBi) ના ગેમેટ્સ IB અથવા i હોય છે. સંતાનમાં ii જનીનપ્રકાર મેળવવા માટે, પિતા અને માતા બંનેને i એલિલ પસાર કરવો પડે. આની શક્યતા 1/2 (પિતા) × 1/2 (માતા) = 1/4 અથવા 25% છે. A) 0% ખોટું છે કારણ કે ii જનીનપ્રકાર શક્ય છે. C) 50% અને D) 75% ગુણોત્તર સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે બે હેટરોઝાયગસ જનીનો (AaBb) એકબીજા સાથે સંકરણ કરે છે, ત્યારે F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર કયો મળે છે, જો બંને જનીનો સ્વતંત્ર રીતે વિયોજન પામે છે અને પ્રભાવી-અપ્રભાવી સંબંધ ધરાવે છે?", "opts": ["9:3:3:1", "1:2:1", "3:1", "1:1:1:1"], "ans": 0, "exp": "વિયોજનના નિયમ અનુસાર, બે હેટરોઝાયગસ જનીનો (AaBb)ના સંકરણથી F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 9:3:3:1 મળે છે, કારણ કે બંને જનીનો સ્વતંત્ર રીતે વિયોજન પામે છે અને પ્રભાવી-અપ્રભાવી સંબંધ ધરાવે છે. વિકલ્પ B (1:2:1) એક જ જનીનના સંકરણનો ગુણોત્તર છે. વિકલ્પ C (3:1) પણ એક જ જનીનના સંકરણનો ફીનોટાઇપિક ગુણોત્તર છે. વિકલ્પ D (1:1:1:1) બે જનીનોના ટેસ્ટ ક્રોસનો ગુણોત્તર છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમનો અપવાદ કયો છે જ્યારે એક જ જનીનના બે એલિલ્સમાંથી કોઈ એક એલિલ પૂર્ણ પ્રભાવી ન હોવાને લીધે મિશ્ર ફીનોટાઇપ દેખાય છે?", "opts": ["પૂર્ણ પ્રભાવિતા", "અપૂર્ણ પ્રભાવિતા", "સહ-પ્રભાવિતા", "બહુ એલિલ પ્રભાવિતા"], "ans": 1, "exp": "અપૂર્ણ પ્રભાવિતા (Incomplete dominance) એ વિયોજનના નિયમનો અપવાદ છે, જ્યારે એક જ જનીનના બે એલિલ્સમાંથી કોઈ એક એલિલ પૂર્ણ પ્રભાવી ન હોવાને લીધે મિશ્ર ફીનોટાઇપ દેખાય છે. ઉદાહરણ તરીકે, લાલ અને સફેદ ફૂલોના છોડના સંકરણથી ગુલાબી ફૂલો વાળા છોડ મળે છે. વિકલ્પ A (પૂર્ણ પ્રભાવિતા) વિયોજનના નિયમનો મૂળભૂત સિદ્ધાંત છે. વિકલ્પ C (સહ-પ્રભાવિતા) એવા કિસ્સામાં થાય છે જ્યારે બંને એલિલ્સ પોતપોતાના પ્રભાવ દર્શાવે છે. વિકલ્પ D (બહુ એલિલ પ્રભાવિતા) એ બહુ એલિલના કિસ્સામાં થાય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક જનીનિક રોગ માટે હેટરોઝાયગસ વ્યક્તિ (Aa)માં રોગના લક્ષણો દેખાય નહીં, પરંતુ તેના સંતાનોમાં રોગ દેખાય શકે. આ કયા પ્રકારની અનુવંશિકતા દર્શાવે છે?", "opts": ["પ્રભાવી અનુવંશિકતા", "અપ્રભાવી અનુવંશિકતા", "X-લિંક્ડ પ્રભાવી અનુવંશિકતા", "Y-લિંક્ડ અનુવંશિકતા"], "ans": 1, "exp": "અપ્રભાવી અનુવંશિકતામાં, હેટરોઝાયગસ વ્યક્તિ (Aa)માં રોગના લક્ષણો દેખાય નહીં, પરંતુ તેના સંતાનોમાં રોગ દેખાય શકે. ઉદાહરણ તરીકે, સિકલ સેલ એનિમિયા. વિકલ્પ A (પ્રભાવી અનુવંશિકતા)માં હેટરોઝાયગસ વ્યક્તિમાં રોગના લક્ષણો દેખાય છે. વિકલ્પ C (X-લિંક્ડ પ્રભાવી અનુવંશિકતા)માં રોગ X વર્ણસૂત્ર સાથે જોડાયેલો હોય છે અને પ્રભાવી હોય છે. વિકલ્પ D (Y-લિંક્ડ અનુવંશિકતા)માં રોગ Y વર્ણસૂત્ર સાથે જોડાયેલો હોય છે અને ફક્ત પુરુષોમાં જ દેખાય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે બે હોમોઝાયગસ પ્રભાવી (AA) અને હોમોઝાયગસ અપ્રભાવી (aa) વ્યક્તિઓના સંકરણથી મળેલા F1 પેઢીના સભ્યોને આંતરસંકરણ કરવામાં આવે છે, ત્યારે F2 પેઢીમાં જનીનોટાઇપિક ગુણોત્તર કયો મળે છે?", "opts": ["1:2:1", "3:1", "1:1", "9:3:3:1"], "ans": 0, "exp": "મેન્ડલના વિયોજનના નિયમ અનુસાર, F1 પેઢીના સભ્યો (Aa)ને આંતરસંકરણ કરવાથી F2 પેઢીમાં જનીનોટાઇપિક ગુણોત્તર 1:2:1 (AA:Aa:aa) મળે છે. વિકલ્પ B (3:1) ફીનોટાઇપિક ગુણોત્તર છે. વિકલ્પ C (1:1) ટેસ્ટ ક્રોસનો ગુણોત્તર છે. વિકલ્પ D (9:3:3:1) બે જનીનોના સંકરણનો ફીનોટાઇપિક ગુણોત્તર છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે એક જીવમાં બે એલિલ્સ (A અને a) હાજર હોય ત્યારે તેના ગેમીટમાં કયા એલિલની હાજરી અપેક્ષિત છે, પરંતુ જો આ જીવમાં 'લીથલ જનીન' (લેથલ એલિલ) હાજર હોય તો શું થશે?", "opts": ["ગેમીટમાં ફક્ત A અથવા a એલિલ હાજર રહેશે, પરંતુ લીથલ જનીન ધરાવતા ગેમીટનું ફલન નહીં થાય", "ગેમીટમાં A અને a બંને એલિલ હાજર રહેશે, કારણ કે લીથલ જનીન ગેમીટ પર કોઈ અસર કરતું નથી", "ગેમીટમાં ફક્ત લીથલ એલિલ હાજર રહેશે, કારણ કે તે પ્રભાવી હોય છે", "ગેમીટમાં કોઈ એલિલ હાજર રહેશે નહીં, કારણ કે લીથલ જનીન ગેમીટના નિર્માણને અટકાવે છે"], "ans": 0, "exp": "વિયોજનના નિયમ અનુસાર, હેટરોઝાયગસ જીવ (Aa) ગેમીટ બનાવતી વખતે એલિલ્સ વિયોજિત થાય છે, જેથી ગેમીટમાં ફક્ત A અથવા a હાજર રહે. લીથલ જનીન ધરાવતા ગેમીટનું ફલન નહીં થાય, કારણ કે તે ભ્રૂણના વિકાસને અટકાવે છે. ઓપ્શન B ખોટું છે કારણ કે ગેમીટમાં કેવળ એક જ એલિલ હાજર રહે. ઓપ્શન C ખોટું છે કારણ કે લીથલ એલિલ પ્રભાવી હોવા છતાં ગેમીટમાં તે એકલું હાજર રહે તો પણ ભ્રૂણ મરી જાય. ઓપ્શન D ખોટું છે કારણ કે ગેમીટ બનવાનું ચાલુ રહે, પરંતુ ફલન નહીં થાય.", "ref": "Std 12 - અધ્યાય 5: વંશાગતિ અને વિકાસ", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમનો અપવાદ કયા પરિસ્થિતિમાં જોવા મળે છે જ્યારે બે એલિલ્સ એકબીજા સાથે સંપૂર્ણ રીતે પ્રભાવી ન હોવાં છતાં પણ એક નવો ગુણધર્મ દર્શાવે છે?", "opts": ["સહ-પ્રભાવિતા (Co-dominance)", "અપૂર્ણ પ્રભાવિતા (Incomplete dominance)", "બહુ એલિલીઝમ (Multiple allelism)", "એપિસ્ટેસિસ (Epistasis)"], "ans": 1, "exp": "વિયોજનના નિયમનો અપવાદ અપૂર્ણ પ્રભાવિતામાં જોવા મળે છે, જ્યારે બે એલિલ્સ એકબીજા પર સંપૂર્ણ પ્રભાવ ધરાવતા નથી અને તેના પરિણામે મિશ્ર ગુણધર્મ દર્શાવે છે. ઉદાહરણ તરીકે, લાલ અને સફેદ ફૂલોના છોડના સંકરણથી ગુલાબી ફૂલો વાળા છોડ ઉત્પન્ન થાય છે. વિકલ્પ A (સહ-પ્રભાવિતા) ખોટો છે કારણ કે તે બંને એલિલ્સ સંપૂર્ણ રીતે પ્રભાવી હોય છે. વિકલ્પ C (બહુ એલિલીઝમ) ખોટો છે કારણ કે તે એક જ જનીનના બહુ એલિલ્સના અસ્તિત્વને દર્શાવે છે. વિકલ્પ D (એપિસ્ટેસિસ) ખોટો છે કારણ કે તે એક જનીનના એલિલ્સ દ્વારા બીજા જનીનના એલિલ્સ પર પ્રભાવ દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે એક હેટરોઝાયગસ જીવ (Aa) સાથે હોમોઝાયગસ અપ્રભાવી જીવ (aa) ને સંકરણ કરવામાં આવે ત્યારે F1 પેઢીના ગુણધર્મો કેવા હશે?", "opts": ["સંપૂર્ણ પ્રભાવી (A) ગુણધર્મ ધરાવશે", "સંપૂર્ણ અપ્રભાવી (a) ગુણધર્મ ધરાવશે", "1:1 ના પ્રમાણમાં પ્રભાવી અને અપ્રભાવી ગુણધર્મ ધરાવશે", "3:1 ના પ્રમાણમાં પ્રભાવી અને અપ્રભાવી ગુણધર્મ ધરાવશે"], "ans": 2, "exp": "હેટરોઝાયગસ (Aa) અને હોમોઝાયગસ અપ્રભાવી (aa) વચ્ચેના સંકરણને ટેસ્ટ ક્રોસ કહેવાય છે. તેના પરિણામે F1 પેઢીમાં 1:1 ના પ્રમાણમાં પ્રભાવી (A) અને અપ્રભાવી (a) ગુણધર્મ ધરાવતા જીવો ઉત્પન્ન થાય છે. વિકલ્પ A અને B ખોટા છે કારણ કે તે સંપૂર્ણ રીતે એક જ ગુણધર્મ દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે 3:1 નું પ્રમાણ ફક્ત બે હેટરોઝાયગસ જીવો વચ્ચેના સંકરણમાં જોવા મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "વિયોજનના નિયમ અનુસાર, જ્યારે એક જીવમાં બે જનીનો (A અને B) સ્વતંત્ર રીતે વહેંચાય છે, ત્યારે તેના ગેમેટમાં કેટલા પ્રકારના જનીનિક સંયોજનો શક્ય છે?", "opts": ["2", "4", "8", "16"], "ans": 1, "exp": "જ્યારે એક જીવમાં બે જનીનો (A અને B) સ્વતંત્ર રીતે વહેંચાય છે, ત્યારે ગેમેટમાં શક્ય જનીનિક સંયોજનોની સંખ્યા 2^n હોવાં જોઈએ, જ્યાં n એ જનીનોની સંખ્યા છે. અહીં n=2 હોવાથી, 2^2 = 4 પ્રકારના જનીનિક સંયોજનો (AB, Ab, aB, ab) શક્ય છે. વિકલ્પ A (2) ખોટો છે કારણ કે તે ફક્ત એક જ જીન માટે લાગુ પડે. વિકલ્પ C (8) અને D (16) ખોટા છે કારણ કે તે વધુ જનીનો માટે લાગુ પડે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમને લગતા નીચેના વિધાનો પૈકી કયું વિધાન અયોગ્ય છે ?", "opts": ["હેટરોઝાયગસ જીવમાં એલિલ્સના જુદા પડવાનું કારણ કોષવિભાજન દરમિયાન વર્ણસૂત્રોનું વિયોજન છે.", "વિયોજનના નિયમ અનુસાર, ગેમેટમાં માત્ર એક જ એલિલ હાજર રહે છે.", "વિયોજનના નિયમનો અપવાદ એ છે જ્યારે જનીનો સંપૂર્ણ રીતે સહપ્રભાવી હોય છે.", "વિયોજનના નિયમ મુજબ, F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 3:1 હોય છે."], "ans": 2, "exp": "વિયોજનના નિયમનો અપવાદ એ નથી જ્યારે જનીનો સંપૂર્ણ રીતે સહપ્રભાવી હોય છે. સહપ્રભાવિતામાં (ઉદા. લાલ અને સફેદ ફૂલોના સંકરણથી ગુલાબી ફૂલો) વિયોજન થાય છે, પરંતુ ફીનોટાઇપિક ગુણોત્તર 1:2:1 હોય છે. અપવાદ તો અપૂર્ણ પ્રભાવિતા (incomplete dominance) અથવા લીંકેજ (linkage) હોય છે. બાકીના વિધાનો (A, B, D) વિયોજનના નિયમ સાથે સુસંગત છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક જીવમાં જનીન A અને B માટે હેટરોઝાયગસ (AaBb) સ્થિતિ છે. જો આ જીવ સાથે હોમોઝાયગસ અપ્રભાવી (aabb) જીવનું સંકરણ કરવામાં આવે, તો F1 પેઢીમાં કયા ગુણોત્તરની અપેક્ષા રાખી શકાય ? (ધારો કે જનીનો સ્વતંત્ર રીતે વિયોજન પામે છે)", "opts": ["9:3:3:1", "1:1:1:1", "3:1", "1:2:1"], "ans": 1, "exp": "હેટરોઝાયગસ (AaBb) અને હોમોઝાયગસ અપ્રભાવી (aabb) વચ્ચેનું સંકરણ એ ટેસ્ટ ક્રોસ છે. ટેસ્ટ ક્રોસમાં, જો જનીનો સ્વતંત્ર રીતે વિયોજન પામે તો F1 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 1:1:1:1 હોય છે, કારણ કે હેટરોઝાયગસ જીવ ચાર પ્રકારના ગેમેટ્સ (AB, Ab, aB, ab) ઉત્પન્ન કરે છે. બાકીના વિકલ્પો (A, C, D) અનુક્રમે ડાયહાયબ્રિડ ક્રોસ, મોનોહાયબ્રિડ ક્રોસ અને અપૂર્ણ પ્રભાવિતા માટેના ગુણોત્તર છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે એક હેટરોઝાયગસ જીવ (AaBb)માં બે જનીનો સ્વતંત્ર રીતે વિયોજન પામે છે, ત્યારે ગેમેટમાં કયા પ્રકારના જનીનોપાયી સંયોજનો મળી શકે છે ?", "opts": ["AB, Ab, aB, ab", "AB, ab", "Aa, Bb", "AA, BB, aa, bb"], "ans": 0, "exp": "વિયોજનના નિયમ અનુસાર, હેટરોઝાયગસ જીવ (AaBb)માં બે જનીનો સ્વતંત્ર રીતે વિયોજન પામે છે, જેથી ગેમેટમાં AB, Ab, aB, અને ab જેવા ચાર પ્રકારના જનીનોપાયી સંયોજનો મળી શકે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે Aa અને Bb ગેમેટમાં નથી મળતા (તેઓ કોષમાં જ હોય છે), અને AA, BB, aa, bb પણ ગેમેટમાં નથી મળતા કારણ કે તેઓ હોમોઝાયગસ સ્થિતિ દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા", "ch": ""}, {"q": "મેન્ડલના વિયોજનના નિયમ અનુસાર, જ્યારે એક જીવમાં બે જનીનો (A અને B) સ્વતંત્ર રીતે વિયોજન પામે છે, ત્યારે નીચેના પૈકી કયું વિધાન ખોટું છે ?", "opts": ["ગેમેટમાં એક જ જીનના બે એલિલ્સ એકસાથે મળી શકે નહીં", "ગેમેટમાં બે જીનના એલિલ્સનો સંયોજન સ્વતંત્ર રીતે થાય છે", "ગેમેટમાં બે જીનના એલિલ્સ હંમેશા એકસાથે જ મળે છે", "ગેમેટમાં એક જીનના બે એલિલ્સ વિયોજન પામે છે"], "ans": 2, "exp": "વિયોજનના નિયમ અનુસાર, ગેમેટમાં બે જીનના એલિલ્સનો સંયોજન સ્વતંત્ર રીતે થાય છે, જેથી તેઓ હંમેશા એકસાથે મળતા નથી. બાકીના વિધાનો સાચા છે કારણ કે ગેમેટમાં એક જ જીનના બે એલિલ્સ એકસાથે મળી શકતા નથી અને તેઓ વિયોજન પામે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા", "ch": ""}, {"q": "એક છોડમાં બે જનીનો Y અને R સંલગ્ન (linked) છે, જ્યાં Y પીળા બીજ માટે અને R લાલ ફૂલ માટે જવાબદાર છે. જો આ બંને જનીનો વચ્ચેનું પુનઃસંયોજન પ્રમાણ (recombination frequency) 15% હોય, તો નીચેના પૈકી કયું વિધાન વિયોજનના નિયમના સંદર્ભમાં સત્ય છે?", "opts": ["વિયોજનનો નિયમ સંપૂર્ણપણે લાગુ પડશે કારણ કે બંને જનીનો સ્વતંત્ર રીતે વર્તે છે.", "વિયોજનનો નિયમ આંશિક રીતે લાગુ પડશે કારણ કે પુનઃસંયોજનને કારણે નવા જનીનિક સંયોજનો ઉત્પન્ન થશે.", "વિયોજનનો નિયમ લાગુ નહીં પડે કારણ કે સંલગ્ન જનીનો હંમેશા સાથે જ વારસામાં મળે છે.", "વિયોજનનો નિયમ માત્ર હોમોઝાયગસ સ્થિતિમાં જ લાગુ પડે છે, હેટરોઝાયગસ સ્થિતિમાં નહીં."], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે કારણ કે સંલગ્ન જનીનો વચ્ચે પુનઃસંયોજન થઈ શકે છે, જેના કારણે નવા જનીનિક સંયોજનો ઉત્પન્ન થાય છે. આથી વિયોજનનો નિયમ આંશિક રીતે લાગુ પડે છે. વિકલ્પ A ખોટો છે કારણ કે સંલગ્ન જનીનો સ્વતંત્ર રીતે વર્તતા નથી. વિકલ્પ C ખોટો છે કારણ કે પુનઃસંયોજનને લીધે જનીનો અલગ થઈ શકે છે. વિકલ્પ D ખોટો છે કારણ કે વિયોજનનો નિયમ હેટરોઝાયગસ અને હોમોઝાયગસ બંને સ્થિતિમાં લાગુ પડે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રયોગમાં, એક હેટરોઝાયગસ છોડ (Aa)માં જનીન A માટેનું એલિલ પ્રભાવી છે અને જનીન a માટેનું એલિલ અપ્રભાવી છે. જો આ છોડનું સ્વફલન (self-fertilization) કરવામાં આવે અને તેમાંથી ઉત્પન્ન થયેલા બધા બીજ અંકુરિત થઈને છોડ ઉગાડવામાં આવે, તો નીચેના પૈકી કયું પરિણામ વિયોજનના નિયમના અપવાદ તરીકે ગણી શકાય?", "opts": ["બધા છોડમાં પ્રભાવી લક્ષણ દેખાશે.", "25% છોડમાં અપ્રભાવી લક્ષણ દેખાશે અને 75% છોડમાં પ્રભાવી લક્ષણ દેખાશે.", "50% છોડમાં પ્રભાવી લક્ષણ અને 50% છોડમાં અપ્રભાવી લક્ષણ દેખાશે.", "100% છોડમાં મિશ્ર લક્ષણ (intermediate trait) દેખાશે."], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે કારણ કે જો 100% છોડમાં મિશ્ર લક્ષણ દેખાય, તો તે અપૂર્ણ પ્રભુત્વ (incomplete dominance) અથવા સહપ્રભુત્વ (codominance) દર્શાવે છે, જે વિયોજનના નિયમનો અપવાદ છે. વિકલ્પ A, B અને C વિયોજનના નિયમ મુજબના સામાન્ય પરિણામો છે. વિયોજનનો નિયમ અનુસાર, 25% છોડ અપ્રભાવી લક્ષણ દર્શાવે છે, જે વિકલ્પ Bમાં દર્શાવેલ છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રાણીમાં જનીન X અને Y એક જ વર્ણસૂત્ર પર સ્થિત છે અને તેમની વચ્ચેનું અંતર 8 મોર્ગન એકમ (map unit) છે. જો આ પ્રાણીનું સંકરણ હેટરોઝાયગસ (XxYy) સાથે હોમોઝાયગસ અપ્રભાવી (xxyy) વચ્ચે કરવામાં આવે, તો નીચેના પૈકી કયું પરિણામ વિયોજનના નિયમના સંદર્ભમાં અપેક્ષિત નથી?", "opts": ["46% સંતતિમાં પિતૃ સંયોજન (parental combination) દેખાશે.", "8% સંતતિમાં પુનઃસંયોજિત સંયોજન (recombinant combination) દેખાશે.", "50% સંતતિમાં પ્રભાવી લક્ષણ અને 50% સંતતિમાં અપ્રભાવી લક્ષણ દેખાશે.", "4% સંતતિમાં એક જનીન માટે પ્રભાવી અને બીજા જનીન માટે અપ્રભાવી લક્ષણ દેખાશે."], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે કારણ કે વિયોજનનો નિયમ સ્વતંત્ર વહેંચણી માટે છે, પરંતુ સંલગ્ન જનીનો માટે તે લાગુ પડતો નથી. અહીં જનીનો સંલગ્ન છે અને પુનઃસંયોજન પ્રમાણ 8% છે, તેથી 46% પિતૃ સંયોજન અને 4% દરેક પુનઃસંયોજિત સંયોજન અપેક્ષિત છે. વિકલ્પ Cમાં દર્શાવેલ 50-50નું પ્રમાણ સ્વતંત્ર વહેંચણી માટે છે, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
