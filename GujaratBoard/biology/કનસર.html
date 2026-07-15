@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>કેન્સર</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>કેન્સર</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">કેન્સર</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "કયા કર્કરોગ (કેન્સર)ના પ્રકારમાં, ટ્યુમર સપાટી પરના ઉપકળા (epithelial) કોષોમાંથી ઉદ્ભવે છે અને સામાન્ય રીતે અતિશય વૃદ્ધિ પામતા હોવા છતાં, તેના કોષો વ્યવસ્થિત રીતે વહેંચાયેલા હોવાના કારણે 'સૌમ્ય' (benign) ગણવામાં આવે છે?", "opts": ["કાર્સિનોમા (Carcinoma)", "સાર્કોમા (Sarcoma)", "એડિનોકાર્સિનોમા (Adenocarcinoma)", "પેપિલોમા (Papilloma)"], "ans": 3, "exp": "પેપિલોમા (Papilloma) એ ઉપકળા (epithelial) કોષોમાંથી ઉદ્ભવતો સૌમ્ય ટ્યુમર છે, જેમાં કોષો વ્યવસ્થિત રીતે વહેંચાયેલા હોવાના કારણે તે સૌમ્ય ગણવામાં આવે છે. કાર્સિનોમા અને એડિનોકાર્સિનોમા ઘાતક (malignant) ટ્યુમર છે, જ્યારે સાર્કોમા પેશી (connective tissue)માંથી ઉદ્ભવે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કર્કરોગના ઉપચારમાં વપરાતી 'કીમોથેરાપી' (Chemotherapy) પદ્ધતિમાં, કયા તત્ત્વના આધારે કોષવિભાજનને અટકાવવામાં આવે છે, જેથી કર્કરોગી કોષોનો નાશ થાય?", "opts": ["કોષકેન્દ્રીય DNA નકલ (Replication)ને અટકાવીને", "માઇટોકોન્ડ્રિયામાં શ્વસન ક્રિયાને વેગ આપીને", "કોષરસમાં પ્રોટીન સંશ્લેષણને પ્રોત્સાહન આપીને", "વર્ણસૂત્રની સંરચનાને સ્થિર કરીને"], "ans": 0, "exp": "કીમોથેરાપીમાં વપરાતા દવાઓ કોષકેન્દ્રીય DNA નકલ (Replication)ને અટકાવીને કોષવિભાજનને રોકે છે, જેથી કર્કરોગી કોષોનો નાશ થાય. શ્વસન ક્રિયાને વેગ આપવો, પ્રોટીન સંશ્લેષણને પ્રોત્સાહન આપવું અથવા વર્ણસૂત્રની સંરચનાને સ્થિર કરવું એ કીમોથેરાપીના મુખ્ય લક્ષ્ય નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કયો કર્કરોગ (કેન્સર) હોર્મોનલ અસંતુલનના કારણે થાય છે અને તેના ઉપચાર માટે હોર્મોન થેરાપી (Hormone Therapy)નો ઉપયોગ થાય છે?", "opts": ["ફેફસાનો કર્કરોગ (Lung Cancer)", "સ્તન કર્કરોગ (Breast Cancer)", "મગજનો કર્કરોગ (Brain Cancer)", "ત્વચાનો કર્કરોગ (Skin Cancer)"], "ans": 1, "exp": "સ્તન કર્કરોગ (Breast Cancer) હોર્મોનલ અસંતુલનના કારણે થાય છે અને તેના ઉપચાર માટે હોર્મોન થેરાપીનો ઉપયોગ થાય છે. ફેફસાનો, મગજનો અને ત્વચાનો કર્કરોગ હોર્મોનલ અસંતુલન સાથે સીધો સંબંધ ધરાવતા નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કર્કરોગી કોષોની વૃદ્ધિમાં કયા જનીન (Gene)ની અતિશય સક્રિયતા (Overactivation) નિર્ણાયક ભૂમિકા ભજવે છે, જે કોષવિભાજનને નિયંત્રિત કરતાં પ્રોટીનનું ઉત્પાદન કરે છે?", "opts": ["ટ્યુમર સપ્રેસર જનીન (Tumor Suppressor Gene)", "ઓન્કોજીન (Oncogene)", "રિપેર જનીન (Repair Gene)", "એપોપ્ટોસિસ જનીન (Apoptosis Gene)"], "ans": 1, "exp": "ઓન્કોજીન (Oncogene)ની અતિશય સક્રિયતા કર્કરોગી કોષોની વૃદ્ધિમાં નિર્ણાયક ભૂમિકા ભજવે છે, કારણ કે તે કોષવિભાજનને પ્રોત્સાહન આપતાં પ્રોટીનનું ઉત્પાદન કરે છે. ટ્યુમર સપ્રેસર જનીન કોષવિભાજનને રોકે છે, જ્યારે રિપેર જનીન અને એપોપ્ટોસિસ જનીન કોષની મારામારી અને ડીએનએની મારામારી સાથે સંબંધિત છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કયા કર્કરોગમાં, કોષોની અસાધારણ વૃદ્ધિના કારણે રક્તવાહિનીઓ (Blood Vessels) પર દબાણ પડતાં, રક્તસ્રાવ (Hemorrhage) થવાની શક્યતા સૌથી વધુ રહે છે?", "opts": ["યકૃતનો કર્કરોગ (Liver Cancer)", "મગજનો કર્કરોગ (Brain Cancer)", "આંતરડાનો કર્કરોગ (Intestinal Cancer)", "હાડકાનો કર્કરોગ (Bone Cancer)"], "ans": 1, "exp": "મગજનો કર્કરોગ (Brain Cancer)માં, કોષોની અસાધારણ વૃદ્ધિના કારણે મગજની રક્તવાહિનીઓ પર દબાણ પડતાં, રક્તસ્રાવ થવાની શક્યતા સૌથી વધુ રહે છે. યકૃત, આંતરડા અને હાડકાનો કર્કરોગમાં આ સમસ્યા એટલી ગંભીર નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'ટેલોમેરેઝ' ઉત્સેચકની સક્રિયતા વધી જવાનું મુખ્ય કારણ શું છે?", "opts": ["ટેલોમિયરની લંબાઈ ઘટવાને રોકવા અને કોષવિભાજનને અમર્યાદિત બનાવવા", "DNA ની માહિતીને સીધી રીતે નકલ કરવા માટે જરૂરી ઉર્જા પૂરી પાડવા", "કોષકેન્દ્રની ઝીણી રચનાને સ્થિર કરવા અને વર્ણસૂત્રોની ગોઠવણી સુધારવા", "પ્રોટીન સંશ્લેષણને વેગ આપવા અને કોષની વૃદ્ધિને પ્રોત્સાહન આપવા"], "ans": 0, "exp": "ટેલોમેરેઝ ઉત્સેચક કોષવિભાજન દરમ્યાન ટેલોમિયરની લંબાઈ જાળવી રાખે છે, જેના કારણે કોષો અમર્યાદિત વખત વિભાજિત થઈ શકે છે. આ કેન્સરના કોષોમાં જોવા મળે છે. બાકીના વિકલ્પો: B) DNA નકલ માટે ઉર્જા પૂરી પાડવી એ ટેલોમેરેઝનું કામ નથી, C) કોષકેન્દ્રની રચનાને સ્થિર કરવા ટેલોમેરેઝ જવાબદાર નથી, D) પ્રોટીન સંશ્લેષણ ટેલોમેરેઝ સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 12 - Chapter 8: અનુવંશિકતા અને ઉત્ક્રાંતિ (જનીન અને વર્ણસૂત્ર)", "ch": ""}, {"q": "કેન્સરના રોગીને 'મોનોક્લોનલ એન્ટીબોડી થેરાપી' આપવામાં આવે છે. આ થેરાપી કયા સિદ્ધાંત પર કામ કરે છે?", "opts": ["કેન્સર કોષો પરના વિશિષ્ટ પ્રોટીનને લક્ષ્ય બનાવીને પ્રતિરક્ષાતંત્રને સક્રિય કરવા", "કોષવિભાજનને રોકવા માટે DNA ની નકલને અટકાવવા", "ટ્યુમરના રક્ત પુરવઠાને કાપી નાખવા માટે રક્તવાહિનીઓને નષ્ટ કરવા", "કેન્સર કોષોની ચયાપચય ક્રિયાને વેગ આપવા અને તેમને સામાન્ય કોષોમાં પરિવર્તિત કરવા"], "ans": 0, "exp": "મોનોક્લોનલ એન્ટીબોડી થેરાપી કેન્સર કોષો પરના વિશિષ્ટ એન્ટિજન (પ્રોટીન)ને ઓળખીને બંધાય છે અને પ્રતિરક્ષાતંત્રને સક્રિય કરે છે. બાકીના વિકલ્પો: B) DNA નકલ અટકાવવા એ કીમોથેરાપીનો ભાગ છે, C) રક્તવાહિનીઓને નષ્ટ કરવા એ એન્જિયોજેનેસિસ ઇન્હિબિટરનું કામ છે, D) ચયાપચય ક્રિયાને વેગ આપવો એ કેન્સર ઉપચારનો હેતુ નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'p53 જનીન' નિષ્ક્રિય થવા પર શું પરિણામ થાય છે?", "opts": ["કોષવિભાજનની ગતિ ઘટે છે અને કોષ મૃત્યુ પામે છે", "DNA નું નુકસાન થવા છતાં કોષ વિભાજન ચાલુ રાખે છે", "કોષની ઉર્જા ઉત્પાદન ક્ષમતા ઘટે છે અને ચયાપચય અટકે છે", "કોષો વર્ણસૂત્રોની સંખ્યામાં ઘટાડો કરે છે અને અલિંગી પ્રજનન શરૂ કરે છે"], "ans": 1, "exp": "p53 જનીન 'ટ્યુમર સપ્રેસર' તરીકે કામ કરે છે. જ્યારે તે નિષ્ક્રિય થાય છે, ત્યારે DNA નું નુકસાન થવા છતાં કોષ વિભાજન ચાલુ રહે છે, જે કેન્સર તરફ દોરી જાય છે. બાકીના વિકલ્પો: A) p53 નિષ્ક્રિય થવા પર કોષવિભાજન અટકતું નથી, C) ઉર્જા ઉત્પાદન સાથે p53 નો સીધો સંબંધ નથી, D) વર્ણસૂત્રોની સંખ્યામાં ઘટાડો અને અલિંગી પ્રજનન p53 સાથે સંબંધિત નથી.", "ref": "Std 12 - Chapter 8: અનુવંશિકતા અને ઉત્ક્રાંતિ (જનીન અને વર્ણસૂત્ર)", "ch": ""}, {"q": "કેન્સરના રોગીને 'રેડિયેશન થેરાપી' આપવામાં આવે છે. આ થેરાપી કયા તબક્કે સૌથી અસરકારક હોય છે?", "opts": ["કોષવિભાજનના M તબક્કે (મિટોસિસ દરમ્યાન)", "કોષવિભાજનના G1 તબક્કે (પ્રથમ ગેપ તબક્કે)", "કોષવિભાજનના S તબક્કે (DNA સંશ્લેષણ દરમ્યાન)", "કોષવિભાજનના G2 તબક્કે (બીજા ગેપ તબક્કે)"], "ans": 0, "exp": "રેડિયેશન થેરાપી કોષવિભાજનના M તબક્કે (મિટોસિસ) સૌથી અસરકારક હોય છે, કારણ કે આ તબક્કે વર્ણસૂત્રો સૌથી વધુ સંવેદનશીલ હોય છે. બાકીના વિકલ્પો: B) G1 તબક્કે કોષ ઓછો સંવેદનશીલ હોય છે, C) S તબક્કે DNA સંશ્લેષણ દરમ્યાન રેડિયેશનનું પ્રમાણ ઓછું અસરકારક હોય છે, D) G2 તબક્કે પણ M તબક્કા જેટલી અસરકારકતા નથી.", "ref": "Std 12 - Chapter 4: કોષ અને કોષવિભાજન", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'વૉરબર્ગ અસર' (Warburg Effect) શું સૂચવે છે?", "opts": ["કોષો ઓક્સિજનની હાજરીમાં પણ ગ્લાયકોલાઇસિસ દ્વારા ઉર્જા ઉત્પન્ન કરે છે", "કોષો ઓક્સિજનની ગેરહાજરીમાં શ્વસન ક્રિયા ચાલુ રાખે છે", "કોષો પ્રોટીનના વિઘટન દ્વારા ઉર્જા મેળવે છે", "કોષો કાર્બોદિતના સંપૂર્ણ ઓક્સિડેશન દ્વારા ઉર્જા ઉત્પન્ન કરે છે"], "ans": 0, "exp": "વૉરબર્ગ અસરમાં, કેન્સરના કોષો ઓક્સિજનની હાજરીમાં પણ ગ્લાયકોલાઇસિસ દ્વારા ઉર્જા ઉત્પન્ન કરે છે, જે સામાન્ય કોષો કરતાં ઓછી કુશળ પદ્ધતિ છે. બાકીના વિકલ્પો: B) ઓક્સિજનની ગેરહાજરીમાં શ્વસન ક્રિયા અશક્ય છે, C) પ્રોટીનના વિઘટન દ્વારા ઉર્જા મેળવવી એ વૉરબર્ગ અસર નથી, D) કાર્બોદિતના સંપૂર્ણ ઓક્સિડેશનથી ઉર્જા મેળવવી એ સામાન્ય શ્વસન ક્રિયા છે.", "ref": "Std 12 - Chapter 5: શ્વસન અને ઉર્જા ઉત્પાદન", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'એપોપ્ટોસિસ' (પ્રોગ્રામ્ડ કોષ મૃત્યુ) ન થવાનું મુખ્ય કારણ કયું છે?", "opts": ["p53 જનીનની અતિશય સક્રિયતા", "Bcl-2 પ્રોટીનની અતિશય ઉત્પત્તિ", "ટેલોમેરેઝ ઉત્સેચકની નિષ્ક્રિયતા", "રસાયણિક સંકેતોની અછત"], "ans": 1, "exp": "Bcl-2 પ્રોટીન એપોપ્ટોસિસને અટકાવે છે, જ્યારે p53 એપોપ્ટોસિસને પ્રોત્સાહન આપે છે. ટેલોમેરેઝ ઉત્સેચક કોષની અમરતા સાથે સંબંધિત છે, રસાયણિક સંકેતોની અછત એપોપ્ટોસિસનું કારણ બની શકે પરંતુ મુખ્ય કારણ Bcl-2ની અતિશય ઉત્પત્તિ છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'એન્જિયોજેનેસિસ' (નવી રક્તવાહિનીઓનું નિર્માણ) કયા પદાર્થ દ્વારા ઉત્તેજિત થાય છે?", "opts": ["VEGF (Vascular Endothelial Growth Factor)", "ઇન્ટરફેરોન", "ઇન્ટરલ્યુકિન", "ટ્યુમર નેક્રોસિસ ફેક્ટર (TNF)"], "ans": 0, "exp": "VEGF એન્જિયોજેનેસિસને ઉત્તેજિત કરે છે, જ્યારે ઇન્ટરફેરોન, ઇન્ટરલ્યુકિન અને TNF પ્રતિરક્ષા પ્રતિક્રિયાઓ સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'મેટાસ્ટેસિસ' (કેન્સરનો ફેલાવો) કયા કારણસર થાય છે?", "opts": ["કોષોની અતિશય વૃદ્ધિ", "કોષોની ચોંટણ ક્ષમતામાં ઘટાડો", "કોષોની પલાયન ક્ષમતામાં વધારો", "કોષોની વૃદ્ધિ દરમાં ઘટાડો"], "ans": 2, "exp": "મેટાસ્ટેસિસ કોષોની પલાયન ક્ષમતામાં વધારા કારણે થાય છે, જ્યારે અતિશય વૃદ્ધિ, ચોંટણ ક્ષમતામાં ઘટાડો અને વૃદ્ધિ દરમાં ઘટાડો મેટાસ્ટેસિસના મુખ્ય કારણો નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના ઉપચારમાં વપરાતી 'ઇમ્યુનોથેરાપી' કયા સિદ્ધાંત પર આધારિત છે?", "opts": ["કેન્સર કોષોની વૃદ્ધિને રોકવા", "પ્રતિરક્ષા તંત્રને કેન્સર કોષો વિરુદ્ધ સક્રિય કરવા", "કેન્સર કોષોને રસાયણિક દ્વારા નષ્ટ કરવા", "કેન્સર કોષોની વૃદ્ધિને હોર્મોન દ્વારા નિયંત્રિત કરવા"], "ans": 1, "exp": "ઇમ્યુનોથેરાપી પ્રતિરક્ષા તંત્રને કેન્સર કોષો વિરુદ્ધ સક્રિય કરવા પર આધારિત છે, જ્યારે અન્ય વિકલ્પો કીમોથેરાપી, રેડિયેશન થેરાપી અને હોર્મોન થેરાપી સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'હાઇપોક્સિયા' (ઓક્સિજનની અછત) કયા પરિણામ સ્વરૂપે થાય છે?", "opts": ["કોષોની વૃદ્ધિ દરમાં ઘટાડો", "એનજિયોજેનેસિસમાં વધારો", "કોષોની મૃત્યુ દરમાં વધારો", "કોષોની પલાયન ક્ષમતામાં ઘટાડો"], "ans": 1, "exp": "હાઇપોક્સિયા એનજિયોજેનેસિસમાં વધારો કરે છે, જ્યારે કોષોની વૃદ્ધિ દરમાં ઘટાડો, મૃત્યુ દરમાં વધારો અને પલાયન ક્ષમતામાં ઘટાડો હાઇપોક્સિયાના પરિણામો નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'મેટાસ્ટેસિસ' દરમિયાન, કયા પ્રોટીનની અભિવ્યક્તિ વધી જવાથી કોષો રક્તપ્રવાહ દ્વારા શરીરના અન્ય ભાગોમાં ફેલાય છે?", "opts": ["મેટલોપ્રોટીનેઝ (Matrix Metalloproteinases - MMPs)", "ટ્યુબ્યુલિન (Tubulin)", "હિસ્ટોન (Histone)", "કોલેજન (Collagen)"], "ans": 0, "exp": "મેટલોપ્રોટીનેઝ (MMPs) એ એવા ઉત્સેચકો છે જે કોષવચ્ચેના પદાર્થો (Extracellular Matrix - ECM) નું વિઘટન કરે છે, જેથી કેન્સરના કોષો રક્તવાહિનીઓમાં પ્રવેશી શકે અને શરીરના અન્ય ભાગોમાં ફેલાઈ શકે. ટ્યુબ્યુલિન કોષકંકાલ સાથે સંબંધિત છે, હિસ્ટોન DNA પેકેજિંગમાં ભૂમિકા ભજવે છે, અને કોલેજન ECM નું ઘટક છે પરંતુ તેના વિઘટનમાં MMPs જવાબદાર છે.", "ref": "Std 12 - Chapter 8: મનુષ્યમાં રોગો અને તેમના નિયંત્રણ (કેન્સર)", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'હાઇપોક્સિયા-ઇન્ડ્યુસિબલ ફેક્ટર 1-અલ્ફા (HIF-1α)' ની ભૂમિકા શું છે?", "opts": ["તે કોષીય શ્વસનને ઉત્તેજિત કરે છે", "તે એન્જિયોજેનેસિસને ઉત્તેજિત કરે છે અને ગ્લાયકોલિસિસને પ્રોત્સાહન આપે છે", "તે કોષીય વિભાજનને અટકાવે છે", "તે DNA મરામતને ઉત્તેજિત કરે છે"], "ans": 1, "exp": "HIF-1α એ હાઇપોક્સિયા (ઓક્સિજનની અછત) દરમિયાન સક્રિય થતું પ્રોટીન છે જે એન્જિયોજેનેસિસ (નવી રક્તવાહિનીઓનું નિર્માણ) અને ગ્લાયકોલિસિસ (શર્કરાનું વિઘટન) ને ઉત્તેજિત કરે છે, જેથી કેન્સરના કોષો ઓક્સિજનની અછત વચ્ચે પણ જીવિત રહી શકે. બાકીના વિકલ્પો HIF-1α ની ભૂમિકા સાથે સુસંગત નથી.", "ref": "Std 12 - Chapter 8: મનુષ્યમાં રોગો અને તેમના નિયંત્રણ (કેન્સર)", "ch": ""}, {"q": "કેન્સરના ઉપચારમાં વપરાતી 'PARP અવરોધકો' (PARP Inhibitors) કયા કોષીય પ્રક્રિયાને અટકાવે છે?", "opts": ["DNA પ્રતિકૃતિ (Replication)", "DNA મરામત (Repair)", "RNA સંશ્લેષણ (Transcription)", "પ્રોટીન સંશ્લેષણ (Translation)"], "ans": 1, "exp": "PARP (Poly ADP Ribose Polymerase) એ DNA મરામત પ્રક્રિયામાં ભૂમિકા ભજવતું પ્રોટીન છે. PARP અવરોધકો આ પ્રક્રિયાને અટકાવે છે, જેથી કેન્સરના કોષોમાં DNA નુકસાન થાય અને કોષ મૃત્યુ થાય. બાકીના વિકલ્પો PARP ની ભૂમિકા સાથે સંબંધિત નથી.", "ref": "Std 12 - Chapter 8: મનુષ્યમાં રોગો અને તેમના નિયંત્રણ (કેન્સર)", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'E-cadherin' પ્રોટીનની અભાવમાં શું પરિણામ થાય છે?", "opts": ["કોષો વચ્ચેના જોડાણમાં વધારો થાય છે", "કોષો વચ્ચેના જોડાણમાં ઘટાડો થાય છે અને મેટાસ્ટેસિસ વધે છે", "કોષીય વિભાજન અટકી જાય છે", "કોષીય શ્વસનમાં વધારો થાય છે"], "ans": 1, "exp": "E-cadherin એ કોષો વચ્ચેના જોડાણ (Cell-Cell Adhesion) માટે જવાબદાર પ્રોટીન છે. તેના અભાવમાં કોષો વચ્ચેનું જોડાણ ઘટે છે, જેથી કેન્સરના કોષો સરળતાથી અલગ થઈ શકે અને મેટાસ્ટેસિસ થઈ શકે. બાકીના વિકલ્પો E-cadherin ની ભૂમિકા સાથે સુસંગત નથી.", "ref": "Std 12 - Chapter 8: મનુષ્યમાં રોગો અને તેમના નિયંત્રણ (કેન્સર)", "ch": ""}, {"q": "કેન્સરના કોષોમાં 'BRCA1' અને 'BRCA2' જનીનોની ભૂમિકા શું છે?", "opts": ["તે કોષીય વિભાજનને ઉત્તેજિત કરે છે", "તે DNA મરામત અને જનીન સ્થિરતા જાળવવામાં મદદ કરે છે", "તે કોષીય શ્વસનને નિયંત્રિત કરે છે", "તે પ્રોટીન સંશ્લેષણને ઉત્તેજિત કરે છે"], "ans": 1, "exp": "BRCA1 અને BRCA2 જનીનો DNA મરામત અને જનીન સ્થિરતા જાળવવામાં મહત્વની ભૂમિકા ભજવે છે. આ જનીનોના મ્યુટેશનથી કેન્સરનો ખાસ કરીને સ્તન કેન્સર અને અંડાશયના કેન્સરનો ખતરો વધી જાય છે. બાકીના વિકલ્પો આ જનીનોની ભૂમિકા સાથે સુસંગત નથી.", "ref": "Std 12 - Chapter 8: મનુષ્યમાં રોગો અને તેમના નિયંત્રણ (કેન્સર)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
