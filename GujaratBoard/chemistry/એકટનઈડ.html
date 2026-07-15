@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>એક્ટિનાઈડ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>એક્ટિનાઈડ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">એક્ટિનાઈડ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 18 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 18 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ શ્રેણીના તત્ત્વો રેડિયોસક્રિય હોય છે અને કુદરતી રીતે મળતા નથી", "એક્ટિનિયમ (Ac) થી લોરેન્સિયમ (Lr) સુધીના તત્ત્વો આ શ્રેણીમાં આવે છે", "આ શ્રેણીના તત્ત્વો f-વિભાગના છે અને તેમના ઇલેક્ટ્રોન 5f કક્ષકમાં ભરાય છે", "થોરિયમ (Th) અને યુરેનિયમ (U) કુદરતી રીતે મળતા એક્ટિનાઈડ છે"], "ans": 0, "exp": "વિકલ્પ A ખોટો છે કારણ કે એક્ટિનાઈડ શ્રેણીના કેટલાક તત્ત્વો જેમ કે થોરિયમ (Th) અને યુરેનિયમ (U) કુદરતી રીતે મળે છે. બાકીના વિકલ્પો સાચા છે: એક્ટિનિયમથી લોરેન્સિયમ સુધીના તત્ત્વો એક્ટિનાઈડ શ્રેણીમાં આવે છે, તેઓ f-વિભાગના છે અને તેમના ઇલેક્ટ્રોન 5f કક્ષકમાં ભરાય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ સંકોચન વિશે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["એક્ટિનાઈડ શ્રેણીમાં પરમાણ્વીય ત્રિજ્યા ઘટતી જાય છે", "આ સંકોચન લેન્થેનાઈડ સંકોચન કરતાં વધુ પ્રબળ હોય છે", "5f ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ આ સંકોચન માટે જવાબદાર છે", "આ સંકોચનને કારણે એક્ટિનાઈડ શ્રેણીના તત્ત્વોના રાસાયણિક ગુણધર્મો સમાન રહે છે"], "ans": 3, "exp": "વિકલ્પ D ખોટો છે કારણ કે એક્ટિનાઈડ સંકોચનને લીધે તત્ત્વોના રાસાયણિક ગુણધર્મોમાં થોડો ફેરફાર થાય છે, પરંતુ તેઓ સંપૂર્ણપણે સમાન રહેતા નથી. બાકીના વિકલ્પો સાચા છે: એક્ટિનાઈડ શ્રેણીમાં પરમાણ્વીય ત્રિજ્યા ઘટે છે, આ સંકોચન લેન્થેનાઈડ સંકોચન કરતાં વધુ પ્રબળ હોય છે, અને 5f ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ આ માટે જવાબદાર છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોમાં નીચેનામાંથી કયું તત્ત્વ +7 ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે?", "opts": ["યુરેનિયમ (U)", "નેપ્ચ્યુનિયમ (Np)", "પ્લુટોનિયમ (Pu)", "અમેરિસિયમ (Am)"], "ans": 1, "exp": "નેપ્ચ્યુનિયમ (Np) એક્ટિનાઈડ શ્રેણીમાં એકમાત્ર તત્ત્વ છે જે +7 ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે. યુરેનિયમ +6 સુધી, પ્લુટોનિયમ +6 સુધી અને અમેરિસિયમ +4 સુધીની ઓક્સિડેશન અવસ્થા દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના સંદર્ભમાં નીચેનામાંથી કયું જોડકું ખોટું છે?", "opts": ["થોરિયમ (Th) - પરમાણુ ઊર્જા ઉત્પાદનમાં ઉપયોગી", "યુરેનિયમ (U) - પરમાણુ બોમ્બમાં ઉપયોગી", "પ્લુટોનિયમ (Pu) - કુદરતી રીતે વિપુલ પ્રમાણમાં મળે છે", "ક્યુરિયમ (Cm) - કૃત્રિમ રીતે બનાવેલું તત્ત્વ"], "ans": 2, "exp": "વિકલ્પ C ખોટો છે કારણ કે પ્લુટોનિયમ (Pu) કુદરતી રીતે ખૂબ જ ઓછા પ્રમાણમાં મળે છે અને મુખ્યત્વે કૃત્રિમ રીતે બનાવવામાં આવે છે. બાકીના વિકલ્પો સાચા છે: થોરિયમ પરમાણુ ઊર્જા ઉત્પાદનમાં ઉપયોગી છે, યુરેનિયમ પરમાણુ બોમ્બમાં ઉપયોગી છે, અને ક્યુરિયમ કૃત્રિમ રીતે બનાવેલું તત્ત્વ છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના રાસાયણિક ગુણધર્મો વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["આ તત્ત્વો મુખ્યત્વે +2 ઓક્સિડેશન અવસ્થા દર્શાવે છે", "આ તત્ત્વોના સંયોજનો મોટાભાગે રંગહીન હોય છે", "આ તત્ત્વો વિવિધ ઓક્સિડેશન અવસ્થાઓ દર્શાવી શકે છે", "આ તત્ત્વોની રાસાયણિક પ્રતિક્રિયાત્મકતા ખૂબ જ ઓછી હોય છે"], "ans": 2, "exp": "વિકલ્પ C સાચો છે કારણ કે એક્ટિનાઈડ શ્રેણીના તત્ત્વો વિવિધ ઓક્સિડેશન અવસ્થાઓ દર્શાવી શકે છે (+3 થી +7 સુધી). વિકલ્પ A ખોટો છે કારણ કે આ તત્ત્વો મુખ્યત્વે +3 અને +4 ઓક્સિડેશન અવસ્થા દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે તેમના સંયોજનો મોટાભાગે રંગીન હોય છે. વિકલ્પ D ખોટો છે કારણ કે આ તત્ત્વોની રાસાયણિક પ્રતિક્રિયાત્મકતા વધુ હોય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી કયું તત્ત્વ તેના +3 ઓક્સિડેશન અવસ્થામાં સૌથી વધુ સ્થિર હોય છે અને તેનું કારણ કયું છે?", "opts": ["એસિટિનિયમ (Ac), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષા પૂર્ણપણે ભરેલી હોય છે", "થોરિયમ (Th), કારણ કે તેની +4 ઓક્સિડેશન અવસ્થા કરતાં +3 ઓક્સિડેશન અવસ્થા વધુ સ્થિર હોય છે", "યુરેનિયમ (U), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષામાં 3 ઇલેક્ટ્રોન હોય છે અને +3 અવસ્થા સ્થિર હોય છે", "પ્લુટોનિયમ (Pu), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષામાં 5 ઇલેક્ટ્રોન હોય છે અને +3 અવસ્થા સ્થિર હોય છે"], "ans": 0, "exp": "એસિટિનિયમ (Ac) તેની +3 ઓક્સિડેશન અવસ્થામાં સૌથી વધુ સ્થિર હોય છે કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષા પૂર્ણપણે ભરેલી હોય છે, જેને લીધે તેની રાસાયણિક ક્રિયાશીલતા ઓછી હોય છે. થોરિયમ (Th)ની +4 ઓક્સિડેશન અવસ્થા વધુ સ્થિર હોય છે, યુરેનિયમ (U) અને પ્લુટોનિયમ (Pu)ની +3 અવસ્થા ઓછી સ્થિર હોય છે કારણ કે તેમની 5f કક્ષામાં ઇલેક્ટ્રોનની સંખ્યા સંપૂર્ણ ભરાયેલી નથી.", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના સંદર્ભમાં, નીચેનામાંથી કયું તત્ત્વ તેની +5 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે અને તેનું ઉદાહરણ કયું છે?", "opts": ["પ્રોટેક્ટિનિયમ (Pa), ઉદાહરણ: Pa2O5", "યુરેનિયમ (U), ઉદાહરણ: UO2", "નેપ્ટ્યુનિયમ (Np), ઉદાહરણ: NpO3", "એમેરિસિયમ (Am), ઉદાહરણ: Am2O3"], "ans": 0, "exp": "પ્રોટેક્ટિનિયમ (Pa) તેની +5 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે અને તેનું ઉદાહરણ Pa2O5 છે. યુરેનિયમ (U) તેની +6 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે (UO2), નેપ્ટ્યુનિયમ (Np) તેની +5 ઓક્સિડેશન અવસ્થામાં ઓછું સ્થિર હોય છે, અને એમેરિસિયમ (Am) તેની +3 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે (Am2O3).", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી કયું તત્ત્વ તેની +6 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે અને તેનું કારણ કયું છે?", "opts": ["થોરિયમ (Th), કારણ કે તેની 6d ઇલેક્ટ્રોનિક કક્ષા સક્રિય હોય છે", "યુરેનિયમ (U), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષામાં 3 ઇલેક્ટ્રોન હોય છે અને +6 અવસ્થા સ્થિર હોય છે", "પ્લુટોનિયમ (Pu), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષામાં 4 ઇલેક્ટ્રોન હોય છે", "એસિટિનિયમ (Ac), કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષા પૂર્ણપણે ભરેલી હોય છે"], "ans": 1, "exp": "યુરેનિયમ (U) તેની +6 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે કારણ કે તેની 5f ઇલેક્ટ્રોનિક કક્ષામાં 3 ઇલેક્ટ્રોન હોય છે અને +6 અવસ્થા સ્થિર હોય છે. થોરિયમ (Th) તેની +4 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે, પ્લુટોનિયમ (Pu) તેની +4 અને +6 ઓક્સિડેશન અવસ્થામાં ઓછું સ્થિર હોય છે, અને એસિટિનિયમ (Ac) તેની +3 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે.", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["એક્ટિનાઈડ તત્ત્વોની રેડિયોએક્ટિવિટી લેન્થેનાઈડ તત્ત્વો કરતાં વધુ હોય છે", "એક્ટિનાઈડ તત્ત્વોની 5f ઇલેક્ટ્રોનિક કક્ષા લેન્થેનાઈડ તત્ત્વોની 4f ઇલેક્ટ્રોનિક કક્ષા કરતાં વધુ પ્રભાવિત હોય છે", "એક્ટિનાઈડ તત્ત્વોની ઓક્સિડેશન અવસ્થાઓ લેન્થેનાઈડ તત્ત્વો કરતાં ઓછી હોય છે", "એક્ટિનાઈડ તત્ત્વોની આયનિક ત્રિજ્યા લેન્થેનાઈડ તત્ત્વો કરતાં મોટી હોય છે"], "ans": 2, "exp": "એક્ટિનાઈડ તત્ત્વોની ઓક્સિડેશન અવસ્થાઓ લેન્થેનાઈડ તત્ત્વો કરતાં વધુ હોય છે, નહીં કે ઓછી. એક્ટિનાઈડ તત્ત્વોની રેડિયોએક્ટિવિટી, 5f ઇલેક્ટ્રોનિક કક્ષાની પ્રભાવિતતા, અને આયનિક ત્રિજ્યા લેન્થેનાઈડ તત્ત્વો કરતાં વધુ હોય છે.", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી કયું તત્ત્વ તેની +7 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે અને તેનું ઉદાહરણ કયું છે?", "opts": ["નેપ્ટ્યુનિયમ (Np), ઉદાહરણ: NpO5", "પ્લુટોનિયમ (Pu), ઉદાહરણ: PuO3", "એમેરિસિયમ (Am), ઉદાહરણ: Am2O7", "ક્યુરિયમ (Cm), ઉદાહરણ: CmO4"], "ans": 0, "exp": "નેપ્ટ્યુનિયમ (Np) તેની +7 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે અને તેનું ઉદાહરણ NpO5 છે. પ્લુટોનિયમ (Pu) તેની +6 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે (PuO3), એમેરિસિયમ (Am) તેની +3 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે (Am2O3), અને ક્યુરિયમ (Cm) તેની +3 ઓક્સિડેશન અવસ્થામાં સ્થિર હોય છે (CmO2).", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી નીચેનામાંથી કયું તત્ત્વ તેના સંયોજનોમાં સૌથી વધુ સ્થિર +4 ઓક્સિડેશન અવસ્થા દર્શાવે છે, પરંતુ તેની +3 અવસ્થા અસ્થિર હોય છે?", "opts": ["થોરિયમ (Th)", "યુરેનિયમ (U)", "પ્લુટોનિયમ (Pu)", "સીરિયમ (Ce)"], "ans": 0, "exp": "થોરિયમ (Th) એ એક્ટિનાઈડ શ્રેણીનું પ્રથમ તત્ત્વ છે, જે મુખ્યત્વે +4 ઓક્સિડેશન અવસ્થા દર્શાવે છે અને તે ખૂબ જ સ્થિર હોય છે. તેની +3 અવસ્થા અસ્થિર હોય છે કારણ કે તેના ઇલેક્ટ્રોનિક બંધારણમાં 5f કક્ષક ખાલી હોય છે. યુરેનિયમ (U) અને પ્લુટોનિયમ (Pu) વિવિધ ઓક્સિડેશન અવસ્થાઓ દર્શાવે છે, પરંતુ તેમની +3 અવસ્થા પણ સ્થિર હોય છે. સીરિયમ (Ce) લેન્થેનાઈડ શ્રેણીનું તત્ત્વ છે, એક્ટિનાઈડ નહીં.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગનાં તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના સંદર્ભમાં, નીચેનામાંથી કયું જોડકું સાચું નથી?", "opts": ["થોરિયમ (Th) - +4 ઓક્સિડેશન અવસ્થા સૌથી સ્થિર", "યુરેનિયમ (U) - +6 ઓક્સિડેશન અવસ્થા સ્થિર", "પ્લુટોનિયમ (Pu) - +7 ઓક્સિડેશન અવસ્થા સ્થિર", "અમેરિસિયમ (Am) - +3 ઓક્સિડેશન અવસ્થા સૌથી સ્થિર"], "ans": 2, "exp": "પ્લુટોનિયમ (Pu) +7 ઓક્સિડેશન અવસ્થા દર્શાવતું નથી. તે મુખ્યત્વે +3, +4, +5, અને +6 ઓક્સિડેશન અવસ્થાઓ દર્શાવે છે. બાકીના જોડકાં સાચાં છે: થોરિયમ (Th) +4 અવસ્થા સ્થિર, યુરેનિયમ (U) +6 અવસ્થા સ્થિર, અને અમેરિસિયમ (Am) +3 અવસ્થા સૌથી સ્થિર છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગનાં તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના ઇલેક્ટ્રોનિક બંધારણ સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે?\n(1) એક્ટિનિયમ (Ac) નું ઇલેક્ટ્રોનિક બંધારણ [Rn] 6d¹ 7s² છે.\n(2) થોરિયમ (Th) નું ઇલેક્ટ્રોનિક બંધારણ [Rn] 5f¹ 6d¹ 7s² છે.\n(3) પ્રોટેક્ટિનિયમ (Pa) નું ઇલેક્ટ્રોનિક બંધારણ [Rn] 5f² 6d¹ 7s² છે.\n(4) યુરેનિયમ (U) નું ઇલેક્ટ્રોનિક બંધારણ [Rn] 5f³ 6d¹ 7s² છે.", "opts": ["માત્ર (2)", "માત્ર (3)", "(2) અને (4)", "(1) અને (3)"], "ans": 0, "exp": "વિધાન (2) ખોટું છે કારણ કે થોરિયમ (Th) નું ઇલેક્ટ્રોનિક બંધારણ [Rn] 6d² 7s² છે, જેમાં 5f કક્ષક ખાલી હોય છે. બાકીના વિધાનો સાચાં છે: એક્ટિનિયમ (Ac) [Rn] 6d¹ 7s², પ્રોટેક્ટિનિયમ (Pa) [Rn] 5f² 6d¹ 7s², અને યુરેનિયમ (U) [Rn] 5f³ 6d¹ 7s² છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગનાં તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?\n(1) એક્ટિનાઈડ શ્રેણીના તત્ત્વોના આયનો રંગીન હોય છે કારણ કે f-f સંક્રમણ થાય છે.\n(2) એક્ટિનિયમ (Ac) એક્ટિનાઈડ શ્રેણીનું પ્રથમ તત્ત્વ છે અને તેના સંયોજનો રંગવિહીન હોય છે.\n(3) એક્ટિનાઈડ શ્રેણીના તત્ત્વો રેડિયોસક્રિય હોય છે અને તેમના સમસ્થાનિકોનો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે.\n(4) એક્ટિનાઈડ શ્રેણીના તત્ત્વોના ઓક્સિડેશન અવસ્થા +2 થી +7 સુધીની હોય છે, પરંતુ +3 અને +4 અવસ્થા વધુ સ્થિર હોય છે.", "opts": ["વિધાન (1) અને (2) ખોટાં છે.", "વિધાન (2) ખોટું છે.", "વિધાન (3) ખોટું છે.", "વિધાન (4) ખોટું છે."], "ans": 1, "exp": "વિધાન (2) ખોટું છે કારણ કે એક્ટિનિયમ (Ac) એક્ટિનાઈડ શ્રેણીનું પ્રથમ તત્ત્વ નથી, થોરિયમ (Th) પ્રથમ તત્ત્વ છે. એક્ટિનિયમ (Ac)ને ઘણીવાર એક્ટિનાઈડ શ્રેણીનું પ્રથમ તત્ત્વ ગણવામાં આવતું નથી કારણ કે તેનું ઇલેક્ટ્રોનિક બંધારણ અન્ય એક્ટિનાઈડ તત્ત્વોથી અલગ હોય છે. બાકીના વિધાનો સાચાં છે: એક્ટિનાઈડ શ્રેણીના તત્ત્વોના આયનો રંગીન હોય છે (f-f સંક્રમણને કારણે), તેઓ રેડિયોસક્રિય હોય છે અને તેમના ઓક્સિડેશન અવસ્થા +2 થી +7 સુધીની હોય છે.", "ref": "Std 12 - પ્રકરણ 8: d અને f-વિભાગના તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી કયું તત્ત્વ તેના +4 ઓક્સિડેશન અવસ્થામાં સૌથી વધુ સ્થિર હોય છે અને તે જ સમયે તેના ડાયોક્સાઇડ (O₂) સાથે સંયોજન બનાવી શકે છે?", "opts": ["થોરિયમ (Th)", "યુરેનિયમ (U)", "પ્લુટોનિયમ (Pu)", "એમેરિકિયમ (Am)"], "ans": 1, "exp": "યુરેનિયમ (U) તેના +4 ઓક્સિડેશન અવસ્થામાં સૌથી વધુ સ્થિર હોય છે અને તે UO₂ (યુરેનિયમ ડાયોક્સાઇડ) બનાવી શકે છે. થોરિયમ (Th) મુખ્યત્વે +4 ઓક્સિડેશન અવસ્થા દર્શાવે છે, પરંતુ તેનો ડાયોક્સાઇડ (ThO₂) બનાવવાની ક્ષમતા યુરેનિયમ જેટલી પ્રબળ નથી. પ્લુટોનિયમ (Pu) અને એમેરિકિયમ (Am) તેમના +4 ઓક્સિડેશન અવસ્થામાં ઓછા સ્થિર હોય છે અને તેમના ડાયોક્સાઇડ બનાવવાની પ્રક્રિયા ઓછી સામાન્ય છે.", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો (d- and f-Block Elements)", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોમાં નીચેનામાંથી કયું તત્ત્વ તેના સંયોજનોમાં સૌથી વધુ રેડિયોએક્ટિવ છે અને તેનો ઉપયોગ પરમાણુ બળતણ તરીકે થાય છે?", "opts": ["થોરિયમ (Th)", "યુરેનિયમ (U)", "પ્લુટોનિયમ (Pu)", "ક્યુરિયમ (Cm)"], "ans": 2, "exp": "પ્લુટોનિયમ (Pu) એ એક્ટિનાઈડ શ્રેણીનું સૌથી વધુ રેડિયોએક્ટિવ તત્ત્વ છે અને તેનો ઉપયોગ પરમાણુ બળતણ તથા પરમાણુ શસ્ત્રોમાં થાય છે. થોરિયમ અને યુરેનિયમ પણ રેડિયોએક્ટિવ છે, પરંતુ પ્લુટોનિયમની રેડિયોએક્ટિવિટી અને ઉપયોગ વધુ મહત્ત્વપૂર્ણ છે. ક્યુરિયમ પણ રેડિયોએક્ટિવ છે, પરંતુ તેનો ઉપયોગ પરમાણુ બળતણ તરીકે થતો નથી.", "ref": "Std 12 - પ્રકરણ 8: d- અને f-વિભાગનાં તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વોના રાસાયણિક ગુણધર્મો સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ખોટું છે? (2)", "opts": ["એક્ટિનાઈડ તત્ત્વો મુખ્યત્વે આયનીય સંયોજનો બનાવે છે.", "એક્ટિનાઈડ તત્ત્વોના સંયોજનો મોટાભાગે રંગીન હોય છે.", "એક્ટિનાઈડ તત્ત્વોના ઓક્સાઇડ મુખ્યત્વે બેઝિક ગુણધર્મ ધરાવે છે.", "એક્ટિનાઈડ તત્ત્વોના હેલાઇડ સંયોજનો સહસંયોજક ગુણધર્મ ધરાવે છે."], "ans": 2, "exp": "એક્ટિનાઈડ તત્ત્વોના ઓક્સાઇડ મુખ્યત્વે એમ્ફોટેરિક ગુણધર્મ ધરાવે છે, નહીં કે માત્ર બેઝિક. બાકીના વિકલ્પો સાચા છે: એક્ટિનાઈડ તત્ત્વો આયનીય સંયોજનો બનાવે છે, તેમના સંયોજનો રંગીન હોય છે, અને તેમના હેલાઇડ સંયોજનો સહસંયોજક ગુણધર્મ ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 8: d- અને f-વિભાગનાં તત્ત્વો", "ch": ""}, {"q": "એક્ટિનાઈડ શ્રેણીના તત્ત્વો પૈકી કયું તત્ત્વ તેના સંયોજનોમાં સૌથી વધુ રેડિયોએક્ટિવ છે અને તેનો અર્ધ-આયુષ્ય કાળ સૌથી ઓછો છે?", "opts": ["પોલોનિયમ (Po)", "રેડિયમ (Ra)", "ફ્રાન્સિયમ (Fr)", "એસ્ટેટિન (At)"], "ans": 2, "exp": "ફ્રાન્સિયમ (Fr) એક્ટિનાઈડ શ્રેણીનું તત્ત્વ છે અને તે સૌથી વધુ રેડિયોએક્ટિવ છે, તેનો અર્ધ-આયુષ્ય કાળ માત્ર 21 મિનિટ છે. પોલોનિયમ (Po), રેડિયમ (Ra), અને એસ્ટેટિન (At) પણ રેડિયોએક્ટિવ છે, પરંતુ તેમનો અર્ધ-આયુષ્ય કાળ ફ્રાન્સિયમ કરતાં વધુ છે.", "ref": "Std 12 - Chapter 7: d- અને f-બ્લોકના તત્ત્વો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
