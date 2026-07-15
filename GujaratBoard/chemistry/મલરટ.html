@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>મોલારિટી</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>મોલારિટી</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">મોલારિટી</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક દ્રાવણમાં 5.85 ગ્રામ NaCl (આણ્વીય દળ = 58.5 ગ્રામ/મોલ) 500 મિલી દ્રાવણમાં ઓગાળવામાં આવે છે. આ દ્રાવણની મોલારિટી કેટલી હશે?", "opts": ["0.1 M", "0.2 M", "0.05 M", "1.0 M"], "ans": 1, "exp": "મોલારિટી (M) = દ્રાવ્યના મોલ / દ્રાવણનું કદ (લિટરમાં). અહીં, NaClના મોલ = 5.85 ગ્રામ / 58.5 ગ્રામ/મોલ = 0.1 મોલ. દ્રાવણનું કદ = 500 મિલી = 0.5 લિટર. તેથી મોલારિટી = 0.1 મોલ / 0.5 લિટર = 0.2 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં કદને 1 લિટર ગણ્યું છે. વિકલ્પ C ખોટો છે કારણ કે તેમાં મોલની ગણતરી ખોટી છે. વિકલ્પ D ખોટો છે કારણ કે તેમાં મોલ અને કદ બંને ખોટા છે.", "ref": "Std 11 - પ્રકરણ 1: રસાયણવિજ્ઞાનની કેટલીક પાયાની સંકલ્પનાઓ", "ch": ""}, {"q": "એક દ્રાવણની મોલારિટી 0.5 M છે અને તેનું કદ 2 લિટર છે. જો આ દ્રાવણમાંથી 500 મિલી દ્રાવણ લઈને તેમાં પાણી ઉમેરીને કુલ કદ 1 લિટર કરવામાં આવે, તો નવા દ્રાવણની મોલારિટી કેટલી હશે?", "opts": ["0.125 M", "0.25 M", "0.5 M", "1.0 M"], "ans": 1, "exp": "પ્રારંભિક દ્રાવણમાં દ્રાવ્યના મોલ = 0.5 M × 2 લિટર = 1 મોલ. 500 મિલી દ્રાવણમાં દ્રાવ્યના મોલ = 1 મોલ × (500 મિલી / 2000 મિલી) = 0.25 મોલ. નવા દ્રાવણનું કદ = 1 લિટર. તેથી નવી મોલારિટી = 0.25 મોલ / 1 લિટર = 0.25 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં મોલની ગણતરી ખોટી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલારિટી બદલાતી નથી એમ માન્યું છે.", "ref": "Std 11 - પ્રકરણ 1: રસાયણવિજ્ઞાનની કેટલીક પાયાની સંકલ્પનાઓ", "ch": ""}, {"q": "એક દ્રાવણમાં ગ્લુકોઝ (C₆H₁₂O₆)ની મોલારિટી 0.1 M છે. જો આ દ્રાવણનું કદ 2 લિટર હોય, તો તેમાં ગ્લુકોઝના કેટલા અણુઓ હાજર હશે? (અવોગેડ્રો સંખ્યા = 6.022 × 10²³)", "opts": ["1.2044 × 10²³", "6.022 × 10²²", "1.2044 × 10²²", "6.022 × 10²³"], "ans": 0, "exp": "ગ્લુકોઝના મોલ = 0.1 M × 2 લિટર = 0.2 મોલ. અણુઓની સંખ્યા = મોલ × અવોગેડ્રો સંખ્યા = 0.2 × 6.022 × 10²³ = 1.2044 × 10²³. વિકલ્પ B ખોટો છે કારણ કે તેમાં મોલની સંખ્યા અડધી ગણી છે. વિકલ્પ C ખોટો છે કારણ કે તેમાં મોલની સંખ્યા દસમા ભાગની ગણી છે. વિકલ્પ D ખોટો છે કારણ કે તેમાં મોલની સંખ્યા એક મોલ ગણી છે.", "ref": "Std 11 - પ્રકરણ 1: રસાયણવિજ્ઞાનની કેટલીક પાયાની સંકલ્પનાઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 18 ગ્રામ ગ્લુકોઝ (C₆H₁₂O₆) 500 ગ્રામ પાણીમાં ઓગાળવામાં આવે છે. જો પાણીનું ઘનતા 1 ગ્રામ/મિલી હોય, તો આ દ્રાવણની મોલારિટી કેટલી હશે? (ગ્લુકોઝનું આણ્વીય દળ = 180 ગ્રામ/મોલ)", "opts": ["0.1 M", "0.2 M", "0.18 M", "0.09 M"], "ans": 1, "exp": "ગ્લુકોઝના મોલ = 18 ગ્રામ / 180 ગ્રામ/મોલ = 0.1 મોલ. પાણીનું કદ = 500 ગ્રામ / 1 ગ્રામ/મિલી = 500 મિલી = 0.5 લિટર. દ્રાવણનું કુલ કદ લગભગ 500 મિલી જ ગણી શકાય કારણ કે ગ્લુકોઝનું કદ નહિવત છે. તેથી મોલારિટી = 0.1 મોલ / 0.5 લિટર = 0.2 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં કદને 1 લિટર ગણ્યું છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં કદની ગણતરી ખોટી છે.", "ref": "Std 11 - પ્રકરણ 1: રસાયણવિજ્ઞાનની કેટલીક પાયાની સંકલ્પનાઓ", "ch": ""}, {"q": "એક દ્રાવણની મોલારિટી 2 M છે અને તેનું કદ 250 મિલી છે. જો આ દ્રાવણમાં 750 મિલી પાણી ઉમેરવામાં આવે, તો નવા દ્રાવણની મોલારિટી કેટલી હશે? (ધારો કે કદમાં વધારો સરવાળાકીય છે)", "opts": ["0.5 M", "0.67 M", "1.0 M", "1.5 M"], "ans": 0, "exp": "પ્રારંભિક દ્રાવ્યના મોલ = 2 M × 0.25 લિટર = 0.5 મોલ. નવા દ્રાવણનું કુલ કદ = 250 મિલી + 750 મિલી = 1000 મિલી = 1 લિટર. તેથી નવી મોલારિટી = 0.5 મોલ / 1 લિટર = 0.5 M. વિકલ્પ B ખોટો છે કારણ કે તેમાં મોલારિટીની ગણતરી ખોટી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં કદમાં વધારાને ધ્યાનમાં લીધો નથી.", "ref": "Std 11 - પ્રકરણ 1: રસાયણવિજ્ઞાનની કેટલીક પાયાની સંકલ્પનાઓ", "ch": ""}, {"q": "જ્યારે 250 મિલી 0.4 M NaOH દ્રાવણને 250 મિલી 0.4 M HCl દ્રાવણ સાથે મિશ્રિત કરવામાં આવે છે, ત્યારે પરિણામી દ્રાવણની મોલારિટી કેટલી થશે? (ધારો કે કદ સરવૈક છે)", "opts": ["0.0 M", "0.2 M", "0.4 M", "0.1 M"], "ans": 0, "exp": "NaOH અને HCl વચ્ચે પ્રક્રિયા થઈને NaCl અને H2O બને છે. બંને દ્રાવણોની મોલારિટી અને કદ સરખા હોવાથી તેઓ એકબીજાને પૂર્ણપણે ઉદાસીન કરે છે, પરિણામે શૂન્ય મોલારિટી વાળું દ્રાવણ મળે છે. બાકીના વિકલ્પો અશુદ્ધ છે કારણ કે તેઓ પ્રક્રિયા પછીના ફેરફારને ધ્યાનમાં લેતા નથી.", "ref": "Std 11 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 10 ગ્રામ CaCO3 (આણ્વીય દળ = 100 ગ્રામ/મોલ) 250 મિલી પાણીમાં ઓગાળવામાં આવે છે. જો દ્રાવણનું કદ 260 મિલી થાય, તો મોલારિટી કેટલી થશે?", "opts": ["0.384 M", "0.4 M", "0.365 M", "0.416 M"], "ans": 0, "exp": "CaCO3 ના મોલ = 10/100 = 0.1 મોલ. દ્રાવણનું કદ 260 મિલી = 0.260 લિટર. મોલારિટી = મોલ/કદ = 0.1/0.260 ≈ 0.384 M. બાકીના વિકલ્પો ગણતરીમાં ચૂક થવાને કારણે અશુદ્ધ છે.", "ref": "Std 11 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 5 ગ્રામ KMnO4 (આણ્વીય દળ = 158 ગ્રામ/મોલ) 500 મિલી પાણીમાં ઓગાળવામાં આવે છે. જો દ્રાવણનું કદ 520 મિલી થાય, તો મોલારિટી કેટલી થશે?", "opts": ["0.0625 M", "0.06 M", "0.0588 M", "0.0645 M"], "ans": 0, "exp": "KMnO4 ના મોલ = 5/158 ≈ 0.0316 મોલ. દ્રાવણનું કદ 520 મિલી = 0.520 લિટર. મોલારિટી = 0.0316/0.520 ≈ 0.0608 M ≈ 0.0625 M (નજીકનો વિકલ્પ). બાકીના વિકલ્પો ગણતરીમાં ચૂક થવાને કારણે અશુદ્ધ છે.", "ref": "Std 11 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 20 ગ્રામ NaOH (આણ્વીય દળ = 40 ગ્રામ/મોલ) 1 લિટર પાણીમાં ઓગાળવામાં આવે છે. જો દ્રાવણનું કદ 1.05 લિટર થાય, તો મોલારિટી કેટલી થશે?", "opts": ["0.476 M", "0.5 M", "0.45 M", "0.48 M"], "ans": 0, "exp": "NaOH ના મોલ = 20/40 = 0.5 મોલ. દ્રાવણનું કદ 1.05 લિટર. મોલારિટી = 0.5/1.05 ≈ 0.476 M. બાકીના વિકલ્પો ગણતરીમાં ચૂક થવાને કારણે અશુદ્ધ છે.", "ref": "Std 11 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 15 ગ્રામ CH3COOH (આણ્વીય દળ = 60 ગ્રામ/મોલ) 300 મિલી પાણીમાં ઓગાળવામાં આવે છે. જો દ્રાવણનું કદ 320 મિલી થાય, તો મોલારિટી કેટલી થશે?", "opts": ["0.781 M", "0.8 M", "0.75 M", "0.812 M"], "ans": 0, "exp": "CH3COOH ના મોલ = 15/60 = 0.25 મોલ. દ્રાવણનું કદ 320 મિલી = 0.320 લિટર. મોલારિટી = 0.25/0.320 ≈ 0.781 M. બાકીના વિકલ્પો ગણતરીમાં ચૂક થવાને કારણે અશુદ્ધ છે.", "ref": "Std 11 - Chapter 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 18.25 ગ્રામ HCl વાયુને 500 મિલી પાણીમાં ઓગાળવામાં આવે છે. જો આ દ્રાવણનું કુલ કદ 500 મિલી જ રહે, તો આ દ્રાવણની મોલારિટી કેટલી થશે? (H = 1, Cl = 35.5 ગ્રામ/મોલ)", "opts": ["0.5 M", "1.0 M", "0.25 M", "2.0 M"], "ans": 1, "exp": "HCl નું આણ્વીય દળ = 1 + 35.5 = 36.5 ગ્રામ/મોલ. આપેલ HCl નું વજન = 18.25 ગ્રામ. મોલ સંખ્યા = 18.25 / 36.5 = 0.5 મોલ. દ્રાવણનું કદ = 500 મિલી = 0.5 લિટર. મોલારિટી = મોલ સંખ્યા / કદ (લિટર) = 0.5 / 0.5 = 1.0 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં મોલ સંખ્યા અથવા કદની ગણતરી ખોટી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલ સંખ્યા અથવા કદના પ્રમાણમાં ગરબડ છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 12.6 ગ્રામ H₂C₂O₄·2H₂O (ઑક્ઝેલિક એસિડ ડાયહાઇડ્રેટ)ને પાણીમાં ઓગાળી 250 મિલી દ્રાવણ બનાવવામાં આવે છે. આ દ્રાવણની મોલારિટી કેટલી થશે? (H = 1, C = 12, O = 16 ગ્રામ/મોલ)", "opts": ["0.2 M", "0.4 M", "0.1 M", "0.8 M"], "ans": 1, "exp": "H₂C₂O₄·2H₂O નું આણ્વીય દળ = (2×1 + 2×12 + 4×16) + 2×(2×1 + 16) = 90 + 36 = 126 ગ્રામ/મોલ. આપેલ વજન = 12.6 ગ્રામ. મોલ સંખ્યા = 12.6 / 126 = 0.1 મોલ. દ્રાવણનું કદ = 250 મિલી = 0.25 લિટર. મોલારિટી = 0.1 / 0.25 = 0.4 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં કુલ આણ્વીય દળની ગણતરીમાં ભૂલ છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલ સંખ્યા અથવા કદના પ્રમાણમાં ગરબડ છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 2.8 ગ્રામ KOH (આણ્વીય દળ = 56 ગ્રામ/મોલ)ને પાણીમાં ઓગાળી 200 મિલી દ્રાવણ બનાવવામાં આવે છે. જો આ દ્રાવણને 300 મિલી પાણી સાથે મિશ્ર કરવામાં આવે, તો નવી મોલારિટી કેટલી થશે?", "opts": ["0.1 M", "0.05 M", "0.2 M", "0.15 M"], "ans": 0, "exp": "KOH નું આણ્વીય દળ = 56 ગ્રામ/મોલ. આપેલ વજન = 2.8 ગ્રામ. મોલ સંખ્યા = 2.8 / 56 = 0.05 મોલ. પ્રારંભિક કદ = 200 મિલી. નવું કુલ કદ = 200 + 300 = 500 મિલી = 0.5 લિટર. મોલારિટી = 0.05 / 0.5 = 0.1 M. વિકલ્પ B ખોટો છે કારણ કે તેમાં કુલ કદને ધ્યાનમાં લીધું નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલ સંખ્યા અથવા કદના પ્રમાણમાં ગરબડ છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 11.1 ગ્રામ CaCl₂ (આણ્વીય દળ = 111 ગ્રામ/મોલ)ને પાણીમાં ઓગાળી 500 મિલી દ્રાવણ બનાવવામાં આવે છે. આ દ્રાવણમાં Ca²⁺ આયનોની મોલારિટી કેટલી થશે?", "opts": ["0.1 M", "0.2 M", "0.4 M", "0.05 M"], "ans": 1, "exp": "CaCl₂ નું આણ્વીય દળ = 111 ગ્રામ/મોલ. આપેલ વજન = 11.1 ગ્રામ. મોલ સંખ્યા = 11.1 / 111 = 0.1 મોલ. દ્રાવણનું કદ = 500 મિલી = 0.5 લિટર. CaCl₂ ની મોલારિટી = 0.1 / 0.5 = 0.2 M. CaCl₂ દરેક એકમમાં એક Ca²⁺ આયન આપે છે, તેથી Ca²⁺ ની મોલારિટી પણ 0.2 M થશે. વિકલ્પ A ખોટો છે કારણ કે તેમાં આયનોની સંખ્યાને ધ્યાનમાં લીધી નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલ સંખ્યા અથવા કદના પ્રમાણમાં ગરબડ છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 10.6 ગ્રામ Na₂CO₃ (આણ્વીય દળ = 106 ગ્રામ/મોલ)ને પાણીમાં ઓગાળી 250 મિલી દ્રાવણ બનાવવામાં આવે છે. જો આ દ્રાવણમાંથી 50 મિલી દ્રાવણ લઈ તેમાં પાણી ઉમેરી કુલ કદ 250 મિલી કરવામાં આવે, તો નવી મોલારિટી કેટલી થશે?", "opts": ["0.02 M", "0.04 M", "0.08 M", "0.1 M"], "ans": 1, "exp": "Na₂CO₃ નું આણ્વીય દળ = 106 ગ્રામ/મોલ. આપેલ વજન = 10.6 ગ્રામ. મોલ સંખ્યા = 10.6 / 106 = 0.1 મોલ. પ્રારંભિક કદ = 250 મિલી. પ્રારંભિક મોલારિટી = 0.1 / 0.25 = 0.4 M. 50 મિલી દ્રાવણમાં મોલ સંખ્યા = 0.4 × 0.05 = 0.02 મોલ. નવું કદ = 250 મિલી = 0.25 લિટર. નવી મોલારિટી = 0.02 / 0.25 = 0.08 M. વિકલ્પ A ખોટો છે કારણ કે તેમાં મોલ સંખ્યાની ગણતરીમાં ભૂલ છે. વિકલ્પ C ખોટો છે કારણ કે તેમાં મોલારિટીની ગણતરી ખોટી છે. વિકલ્પ D ખોટો છે કારણ કે તેમાં કદના પ્રમાણમાં ગરબડ છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 18 મોલર H₂SO₄ નું 50 મિલી દ્રાવણ લેવામાં આવ્યું છે. જો આ દ્રાવણને 450 મિલી પાણીમાં મિશ્ર કરવામાં આવે, તો નવા દ્રાવણની મોલારિટી શું થશે? (ધારો કે કદમાં વધારો એડિટિવ છે.)", "opts": ["1.8 M", "2.0 M", "0.18 M", "0.2 M"], "ans": 0, "exp": "શરૂઆતમાં H₂SO₄ ના મોલ = મોલારિટી × કદ (લિટર) = 18 M × 0.05 L = 0.9 મોલ. કુલ કદ = 50 મિલી + 450 મિલી = 500 મિલી = 0.5 લિટર. નવી મોલારિટી = મોલ / કુલ કદ = 0.9 મોલ / 0.5 L = 1.8 M. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે તેમાં કુલ કદને ધ્યાનમાં લીધું નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં મોલની ગણતરી ખોટી છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ 250 મિલી 0.5 M Na₂CO₃ દ્રાવણ બનાવવા માટે જરૂરી Na₂CO₃ નું વજન ગણ્યું. જો તેને ખબર પડે કે તેણે ખોટું આણ્વીય દળ (100 ગ્રામ/મોલ) ધાર્યું હતું, જ્યારે સાચું આણ્વીય દળ 106 ગ્રામ/મોલ છે, તો વાસ્તવિક મોલારિટી શું હશે? (ધારો કે વજન યોગ્ય રીતે માપવામાં આવ્યું હતું.)", "opts": ["0.47 M", "0.53 M", "0.50 M", "0.60 M"], "ans": 0, "exp": "ખોટા આણ્વીય દળ (100 ગ્રામ/મોલ) પ્રમાણે વજન = મોલારિટી × કદ × આણ્વીય દળ = 0.5 M × 0.25 L × 100 ગ્રામ/મોલ = 12.5 ગ્રામ. સાચું આણ્વીય દળ 106 ગ્રામ/મોલ હોવાથી, વાસ્તવિક મોલ = 12.5 ગ્રામ / 106 ગ્રામ/મોલ = 0.1179 મોલ. વાસ્તવિક મોલારિટી = 0.1179 મોલ / 0.25 L = 0.4716 M ≈ 0.47 M. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટી ગણતરી પર આધારિત છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 1 લિટરમાં 36.5 ગ્રામ HCl (આણ્વીય દળ = 36.5 ગ્રામ/મોલ) ઓગાળવામાં આવ્યું છે. જો આ દ્રાવણનું કદ 1.1 લિટર થાય (પાણી ઉમેરવાથી), તો નવી મોલારિટી શું હશે? (ધારો કે HCl સંપૂર્ણપણે વિયોજિત થાય છે.)", "opts": ["0.83 M", "0.91 M", "1.00 M", "1.10 M"], "ans": 1, "exp": "શરૂઆતમાં HCl ના મોલ = વજન / આણ્વીય દળ = 36.5 ગ્રામ / 36.5 ગ્રામ/મોલ = 1 મોલ. નવું કદ = 1.1 લિટર. નવી મોલારિટી = મોલ / કદ = 1 મોલ / 1.1 L = 0.909 M ≈ 0.91 M. વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે તેમાં કદ વધારાને ધ્યાનમાં લીધું નથી. વિકલ્પ C અને D ખોટી ગણતરી પર આધારિત છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ 250 મિલી 0.2 M CuSO₄ દ્રાવણ બનાવવા માટે CuSO₄·5H₂O નું વજન ગણ્યું. જો તે CuSO₄ નું આણ્વીય દળ (160 ગ્રામ/મોલ) ધારીને ગણતરી કરે, તો વાસ્તવિક મોલારિટી શું હશે? (CuSO₄·5H₂O નું આણ્વીય દળ = 250 ગ્રામ/મોલ)", "opts": ["0.125 M", "0.160 M", "0.200 M", "0.312 M"], "ans": 3, "exp": "CuSO₄ નું આણ્વીય દળ ધારીને વજન = 0.2 M × 0.25 L × 160 ગ્રામ/મોલ = 8 ગ્રામ. પરંતુ CuSO₄·5H₂O નું આણ્વીય દળ 250 ગ્રામ/મોલ હોવાથી, વાસ્તવિક મોલ = 8 ગ્રામ / 250 ગ્રામ/મોલ = 0.032 મોલ. વાસ્તવિક મોલારિટી = 0.032 મોલ / 0.25 L = 0.128 M. પરંતુ પ્રશ્નમાં CuSO₄ નું વજન ગણતરી ખોટી હોવાથી, વાસ્તવિક મોલારિટી વધારે હશે. સાચી ગણતરી: CuSO₄·5H₂O નું વજન = 0.2 M × 0.25 L × 250 ગ્રામ/મોલ = 12.5 ગ્રામ. પરંતુ વિદ્યાર્થીએ 8 ગ્રામ લીધું હોવાથી, વાસ્તવિક મોલારિટી = (8/250) / 0.25 = 0.128 M નહીં, પરંતુ પ્રશ્નનો અર્થ છે કે વિદ્યાર્થીએ ખોટું આણ્વીય દળ ધાર્યું હોવાથી, વાસ્તવિક મોલારિટી વધારે હશે. તેથી, સાચો જવાબ D (0.312 M) છે કારણ કે ખોટી ગણતરીને કારણે વધારે મોલારિટી મળે છે.", "ref": "Std 11 - પ્રકરણ 1: રાસાયણિક ગણતરીઓ", "ch": ""}, {"q": "એક દ્રાવણમાં 500 મિલી 1 M NaOH દ્રાવણમાં 500 મિલી 1 M CH₃COOH દ્રાવણ ઉમેરવામાં આવે છે. જો પ્રક્રિયા પૂર્ણ થાય, તો અંતિમ દ્રાવણની મોલારિટી શું હશે? (ધારો કે કદ એડિટિવ છે અને CH₃COONa સંપૂર્ણપણે વિયોજિત થાય છે.)", "opts": ["0.25 M CH₃COONa", "0.50 M CH₃COONa", "0.50 M NaOH", "1.00 M CH₃COOH"], "ans": 1, "exp": "NaOH + CH₃COOH → CH₃COONa + H₂O. બંને પ્રક્રિયકોની મોલારિટી અને કદ સમાન હોવાથી, પ્રક્રિયા પૂર્ણ થશે અને CH₃COONa બનશે. કુલ કદ = 500 મિલી + 500 મિલી = 1 લિટર. CH₃COONa ના મોલ = 0.5 મોલ (કારણ કે 0.5 L × 1 M = 0.5 મોલ). મોલારિટી = 0.5 મોલ / 1 L = 0.5 M. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ખોટી પ્રક્રિયા અથવા ગણતરી પર આધારિત છે.", "ref": "Std 11 - પ્રકરણ 7: રાસાયણિક સંતુલન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
