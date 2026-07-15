@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hardy–Weinberg Principle</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Hardy–Weinberg Principle</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Hardy–Weinberg Principle</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક મોટી, અલગ અલગ જાતિ ધરાવતી વસ્તીમાં જનીન આવૃત્તિનું સંતુલન જાળવવા માટે હાર્ડી-વેઇનબર્ગના સિદ્ધાંત મુજબ નીચેનામાંથી કયું પરિબળ જરૂરી નથી?", "opts": ["વસ્તીનું કદ અનંત હોવું જોઈએ", "વસ્તીમાં પ્રાકૃતિક પસંદગી ન થવી જોઈએ", "વસ્તીમાં પરિવર્તન (મ્યુટેશન) ન થવું જોઈએ", "વસ્તીમાં સતત પ્રવાહ (માઇગ્રેશન) થતો રહેવો જોઈએ"], "ans": 3, "exp": "હાર્ડી-વેઇનબર્ગના સિદ્ધાંત મુજબ જનીન આવૃત્તિનું સંતુલન જાળવવા માટે વસ્તીમાં પ્રવાહ (માઇગ્રેશન) ન થવું જોઈએ, કારણ કે તે નવા જનીનોનો પ્રવેશ કરાવે છે અને આવૃત્તિ બદલે છે. વિકલ્પ A, B અને C એ સિદ્ધાંતના મુખ્ય ધારણાઓ છે, જ્યારે D એ સંતુલન માટે અવરોધક પરિબળ છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક નાની ટાપુ પરની વસ્તીમાં એક જનીન માટે બે એલીલ (A અને a) છે. જો AA જનીનપ્રકાર ધરાવતા વ્યક્તિઓની સંખ્યા 36, Aa ધરાવતા 48 અને aa ધરાવતા 16 હોય, તો હાર્ડી-વેઇનબર્ગ સંતુલનમાં a એલીલની આવૃત્તિ કેટલી હશે?", "opts": ["0.2", "0.4", "0.6", "0.8"], "ans": 1, "exp": "કુલ વ્યક્તિઓ = 36 + 48 + 16 = 100. a એલીલની સંખ્યા = (2 × 16) + 48 = 80. કુલ એલીલ = 2 × 100 = 200. a એલીલની આવૃત્તિ = 80/200 = 0.4. આથી સાચો જવાબ B છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન હાર્ડી-વેઇનબર્ગ સંતુલન માટે ખોટું છે?", "opts": ["વસ્તીમાં પ્રાકૃતિક પસંદગી ન થવી જોઈએ", "વસ્તીમાં પરિવર્તન (મ્યુટેશન) ન થવું જોઈએ", "વસ્તીમાં પ્રજનન હંમેશા અલિંગી હોવું જોઈએ", "વસ્તીમાં જનીન પ્રવાહ ન થવો જોઈએ"], "ans": 2, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન માટે પ્રજનન અલિંગી હોવું જરૂરી નથી. તે લિંગી પ્રજનન ધરાવતી વસ્તીઓમાં પણ લાગુ પડે છે. વિકલ્પ A, B અને D એ સિદ્ધાંતની મુખ્ય ધારણાઓ છે, જ્યારે C ખોટું છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં એક જનીન માટે બે એલીલ (B અને b) છે. જો B એલીલની આવૃત્તિ 0.7 હોય, તો હાર્ડી-વેઇનબર્ગ સંતુલનમાં Bb જનીનપ્રકાર ધરાવતા વ્યક્તિઓની સંભાવના કેટલી હશે?", "opts": ["0.21", "0.42", "0.49", "0.09"], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સૂત્ર મુજબ, Bb જનીનપ્રકારની સંભાવના = 2 × p × q = 2 × 0.7 × 0.3 = 0.42. આથી સાચો જવાબ B છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું છે. જો એક એલીલની આવૃત્તિ 0.3 હોય, તો 5 પેઢી પછી તેની આવૃત્તિ કેટલી હશે?", "opts": ["0.3", "0.09", "0.6", "0.15"], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલનમાં જનીન આવૃત્તિ સમય સાથે બદલાતી નથી, જો બધી ધારણાઓ પૂરી થતી હોય. આથી 5 પેઢી પછી પણ એલીલની આવૃત્તિ 0.3 જ રહેશે. આથી સાચો જવાબ A છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક મોટી વસ્તીમાં એક જનીન માટે ત્રણ એલીલ્સ (A₁, A₂, A₃) છે. જો A₁ની આવૃત્તિ p = 0.4, A₂ની આવૃત્તિ q = 0.3 હોય, તો હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર A₃ની આવૃત્તિ અને A₂A₃ જનીન પ્રકારની આવૃત્તિ અનુક્રમે કેટલી હશે?", "opts": ["0.3 અને 0.18", "0.3 અને 0.09", "0.2 અને 0.12", "0.3 અને 0.12"], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, ત્રણ એલીલ્સ માટે કુલ આવૃત્તિ p + q + r = 1 હોવી જોઈએ. અહીં p = 0.4, q = 0.3 હોવાથી r = 1 - (0.4 + 0.3) = 0.3 થાય. હવે A₂A₃ જનીન પ્રકારની આવૃત્તિ 2 × q × r = 2 × 0.3 × 0.3 = 0.18 થાય. વિકલ્પ A સિવાયના અન્ય વિકલ્પોમાં આવૃત્તિની ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું છે. જો એક પ્રભાવી એલીલ (D)ની આવૃત્તિ 0.6 હોય, તો વસ્તીમાં વિષમયુગ્મી (Heterozygous) વ્યક્તિઓનું પ્રમાણ કેટલું હશે? (નોંધ: આ જનીન માટે માત્ર બે એલીલ્સ છે.)", "opts": ["0.24", "0.36", "0.48", "0.16"], "ans": 2, "exp": "હાર્ડી-વેઇનબર્ગ સૂત્ર અનુસાર, વિષમયુગ્મી વ્યક્તિઓનું પ્રમાણ 2pq હોય છે. અહીં p = 0.6 (પ્રભાવી એલીલ) અને q = 1 - p = 0.4 (પ્રચ્છન્ન એલીલ) છે. તેથી 2pq = 2 × 0.6 × 0.4 = 0.48 થાય. અન્ય વિકલ્પોમાં ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ હાર્ડી-વેઇનબર્ગ સંતુલનને અસર કરતું નથી, પરંતુ જો તે અસ્તિત્વમાં હોય તો વસ્તીમાં જનીન આવૃત્તિ પર લાંબા ગાળે અસર કરી શકે છે?", "opts": ["જનીન સ્થળાંતર (Gene Migration)", "જનીનિક વિચલન (Genetic Drift)", "પરિવર્તન (Mutation)", "અસંતુલિત પ્રજનન (Non-random Mating)"], "ans": 2, "exp": "પરિવર્તન (Mutation) એ હાર્ડી-વેઇનબર્ગ સંતુલનને સીધું અસર કરતું નથી, કારણ કે તે ખૂબ જ ધીમી પ્રક્રિયા છે. પરંતુ લાંબા ગાળે તે જનીન આવૃત્તિમાં ફેરફાર લાવી શકે છે. જ્યારે જનીન સ્થળાંતર, જનીનિક વિચલન અને અસંતુલિત પ્રજનન સંતુલનને તાત્કાલિક અસર કરે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં એક જનીન માટે બે એલીલ્સ (T અને t) છે. જો TT જનીન પ્રકારની આવૃત્તિ 0.36, Tt જનીન પ્રકારની આવૃત્તિ 0.48 હોય, તો હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર t એલીલની આવૃત્તિ કેટલી હશે?", "opts": ["0.2", "0.4", "0.6", "0.8"], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સૂત્ર અનુસાર, જો TTની આવૃત્તિ p² = 0.36 હોય, તો p = √0.36 = 0.6 થાય. તેથી t એલીલની આવૃત્તિ q = 1 - p = 0.4 થાય. વિકલ્પ B સિવાયના અન્ય વિકલ્પોમાં ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું છે. જો આ વસ્તીમાં સ્ત્રી અને પુરુષ જનીન આવૃત્તિઓ વચ્ચે ફરક હોય તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["વસ્તી હાર્ડી-વેઇનબર્ગ સંતુલનમાં રહેશે કારણ કે લિંગ-લિંક્ડ જનીનોએ સંતુલન પર અસર કરતી નથી", "વસ્તી હાર્ડી-વેઇનબર્ગ સંતુલનમાં રહેશે નહીં કારણ કે લિંગ-લિંક્ડ જનીનોએ સંતુલનને ભંગ કરે છે", "વસ્તી હાર્ડી-વેઇનબર્ગ સંતુલનમાં રહેશે કારણ કે લિંગ-લિંક્ડ જનીનોએ સંતુલન પર કોઈ અસર કરતી નથી, પરંતુ યાદૃચ્છિક સંવરણ થવું જરૂરી છે", "વસ્તી હાર્ડી-વેઇનબર્ગ સંતુલનમાં રહેશે નહીં કારણ કે લિંગ-લિંક્ડ જનીનોએ સંતુલનને ભંગ કરે છે, પરંતુ યાદૃચ્છિક સંવરણ થવું જરૂરી નથી"], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલનના નિયમો અનુસાર, વસ્તીમાં લિંગ-લિંક્ડ જનીનોએ સંતુલનને ભંગ કરે છે કારણ કે સ્ત્રી અને પુરુષ જનીન આવૃત્તિઓ વચ્ચે ફરક હોવાથી એલીલની આવૃત્તિ સમાન રહેતી નથી. આથી, વસ્તી હાર્ડી-વેઇનબર્ગ સંતુલનમાં રહેશે નહીં. વિકલ્પ A અને C ખોટા છે કારણ કે લિંગ-લિંક્ડ જનીનોએ સંતુલન પર અસર કરે છે. વિકલ્પ D ખોટો છે કારણ કે યાદૃચ્છિક સંવરણ હાર્ડી-વેઇનબર્ગ સંતુલન માટે જરૂરી છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું છે. જો વસ્તીમાં A એલીલની આવૃત્તિ 0.6 છે, તો AA જનીનપ્રકારની આવૃત્તિ કેટલી હશે? પરંતુ જો વસ્તીમાં યાદચ્છિક સંવરણ (random mating) ન થતું હોય, તો શું થશે?", "opts": ["0.36, સંતુલન જળવાઈ રહેશે કારણ કે યાદચ્છિક સંવરણ હાર્ડી-વેઇનબર્ગ સંતુલન માટે આવશ્યક નથી.", "0.36, સંતુલન ભંગ થશે કારણ કે યાદચ્છિક સંવરણ હાર્ડી-વેઇનબર્ગ સંતુલન માટે આવશ્યક છે.", "0.48, સંતુલન જળવાઈ રહેશે કારણ કે યાદચ્છિક સંવરણની અસર વસ્તીની આકાર પર નિર્ભર રહે છે.", "0.24, સંતુલન ભંગ થશે કારણ કે એલીલની આવૃત્તિ બદલાશે."], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન માટે યાદચ્છિક સંવરણ (random mating) એ એક મહત્વપૂર્ણ અગત્યની શરત છે. AA જનીનપ્રકારની આવૃત્તિ p² = (0.6)² = 0.36 હશે. જો યાદચ્છિક સંવરણ ન થતું હોય, તો સંતુલન ભંગ થશે કારણ કે એલીલની આવૃત્તિ સ્થિર રહેતી નથી. વિકલ્પ A ખોટો છે કારણ કે યાદચ્છિક સંવરણ સંતુલન માટે આવશ્યક છે. વિકલ્પ C અને D ખોટા છે કારણ કે એલીલની આવૃત્તિ અને જનીનપ્રકારની ગણતરી યાદચ્છિક સંવરણ પર આધારિત છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "હાર્ડી-વેઇનબર્ગ સંતુલનમાં, જો એક વસ્તીમાં હેટરોઝાયગસ (Aa) જનીનપ્રકારની આવૃત્તિ 0.48 છે, તો એલીલ A અને aની આવૃત્તિ શું હશે? અને જો વસ્તીમાં પ્રવાસ (migration) થતો હોય, તો શું અસર થશે?", "opts": ["A = 0.6, a = 0.4; પ્રવાસથી એલીલની આવૃત્તિ બદલાશે અને સંતુલન ભંગ થશે.", "A = 0.4, a = 0.6; પ્રવાસથી સંતુલન પર કોઈ અસર થશે નહીં.", "A = 0.7, a = 0.3; પ્રવાસથી જનીનપ્રકારની આવૃત્તિ સ્થિર રહેશે.", "A = 0.8, a = 0.2; પ્રવાસથી વસ્તીનો આકાર બદલાશે પરંતુ સંતુલન જળવાઈ રહેશે."], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, હેટરોઝાયગસ (Aa) જનીનપ્રકારની આવૃત્તિ 2pq = 0.48 છે. અહીં, p + q = 1 અને 2pq = 0.48 હોવાથી, p = 0.6 અને q = 0.4 (અથવા તેનાથી વિરુદ્ધ). પ્રવાસ (migration) એ હાર્ડી-વેઇનબર્ગ સંતુલનને ભંગ કરતું પરિબળ છે કારણ કે તે એલીલની આવૃત્તિ બદલે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ એલીલની આવૃત્તિ અથવા પ્રવાસની અસરને ખોટી રીતે દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન હાર્ડી-વેઇનબર્ગ સંતુલન માટે સત્ય નથી, પરંતુ જો તે અસ્તિત્વમાં હોય તો પણ સંતુલન જળવાઈ શકે?", "opts": ["વસ્તીનો આકાર મોટો છે.", "વસ્તીમાં પ્રવાસ થાય છે.", "વસ્તીમાં પર્યાવરણીય ચયન (natural selection) થાય છે.", "વસ્તીમાં મ્યુટેશન થાય છે."], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન માટે વસ્તીનો આકાર મોટો હોવો જરૂરી છે, પરંતુ મોટી વસ્તીમાં પણ જો પ્રવાસ, પર્યાવરણીય ચયન, અથવા મ્યુટેશન થતું હોય, તો સંતુલન ભંગ થાય છે. વિકલ્પ A સત્ય છે કારણ કે મોટી વસ્તી સંતુલન જાળવવા માટે અનુકૂળ છે, પરંતુ બાકીના પરિબળો સંતુલન ભંગ કરે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ સંતુલન ભંગ કરતાં પરિબળો છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "હાર્ડી-વેઇનબર્ગ સંતુલનમાં, જો એક વસ્તીમાં હોમોઝાયગસ પ્રભાવી (AA) અને હોમોઝાયગસ અપ્રભાવી (aa) જનીનપ્રકારની આવૃત્તિ અનુક્રમે 0.36 અને 0.16 છે, તો હેટરોઝાયગસ (Aa) જનીનપ્રકારની આવૃત્તિ કેટલી હશે? અને જો વસ્તીમાં ચયન (selection) થતું હોય, તો શું અસર થશે?", "opts": ["0.48; ચયનથી સંતુલન જળવાઈ રહેશે.", "0.48; ચયનથી સંતુલન ભંગ થશે.", "0.64; ચયનથી એલીલની આવૃત્તિ સ્થિર રહેશે.", "0.28; ચયનથી જનીનપ્રકારની આવૃત્તિ બદલાશે."], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, AA = p² = 0.36 ⇒ p = 0.6, aa = q² = 0.16 ⇒ q = 0.4. હેટરોઝાયગસ (Aa) જનીનપ્રકારની આવૃત્તિ 2pq = 2 × 0.6 × 0.4 = 0.48 હશે. ચયન (selection) એ હાર્ડી-વેઇનબર્ગ સંતુલનને ભંગ કરતું પરિબળ છે કારણ કે તે એલીલની આવૃત્તિ બદલે છે. વિકલ્પ A ખોટો છે કારણ કે ચયનથી સંતુલન ભંગ થાય છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ જનીનપ્રકારની આવૃત્તિ અથવા એલીલની આવૃત્તિને ખોટી રીતે દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક મોટી, બંધ વસ્તીમાં એક જનીન માટે ત્રણ એલીલ્સ (A₁, A₂, A₃) છે. જો આ વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું હોય અને A₁ એલીલની આવૃત્તિ 0.4 હોય, તો નીચેનામાંથી કયું વિધાન ખોટું છે? (નોંધ: આ વસ્તીમાં કોઈપણ પ્રકારનું પ્રાકૃતિક પસંદગી, પરિવર્તન, સ્થળાંતર કે આનુવંશિક વિચલન થતું નથી.)", "opts": ["A₂ અને A₃ એલીલ્સની સંયુક્ત આવૃત્તિ 0.6 હશે.", "ત્રણેય એલીલ્સની આવૃત્તિઓનો સરવાળો 1 થશે.", "હોમોઝાયગસ A₂A₂ જનીનપ્રકારની આવૃત્તિ A₂ એલીલની આવૃત્તિના વર્ગ જેટલી હશે.", "હેટરોઝાયગસ A₁A₂ જનીનપ્રકારની આવૃત્તિ 2 × 0.4 × A₂ એલીલની આવૃત્તિ કરતાં વધુ હશે."], "ans": 3, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન મુજબ, ત્રણ એલીલ્સ ધરાવતા જનીન માટે જનીનપ્રકારોની આવૃત્તિ (p + q + r)² = p² + q² + r² + 2pq + 2pr + 2qr સૂત્રથી મળે છે. અહીં p = A₁ની આવૃત્તિ = 0.4 છે. હેટરોઝાયગસ A₁A₂ જનીનપ્રકારની આવૃત્તિ 2 × p × q = 2 × 0.4 × A₂ની આવૃત્તિ જેટલી જ હશે, તેનાથી વધુ નહીં. તેથી વિકલ્પ D ખોટું છે. વિકલ્પ Aમાં A₂ અને A₃ની સંયુક્ત આવૃત્તિ 1 - 0.4 = 0.6 હશે, જે સાચું છે. વિકલ્પ Bમાં ત્રણેય એલીલ્સની આવૃત્તિઓનો સરવાળો હંમેશા 1 થાય, જે સાચું છે. વિકલ્પ Cમાં હોમોઝાયગસ A₂A₂ની આવૃત્તિ q² હશે, જે સાચું છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ હાર્ડી-વેઇનબર્ગ સંતુલનને તોડી શકે છે, પરંતુ તે વસ્તીના કદ પર આધાર રાખતું નથી?", "opts": ["જનીન વહન (Gene flow)", "જનીન વિકિરણ (Genetic drift)", "પ્રાકૃતિક પસંદગી (Natural selection)", "યાદૃચ્છિક સંયોગ (Random mating)"], "ans": 0, "exp": "જનીન વહન (Gene flow) એ હાર્ડી-વેઇનબર્ગ સંતુલનને તોડી શકે છે, કારણ કે તે વસ્તીના કદ પર આધાર રાખતું નથી. જનીન વિકિરણ (B) અને પ્રાકૃતિક પસંદગી (C) વસ્તીના કદ પર આધાર રાખે છે, જ્યારે યાદૃચ્છિક સંયોગ (D) હાર્ડી-વેઇનબર્ગ સંતુલન માટે જરૂરી શરત છે અને તેને તોડતું નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન હાર્ડી-વેઇનબર્ગ સંતુલન માટે સત્ય છે, પરંતુ તે વસ્તીના કદ પર આધાર રાખતું નથી?", "opts": ["વસ્તીનું કદ મોટું હોવું જોઈએ", "વસ્તીમાં યાદૃચ્છિક સંયોગ થવો જોઈએ", "વસ્તીમાં કોઈ પણ પ્રકારની પસંદગી થવી જોઈએ નહીં", "વસ્તીમાં કોઈ પણ પ્રકારનો ઉત્ક્રાંતિ થવો જોઈએ નહીં"], "ans": 1, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન માટે યાદૃચ્છિક સંયોગ (B) એ એક મહત્વની શરત છે, પરંતુ તે વસ્તીના કદ પર આધાર રાખતું નથી. વસ્તીનું કદ મોટું હોવું (A), કોઈ પણ પ્રકારની પસંદગી ન થવી (C), અને કોઈ પણ પ્રકારનો ઉત્ક્રાંતિ ન થવો (D) એ બધી શરતો વસ્તીના કદ પર આધાર રાખે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક મોટી વસ્તીમાં એક જનીન માટે બે એલીલ્સ (P અને p) છે. હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, જો પ્રભાવી એલીલ (P)ની આવૃત્તિ 0.6 હોય, તો આ વસ્તીમાં હેટરોઝાયગસ (Pp) વ્યક્તિઓની આવૃત્તિ કેટલી હશે? પરંતુ જો આ વસ્તીમાં પ્રત્યેક પેઢીમાં 10% વ્યક્તિઓ સ્થળાંતર દ્વારા બહારથી આવે છે અને બહારના વ્યક્તિઓમાં P એલીલની આવૃત્તિ 0.4 હોય, તો નવી પેઢીમાં હેટરોઝાયગસ વ્યક્તિઓની આવૃત્તિ કેટલી થશે?", "opts": ["0.48 અને 0.496", "0.48 અને 0.464", "0.36 અને 0.496", "0.36 અને 0.464"], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, હેટરોઝાયગસ વ્યક્તિઓની આવૃત્તિ 2pq = 2 × 0.6 × 0.4 = 0.48 થાય. સ્થળાંતરની અસર ગણતરી માટે, નવી P એલીલની આવૃત્તિ = (0.9 × 0.6) + (0.1 × 0.4) = 0.58 થશે. તેથી, નવી હેટરોઝાયગસ આવૃત્તિ = 2 × 0.58 × 0.42 = 0.4872 ≈ 0.496 થાય. બાકીના વિકલ્પો ખોટી ગણતરી પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં હાર્ડી-વેઇનબર્ગ સંતુલન જળવાઈ રહ્યું છે. આ વસ્તીમાં એક જનીન માટે ત્રણ એલીલ્સ (A₁, A₂, A₃) છે, જેમની આવૃત્તિ અનુક્રમે p, q અને r છે. જો આ વસ્તીમાં A₁A₂ જનીનપ્રકારની આવૃત્તિ 0.24 હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે? (નોંધ: p + q + r = 1)", "opts": ["p = 0.4 અને q = 0.3", "p = 0.6 અને q = 0.2", "p = 0.3 અને q = 0.4", "p = 0.5 અને q = 0.3"], "ans": 0, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલનમાં ત્રણ એલીલ્સ માટે હેટરોઝાયગસ જનીનપ્રકારની આવૃત્તિ 2pq હોય છે. અહીં 2pq = 0.24 ⇒ pq = 0.12. વિકલ્પ A માં p = 0.4 અને q = 0.3 ⇒ pq = 0.12, જે સાચું છે. બાકીના વિકલ્પોમાં pq ≠ 0.12 થાય છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક મોટી, બંધ વસ્તીમાં એક જનીન માટે બે એલીલ્સ (M અને m) છે. હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, જો વસ્તીમાં હોમોઝાયગસ પ્રભાવી (MM) વ્યક્તિઓની આવૃત્તિ 0.36 હોય, તો નીચેનામાંથી કયું વિધાન આ વસ્તી માટે ખોટું છે? (નોંધ: આ જનીન લિંગ-સંકળાયેલ નથી અને વસ્તીમાં કોઈ પરિવર્તન, સ્થળાંતર કે પ્રાકૃતિક પસંદગી થતી નથી.)", "opts": ["વસ્તીમાં m એલીલની આવૃત્તિ 0.4 છે.", "વસ્તીમાં હેટરોઝાયગસ (Mm) વ્યક્તિઓની આવૃત્તિ 0.48 છે.", "જો આ વસ્તીમાં 1000 વ્યક્તિઓ હોય, તો તેમાં હોમોઝાયગસ અપ્રભાવી (mm) વ્યક્તિઓની સંખ્યા 160 હશે.", "આ વસ્તીમાં જનીનપ્રકારોની આવૃત્તિ સમય સાથે બદલાશે નહીં, પરંતુ એલીલ આવૃત્તિ બદલાઈ શકે છે."], "ans": 3, "exp": "હાર્ડી-વેઇનબર્ગ સંતુલન અનુસાર, જો વસ્તીમાં કોઈ ઉત્ક્રાંતિના પરિબળો (પરિવર્તન, સ્થળાંતર, પ્રાકૃતિક પસંદગી, જનીનિક વિચલન) કામ કરતા ન હોય, તો જનીનપ્રકારો અને એલીલની આવૃત્તિ સમય સાથે અચળ રહે છે. અહીં, MM = 0.36 ⇒ p² = 0.36 ⇒ p = 0.6 (M એલીલની આવૃત્તિ). તેથી m એલીલની આવૃત્તિ q = 1 - p = 0.4 (વિકલ્પ A સાચો). હેટરોઝાયગસ આવૃત્તિ 2pq = 2 × 0.6 × 0.4 = 0.48 (વિકલ્પ B સાચો). હોમોઝાયગસ અપ્રભાવી (mm) આવૃત્તિ q² = 0.4² = 0.16 ⇒ 1000 વ્યક્તિઓમાં 160 mm વ્યક્તિઓ (વિકલ્પ C સાચો). વિકલ્પ D ખોટો છે કારણ કે હાર્ડી-વેઇનબર્ગ સંતુલનમાં જનીનપ્રકારો અને એલીલ બંનેની આવૃત્તિ સમય સાથે અચળ રહે છે, બદલાતી નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
