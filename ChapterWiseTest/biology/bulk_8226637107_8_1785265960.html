@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>શરીર પ્રવાહીઓ અને પરિવહન Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>શરીર પ્રવાહીઓ અને પરિવહન Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "માનવ શરીરમાં રુધિરરસ (પ્લાઝ્મા) નું મુખ્ય કાર્ય શું છે?", "opts": ["ઓક્સિજનનું વહન કરવું", "કાર્બન ડાયોક્સાઇડનું વહન કરવું", "પોષક તત્ત્વો, હોર્મોન્સ અને કચરાના પદાર્થોનું પરિવહન કરવું", "રોગપ્રતિકારક કોષોનું નિર્માણ કરવું"], "ans": 2, "exp": "રુધિરરસ (પ્લાઝ્મા) પોષક તત્ત્વો, હોર્મોન્સ, ઉત્સર્ગ પદાર્થો અને અન્ય દ્રવ્યોનું પરિવહન કરે છે, જ્યારે ઓક્સિજનનું વહન હિમોગ્લોબિન ધરાવતા લાલ રક્તકણો દ્વારા થાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન હૃદયના કાર્ય માટે ખોટું છે?", "opts": ["હૃદયના જમણા કર્ણકમાંથી રુધિર ફેફસાંમાં ઓક્સિજન મેળવવા માટે જાય છે", "હૃદયના ડાબા ક્ષેપકમાંથી ઓક્સિજનયુક્ત રુધિર સમગ્ર શરીરમાં પંપ થાય છે", "હૃદયના જમણા ક્ષેપકમાંથી કાર્બન ડાયોક્સાઇડયુક્ત રુધિર ફેફસાંમાં જાય છે", "હૃદયના ડાબા કર્ણકમાંથી રુધિર સીધું શરીરના વિવિધ ભાગોમાં જાય છે"], "ans": 3, "exp": "હૃદયના ડાબા કર્ણકમાં ઓક્સિજનયુક્ત રુધિર આવે છે, જે પછી ડાબા ક્ષેપક દ્વારા શરીરમાં પંપ થાય છે, જ્યારે જમણા કર્ણકમાં કાર્બન ડાયોક્સાઇડયુક્ત રુધિર આવે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "લસિકા તંત્ર (Lymphatic System) નું મુખ્ય કાર્ય શું છે?", "opts": ["રુધિરનું પરિવહન કરવું", "શરીરમાંથી વધારાનું પાણી અને પ્રોટીનને પાછું રુધિરમાં લાવવું", "ઓક્સિજનનું વહન કરવું", "પાચનમાં મદદ કરવી"], "ans": 1, "exp": "લસિકા તંત્ર શરીરમાંથી વધારાનું પાણી, પ્રોટીન અને અન્ય પદાર્થોને પાછું રુધિરમાં પરત લાવવામાં મદદ કરે છે, તેમજ રોગપ્રતિકારકતા માટે પણ મહત્વપૂર્ણ છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન રુધિરના ગંઠાઈ જવાની પ્રક્રિયા માટે સાચું નથી?", "opts": ["પ્લેટલેટ્સ રુધિર ગંઠાઈ જવામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે", "ફાઇબ્રિનોજેન ફાઇબ્રિનમાં રૂપાંતરિત થાય છે", "કૅલ્શિયમ આયનો ગંઠાઈ જવાની પ્રક્રિયામાં જરૂરી નથી", "થ્રોમ્બિન ઉત્સેચક ગંઠાઈ જવાની પ્રક્રિયામાં ભાગ લે છે"], "ans": 2, "exp": "રુધિર ગંઠાઈ જવાની પ્રક્રિયામાં કૅલ્શિયમ આયનો જરૂરી છે, જે ફાઇબ્રિનોજેનને ફાઇબ્રિનમાં રૂપાંતરિત કરવામાં મદદ કરે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં રુધિરનું pH મૂલ્ય સામાન્ય રીતે કેટલું હોય છે?", "opts": ["6.8 - 7.0", "7.0 - 7.2", "7.35 - 7.45", "7.5 - 7.8"], "ans": 2, "exp": "માનવ રુધિરનું સામાન્ય pH મૂલ્ય 7.35 થી 7.45 ની વચ્ચે હોય છે, જે શરીરના કાર્યો માટે યોગ્ય સંતુલન જાળવે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું રુધિર જૂથ 'AB' છે. નીચેના પૈકી કયા રુધિર જૂથ ધરાવતા દાતા પાસેથી તેને રુધિર મેળવી શકે છે? (અપવાદરૂપ પરિસ્થિતિને બાદ કરતાં)", "opts": ["માત્ર 'A' અને 'B'", "માત્ર 'O'", "માત્ર 'AB'", "'A', 'B', 'AB' અને 'O'"], "ans": 3, "exp": "'AB' રુધિર જૂથ ધરાવતી વ્યક્તિ સાર્વત્રિક પ્રાપ્તકર્તા છે, કારણ કે તેના રુધિરમાં એન્ટિબોડી હોતા નથી, તેથી તે તમામ રુધિર જૂથ ('A', 'B', 'AB' અને 'O') માંથી રુધિર મેળવી શકે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન લસિકા તંત્ર (લિમ્ફેટિક સિસ્ટમ) માટે સાચું નથી?", "opts": ["લસિકા તંત્ર શરીરમાં પ્રવાહી સંતુલન જાળવવામાં મદદ કરે છે.", "લસિકા ગાંઠો રોગપ્રતિકારક કોષોનું ઉત્પાદન કરે છે.", "લસિકા તંત્ર રુધિરના પરિવહનમાં સીધો ભાગ લે છે.", "લસિકા તંત્ર ચરબીનું શોષણ અને પરિવહન કરવામાં મદદ કરે છે."], "ans": 2, "exp": "લસિકા તંત્ર રુધિરના પરિવહનમાં સીધો ભાગ લેતું નથી. તે શરીરમાં પ્રવાહી સંતુલન, રોગપ્રતિકારકતા અને ચરબીના શોષણમાં મદદ કરે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું હૃદય દર મિનિટે 72 વખત ધબકે છે અને દરેક ધબકારે 70 મિલી રુધિર પંપ કરે છે. તે વ્યક્તિનું કાર્ડિયાક આઉટપુટ (લિટર/મિનિટ) કેટલું હશે?", "opts": ["4.02 લિટર/મિનિટ", "5.04 લિટર/મિનિટ", "6.04 લિટર/મિનિટ", "7.02 લિટર/મિનિટ"], "ans": 1, "exp": "કાર્ડિયાક આઉટપુટ = હૃદય દર × સ્ટ્રોક વોલ્યુમ = 72 × 70 મિલી = 5040 મિલી/મિનિટ = 5.04 લિટર/મિનિટ.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં રુધિર અને લસિકા બંનેને સામૂહિક રીતે શું કહેવાય છે?", "opts": ["શરીર પ્રવાહી", "અંતઃસ્ત્રાવી પ્રવાહી", "ઉત્સર્જન પ્રવાહી", "પાચન પ્રવાહી"], "ans": 0, "exp": "રુધિર અને લસિકા બંને શરીરમાં પરિવહન અને પ્રવાહી સંતુલન જાળવવામાં મદદ કરે છે, તેથી તેને સામૂહિક રીતે શરીર પ્રવાહી કહે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન રુધિરરસ (પ્લાઝ્મા) માટે ખોટું છે?", "opts": ["તેમાં લગભગ 90-92% પાણી હોય છે.", "તેમાં ફાઇબ્રિનોજેન નામનું પ્રોટીન હોય છે જે રુધિર ગંઠાઈ જવામાં મદદ કરે છે.", "તે કોષીય ઘટકો જેવા કે લાલ રુધિરકણો, શ્વેત રુધિરકણો અને ત્રાકકણો ધરાવે છે.", "તે પોષક તત્ત્વો, હોર્મોન્સ અને ઉત્સર્ગ પદાર્થોનું વહન કરે છે."], "ans": 2, "exp": "રુધિરરસમાં કોષીય ઘટકો હોતા નથી; તે માત્ર પ્રવાહી માધ્યમ છે જેમાં પ્રોટીન, પોષક તત્ત્વો અને અન્ય દ્રાવ્ય પદાર્થો હોય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ હૃદયમાં કયા કક્ષમાંથી શુદ્ધ રુધિર શરીરના વિવિધ ભાગોમાં મોકલવામાં આવે છે?", "opts": ["જમણું કર્ણક", "ડાબું કર્ણક", "જમણું ક્ષેપક", "ડાબું ક્ષેપક"], "ans": 3, "exp": "ડાબું ક્ષેપક શુદ્ધ રુધિરને મહાધમની દ્વારા શરીરના વિવિધ ભાગોમાં પંપ કરે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું લસિકાતંત્રનું કાર્ય નથી?", "opts": ["ઊતક પ્રવાહીમાંથી વધારાનું પ્રવાહી એકત્ર કરી રુધિરમાં પરત મોકલવું.", "ચરબીનું શોષણ અને પરિવહન કરવું.", "રોગપ્રતિકારક કોષોનું ઉત્પાદન અને પરિવહન કરવું.", "ઑક્સિજનનું પરિવહન કરવું."], "ans": 3, "exp": "લસિકાતંત્ર ઑક્સિજનનું પરિવહન કરતું નથી; તેનું મુખ્ય કાર્ય પ્રવાહી સંતુલન, ચરબીનું શોષણ અને રોગપ્રતિકારકતા છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિરરસ (પ્લાઝ્મા)ના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["રુધિરરસમાં લગભગ 90-92% પાણી હોય છે.", "રુધિરરસમાં ફાઇબ્રિનોજેન નામનું પ્રોટીન જામી જવાની પ્રક્રિયામાં મદદ કરે છે.", "રુધિરરસમાં હિમોગ્લોબિન જેવા શ્વસન વર્ણકો હોય છે.", "રુધિરરસમાં ગ્લુકોઝ, એમિનો એસિડ અને ખનીજ ક્ષારો જેવા પોષક તત્ત્વો હોય છે."], "ans": 2, "exp": "હિમોગ્લોબિન લાલ રુધિરકણોમાં જોવા મળે છે, રુધિરરસમાં નહીં. રુધિરરસમાં શ્વસન વર્ણકો હોતા નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું અંગ રુધિર પરિવહન તંત્રમાં 'રુધિર બેંક' તરીકે કાર્ય કરે છે?", "opts": ["હૃદય", "ફેફસાં", "યકૃત", "પ્લીહા (સ્પ્લીન)"], "ans": 3, "exp": "પ્લીહા (સ્પ્લીન) રુધિરનો સંગ્રહ કરે છે અને જરૂરિયાત મુજબ શરીરમાં મુક્ત કરે છે, તેથી તેને 'રુધિર બેંક' કહે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના રુધિરનું pH 7.4 છે. જો તેનું pH 7.0 થઈ જાય તો નીચેનામાંથી કયું પરિણામ સંભવિત છે?", "opts": ["એસિડોસિસ થશે, જે શ્વસન અને ચેતાતંત્રને અસર કરશે.", "આલ્કલોસિસ થશે, જે સ્નાયુઓમાં ખેંચાણનું કારણ બનશે.", "રુધિરમાં ઓક્સિજનનું વહન વધશે.", "રુધિરમાં કાર્બન ડાયોક્સાઇડનું વહન ઘટશે."], "ans": 0, "exp": "pH 7.4 થી 7.0 થવાથી એસિડોસિસ થાય છે, જે શ્વસન અને ચેતાતંત્રને ગંભીર રીતે અસર કરે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન લસિકા તંત્ર (Lymphatic System) માટે સાચું નથી?", "opts": ["લસિકા તંત્ર શરીરમાં પ્રવાહી સંતુલન જાળવવામાં મદદ કરે છે.", "લસિકા ગાંઠો રોગપ્રતિકારક કોષોનું ઉત્પાદન કરે છે.", "લસિકા તંત્રમાં હૃદય જેવું પંપિંગ અંગ હોતું નથી.", "લસિકા રુધિરરસ જેવું જ બંધારણ ધરાવે છે, પરંતુ તેમાં લાલ રુધિરકણો હોય છે."], "ans": 3, "exp": "લસિકામાં લાલ રુધિરકણો હોતા નથી, તે માત્ર શ્વેત રુધિરકણો અને પ્રવાહી ધરાવે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના હૃદયમાં કેટલા કક્ષ (Chambers) હોય છે અને તેમાંથી કયા કક્ષ ઓક્સિજનયુક્ત રુધિર મેળવે છે?", "opts": ["ચાર કક્ષ, જેમાં ડાબું કર્ણક અને ડાબું ક્ષેપક ઓક્સિજનયુક્ત રુધિર મેળવે છે.", "ત્રણ કક્ષ, જેમાં ડાબું કર્ણક ઓક્સિજનયુક્ત રુધિર મેળવે છે.", "ચાર કક્ષ, જેમાં જમણું કર્ણક અને જમણું ક્ષેપક ઓક્સિજનયુક્ત રુધિર મેળવે છે.", "બે કક્ષ, જેમાં ડાબું ક્ષેપક ઓક્સિજનયુક્ત રુધિર મેળવે છે."], "ans": 0, "exp": "મનુષ્યના હૃદયમાં ચાર કક્ષ હોય છે: ડાબું કર્ણક અને ડાબું ક્ષેપક ઓક્સિજનયુક્ત રુધિર મેળવે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિર અને લસિકા તંત્રના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["રુધિરમાં હિમોગ્લોબિન ઓક્સિજનનું વહન કરે છે, જ્યારે લસિકામાં હિમોગ્લોબિન હોતું નથી.", "રુધિરમાં લાલ રુધિરકણિકાઓ (RBCs) હોય છે, જ્યારે લસિકામાં લાલ રુધિરકણિકાઓ હોતી નથી.", "રુધિરમાં કાર્બન ડાયોક્સાઇડનું વહન મુખ્યત્વે પ્લાઝ્મામાં દ્રાવ્ય સ્વરૂપે થાય છે, જ્યારે લસિકામાં કાર્બન ડાયોક્સાઇડ હોતું નથી.", "રુધિર અને લસિકા બંને શરીરના પ્રતિરક્ષાતંત્રમાં મહત્ત્વની ભૂમિકા ભજવે છે."], "ans": 2, "exp": "લસિકામાં પણ કાર્બન ડાયોક્સાઇડ હોઈ શકે છે, કારણ કે તે પેશીઓમાંથી કચરો અને વાયુઓ એકત્રિત કરે છે. રુધિરમાં કાર્બન ડાયોક્સાઇડનું વહન મુખ્યત્વે બાયકાર્બોનેટ આયનો તરીકે થાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું સંયોજન રુધિરના પ્લાઝ્મામાં હોતું નથી?", "opts": ["ફાઇબ્રિનોજેન", "આલ્બ્યુમિન", "હિમોગ્લોબિન", "ગ્લોબ્યુલિન"], "ans": 2, "exp": "હિમોગ્લોબિન લાલ રુધિરકણિકાઓમાં જોવા મળે છે, પ્લાઝ્મામાં નહીં. પ્લાઝ્મામાં ફાઇબ્રિનોજેન, આલ્બ્યુમિન અને ગ્લોબ્યુલિન જેવા પ્રોટીન હોય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું હૃદય પ્રતિ મિનિટે 75 વખત ધબકે છે અને દરેક ધબકારે 70 મિલી રુધિર પંપ કરે છે. આ વ્યક્તિના કાર્ડિયાક આઉટપુટની ગણતરી કરો.", "opts": ["4500 મિલી/મિનિટ", "5250 મિલી/મિનિટ", "5000 મિલી/મિનિટ", "6000 મિલી/મિનિટ"], "ans": 1, "exp": "કાર્ડિયાક આઉટપુટ = હૃદયના ધબકારાની સંખ્યા × એક ધબકારામાં પંપ થતું રુધિર = 75 × 70 = 5250 મિલી/મિનિટ.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું લસિકા તંત્રનું કાર્ય નથી?", "opts": ["પેશીઓમાંથી વધારાનું પ્રવાહી રુધિરમાં પરત લાવવું.", "ચરબીનું શોષણ અને પરિવહન કરવું.", "શરીરમાં ઓક્સિજનનું વહન કરવું.", "રોગપ્રતિકારક કોષોનું પરિવહન કરવું."], "ans": 2, "exp": "લસિકા તંત્ર ઓક્સિજનનું વહન કરતું નથી. ઓક્સિજનનું વહન રુધિરમાં હિમોગ્લોબિન દ્વારા થાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિરરસ (પ્લાઝ્મા) નું મુખ્ય કાર્ય શું છે?", "opts": ["ઓક્સિજનનું પરિવહન કરવું", "કાર્બન ડાયોક્સાઇડનું પરિવહન કરવું", "પોષક તત્ત્વો, હોર્મોન્સ અને ઉત્સર્ગ પદાર્થોનું વહન કરવું", "રક્તકણોનું નિર્માણ કરવું"], "ans": 2, "exp": "રુધિરરસ (પ્લાઝ્મા) મુખ્યત્વે પોષક તત્ત્વો, હોર્મોન્સ, ઉત્સર્ગ પદાર્થો અને અન્ય દ્રાવ્ય પદાર્થોનું પરિવહન કરે છે, જ્યારે ઓક્સિજન અને કાર્બન ડાયોક્સાઇડનું પરિવહન રક્તકણો દ્વારા થાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું હૃદય દર મિનિટે 75 વખત ધબકે છે અને દરેક ધબકારે 70 મિલી રુધિર પંપ કરે છે. આ વ્યક્તિનું કાર્ડિયાક આઉટપુટ (Cardiac Output) કેટલું હશે?", "opts": ["4250 મિલી/મિનિટ", "5250 મિલી/મિનિટ", "6250 મિલી/મિનિટ", "7250 મિલી/મિનિટ"], "ans": 1, "exp": "કાર્ડિયાક આઉટપુટ = હૃદયના ધબકારાની સંખ્યા × દરેક ધબકારે પંપ થતું રુધિરનું પ્રમાણ = 75 × 70 = 5250 મિલી/મિનિટ.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું રુધિરના ગંઠાઈ જવાની પ્રક્રિયામાં સીધી રીતે સંકળાયેલું નથી?", "opts": ["પ્રોથ્રોમ્બિન", "ફાઇબ્રિનોજેન", "કેલ્શિયમ આયનો", "હિમોગ્લોબિન"], "ans": 3, "exp": "હિમોગ્લોબિન ઓક્સિજન વહનમાં મદદ કરે છે, પરંતુ રુધિર ગંઠાઈ જવાની પ્રક્રિયામાં સીધી રીતે સંકળાયેલું નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના રુધિર જૂથ 'AB' છે. નીચેનામાંથી કયું વિધાન આ રુધિર જૂથ માટે સાચું છે?", "opts": ["આ વ્યક્તિને 'A' અને 'B' એન્ટિજન બંને હાજર હોય છે અને એન્ટિબોડી હાજર નથી.", "આ વ્યક્તિને 'A' અને 'B' એન્ટિબોડી બંને હાજર હોય છે અને એન્ટિજન હાજર નથી.", "આ વ્યક્તિને માત્ર 'A' એન્ટિજન અને 'B' એન્ટિબોડી હાજર હોય છે.", "આ વ્યક્તિને માત્ર 'B' એન્ટિજન અને 'A' એન્ટિબોડી હાજર હોય છે."], "ans": 0, "exp": "'AB' રુધિર જૂથ ધરાવતી વ્યક્તિમાં 'A' અને 'B' એન્ટિજન બંને હાજર હોય છે, પરંતુ એન્ટિબોડી હાજર હોતી નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) લસિકા તંત્ર શરીરમાં પ્રવાહી સંતુલન જાળવવામાં મદદ કરે છે. (2) લસિકા ગાંઠો શ્વેતકણો ઉત્પન્ન કરે છે. (3) લસિકા તંત્ર રુધિરના ગંઠાઈ જવાની પ્રક્રિયામાં મદદ કરે છે. (4) લસિકા તંત્ર ચરબીના પાચનમાં મદદ કરે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (1), (2) અને (4) સાચાં છે, જ્યારે વિધાન (3) ખોટું છે કારણ કે લસિકા તંત્ર રુધિર ગંઠાઈ જવાની પ્રક્રિયામાં સીધી રીતે સંકળાયેલું નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિર અને લસિકા બંનેના પરિવહન તંત્રમાં નીચેનામાંથી કયું સામાન્ય લક્ષણ જોવા મળે છે?", "opts": ["બંને તંત્રમાં હૃદય દ્વારા પંપ થાય છે", "બંને તંત્રમાં વાલ્વની હાજરી હોય છે", "બંને તંત્રમાં ઓક્સિજનયુક્ત અને ઓક્સિજનવિહીન રુધિરનું પરિવહન થાય છે", "બંને તંત્રમાં રુધિરકેશિકાઓ દ્વારા પદાર્થોનું વિનિમય થાય છે"], "ans": 1, "exp": "રુધિર અને લસિકા બંને તંત્રમાં વાલ્વની હાજરી હોય છે જે પ્રવાહીને એક દિશામાં વહેવામાં મદદ કરે છે. રુધિર તંત્રમાં હૃદય પંપ તરીકે કાર્ય કરે છે જ્યારે લસિકા તંત્રમાં હૃદયનો ઉપયોગ થતો નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના હૃદયના ધબકારા દર મિનિટે 72 છે અને દરેક ધબકારામાં 70 મિલી રુધિર પંપ થાય છે. આ વ્યક્તિના કાર્ડિયાક આઉટપુટની ગણતરી કરો.", "opts": ["4.04 લિટર/મિનિટ", "5.04 લિટર/મિનિટ", "6.04 લિટર/મિનિટ", "7.04 લિટર/મિનિટ"], "ans": 1, "exp": "કાર્ડિયાક આઉટપુટ = ધબકારા દર × સ્ટ્રોક વોલ્યુમ = 72 × 70 મિલી = 5040 મિલી/મિનિટ = 5.04 લિટર/મિનિટ.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) રુધિરકેશિકાઓની દીવાલ એકસ્તરીય શલ્કી અધિચ્છદની બનેલી હોય છે. (2) ધમનીઓની દીવાલમાં સ્નાયુસ્તર જાડું હોય છે જ્યારે શિરાઓમાં પાતળું હોય છે. (3) શિરાઓમાં વાલ્વ હોતા નથી. (4) ધમનીઓમાં રુધિરનું દબાણ શિરાઓ કરતાં વધારે હોય છે. ઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર 1, 2 અને 4", "માત્ર 1, 2 અને 3", "માત્ર 2, 3 અને 4", "માત્ર 1, 3 અને 4"], "ans": 0, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. શિરાઓમાં વાલ્વ હોય છે જે રુધિરને એક દિશામાં વહેવામાં મદદ કરે છે, તેથી વિધાન 3 ખોટું છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિર અને લસિકા બંનેનું પરિવહન તંત્રમાં શું સામાન્ય લક્ષણ છે?", "opts": ["બંને ઓક્સિજનનું પરિવહન કરે છે", "બંને બંધ પરિવહન તંત્ર ધરાવે છે", "બંને હૃદય દ્વારા પંપ થાય છે", "બંને શ્વેતકણો ધરાવે છે"], "ans": 3, "exp": "રુધિર અને લસિકા બંનેમાં શ્વેતકણો (WBC) હાજર હોય છે, જે પ્રતિરક્ષા તંત્રમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. રુધિર ઓક્સિજનનું પરિવહન કરે છે, જ્યારે લસિકા નથી કરતું; લસિકા ખુલ્લું તંત્ર ધરાવે છે અને તે હૃદય દ્વારા પંપ થતું નથી.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના હૃદયના ધબકારા દર મિનિટે 72 વખત છે અને તેનું સ્ટ્રોક વોલ્યુમ 70 મિલી છે. તેનું કાર્ડિયાક આઉટપુટ (લિટર/મિનિટમાં) કેટલું હશે?", "opts": ["4.02 લિટર/મિનિટ", "5.04 લિટર/મિનિટ", "6.06 લિટર/મિનિટ", "7.20 લિટર/મિનિટ"], "ans": 1, "exp": "કાર્ડિયાક આઉટપુટ = ધબકારા દર × સ્ટ્રોક વોલ્યુમ = 72 × 70 મિલી = 5040 મિલી/મિનિટ = 5.04 લિટર/મિનિટ.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) રુધિરનું pH લગભગ 7.4 હોય છે, (2) રુધિરરસમાં લગભગ 55% રુધિરનો ભાગ હોય છે, (3) રક્તકણોનું આયુષ્ય લગભગ 120 દિવસનું હોય છે, (4) લ્યુકોસાઇટ્સ રુધિર ગંઠાઈ જવાની પ્રક્રિયામાં મદદ કરે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (1), (2) અને (3) સાચાં છે. વિધાન (4) ખોટું છે કારણ કે લ્યુકોસાઇટ્સ પ્રતિરક્ષામાં મદદ કરે છે, જ્યારે રુધિર ગંઠાઈ જવાની પ્રક્રિયામાં પ્લેટલેટ્સ મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિરરસ (પ્લાઝ્મા) અને રુધિરકણિકાઓના પ્રમાણ વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["રુધિરરસ લગભગ 45% અને રુધિરકણિકાઓ લગભગ 55% હોય છે.", "રુધિરરસ લગભગ 55% અને રુધિરકણિકાઓ લગભગ 45% હોય છે.", "રુધિરરસ અને રુધિરકણિકાઓનું પ્રમાણ સરખું હોય છે.", "રુધિરરસ લગભગ 60% અને રુધિરકણિકાઓ લગભગ 40% હોય છે."], "ans": 1, "exp": "મનુષ્યના શરીરમાં રુધિરરસ લગભગ 55% અને રુધિરકણિકાઓ લગભગ 45% હોય છે, જેમાં લાલ રક્તકણો, શ્વેત રક્તકણો અને પ્લેટલેટ્સનો સમાવેશ થાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું રુધિર જૂથ (Blood Group) 'સાર્વત્રિક દાતા' તરીકે ઓળખાય છે?", "opts": ["A", "B", "AB", "O"], "ans": 3, "exp": "O રુધિર જૂથને 'સાર્વત્રિક દાતા' કહેવાય છે કારણ કે તેના રક્તકણોમાં A કે B પ્રતિજન હોતા નથી, તેથી તે કોઈપણ રુધિર જૂથને દાન કરી શકાય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) રુધિરરસમાં લગભગ 90% પાણી હોય છે. (2) રુધિરરસમાં ફાઇબ્રિનોજેન નામનું પ્રોટીન રુધિર ગંઠાઈ જવા માટે જવાબદાર છે. (3) રુધિરરસમાં હિમોગ્લોબિન હોતું નથી. (4) રુધિરરસનું pH લગભગ 7.4 હોય છે. ઉપરના વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "વિધાન (1), (2) અને (4) સાચાં છે. રુધિરરસમાં હિમોગ્લોબિન હોતું નથી, તેથી વિધાન (3) ખોટું છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિરરસ (પ્લાઝ્મા)ના ઘટકોમાં નીચેનામાંથી કયો ઘટક સૌથી વધુ પ્રમાણમાં હોય છે?", "opts": ["પ્રોટીન", "પાણી", "કાર્બોદિત", "ક્ષાર"], "ans": 1, "exp": "રુધિરરસમાં લગભગ 90-92% પાણી હોય છે, જે તેનો મુખ્ય ઘટક છે. પ્રોટીન લગભગ 6-8% હોય છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં રુધિર અને લસિકા બંને પરિવહન તંત્રના ભાગ છે. નીચેનામાંથી કયું વિધાન રુધિર અને લસિકા વચ્ચેનો મુખ્ય તફાવત દર્શાવે છે?", "opts": ["રુધિરમાં હિમોગ્લોબિન હોય છે જ્યારે લસિકામાં હિમોગ્લોબિન હોતું નથી", "રુધિર હૃદય દ્વારા પંપ થાય છે જ્યારે લસિકા સ્નાયુઓના સંકોચન દ્વારા ગતિ કરે છે", "રુધિરમાં રક્તકણો અને શ્વેતકણો બંને હોય છે જ્યારે લસિકામાં માત્ર શ્વેતકણો હોય છે", "રુધિર શરીરના બધા ભાગોમાં પરિવહન કરે છે જ્યારે લસિકા માત્ર આંતરડામાં જ પરિવહન કરે છે"], "ans": 1, "exp": "રુધિર હૃદય દ્વારા પંપ થાય છે અને બંધ પરિવહન તંત્રમાં વહે છે, જ્યારે લસિકા ખુલ્લું પરિવહન તંત્ર છે જે સ્નાયુઓના સંકોચન અને વાલ્વ દ્વારા ગતિ કરે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના રુધિર જૂથ 'AB' છે. નીચેનામાંથી કયું વિધાન આ રુધિર જૂથ માટે યોગ્ય નથી?", "opts": ["આ વ્યક્તિને કોઈપણ રુધિર જૂથનું રુધિર ચઢાવી શકાય છે", "આ વ્યક્તિના રુધિરમાં એન્ટિજન A અને B બંને હાજર હોય છે", "આ વ્યક્તિના રુધિરમાં એન્ટિબોડી anti-A કે anti-B હાજર હોતા નથી", "આ વ્યક્તિ માત્ર 'AB' રુધિર જૂથ ધરાવતા વ્યક્તિને જ રુધિર દાન કરી શકે છે"], "ans": 3, "exp": "'AB' રુધિર જૂથ ધરાવતા વ્યક્તિ સાર્વત્રિક પ્રાપ્તકર્તા છે પરંતુ માત્ર 'AB' રુધિર જૂથ ધરાવતા વ્યક્તિને જ રુધિર દાન કરી શકતા નથી, તેઓ અન્ય રુધિર જૂથને પણ દાન કરી શકે છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વિધાન (A): હૃદયના જમણા ક્ષેપકમાંથી રુધિર ફેફસાંની ધમનીઓ દ્વારા ફેફસાંમાં જાય છે.\nકારણ (R): ફેફસાંની ધમનીઓમાં ઓક્સિજનયુક્ત રુધિર વહે છે.", "opts": ["A અને R બંને સાચાં છે અને R એ A નું સાચું સમર્થન છે", "A અને R બંને સાચાં છે પરંતુ R એ A નું સાચું સમર્થન નથી", "A સાચું છે પરંતુ R ખોટું છે", "A ખોટું છે પરંતુ R સાચું છે"], "ans": 2, "exp": "હૃદયના જમણા ક્ષેપકમાંથી રુધિર ફેફસાંની ધમનીઓ દ્વારા ફેફસાંમાં જાય છે, પરંતુ ફેફસાંની ધમનીઓમાં ઓક્સિજનવિહીન રુધિર વહે છે, તેથી R ખોટું છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો અને કેટલાં સાચાં છે તે જણાવો:\n1. રુધિરરસમાં લગભગ 90% પાણી હોય છે.\n2. રુધિરરસમાં ફાઇબ્રિનોજેન નામનું પ્રોટીન હોય છે જે રુધિર ગંઠાઈ જવામાં મદદ કરે છે.\n3. રુધિરરસમાં હિમોગ્લોબિન હોય છે જે ઓક્સિજનનું વહન કરે છે.\n4. રુધિરરસમાં એન્ટિબોડીઝ હોય છે જે પ્રતિરક્ષા પ્રદાન કરે છે.", "opts": ["માત્ર 1 અને 2 સાચાં છે", "માત્ર 1, 2 અને 4 સાચાં છે", "માત્ર 2 અને 3 સાચાં છે", "માત્ર 1, 3 અને 4 સાચાં છે"], "ans": 1, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. હિમોગ્લોબિન રક્તકણોમાં હોય છે, રુધિરરસમાં નહીં, તેથી વિધાન 3 ખોટું છે.", "chapter": "શરીર પ્રવાહીઓ અને પરિવહન", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "શરીર પ્રવાહીઓ અને પરિવહન Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
