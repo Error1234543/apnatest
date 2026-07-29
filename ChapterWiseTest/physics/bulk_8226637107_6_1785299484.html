@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દ્રવોના યાંત્રિક ગુણધર્મો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>દ્રવોના યાંત્રિક ગુણધર્મો Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "એક પ્રવાહીની સપાટી પર તરતા પદાર્થ પર લાગતું ઉત્લાવક બળ કયા નિયમ પર આધારિત છે?", "opts": ["પાસ્કલનો નિયમ", "આર્કિમિડિઝનો સિદ્ધાંત", "બર્નુલીનો સિદ્ધાંત", "સ્ટોક્સનો નિયમ"], "ans": 1, "exp": "ઉત્લાવક બળ પ્રવાહીમાં ડૂબેલા પદાર્થના વજન જેટલું પ્રવાહીનું સ્થાનાંતર કરે છે, જે આર્કિમિડિઝના સિદ્ધાંત પર આધારિત છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક સાંકડી નળીમાં પ્રવાહીના ઉપર ચડવાની ઘટનાને શું કહે છે?", "opts": ["પૃષ્ઠતાણ", "કેશિકાત્વ", "સ્નિગ્ધતા", "દબાણ"], "ans": 1, "exp": "સાંકડી નળીમાં પ્રવાહીના ઉપર ચડવાની ઘટનાને કેશિકાત્વ કહે છે, જે પૃષ્ઠતાણ અને સંલગ્નતા બળોને કારણે થાય છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સ્નિગ્ધતા 0.8 પોઈઝ છે. તેનું SI એકમમાં મૂલ્ય કેટલું થશે?", "opts": ["0.08 Pa·s", "0.8 Pa·s", "0.008 Pa·s", "8 Pa·s"], "ans": 0, "exp": "1 પોઈઝ = 0.1 Pa·s, તેથી 0.8 પોઈઝ = 0.08 Pa·s થાય.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સત્ય છે?\n(1) પ્રવાહીનું પૃષ્ઠતાણ તાપમાન વધતા ઘટે છે.\n(2) પ્રવાહીની સ્નિગ્ધતા તાપમાન વધતા વધે છે.\n(3) પ્રવાહીનું ઉત્લાવક બળ તેના ઘનત્વ પર આધારિત નથી.", "opts": ["માત્ર (1)", "(1) અને (2)", "(1) અને (3)", "માત્ર (2)"], "ans": 0, "exp": "પ્રવાહીનું પૃષ્ઠતાણ તાપમાન વધતા ઘટે છે, જ્યારે સ્નિગ્ધતા તાપમાન વધતા ઘટે છે અને ઉત્લાવક બળ પ્રવાહીના ઘનત્વ પર આધારિત છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને પાણીમાં ડુબાડતા તેનું વજન 2 N ઘટે છે. જો પાણીની ઘનતા 1000 kg/m³ અને ગુરુત્વપ્રવેગ 10 m/s² હોય, તો પદાર્થનું કદ કેટલું હશે?", "opts": ["2 × 10⁻⁴ m³", "2 × 10⁻³ m³", "2 × 10⁻⁵ m³", "2 × 10⁻² m³"], "ans": 0, "exp": "ઉત્લાવક બળ = વજનમાં ઘટાડો = પ્રવાહીનું સ્થાનાંતર × ઘનતા × g. તેથી, કદ = 2 N / (1000 kg/m³ × 10 m/s²) = 2 × 10⁻⁴ m³.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળીમાંથી વહેતા પ્રવાહીની ઝડપ વધારવામાં આવે તો નળીના તે ભાગમાં દબાણમાં શું ફેરફાર થાય છે? (બર્નુલીના નિયમ અનુસાર)", "opts": ["દબાણ વધે છે", "દબાણ ઘટે છે", "દબાણ અચળ રહે છે", "દબાણ શૂન્ય થાય છે"], "ans": 1, "exp": "બર્નુલીના નિયમ અનુસાર, પ્રવાહીની ઝડપ વધે ત્યારે દબાણ ઘટે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન પૃષ્ઠતાણ વિશે ખોટું છે?", "opts": ["પૃષ્ઠતાણનું મૂલ્ય તાપમાન વધતા ઘટે છે", "પૃષ્ઠતાણને કારણે પ્રવાહીના ટીપાં ગોળાકાર બને છે", "પૃષ્ઠતાણનું એકમ ન્યૂટન/મીટર છે", "પૃષ્ઠતાણ માત્ર ઘન પદાર્થો માટે લાગુ પડે છે"], "ans": 3, "exp": "પૃષ્ઠતાણ માત્ર પ્રવાહીઓ માટે લાગુ પડે છે, ઘન પદાર્થો માટે નહીં.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સ્નિગ્ધતા 0.8 પોઈઝ છે. તેનું SI એકમમાં મૂલ્ય શું હશે? (1 પોઈઝ = 0.1 Pa·s)", "opts": ["0.08 Pa·s", "0.8 Pa·s", "8 Pa·s", "0.008 Pa·s"], "ans": 0, "exp": "1 પોઈઝ = 0.1 Pa·s હોવાથી, 0.8 પોઈઝ = 0.8 × 0.1 = 0.08 Pa·s થાય.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ કેશિકાત્વ સાથે સંબંધિત નથી?", "opts": ["પાણીનું છોડના મૂળમાંથી ઉપર ચઢવું", "સૂકા કપડામાં પાણીનું શોષાવું", "પ્રવાહીનું પાત્રની દીવાલ પર ચઢવું", "પ્રવાહીનું પાત્રમાંથી બહાર નીકળવું"], "ans": 3, "exp": "પ્રવાહીનું પાત્રમાંથી બહાર નીકળવું કેશિકાત્વ સાથે સંબંધિત નથી, તે ગુરુત્વાકર્ષણને કારણે થાય છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સપાટી તણાવનું મૂલ્ય 0.072 N/m છે. આ પ્રવાહીના 5 cm ત્રિજ્યાવાળા એક પરપોટાને ફૂલાવવા માટે કેટલું કાર્ય કરવું પડે? (પરપોટામાં બે સપાટી હોય છે)", "opts": ["4.52 × 10⁻⁴ J", "9.05 × 10⁻⁴ J", "2.26 × 10⁻⁴ J", "1.13 × 10⁻⁴ J"], "ans": 0, "exp": "કાર્ય = સપાટી તણાવ × કુલ સપાટીનું ક્ષેત્રફળ × 2 (કારણ કે બે સપાટી હોય છે). અહીં કુલ સપાટીનું ક્ષેત્રફળ = 4πr² = 4π(0.05)² = 0.00314 m². તેથી કાર્ય = 0.072 × 0.00314 × 2 = 4.52 × 10⁻⁴ J.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સપાટી તણાવ માટે ખોટું છે?", "opts": ["સપાટી તણાવનું કારણ પ્રવાહીના અણુઓ વચ્ચેનું આંતરઆણ્વિક આકર્ષણ બળ છે.", "સપાટી તણાવનું મૂલ્ય તાપમાન વધતા વધે છે.", "સપાટી તણાવને કારણે પ્રવાહીની મુક્ત સપાટી લઘુતમ ક્ષેત્રફળ ધરાવે છે.", "સાબુના દ્રાવણમાં શુદ્ધ પાણી કરતાં સપાટી તણાવ ઓછો હોય છે."], "ans": 1, "exp": "સપાટી તણાવનું મૂલ્ય તાપમાન વધતા ઘટે છે, કારણ કે ઉષ્મીય ગતિને કારણે આંતરઆણ્વિક બળો નબળા પડે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાઇપમાં પાણી 2 m/s ની ઝડપથી વહે છે. જો પાઇપનો વ્યાસ અડધો કરવામાં આવે, તો પાણીની ઝડપ કેટલી થશે? (પાણી અસંકોચનીય માનો)", "opts": ["4 m/s", "8 m/s", "1 m/s", "16 m/s"], "ans": 1, "exp": "સાતત્ય સમીકરણ અનુસાર A₁v₁ = A₂v₂. વ્યાસ અડધો થતાં ક્ષેત્રફળ ચોથા ભાગનું થાય. તેથી v₂ = v₁ × (A₁/A₂) = 2 × 4 = 8 m/s.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "બર્નુલીના સમીકરણ અનુસાર, જ્યારે પ્રવાહીની ઝડપ વધે છે ત્યારે દબાણ ____.", "opts": ["વધે છે", "ઘટે છે", "સમાન રહે છે", "પ્રવાહીના પ્રકાર પર આધાર રાખે છે"], "ans": 1, "exp": "બર્નુલીના સમીકરણ અનુસાર, ઝડપ વધતા દબાણ ઘટે છે, કારણ કે કુલ ઊર્જા અચળ રહે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં 2 m/sની ઝડપથી પાણી વહે છે. જો નળાકારની ત્રિજ્યા અડધી કરવામાં આવે, તો પાણીની ઝડપ કેટલી થશે? (પ્રવાહનું પ્રમાણ અચળ રહે છે)", "opts": ["4 m/s", "8 m/s", "1 m/s", "16 m/s"], "ans": 1, "exp": "પ્રવાહનું પ્રમાણ A₁v₁ = A₂v₂ હોવાથી, જો ત્રિજ્યા અડધી થાય તો ક્ષેત્રફળ 1/4 થાય, તેથી ઝડપ 4 ગણી થાય. આથી v₂ = 2 × 4 = 8 m/s.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ પ્રવાહીના સ્નિગ્ધતાના ગુણધર્મ સાથે સીધો સંબંધ ધરાવતું નથી?", "opts": ["તેલનું ધીમું વહેવું", "પાણીની સપાટી પર તરતા કીડાનું હલનચલન", "શહેરમાં પાણીની પાઇપલાઇનમાં દબાણ ઘટવું", "રક્તવાહિનીઓમાં લોહીનું વહન"], "ans": 1, "exp": "પાણીની સપાટી પર તરતા કીડાનું હલનચલન પૃષ્ઠતાણ સાથે સંબંધિત છે, સ્નિગ્ધતા સાથે નહીં.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પાત્રમાં પાણી ભરેલું છે અને તેના તળિયે એક નાનું છિદ્ર છે. જો પાણીનું સ્તર પાત્રમાં h ઊંચાઈએ હોય, તો છિદ્રમાંથી બહાર નીકળતા પાણીની ઝડપ કયા નિયમ પર આધારિત છે?", "opts": ["આર્કિમિડિઝનો સિદ્ધાંત", "ટૉરિસેલીનો નિયમ", "પાસ્કલનો નિયમ", "બર્નુલીનો સિદ્ધાંત"], "ans": 1, "exp": "ટૉરિસેલીના નિયમ અનુસાર, છિદ્રમાંથી બહાર નીકળતા પ્રવાહની ઝડપ v = √(2gh) હોય છે, જ્યાં h એ પ્રવાહીનું સ્તર છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સપાટી તણાવ 0.075 N/m છે. જો એક વર્તુળાકાર ફ્રેમ (વ્યાસ 6 cm) પર પ્રવાહીની ફિલ્મ બને, તો ફિલ્મ પર લાગતું બળ કેટલું હશે? (ફિલ્મની બંને બાજુઓ ધ્યાનમાં લો)", "opts": ["1.41 × 10⁻² N", "2.83 × 10⁻² N", "7.07 × 10⁻³ N", "3.53 × 10⁻³ N"], "ans": 0, "exp": "ફિલ્મની લંબાઈ = π × વ્યાસ = π × 0.06 m. બંને બાજુઓ માટે બળ = 2 × સપાટી તણાવ × લંબાઈ = 2 × 0.075 × π × 0.06 ≈ 2.83 × 10⁻² N. પરંતુ ફિલ્મની એક બાજુ માટે બળ અડધું થશે: 1.41 × 10⁻² N.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં 2 m ઊંચાઈ સુધી પાણી ભરેલું છે. પાત્રના તળિયે દબાણ કેટલું હશે? (પાણીની ઘનતા = 1000 kg/m³, g = 9.8 m/s²)", "opts": ["9800 Pa", "19600 Pa", "4900 Pa", "29400 Pa"], "ans": 1, "exp": "દબાણ = ઘનતા × g × ઊંચાઈ = 1000 × 9.8 × 2 = 19600 Pa.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ કેશિકાત્વની ઘટના સાથે સંકળાયેલું નથી?", "opts": ["ઇંધણની વાટમાં તેલ ચડવું", "પાણીનું વૃક્ષના થડમાં ઉપર ચડવું", "સ્પંજમાં પાણી શોષાવું", "પ્રવાહીનું પાત્રમાંથી છલકાવું"], "ans": 3, "exp": "કેશિકાત્વ એ પ્રવાહીનું સાંકડી નળીમાં ઉપર ચડવાની ઘટના છે. પાત્રમાંથી છલકાવું એ ગુરુત્વાકર્ષણ અને સપાટી તણાવ સાથે સંબંધિત છે, કેશિકાત્વ સાથે નહીં.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પાતળી દીવાલવાળી નળીને પાણીમાં ઊભી ડુબાડતાં પાણી નળીમાં 4 cm જેટલું ઉપર ચડે છે. જો આ જ નળીને પારા (Hg)માં ઊભી ડુબાડવામાં આવે, તો પારો નળીમાં કેટલું નીચે ઉતરશે? (પાણીની સપાટી તણાવ = 0.072 N/m, પારાની સપાટી તણાવ = 0.465 N/m, પાણીનો સંપર્કકોણ = 0°, પારાનો સંપર્કકોણ = 135°, પાણીની ઘનતા = 1000 kg/m³, પારાની ઘનતા = 13600 kg/m³, g = 9.8 m/s²)", "opts": ["0.13 cm નીચે", "1.3 cm નીચે", "0.26 cm નીચે", "2.6 cm નીચે"], "ans": 0, "exp": "કેશાકર્ષણના સૂત્ર h = (2T cosθ)/(ρgr) મુજબ, પાણી અને પારા માટે h₁/h₂ = (T₁ cosθ₁ ρ₂)/(T₂ cosθ₂ ρ₁) થાય. આથી પારો 0.13 cm જેટલો નીચે ઉતરશે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો પૈકી કેટલાં સાચાં છે?\n1. પાસ્કલનો નિયમ દ્રવોના સ્થિર અને ગતિશીલ બંને અવસ્થામાં લાગુ પડે છે.\n2. વહેતા પ્રવાહીના દબાણમાં ઘટાડો તેની ઝડપમાં વધારો થવાને કારણે થાય છે.\n3. વેન્ટુરી મીટર પ્રવાહીની ઝડપ માપવા માટે વપરાય છે.\n4. સ્ટોક્સનો નિયમ માત્ર ગોળાકાર પદાર્થો માટે જ લાગુ પડે છે.", "opts": ["માત્ર 1 અને 2", "માત્ર 2, 3 અને 4", "માત્ર 2 અને 3", "માત્ર 1, 3 અને 4"], "ans": 1, "exp": "પાસ્કલનો નિયમ માત્ર સ્થિર પ્રવાહી માટે લાગુ પડે છે. બાકીનાં ત્રણ વિધાનો સાચાં છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને પાણીમાં ડુબાડતાં તેના વજનમાં 20% ઘટાડો થાય છે. જો આ જ પદાર્થને ઘનતા 800 kg/m³ ધરાવતા પ્રવાહીમાં ડુબાડવામાં આવે, તો તેના વજનમાં કેટલા ટકાનો ઘટાડો થશે? (પાણીની ઘનતા = 1000 kg/m³)", "opts": ["12%", "16%", "20%", "25%"], "ans": 1, "exp": "આર્કિમિડિઝના સિદ્ધાંત મુજબ, વજનમાં ઘટાડો પ્રવાહીની ઘનતા પર આધારિત છે. પાણીમાં 20% ઘટાડો એટલે પદાર્થની ઘનતા 1250 kg/m³ થાય. તેથી નવા પ્રવાહીમાં ઘટાડો = (800/1250) × 20% = 16%.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ કેશાકર્ષણની ઘટના સાથે સીધું સંકળાયેલું નથી?", "opts": ["સૂકા કપડાંમાંથી પાણી નીચોવવું", "તેલની વાટમાં તેલ ઉપર ચડવું", "પ્રવાહીનું પાતળી નળીમાં ઉપર ચડવું", "સ્પંજમાં પાણી શોષાવું"], "ans": 0, "exp": "સૂકા કપડાંમાંથી પાણી નીચોવવું એ કેશાકર્ષણ સાથે સંકળાયેલું નથી, તે યાંત્રિક દબાણનું પરિણામ છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સ્નિગ્ધતા η₁ અને બીજા પ્રવાહીની સ્નિગ્ધતા η₂ છે. જો બંને પ્રવાહીઓને સમાન કદમાં મિશ્ર કરતાં મિશ્રણની સ્નિગ્ધતા η = (η₁ + η₂)/2 થાય, તો આ મિશ્રણને શું કહેવાય?", "opts": ["આદર્શ મિશ્રણ", "અનાદર્શ મિશ્રણ", "ઇમલ્શન", "કોલોઇડલ દ્રાવણ"], "ans": 0, "exp": "જ્યારે મિશ્રણની સ્નિગ્ધતા ઘટકોની સ્નિગ્ધતાના સરેરાશ મૂલ્ય જેટલી હોય, તો તેને આદર્શ મિશ્રણ કહે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં પાણી ભરેલું છે અને તેના તળિયે દબાણ 2 × 10⁴ Pa છે. જો પાણીની ઘનતા 1000 kg/m³ અને ગુરુત્વપ્રવેગ g = 10 m/s² હોય, તો પાણીની ઊંચાઈ કેટલી હશે?", "opts": ["1 મીટર", "2 મીટર", "3 મીટર", "4 મીટર"], "ans": 1, "exp": "દબાણ P = hρg ⇒ h = P/(ρg) = (2 × 10⁴)/(1000 × 10) = 2 મીટર.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ પ્રવાહીના સ્નિગ્ધતાનું નથી?", "opts": ["તેલમાં ડૂબેલા પદાર્થનું ધીમે ધીમે નીચે જવું", "પાણીમાં તરતી હોડીનું ગતિ કરવું", "હવામાં ફેંકેલા પથ્થરનું નીચે પડવું", "શહેરમાં પાણીની પાઇપલાઇનમાં પાણીનું વહન"], "ans": 2, "exp": "હવામાં ફેંકેલા પથ્થરનું નીચે પડવું એ ગુરુત્વાકર્ષણને કારણે છે, સ્નિગ્ધતા સાથે સંબંધિત નથી.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રવાહીની સ્નિગ્ધતા 0.5 પોઈઝ છે. તેનું SI એકમમાં મૂલ્ય કેટલું થશે? (1 પોઈઝ = 0.1 Pa·s)", "opts": ["0.05 Pa·s", "0.5 Pa·s", "0.005 Pa·s", "5 Pa·s"], "ans": 0, "exp": "0.5 પોઈઝ = 0.5 × 0.1 Pa·s = 0.05 Pa·s.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાંકડી નળીમાં પ્રવાહીના ઉપર ચડવાની ઘટના (કેશિકાત્વ) માટે સાચું નથી?", "opts": ["પ્રવાહીની સપાટી તણાવ પર આધારિત છે.", "નળીનો વ્યાસ ઘટાડતાં પ્રવાહીનું સ્તર વધે છે.", "પ્રવાહી અને નળીની દીવાલ વચ્ચેનું સંલગ્ન બળ મહત્ત્વનું છે.", "ગુરુત્વાકર્ષણ બળની અસર કેશિકાત્વમાં નથી હોતી."], "ans": 3, "exp": "કેશિકાત્વમાં ગુરુત્વાકર્ષણ બળની અસર હોય છે, જે પ્રવાહીના ઉપર ચડવાની મર્યાદા નક્કી કરે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "બર્નુલીના સમીકરણ અનુસાર, જો પ્રવાહીની ઝડપ વધે તો તેના માર્ગમાં દબાણ પર શું અસર થાય છે?", "opts": ["દબાણ વધે છે.", "દબાણ ઘટે છે.", "દબાણ અચળ રહે છે.", "દબાણ શૂન્ય થઈ જાય છે."], "ans": 1, "exp": "બર્નુલીના સમીકરણ અનુસાર, પ્રવાહીની ઝડપ વધતાં દબાણ ઘટે છે, કારણ કે કુલ ઊર્જા અચળ રહે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં પાણી ભરેલું છે અને તેના તળિયે દબાણ 2 × 10⁴ Pa છે. જો પાત્રની ઊંચાઈ 2 m હોય, તો પાણીની ઘનતા કેટલી હશે? (g = 10 m/s²)", "opts": ["1000 kg/m³", "10³ kg/m³", "2000 kg/m³", "500 kg/m³"], "ans": 0, "exp": "દબાણ P = hρg ⇒ ρ = P/(hg) = (2 × 10⁴)/(2 × 10) = 1000 kg/m³.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન પ્રવાહીના પૃષ્ઠતાણ સાથે સંબંધિત નથી?", "opts": ["પૃષ્ઠતાણને કારણે પ્રવાહીના ટીપાં ગોળાકાર બને છે.", "પૃષ્ઠતાણનું મૂલ્ય તાપમાન વધતા ઘટે છે.", "પૃષ્ઠતાણને કારણે કેશાકર્ષણની ઘટના જોવા મળે છે.", "પૃષ્ઠતાણનું મૂલ્ય પ્રવાહીની સ્નિગ્ધતા પર આધારિત છે."], "ans": 3, "exp": "પૃષ્ઠતાણ એ પ્રવાહીની સ્નિગ્ધતા પર આધારિત નથી, પરંતુ તે પ્રવાહીના અણુઓ વચ્ચેના આંતરઆણ્વીય બળો પર આધારિત છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળમાંથી પાણી 4 m/sની ઝડપથી વહે છે. જો નળના વ્યાસને અડધો કરવામાં આવે, તો પાણીની ઝડપ કેટલી થશે? (ધારો કે પ્રવાહ અવરોધ રહિત છે)", "opts": ["8 m/s", "16 m/s", "4 m/s", "2 m/s"], "ans": 1, "exp": "સાતત્ય સમીકરણ A₁v₁ = A₂v₂ ⇒ πr²v₁ = π(r/2)²v₂ ⇒ v₂ = 4v₁ = 4 × 4 = 16 m/s.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પાતળી કેશનળીમાં પાણીના ઉપર ચડવાની ઘટનાનું મુખ્ય કારણ શું છે?", "opts": ["પાણીનું સ્નિગ્ધત્વ", "પાણીનું પૃષ્ઠતાણ", "પાણીનું દબાણ", "પાણીનું બાષ્પીભવન"], "ans": 1, "exp": "કેશનળીમાં પાણીના ઉપર ચડવાની ઘટના પાણીના પૃષ્ઠતાણને કારણે થાય છે, જે કેશિકા ક્રિયા તરીકે ઓળખાય છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રવાહીના પૃષ્ઠતાણની વ્યાખ્યા શું છે?", "opts": ["પ્રવાહીની સપાટી પર એકમ લંબાઈ દીઠ લાગતું બળ", "પ્રવાહીના કણો વચ્ચેનું આકર્ષણ બળ", "પ્રવાહીની સપાટી પર એકમ ક્ષેત્રફળ દીઠ લાગતું બળ", "પ્રવાહીની સપાટીને સંકોચવાનું વલણ"], "ans": 0, "exp": "પ્રવાહીના પૃષ્ઠતાણની વ્યાખ્યા પ્રવાહીની સપાટી પર એકમ લંબાઈ દીઠ લાગતું બળ છે, જેને ન્યૂટન પ્રતિ મીટર (N/m)માં માપવામાં આવે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં 2 મીટર ઊંચાઈ સુધી પાણી ભરેલું છે. જો પાણીની ઘનતા 1000 kg/m³ અને ગુરુત્વપ્રવેગ g = 9.8 m/s² હોય, તો પાત્રના તળિયે દબાણ કેટલું હશે?", "opts": ["19600 Pa", "9800 Pa", "1960 Pa", "980 Pa"], "ans": 0, "exp": "દબાણ P = hρg સૂત્રથી ગણતરી કરતાં, P = 2 × 1000 × 9.8 = 19600 Pa મળે છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રવાહીના પૃષ્ઠતાણની વ્યાખ્યા શું છે અને તેનું SI એકમ શું છે?", "opts": ["પ્રવાહીની સપાટી પર લાગતું બળ પ્રતિ એકમ લંબાઈ, એકમ: N/m", "પ્રવાહીની સપાટી પર લાગતું બળ પ્રતિ એકમ ક્ષેત્રફળ, એકમ: N/m²", "પ્રવાહીની સપાટી પર લાગતું બળ પ્રતિ એકમ કદ, એકમ: N/m³", "પ્રવાહીની સપાટી પર લાગતું બળ પ્રતિ એકમ સમય, એકમ: N/s"], "ans": 0, "exp": "પૃષ્ઠતાણ એ પ્રવાહીની સપાટી પર લાગતું બળ છે જે પ્રતિ એકમ લંબાઈમાં માપવામાં આવે છે, તેનું SI એકમ N/m છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન બર્નુલીના સમીકરણ માટે સત્ય નથી?", "opts": ["પ્રવાહીનો વેગ વધે તો દબાણ ઘટે છે.", "પ્રવાહીનો વેગ અને દબાણ વચ્ચે સીધો સંબંધ છે.", "બર્નુલીનું સમીકરણ ઊર્જા સંરક્ષણના સિદ્ધાંત પર આધારિત છે.", "આ સમીકરણ અસંકોચ્ય અને અશ્યાન પ્રવાહી માટે લાગુ પડે છે."], "ans": 1, "exp": "બર્નુલીના સમીકરણ મુજબ, પ્રવાહીનો વેગ વધે તો દબાણ ઘટે છે, તેથી વેગ અને દબાણ વચ્ચે સીધો સંબંધ નથી.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નળાકાર પાત્રમાં 5 cm ત્રિજ્યાના વર્તુળાકાર ફ્રેમ પર પાણીનું પૃષ્ઠતાણ 0.072 N/m છે. આ ફ્રેમ પર લાગતું બળ કેટલું હશે? (ફ્રેમની બંને બાજુઓ ધ્યાનમાં લો)", "opts": ["0.0144 N", "0.0226 N", "0.0072 N", "0.036 N"], "ans": 1, "exp": "બળ = પૃષ્ઠતાણ × લંબાઈ × 2 (બંને બાજુઓ) ⇒ F = 0.072 × (2π × 0.05) × 2 = 0.0226 N.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ પ્રવાહીના સ્નિગ્ધતાના ગુણધર્મ સાથે સંકળાયેલું નથી?", "opts": ["મધ ધીમે ધીમે વહે છે.", "પાણી ઝડપથી વહે છે.", "તેલનો પ્રવાહ ધીમો હોય છે.", "પારો ઝડપથી વહે છે."], "ans": 3, "exp": "પારો પ્રવાહી હોવા છતાં તેની સ્નિગ્ધતા ખૂબ ઓછી હોય છે, તેથી તે ઝડપથી વહે છે, જે સ્નિગ્ધતાના ગુણધર્મ સાથે સીધો સંબંધ ધરાવતું નથી.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}, {"q": "એક નાના કેશનળીમાં પાણીની સપાટી વક્રાકાર બને છે, જેને મેનિસ્કસ કહે છે. આ ઘટના માટે નીચેનામાંથી કયું કારણ જવાબદાર છે?", "opts": ["પાણીનું સ્નિગ્ધત્વ (viscosity)", "પાણીનું પૃષ્ઠતાણ (surface tension)", "પાણીનું સંપીડન (compressibility)", "પાણીનું ઉષ્મીય પ્રસરણ (thermal expansion)"], "ans": 1, "exp": "કેશનળીમાં પાણીની વક્ર સપાટી (મેનિસ્કસ) પાણીના પૃષ્ઠતાણ અને કેશાકર્ષણ બળને કારણે બને છે, જે પાણી અને કાચની દીવાલ વચ્ચેના આંતરઆણ્વિક બળોને આભારી છે.", "chapter": "દ્રવોના યાંત્રિક ગુણધર્મો", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "દ્રવોના યાંત્રિક ગુણધર્મો Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
