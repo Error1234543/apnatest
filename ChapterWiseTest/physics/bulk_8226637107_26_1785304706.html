@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ઉપકરણો અને સાદા પરિપથો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>ઉપકરણો અને સાદા પરિપથો Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "એક વોલ્ટમીટરનો અવરોધ 500 Ω છે અને તેને 10 V ના વિદ્યુતસ્થિતિમાનના તફાવતને માપવા માટે વાપરવામાં આવે છે. જો વોલ્ટમીટરને એક 200 Ω ના અવરોધ સાથે શ્રેણીમાં જોડવામાં આવે, તો વોલ્ટમીટરમાંથી પસાર થતો વિદ્યુતપ્રવાહ કેટલો હશે?", "opts": ["10 mA", "14.3 mA", "20 mA", "25 mA"], "ans": 1, "exp": "કુલ અવરોધ = 500 Ω + 200 Ω = 700 Ω. વિદ્યુતપ્રવાહ I = V/R = 10 V / 700 Ω ≈ 0.0143 A = 14.3 mA.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું સાધન વિદ્યુતપ્રવાહ માપવા માટે વપરાય છે અને તેને હંમેશા પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે?", "opts": ["વોલ્ટમીટર", "અમીટર", "ગેલ્વેનોમીટર", "પોટેન્શિયોમીટર"], "ans": 1, "exp": "અમીટર વિદ્યુતપ્રવાહ માપવા માટે વપરાય છે અને તેને પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 3 Ω, 4 Ω અને 6 Ω ના ત્રણ અવરોધો સમાંતરમાં જોડાયેલા છે. આ સંયોજનનો સમતુલ્ય અવરોધ કેટલો હશે?", "opts": ["13 Ω", "1.33 Ω", "0.75 Ω", "2 Ω"], "ans": 1, "exp": "સમાંતર અવરોધો માટે, 1/R = 1/3 + 1/4 + 1/6 = (4+3+2)/12 = 9/12 = 3/4 ⇒ R = 4/3 Ω ≈ 1.33 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n1. વ્હીટસ્ટોન બ્રિજનો ઉપયોગ અજ્ઞાત અવરોધ માપવા માટે થાય છે.\n2. વ્હીટસ્ટોન બ્રિજમાં ગેલ્વેનોમીટરનો ઉપયોગ શૂન્ય વિચલન માટે થાય છે.\n3. વ્હીટસ્ટોન બ્રિજ માત્ર AC પરિપથમાં જ કામ કરે છે.\nઉપરનાં વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 0, "exp": "વ્હીટસ્ટોન બ્રિજનો ઉપયોગ અજ્ઞાત અવરોધ માપવા માટે થાય છે અને તેમાં ગેલ્વેનોમીટર શૂન્ય વિચલન માટે વપરાય છે. તે DC પરિપથમાં કામ કરે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 12 V ની બેટરી અને 4 Ω નો અવરોધ શ્રેણીમાં જોડાયેલા છે. જો પરિપથમાં 2 A નો વિદ્યુતપ્રવાહ વહેતો હોય, તો બેટરીનો આંતરિક અવરોધ કેટલો હશે?", "opts": ["0 Ω", "1 Ω", "2 Ω", "4 Ω"], "ans": 2, "exp": "કુલ વોલ્ટેજ V = IR ⇒ 12 V = 2 A × (4 Ω + r) ⇒ 12 = 8 + 2r ⇒ 2r = 4 ⇒ r = 2 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરનો અવરોધ 500 Ω છે અને તેને 10 V ની રેન્જમાં વાપરવું છે. જો તેને 100 V ની રેન્જમાં વાપરવું હોય તો શ્રેણીમાં કેટલો અવરોધ જોડવો પડે?", "opts": ["4500 Ω", "5000 Ω", "4950 Ω", "5500 Ω"], "ans": 0, "exp": "વોલ્ટમીટરની રેન્જ વધારવા માટે શ્રેણીમાં જોડાતો અવરોધ R = (V_new/V_old - 1) × R_v = (100/10 - 1) × 500 = 4500 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ગેલ્વેનોમીટર માટે ખોટું છે?", "opts": ["તે નાના પ્રવાહને માપવા માટે વપરાય છે.", "તેનો અવરોધ ખૂબ જ ઓછો હોય છે.", "તેને એમીટરમાં રૂપાંતરિત કરવા માટે તેની સાથે સમાંતરમાં અવરોધ જોડવામાં આવે છે.", "તેને વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે તેની સાથે શ્રેણીમાં અવરોધ જોડવામાં આવે છે."], "ans": 1, "exp": "ગેલ્વેનોમીટરનો અવરોધ સામાન્ય રીતે વધારે હોય છે, કારણ કે તે નાના પ્રવાહને સંવેદનશીલતાથી માપે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક કોષનો આંતરિક અવરોધ 0.5 Ω છે અને તેનો વીજચાલક બળ (emf) 2 V છે. જો તેને 3.5 Ω ના બાહ્ય અવરોધ સાથે જોડવામાં આવે, તો પરિપથમાં પ્રવાહ કેટલો હશે?", "opts": ["0.5 A", "0.4 A", "0.6 A", "0.3 A"], "ans": 0, "exp": "પ્રવાહ I = emf / (R + r) = 2 / (3.5 + 0.5) = 2 / 4 = 0.5 A.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરનો આંતરિક અવરોધ 10 kΩ છે અને તેને 5 V ના વિદ્યુતકોષ સાથે જોડતાં તેમાંથી 0.5 mA વિદ્યુતપ્રવાહ વહે છે. જો આ વોલ્ટમીટરને 25 V ના વિદ્યુતસ્રોત સાથે જોડવામાં આવે તો તેમાંથી કેટલો વિદ્યુતપ્રવાહ વહેશે?", "opts": ["1.25 mA", "2.5 mA", "5 mA", "0.25 mA"], "ans": 1, "exp": "વોલ્ટમીટરનો અવરોધ અચળ રહે છે. ઓહ્મના નિયમ મુજબ, I = V/R. 5 V માટે I = 0.5 mA, તેથી 25 V માટે I = (25/5) × 0.5 = 2.5 mA.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન સાચું નથી? (A) એમીટરને પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે. (B) વોલ્ટમીટરને પરિપથમાં સમાંતરમાં જોડવામાં આવે છે. (C) આદર્શ એમીટરનો અવરોધ શૂન્ય હોય છે. (D) આદર્શ વોલ્ટમીટરનો અવરોધ અનંત હોય છે.", "opts": ["માત્ર A અને B", "માત્ર C", "માત્ર D", "આપેલામાંથી એક પણ નહીં"], "ans": 3, "exp": "બધાં જ વિધાનો સાચાં છે. એમીટર શ્રેણીમાં અને વોલ્ટમીટર સમાંતરમાં જોડાય છે. આદર્શ એમીટરનો અવરોધ શૂન્ય અને આદર્શ વોલ્ટમીટરનો અવરોધ અનંત હોય છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 6 Ω અને 3 Ω ના બે અવરોધો સમાંતરમાં જોડેલા છે. આ સંયોજનને 2 Ω ના અવરોધ સાથે શ્રેણીમાં જોડવામાં આવે છે. જો પરિપથમાં 12 V નો વિદ્યુતકોષ જોડવામાં આવે, તો 3 Ω ના અવરોધમાં વહેતો વિદ્યુતપ્રવાહ કેટલો હશે?", "opts": ["1 A", "2 A", "1.5 A", "0.5 A"], "ans": 0, "exp": "સમાંતર અવરોધોનો સમતુલ્ય અવરોધ = (6×3)/(6+3) = 2 Ω. કુલ અવરોધ = 2 + 2 = 4 Ω. કુલ પ્રવાહ = 12/4 = 3 A. સમાંતર શાખામાં વોલ્ટેજ = 3 × 2 = 6 V. 3 Ω માં પ્રવાહ = 6/3 = 2 A નો અડધો = 1 A.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું ઉપકરણ વિદ્યુતપ્રવાહ માપવા માટે વપરાય છે અને તેને પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે?", "opts": ["વોલ્ટમીટર", "ગેલ્વેનોમીટર", "એમીટર", "પોટેન્શિયોમીટર"], "ans": 2, "exp": "એમીટર વિદ્યુતપ્રવાહ માપવા માટે વપરાય છે અને તેને પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતકોષનો આંતરિક અવરોધ 0.5 Ω છે અને તેનો વિદ્યુતચાલક બળ (emf) 1.5 V છે. જો આ કોષને 2.5 Ω ના અવરોધ સાથે જોડવામાં આવે, તો પરિપથમાં વહેતો વિદ્યુતપ્રવાહ કેટલો હશે?", "opts": ["0.5 A", "0.6 A", "0.4 A", "0.3 A"], "ans": 0, "exp": "કુલ અવરોધ = 2.5 + 0.5 = 3 Ω. ઓહ્મના નિયમ મુજબ, I = E/R = 1.5/3 = 0.5 A.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન વૉલ્ટમીટર માટે ખોટું છે?", "opts": ["વૉલ્ટમીટરને પરિપથમાં સમાંતર જોડવામાં આવે છે.", "વૉલ્ટમીટરની પ્રતિરોધકતા ખૂબ જ વધારે હોવી જોઈએ.", "વૉલ્ટમીટરનો ઉપયોગ પ્રવાહ માપવા માટે થાય છે.", "વૉલ્ટમીટર વોલ્ટેજ માપવા માટે વપરાય છે."], "ans": 2, "exp": "વૉલ્ટમીટરનો ઉપયોગ વોલ્ટેજ માપવા માટે થાય છે, પ્રવાહ માપવા માટે એમીટર વપરાય છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ વીજપ્રવાહની દિશા અને પ્રબળતા માપવા માટે વપરાય છે?", "opts": ["વૉલ્ટમીટર", "ગૅલ્વેનોમીટર", "એમીટર", "પોટેન્શિયોમીટર"], "ans": 1, "exp": "ગૅલ્વેનોમીટર વીજપ્રવાહની દિશા અને પ્રબળતા માપવા માટે વપરાય છે, જ્યારે એમીટર માત્ર પ્રવાહની પ્રબળતા માપે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ વિદ્યુતપ્રવાહની દિશા અને માત્રા બંને માપવા માટે વપરાય છે?", "opts": ["ગૅલ્વેનોમીટર", "એમીટર", "વૉલ્ટમીટર", "પોટેન્શિયોમીટર"], "ans": 0, "exp": "ગૅલ્વેનોમીટર પ્રવાહની દિશા અને માત્રા બંને માપી શકે છે, જ્યારે એમીટર માત્ર માત્રા માપે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરનો અવરોધ 10 kΩ છે અને તેને 30 V ના વિદ્યુતકોષ સાથે જોડવામાં આવે છે. જો વોલ્ટમીટરની મર્યાદા 10 V હોય, તો તેની સાથે શ્રેણીમાં કેટલો અવરોધ જોડવો જોઈએ જેથી તે 30 V માપી શકે?", "opts": ["20 kΩ", "10 kΩ", "30 kΩ", "40 kΩ"], "ans": 0, "exp": "વોલ્ટમીટરની મર્યાદા વધારવા માટે શ્રેણીમાં અવરોધ જોડવો પડે. અહીં, 30 V માપવા માટે 20 kΩ નો અવરોધ જોડવો જરૂરી છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 4 Ω અને 6 Ω ના બે અવરોધો સમાંતરમાં જોડેલા છે. જો પરિપથમાં કુલ પ્રવાહ 5 A હોય, તો 4 Ω અવરોધમાંથી પસાર થતો પ્રવાહ કેટલો હશે?", "opts": ["3 A", "2 A", "5 A", "1.5 A"], "ans": 0, "exp": "સમાંતર જોડાણમાં વોલ્ટેજ સમાન હોય છે. અહીં, 4 Ω અવરોધમાંથી 3 A પ્રવાહ પસાર થશે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?\n1. વોલ્ટમીટરને પરિપથમાં સમાંતરમાં જોડવામાં આવે છે.\n2. એમીટરનો અવરોધ ખૂબ જ ઓછો હોય છે.\n3. ગેલ્વેનોમીટરનો ઉપયોગ વિદ્યુતપ્રવાહ અને વોલ્ટેજ બંને માપવા માટે થાય છે.\n4. ઓહ્મમીટરનો ઉપયોગ અવરોધ માપવા માટે થાય છે.", "opts": ["ફક્ત 3", "ફક્ત 1 અને 2", "ફક્ત 2 અને 4", "ફક્ત 4"], "ans": 0, "exp": "ગેલ્વેનોમીટર માત્ર નાના પ્રવાહો માપવા માટે વપરાય છે, તે વોલ્ટેજ માપવા માટે નથી.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 12 V નો બેટરી અને 3 Ω, 4 Ω અને 6 Ω ના ત્રણ અવરોધો શ્રેણીમાં જોડેલા છે. પરિપથમાં પ્રવાહ કેટલો હશે?", "opts": ["1 A", "2 A", "1.5 A", "0.5 A"], "ans": 0, "exp": "શ્રેણી જોડાણમાં કુલ અવરોધ 3 + 4 + 6 = 13 Ω થાય. પ્રવાહ I = V/R = 12/13 ≈ 0.92 A નજીકનું મૂલ્ય 1 A છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગેલ્વેનોમીટરને વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે શું કરવું જોઈએ?", "opts": ["ગેલ્વેનોમીટર સાથે શ્રેણીમાં નીચો અવરોધ જોડવો", "ગેલ્વેનોમીટર સાથે સમાંતરમાં ઊંચો અવરોધ જોડવો", "ગેલ્વેનોમીટર સાથે શ્રેણીમાં ઊંચો અવરોધ જોડવો", "ગેલ્વેનોમીટર સાથે સમાંતરમાં નીચો અવરોધ જોડવો"], "ans": 2, "exp": "ગેલ્વેનોમીટરને વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે તેની સાથે શ્રેણીમાં ઊંચો અવરોધ જોડવામાં આવે છે, જેથી તે વધુ વોલ્ટેજ માપી શકે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પરિપથમાં 6 Ω અને 3 Ω ના બે અવરોધો સમાંતરમાં જોડેલા છે. આ સંયોજનનો સમતુલ્ય અવરોધ કેટલો હશે?", "opts": ["9 Ω", "4.5 Ω", "2 Ω", "1 Ω"], "ans": 2, "exp": "સમાંતરમાં જોડેલા અવરોધોનો સમતુલ્ય અવરોધ 1/R = 1/6 + 1/3 = 1/2 ⇒ R = 2 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: (1) વોલ્ટમીટરને હંમેશા શ્રેણીમાં જોડવામાં આવે છે. (2) એમીટરનો અવરોધ ખૂબ જ ઓછો હોય છે. (3) ગેલ્વેનોમીટર વીજપ્રવાહની દિશા અને માત્રા બંને દર્શાવે છે. કયાં વિધાનો સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "વોલ્ટમીટર સમાંતરમાં જોડવામાં આવે છે, એમીટરનો અવરોધ ઓછો હોય છે અને ગેલ્વેનોમીટર વીજપ્રવાહની દિશા અને માત્રા બંને દર્શાવે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરનો અવરોધ 50 kΩ છે અને તે 100 V સુધી માપી શકે છે. જો તેને 250 V સુધી માપવા માટે રૂપાંતરિત કરવું હોય, તો તેની સાથે કેટલો વધારાનો અવરોધ શ્રેણીમાં જોડવો પડે?", "opts": ["25 kΩ", "50 kΩ", "75 kΩ", "100 kΩ"], "ans": 2, "exp": "વધારાનો અવરોધ R = (V_new/V_old - 1) × R_voltmeter = (250/100 - 1) × 50 kΩ = 75 kΩ.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ વોલ્ટેજ માપવા માટે વપરાય છે અને તેને પરિપથમાં સમાંતર જોડવામાં આવે છે?", "opts": ["વોલ્ટમીટર", "એમીટર", "ગેલ્વેનોમીટર", "ઓહ્મમીટર"], "ans": 0, "exp": "વોલ્ટમીટર વોલ્ટેજ માપવા માટે વપરાય છે અને તેને પરિપથમાં સમાંતર જોડવામાં આવે છે જેથી તે પરિપથના વોલ્ટેજને અસર ન કરે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?\n1. એમીટરને પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે.\n2. વોલ્ટમીટરની પ્રતિરોધકતા ખૂબ ઊંચી હોય છે.\n3. ગેલ્વેનોમીટર પ્રવાહ અને વોલ્ટેજ બંને માપી શકે છે.\n4. ઓહ્મમીટરનો ઉપયોગ અવરોધ માપવા માટે થાય છે.", "opts": ["માત્ર 3", "માત્ર 1 અને 2", "માત્ર 2 અને 4", "માત્ર 1"], "ans": 0, "exp": "ગેલ્વેનોમીટર માત્ર નાના પ્રવાહો માપી શકે છે, વોલ્ટેજ માપવા માટે તેને યોગ્ય રીતે રૂપાંતરિત કરવું પડે છે. તેથી વિધાન 3 ખોટું છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરનો આંતરિક અવરોધ 20 kΩ છે અને તેને 100 V ના વિદ્યુતકોષ સાથે જોડવામાં આવે છે. જો વોલ્ટમીટરનો અવરોધ ઘટાડીને 10 kΩ કરવામાં આવે, તો વોલ્ટમીટરના વાંચનમાં શું ફેરફાર થશે?", "opts": ["વોલ્ટમીટરનું વાંચન વધશે", "વોલ્ટમીટરનું વાંચન ઘટશે", "વોલ્ટમીટરનું વાંચન અચળ રહેશે", "વોલ્ટમીટરનું વાંચન શૂન્ય થશે"], "ans": 2, "exp": "વોલ્ટમીટરનો આંતરિક અવરોધ બદલવાથી વિદ્યુતકોષના વોલ્ટેજ પર કોઈ અસર થતી નથી, કારણ કે આદર્શ વિદ્યુતકોષનો આંતરિક અવરોધ શૂન્ય હોય છે. તેથી વોલ્ટમીટરનું વાંચન અચળ રહેશે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું ઉપકરણ વિદ્યુતપ્રવાહની દિશા અને પ્રબળતા બંને માપવા માટે વપરાય છે?", "opts": ["વોલ્ટમીટર", "એમીટર", "ગેલ્વેનોમીટર", "ઓહ્મમીટર"], "ans": 2, "exp": "ગેલ્વેનોમીટર વિદ્યુતપ્રવાહની દિશા અને પ્રબળતા બંને માપવા માટે વપરાય છે, જ્યારે એમીટર માત્ર પ્રબળતા અને વોલ્ટમીટર માત્ર વોલ્ટેજ માપે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?\n1. એમીટર હંમેશા શ્રેણીમાં જોડવામાં આવે છે.\n2. વોલ્ટમીટર હંમેશા સમાંતરમાં જોડવામાં આવે છે.\n3. ગેલ્વેનોમીટરનો ઉપયોગ માત્ર પ્રવાહની દિશા જાણવા માટે થાય છે.\n4. ઓહ્મમીટરનો ઉપયોગ અવરોધ માપવા માટે થાય છે.", "opts": ["ફક્ત 1", "ફક્ત 3", "1 અને 2", "3 અને 4"], "ans": 1, "exp": "ગેલ્વેનોમીટર પ્રવાહની દિશા અને પ્રબળતા બંને માપવા માટે વપરાય છે, માત્ર દિશા જાણવા માટે નહીં.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વોલ્ટમીટરની આંતરિક અવરોધ 50 kΩ છે અને તે 100 V સુધી માપી શકે છે. જો તેને 250 V સુધી માપવા માટે રૂપાંતરિત કરવું હોય, તો કયા મૂલ્યનો શ્રેણી અવરોધ ઉમેરવો જોઈએ?", "opts": ["30 kΩ", "50 kΩ", "75 kΩ", "100 kΩ"], "ans": 2, "exp": "વોલ્ટમીટરની મહત્તમ વોલ્ટેજ ક્ષમતા વધારવા માટે શ્રેણીમાં અવરોધ ઉમેરવામાં આવે છે. અહીં, જરૂરી શ્રેણી અવરોધ = (250 V / 100 V) × 50 kΩ - 50 kΩ = 75 kΩ.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) એમીટરનો અવરોધ ખૂબ જ ઓછો હોય છે. (2) વોલ્ટમીટરનો અવરોધ ખૂબ જ વધારે હોય છે. (3) એમીટરને હંમેશા પરિપથમાં સમાંતરમાં જોડવામાં આવે છે. (4) વોલ્ટમીટરને હંમેશા પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે.", "opts": ["માત્ર (1) અને (2)", "માત્ર (3) અને (4)", "માત્ર (3)", "માત્ર (4)"], "ans": 1, "exp": "એમીટરને હંમેશા શ્રેણીમાં અને વોલ્ટમીટરને હંમેશા સમાંતરમાં જોડવામાં આવે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગૅલ્વેનોમીટરનો અવરોધ 50 Ω છે અને તે 10 mA પ્રવાહથી પૂર્ણ સ્કેલ ડિફ્લેક્શન દર્શાવે છે. તેને 10 V ના વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે કેટલો અવરોધ શ્રેણીમાં જોડવો જોઈએ?", "opts": ["950 Ω", "500 Ω", "1000 Ω", "450 Ω"], "ans": 0, "exp": "R = (V/I) - G = (10/0.01) - 50 = 1000 - 50 = 950 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ વિદ્યુતપ્રવાહના મૂલ્યને માપવા માટે વપરાય છે અને તેને હંમેશા પરિપથમાં શ્રેણીમાં જોડવામાં આવે છે?", "opts": ["વોલ્ટમીટર", "એમીટર", "ગૅલ્વેનોમીટર", "પોટેન્શિયોમીટર"], "ans": 1, "exp": "એમીટર વિદ્યુતપ્રવાહ માપવા માટે વપરાય છે અને તેને હંમેશા શ્રેણીમાં જોડવામાં આવે છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગૅલ્વેનોમીટરની પ્રતિરોધકતા 50 Ω છે અને તે 15 mA પ્રવાહથી પૂર્ણ સ્કેલ ડિફ્લેક્શન દર્શાવે છે. આ ગૅલ્વેનોમીટરને 3 A સુધીના અવરોધ વગરના એમીટરમાં રૂપાંતરિત કરવા માટે શું કરવું જોઈએ?", "opts": ["50 Ω નો શન્ટ અવરોધ ગૅલ્વેનોમીટર સાથે સમાંતરમાં જોડવો", "2.525 Ω નો શન્ટ અવરોધ ગૅલ્વેનોમીટર સાથે સમાંતરમાં જોડવો", "50 Ω નો શ્રેણી અવરોધ ગૅલ્વેનોમીટર સાથે જોડવો", "2.525 Ω નો શ્રેણી અવરોધ ગૅલ્વેનોમીટર સાથે જોડવો"], "ans": 1, "exp": "ગૅલ્વેનોમીટરને એમીટરમાં રૂપાંતરિત કરવા માટે શન્ટ અવરોધ (R_s) સમાંતરમાં જોડવો જોઈએ. R_s = (G * I_g) / (I - I_g) = (50 * 0.015) / (3 - 0.015) = 2.525 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વૉલ્ટમીટરનો આંતરિક અવરોધ 20 kΩ છે અને તે 0 થી 100 V સુધીનું માપન કરી શકે છે. આ વૉલ્ટમીટરને 0 થી 500 V સુધી માપન કરવા માટે શું કરવું જોઈએ?", "opts": ["80 kΩ નો અવરોધ વૉલ્ટમીટર સાથે શ્રેણીમાં જોડવો", "80 kΩ નો અવરોધ વૉલ્ટમીટર સાથે સમાંતરમાં જોડવો", "20 kΩ નો અવરોધ વૉલ્ટમીટર સાથે શ્રેણીમાં જોડવો", "20 kΩ નો અવરોધ વૉલ્ટમીટર સાથે સમાંતરમાં જોડવો"], "ans": 0, "exp": "વૉલ્ટમીટરની રેન્જ વધારવા માટે શ્રેણીમાં ઉચ્ચ અવરોધ જોડવો જોઈએ. R = (V_new / V_old - 1) * R_v = (500/100 - 1) * 20 kΩ = 80 kΩ.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પરિપથમાં 12 V ની બેટરી અને 4 Ω, 6 Ω અને 12 Ω ના ત્રણ અવરોધો શ્રેણીમાં જોડેલા છે. જો 6 Ω ના અવરોધ પર વૉલ્ટમીટર જોડવામાં આવે, તો વૉલ્ટમીટરનું વાંચન કેટલું હશે? (વૉલ્ટમીટરનો અવરોધ અનંત ગણો)", "opts": ["3 V", "4 V", "6 V", "8 V"], "ans": 1, "exp": "કુલ અવરોધ R_total = 4 + 6 + 12 = 22 Ω. પરિપથમાં પ્રવાહ I = V / R_total = 12 / 22 A. 6 Ω ના અવરોધ પર વૉલ્ટેજ V = I * 6 = (12/22) * 6 = 3.27 V ≈ 4 V.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક પરિપથમાં 12 V ની બેટરી અને 2 Ω, 3 Ω અને 6 Ω ના ત્રણ અવરોધો શ્રેણીમાં જોડેલા છે. 3 Ω ના અવરોધ પર વોલ્ટેજ ડ્રોપ કેટલો હશે?", "opts": ["2 V", "3 V", "4 V", "6 V"], "ans": 2, "exp": "કુલ અવરોધ = 2 + 3 + 6 = 11 Ω. પરિપથમાં પ્રવાહ = 12 V / 11 Ω ≈ 1.09 A. 3 Ω ના અવરોધ પર વોલ્ટેજ ડ્રોપ = 1.09 A × 3 Ω ≈ 3.27 V ≈ 4 V.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગૅલ્વેનોમીટરનો અવરોધ 40 Ω છે અને તે 10 mA પ્રવાહથી પૂર્ણ સ્કેલ ડિફ્લેક્શન દર્શાવે છે. તેને 0 થી 5 A સુધીના અમીટરમાં રૂપાંતરિત કરવા માટે કેટલા મૂલ્યનો શન્ટ અવરોધ જોડવો જોઈએ?", "opts": ["0.08 Ω", "0.1 Ω", "0.8 Ω", "1 Ω"], "ans": 0, "exp": "શન્ટ અવરોધ (R_s) = (I_g × R_g) / (I - I_g) = (0.01 A × 40 Ω) / (5 A - 0.01 A) ≈ 0.08 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે? (1) વોલ્ટમીટરને પરિપથમાં સમાંતરમાં જોડવામાં આવે છે. (2) એમીટરની પ્રતિરોધકતા ખૂબ જ ઓછી હોય છે. (3) ગૅલ્વેનોમીટરનો ઉપયોગ વોલ્ટેજ અને પ્રવાહ બંને માપવા માટે થાય છે. (4) વોલ્ટમીટરનો ઉપયોગ પ્રવાહ માપવા માટે થાય છે.", "opts": ["1", "2", "3", "4"], "ans": 3, "exp": "વોલ્ટમીટરનો ઉપયોગ પ્રવાહ માપવા માટે થતો નથી, તે માત્ર વોલ્ટેજ માપવા માટે જ વપરાય છે. બાકીના વિધાનો સાચાં છે.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુત પરિપથમાં 6 V ના બૅટરી, 2 Ω નો અવરોધ અને એક ગૅલ્વેનોમીટર શ્રેણીમાં જોડેલ છે. જો ગૅલ્વેનોમીટરનો અવરોધ 40 Ω હોય અને તેનું પૂર્ણ સ્કેલ ડિફ્લેક્શન 10 mA હોય, તો ગૅલ્વેનોમીટરને વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે કેટલા મૂલ્યનો શંટ અવરોધ જોડવો જોઈએ જેથી તે 0 થી 10 V સુધીનું વોલ્ટેજ માપી શકે?", "opts": ["360 Ω નો અવરોધ શ્રેણીમાં જોડવો", "40 Ω નો અવરોધ સમાંતરમાં જોડવો", "360 Ω નો અવરોધ સમાંતરમાં જોડવો", "400 Ω નો અવરોધ શ્રેણીમાં જોડવો"], "ans": 2, "exp": "ગૅલ્વેનોમીટરને વોલ્ટમીટરમાં રૂપાંતરિત કરવા માટે સમાંતરમાં શંટ અવરોધ જોડવો જરૂરી છે. પૂર્ણ સ્કેલ વોલ્ટેજ 10 V માટે, ગૅલ્વેનોમીટરમાંથી વહેતો પ્રવાહ 10 mA હોવો જોઈએ. કુલ અવરોધ (R) = V/I = 10 V / 10 mA = 1000 Ω. ગૅલ્વેનોમીટરનો અવરોધ 40 Ω હોવાથી, શંટ અવરોધ (R_s) = (R_g * R) / (R - R_g) = (40 * 1000) / (1000 - 40) = 360 Ω.", "chapter": "ઉપકરણો અને સાદા પરિપથો", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "ઉપકરણો અને સાદા પરિપથો Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
