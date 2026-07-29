@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "માનવ શરીરમાં મુખ્ય નાઇટ્રોજનયુક્ત ઉત્સર્જન પદાર્થ કયો છે અને તેનું નિર્માણ કયા અંગમાં મુખ્યત્વે થાય છે?", "opts": ["યુરિયા, યકૃત", "યુરિક એસિડ, મૂત્રપિંડ", "એમોનિયા, મૂત્રપિંડ", "ક્રિએટિનિન, સ્નાયુઓ"], "ans": 0, "exp": "યુરિયા એ માનવ શરીરનો મુખ્ય નાઇટ્રોજનયુક્ત ઉત્સર્જન પદાર્થ છે, જે યકૃતમાં ઓર્નિથિન ચક્ર દ્વારા નિર્માણ પામે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું પ્રાણી યુરિકોટેલિક છે?", "opts": ["માનવ", "ગાય", "કબૂતર", "માછલી"], "ans": 2, "exp": "યુરિકોટેલિક પ્રાણીઓ યુરિક એસિડનું ઉત્સર્જન કરે છે, જેમાં પક્ષીઓ (કબૂતર) અને સરિસૃપોનો સમાવેશ થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ મૂત્રપિંડમાં ગ્લોમેર્યુલર ગાળણ દર (GFR) લગભગ કેટલો હોય છે?", "opts": ["125 મિલી/મિનિટ", "180 લિટર/દિવસ", "1.5 લિટર/દિવસ", "500 મિલી/મિનિટ"], "ans": 0, "exp": "સ્વસ્થ માનવમાં ગ્લોમેર્યુલર ગાળણ દર (GFR) લગભગ 125 મિલી પ્રતિ મિનિટ અથવા 180 લિટર પ્રતિ દિવસ હોય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) હેન્લેની પાશમાં અવરોહી ભુજા પાણી માટે અપ્રવેશશીલ છે. (ii) દૂરસ્થ ગૂંચળાકાર નલિકામાં સોડિયમનું પુનઃશોષણ થાય છે. (iii) મૂત્રપિંડ નલિકામાં યુરિયાનું પુનઃશોષણ થતું નથી. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "એક પણ નહીં"], "ans": 1, "exp": "વિધાન (i) ખોટું છે કારણ કે હેન્લેની પાશની અવરોહી ભુજા પાણી માટે અપ્રવેશશીલ છે, પરંતુ આરોહી ભુજા પાણી માટે અપ્રવેશશીલ છે. વિધાન (ii) સાચું છે. વિધાન (iii) ખોટું છે કારણ કે યુરિયાનું પુનઃશોષણ મૂત્રપિંડ નલિકામાં થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ઉત્સર્જન તંત્રનું કાર્ય નથી?", "opts": ["શરીરમાં પાણી અને ઇલેક્ટ્રોલાઇટ્સનું સંતુલન જાળવવું", "રુધિરમાંથી નાઇટ્રોજનયુક્ત ઉત્સર્ગો દૂર કરવા", "રુધિરમાં ગ્લુકોઝનું નિયમન કરવું", "રુધિરનું pH સંતુલન જાળવવું"], "ans": 2, "exp": "રુધિરમાં ગ્લુકોઝનું નિયમન એ સ્વાદુપિંડના ઇન્સ્યુલિન અને ગ્લુકાગોન હોર્મોનનું કાર્ય છે, ઉત્સર્જન તંત્રનું નહીં.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં મુખ્ય ઉત્સર્જન પદાર્થ યુરિયા કયા અંગમાં ઉત્પન્ન થાય છે?", "opts": ["મૂત્રપિંડ (કિડની)", "યકૃત (લિવર)", "મૂત્રાશય (યુરિનરી બ્લેડર)", "ફેફસાં (લંગ્સ)"], "ans": 1, "exp": "યુરિયા ઓર્નિથિન ચક્ર દ્વારા યકૃતમાં એમોનિયામાંથી ઉત્પન્ન થાય છે, જે પ્રોટીન ચયાપચયનો ઝેરી ઉપપેદાશ છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી યુરિકોટે લિક ઉત્સર્જન પદ્ધતિ ધરાવે છે?", "opts": ["માછલી", "માનવ", "ગરોળી", "દેડકો"], "ans": 2, "exp": "સરિસૃપ અને પક્ષીઓ જેવા પ્રાણીઓ યુરિકોટે લિક ઉત્સર્જન પદ્ધતિ ધરાવે છે, જેમાં યુરિક એસિડ મુખ્ય ઉત્સર્જન પદાર્થ છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ મૂત્રપિંડમાં નેફ્રોનના કયા ભાગમાં ગ્લોમેર્યુલર ગાળણ થાય છે?", "opts": ["હેન્લેનો લૂપ", "પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલ", "બોમેનની કોથળી", "ડિસ્ટલ કન્વોલ્યુટેડ ટ્યુબ્યુલ"], "ans": 2, "exp": "ગ્લોમેર્યુલર ગાળણ બોમેનની કોથળીમાં થાય છે, જ્યાં રુધિરમાંથી નાના અણુઓ ગાળણ દ્વારા નિકાલ થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: 1. મૂત્રપિંડમાં રુધિરનું ગાળણ દબાણ દ્વારા થાય છે. 2. પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલમાં ગ્લુકોઝનું પુનઃશોષણ થાય છે. 3. હેન્લેનો લૂપ મુખ્યત્વે પાણીના પુનઃશોષણ માટે જવાબદાર છે. કયા વિધાનો સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 3, "exp": "વિધાન 1 અને 3 સાચાં છે. વિધાન 2માં ગ્લુકોઝનું પુનઃશોષણ પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલમાં થાય છે, પરંતુ તે સક્રિય પરિવહન દ્વારા થાય છે, માત્ર દબાણથી નહીં.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ માનવ શરીરમાંથી સૌથી વધુ પ્રમાણમાં ઉત્સર્જિત થાય છે?", "opts": ["યુરિક એસિડ", "યુરિયા", "ક્રિએટિનિન", "કાર્બન ડાયોક્સાઇડ"], "ans": 3, "exp": "કાર્બન ડાયોક્સાઇડ શ્વસન દરમિયાન સૌથી વધુ પ્રમાણમાં ઉત્પન્ન થાય છે અને ફેફસાં દ્વારા ઉત્સર્જિત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મૂત્રપિંડના નેફ્રોનમાં ગ્લોમેર્યુલસનું મુખ્ય કાર્ય શું છે?", "opts": ["મૂત્રનું સાંદ્રીકરણ કરવું", "રુધિરનું ગાળણ કરવું", "પાણીનું પુનઃશોષણ કરવું", "યુરિયાનું વિઘટન કરવું"], "ans": 1, "exp": "ગ્લોમેર્યુલસ રુધિરમાંથી નાના અણુઓ અને પાણીનું ગાળણ કરીને પ્રાથમિક મૂત્ર બનાવે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) મૂત્રપિંડમાં રેનિન ઉત્સેચક રુધિર દબાણનું નિયમન કરે છે. (2) એન્ટિડાયયુરેટિક હોર્મોન (ADH) પાણીના પુનઃશોષણને વધારે છે. (3) એલ્ડોસ્ટેરોન સોડિયમના પુનઃશોષણને ઘટાડે છે. કયા વિધાનો સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 0, "exp": "રેનિન રુધિર દબાણનું નિયમન કરે છે અને ADH પાણીના પુનઃશોષણને વધારે છે, જ્યારે એલ્ડોસ્ટેરોન સોડિયમના પુનઃશોષણને વધારે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં યુરિયાનું સંશ્લેષણ મુખ્યત્વે કયા અંગમાં થાય છે?", "opts": ["મૂત્રપિંડ (કિડની)", "યકૃત (લિવર)", "મૂત્રાશય (યુરિનરી બ્લેડર)", "સ્વાદુપિંડ (પેન્ક્રિયાસ)"], "ans": 1, "exp": "યુરિયાનું સંશ્લેષણ ઓર્નિથિન ચક્ર દ્વારા યકૃતમાં થાય છે, જે એમોનિયાને ઓછું ઝેરી યુરિયામાં રૂપાંતરિત કરે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન ઉત્પાદન મૂત્રપિંડ દ્વારા સૌથી વધુ પ્રમાણમાં ઉત્સર્જિત થાય છે?", "opts": ["યુરિક એસિડ", "યુરિયા", "ક્રિએટિનિન", "એમોનિયા"], "ans": 1, "exp": "મનુષ્યમાં મૂત્રપિંડ દ્વારા સૌથી વધુ પ્રમાણમાં યુરિયા ઉત્સર્જિત થાય છે, જે પ્રોટીન ચયાપચયનું મુખ્ય ઉત્સર્જન ઉત્પાદન છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મૂત્રપિંડના નેફ્રોનમાં ગ્લોમેર્યુલર ફિલ્ટરેશન રેટ (GFR) નું મૂલ્ય લગભગ કેટલું હોય છે?", "opts": ["100 મિલી/મિનિટ", "125 મિલી/મિનિટ", "150 મિલી/મિનિટ", "175 મિલી/મિનિટ"], "ans": 1, "exp": "સ્વસ્થ મનુષ્યમાં GFR નું સામાન્ય મૂલ્ય લગભગ 125 મિલી/મિનિટ હોય છે, જે મૂત્રપિંડના કાર્યનું મહત્વપૂર્ણ સૂચક છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મૂત્રપિંડના કાર્ય માટે ખોટું છે?", "opts": ["રુધિરમાંથી વધારાના પાણી અને કચરાને દૂર કરે છે", "રુધિરનું pH સંતુલન જાળવે છે", "રક્તકણોનું ઉત્પાદન નિયંત્રિત કરે છે", "રુધિરમાં ઇલેક્ટ્રોલાઇટ્સનું સંતુલન જાળવે છે"], "ans": 2, "exp": "રક્તકણોનું ઉત્પાદન એરિથ્રોપોએટિન હોર્મોન દ્વારા નિયંત્રિત થાય છે, જે મૂત્રપિંડમાં ઉત્પન્ન થાય છે, પરંતુ આ મૂત્રપિંડનું મુખ્ય કાર્ય નથી.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં મુખ્ય ઉત્સર્જન પદાર્થ યુરિયા કયા અંગમાં ઉત્પન્ન થાય છે?", "opts": ["મૂત્રપિંડ (કિડની)", "યકૃત (લિવર)", "ફેફસાં (લંગ્સ)", "ત્વચા (સ્કિન)"], "ans": 1, "exp": "યુરિયા ઓર્નિથિન ચક્ર દ્વારા યકૃતમાં એમોનિયા અને કાર્બન ડાયોક્સાઇડમાંથી ઉત્પન્ન થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક દર્દીના રુધિરમાં ક્રિએટિનિનનું પ્રમાણ 2.5 mg/dL છે. આ પરિસ્થિતિ શું સૂચવે છે?", "opts": ["સામાન્ય મૂત્રપિંડ કાર્ય", "મૂત્રપિંડની નિષ્ફળતા", "યકૃતની નિષ્ફળતા", "હૃદયની નિષ્ફળતા"], "ans": 1, "exp": "ક્રિએટિનિનનું સામાન્ય પ્રમાણ 0.6-1.2 mg/dL છે. 2.5 mg/dL મૂત્રપિંડની નિષ્ફળતાનું સૂચક છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મૂત્રપિંડમાં ગ્લોમેર્યુલર ગાળણ દર (GFR) માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["GFR નું નિયમન રેનિન-એન્જિયોટેન્સિન તંત્ર દ્વારા થાય છે", "GFR નું મૂલ્ય લગભગ 125 mL/મિનિટ હોય છે", "GFR નું નિયમન મુખ્યત્વે હૃદયના કાર્ય પર આધારિત છે", "GFR માં ઘટાડો મૂત્રપિંડના રોગનું સૂચક છે"], "ans": 2, "exp": "GFR નું નિયમન મુખ્યત્વે રુધિર દબાણ અને મૂત્રપિંડના રુધિર પ્રવાહ દ્વારા થાય છે, હૃદયના કાર્ય પર સીધું આધારિત નથી.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ મનુષ્યમાં સૌથી ઓછું ઝેરી છે?", "opts": ["એમોનિયા", "યુરિક એસિડ", "યુરિયા", "કાર્બન ડાયોક્સાઇડ"], "ans": 1, "exp": "યુરિક એસિડ સૌથી ઓછું ઝેરી ઉત્સર્જન પદાર્થ છે કારણ કે તે પાણીમાં અદ્રાવ્ય છે અને સ્ફટિક સ્વરૂપે ઉત્સર્જિત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મૂત્રપિંડમાં ગ્લોમેર્યુલસ ફિલ્ટરેશન દર (GFR) લગભગ કેટલો હોય છે?", "opts": ["100 મિલી/મિનિટ", "125 મિલી/મિનિટ", "150 મિલી/મિનિટ", "200 મિલી/મિનિટ"], "ans": 1, "exp": "સ્વસ્થ મનુષ્યમાં ગ્લોમેર્યુલસ ફિલ્ટરેશન દર (GFR) લગભગ 125 મિલી/મિનિટ હોય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મૂત્રપિંડના હેન્લે લૂપ વિશે ખોટું છે?", "opts": ["હેન્લે લૂપ મૂત્રના સાંદ્રીકરણમાં મદદ કરે છે.", "હેન્લે લૂપની આરોહી ભુજા પાણી માટે અપ્રવેશશીલ છે.", "હેન્લે લૂપની અવરોહી ભુજા Na⁺ અને Cl⁻ આયનોના પુનઃશોષણમાં મદદ કરે છે.", "હેન્લે લૂપ મૂત્રપિંડના મેડ્યુલા વિસ્તારમાં આવેલું છે."], "ans": 2, "exp": "હેન્લે લૂપની અવરોહી ભુજા પાણી માટે પ્રવેશશીલ છે, જ્યારે આરોહી ભુજા Na⁺ અને Cl⁻ આયનોના પુનઃશોષણમાં મદદ કરે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ મનુષ્યના શરીરમાં સૌથી વધુ પ્રમાણમાં ઉત્પન્ન થાય છે?", "opts": ["યુરિક એસિડ", "યુરિયા", "એમોનિયા", "ક્રિએટિનિન"], "ans": 1, "exp": "મનુષ્ય યુરિયોટેલિક પ્રાણી છે, જેમાં પ્રોટીન ચયાપચય દરમિયાન યુરિયા સૌથી વધુ પ્રમાણમાં ઉત્પન્ન થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મૂત્રપિંડના હેન્લેના લૂપની કાર્યપદ્ધતિ માટે ખોટું છે?", "opts": ["હેન્લેના લૂપમાં પાણીનું પુનઃશોષણ થાય છે", "હેન્લેના લૂપમાં Na⁺ અને Cl⁻ નું સક્રિય પરિવહન થાય છે", "હેન્લેના લૂપમાં યુરિયાનું સાંદ્રીકરણ થાય છે", "હેન્લેના લૂપમાં ગ્લુકોઝનું સંપૂર્ણ પુનઃશોષણ થાય છે"], "ans": 3, "exp": "હેન્લેના લૂપમાં યુરિયાનું સાંદ્રીકરણ થતું નથી, પરંતુ પાણી અને આયનોનું પુનઃશોષણ થાય છે. ગ્લુકોઝનું પુનઃશોષણ પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલમાં થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (i) મૂત્રપિંડમાં રેનિનનું સ્ત્રાવણ થાય છે (ii) એન્ટિડાયયુરેટિક હોર્મોન (ADH) પાણીના પુનઃશોષણને વધારે છે (iii) એલ્ડોસ્ટેરોન Na⁺ ના પુનઃશોષણને ઘટાડે છે (iv) એટ્રિયલ નેટ્રીયુરેટિક ફેક્ટર (ANF) રુધિરદાબ ઘટાડે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે. વિધાન (iii) ખોટું છે કારણ કે એલ્ડોસ્ટેરોન Na⁺ ના પુનઃશોષણને વધારે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ઉત્સર્જન તંત્રમાં હેનલેનો લૂપ કયા કાર્ય સાથે સંકળાયેલો છે?", "opts": ["રુધિરમાંથી ગ્લુકોઝનું પુનઃશોષણ", "મૂત્રની સાંદ્રતા વધારવા માટે પાણીનું પુનઃશોષણ", "યુરિયાનું સક્રિય સ્ત્રાવ", "મૂત્રમાંથી પ્રોટીનનું નિકાલ"], "ans": 1, "exp": "હેનલેનો લૂપ મૂત્રની સાંદ્રતા વધારવા માટે પાણી અને આયનોના પુનઃશોષણમાં મુખ્ય ભૂમિકા ભજવે છે, જે મૂત્રને સાંદ્ર બનાવે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ મનુષ્યમાં યકૃત દ્વારા યુરિયામાં રૂપાંતરિત થાય છે?", "opts": ["યુરિક એસિડ", "એમોનિયા", "ક્રિએટિનિન", "કાર્બન ડાયોક્સાઇડ"], "ans": 1, "exp": "યકૃત એમોનિયાને ઓર્નિથિન ચક્ર દ્વારા ઓછું ઝેરી યુરિયામાં રૂપાંતરિત કરે છે, જે પછી મૂત્રપિંડ દ્વારા ઉત્સર્જિત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "જો મનુષ્યના મૂત્રમાં ગ્લુકોઝની હાજરી જોવા મળે, તો તે કયા રોગનું સૂચક છે?", "opts": ["મૂત્રપિંડની પથરી", "ડાયાબિટીસ મેલિટસ", "યકૃતનું સિરોસિસ", "હાઈપરટેન્શન"], "ans": 1, "exp": "મૂત્રમાં ગ્લુકોઝની હાજરી ડાયાબિટીસ મેલિટસનું સૂચક છે, જ્યાં રુધિરમાં ગ્લુકોઝનું પ્રમાણ વધી જાય છે અને મૂત્રપિંડ તેને પુનઃશોષણ કરી શકતા નથી.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1. મૂત્રપિંડમાં રુધિરનું ગાળણ ગ્લોમેર્યુલસમાં થાય છે. 2. પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલ (PCT)માં યુરિયાનું સક્રિય સ્ત્રાવ થાય છે. 3. ડિસ્ટલ કન્વોલ્યુટેડ ટ્યુબ્યુલ (DCT)માં પાણીનું પુનઃશોષણ એન્ટિડાયયુરેટિક હોર્મોન (ADH) દ્વારા નિયંત્રિત થાય છે. ઉપરોક્ત વિધાનોમાંથી કેટલા સાચાં છે?", "opts": ["માત્ર એક", "માત્ર બે", "ત્રણેય", "એક પણ નહીં"], "ans": 1, "exp": "વિધાન 1 અને 3 સાચાં છે. વિધાન 2 ખોટું છે કારણ કે PCTમાં યુરિયાનું સક્રિય સ્ત્રાવ થતું નથી, પરંતુ ગ્લુકોઝ અને એમિનો એસિડનું પુનઃશોષણ થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ માત્ર પક્ષીઓ અને સરિસૃપોમાં જોવા મળે છે?", "opts": ["યુરિયા", "યુરિક એસિડ", "એમોનિયા", "ક્રિએટિનિન"], "ans": 1, "exp": "યુરિક એસિડ એ પાણીની ઓછી જરૂરિયાત ધરાવતું ઉત્સર્જન પદાર્થ છે, જે પક્ષીઓ અને સરિસૃપોમાં જોવા મળે છે, જેથી પાણીની બચત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના મૂત્રમાં યુરિયાનું પ્રમાણ લગભગ કેટલું હોય છે?", "opts": ["0.2%", "2%", "5%", "10%"], "ans": 1, "exp": "મનુષ્યના મૂત્રમાં યુરિયાનું પ્રમાણ લગભગ 2% હોય છે, જે મુખ્ય ઉત્સર્જન પદાર્થ છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં યુરિયાનું સંશ્લેષણ મુખ્યત્વે કયા અંગમાં થાય છે?", "opts": ["મૂત્રપિંડ (Kidney)", "યકૃત (Liver)", "મૂત્રાશય (Urinary bladder)", "સ્વાદુપિંડ (Pancreas)"], "ans": 1, "exp": "યુરિયાનું સંશ્લેષણ ઓર્નિથિન ચક્ર દ્વારા યકૃતમાં થાય છે, જે એમિનોએસિડના વિઘટનથી ઉત્પન્ન થતા એમોનિયાને ઓછા ઝેરી યુરિયામાં રૂપાંતરિત કરે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ઉત્સર્જન પદાર્થ મનુષ્યના શરીરમાં સૌથી વધુ પ્રમાણમાં ઉત્પન્ન થાય છે અને ઉત્સર્જિત થાય છે?", "opts": ["યુરિક એસિડ", "ક્રિએટિનિન", "યુરિયા", "એમોનિયા"], "ans": 2, "exp": "મનુષ્યના શરીરમાં નાઇટ્રોજનયુક્ત ઉત્સર્ગ પદાર્થોમાં યુરિયા સૌથી વધુ પ્રમાણમાં ઉત્પન્ન થાય છે અને મૂત્ર દ્વારા ઉત્સર્જિત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના ઉત્સર્જન પદાર્થો અને તેમના મુખ્ય ઉત્સર્જન અંગોની જોડીઓમાંથી કઈ જોડી ખોટી છે?", "opts": ["યુરિયા - મૂત્રપિંડ", "યુરિક એસિડ - ત્વચા", "એમોનિયા - યકૃત", "કાર્બન ડાયોક્સાઇડ - ફેફસાં"], "ans": 2, "exp": "એમોનિયા મુખ્યત્વે યકૃતમાં યુરિયામાં રૂપાંતરિત થાય છે અને પછી મૂત્રપિંડ દ્વારા ઉત્સર્જિત થાય છે, તે સીધું યકૃત દ્વારા ઉત્સર્જિત થતું નથી.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ઉત્સર્જન તંત્રમાં હેનલેનો લૂપ કયા કાર્ય માટે મહત્ત્વપૂર્ણ છે?", "opts": ["ગ્લોમેર્યુલર ફિલ્ટરેશન દર (GFR) નિયંત્રણ", "પેશાબમાં યુરિયાનું સાંદ્રીકરણ", "રુધિરમાંથી ગ્લુકોઝનું પુનઃશોષણ", "પેશાબમાં એમોનિયાનું વિસર્જન"], "ans": 1, "exp": "હેનલેનો લૂપ મુખ્યત્વે પેશાબના સાંદ્રીકરણ માટે જવાબદાર છે, જેમાં યુરિયા અને અન્ય ઉત્સર્જન પદાર્થોનું સાંદ્રીકરણ થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સર્જન પદાર્થ માત્ર યકૃતમાં ઉત્પન્ન થાય છે અને મૂત્રપિંડ દ્વારા વિસર્જિત થાય છે?", "opts": ["યુરિક એસિડ", "ક્રિએટિનિન", "યુરિયા", "એમોનિયા"], "ans": 2, "exp": "યુરિયા ઓર્નિથિન ચક્ર દ્વારા યકૃતમાં ઉત્પન્ન થાય છે અને મૂત્રપિંડ દ્વારા વિસર્જિત થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મૂત્રપિંડના નેફ્રોનમાં ગ્લોમેર્યુલસ અને બોવમેનની કોથળી વચ્ચેના દબાણનો તફાવત શું કહેવાય છે?", "opts": ["રુધિરકેશિકા દબાણ", "ઓસ્મોટિક દબાણ", "કાર્યકારી ફિલ્ટરેશન દબાણ", "હાઇડ્રોસ્ટેટિક દબાણ"], "ans": 2, "exp": "ગ્લોમેર્યુલર ફિલ્ટરેશન દર માટે કાર્યકારી ફિલ્ટરેશન દબાણ જવાબદાર છે, જે ગ્લોમેર્યુલર હાઇડ્રોસ્ટેટિક દબાણ અને કોલોઇડ ઓસ્મોટિક દબાણ વચ્ચેનો તફાવત છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મનુષ્યના ઉત્સર્જન તંત્ર માટે ખોટું છે?", "opts": ["પ્રોક્સિમલ કન્વોલ્યુટેડ ટ્યુબ્યુલમાં ગ્લુકોઝનું સંપૂર્ણ પુનઃશોષણ થાય છે", "ડિસ્ટલ કન્વોલ્યુટેડ ટ્યુબ્યુલમાં પાણીનું પુનઃશોષણ એન્ટિડાયયુરેટિક હોર્મોન (ADH) દ્વારા નિયંત્રિત થાય છે", "હેનલેનો લૂપ પાણી અને સોડિયમ ક્લોરાઇડના પુનઃશોષણ માટે જવાબદાર છે", "કલેક્ટિંગ ડક્ટમાં યુરિયાનું પુનઃશોષણ થતું નથી"], "ans": 3, "exp": "કલેક્ટિંગ ડક્ટમાં યુરિયાનું પુનઃશોષણ થાય છે, જે પેશાબના સાંદ્રીકરણમાં મદદ કરે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ઉત્સર્જન તંત્રમાં હેંલેની પાશ (Loop of Henle)નો મુખ્ય કાર્ય શું છે?", "opts": ["ગ્લોમેર્યુલર ફિલ્ટરેશન દર (GFR) નિયંત્રિત કરવું", "મૂત્રમાંથી ગ્લુકોઝનું પુનઃશોષણ કરવું", "મૂત્રની સાંદ્રતા વધારવા માટે સોડિયમ અને ક્લોરાઇડ આયનોનું પુનઃશોષણ કરવું", "યુરિયાનું સીધું ઉત્સર્જન કરવું"], "ans": 2, "exp": "હેંલેની પાશનો મુખ્ય કાર્ય મૂત્રની સાંદ્રતા વધારવા માટે સોડિયમ અને ક્લોરાઇડ આયનોનું પુનઃશોષણ કરવાનો છે, જે કાઉન્ટર કરન્ટ મલ્ટિપ્લાયર સિસ્ટમ દ્વારા થાય છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ઉત્સર્જન તંત્રમાં હેન્લેનો લૂપ (Loop of Henle) કયા મુખ્ય કાર્ય સાથે સંકળાયેલ છે?", "opts": ["ગ્લોમેર્યુલર ફિલ્ટરેશન દર (GFR) નું નિયમન", "પેશાબમાંથી ગ્લુકોઝનું પુનઃશોષણ", "પાણી અને વિદ્યુતવિભાજ્યના સંતુલન દ્વારા પેશાબનું સાંદ્રણ", "યુરિયાનું સીધું ઉત્સર્જન"], "ans": 2, "exp": "હેન્લેનો લૂપ મુખ્યત્વે પાણી અને વિદ્યુતવિભાજ્યના પુનઃશોષણ દ્વારા પેશાબનું સાંદ્રણ કરવામાં મદદ કરે છે, જેને કાઉન્ટર-કરન્ટ મલ્ટિપ્લાયર સિસ્ટમ કહે છે.", "chapter": "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "ઉત્સર્જન ઉત્પાદનો અને તેમનું નિકાલ Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
