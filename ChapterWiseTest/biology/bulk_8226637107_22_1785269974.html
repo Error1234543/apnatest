@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>જૈવતકનીકી અને તેના ઉપયોગો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>જૈવતકનીકી અને તેના ઉપયોગો Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "જનીન ઇજનેરીની મદદથી ઉત્પાદિત પ્રથમ માનવ હોર્મોન કયું હતું?", "opts": ["ઇન્સ્યુલિન", "ગ્રોથ હોર્મોન", "ઇન્ટરફેરોન", "ઇરિથ્રોપોએટિન"], "ans": 0, "exp": "જનીન ઇજનેરીની મદદથી ઉત્પાદિત પ્રથમ માનવ હોર્મોન ઇન્સ્યુલિન હતું, જે ડાયાબિટીસના દર્દીઓ માટે ઉપયોગી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકનો મુખ્ય હેતુ શું છે?", "opts": ["DNA ના નાના ટુકડાનું પ્રવર્ધન કરવું", "પ્રોટીનનું સંશ્લેષણ કરવું", "કોષોનું વિભાજન કરવું", "વર્ણસૂત્રોનું અલગીકરણ કરવું"], "ans": 0, "exp": "PCR ટેકનિકનો મુખ્ય હેતુ DNA ના નાના ટુકડાનું પ્રવર્ધન (amplification) કરવાનો છે, જે જનીન અભ્યાસમાં ઉપયોગી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'રિકોમ્બિનન્ટ DNA ટેકનોલોજી' માટે નીચેનામાંથી કયું ઉત્સેચક જરૂરી છે?", "opts": ["લાઇગેઝ", "એમાઇલેઝ", "પેપ્સિન", "લાઇપેઝ"], "ans": 0, "exp": "રિકોમ્બિનન્ટ DNA ટેકનોલોજીમાં DNA ટુકડાઓને જોડવા માટે લાઇગેઝ ઉત્સેચક જરૂરી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ઉદાહરણ જૈવતકનીકીના ઉપયોગનું નથી?", "opts": ["ગોલ્ડન રાઇસમાં વિટામિન-A નું ઉત્પાદન", "પેનિસિલિનનું ઉત્પાદન ફૂગ દ્વારા", "ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયા દ્વારા", "પ્રકાશસંશ્લેષણ દ્વારા ગ્લુકોઝનું નિર્માણ"], "ans": 3, "exp": "પ્રકાશસંશ્લેષણ એ કુદરતી પ્રક્રિયા છે અને તે જૈવતકનીકીનો ઉપયોગ નથી.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી (Genetic Engineering)માં વપરાતું 'રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ' ઉત્સેચકનું મુખ્ય કાર્ય શું છે?", "opts": ["DNA ના ટુકડાઓને જોડવું", "DNA ના ચોક્કસ સ્થાને કાપણી કરવી", "RNA નું સંશ્લેષણ કરવું", "પ્રોટીનનું સંશ્લેષણ કરવું"], "ans": 1, "exp": "રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચક DNA ના ચોક્કસ ન્યુક્લિઓટાઇડ ક્રમને ઓળખીને તેને કાપે છે, જે જનીન ઇજનેરી માટે જરૂરી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકનો ઉપયોગ શેના માટે થાય છે?", "opts": ["પ્રોટીનનું વિશ્લેષણ કરવા", "DNA ની નકલોનું સંશ્લેષણ કરવા", "કોષોનું વિભાજન કરવા", "હોર્મોનનું ઉત્પાદન કરવા"], "ans": 1, "exp": "PCR ટેકનિકનો ઉપયોગ DNA ના નાના ટુકડાની લાખો નકલો બનાવવા માટે થાય છે, જે જનીન વિશ્લેષણમાં મદદરૂપ છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકમાં કયો ઉત્સેચક મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["લાઇગેઝ", "રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ", "ટેક પોલિમરેઝ", "રિવર્સ ટ્રાન્સક્રિપ્ટેઝ"], "ans": 2, "exp": "PCR ટેકનિકમાં DNA ના વિસ્તરણ માટે ઉષ્મા-સ્થિર ટેક પોલિમરેઝ ઉત્સેચકનો ઉપયોગ થાય છે, જે ઉચ્ચ તાપમાને પણ કાર્યરત રહે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન જનીન થેરાપી માટે ખોટું છે?", "opts": ["આનુવંશિક રોગોના ઉપચાર માટે ઉપયોગી છે.", "રોગગ્રસ્ત કોષોમાં સામાન્ય જનીન દાખલ કરવામાં આવે છે.", "આ ટેકનિક માત્ર પ્રાણીઓમાં જ શક્ય છે.", "આ ટેકનિકથી સિકલ સેલ એનીમિયા જેવા રોગોનો ઉપચાર થઈ શકે છે."], "ans": 2, "exp": "જનીન થેરાપી માનવોમાં પણ શક્ય છે અને તેનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીના ક્ષેત્રમાં 'ગોલ્ડન રાઇસ' શું છે અને તેનો મુખ્ય હેતુ શું છે?", "opts": ["વિટામિન-A નો સમૃદ્ધ સ્ત્રોત, કુપોષણ ઘટાડવા માટે વિકસાવવામાં આવેલ ચોખા.", "પ્રોટીન સમૃદ્ધ ચોખા, જે પ્રાણીઓના ખોરાક માટે વપરાય છે.", "ઉચ્ચ ઉત્પાદન આપતા ચોખા, જે જંતુનાશક પ્રતિરોધક છે.", "કાર્બોહાઇડ્રેટ સમૃદ્ધ ચોખા, જે ડાયાબિટીસના દર્દીઓ માટે છે."], "ans": 0, "exp": "ગોલ્ડન રાઇસ એ વિટામિન-A નો સમૃદ્ધ સ્ત્રોત છે, જે કુપોષણ અને વિટામિન-A ની ઉણપ ઘટાડવા માટે જનીન ઇજનેરી દ્વારા વિકસાવવામાં આવેલ છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) પ્રક્રિયામાં નીચેનામાંથી કયું તત્વ જરૂરી નથી?", "opts": ["DNA ટેમ્પલેટ", "પ્રાઇમર્સ", "DNA પોલિમરેઝ ઉત્સેચક", "રિસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચક"], "ans": 3, "exp": "PCRમાં રિસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝની જરૂર નથી, કારણ કે તે DNAને કાપવા માટે નહીં, પરંતુ DNAના નકલીકરણ માટે વપરાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'જનીન થેરાપી' માટે સાચું નથી?", "opts": ["આનુવંશિક રોગોના ઉપચાર માટે ઉપયોગી છે", "રોગગ્રસ્ત જનીનને સ્વસ્થ જનીન વડે બદલવામાં આવે છે", "તેનો ઉપયોગ માત્ર વનસ્પતિઓમાં થાય છે", "વાયરસનો વાહક તરીકે ઉપયોગ થઈ શકે છે"], "ans": 2, "exp": "જનીન થેરાપીનો ઉપયોગ મનુષ્યોમાં આનુવંશિક રોગોના ઉપચાર માટે થાય છે, માત્ર વનસ્પતિઓમાં નહીં.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'બ્લોટિંગ ટેકનિક'નો ઉપયોગ શેના માટે થાય છે?", "opts": ["DNA, RNA અથવા પ્રોટીનના અલગીકરણ અને ઓળખ માટે", "કોષોના વિભાજન માટે", "પ્રકાશસંશ્લેષણની ક્રિયા માટે", "હોર્મોનના ઉત્પાદન માટે"], "ans": 0, "exp": "બ્લોટિંગ ટેકનિકનો ઉપયોગ DNA, RNA અથવા પ્રોટીનના અલગીકરણ અને તેમની ઓળખ માટે થાય છે, જેમ કે સાઉધર્ન, નોર્ધર્ન અને વેસ્ટર્ન બ્લોટિંગ.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ 'ટ્રાન્સજેનિક સજીવ'નું નથી?", "opts": ["Bt કપાસ", "ગોલ્ડન રાઇસ", "ડોલી ઘેટું", "ફ્લેવર સેવર ટામેટાં"], "ans": 2, "exp": "ડોલી ઘેટું ક્લોનિંગ દ્વારા ઉત્પન્ન થયેલું હતું, જ્યારે ટ્રાન્સજેનિક સજીવોમાં વિદેશી જનીન દાખલ કરવામાં આવે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી (Genetic Engineering)માં 'પ્રતિબંધક ઉત્સેચકો' (Restriction Enzymes)નો મુખ્ય ઉપયોગ શું છે?", "opts": ["DNAના ટુકડાઓને જોડવા માટે", "DNAને ચોક્કસ સ્થાનેથી કાપવા માટે", "RNAનું સંશ્લેષણ કરવા માટે", "પ્રોટીનનું નિર્માણ કરવા માટે"], "ans": 1, "exp": "પ્રતિબંધક ઉત્સેચકો DNAને ચોક્કસ ન્યુક્લિઓટાઇડ ક્રમ પર કાપે છે, જે જનીન ઇજનેરીમાં DNAના ટુકડાઓને અલગ કરવા માટે જરૂરી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'જૈવિક ખાતર' (Biofertilizers) માટે ખોટું છે?", "opts": ["તે જમીનની ફળદ્રુપતા વધારે છે.", "તે રાસાયણિક ખાતરોની જરૂરિયાત ઘટાડે છે.", "તે માત્ર વનસ્પતિના વિકાસ માટે જ ઉપયોગી છે.", "તે પર્યાવરણને અનુકૂળ છે."], "ans": 2, "exp": "જૈવિક ખાતરો માત્ર વનસ્પતિના વિકાસ માટે જ નહીં, પરંતુ જમીનના સૂક્ષ્મજીવોને પણ પોષણ આપે છે અને પર્યાવરણને અનુકૂળ હોય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપી (Gene Therapy)માં વપરાતા વેક્ટરનું મુખ્ય કાર્ય શું છે?", "opts": ["રોગીના કોષોમાં સ્વસ્થ જનીન પહોંચાડવું", "રોગીના DNAને સંપૂર્ણપણે બદલી નાખવું", "રોગીના શરીરમાંથી ખરાબ જનીનોને દૂર કરવું", "રોગીના કોષોમાં નવા પ્રોટીનનું સંશ્લેષણ કરવું"], "ans": 0, "exp": "જનીન થેરાપીમાં વેક્ટરનો ઉપયોગ રોગીના કોષોમાં સ્વસ્થ જનીન પહોંચાડવા માટે થાય છે, જે ખામીયુક્ત જનીનને બદલે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ 'ટ્રાન્સજેનિક પ્રાણી'નું નથી?", "opts": ["Bt કપાસ", "ડોલી ઘેટું", "એટલા દૂધ આપતી ગાય", "ઇન્સ્યુલિન ઉત્પન્ન કરતું બેક્ટેરિયમ"], "ans": 3, "exp": "ઇન્સ્યુલિન ઉત્પન્ન કરતું બેક્ટેરિયમ ટ્રાન્સજેનિક સૂક્ષ્મજીવ છે, જ્યારે બાકીના ઉદાહરણો ટ્રાન્સજેનિક પ્રાણીઓ અથવા વનસ્પતિઓના છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી (Genetic Engineering)માં વપરાતું 'પ્રતિબંધ ઉત્સેચક' (Restriction Enzyme) કયા પ્રકારના બંધને તોડે છે?", "opts": ["ફૉસ્ફોડાયએસ્ટર બંધ", "પેપ્ટાઇડ બંધ", "ગ્લાયકોસિડિક બંધ", "હાઇડ્રોજન બંધ"], "ans": 0, "exp": "પ્રતિબંધ ઉત્સેચક DNAના ફૉસ્ફોડાયએસ્ટર બંધને ચોક્કસ સ્થાને તોડે છે, જેનાથી DNAના ટુકડા મળે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'જનીન થેરાપી' (Gene Therapy) માટે ખોટું છે?", "opts": ["આ પદ્ધતિમાં ખામીયુક્ત જનીનને સુધારવા માટે સામાન્ય જનીનનો ઉપયોગ થાય છે.", "તેનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે.", "જનીન થેરાપીમાં વાઇરસનો વાહક તરીકે ઉપયોગ થઈ શકે છે.", "તે માત્ર પ્રાણીઓમાં જ શક્ય છે, મનુષ્યમાં નહીં."], "ans": 3, "exp": "જનીન થેરાપી મનુષ્યમાં પણ શક્ય છે અને તેનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરીમાં વપરાતા 'પ્લાસ્મિડ' વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["પ્લાસ્મિડ એ બેક્ટેરિયાના કોષકેન્દ્ર સિવાયના ગોળાકાર DNA છે", "પ્લાસ્મિડ સ્વતંત્ર રીતે પ્રતિકૃતિ બનાવી શકે છે", "પ્લાસ્મિડ માત્ર યુકેરિયોટિક કોષોમાં જ જોવા મળે છે", "પ્લાસ્મિડનો ઉપયોગ જનીન ઇજનેરીમાં વાહક તરીકે થાય છે"], "ans": 2, "exp": "પ્લાસ્મિડ મુખ્યત્વે પ્રોકેરિયોટિક કોષોમાં જોવા મળે છે, જેમ કે બેક્ટેરિયા, અને તે યુકેરિયોટિક કોષોમાં જોવા મળતા નથી.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જનીન થેરાપી (gene therapy) સાથે સંબંધિત નથી?", "opts": ["એડિનોસાઇન ડિએમિનેઝ (ADA) ઉણપનો ઉપચાર", "સિકલ સેલ એનીમિયાનો ઉપચાર", "ઇન્સ્યુલિનનું ઉત્પાદન", "કેન્સરના કોષોનો નાશ"], "ans": 2, "exp": "ઇન્સ્યુલિનનું ઉત્પાદન જનીન ઇજનેરી દ્વારા થાય છે, જ્યારે જનીન થેરાપી રોગના મૂળ કારણને સુધારવા માટે વપરાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં વપરાતા 'રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ' ઉત્સેચકો વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["તે DNA ને ચોક્કસ સ્થાને કાપે છે", "તે RNA ને ચોક્કસ સ્થાને જોડે છે", "તે પ્રોટીન સંશ્લેષણમાં મદદ કરે છે", "તે કાર્બોદિતના પાચનમાં મદદ કરે છે"], "ans": 0, "exp": "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચકો DNA ને ચોક્કસ સ્થાને કાપવા માટે વપરાય છે, જે જનીન ઇજનેરીમાં મહત્વપૂર્ણ છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવતકનીકીના ઉપયોગનું નથી?", "opts": ["ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયામાં જનીન ઇજનેરી દ્વારા", "Bt કપાસનું ઉત્પાદન જંતુનાશક પ્રોટીન માટે", "પ્રકાશસંશ્લેષણ દ્વારા ગ્લુકોઝનું સંશ્લેષણ", "ગોલ્ડન રાઇસમાં વિટામિન-Aનું ઉત્પાદન"], "ans": 2, "exp": "પ્રકાશસંશ્લેષણ એ કુદરતી પ્રક્રિયા છે, જ્યારે બાકીના ઉદાહરણો જૈવતકનીકીના ઉપયોગો છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપીમાં વપરાતા વાહકો (વેક્ટર્સ) વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["વાહકો માત્ર બેક્ટેરિયામાંથી મેળવવામાં આવે છે.", "વાહકો જનીનને કોષકેન્દ્રમાં પહોંચાડી શકતા નથી.", "વાહકો તરીકે વાઇરસનો ઉપયોગ થઈ શકે છે.", "વાહકો માત્ર પ્રાણીકોષોમાં જ કામ કરે છે."], "ans": 2, "exp": "જનીન થેરાપીમાં વાઇરસનો ઉપયોગ વાહક તરીકે થાય છે, જે જનીનને કોષકેન્દ્રમાં પહોંચાડે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'બાયોફર્ટિલાઇઝર્સ' માટે સાચું નથી?", "opts": ["બાયોફર્ટિલાઇઝર્સ રાસાયણિક ખાતરોનું સ્થાન લઈ શકે છે.", "બાયોફર્ટિલાઇઝર્સ જમીનની ફળદ્રુપતા વધારે છે.", "બાયોફર્ટિલાઇઝર્સ માત્ર વનસ્પતિઓ માટે જ ઉપયોગી છે.", "બાયોફર્ટિલાઇઝર્સ પર્યાવરણને નુકસાન પહોંચાડતા નથી."], "ans": 2, "exp": "બાયોફર્ટિલાઇઝર્સ માત્ર વનસ્પતિઓ માટે જ નહીં, પરંતુ જમીનના સૂક્ષ્મજીવો માટે પણ ઉપયોગી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ 'જૈવિક ખાતર' (Biofertilizer) તરીકે વર્ગીકૃત કરી શકાય નહીં?", "opts": ["રાઇઝોબિયમ બેક્ટેરિયા", "એઝોટોબેક્ટર બેક્ટેરિયા", "માયકોરાઇઝા ફૂગ", "બેસિલસ થુરિન્જિએન્સિસ (Bt)"], "ans": 3, "exp": "બેસિલસ થુરિન્જિએન્સિસ (Bt) એ જૈવિક કીટનાશક છે, જ્યારે અન્ય ત્રણ જૈવિક ખાતર તરીકે ઉપયોગી છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપી (Gene Therapy)માં વપરાતા વાહકો (Vectors) વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["વાઇરલ વાહકો માત્ર પ્રોકેરિયોટિક કોષોમાં જ જનીન દાખલ કરી શકે છે.", "નૉન-વાઇરલ વાહકો (જેમ કે લિપોઝોમ્સ) વાઇરલ વાહકો કરતાં વધુ સલામત છે પરંતુ ઓછા કાર્યક્ષમ છે.", "વાઇરલ વાહકો હંમેશા રોગકારક હોય છે અને તેનો ઉપયોગ જનીન થેરાપીમાં થઈ શકતો નથી.", "નૉન-વાઇરલ વાહકો વાઇરલ વાહકો કરતાં વધુ કાર્યક્ષમ છે અને તેનો ઉપયોગ વધુ પ્રમાણમાં થાય છે."], "ans": 1, "exp": "નૉન-વાઇરલ વાહકો (જેમ કે લિપોઝોમ્સ) વાઇરલ વાહકો કરતાં વધુ સલામત છે પરંતુ ઓછા કાર્યક્ષમ છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'રિકોમ્બિનન્ટ DNA ટેકનોલોજી' માટે ખોટું છે?", "opts": ["રિકોમ્બિનન્ટ DNA બનાવવા માટે રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચકનો ઉપયોગ થાય છે.", "લાઇગેઝ ઉત્સેચક DNAના ટુકડાઓને જોડવા માટે વપરાય છે.", "રિકોમ્બિનન્ટ DNA માત્ર બેક્ટેરિયામાં જ બનાવી શકાય છે, યુકેરિયોટિક કોષોમાં નહીં.", "પ્લાસ્મિડ અને બેક્ટેરિયોફેજ વાહકો તરીકે ઉપયોગી છે."], "ans": 2, "exp": "રિકોમ્બિનન્ટ DNA ટેકનોલોજી યુકેરિયોટિક કોષોમાં પણ ઉપયોગમાં લઈ શકાય છે, માત્ર બેક્ટેરિયામાં જ નહીં.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકમાં નીચેનામાંથી કયું તત્વ જરૂરી નથી?", "opts": ["DNA ટેમ્પલેટ", "પ્રાઇમર્સ", "DNA પોલિમરેઝ ઉત્સેચક", "પ્લાસ્મિડ વેક્ટર"], "ans": 3, "exp": "PCR ટેકનિકમાં પ્લાસ્મિડ વેક્ટરની જરૂર નથી, તે જનીન ક્લોનિંગમાં વપરાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનીકીમાં વપરાતી 'જનીન કાતર' તરીકે ઓળખાતી ઉત્સેચક કઈ છે?", "opts": ["લાઇગેઝ", "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ", "પોલિમરેઝ", "રિવર્સ ટ્રાન્સક્રિપ્ટેઝ"], "ans": 1, "exp": "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચક DNA ને ચોક્કસ સ્થાને કાપે છે, જેને 'જનીન કાતર' કહેવાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનીકીના ક્ષેત્રમાં 'પ્રત્યક્ષ જનીન સ્થાનાંતરણ' (Direct Gene Transfer) માટે નીચેનામાંથી કયું તંત્ર સામાન્ય રીતે ઉપયોગમાં લેવાતું નથી?", "opts": ["એગ્રોબેક્ટેરિયમ ટ્યુમેફેસિયન્સ (Agrobacterium tumefaciens) દ્વારા ટી-પ્લાઝમિડનો ઉપયોગ", "ઇલેક્ટ્રોપોરેશન (Electroporation) પદ્ધતિ", "માઇક્રોઇન્જેક્શન (Microinjection) પદ્ધતિ", "પોલિમરેઝ ચેઇન રિએક્શન (PCR) પદ્ધતિ"], "ans": 3, "exp": "PCR પદ્ધતિનો ઉપયોગ DNA ના વિસ્તરણ માટે થાય છે, જ્યારે પ્રત્યક્ષ જનીન સ્થાનાંતરણ માટે એગ્રોબેક્ટેરિયમ, ઇલેક્ટ્રોપોરેશન અને માઇક્રોઇન્જેક્શન જેવી પદ્ધતિઓનો ઉપયોગ થાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનીકીના ઉપયોગથી ઉત્પાદિત 'Bt કપાસ'માં કયું વિશેષ જનીન દાખલ કરવામાં આવે છે?", "opts": ["નાઇટ્રોજન ફિક્સેશન માટેનું જનીન", "કીટનાશક પ્રોટીન ઉત્પન્ન કરતું જનીન", "હર્બિસાઇડ પ્રતિરોધક જનીન", "વૃદ્ધિ હોર્મોન ઉત્પન્ન કરતું જનીન"], "ans": 1, "exp": "Bt કપાસમાં બેસિલસ થુરિન્જિએન્સિસ (Bt) બેક્ટેરિયામાંથી કીટનાશક પ્રોટીન ઉત્પન્ન કરતું જનીન દાખલ કરવામાં આવે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિક માટે ખોટું છે?", "opts": ["PCRમાં ઉચ્ચ તાપમાને DNAનું વિરલન (Denaturation) થાય છે", "PCR માટે DNA પોલિમરેઝ ઉત્સેચક જરૂરી નથી", "PCRમાં પ્રાઇમર્સનો ઉપયોગ DNAના ચોક્કસ વિસ્તારને લક્ષ્ય બનાવવા થાય છે", "PCR ટેકનિકનો ઉપયોગ DNAના નાના નમૂનાઓનું વિસ્તરણ કરવા થાય છે"], "ans": 1, "exp": "PCR ટેકનિકમાં DNA પોલિમરેઝ ઉત્સેચક જરૂરી છે, જે DNAના નવા સ્ટ્રેન્ડનું સંશ્લેષણ કરે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી (Genetic Engineering)માં વપરાતું 'પ્લાસ્મિડ' શું છે?", "opts": ["બેક્ટેરિયાના કોષકેન્દ્રમાં આવેલું વર્તુળાકાર DNA", "બેક્ટેરિયાના કોષમાં આવેલું વધારાનું વર્તુળાકાર DNA જે સ્વતંત્ર રીતે પ્રતિકૃતિ બનાવે છે", "યુકેરિયોટિક કોષના કોષકેન્દ્રમાં આવેલું રેખીય DNA", "વાયરસનું જનીનિક દ્રવ્ય જે બેક્ટેરિયામાં પ્રવેશે છે"], "ans": 1, "exp": "પ્લાસ્મિડ એ બેક્ટેરિયાના કોષમાં આવેલું વધારાનું વર્તુળાકાર DNA છે જે સ્વતંત્ર રીતે પ્રતિકૃતિ બનાવી શકે છે અને જનીન ઇજનેરીમાં વાહક તરીકે વપરાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) પદ્ધતિમાં નીચેનામાંથી કયું તત્વ જરૂરી નથી?", "opts": ["DNA ટેમ્પલેટ", "DNA પોલિમરેઝ ઉત્સેચક", "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચક", "પ્રાઇમર્સ"], "ans": 2, "exp": "PCR પદ્ધતિમાં રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચકની જરૂર નથી, કારણ કે તે DNA ને કાપવા માટે વપરાય છે, જ્યારે PCR માં DNA ની પ્રતિકૃતિ બનાવવામાં આવે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કઈ પદ્ધતિ જનીન ઇજનેરી માટે 'ડાયરેક્ટ જનીન ટ્રાન્સફર'ની નથી?", "opts": ["માઇક્રોઇન્જેક્શન", "ઇલેક્ટ્રોપોરેશન", "એગ્રોબેક્ટેરિયમ-મધ્યસ્થી ટ્રાન્સફર", "બાયોલિસ્ટિક્સ"], "ans": 2, "exp": "એગ્રોબેક્ટેરિયમ-મધ્યસ્થી ટ્રાન્સફર એ પરોક્ષ પદ્ધતિ છે જેમાં *Agrobacterium tumefaciens* નો ઉપયોગ થાય છે, જ્યારે અન્ય ત્રણ પદ્ધતિઓ ડાયરેક્ટ જનીન ટ્રાન્સફરની છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવતકનીકીના ઉપયોગથી ઉત્પાદિત 'બાયોફાર્માસ્યુટિકલ' નથી?", "opts": ["ઇન્સ્યુલિન", "ગ્રોથ હોર્મોન", "પેનિસિલિન", "ઇન્ટરફેરોન"], "ans": 2, "exp": "પેનિસિલિન એ ફૂગ (*Penicillium*) દ્વારા કુદરતી રીતે ઉત્પન્ન થતું એન્ટિબાયોટિક છે, જ્યારે અન્ય ત્રણ બાયોફાર્માસ્યુટિકલ્સ છે જે જનીન ઇજનેરી દ્વારા ઉત્પાદિત થાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનીકીના ક્ષેત્રમાં 'જનીન થેરાપી' (gene therapy)નો મુખ્ય હેતુ શું છે?", "opts": ["અસામાન્ય જનીનને સામાન્ય જનીન વડે બદલવું અથવા સુધારવું", "બેક્ટેરિયામાં ઇન્સ્યુલિનનું ઉત્પાદન વધારવું", "વનસ્પતિમાં જંતુનાશક પ્રતિકારકતા ઉત્પન્ન કરવી", "પ્રાણીઓના ક્લોનિંગ માટે જનીનને સ્થાનાંતરિત કરવું"], "ans": 0, "exp": "જનીન થેરાપીનો મુખ્ય હેતુ વારસાગત રોગો અથવા જનીનિક ખામીઓને દૂર કરવા માટે અસામાન્ય જનીનને સામાન્ય જનીન વડે બદલવું અથવા સુધારવાનો છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી (Genetic Engineering)માં વપરાતા 'પ્રોબ' (Probe)નું મુખ્ય કાર્ય શું છે?", "opts": ["વિશિષ્ટ DNA અનુક્રમની ઓળખ અને તેને બાંધવું", "પ્રોટીનનું સંશ્લેષણ કરવું", "કોષમાંથી DNAને અલગ કરવું", "ઉત્સેચકોનું ઉત્પાદન કરવું"], "ans": 0, "exp": "પ્રોબ એ એક નાનો DNA અથવા RNA ટુકડો છે જે વિશિષ્ટ DNA અનુક્રમ સાથે જોડાઈને તેની ઓળખ કરવામાં મદદ કરે છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન 'બાયોસેન્સર' (Biosensor) માટે ખોટું છે?", "opts": ["બાયોસેન્સર જૈવિક અણુઓની હાજરીને વિદ્યુત સંકેતમાં રૂપાંતરિત કરે છે", "તેનો ઉપયોગ માત્ર તબીબી ક્ષેત્રમાં જ થાય છે", "બાયોસેન્સરમાં જૈવિક ઘટક અને ટ્રાન્સડ્યુસરનો સમાવેશ થાય છે", "તે ગ્લુકોઝનું સ્તર માપવા માટે વપરાય છે"], "ans": 1, "exp": "બાયોસેન્સરનો ઉપયોગ તબીબી ક્ષેત્ર ઉપરાંત પર્યાવરણીય દેખરેખ, ખાદ્ય ઉદ્યોગ અને સુરક્ષા ક્ષેત્રમાં પણ થાય છે.", "chapter": "જૈવતકનીકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "જૈવતકનીકી અને તેના ઉપયોગો Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
