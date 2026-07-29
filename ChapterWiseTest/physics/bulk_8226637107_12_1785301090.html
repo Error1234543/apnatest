@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિદ્યુતભારો અને ક્ષેત્રો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>વિદ્યુતભારો અને ક્ષેત્રો Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "બે બિંદુવત્ વિદ્યુતભારો વચ્ચેનું અંતર ત્રણ ગણું કરવામાં આવે તો તેમની વચ્ચે લાગતું વિદ્યુતબળ કેટલું થશે? (અન્ય પરિબળો અચળ રાખવામાં આવે છે.)", "opts": ["આપેલ બળના નવમા ભાગનું", "આપેલ બળના ત્રીજા ભાગનું", "આપેલ બળના ત્રણ ગણું", "આપેલ બળના નવ ગણું"], "ans": 0, "exp": "કુલંબના નિયમ મુજબ, વિદ્યુતબળ અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે. તેથી અંતર ત્રણ ગણું કરતાં બળ 1/9 ગણું થાય છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન વિદ્યુતક્ષેત્ર માટે ખોટું છે?", "opts": ["વિદ્યુતક્ષેત્રની તીવ્રતા એકમ ધન વિદ્યુતભાર પર લાગતા બળ તરીકે વ્યાખ્યાયિત થાય છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા હંમેશા ધન હોય છે.", "વિદ્યુતક્ષેત્રની રેખાઓ ધન વિદ્યુતભારથી શરૂ થઈ ઋણ વિદ્યુતભાર પર સમાપ્ત થાય છે."], "ans": 2, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા ધન કે ઋણ હોઈ શકે છે, તે વિદ્યુતભારના પ્રકાર પર આધારિત છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભારિત કણને વિદ્યુતક્ષેત્રમાં મુકત કરતાં તે ગતિ કરે છે. આ કણની ગતિ-ઊર્જામાં થતો વધારો શેના પર આધારિત છે?", "opts": ["માત્ર કણના વિદ્યુતભાર પર", "માત્ર વિદ્યુતક્ષેત્રની તીવ્રતા પર", "કણના વિદ્યુતભાર અને વિદ્યુતક્ષેત્રની તીવ્રતા બંને પર", "કણના દળ અને વિદ્યુતક્ષેત્રની તીવ્રતા પર"], "ans": 2, "exp": "વિદ્યુતક્ષેત્રમાં ગતિ કરતા કણની ગતિ-ઊર્જામાં થતો વધારો કણના વિદ્યુતભાર અને વિદ્યુતક્ષેત્રની તીવ્રતા બંને પર આધારિત છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) વિદ્યુતક્ષેત્રની રેખાઓ એકબીજાને છેદતી નથી. (2) વિદ્યુતક્ષેત્રની રેખાઓની સંખ્યા વિદ્યુતભારના મૂલ્ય પર આધારિત નથી. (3) વિદ્યુતક્ષેત્રની રેખાઓ સમાંતર હોય તો વિદ્યુતક્ષેત્ર સમાન હોય છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં સાચું/સાચાં છે?", "opts": ["માત્ર (1)", "માત્ર (1) અને (3)", "(1), (2) અને (3)", "માત્ર (2) અને (3)"], "ans": 1, "exp": "વિદ્યુતક્ષેત્રની રેખાઓ એકબીજાને છેદતી નથી અને સમાંતર રેખાઓ સમાન વિદ્યુતક્ષેત્ર દર્શાવે છે. વિધાન (2) ખોટું છે કારણ કે રેખાઓની સંખ્યા વિદ્યુતભારના મૂલ્ય પર આધારિત છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુવત્ વિદ્યુતભાર q ને વિદ્યુતક્ષેત્રમાં મૂકતાં તેના પર 4 × 10⁻⁶ N બળ લાગે છે. જો વિદ્યુતક્ષેત્રની તીવ્રતા 2 × 10³ N/C હોય, તો વિદ્યુતભાર q નું મૂલ્ય કેટલું હશે?", "opts": ["2 × 10⁻⁹ C", "8 × 10⁻⁹ C", "4 × 10⁻⁹ C", "1 × 10⁻⁹ C"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = F/q ⇒ q = F/E = (4 × 10⁻⁶)/(2 × 10³) = 2 × 10⁻⁹ C.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભારિત કણને સમાન વિદ્યુતક્ષેત્રમાં મૂકવામાં આવે છે. જો કણ પર લાગતું વિદ્યુતબળ F હોય અને કણનો પ્રવેગ a હોય, તો કણનું દળ શોધો. (વિદ્યુતક્ષેત્રની તીવ્રતા E અને કણનો વિદ્યુતભાર q છે)", "opts": ["m = F / a", "m = qE / a", "m = F / (qE)", "m = a / (qE)"], "ans": 0, "exp": "ન્યૂટનના બીજા નિયમ મુજબ, F = m × a. તેથી દળ m = F / a થાય છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: \n1. વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.\n2. વિદ્યુતક્ષેત્રની તીવ્રતા અને વિદ્યુતસ્થિતિમાન સમાન એકમ ધરાવે છે.\n3. વિદ્યુતક્ષેત્રની રેખાઓની દિશા હંમેશા ઊંચા વિદ્યુતસ્થિતિમાનથી નીચા વિદ્યુતસ્થિતિમાન તરફ હોય છે.\nઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["માત્ર એક", "માત્ર બે", "ત્રણેય", "એક પણ નહીં"], "ans": 1, "exp": "વિધાન 1 અને 3 સાચાં છે. વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે અને વિદ્યુતક્ષેત્રની રેખાઓ ઊંચા વિદ્યુતસ્થિતિમાનથી નીચા તરફ હોય છે. વિધાન 2 ખોટું છે કારણ કે બંનેના એકમ અલગ છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુવત્ વિદ્યુતભાર q ને વિદ્યુતક્ષેત્ર E માં મૂકતાં તેના પર લાગતું ટોર્ક (τ) કેટલું હશે? (વિદ્યુતભારનો ડાઇપોલ મોમેન્ટ p = q × 2a છે, જ્યાં 2a એ બે વિદ્યુતભારો વચ્ચેનું અંતર છે)", "opts": ["τ = p × E", "τ = p · E", "τ = q × E", "τ = 0"], "ans": 0, "exp": "વિદ્યુત ડાઇપોલ પર લાગતું ટોર્ક τ = p × E હોય છે, જ્યાં p એ ડાઇપોલ મોમેન્ટ છે અને E વિદ્યુતક્ષેત્ર છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભારિત કણને વિદ્યુતક્ષેત્રમાં મૂકતાં તેના પર લાગતું બળ 4 × 10⁻¹⁴ N છે. જો વિદ્યુતક્ષેત્રની તીવ્રતા 2 × 10⁵ N/C હોય, તો કણ પરનો વિદ્યુતભાર કેટલો હશે?", "opts": ["2 × 10⁻¹⁹ C", "8 × 10⁻¹⁹ C", "3.2 × 10⁻¹⁸ C", "1.6 × 10⁻¹⁹ C"], "ans": 0, "exp": "બળ (F) = વિદ્યુતભાર (q) × વિદ્યુતક્ષેત્રની તીવ્રતા (E). તેથી q = F/E = (4 × 10⁻¹⁴)/(2 × 10⁵) = 2 × 10⁻¹⁹ C.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનોમાંથી કયાં વિધાનો સાચાં છે?\n(i) વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.\n(ii) વિદ્યુતક્ષેત્રની તીવ્રતા અને વિદ્યુતસ્થિતિમાન અદિશ રાશિ છે.\n(iii) વિદ્યુતક્ષેત્રની રેખાઓ હંમેશાં સમાંતર હોય છે.\n(iv) વિદ્યુતક્ષેત્રની તીવ્રતા એકમ વિદ્યુતભાર પર લાગતા બળ તરીકે વ્યાખ્યાયિત થાય છે.", "opts": ["માત્ર (i) અને (iv)", "(i), (ii) અને (iv)", "(i), (iii) અને (iv)", "(ii) અને (iii)"], "ans": 1, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે અને વિદ્યુતસ્થિતિમાન અદિશ રાશિ છે. વિદ્યુતક્ષેત્રની રેખાઓ હંમેશાં સમાંતર હોતી નથી.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ વિદ્યુતક્ષેત્રના સમાન વિભાગનું નથી?", "opts": ["સમાંતર પ્લેટ કેપેસિટરની વચ્ચેનું ક્ષેત્ર", "બિંદુવત્ વિદ્યુતભારની આસપાસનું ક્ષેત્ર", "અનંત લંબાઈના સુરેખ વિદ્યુતભારિત તારની આસપાસનું ક્ષેત્ર", "અનંત વિસ્તારની વિદ્યુતભારિત પ્લેટની નજીકનું ક્ષેત્ર"], "ans": 1, "exp": "બિંદુવત્ વિદ્યુતભારની આસપાસનું ક્ષેત્ર અસમાન હોય છે, જ્યારે બાકીના ઉદાહરણોમાં સમાન વિદ્યુતક્ષેત્ર હોય છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભારિત કણને સમાન વિદ્યુતક્ષેત્રમાં મૂકતાં તેના પર લાગતું બળ કયા પરિબળો પર આધારિત છે?", "opts": ["માત્ર વિદ્યુતભારના મૂલ્ય પર", "માત્ર વિદ્યુતક્ષેત્રની તીવ્રતા પર", "વિદ્યુતભારના મૂલ્ય અને વિદ્યુતક્ષેત્રની તીવ્રતા બંને પર", "વિદ્યુતભારના મૂલ્ય, વિદ્યુતક્ષેત્રની તીવ્રતા અને કણના દળ પર"], "ans": 2, "exp": "વિદ્યુતભારિત કણ પર લાગતું બળ F = qE સૂત્ર અનુસાર વિદ્યુતભાર (q) અને વિદ્યુતક્ષેત્રની તીવ્રતા (E) બંને પર આધારિત છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુ વિદ્યુતભાર q ને વિદ્યુતક્ષેત્ર E માં મૂકતાં તેના પર લાગતું ટૉર્ક (τ) કેટલું હશે, જો વિદ્યુતભારનું ડાઇપોલ મોમેન્ટ p હોય અને તે વિદ્યુતક્ષેત્ર સાથે θ કોણ બનાવતું હોય?", "opts": ["τ = pE sinθ", "τ = pE cosθ", "τ = qE sinθ", "τ = qE cosθ"], "ans": 0, "exp": "વિદ્યુત ડાઇપોલ પર લાગતું ટૉર્ક τ = p × E = pE sinθ સૂત્રથી મળે છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન વિદ્યુતક્ષેત્રની તીવ્રતા માટે સાચું નથી?", "opts": ["વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા બિંદુ વિદ્યુતભારથી અંતરના વ્યસ્ત પ્રમાણમાં હોય છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા બે બિંદુ વિદ્યુતભારો વચ્ચેના અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા માત્ર વિદ્યુતભારના મૂલ્ય પર આધારિત છે."], "ans": 3, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = kq/r² સૂત્ર અનુસાર વિદ્યુતભાર (q) અને અંતર (r) બંને પર આધારિત છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભાર q = 2 μC ને વિદ્યુતક્ષેત્ર E = 5 × 10³ N/C માં મૂકતાં તેના પર લાગતું બળ કેટલું હશે?", "opts": ["1 × 10⁻² N", "1 × 10⁻³ N", "1 × 10⁻¹ N", "1 × 10⁻⁴ N"], "ans": 0, "exp": "બળ F = qE = (2 × 10⁻⁶ C) × (5 × 10³ N/C) = 1 × 10⁻² N.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુ વીજભાર Q ને કારણે r અંતરે આવેલા બિંદુ પર વિદ્યુતક્ષેત્રની તીવ્રતા E છે. જો Q નું મૂલ્ય બમણું કરવામાં આવે અને r નું મૂલ્ય અડધું કરવામાં આવે, તો નવી વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી થશે?", "opts": ["E", "2E", "4E", "8E"], "ans": 3, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = kQ/r². Q બમણું અને r અડધું કરતાં E' = k(2Q)/(r/2)² = 8kQ/r² = 8E.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમાન વિદ્યુતક્ષેત્રમાં +2 μC નો વીજભાર મૂકવામાં આવે છે. જો વીજભાર પર લાગતું બળ 4 × 10⁻³ N હોય, તો વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી હશે?", "opts": ["2 × 10³ N/C", "2 × 10⁻³ N/C", "8 × 10³ N/C", "8 × 10⁻³ N/C"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = F/q. અહીં F = 4 × 10⁻³ N અને q = 2 × 10⁻⁶ C, તેથી E = 2 × 10³ N/C.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.", "વિદ્યુતક્ષેત્રની રેખાઓની દિશા ધન વીજભારથી ઋણ વીજભાર તરફ હોય છે.", "વિદ્યુતક્ષેત્રની તીવ્રતા વીજભારના મૂલ્ય પર આધારિત નથી.", "સમાન વિદ્યુતક્ષેત્રમાં વિદ્યુતક્ષેત્રની રેખાઓ સમાંતર અને સમાન અંતરે હોય છે."], "ans": 2, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા વીજભારના મૂલ્ય પર આધારિત છે, કારણ કે E = kQ/r².", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોનને સમાન વિદ્યુતક્ષેત્રમાં મૂકવામાં આવે છે. જો ઇલેક્ટ્રોન પર લાગતું પ્રવેગક બળ 1.6 × 10⁻¹⁷ N હોય, તો વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી હશે? (ઇલેક્ટ્રોનનો વીજભાર = 1.6 × 10⁻¹⁹ C)", "opts": ["100 N/C", "10 N/C", "1 N/C", "0.1 N/C"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = F/q. અહીં F = 1.6 × 10⁻¹⁷ N અને q = 1.6 × 10⁻¹⁹ C, તેથી E = 100 N/C.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોનને વિદ્યુતક્ષેત્રમાં મૂકતાં તે 1.6 × 10⁻¹⁹ C વીજભાર ધરાવે છે. જો વિદ્યુતક્ષેત્રની તીવ્રતા 5 × 10⁴ N/C હોય, તો ઇલેક્ટ્રોન પર લાગતું બળ કેટલું હશે?", "opts": ["8 × 10⁻¹⁵ N", "3.125 × 10²³ N", "8 × 10⁻¹⁴ N", "3.125 × 10⁻¹⁴ N"], "ans": 0, "exp": "બળ F = qE = (1.6 × 10⁻¹⁹ C) × (5 × 10⁴ N/C) = 8 × 10⁻¹⁵ N.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન કુલંબના નિયમ માટે સાચું નથી?", "opts": ["કુલંબનો નિયમ માત્ર બિંદુ વીજભારો માટે જ લાગુ પડે છે.", "બે વીજભારો વચ્ચેનું બળ તેમના અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે.", "બે વીજભારો વચ્ચેનું બળ તેમના વીજભારોના ગુણાકારના સીધા પ્રમાણમાં હોય છે.", "કુલંબનો નિયમ ગુરુત્વાકર્ષણ બળ માટે પણ લાગુ પડે છે."], "ans": 3, "exp": "કુલંબનો નિયમ માત્ર વિદ્યુતભારો વચ્ચેના વિદ્યુતબળ માટે લાગુ પડે છે, ગુરુત્વાકર્ષણ બળ માટે નહીં.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમાન વિદ્યુતક્ષેત્રમાં એક પ્રોટોન અને એક ઇલેક્ટ્રોનને મૂકવામાં આવે છે. જો બંને પર લાગતું બળ સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["પ્રોટોન અને ઇલેક્ટ્રોનની ગતિ સમાન દિશામાં હશે.", "પ્રોટોન અને ઇલેક્ટ્રોનની ગતિ વિરુદ્ધ દિશામાં હશે.", "પ્રોટોન અને ઇલેક્ટ્રોનની પ્રવેગ સમાન હશે.", "પ્રોટોન અને ઇલેક્ટ્રોનની ઝડપ સમાન હશે."], "ans": 1, "exp": "પ્રોટોન ધન વીજભારિત છે અને ઇલેક્ટ્રોન ઋણ વીજભારિત છે, તેથી બંને પર લાગતું બળ વિરુદ્ધ દિશામાં હશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુતક્ષેત્રની તીવ્રતા એટલે શું? નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["એકમ ધન વિદ્યુતભાર પર લાગતું બળ", "એકમ ક્ષેત્રફળ દીઠ વિદ્યુતભાર", "વિદ્યુતભારની ગતિ ઊર્જા પ્રતિ એકમ વિદ્યુતભાર", "વિદ્યુતક્ષેત્રમાં એકમ અંતરે વિદ્યુતસ્થિતિમાનનો તફાવત"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા (E) ની વ્યાખ્યા એકમ ધન વિદ્યુતભાર (q) પર લાગતા બળ (F) તરીકે આપવામાં આવે છે, એટલે કે E = F/q.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભાર qને વિદ્યુતક્ષેત્ર Eમાં મૂકતાં તેના પર લાગતું બળ F છે. જો વિદ્યુતભારનું મૂલ્ય બમણું કરવામાં આવે, તો નવું બળ કેટલું થશે?", "opts": ["F/2", "F", "2F", "4F"], "ans": 2, "exp": "વિદ્યુતબળ F = qE છે. જો q બમણું થાય તો F પણ બમણું થશે, એટલે કે નવું બળ 2F થશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોનને 3 × 10³ N/C તીવ્રતાવાળા વિદ્યુતક્ષેત્રમાં મૂકવામાં આવે છે. ઇલેક્ટ્રોન પર લાગતું બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = 1.6 × 10⁻¹⁹ C)", "opts": ["4.8 × 10⁻¹⁶ N", "3.2 × 10⁻¹⁶ N", "1.6 × 10⁻¹⁶ N", "4.8 × 10⁻¹⁹ N"], "ans": 0, "exp": "બળ F = qE = (1.6 × 10⁻¹⁹ C) × (3 × 10³ N/C) = 4.8 × 10⁻¹⁶ N.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે. (ii) વિદ્યુતક્ષેત્રની તીવ્રતા અને વિદ્યુતસ્થિતિમાન બંને સમાન એકમ ધરાવે છે. (iii) વિદ્યુતક્ષેત્રની રેખાઓની દિશા હંમેશાં ઊંચા વિદ્યુતસ્થિતિમાનથી નીચા વિદ્યુતસ્થિતિમાન તરફ હોય છે. ઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર (i)", "(i) અને (ii)", "(i) અને (iii)", "(ii) અને (iii)"], "ans": 2, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે અને વિદ્યુતક્ષેત્રની રેખાઓ ઊંચા વિદ્યુતસ્થિતિમાનથી નીચા વિદ્યુતસ્થિતિમાન તરફ હોય છે. વિધાન (ii) ખોટું છે કારણ કે બંનેના એકમ અલગ છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુતક્ષેત્રની તીવ્રતા (E) અને વિદ્યુતસ્થિતિમાન (V) વચ્ચેનો સંબંધ કયો છે?", "opts": ["E = -∇V", "E = ∇V", "E = V/r", "E = -V/r"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા એ વિદ્યુતસ્થિતિમાનના ઋણ ઢાળ (negative gradient) જેટલી હોય છે, જે ગાણિતિક રીતે E = -∇V વડે દર્શાવાય છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "બે બિંદુવત્ વિદ્યુતભારો q₁ અને q₂ વચ્ચેનું અંતર ત્રણ ગણું કરવામાં આવે, તો તેમની વચ્ચે લાગતું વિદ્યુતબળ કેટલું થશે? (મૂળ બળ F છે)", "opts": ["F/9", "F/3", "3F", "9F"], "ans": 0, "exp": "કુલંબના નિયમ મુજબ, વિદ્યુતબળ અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે. તેથી અંતર ત્રણ ગણું થતાં બળ મૂળ બળના 1/9 ગણું થશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોનને વિદ્યુતક્ષેત્રમાં મૂકતાં તેના પર લાગતું પ્રવેગક બળ 3.2 × 10⁻¹⁷ N છે. જો ઇલેક્ટ્રોનનો વિદ્યુતભાર 1.6 × 10⁻¹⁹ C હોય, તો વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી હશે?", "opts": ["200 N/C", "2 × 10⁻³⁶ N/C", "5 × 10⁻⁶ N/C", "500 N/C"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા E = F/q વડે મળે છે. અહીં F = 3.2 × 10⁻¹⁷ N અને q = 1.6 × 10⁻¹⁹ C છે, તેથી E = 200 N/C થશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુતક્ષેત્રની તીવ્રતા એટલે શું? નીચેનામાંથી કયો વિકલ્પ યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["એકમ ધન વિદ્યુતભાર પર લાગતું વિદ્યુતબળ", "એકમ ક્ષેત્રફળમાંથી પસાર થતો વિદ્યુતપ્રવાહ", "વિદ્યુતભારો વચ્ચેનું અંતર", "વિદ્યુતક્ષેત્રમાં સંગ્રહિત ઊર્જા"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા (E) ની વ્યાખ્યા એકમ ધન વિદ્યુતભાર પર લાગતા વિદ્યુતબળ (F) તરીકે કરવામાં આવે છે, એટલે કે E = F/q.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુવત્ વિદ્યુતભાર Q ના કારણે r અંતરે વિદ્યુતક્ષેત્રની તીવ્રતા E છે. જો અંતર બમણું કરવામાં આવે, તો નવી વિદ્યુતક્ષેત્રની તીવ્રતા કેટલી થશે?", "opts": ["E/4", "E/2", "2E", "4E"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે (E ∝ 1/r²). તેથી અંતર બમણું કરતાં તીવ્રતા ચોથા ભાગની થશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n1. વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે.\n2. વિદ્યુતક્ષેત્રની રેખાઓ એકબીજાને છેદી શકે છે.\n3. વિદ્યુતક્ષેત્રની તીવ્રતા અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે.\nઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["ફક્ત 1 અને 3", "ફક્ત 1 અને 2", "ફક્ત 2 અને 3", "1, 2 અને 3"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રની તીવ્રતા સદિશ રાશિ છે અને અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે. વિદ્યુતક્ષેત્રની રેખાઓ એકબીજાને છેદતી નથી.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુતક્ષેત્રમાં મૂકેલા બિંદુવત્ વિદ્યુતભાર પર લાગતું બળ કયા પરિબળો પર આધાર રાખે છે? (i) વિદ્યુતભારના મૂલ્ય (ii) વિદ્યુતક્ષેત્રની તીવ્રતા (iii) વિદ્યુતભારની ગતિની દિશા (iv) વિદ્યુતભારનું દળ", "opts": ["(i) અને (ii) માત્ર", "(i), (ii) અને (iii) માત્ર", "(i), (ii) અને (iv) માત્ર", "(i), (ii), (iii) અને (iv)"], "ans": 0, "exp": "વિદ્યુતભાર પર લાગતું બળ F = qE સૂત્ર મુજબ માત્ર વિદ્યુતભાર (q) અને વિદ્યુતક્ષેત્રની તીવ્રતા (E) પર આધાર રાખે છે, ગતિની દિશા કે દળ પર નહીં.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "બે બિંદુવત્ વિદ્યુતભારો q₁ = +2 μC અને q₂ = -3 μC વચ્ચેનું અંતર 0.5 m છે. તેમની વચ્ચે લાગતું વિદ્યુતબળ કેટલું હશે? (k = 9 × 10⁹ N m²/C²)", "opts": ["2.16 × 10⁻¹ N (આકર્ષણ)", "2.16 × 10⁻¹ N (અપાકર્ષણ)", "1.08 × 10⁻¹ N (આકર્ષણ)", "1.08 × 10⁻¹ N (અપાકર્ષણ)"], "ans": 0, "exp": "કુલંબના નિયમ મુજબ, F = k(q₁q₂)/r² = 9 × 10⁹ × (2 × 10⁻⁶ × 3 × 10⁻⁶)/(0.5)² = 2.16 × 10⁻¹ N. વિજાતીય ભારો હોવાથી આકર્ષણ બળ લાગશે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોનને 3 × 10⁴ N/C તીવ્રતાવાળા સમાન વિદ્યુતક્ષેત્રમાં મૂકવામાં આવે છે. ઇલેક્ટ્રોન પર લાગતું પ્રવેગક બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = -1.6 × 10⁻¹⁹ C, દળ = 9.1 × 10⁻³¹ kg)", "opts": ["5.28 × 10¹⁵ m/s² (ક્ષેત્રની વિરુદ્ધ દિશામાં)", "5.28 × 10¹⁵ m/s² (ક્ષેત્રની દિશામાં)", "3.3 × 10¹¹ m/s² (ક્ષેત્રની વિરુદ્ધ દિશામાં)", "3.3 × 10¹¹ m/s² (ક્ષેત્રની દિશામાં)"], "ans": 0, "exp": "બળ F = qE = (-1.6 × 10⁻¹⁹) × (3 × 10⁴) = -4.8 × 10⁻¹⁵ N. પ્રવેગ a = F/m = (-4.8 × 10⁻¹⁵)/(9.1 × 10⁻³¹) = -5.28 × 10¹⁵ m/s². ઋણ ચિહ્ન ક્ષેત્રની વિરુદ્ધ દિશા દર્શાવે છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) વિદ્યુતક્ષેત્રની રેખાઓ સદિશ રાશિ છે.\n(ii) વિદ્યુતક્ષેત્રની રેખાઓની દિશા ધન વિદ્યુતભાર પરથી ઋણ વિદ્યુતભાર તરફની હોય છે.\n(iii) વિદ્યુતક્ષેત્રની રેખાઓની સંખ્યા વિદ્યુતભારના મૂલ્ય પર આધારિત છે.\n(iv) વિદ્યુતક્ષેત્રની રેખાઓ એકબીજાને છેદી શકે છે.\nઉપરોક્ત વિધાનોમાંથી કયાં વિધાનો સાચાં છે?", "opts": ["(i), (ii) અને (iii)", "(ii) અને (iii)", "(i), (iii) અને (iv)", "(ii), (iii) અને (iv)"], "ans": 1, "exp": "વિદ્યુતક્ષેત્રની રેખાઓ સદિશ રાશિ નથી (i ખોટું), અને તેઓ એકબીજાને છેદતી નથી (iv ખોટું). બાકીનાં વિધાનો સાચાં છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "એક બિંદુવત્ વિદ્યુતભાર q = 5 μC ને વિદ્યુતક્ષેત્ર E = 2 × 10³ N/C માં મૂકવામાં આવે છે. આ વિદ્યુતભાર પર લાગતું બળ કેટલું હશે?", "opts": ["1 × 10⁻² N", "1 × 10⁻³ N", "1 × 10⁻¹ N", "1 × 10⁻⁴ N"], "ans": 0, "exp": "બળ F = qE = (5 × 10⁻⁶ C) × (2 × 10³ N/C) = 1 × 10⁻² N.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુતક્ષેત્રમાં મૂકેલા બિંદુવત્ વિદ્યુતભાર પર લાગતું બળ અને તે વિદ્યુતભાર વચ્ચેનો સંબંધ કયો છે?", "opts": ["બળ એ વિદ્યુતભારના સમપ્રમાણમાં હોય છે", "બળ એ વિદ્યુતભારના વ્યસ્ત પ્રમાણમાં હોય છે", "બળ એ વિદ્યુતભારના વર્ગના સમપ્રમાણમાં હોય છે", "બળ એ વિદ્યુતભારથી સ્વતંત્ર હોય છે"], "ans": 0, "exp": "વિદ્યુતક્ષેત્રમાં મૂકેલા વિદ્યુતભાર પર લાગતું બળ F = qE અનુસાર વિદ્યુતભાર q ના સમપ્રમાણમાં હોય છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "બે બિંદુવત્ વિદ્યુતભારો q₁ = 4 μC અને q₂ = -6 μC વચ્ચેનું અંતર 3 cm છે. આ બંને વિદ્યુતભારો વચ્ચે લાગતું વિદ્યુતબળ કેટલું હશે? (k = 9 × 10⁹ N m²/C²)", "opts": ["240 N", "-240 N", "2.4 × 10⁵ N", "-2.4 × 10⁵ N"], "ans": 1, "exp": "કુલંબના નિયમ મુજબ, F = k(q₁q₂)/r² = 9 × 10⁹ × (4 × 10⁻⁶ × -6 × 10⁻⁶)/(0.03)² = -240 N. બળ આકર્ષી હોવાથી ઋણ છે.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}, {"q": "બે બિંદુવત વિદ્યુતભારો q₁ અને q₂ વચ્ચેનું અંતર r છે. જો q₁ ને અડધું અને q₂ ને બમણું કરવામાં આવે, તો નવું વિદ્યુતબળ મૂળ બળ કરતાં કેટલું ગણું થશે?", "opts": ["મૂળ બળ જેટલું જ", "મૂળ બળ કરતાં અડધું", "મૂળ બળ કરતાં બમણું", "મૂળ બળ કરતાં ચોથા ભાગનું"], "ans": 0, "exp": "કુલંબના નિયમ મુજબ, બળ F ∝ q₁q₂/r². q₁ ને અડધું અને q₂ ને બમણું કરતાં, નવું બળ F' ∝ (q₁/2)(2q₂)/r² = q₁q₂/r² ∝ F. તેથી બળમાં કોઈ ફેર પડતો નથી.", "chapter": "વિદ્યુતભારો અને ક્ષેત્રો", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "વિદ્યુતભારો અને ક્ષેત્રો Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
