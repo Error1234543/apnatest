@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સવર્ગ સંયોજનો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>સવર્ગ સંયોજનો Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "નીચેના પૈકી કયું સંયોજન સવર્ગ સંયોજન નથી?", "opts": ["ઇથેનોલ", "ડાઇમિથાઇલ ઈથર", "એસિટોન", "બેન્ઝિન"], "ans": 3, "exp": "બેન્ઝિન એ એરોમેટિક સંયોજન છે, જ્યારે બાકીના ત્રણ સંયોજનો સવર્ગ સંયોજનો છે જેમાં ઓક્સિજન પરમાણુ કાર્બન સાથે જોડાયેલો હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સવર્ગ સંયોજનોમાંથી કયા સંયોજનમાં કાર્બોનિલ સમૂહ (C=O) હાજર નથી?", "opts": ["આલ્ડિહાઇડ", "કીટોન", "ઇથર", "કાર્બોક્સિલિક એસિડ"], "ans": 2, "exp": "ઇથરમાં કાર્બોનિલ સમૂહ હાજર નથી, જ્યારે આલ્ડિહાઇડ, કીટોન અને કાર્બોક્સિલિક એસિડમાં કાર્બોનિલ સમૂહ હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંરચના સૂત્રમાં કયું સંયોજન પ્રાથમિક આલ્કોહોલ છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L60 60 L90 40 L90 80 L60 60 L120 60' fill='none' stroke='black'/><text x='75' y='35'>CH₃</text><text x='105' y='65'>OH</text><text x='135' y='65'>CH₃</text></svg>", "opts": ["આ સંયોજન પ્રાથમિક આલ્કોહોલ છે", "આ સંયોજન દ્વિતીયક આલ્કોહોલ છે", "આ સંયોજન તૃતીયક આલ્કોહોલ છે", "આ સંયોજન આલ્કોહોલ નથી"], "ans": 1, "exp": "આ સંયોજનમાં -OH સમૂહ એવા કાર્બન સાથે જોડાયેલો છે જે બે અન્ય કાર્બન સાથે જોડાયેલો છે, તેથી તે દ્વિતીયક આલ્કોહોલ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L60 60 L90 40 L90 80 L60 60 L120 60' fill='none' stroke='black'/><text x='75' y='35'>CH₃</text><text x='105' y='65'>OH</text><text x='135' y='65'>CH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન લ્યુકાસ કસોટીમાં તરત જ ધૂંધળું દ્રાવણ આપે છે?", "opts": ["પ્રાથમિક આલ્કોહોલ", "દ્વિતીયક આલ્કોહોલ", "તૃતીયક આલ્કોહોલ", "ફિનોલ"], "ans": 2, "exp": "તૃતીયક આલ્કોહોલ લ્યુકાસ કસોટીમાં તરત જ ધૂંધળું દ્રાવણ આપે છે કારણ કે તે ઝડપથી હેલાઇડમાં રૂપાંતરિત થાય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?<br>(i) ઇથર સંયોજનો પાણીમાં અદ્રાવ્ય હોય છે.<br>(ii) કાર્બોક્સિલિક એસિડ સંયોજનો નિર્બળ એસિડ તરીકે વર્તે છે.<br>(iii) આલ્ડિહાઇડ સંયોજનો ટોલેન્સ કસોટીમાં ચાંદીનું અરીસું આપે છે.<br>(iv) કીટોન સંયોજનો ફેહલિંગ દ્રાવણ સાથે કસોટીમાં ધન પરિણામ આપે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (ii) અને (iii) સાચાં છે. ઇથર સંયોજનો પાણીમાં અંશતઃ દ્રાવ્ય હોય છે અને કીટોન ફેહલિંગ દ્રાવણ સાથે કસોટીમાં ઋણ પરિણામ આપે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના બંધારણમાં કયો ક્રિયાશીલ સમૂહ હાજર છે?\n<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' stroke='black' fill='none'/><text x='70' y='35' font-size='12'>O</text><line x1='80' y1='40' x2='80' y2='20' stroke='black'/><text x='90' y='15' font-size='12'>H</text></svg>", "opts": ["આલ્કોહોલ સમૂહ (-OH)", "આલ્ડિહાઇડ સમૂહ (-CHO)", "કાર્બોક્સિલિક એસિડ સમૂહ (-COOH)", "કીટોન સમૂહ (>C=O)"], "ans": 2, "exp": "આપેલ બંધારણમાં કાર્બોક્સિલિક એસિડ સમૂહ (-COOH) હાજર છે, જે કાર્બનિલ (C=O) અને હાઇડ્રોક્સિલ (-OH) સમૂહનું સંયોજન છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' stroke='black' fill='none'/><text x='70' y='35' font-size='12'>O</text><line x1='80' y1='40' x2='80' y2='20' stroke='black'/><text x='90' y='15' font-size='12'>H</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સંતૃપ્ત હાઇડ્રોકાર્બન છે?", "opts": ["ઇથિન (C₂H₄)", "ઇથાઇન (C₂H₂)", "ઇથેન (C₂H₆)", "બેન્ઝિન (C₆H₆)"], "ans": 2, "exp": "ઇથેન (C₂H₆)માં કાર્બન-કાર્બન એકલ બંધ હોય છે, જે સંતૃપ્ત હાઇડ્રોકાર્બન છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "કાર્બનિક સંયોજનોમાં આઇસોમેરિઝમ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["સમાન આણ્વીય સૂત્ર ધરાવતા સંયોજનોને આઇસોમર કહે છે.", "સ્ટ્રક્ચરલ આઇસોમેરિઝમમાં અણુઓની બંધારણીય ગોઠવણી અલગ હોય છે.", "સ્ટીરિયોઆઇસોમેરિઝમમાં અણુઓની અવકાશીય ગોઠવણી અલગ હોય છે.", "બધા આઇસોમરોના રાસાયણિક ગુણધર્મો સમાન હોય છે."], "ans": 3, "exp": "આઇસોમરોના ભૌતિક અને રાસાયણિક ગુણધર્મો અલગ-અલગ હોઈ શકે છે, કારણ કે તેમની બંધારણીય અથવા અવકાશીય ગોઠવણી અલગ હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન કાર્બનિક દ્રાવક તરીકે વપરાતું નથી?", "opts": ["ઇથેનોલ (C₂H₅OH)", "બેન્ઝિન (C₆H₆)", "કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄)", "સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)"], "ans": 3, "exp": "સોડિયમ હાઇડ્રોક્સાઇડ (NaOH) અકાર્બનિક સંયોજન છે અને તેનો ઉપયોગ કાર્બનિક દ્રાવક તરીકે થતો નથી.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંયોજનની રચના માટે યોગ્ય નામ શું છે?\n<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 L90 40 L110 60 L150 60 L170 80 L150 100 L110 100 L90 120 L70 100 L30 100 Z' fill='none' stroke='black' stroke-width='2'/><text x='50' y='35' font-size='12'>CH₃</text><text x='130' y='35' font-size='12'>CH₃</text><text x='160' y='85' font-size='12'>OH</text></svg>", "opts": ["2-મિથાઇલપ્રોપેન-2-ઓલ", "2-મિથાઇલબ્યુટેન-2-ઓલ", "પેન્ટેન-2-ઓલ", "3-મિથાઇલબ્યુટેન-2-ઓલ"], "ans": 0, "exp": "આ સંયોજનમાં ત્રણ મિથાઇલ સમૂહો અને એક હાઇડ્રોક્સિલ સમૂહ તૃતીય કાર્બન પર જોડાયેલો છે, તેથી તેનું નામ 2-મિથાઇલપ્રોપેન-2-ઓલ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 L90 40 L110 60 L150 60 L170 80 L150 100 L110 100 L90 120 L70 100 L30 100 Z' fill='none' stroke='black' stroke-width='2'/><text x='50' y='35' font-size='12'>CH₃</text><text x='130' y='35' font-size='12'>CH₃</text><text x='160' y='85' font-size='12'>OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનાં વિધાનો પૈકી કયાં વિધાનો સવર્ગ સંયોજનો માટે સાચાં છે?\n(i) તેઓ સહસંયોજક બંધ ધરાવે છે.\n(ii) તેઓ પાણીમાં સારી રીતે દ્રાવ્ય હોય છે.\n(iii) તેઓ ઉચ્ચ ગલનબિંદુ ધરાવે છે.\n(iv) તેઓ વિદ્યુતના અવાહક હોય છે.", "opts": ["માત્ર (i) અને (iv)", "(i), (ii) અને (iv)", "(i), (iii) અને (iv)", "(ii) અને (iii)"], "ans": 0, "exp": "સવર્ગ સંયોજનો સહસંયોજક બંધ ધરાવે છે અને વિદ્યુતના અવાહક હોય છે. તેઓ સામાન્ય રીતે પાણીમાં અદ્રાવ્ય હોય છે અને નીચું ગલનબિંદુ ધરાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન કાર્બોક્સિલિક એસિડ છે?", "opts": ["CH₃CHO", "CH₃COOH", "CH₃COCH₃", "CH₃CH₂OH"], "ans": 1, "exp": "કાર્બોક્સિલિક એસિડમાં -COOH સમૂહ હોય છે, જે CH₃COOH (એસિટિક એસિડ)માં જોવા મળે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર C₄H₈O છે. તેનું નામ શું હોઈ શકે જો તે કીટોન હોય?", "opts": ["બ્યુટેનાલ", "બ્યુટેન-2-ઓન", "બ્યુટેન-1-ઓલ", "2-મિથાઇલપ્રોપેનાલ"], "ans": 1, "exp": "C₄H₈O આણ્વીય સૂત્ર ધરાવતું કીટોન બ્યુટેન-2-ઓન છે, જેમાં કાર્બોનિલ સમૂહ બીજા કાર્બન પર હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='30' y='65' font-size='12'>CH₃</text><text x='55' y='50' font-size='12'>C=O</text><line x1='70' y1='60' x2='110' y2='60' stroke='black' stroke-width='2'/><text x='115' y='65' font-size='12'>CH₃</text><line x1='50' y1='45' x2='50' y2='75' stroke='black' stroke-width='2'/></svg>", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંયોજનની રચનામાં કાર્બોનિલ સમૂહ (C=O) કયા સ્થાને આવેલું છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 80 L140 100 L100 100 L80 120 L60 100 L20 100 Z' fill='none' stroke='black'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>CH₃</text><text x='80' y='35' font-size='12'>O</text></svg>", "opts": ["પ્રાથમિક કાર્બન પર", "દ્વિતીયક કાર્બન પર", "તૃતીયક કાર્બન પર", "કોઈપણ કાર્બન પર નહીં"], "ans": 1, "exp": "આ સંયોજન એસિટોન છે, જેમાં કાર્બોનિલ સમૂહ દ્વિતીયક કાર્બન પર આવેલું છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 80 L140 100 L100 100 L80 120 L60 100 L20 100 Z' fill='none' stroke='black'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>CH₃</text><text x='80' y='35' font-size='12'>O</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન આલ્કોહોલનું ઉદાહરણ નથી?", "opts": ["મિથેનોલ", "ઇથેનોલ", "ફોર્માલ્ડિહાઇડ", "ગ્લિસરોલ"], "ans": 2, "exp": "ફોર્માલ્ડિહાઇડ એ આલ્ડિહાઇડ છે, જ્યારે અન્ય ત્રણ સંયોજનો આલ્કોહોલ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન કાર્બોક્સિલિક એસિડ છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60' fill='none' stroke='black'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>OH</text><text x='80' y='35' font-size='12'>O</text></svg>", "opts": ["ઇથેનોઇક એસિડ", "ઇથાઇલ એસિટેટ", "ઇથેનોલ", "ઇથાઇલ એમિન"], "ans": 0, "exp": "ઇથેનોઇક એસિડમાં કાર્બોક્સિલિક સમૂહ (-COOH) હોય છે, જે તેને કાર્બોક્સિલિક એસિડ બનાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60' fill='none' stroke='black'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>OH</text><text x='80' y='35' font-size='12'>O</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન કાર્બનિક સંયોજન નથી, પરંતુ સવર્ગ સંયોજન તરીકે ગણી શકાય?", "opts": ["કાર્બન ડાયોક્સાઇડ", "યુરિયા", "મિથેન", "બેન્ઝિન"], "ans": 1, "exp": "યુરિયા કાર્બનિક સંયોજન છે, પરંતુ તેને સવર્ગ સંયોજન તરીકે ગણવામાં આવે છે કારણ કે તેમાં કાર્બન પરમાણુ હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંયોજનની રચનામાં કાર્બોનિલ સમૂહ ધરાવતું સંયોજન કયું છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 M70 60 L90 40 M70 60 L90 80 M90 40 L130 40 M90 80 L130 80 M130 40 L150 60 M130 80 L150 60 M150 60 L190 60' stroke='black' fill='none'/><text x='50' y='50'>CH₃</text><text x='110' y='30'>O</text><text x='170' y='50'>CH₃</text></svg>", "opts": ["આલ્કોહોલ", "ઇથર", "કીટોન", "એમાઇન"], "ans": 2, "exp": "આપેલી રચનામાં કાર્બોનિલ સમૂહ (C=O) હાજર છે, જે કીટોનનું લક્ષણ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 M70 60 L90 40 M70 60 L90 80 M90 40 L130 40 M90 80 L130 80 M130 40 L150 60 M130 80 L150 60 M150 60 L190 60' stroke='black' fill='none'/><text x='50' y='50'>CH₃</text><text x='110' y='30'>O</text><text x='170' y='50'>CH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોના સંદર્ભમાં નીચેનાં વિધાનોમાંથી કેટલાં સાચાં છે?<br>(i) સવર્ગ સંયોજનોમાં કાર્બન-કાર્બન બંધ હંમેશાં સહસંયોજક હોય છે.<br>(ii) સવર્ગ સંયોજનો પાણીમાં સારી રીતે દ્રાવ્ય હોય છે.<br>(iii) સવર્ગ સંયોજનોના ગલનબિંદુ અને ઉત્કલનબિંદુ સામાન્ય રીતે નીચાં હોય છે.<br>(iv) સવર્ગ સંયોજનો વિદ્યુતના અવાહક હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i) અને (iii) સાચાં છે. વિધાન (ii) ખોટું છે કારણ કે સવર્ગ સંયોજનો સામાન્ય રીતે પાણીમાં અદ્રાવ્ય હોય છે, અને વિધાન (iv) સાચું છે કારણ કે તે વિદ્યુતના અવાહક હોય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન આલ્કાઇલ હેલાઇડ સાથે પ્રક્રિયા કરીને ઇથર બનાવી શકે છે?", "opts": ["આલ્કોહોલ", "ફિનોલ", "કાર્બોક્સિલિક એસિડ", "આલ્કેન"], "ans": 0, "exp": "આલ્કોહોલ આલ્કાઇલ હેલાઇડ સાથે પ્રક્રિયા કરીને વિલિયમસન ઇથર સંશ્લેષણ દ્વારા ઇથર બનાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંયોજનનું IUPAC નામ શું છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 M70 60 L90 40 M70 60 L90 80 M90 40 L130 40 M90 80 L130 80 M130 40 L150 60 M130 80 L150 60 M150 60 L190 60' stroke='black' fill='none'/><text x='50' y='50'>CH₃</text><text x='110' y='30'>O</text><text x='170' y='50'>C₂H₅</text></svg>", "opts": ["પ્રોપેન-2-ઓન", "બ્યુટેન-2-ઓન", "પેન્ટેન-2-ઓન", "પેન્ટેન-3-ઓન"], "ans": 1, "exp": "આપેલી રચનામાં ચાર કાર્બન પરમાણુઓ છે અને કાર્બોનિલ સમૂહ બીજા કાર્બન પર હોવાથી તેનું IUPAC નામ બ્યુટેન-2-ઓન છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 M70 60 L90 40 M70 60 L90 80 M90 40 L130 40 M90 80 L130 80 M130 40 L150 60 M130 80 L150 60 M150 60 L190 60' stroke='black' fill='none'/><text x='50' y='50'>CH₃</text><text x='110' y='30'>O</text><text x='170' y='50'>C₂H₅</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંયોજનની રચનામાં કયો ક્રિયાશીલ સમૂહ હાજર છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' fill='none' stroke='black'/><text x='40' y='80' font-size='12'>CH₃</text><text x='120' y='30' font-size='12'>O</text><text x='160' y='80' font-size='12'>CH₃</text></svg>", "opts": ["આલ્કોહોલ", "ઇથર", "કીટોન", "આલ્ડિહાઇડ"], "ans": 2, "exp": "આપેલી રચનામાં કાર્બોનિલ સમૂહ (C=O) બે કાર્બન શૃંખલાઓ વચ્ચે હાજર છે, જે કીટોન સમૂહ દર્શાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' fill='none' stroke='black'/><text x='40' y='80' font-size='12'>CH₃</text><text x='120' y='30' font-size='12'>O</text><text x='160' y='80' font-size='12'>CH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર C₃H₆O છે. તે કયા પ્રકારનું સંયોજન હોઈ શકે?", "opts": ["આલ્કોહોલ અથવા ઇથર", "આલ્ડિહાઇડ અથવા કીટોન", "કાર્બોક્સિલિક એસિડ અથવા એસ્ટર", "આલ્કીન અથવા સાયક્લોઆલ્કેન"], "ans": 1, "exp": "C₃H₆O સૂત્ર ધરાવતા સંયોજનોમાં કાર્બોનિલ સમૂહ હાજર હોઈ શકે છે, જે આલ્ડિહાઇડ અથવા કીટોન હોઈ શકે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સૌથી વધુ ઍસિડિક ગુણધર્મ ધરાવે છે?", "opts": ["ઇથેનોલ", "ફિનોલ", "ઇથેનાલ", "ઇથેન"], "ans": 1, "exp": "ફિનોલમાં હાઇડ્રોક્સિલ સમૂહ બેન્ઝિન વલય સાથે જોડાયેલો હોવાથી તે ઍસિડિક ગુણધર્મ ધરાવે છે, જે અન્ય સંયોજનો કરતાં વધુ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><circle cx='110' cy='60' r='40' fill='none' stroke='black'/><path d='M110 20 L110 40' stroke='black'/><path d='M110 80 L110 100' stroke='black'/><path d='M70 30 L90 50' stroke='black'/><path d='M130 30 L150 50' stroke='black'/><path d='M70 90 L90 70' stroke='black'/><path d='M130 90 L150 70' stroke='black'/><text x='100' y='115' font-size='12'>OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સવર્ગ સંયોજન નથી પરંતુ કાર્બનિક સંયોજન છે?", "opts": ["ઇથેનોલ", "ગ્લુકોઝ", "કાર્બન ડાયોક્સાઇડ", "એસિટોન"], "ans": 2, "exp": "કાર્બન ડાયોક્સાઇડ (CO₂) અકાર્બનિક સંયોજન છે, જ્યારે બાકીના ત્રણ કાર્બનિક સંયોજનો છે જે સવર્ગ સંયોજનો પણ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોમાં કાર્બન-કાર્બન બંધનની લંબાઈ નીચેનામાંથી કયા ક્રમમાં વધે છે?", "opts": ["આલ્કેન < આલ્કીન < આલ્કાઇન", "આલ્કાઇન < આલ્કીન < આલ્કેન", "આલ્કીન < આલ્કાઇન < આલ્કેન", "આલ્કેન < આલ્કાઇન < આલ્કીન"], "ans": 1, "exp": "આલ્કાઇનમાં ત્રિબંધ, આલ્કીનમાં દ્વિબંધ અને આલ્કેનમાં એકલ બંધ હોવાથી બંધનની લંબાઈ આલ્કાઇન < આલ્કીન < આલ્કેન ક્રમમાં વધે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન ફેહલિંગ દ્રાવણનું રિડક્શન કરતું નથી?", "opts": ["ફોર્માલ્ડિહાઇડ", "એસિટાલ્ડિહાઇડ", "બેન્ઝાલ્ડિહાઇડ", "ગ્લુકોઝ"], "ans": 2, "exp": "બેન્ઝાલ્ડિહાઇડ એરોમેટિક આલ્ડિહાઇડ છે જે ફેહલિંગ દ્રાવણનું રિડક્શન કરતું નથી, જ્યારે બાકીના સંયોજનો રિડક્શન કરે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?<br>(i) આલ્કોહોલનું ઑક્સિડેશન કરવાથી આલ્ડિહાઇડ મળે છે.<br>(ii) કીટોનનું રિડક્શન કરવાથી દ્વિતીયક આલ્કોહોલ મળે છે.<br>(iii) કાર્બોક્સિલિક એસિડનું ડિકાર્બોક્સિલેશન કરવાથી આલ્કેન મળે છે.<br>(iv) આલ્કીનનું હાઇડ્રોજનેશન કરવાથી આલ્કાઇન મળે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, જ્યારે વિધાન (iv) ખોટું છે કારણ કે આલ્કીનનું હાઇડ્રોજનેશન આલ્કેન આપે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન કાર્બોક્સિલિક એસિડ છે?", "opts": ["CH₃CHO", "CH₃COOH", "CH₃COCH₃", "CH₃OCH₃"], "ans": 1, "exp": "CH₃COOHમાં કાર્બોક્સિલ સમૂહ (-COOH) હાજર છે, જે કાર્બોક્સિલિક એસિડની ઓળખ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન આલ્ડિહાઇડ નથી પરંતુ કીટોન છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' stroke='black' fill='none'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>C=O</text><text x='170' y='55' font-size='12'>CH₃</text></svg>", "opts": ["ફોર્માલ્ડિહાઇડ", "એસિટાલ્ડિહાઇડ", "એસિટોન", "બેન્ઝાલ્ડિહાઇડ"], "ans": 2, "exp": "એસિટોનમાં કાર્બોનિલ સમૂહ (-C=O) બે કાર્બન પરમાણુઓ સાથે જોડાયેલું છે, જે કીટોનની લાક્ષણિકતા છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 L80 40 L100 60 L140 60 L160 40 L180 60 L200 60' stroke='black' fill='none'/><text x='40' y='55' font-size='12'>CH₃</text><text x='120' y='55' font-size='12'>C=O</text><text x='170' y='55' font-size='12'>CH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના સંયોજનની રચનામાં કયો ક્રિયાશીલ સમૂહ હાજર છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 L90 40 L110 60 L150 60 L170 80 L150 100 L110 100 L90 120 L70 100 L30 100 Z' fill='none' stroke='black' stroke-width='2'/><text x='50' y='50' font-size='12'>CH₃</text><text x='130' y='50' font-size='12'>CHO</text></svg>", "opts": ["આલ્કોહોલ", "આલ્ડિહાઇડ", "કીટોન", "કાર્બોક્સિલિક એસિડ"], "ans": 1, "exp": "આ સંયોજનમાં -CHO સમૂહ હાજર છે, જે આલ્ડિહાઇડ સમૂહ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L70 60 L90 40 L110 60 L150 60 L170 80 L150 100 L110 100 L90 120 L70 100 L30 100 Z' fill='none' stroke='black' stroke-width='2'/><text x='50' y='50' font-size='12'>CH₃</text><text x='130' y='50' font-size='12'>CHO</text></svg>", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોમાં કાર્બનની સંયોજકતા કેટલી હોય છે?", "opts": ["2", "3", "4", "1"], "ans": 2, "exp": "કાર્બનની સંયોજકતા હંમેશા 4 હોય છે, જે તેને ચાર બંધ બનાવવા સક્ષમ બનાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન સવર્ગ સંયોજન નથી?", "opts": ["મિથેનોલ", "કાર્બન ડાયોક્સાઇડ", "બેન્ઝિન", "કેલ્શિયમ કાર્બોનેટ"], "ans": 3, "exp": "કેલ્શિયમ કાર્બોનેટ અકાર્બનિક સંયોજન છે, જ્યારે બાકીનાં સંયોજનો કાર્બનિક (સવર્ગ) સંયોજનો છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોમાં કાર્બન અને હાઇડ્રોજન ઉપરાંત અન્ય તત્ત્વનું પ્રમાણ કયા નિયમ મુજબ નક્કી થાય છે?", "opts": ["ઓક્ટેટ નિયમ", "સંયોજકતા નિયમ", "સ્થિરતા નિયમ", "સમતુલ્યતા નિયમ"], "ans": 1, "exp": "સવર્ગ સંયોજનોમાં કાર્બન અને હાઇડ્રોજન સાથે અન્ય તત્ત્વોની સંયોજકતા નિયમ મુજબ જોડાય છે, જેમ કે ઓક્સિજનની સંયોજકતા 2 છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોમાં કાર્બનના કયા ગુણધર્મને કારણે તે વિવિધ પ્રકારના સંયોજનો બનાવી શકે છે?", "opts": ["કાર્બનની વિદ્યુતઋણતા", "કાર્બનની સંયોજકતા", "કાર્બનની કેટેનેશન ક્ષમતા", "કાર્બનની સ્ફટિક રચના"], "ans": 2, "exp": "કાર્બનની કેટેનેશન ક્ષમતાને કારણે તે અન્ય કાર્બન પરમાણુઓ સાથે જોડાઈને લાંબી શૃંખલાઓ બનાવી શકે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન સવર્ગ સંયોજન નથી પરંતુ તેનો ઉપયોગ કાર્બનિક સંશ્લેષણમાં થાય છે?", "opts": ["ઇથેન (C₂H₆)", "કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄)", "યુરિયા (NH₂CONH₂)", "બેન્ઝિન (C₆H₆)"], "ans": 2, "exp": "યુરિયા (NH₂CONH₂) એ કાર્બનિક સંયોજન છે પરંતુ તે સવર્ગ સંયોજન નથી કારણ કે તેમાં કાર્બન-કાર્બન બંધ નથી.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન સવર્ગ સંયોજન તરીકે વર્ગીકૃત થતું નથી?", "opts": ["કાર્બન મોનોક્સાઇડ (CO)", "કાર્બન ડાયસલ્ફાઇડ (CS₂)", "કેલ્શિયમ કાર્બોનેટ (CaCO₃)", "હાઇડ્રોજન સાયનાઇડ (HCN)"], "ans": 2, "exp": "કેલ્શિયમ કાર્બોનેટ (CaCO₃) એ આયનિક સંયોજન છે અને સવર્ગ સંયોજન તરીકે ગણાતું નથી.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર C₄H₆O₂ છે. નીચેનામાંથી કયું સંયોજન આ સૂત્ર ધરાવતું નથી?", "opts": ["બ્યુટેનોઇક ઍસિડ", "મિથાઇલ પ્રોપેનોએટ", "ઇથાઇલ ઇથેનોએટ", "2-બ્યુટીનોઇક ઍસિડ"], "ans": 0, "exp": "બ્યુટેનોઇક ઍસિડનું આણ્વીય સૂત્ર C₄H₈O₂ છે, જે C₄H₆O₂ થી અલગ છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોમાંથી કેટલાં વિધાનો સાચાં છે?<br>i. સવર્ગ સંયોજનોમાં કાર્બન હંમેશાં ચાર સહસંયોજક બંધ બનાવે છે.<br>ii. કાર્બન ડાયોક્સાઇડ એ સવર્ગ સંયોજન છે.<br>iii. સવર્ગ સંયોજનોમાં કાર્બન-કાર્બન બહુબંધ હાજર હોઈ શકે છે.<br>iv. મિથેન એ સવર્ગ સંયોજન નથી.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન ii અને iii સાચાં છે. વિધાન i ખોટું છે કારણ કે કાર્બન ત્રિબંધ પણ બનાવી શકે છે, અને વિધાન iv ખોટું છે કારણ કે મિથેન કાર્બનિક સંયોજન છે પરંતુ સવર્ગ સંયોજન નથી.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સવર્ગ સંયોજનોમાંથી કયું સંયોજન આલ્કોહોલનું ઉદાહરણ છે?", "opts": ["CH₃CHO", "CH₃COOH", "CH₃CH₂OH", "CH₃OCH₃"], "ans": 2, "exp": "CH₃CH₂OH (ઇથેનોલ) એ આલ્કોહોલ સમૂહ ધરાવતું સંયોજન છે, જેમાં -OH સમૂહ હાજર છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><line x1='20' y1='60' x2='60' y2='60' stroke='black'/><line x1='60' y1='60' x2='80' y2='40' stroke='black'/><line x1='80' y1='40' x2='100' y2='60' stroke='black'/><line x1='100' y1='60' x2='140' y2='60' stroke='black'/><text x='40' y='55' font-family='Arial' font-size='12'>H</text><text x='85' y='35' font-family='Arial' font-size='12'>O</text><text x='120' y='55' font-family='Arial' font-size='12'>H</text><text x='65' y='70' font-family='Arial' font-size='12'>CH₃CH₂OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન ફિનોલનું ઉદાહરણ છે?", "opts": ["બેન્ઝિન રિંગ સાથે -CHO સમૂહ", "બેન્ઝિન રિંગ સાથે -OH સમૂહ", "બેન્ઝિન રિંગ સાથે -COOH સમૂહ", "બેન્ઝિન રિંગ સાથે -NH₂ સમૂહ"], "ans": 1, "exp": "ફિનોલમાં બેન્ઝિન રિંગ સાથે -OH સમૂહ જોડાયેલો હોય છે, જે તેને આલ્કોહોલથી અલગ પાડે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><circle cx='60' cy='60' r='30' fill='none' stroke='black'/><line x1='60' y1='30' x2='60' y2='90' stroke='black'/><line x1='30' y1='60' x2='90' y2='60' stroke='black'/><line x1='42' y1='42' x2='78' y2='78' stroke='black'/><line x1='42' y1='78' x2='78' y2='42' stroke='black'/><line x1='90' y1='60' x2='120' y2='40' stroke='black'/><text x='110' y='35' font-family='Arial' font-size='12'>O</text><text x='130' y='45' font-family='Arial' font-size='12'>H</text><text x='80' y='100' font-family='Arial' font-size='12'>ફિનોલ</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન સવર્ગ સંયોજનો માટે ખોટું છે?", "opts": ["સવર્ગ સંયોજનોમાં કાર્બન હંમેશા ચતુષ્ક બંધન બનાવે છે.", "સવર્ગ સંયોજનોમાં કાર્બન અન્ય કાર્બન અથવા વિવિધ તત્ત્વો સાથે બંધન બનાવી શકે છે.", "સવર્ગ સંયોજનો કુદરતી અને કૃત્રિમ બંને રીતે મળી શકે છે.", "સવર્ગ સંયોજનોમાં કાર્બન-કાર્બન બંધન એકલ, દ્વિઅથવા ત્રિબંધન સ્વરૂપે હોઈ શકે છે."], "ans": 0, "exp": "કાર્બન હંમેશા ચતુષ્ક બંધન બનાવતું નથી; તે એકલ, દ્વિઅથવા ત્રિબંધન પણ બનાવી શકે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સવર્ગ સંયોજન તરીકે ઓળખાતું નથી?", "opts": ["CH₃-CH₂-OH", "CH₃-O-CH₃", "CH₃-CH₂-Cl", "CH₃-CH₂-CH₃"], "ans": 3, "exp": "સવર્ગ સંયોજનોમાં કાર્બન સાથે વિદ્યુતઋણમય તત્ત્વો જેમ કે O, N, Cl જોડાયેલા હોય છે. પ્રોપેન (CH₃-CH₂-CH₃) માત્ર કાર્બન અને હાઇડ્રોજન ધરાવે છે તેથી તે હાઇડ્રોકાર્બન છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંયોજનની IUPAC નામકરણ પદ્ધતિ મુજબ સાચું નામ શું છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 M60 60 L80 40 M60 60 L80 80 M80 40 L120 40 M80 80 L120 80 M120 40 L140 60 M120 80 L140 60 M140 60 L180 60' stroke='black' fill='none'/><text x='40' y='55' font-size='12'>CH₃</text><text x='100' y='35' font-size='12'>CH</text><text x='100' y='85' font-size='12'>CH₂</text><text x='160' y='55' font-size='12'>OH</text><circle cx='80' cy='40' r='2' fill='black'/><circle cx='80' cy='80' r='2' fill='black'/><circle cx='120' cy='40' r='2' fill='black'/><circle cx='120' cy='80' r='2' fill='black'/></svg>", "opts": ["2-મિથાઇલપ્રોપેન-1-ઑલ", "2-મિથાઇલપ્રોપેન-2-ઑલ", "બ્યુટેન-2-ઑલ", "1-હાઇડ્રોક્સિ-2-મિથાઇલપ્રોપેન"], "ans": 0, "exp": "આ સંયોજનમાં કાર્બન શૃંખલા ત્રણ કાર્બનની છે અને OH સમૂહ પ્રથમ કાર્બન પર છે, જ્યારે બીજા કાર્બન પર મિથાઇલ સમૂહ જોડાયેલો છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M20 60 L60 60 M60 60 L80 40 M60 60 L80 80 M80 40 L120 40 M80 80 L120 80 M120 40 L140 60 M120 80 L140 60 M140 60 L180 60' stroke='black' fill='none'/><text x='40' y='55' font-size='12'>CH₃</text><text x='100' y='35' font-size='12'>CH</text><text x='100' y='85' font-size='12'>CH₂</text><text x='160' y='55' font-size='12'>OH</text><circle cx='80' cy='40' r='2' fill='black'/><circle cx='80' cy='80' r='2' fill='black'/><circle cx='120' cy='40' r='2' fill='black'/><circle cx='120' cy='80' r='2' fill='black'/></svg>", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોમાં કાર્બન અને હેલોજન વચ્ચેના બંધનો પ્રકાર કયો છે?", "opts": ["સહસંયોજક બંધ", "આયનિક બંધ", "સવર્ગ સહસંયોજક બંધ", "ધાત્વિક બંધ"], "ans": 2, "exp": "સવર્ગ સંયોજનોમાં કાર્બન અને હેલોજન વચ્ચેનો બંધ સવર્ગ સહસંયોજક બંધ હોય છે, જેમાં ઇલેક્ટ્રોન યુગ્મનું અસમાન વિતરણ થાય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરીને આલ્કીન બનાવે છે?", "opts": ["CH₃-CH₂-Cl", "CH₃-CH₂-OH", "CH₃-O-CH₃", "CH₃-CH₃"], "ans": 0, "exp": "આલ્કાઇલ હેલાઇડ સંયોજનો આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરીને વિલોપન પ્રક્રિયા દ્વારા આલ્કીન બનાવે છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?<br>(i) સવર્ગ સંયોજનોમાં કાર્બન સાથે વિદ્યુતઋણમય તત્ત્વો જોડાયેલા હોય છે.<br>(ii) આલ્કોહોલ સંયોજનો પાણીમાં દ્રાવ્ય હોય છે.<br>(iii) હેલોઆલ્કેન સંયોજનો પાણીમાં અદ્રાવ્ય હોય છે.<br>(iv) ઇથર સંયોજનો આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરીને આલ્કીન બનાવે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે. વિધાન (iv) ખોટું છે કારણ કે ઇથર સંયોજનો આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરતા નથી.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંયોજનની રચનામાં કાર્બન-કાર્બન બેવડું બંધ ધરાવતું સવર્ગ સંયોજન કયું છે?<br><svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L60 60 M60 60 L90 30 M60 60 L90 90 M90 30 L120 60 M90 90 L120 60 M120 60 L150 60' stroke='black' fill='none'/><text x='45' y='55'>H</text><text x='135' y='55'>H</text><text x='75' y='25'>H</text><text x='75' y='95'>H</text><text x='105' y='25'>H</text><text x='105' y='95'>H</text></svg>", "opts": ["ઇથેન (C₂H₆)", "ઇથિન (C₂H₄)", "ઇથાઇન (C₂H₂)", "બેન્ઝિન (C₆H₆)"], "ans": 1, "exp": "ઇથિનમાં કાર્બન-કાર્બન બેવડું બંધ હોવાથી તે અસંતૃપ્ત સવર્ગ સંયોજન છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M30 60 L60 60 M60 60 L90 30 M60 60 L90 90 M90 30 L120 60 M90 90 L120 60 M120 60 L150 60' stroke='black' fill='none'/><text x='45' y='55'>H</text><text x='135' y='55'>H</text><text x='75' y='25'>H</text><text x='75' y='95'>H</text><text x='105' y='25'>H</text><text x='105' y='95'>H</text></svg>", "subject": "CHEMISTRY"}, {"q": "સવર્ગ સંયોજનોના સંદર્ભમાં નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?<br>(i) સવર્ગ સંયોજનોમાં કાર્બન-કાર્બન એકલ બંધ, બેવડું બંધ કે ત્રેવડું બંધ હોઈ શકે છે.<br>(ii) સવર્ગ સંયોજનોમાં કાર્બન હંમેશાં ચતુર્સંયોજકતા ધરાવે છે.<br>(iii) સવર્ગ સંયોજનો માત્ર કુદરતી સ્રોતોમાંથી મળે છે.<br>(iv) સવર્ગ સંયોજનોના ગલનબિંદુ અને ઉત્કલનબિંદુ સામાન્ય રીતે નીચાં હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે, જ્યારે (iii) ખોટું છે કારણ કે સવર્ગ સંયોજનો કૃત્રિમ રીતે પણ બનાવી શકાય છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સવર્ગ સંયોજન નથી પરંતુ તેનો ઉપયોગ સવર્ગ સંયોજનના સંશ્લેષણમાં મહત્ત્વનો મધ્યવર્તી તરીકે થાય છે?", "opts": ["ઇથેનોલ", "ઇથેનાલ", "ઇથાઇલ બ્રોમાઇડ", "ઇથાઇલ એમિન"], "ans": 2, "exp": "ઇથાઇલ બ્રોમાઇડ (C₂H₅Br) એ હેલોઆલ્કેન છે, જે સવર્ગ સંયોજન નથી પરંતુ તેનો ઉપયોગ ગ્રિગ્નાર્ડ પ્રક્રિયક બનાવવા માટે થાય છે, જે સવર્ગ સંયોજનોના સંશ્લેષણમાં મહત્ત્વનો મધ્યવર્તી છે.", "chapter": "સવર્ગ સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L90 60 L110 40 L130 60 L170 60' stroke='black' fill='none'/><text x='70' y='80' font-size='12'>CH₃</text><text x='150' y='80' font-size='12'>Br</text><circle cx='110' cy='40' r='15' stroke='black' fill='none'/></svg>", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "સવર્ગ સંયોજનો Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
