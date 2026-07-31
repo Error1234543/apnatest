@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "એક સમાન ચુંબકીય ક્ષેત્રમાં ગતિ કરતો વિદ્યુતભારિત કણ કયા પ્રકારની ગતિ કરે છે?", "opts": ["સુરેખ ગતિ", "વર્તુળાકાર ગતિ", "પરવલયાકાર ગતિ", "અસમાન પ્રવેગી ગતિ"], "ans": 1, "exp": "સમાન ચુંબકીય ક્ષેત્રમાં વિદ્યુતભારિત કણ પર લાગતું બળ તેની ગતિની દિશાને લંબ હોય છે, જેના કારણે તે વર્તુળાકાર ગતિ કરે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 2 × 10³ T ના સમાન ચુંબકીય ક્ષેત્રમાં 4 × 10⁶ m/s ની ઝડપથી લંબરૂપે ગતિ કરે છે. ઇલેક્ટ્રોનની વર્તુળાકાર ગતિની ત્રિજ્યા કેટલી હશે? (ઇલેક્ટ્રોનનું દળ = 9.1 × 10⁻³¹ kg, વિદ્યુતભાર = 1.6 × 10⁻¹⁹ C)", "opts": ["1.14 × 10⁻² m", "2.28 × 10⁻² m", "5.69 × 10⁻³ m", "1.14 × 10⁻³ m"], "ans": 0, "exp": "વર્તુળાકાર ગતિની ત્રિજ્યા r = mv/qB સૂત્રથી મળે છે. આમાં મૂલ્યો મૂકતાં r = (9.1 × 10⁻³¹ × 4 × 10⁶) / (1.6 × 10⁻¹⁹ × 2 × 10³) = 1.14 × 10⁻² m.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું સાધન ગતિમાન વિદ્યુતભારોના સિદ્ધાંત પર કાર્ય કરતું નથી?", "opts": ["સાયક્લોટ્રોન", "ગેલ્વેનોમીટર", "વિદ્યુત મોટર", "વોલ્ટમીટર"], "ans": 3, "exp": "વોલ્ટમીટર વિદ્યુતસ્થિતિમાનના તફાવતને માપે છે, જે ગતિમાન વિદ્યુતભારોના સિદ્ધાંત પર આધારિત નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન ચુંબકીય ક્ષેત્રમાં સમાન ઝડપથી લંબરૂપે ગતિ કરે છે. તેમની વર્તુળાકાર ગતિની ત્રિજ્યાનો ગુણોત્તર કેટલો હશે? (પ્રોટોનનું દળ = m, આલ્ફા કણનું દળ = 4m, પ્રોટોનનો વિદ્યુતભાર = q, આલ્ફા કણનો વિદ્યુતભાર = 2q)", "opts": ["1:2", "2:1", "1:1", "4:1"], "ans": 0, "exp": "વર્તુળાકાર ગતિની ત્રિજ્યા r = mv/qB. પ્રોટોન માટે r₁ = mv/qB, આલ્ફા કણ માટે r₂ = (4m)v/(2q)B = 2mv/qB. તેથી ગુણોત્તર r₁:r₂ = 1:2.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન ૩ × ૧૦⁶ મી/સે ના વેગથી ૦.૨ ટેસ્લાના ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. ઇલેક્ટ્રોન પર લાગતું ચુંબકીય બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = ૧.૬ × ૧૦⁻¹⁹ કુલંબ)", "opts": ["૯.૬ × ૧૦⁻¹⁴ ન્યૂટન", "૪.૮ × ૧૦⁻¹⁴ ન્યૂટન", "૨.૪ × ૧૦⁻¹⁴ ન્યૂટન", "૧.૨ × ૧૦⁻¹⁴ ન્યૂટન"], "ans": 0, "exp": "ચુંબકીય બળ F = qvB sinθ. અહીં θ = ૯૦° (લંબરૂપે ગતિ), તેથી F = ૧.૬ × ૧૦⁻¹⁹ × ૩ × ૧૦⁶ × ૦.૨ = ૯.૬ × ૧૦⁻¹⁴ ન્યૂટન.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ તેની ગતિની દિશાને લંબરૂપે હોય છે.", "ચુંબકીય ક્ષેત્રમાં સ્થિર વિદ્યુતભાર પર કોઈ બળ લાગતું નથી.", "ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ તેના વેગના સમપ્રમાણમાં હોય છે.", "ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ તેના વિદ્યુતભારના સમપ્રમાણમાં હોતું નથી."], "ans": 3, "exp": "ચુંબકીય બળ F = qvB sinθ મુજબ, બળ વિદ્યુતભાર q ના સમપ્રમાણમાં હોય છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન વેગથી સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. પ્રોટોન પર લાગતા બળ અને આલ્ફા કણ પર લાગતા બળનો ગુણોત્તર કેટલો હશે?", "opts": ["૧:૨", "૧:૪", "૨:૧", "૪:૧"], "ans": 0, "exp": "બળ F = qvB. પ્રોટોનનો વિદ્યુતભાર qₚ = e, આલ્ફા કણનો વિદ્યુતભાર qₐ = 2e. તેથી ગુણોત્તર Fₚ:Fₐ = e:2e = ૧:૨.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું સાધન ગતિમાન વિદ્યુતભારોના વેગમાપન માટે ઉપયોગમાં લેવાય છે?", "opts": ["વિદ્યુત માપક (વોલ્ટમીટર)", "વેગમાપક (વેલોસિટી સિલેક્ટર)", "ચુંબકીય માપક (ટેસ્લામીટર)", "અવરોધ માપક (ઓહ્મમીટર)"], "ans": 1, "exp": "વેગમાપક (વેલોસિટી સિલેક્ટર) ગતિમાન વિદ્યુતભારોના વેગ માપવા માટે ઉપયોગમાં લેવાય છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન ૨ × ૧૦⁵ મી/સે ના વેગથી ૦.૧ ટેસ્લાના ચુંબકીય ક્ષેત્રમાં ૩૦° ના ખૂણે ગતિ કરે છે. ઇલેક્ટ્રોનની ગતિની ત્રિજ્યા કેટલી હશે? (ઇલેક્ટ્રોનનું દળ = ૯.૧ × ૧૦⁻³¹ કિગ્રા, વિદ્યુતભાર = ૧.૬ × ૧૦⁻¹⁹ કુલંબ)", "opts": ["૫.૬૯ × ૧૦⁻⁶ મીટર", "૨.૮૪ × ૧૦⁻⁶ મીટર", "૧.૧૪ × ૧૦⁻⁵ મીટર", "૮.૫૩ × ૧૦⁻⁶ મીટર"], "ans": 0, "exp": "ત્રિજ્યા r = mv/(qB sinθ). અહીં r = (૯.૧ × ૧૦⁻³¹ × ૨ × ૧૦⁵)/(૧.૬ × ૧૦⁻¹⁹ × ૦.૧ × sin ૩૦°) = ૫.૬૯ × ૧૦⁻⁶ મીટર.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાચું નથી? (1) ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ તેની ઝડપ પર આધારિત નથી. (2) ચુંબકીય બળ હંમેશા વિદ્યુતભારની ગતિની દિશાને લંબ હોય છે. (3) સ્થિર વિદ્યુતભાર પર ચુંબકીય ક્ષેત્ર કોઈ બળ લગાડતું નથી. (4) ચુંબકીય બળ વિદ્યુતભારની ગતિની દિશામાં કાર્ય કરે છે.", "opts": ["ફક્ત (1)", "ફક્ત (2) અને (3)", "ફક્ત (4)", "ફક્ત (1) અને (4)"], "ans": 2, "exp": "ચુંબકીય બળ હંમેશા વિદ્યુતભારની ગતિની દિશાને લંબ હોય છે અને તે કાર્ય કરતું નથી, તેથી વિધાન (4) ખોટું છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ ચુંબકીય બળના કાર્ય સાથે સંકળાયેલું નથી?", "opts": ["સાયક્લોટ્રોનમાં વિદ્યુતભારિત કણોની ગતિ", "વિદ્યુત મોટરમાં આર્મેચરની ગતિ", "સાઇકલના ટાયરમાં હવા ભરવી", "હોલ ઇફેક્ટમાં વિદ્યુતક્ષેત્રનું નિર્માણ"], "ans": 2, "exp": "સાઇકલના ટાયરમાં હવા ભરવી એ યાંત્રિક કાર્ય છે, જે ચુંબકીય બળ સાથે સંકળાયેલું નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન અને એક પ્રોટોન એકસમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. જો બંનેની ઝડપ સમાન હોય, તો તેમના વર્તુળાકાર માર્ગની ત્રિજ્યાનો ગુણોત્તર (r_e : r_p) કેટલો હશે?", "opts": ["1 : 1", "1 : 1836", "1836 : 1", "1 : 918"], "ans": 1, "exp": "વર્તુળાકાર માર્ગની ત્રિજ્યા r = mv/qB છે. ઇલેક્ટ્રોન અને પ્રોટોનની ઝડપ અને ચુંબકીય ક્ષેત્ર સમાન હોવાથી, ત્રિજ્યાનો ગુણોત્તર તેમના દળ અને વીજભારના ગુણોત્તર પર આધારિત છે. ઇલેક્ટ્રોનનું દળ પ્રોટોનના દળ કરતાં 1/1836 ગણું હોવાથી, ત્રિજ્યાનો ગુણોત્તર 1 : 1836 થશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ચુંબકીય બળ માટે ખોટું છે?", "opts": ["ચુંબકીય બળ હંમેશા વીજભારની ગતિની દિશાને લંબરૂપે લાગે છે.", "ચુંબકીય બળ વીજભારની ઝડપ પર આધારિત નથી.", "ચુંબકીય બળ વીજભારની ગતિ અને ચુંબકીય ક્ષેત્રની દિશા બંને પર આધારિત છે.", "સ્થિર વીજભાર પર ચુંબકીય બળ લાગતું નથી."], "ans": 1, "exp": "ચુંબકીય બળ વીજભારની ઝડપ પર આધારિત છે, કારણ કે F = q(v × B). જો ઝડપ શૂન્ય હોય તો બળ પણ શૂન્ય થાય છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 2 × 10^6 m/s ની ઝડપથી 0.1 T ના ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. ઇલેક્ટ્રોન પર લાગતું ચુંબકીય બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વીજભાર e = 1.6 × 10^-19 C)", "opts": ["3.2 × 10^-14 N", "1.6 × 10^-14 N", "6.4 × 10^-14 N", "0 N"], "ans": 0, "exp": "ચુંબકીય બળ F = qvB sinθ. અહીં θ = 90° (લંબરૂપે ગતિ) હોવાથી sinθ = 1. તેથી F = (1.6 × 10^-19)(2 × 10^6)(0.1) = 3.2 × 10^-14 N.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું સાધન ગતિમાન વિદ્યુતભારોના વેગમાનના માપન માટે ઉપયોગમાં લેવાય છે?", "opts": ["વોલ્ટમીટર", "સાયક્લોટ્રોન", "સ્પેક્ટ્રોમીટર", "બેઇનબ્રિજ માસ સ્પેક્ટ્રોમીટર"], "ans": 3, "exp": "બેઇનબ્રિજ માસ સ્પેક્ટ્રોમીટર ગતિમાન વિદ્યુતભારોના વેગમાન અને દળના ગુણોત્તરના માપન માટે ઉપયોગમાં લેવાય છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન વેગથી સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. તેમના વર્તુળાકાર માર્ગની ત્રિજ્યાનો ગુણોત્તર (r_p : r_α) કેટલો હશે? (આલ્ફા કણનો વીજભાર +2e અને દળ 4u છે, જ્યારે પ્રોટોનનો વીજભાર +e અને દળ u છે.)", "opts": ["1 : 2", "2 : 1", "1 : 1", "1 : 4"], "ans": 0, "exp": "ત્રિજ્યા r = mv/qB. પ્રોટોન માટે r_p = mu/eB અને આલ્ફા કણ માટે r_α = 4mu/2eB = 2mu/eB. તેથી ગુણોત્તર r_p : r_α = 1 : 2 થશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન અને એક પ્રોટોન સમાન વેગથી એકસમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["ઇલેક્ટ્રોન અને પ્રોટોન બંનેની ગતિનો માર્ગ સમાન ત્રિજ્યાનો વર્તુળાકાર હશે", "ઇલેક્ટ્રોનની ગતિનો માર્ગ પ્રોટોનની તુલનામાં નાની ત્રિજ્યાનો વર્તુળાકાર હશે", "ઇલેક્ટ્રોનની ગતિનો માર્ગ પ્રોટોનની તુલનામાં મોટી ત્રિજ્યાનો વર્તુળાકાર હશે", "ઇલેક્ટ્રોન અને પ્રોટોન બંને સીધી રેખામાં ગતિ કરશે"], "ans": 1, "exp": "ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભારિત કણની વર્તુળાકાર ત્રિજ્યા r = mv/qB સૂત્રથી મળે છે. ઇલેક્ટ્રોનનું દળ પ્રોટોન કરતાં ઘણું ઓછું હોવાથી તેની ત્રિજ્યા નાની હશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતભારિત કણ ચુંબકીય ક્ષેત્રમાં ગતિ કરે છે ત્યારે તેના પર લાગતું ચુંબકીય બળ કયા પરિબળો પર આધારિત નથી?", "opts": ["વિદ્યુતભારની માત્રા", "કણની ઝડપ", "ચુંબકીય ક્ષેત્રની તીવ્રતા", "કણનું દળ"], "ans": 3, "exp": "ચુંબકીય બળ F = q(v × B) સૂત્રથી મળે છે, જેમાં કણનું દળ સમાવિષ્ટ નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ચુંબકીય બળ વિદ્યુતભારિત કણની ગતિની દિશામાં કાર્ય કરતું નથી", "ચુંબકીય બળ વિદ્યુતભારિત કણની ગતિની ઝડપમાં ફેરફાર કરતું નથી", "ચુંબકીય બળ હંમેશાં વિદ્યુતભારિત કણની ગતિની દિશાને સમાંતર હોય છે", "ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભારિત કણ પર લાગતું બળ તેની ગતિ અને ચુંબકીય ક્ષેત્ર બંનેને લંબરૂપ હોય છે"], "ans": 2, "exp": "ચુંબકીય બળ હંમેશાં વિદ્યુતભારિત કણની ગતિ અને ચુંબકીય ક્ષેત્ર બંનેને લંબરૂપ હોય છે, સમાંતર નહીં.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન ૨ × ૧૦⁷ મી/સે ની ઝડપથી ૦.૫ ટેસ્લા ના સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. ઇલેક્ટ્રોન પર લાગતું ચુંબકીય બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = ૧.૬ × ૧૦⁻¹⁹ કુલંબ)", "opts": ["૧.૬ × ૧૦⁻¹² ન્યૂટન", "૩.૨ × ૧૦⁻¹² ન્યૂટન", "૦.૮ × ૧૦⁻¹² ન્યૂટન", "૬.૪ × ૧૦⁻¹² ન્યૂટન"], "ans": 0, "exp": "ચુંબકીય બળ F = qvB sinθ. અહીં θ = ૯૦° તેથી sinθ = ૧. આથી F = (૧.૬ × ૧૦⁻¹⁹)(૨ × ૧૦⁷)(૦.૫) = ૧.૬ × ૧૦⁻¹² ન્યૂટન.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતા બળ માટે ખોટું છે?", "opts": ["બળ હંમેશા વિદ્યુતભારની ગતિની દિશાને લંબરૂપે લાગે છે.", "બળની તીવ્રતા વિદ્યુતભારની ઝડપ પર આધારિત નથી.", "બળની દિશા ફ્લેમિંગના ડાબા હાથના નિયમથી નક્કી થાય છે.", "બળની તીવ્રતા ચુંબકીય ક્ષેત્રની તીવ્રતા પર આધારિત છે."], "ans": 1, "exp": "ચુંબકીય બળ F = qvB sinθ મુજબ બળની તીવ્રતા વિદ્યુતભારની ઝડપ (v) પર આધારિત છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન વેગથી સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. પ્રોટોન પર લાગતું ચુંબકીય બળ આલ્ફા કણ પર લાગતા બળ કરતાં કેટલું હશે? (આલ્ફા કણનો વિદ્યુતભાર પ્રોટોન કરતાં બમણો અને દળ ચાર ગણું છે)", "opts": ["બરાબર", "અડધું", "બમણું", "ચાર ગણું"], "ans": 1, "exp": "ચુંબકીય બળ F = qvB. આલ્ફા કણનો વિદ્યુતભાર પ્રોટોન કરતાં બમણો છે, તેથી આલ્ફા કણ પર લાગતું બળ પ્રોટોન કરતાં બમણું હશે. આથી પ્રોટોન પર લાગતું બળ આલ્ફા કણ કરતાં અડધું હશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ તેની ગતિની દિશામાં કાર્ય કરતું નથી.\n2. સમાન ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર વર્તુળાકાર ગતિ કરે છે.\n3. ચુંબકીય બળની દિશા હંમેશા વિદ્યુતભારની ગતિની દિશામાં હોય છે.\n4. વિદ્યુતભારની ઝડપ વધારતાં તેના પર લાગતું ચુંબકીય બળ ઘટે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 1, "exp": "વિધાન ૧ અને ૨ સાચાં છે. વિધાન ૩ અને ૪ ખોટાં છે કારણ કે ચુંબકીય બળ ગતિની દિશાને લંબરૂપે લાગે છે અને ઝડપ વધતાં બળ વધે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન ૩ × ૧૦⁶ મી/સે ની ઝડપથી ૦.૨ ટેસ્લા ના સમાન ચુંબકીય ક્ષેત્રમાં ૩૦° ના ખૂણે પ્રવેશે છે. ઇલેક્ટ્રોનની વર્તુળાકાર ગતિનો ત્રિજ્યા કેટલી હશે? (ઇલેક્ટ્રોનનું દળ = ૯.૧ × ૧૦⁻³¹ કિગ્રા, વિદ્યુતભાર = ૧.૬ × ૧૦⁻¹⁹ કુલંબ)", "opts": ["૪.૨૮ × ૧૦⁻⁵ મીટર", "૮.૫૬ × ૧૦⁻⁵ મીટર", "૨.૧૪ × ૧૦⁻⁵ મીટર", "૧.૦૭ × ૧૦⁻⁵ મીટર"], "ans": 0, "exp": "વર્તુળાકાર ગતિની ત્રિજ્યા r = mv/(qB sinθ). અહીં θ = ૩૦° તેથી sinθ = ૦.૫. આથી r = (૯.૧ × ૧૦⁻³¹)(૩ × ૧૦⁶)/[(૧.૬ × ૧૦⁻¹⁹)(૦.૨)(૦.૫)] = ૪.૨૮ × ૧૦⁻⁵ મીટર.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાચું નથી? (1) ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ હંમેશા વેગની દિશાને લંબ હોય છે. (2) ચુંબકીય ક્ષેત્રમાં સ્થિર વિદ્યુતભાર પર કોઈ બળ લાગતું નથી. (3) ચુંબકીય ક્ષેત્રમાં ગતિમાન વિદ્યુતભાર પર લાગતું બળ હંમેશા વેગની દિશામાં હોય છે. (4) ચુંબકીય બળ ક્યારેય કાર્ય કરતું નથી.", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (3)", "ફક્ત (4)", "(1), (2) અને (4)"], "ans": 1, "exp": "ચુંબકીય બળ હંમેશા વેગની દિશાને લંબ હોય છે, તેથી વિધાન (3) ખોટું છે. બાકીનાં વિધાનો સાચાં છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન 2 × 10^6 m/s ના વેગથી 0.5 T ના સમાન ચુંબકીય ક્ષેત્રમાં 30° ના ખૂણે પ્રવેશે છે. પ્રોટોન પર લાગતું મહત્તમ ચુંબકીય બળ કેટલું હશે? (પ્રોટોનનો વીજભાર = 1.6 × 10^-19 C)", "opts": ["8 × 10^-14 N", "1.6 × 10^-13 N", "4 × 10^-14 N", "3.2 × 10^-13 N"], "ans": 0, "exp": "મહત્તમ બળ F = qvB sinθ. અહીં θ = 90° (મહત્તમ માટે), તેથી F = 1.6 × 10^-19 × 2 × 10^6 × 0.5 × 1 = 1.6 × 10^-13 N. પરંતુ પ્રશ્નમાં θ = 30° આપેલું છે, તેથી F = 1.6 × 10^-19 × 2 × 10^6 × 0.5 × 0.5 = 8 × 10^-14 N.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 3 × 10^6 m/s ના વેગથી 0.1 T ના સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. ઇલેક્ટ્રોનના વર્તુળાકાર માર્ગની આવૃત્તિ કેટલી હશે? (ઇલેક્ટ્રોનનું દળ = 9.1 × 10^-31 kg, વીજભાર = 1.6 × 10^-19 C)", "opts": ["2.8 × 10^9 Hz", "5.6 × 10^9 Hz", "1.4 × 10^9 Hz", "8.4 × 10^9 Hz"], "ans": 0, "exp": "આવૃત્તિ f = qB/(2πm). અહીં f = (1.6 × 10^-19 × 0.1)/(2 × 3.14 × 9.1 × 10^-31) ≈ 2.8 × 10^9 Hz.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ કયા પરિબળો પર આધાર રાખે છે?", "opts": ["માત્ર વિદ્યુતભાર અને વેગ પર", "વિદ્યુતભાર, વેગ અને ચુંબકીય ક્ષેત્રની તીવ્રતા પર", "માત્ર ચુંબકીય ક્ષેત્રની તીવ્રતા અને વેગ પર", "વિદ્યુતભાર, વેગ અને કણના દળ પર"], "ans": 1, "exp": "ચુંબકીય બળ F = q(v × B) સૂત્ર મુજબ, તે વિદ્યુતભાર (q), વેગ (v) અને ચુંબકીય ક્ષેત્ર (B) પર આધાર રાખે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 2 × 10^6 મી/સે ના વેગથી 0.5 ટેસ્લાના સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. ઇલેક્ટ્રોન પર લાગતું ચુંબકીય બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = 1.6 × 10^-19 કુલંબ)", "opts": ["1.6 × 10^-13 ન્યૂટન", "3.2 × 10^-13 ન્યૂટન", "0 ન્યૂટન", "6.4 × 10^-13 ન્યૂટન"], "ans": 0, "exp": "F = qvB = (1.6 × 10^-19) × (2 × 10^6) × 0.5 = 1.6 × 10^-13 ન્યૂટન.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સત્ય છે? (1) ચુંબકીય બળ હંમેશા વેગને લંબરૂપે લાગે છે. (2) ચુંબકીય બળ કણની ગતિની દિશામાં કાર્ય કરતું નથી. (3) ચુંબકીય બળ કણની ઝડપમાં ફેરફાર કરે છે.", "opts": ["માત્ર (1) અને (2)", "માત્ર (1) અને (3)", "માત્ર (2) અને (3)", "(1), (2) અને (3)"], "ans": 0, "exp": "ચુંબકીય બળ વેગને લંબરૂપે લાગે છે અને તે કણની ગતિની દિશામાં કાર્ય કરતું નથી, તેથી ઝડપમાં ફેરફાર થતો નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતા ચુંબકીય બળની દિશા કયા નિયમ દ્વારા નક્કી થાય છે?", "opts": ["ફ્લેમિંગનો ડાબા હાથનો નિયમ", "ફ્લેમિંગનો જમણા હાથનો નિયમ", "લેન્ઝનો નિયમ", "એમ્પિયરનો નિયમ"], "ans": 0, "exp": "ફ્લેમિંગનો ડાબા હાથનો નિયમ વિદ્યુતભારિત કણ પર લાગતા ચુંબકીય બળની દિશા નક્કી કરવા માટે ઉપયોગમાં લેવાય છે, જ્યાં અંગૂઠો બળની દિશા, તર્જની ચુંબકીય ક્ષેત્ર અને મધ્યમા આંગળી વેગની દિશા દર્શાવે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન વેગથી સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. તેમના પર લાગતા ચુંબકીય બળનો ગુણોત્તર કેટલો હશે? (આલ્ફા કણનો વિદ્યુતભાર = 2e, પ્રોટોનનો વિદ્યુતભાર = e)", "opts": ["1:2", "2:1", "1:1", "4:1"], "ans": 0, "exp": "ચુંબકીય બળ F = qvB sinθ. અહીં v, B અને θ સમાન હોવાથી F ∝ q. પ્રોટોનનો વિદ્યુતભાર e અને આલ્ફા કણનો વિદ્યુતભાર 2e હોવાથી બળનો ગુણોત્તર 1:2 થશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગતિમાન વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ કયા પરિબળો પર આધાર રાખે છે?", "opts": ["માત્ર કણના વેગ અને ચુંબકીય ક્ષેત્રની તીવ્રતા પર", "માત્ર કણના વેગ, ચુંબકીય ક્ષેત્રની તીવ્રતા અને કણના વિદ્યુતભાર પર", "કણના વેગ, ચુંબકીય ક્ષેત્રની તીવ્રતા, કણના વિદ્યુતભાર અને વેગ તથા ચુંબકીય ક્ષેત્ર વચ્ચેના ખૂણા પર", "માત્ર કણના વિદ્યુતભાર અને ચુંબકીય ક્ષેત્રની તીવ્રતા પર"], "ans": 2, "exp": "ચુંબકીય બળ F = q(v × B) સૂત્ર મુજબ, બળ કણના વિદ્યુતભાર (q), વેગ (v), ચુંબકીય ક્ષેત્ર (B) અને વેગ તથા ચુંબકીય ક્ષેત્ર વચ્ચેના ખૂણા (θ) પર આધાર રાખે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) ચુંબકીય બળ હંમેશા વેગના લંબરૂપે લાગે છે. (2) ચુંબકીય બળ કણની ગતિની દિશામાં કાર્ય કરે છે. (3) ચુંબકીય બળ કણની ગતિની ઊર્જામાં ફેરફાર કરતું નથી. (4) ચુંબકીય બળ કણના વેગ અને ચુંબકીય ક્ષેત્ર બંનેના લંબરૂપે હોય છે.", "opts": ["વિધાન (1) ખોટું છે", "વિધાન (2) ખોટું છે", "વિધાન (3) ખોટું છે", "વિધાન (4) ખોટું છે"], "ans": 1, "exp": "ચુંબકીય બળ હંમેશા વેગ અને ચુંબકીય ક્ષેત્ર બંનેના લંબરૂપે લાગે છે, તેથી તે કણની ગતિની દિશામાં કાર્ય કરતું નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયો કણ સમાન ચુંબકીય ક્ષેત્રમાં ગતિ કરતી વખતે સૌથી વધુ ત્રિજ્યાવાળો વર્તુળાકાર માર્ગ બનાવશે? (બધા કણોનો વેગ અને ચુંબકીય ક્ષેત્ર સમાન છે)", "opts": ["ઇલેક્ટ્રોન (q = -1.6 × 10^-19 C, m = 9.1 × 10^-31 kg)", "પ્રોટોન (q = +1.6 × 10^-19 C, m = 1.67 × 10^-27 kg)", "આલ્ફા કણ (q = +3.2 × 10^-19 C, m = 6.64 × 10^-27 kg)", "ડ્યુટેરોન (q = +1.6 × 10^-19 C, m = 3.34 × 10^-27 kg)"], "ans": 2, "exp": "વર્તુળાકાર માર્ગની ત્રિજ્યા r = mv/qB સૂત્ર મુજબ, ત્રિજ્યા કણના દળ (m)ના સમપ્રમાણમાં અને વિદ્યુતભાર (q)ના વ્યસ્ત પ્રમાણમાં હોય છે. આલ્ફા કણનું દળ સૌથી વધુ અને વિદ્યુતભાર પણ વધુ હોવા છતાં દળનો પ્રભાવ વધુ હોવાથી તેની ત્રિજ્યા સૌથી વધુ હશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગતિમાન વિદ્યુતભારિત કણ સમાન ચુંબકીય ક્ષેત્રમાં ગતિ કરે છે. જો કણનો વેગ બમણો કરવામાં આવે અને ચુંબકીય ક્ષેત્રની તીવ્રતા અડધી કરવામાં આવે, તો કણના વર્તુળાકાર માર્ગની ત્રિજ્યામાં શું ફેરફાર થશે?", "opts": ["ત્રિજ્યા બમણી થશે", "ત્રિજ્યા ચાર ગણી થશે", "ત્રિજ્યા અડધી થશે", "ત્રિજ્યા ચોથા ભાગની થશે"], "ans": 1, "exp": "ત્રિજ્યા r = mv/qB સૂત્ર મુજબ, જો v બમણો અને B અડધું થાય, તો r ∝ (2v)/(q × B/2) = 4v/qB, એટલે કે ત્રિજ્યા ચાર ગણી થશે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1) ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભાર પર લાગતું બળ હંમેશા વેગને લંબરૂપે હોય છે. 2) ચુંબકીય બળ વિદ્યુતભારની ગતિની ઝડપ બદલી શકે છે. 3) સ્થિર વિદ્યુતભાર પર ચુંબકીય બળ લાગતું નથી. કયા વિધાનો સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 1 અને 3", "માત્ર 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "વિધાન 1 અને 3 સાચાં છે. વિધાન 2 ખોટું છે કારણ કે ચુંબકીય બળ ઝડપ બદલી શકતું નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["ચુંબકીય બળ હંમેશા વેગને લંબરૂપે લાગે છે", "ચુંબકીય બળ કણની ગતિની દિશા બદલે છે પરંતુ તેની ઝડપ બદલતું નથી", "ચુંબકીય બળ કણ પર કાર્ય કરતું નથી", "ચુંબકીય બળ હંમેશા વિદ્યુતભારને પ્રવેગિત કરે છે"], "ans": 3, "exp": "ચુંબકીય બળ વેગને લંબરૂપે લાગતું હોવાથી તે કણને પ્રવેગિત કરતું નથી, માત્ર દિશા બદલે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "સાઇક્લોટ્રોનમાં વિદ્યુતભારિત કણની આવૃત્તિ કયા પરિબળ પર આધાર રાખતી નથી?", "opts": ["ચુંબકીય ક્ષેત્રની તીવ્રતા", "કણના વિદ્યુતભાર", "કણના દળ", "કણની ઝડપ"], "ans": 3, "exp": "સાઇક્લોટ્રોનની આવૃત્તિ f = qB/(2πm) સૂત્ર મુજબ, તે ચુંબકીય ક્ષેત્ર (B), વિદ્યુતભાર (q) અને દળ (m) પર આધાર રાખે છે, ઝડપ પર નહીં.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ ચુંબકીય બળની ક્રિયા દર્શાવતું નથી?", "opts": ["વિદ્યુત મોટરનું પરિભ્રમણ", "ટેલિવિઝનમાં ઇલેક્ટ્રોન બીમનું વિચલન", "સૂર્યમાંથી આવતા કોસ્મિક કિરણોનું પૃથ્વીના ચુંબકીય ક્ષેત્ર દ્વારા વિચલન", "સ્થિર વિદ્યુતભાર પર લાગતું વિદ્યુત બળ"], "ans": 3, "exp": "સ્થિર વિદ્યુતભાર પર લાગતું બળ વિદ્યુત બળ છે, ચુંબકીય બળ નહીં. ચુંબકીય બળ ફક્ત ગતિમાન વિદ્યુતભાર પર લાગે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ કઈ દિશામાં હોય છે?", "opts": ["વિદ્યુતભારની ગતિની દિશામાં", "વિદ્યુતભારની ગતિની વિરુદ્ધ દિશામાં", "ચુંબકીય ક્ષેત્રની દિશામાં", "વિદ્યુતભારની ગતિ અને ચુંબકીય ક્ષેત્ર બંનેને લંબ દિશામાં"], "ans": 3, "exp": "ચુંબકીય બળ હંમેશા વિદ્યુતભારની ગતિ અને ચુંબકીય ક્ષેત્ર બંનેને લંબ દિશામાં લાગે છે, જે ફ્લેમિંગના ડાબા હાથના નિયમથી સમજી શકાય છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 3 × 10^6 મી/સે ની ઝડપથી 0.2 ટેસ્લાના સમાન ચુંબકીય ક્ષેત્રમાં 30° ના ખૂણે પ્રવેશે છે. ઇલેક્ટ્રોન પર લાગતું ચુંબકીય બળ કેટલું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = 1.6 × 10^-19 કુલંબ)", "opts": ["4.8 × 10^-14 ન્યૂટન", "8.3 × 10^-14 ન્યૂટન", "1.6 × 10^-14 ન્યૂટન", "3.2 × 10^-14 ન્યૂટન"], "ans": 0, "exp": "ચુંબકીય બળ F = qvB sinθ = (1.6 × 10^-19)(3 × 10^6)(0.2)(sin 30°) = 4.8 × 10^-14 ન્યૂટન.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતા ચુંબકીય બળનું સૂત્ર કયું છે?", "opts": ["F = qvB sinθ", "F = qvB cosθ", "F = qvB tanθ", "F = qv/B sinθ"], "ans": 0, "exp": "ચુંબકીય બળનું સૂત્ર F = qvB sinθ છે, જ્યાં q વિદ્યુતભાર, v વેગ, B ચુંબકીય ક્ષેત્ર અને θ વેગ અને ચુંબકીય ક્ષેત્ર વચ્ચેનો ખૂણો છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન 2 × 10^6 m/s ની ઝડપથી 0.1 T ના સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. ઇલેક્ટ્રોન પર લાગતા ચુંબકીય બળનું મૂલ્ય શું હશે? (ઇલેક્ટ્રોનનો વિદ્યુતભાર = 1.6 × 10^-19 C)", "opts": ["3.2 × 10^-14 N", "1.6 × 10^-14 N", "6.4 × 10^-14 N", "0 N"], "ans": 0, "exp": "F = qvB sinθ માં θ = 90° હોવાથી sinθ = 1. તેથી F = 1.6 × 10^-19 × 2 × 10^6 × 0.1 = 3.2 × 10^-14 N.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ કઈ ભૌતિક રાશિ પર આધાર રાખતું નથી?", "opts": ["વિદ્યુતભારની માત્રા", "કણની ઝડપ", "ચુંબકીય ક્ષેત્રની તીવ્રતા", "વિદ્યુતભારની સંજ્ઞા"], "ans": 3, "exp": "ચુંબકીય બળ F = q(v × B) સૂત્ર મુજબ વિદ્યુતભારની સંજ્ઞા પર નહીં, પરંતુ માત્રા, ઝડપ અને ચુંબકીય ક્ષેત્રની તીવ્રતા પર આધાર રાખે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રોટોન અને એક આલ્ફા કણ સમાન વેગથી સમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે ગતિ કરે છે. તેમના વર્તુળાકાર માર્ગની ત્રિજ્યાનો ગુણોત્તર કેટલો હશે?", "opts": ["1:2", "2:1", "1:1", "4:1"], "ans": 0, "exp": "ત્રિજ્યા r = mv/qB. પ્રોટોન માટે q = e, આલ્ફા કણ માટે q = 2e. તેથી rₚ:rₐ = 1:2.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગતિમાન વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ કઈ ભૌતિક રાશિ પર આધારિત નથી?", "opts": ["વિદ્યુતભારની મૂલ્ય", "કણની ઝડપ", "ચુંબકીય ક્ષેત્રની તીવ્રતા", "કણનું દળ"], "ans": 3, "exp": "ચુંબકીય બળ F = q(v × B) સૂત્ર અનુસાર, બળ વિદ્યુતભાર (q), ઝડપ (v) અને ચુંબકીય ક્ષેત્ર (B) પર આધારિત છે, પરંતુ કણના દળ પર આધારિત નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ઇલેક્ટ્રોન અને એક પ્રોટોન સમાન વેગથી એકસમાન ચુંબકીય ક્ષેત્રમાં લંબરૂપે પ્રવેશે છે. જો બંને કણો પર લાગતા ચુંબકીય બળનો ગુણોત્તર 1:1 હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["ઇલેક્ટ્રોન અને પ્રોટોનના વેગ સમાન હોવાથી તેમના વેગમાન સમાન હશે", "ઇલેક્ટ્રોન અને પ્રોટોનના વેગમાન સમાન હોવાથી તેમના પર લાગતા ચુંબકીય બળ સમાન હશે", "ઇલેક્ટ્રોન અને પ્રોટોનના વેગમાન જુદા હોવા છતાં તેમના પર લાગતા ચુંબકીય બળ સમાન હોઈ શકે છે", "ઇલેક્ટ્રોન અને પ્રોટોનના વેગમાન જુદા હોવાથી તેમના પર લાગતા ચુંબકીય બળ જુદું જ હશે"], "ans": 2, "exp": "ચુંબકીય બળ F = q(v × B) પરથી, બળ વેગમાન પર નહીં પરંતુ વેગ અને વીજભાર પર આધારિત છે. તેથી જો વેગ અને વીજભારનો ગુણાકાર સમાન હોય, તો બળ સમાન મળે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: 1. ચુંબકીય ક્ષેત્રમાં ગતિ કરતા વિદ્યુતભારિત કણ પર લાગતું ચુંબકીય બળ હંમેશા કણના વેગને લંબરૂપે હોય છે. 2. ચુંબકીય બળ કણની ગતિની દિશામાં કાર્ય કરતું નથી. 3. ચુંબકીય બળ કણની ગતિ-ઊર્જામાં ફેરફાર કરે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["માત્ર 1", "માત્ર 1 અને 2", "માત્ર 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "વિધાન 1 અને 2 સાચાં છે કારણ કે ચુંબકીય બળ હંમેશા વેગને લંબરૂપે હોય છે અને તે કાર્ય કરતું નથી. વિધાન 3 ખોટું છે કારણ કે ચુંબકીય બળ ગતિ-ઊર્જામાં ફેરફાર કરતું નથી.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ગતિમાન વિદ્યુતભારિત કણ સમક્ષિતિજ ચુંબકીય ક્ષેત્રમાં પ્રવેશે છે. જો કણનો પ્રારંભિક વેગ ચુંબકીય ક્ષેત્રને લંબરૂપે હોય, તો કણની ગતિ કેવા પ્રકારની હશે?", "opts": ["સુરેખ ગતિ", "વર્તુળાકાર ગતિ", "પરવલયાકાર ગતિ", "સર્પિલ ગતિ"], "ans": 1, "exp": "જ્યારે વિદ્યુતભારિત કણનો વેગ ચુંબકીય ક્ષેત્રને લંબરૂપે હોય છે, ત્યારે તે વર્તુળાકાર ગતિ કરે છે કારણ કે ચુંબકીય બળ હંમેશા વેગને લંબરૂપે લાગે છે.", "chapter": "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "ગતિમાન વિદ્યુતભારો અને ચુંબકત્વ Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
