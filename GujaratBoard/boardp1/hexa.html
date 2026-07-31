@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SONIC HUB · LEARN X PRO</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f4f7fc;
+      color: #0b1a2e;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 20, 50, 0.06);
+      padding: 12px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: #0b1a2e;
+    }
+    .logo img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #2563eb;
+      object-fit: cover;
+    }
+    .logo span {
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .breadcrumb {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+    .breadcrumb a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb .current-mode {
+      color: #2563eb;
+      font-weight: 700;
+    }
+    .hero {
+      text-align: center;
+      padding: 50px 5% 30px;
+    }
+    .std-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      font-weight: 900;
+      font-size: 2.8rem;
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      line-height: 80px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 30px rgba(37, 99, 235, 0.25);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, #0b1a2e 30%, #2563eb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .hero p {
+      color: #475569;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+    }
+    .mode-badge {
+      display: inline-block;
+      padding: 6px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px;
+      margin-top: 8px;
+    }
+    .mode-badge.topic { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; }
+    .mode-badge.chapter { background: linear-gradient(135deg, #f59e0b, #ef4444); color: #fff; }
+    .section-title {
+      text-align: center;
+      font-size: 0.7rem;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #64748b;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 30px;
+    }
+    .section-title span { color: #2563eb; font-weight: 700; }
+    
+    /* Mode Grid */
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+      padding: 0 5%;
+    }
+    .mode-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 40px 28px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      border: 1px solid rgba(0, 20, 50, 0.05);
+      box-shadow: 0 8px 30px rgba(0, 20, 50, 0.04);
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .mode-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    .mode-card.topic::before { background: linear-gradient(90deg, #2563eb, #7c3aed); }
+    .mode-card.chapter::before { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .mode-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(37, 99, 235, 0.10);
+    }
+    .mode-card:hover::before { transform: scaleX(1); }
+    .mode-icon { font-size: 3.2rem; display: block; margin-bottom: 14px; }
+    .mode-card h2 { font-size: 1.6rem; font-weight: 800; color: #0b1a2e; margin-bottom: 4px; }
+    .mode-card p { color: #64748b; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; }
+    .mode-card .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 5px 20px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    .mode-card.topic .tag { background: #eef2ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.10); }
+    .mode-card.chapter .tag { background: #fef3c7; color: #d97706; border: 1px solid rgba(245,158,11,0.10); }
+
+    /* Subject Grid */
+    .subject-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto 60px;
+      padding: 0 5%;
+    }
+    .subject-grid.active { display: grid; }
+    .subject-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 40px 28px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      border: 1px solid rgba(0, 20, 50, 0.05);
+      box-shadow: 0 8px 30px rgba(0, 20, 50, 0.04);
+      transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .subject-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 50px rgba(37, 99, 235, 0.10);
+    }
+    .subject-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    .subject-card.physics::before { background: linear-gradient(90deg, #2563eb, #06b6d4); }
+    .subject-card.chemistry::before { background: linear-gradient(90deg, #7c3aed, #ec4899); }
+    .subject-card.biology::before { background: linear-gradient(90deg, #10b981, #84cc16); }
+    .subject-card:hover::before { transform: scaleX(1); }
+    .subject-icon { font-size: 3.2rem; display: block; margin-bottom: 14px; }
+    .subject-card h2 { font-size: 1.4rem; font-weight: 800; color: #0b1a2e; margin-bottom: 4px; }
+    .subject-card p { color: #64748b; font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; }
+    .subject-card .tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 5px 16px;
+      border-radius: 40px;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    .physics .tag { background: #eef2ff; color: #2563eb; border: 1px solid rgba(37,99,235,0.10); }
+    .chemistry .tag { background: #f3e8ff; color: #7c3aed; border: 1px solid rgba(124,58,237,0.10); }
+    .biology .tag { background: #dcfce7; color: #10b981; border: 1px solid rgba(16,185,129,0.10); }
+
+    .back-btn {
+      display: none;
+      text-align: center;
+      margin: -30px auto 30px;
+      padding: 0 5%;
+    }
+    .back-btn.active { display: block; }
+    .back-btn button {
+      background: #eef2ff;
+      border: none;
+      padding: 10px 30px;
+      border-radius: 40px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #2563eb;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .back-btn button:hover {
+      background: #2563eb;
+      color: #fff;
+      transform: translateX(-4px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 28px 5%;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      border-top: 1px solid rgba(0, 20, 50, 0.06);
+      background: #ffffff;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      nav { flex-direction: column; align-items: center; }
+      .mode-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .subject-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .hero { padding: 36px 5% 24px; }
+      .std-badge { width: 64px; height: 64px; font-size: 2.2rem; line-height: 64px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">
+      <img src="https://i.ibb.co/Q152gXX/x.jpg" alt="logo" />
+      <span>LEARN X PRO</span>
+    </div>
+    <div class="breadcrumb">
+      <a onclick="goHome()">Home</a> › 
+      <span>STD 12</span>
+      <span id="breadcrumb-mode" class="current-mode"></span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="std-badge">12</div>
+    <h1>GUJARAT BOARD</h1>
+    <p id="hero-subtitle">Select your test mode</p>
+    <div id="mode-badge-container"></div>
+  </section>
+
+  <p class="section-title" id="main-title">— Choose <span>Test Mode</span> —</p>
+
+  <div class="mode-grid" id="mode-grid">
+    <div onclick="showSubjects('topic')" class="mode-card topic">
+      <span class="mode-icon">📚</span>
+      <h2>Topic Wise</h2>
+      <p>Subject wise topic based tests</p>
+      <span class="tag">TOPICS →</span>
+    </div>
+    <div onclick="showSubjects('chapter')" class="mode-card chapter">
+      <span class="mode-icon">📖</span>
+      <h2>Chapter Wise</h2>
+      <p>Subject wise chapter based tests</p>
+      <span class="tag">CHAPTERS →</span>
+    </div>
+  </div>
+
+  <div class="back-btn" id="back-btn">
+    <button onclick="goHome()">← Back to Modes</button>
+  </div>
+
+  <p class="section-title" id="subject-title" style="display:none;">— Choose <span>Subject</span> —</p>
+
+  <div class="subject-grid" id="subject-grid">
+    <!-- Physics -->
+    <a href="#" id="physics-link" class="subject-card physics">
+      <span class="subject-icon">📘</span>
+      <h2>Physics</h2>
+      <p id="physics-desc">Topic wise tests</p>
+      <span class="tag">PHY →</span>
+    </a>
+
+    <!-- Chemistry -->
+    <a href="#" id="chemistry-link" class="subject-card chemistry">
+      <span class="subject-icon">🧪</span>
+      <h2>Chemistry</h2>
+      <p id="chemistry-desc">Topic wise tests</p>
+      <span class="tag">CHEM →</span>
+    </a>
+
+    <!-- Biology -->
+    <a href="#" id="biology-link" class="subject-card biology">
+      <span class="subject-icon">🌿</span>
+      <h2>Biology</h2>
+      <p id="biology-desc">Topic wise tests</p>
+      <span class="tag">BIO →</span>
+    </a>
+  </div>
+
+  <footer>© 2025 LEARN X PRO — STD 12</footer>
+
+  <script>
+    let currentMode = '';
+
+    function goHome() {
+      currentMode = '';
+      document.getElementById('mode-grid').style.display = 'grid';
+      document.getElementById('subject-grid').classList.remove('active');
+      document.getElementById('subject-title').style.display = 'none';
+      document.getElementById('back-btn').classList.remove('active');
+      document.getElementById('main-title').style.display = 'block';
+      document.getElementById('hero-subtitle').textContent = 'Select your test mode';
+      document.getElementById('mode-badge-container').innerHTML = '';
+      document.getElementById('breadcrumb-mode').textContent = '';
+      document.getElementById('breadcrumb-mode').style.display = 'none';
+    }
+
+    function showSubjects(mode) {
+      currentMode = mode;
+      const modeName = mode === 'topic' ? 'Topic Wise' : 'Chapter Wise';
+      const modeEmoji = mode === 'topic' ? '📚' : '📖';
+      const badgeClass = mode === 'topic' ? 'topic' : 'chapter';
+
+      document.getElementById('mode-grid').style.display = 'none';
+      document.getElementById('main-title').style.display = 'none';
+
+      document.getElementById('subject-grid').classList.add('active');
+      document.getElementById('subject-title').style.display = 'block';
+      document.getElementById('back-btn').classList.add('active');
+
+      document.getElementById('hero-subtitle').textContent = `Select your subject for ${modeName} tests`;
+      document.getElementById('mode-badge-container').innerHTML = `
+        <span class="mode-badge ${badgeClass}">${modeEmoji} ${modeName}</span>
+      `;
+
+      document.getElementById('breadcrumb-mode').textContent = `› ${modeName}`;
+      document.getElementById('breadcrumb-mode').style.display = 'inline';
+
+      if (mode === 'topic') {
+        // ✅ Topic Wise - physics/, chemistry/, biology/
+        document.getElementById('physics-desc').textContent = 'Topic wise tests';
+        document.getElementById('chemistry-desc').textContent = 'Topic wise tests';
+        document.getElementById('biology-desc').textContent = 'Topic wise tests';
+        
+        document.getElementById('physics-link').href = 'physics/index.html';
+        document.getElementById('chemistry-link').href = 'chemistry/index.html';
+        document.getElementById('biology-link').href = 'biology/index.html';
+      } else {
+        // ✅ Chapter Wise - Boardp1/, Boardc/, Boardb/
+        document.getElementById('physics-desc').textContent = 'Chapter wise tests';
+        document.getElementById('chemistry-desc').textContent = 'Chapter wise tests';
+        document.getElementById('biology-desc').textContent = 'Chapter wise tests';
+        
+        document.getElementById('physics-link').href = 'Boardp1/index.html';
+        document.getElementById('chemistry-link').href = 'Boardc/index.html';
+        document.getElementById('biology-link').href = 'Boardb/index.html';
+      }
+    }
+  </script>
+
+</body>
+</html>
