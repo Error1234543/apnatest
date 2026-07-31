@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>d અને f-બ્લોક તત્ત્વો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>d અને f-બ્લોક તત્ત્વો Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "નીચેના પૈકી કયું તત્વ d-બ્લોકનું નથી?", "opts": ["ઝિંક (Zn)", "કોપર (Cu)", "સ્કેન્ડિયમ (Sc)", "એલ્યુમિનિયમ (Al)"], "ans": 3, "exp": "એલ્યુમિનિયમ p-બ્લોકનું તત્વ છે, જ્યારે બાકીના તત્વો d-બ્લોકમાં આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ્સ શ્રેણીમાં કેટલા તત્વોનો સમાવેશ થાય છે?", "opts": ["12", "14", "10", "15"], "ans": 1, "exp": "લેન્થેનાઇડ્સ શ્રેણીમાં સિરિયમ (Ce) થી લ્યુટેશિયમ (Lu) સુધીના 14 તત્વોનો સમાવેશ થાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયા તત્વની ઇલેક્ટ્રોનીય રચના [Xe] 4f¹⁴ 5d¹ 6s² છે?", "opts": ["સેરિયમ (Ce)", "લ્યુટેશિયમ (Lu)", "લેન્થેનમ (La)", "ગેડોલિનિયમ (Gd)"], "ans": 1, "exp": "લ્યુટેશિયમની ઇલેક્ટ્રોનીય રચના [Xe] 4f¹⁴ 5d¹ 6s² છે, જે f-બ્લોકના છેલ્લા તત્વ તરીકે ઓળખાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલા વિધાનો સાચાં છે?\n(i) d-બ્લોક તત્વોને સંક્રાંતિ તત્વો કહે છે.\n(ii) લેન્થેનાઇડ્સ અને એક્ટિનાઇડ્સ f-બ્લોક તત્વો છે.\n(iii) સ્કેન્ડિયમ (Sc) અને ઝિંક (Zn) d-બ્લોક તત્વો નથી.\n(iv) f-બ્લોક તત્વોની ઓક્સિડેશન અવસ્થા +3 સામાન્ય છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે, જ્યારે વિધાન (iii) ખોટું છે કારણ કે સ્કેન્ડિયમ અને ઝિંક d-બ્લોક તત્વો છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ રેડિયોએક્ટિવ નથી?", "opts": ["યુરેનિયમ (U)", "થોરિયમ (Th)", "સેરિયમ (Ce)", "પ્લુટોનિયમ (Pu)"], "ans": 2, "exp": "સેરિયમ (Ce) લેન્થેનાઇડ્સ શ્રેણીનું તત્વ છે અને તે રેડિયોએક્ટિવ નથી, જ્યારે બાકીના તત્વો રેડિયોએક્ટિવ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ્સ શ્રેણીમાં કયા તત્ત્વનું ઇલેક્ટ્રોનીય રચના [Xe] 4f⁷ 6s² છે?", "opts": ["યુરોપિયમ (Eu)", "ગેડોલિનિયમ (Gd)", "ટર્બિયમ (Tb)", "ડિસ્પ્રોસિયમ (Dy)"], "ans": 1, "exp": "ગેડોલિનિયમની ઇલેક્ટ્રોનીય રચના [Xe] 4f⁷ 5d¹ 6s² છે, પરંતુ અહીં આપેલ રચના ગેડોલિનિયમની સાચી રચના છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન લેન્થેનાઇડ સંકોચન માટે ખોટું છે?", "opts": ["લેન્થેનાઇડ્સમાં પરમાણ્વીય ત્રિજ્યા ઘટે છે.", "લેન્થેનાઇડ્સમાં 4f ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ થાય છે.", "લેન્થેનાઇડ્સમાં પરમાણ્વીય ક્રમાંક વધતા પરમાણ્વીય કદ વધે છે.", "લેન્થેનાઇડ સંકોચનને કારણે Hf અને Zr ની ત્રિજ્યા લગભગ સમાન હોય છે."], "ans": 2, "exp": "લેન્થેનાઇડ સંકોચનમાં પરમાણ્વીય ક્રમાંક વધતા પરમાણ્વીય ત્રિજ્યા ઘટે છે, નહીં કે વધે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્ત્વ +7 ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે?", "opts": ["મેંગેનીઝ (Mn)", "આયર્ન (Fe)", "કોબાલ્ટ (Co)", "નિકલ (Ni)"], "ans": 0, "exp": "મેંગેનીઝ +7 ઓક્સિડેશન અવસ્થા દર્શાવે છે, જેમ કે KMnO₄ માં.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "f-બ્લોક તત્ત્વો માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["f-બ્લોક તત્ત્વોને આંતરિક સંક્રાંતિ તત્ત્વો કહે છે.", "લેન્થેનાઇડ્સ અને એક્ટિનાઇડ્સ f-બ્લોકમાં આવે છે.", "f-બ્લોક તત્ત્વોના બાહ્યતમ કક્ષામાં f-ઇલેક્ટ્રોન હોય છે.", "f-બ્લોક તત્ત્વો રાસાયણિક રીતે ખૂબ જ સક્રિય હોય છે."], "ans": 2, "exp": "f-બ્લોક તત્ત્વોના બાહ્યતમ કક્ષામાં f-ઇલેક્ટ્રોન હોતા નથી, પરંતુ આંતરિક કક્ષામાં હોય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્ત્વ f-બ્લોકનું નથી?", "opts": ["સેરિયમ (Ce)", "યુરેનિયમ (U)", "ગોલ્ડ (Au)", "થોરિયમ (Th)"], "ans": 2, "exp": "ગોલ્ડ (Au) એ d-બ્લોક તત્ત્વ છે, જ્યારે બાકીનાં તત્ત્વો f-બ્લોકમાં આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનોઇડ્સ શ્રેણીમાં કયું તત્ત્વ +2 ઓક્સિડેશન અવસ્થા દર્શાવે છે?", "opts": ["લેન્થેનમ (La)", "યુરોપિયમ (Eu)", "સેરિયમ (Ce)", "પ્રોમેથિયમ (Pm)"], "ans": 1, "exp": "યુરોપિયમ (Eu) એ લેન્થેનોઇડ્સ શ્રેણીમાં +2 ઓક્સિડેશન અવસ્થા દર્શાવે છે કારણ કે તેના ઇલેક્ટ્રોનિક રચનામાં સ્થિર અર્ધપૂર્ણ 4f⁷ રચના હોય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્ત્વ એક્ટિનોઇડ્સ શ્રેણીનું નથી?", "opts": ["એક્ટિનિયમ (Ac)", "થોરિયમ (Th)", "પ્લુટોનિયમ (Pu)", "હાફનિયમ (Hf)"], "ans": 3, "exp": "હાફનિયમ (Hf) એ d-બ્લોક તત્ત્વ છે, જ્યારે બાકીનાં તત્ત્વો એક્ટિનોઇડ્સ શ્રેણીમાં આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "d-બ્લોક તત્ત્વોમાં કયું તત્ત્વ સૌથી વધુ ઓક્સિડેશન અવસ્થા દર્શાવે છે?", "opts": ["મેંગેનીઝ (Mn)", "આયર્ન (Fe)", "કોબાલ્ટ (Co)", "નિકલ (Ni)"], "ans": 0, "exp": "મેંગેનીઝ (Mn) એ +7 સુધીની ઓક્સિડેશન અવસ્થા દર્શાવે છે, જે d-બ્લોક તત્ત્વોમાં સૌથી વધુ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. લેન્થેનોઇડ્સ શ્રેણીમાં ત્રિજ્યા ઘટતી જાય છે.\n2. એક્ટિનોઇડ્સ શ્રેણીમાં રેડિયોએક્ટિવ તત્ત્વો છે.\n3. d-બ્લોક તત્ત્વો રંગીન સંયોજનો બનાવે છે.\n4. f-બ્લોક તત્ત્વો માત્ર +3 ઓક્સિડેશન અવસ્થા દર્શાવે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન 1, 2 અને 3 સાચાં છે. વિધાન 4 ખોટું છે કારણ કે f-બ્લોક તત્ત્વો અન્ય ઓક્સિડેશન અવસ્થાઓ પણ દર્શાવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ d-બ્લોકનું નથી પરંતુ તેની રાસાયણિક વર્તણૂક d-બ્લોક તત્વોને મળતી આવે છે?", "opts": ["ઝિંક (Zn)", "સ્કેન્ડિયમ (Sc)", "કોપર (Cu)", "ક્રોમિયમ (Cr)"], "ans": 0, "exp": "ઝિંક (Zn) d-બ્લોકનું તત્વ નથી કારણ કે તેની ઇલેક્ટ્રોન રચના [Ar] 3d¹⁰ 4s² છે, પરંતુ તેની રાસાયણિક વર્તણૂક d-બ્લોક તત્વો જેવી જ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીમાં તત્વોના પરમાણ્વીય ક્રમાંક વધતા જતા તેમના પરમાણ્વીય ત્રિજ્યામાં થતો ફેરફાર કયો છે?", "opts": ["ત્રિજ્યા વધે છે", "ત્રિજ્યા ઘટે છે (લેન્થેનાઇડ સંકોચન)", "ત્રિજ્યા અચળ રહે છે", "ત્રિજ્યા અનિયમિત રીતે બદલાય છે"], "ans": 1, "exp": "લેન્થેનાઇડ શ્રેણીમાં પરમાણ્વીય ક્રમાંક વધતા જતા પરમાણ્વીય ત્રિજ્યા ઘટે છે, જેને લેન્થેનાઇડ સંકોચન કહે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ f-બ્લોકનું છે અને તેની ઇલેક્ટ્રોન રચના [Xe] 4f⁷ 6s² છે?", "opts": ["સેરિયમ (Ce)", "ગેડોલિનિયમ (Gd)", "યુરોપિયમ (Eu)", "ટર્બિયમ (Tb)"], "ans": 1, "exp": "ગેડોલિનિયમ (Gd) ની ઇલેક્ટ્રોન રચના [Xe] 4f⁷ 6s² છે, જે f-બ્લોકનું તત્વ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "d-બ્લોક તત્વોમાં નીચેના પૈકી કયું તત્વ સૌથી વધુ ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે?", "opts": ["મેંગેનીઝ (Mn)", "આયર્ન (Fe)", "કોબાલ્ટ (Co)", "નિકલ (Ni)"], "ans": 0, "exp": "મેંગેનીઝ (Mn) +7 સુધીની ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે, જે d-બ્લોક તત્વોમાં સૌથી વધુ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલા વિધાનો સાચાં છે?\n(i) લેન્થેનાઇડ તત્વો રંગીન આયનો બનાવે છે.\n(ii) એક્ટિનાઇડ તત્વો રેડિયોએક્ટિવ હોય છે.\n(iii) d-બ્લોક તત્વો ઉત્તમ ઉદ્દીપક તરીકે વર્તે છે.\n(iv) f-બ્લોક તત્વોની ચુંબકીય ગુણધર્મો નબળા હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, જ્યારે વિધાન (iv) ખોટું છે કારણ કે f-બ્લોક તત્વો પ્રબળ ચુંબકીય ગુણધર્મો ધરાવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીમાં તત્વોના પરમાણ્વીય કદમાં થતો ફેરફાર કયા નામે ઓળખાય છે?", "opts": ["લેન્થેનાઇડ સંકોચન", "એક્ટિનાઇડ સંકોચન", "ટ્રાન્સઇફેક્ટ", "આયનિક ત્રિજ્યા વધારો"], "ans": 0, "exp": "લેન્થેનાઇડ શ્રેણીમાં તત્વોના પરમાણ્વીય કદમાં થતો ઘટાડો 'લેન્થેનાઇડ સંકોચન' તરીકે ઓળખાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ f-બ્લોકનું છે અને તેનો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે?", "opts": ["આયર્ન (Fe)", "યુરેનિયમ (U)", "કોબાલ્ટ (Co)", "નિકલ (Ni)"], "ans": 1, "exp": "યુરેનિયમ (U) f-બ્લોકનું તત્વ છે અને તેનો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "d-બ્લોક તત્વોમાં કયા તત્વની ઇલેક્ટ્રોનીય રચના અપવાદરૂપ છે અને તેની રચના [Ar] 3d⁵ 4s¹ છે?", "opts": ["વેનેડિયમ (V)", "ક્રોમિયમ (Cr)", "મેંગેનીઝ (Mn)", "આયર્ન (Fe)"], "ans": 1, "exp": "ક્રોમિયમ (Cr)ની ઇલેક્ટ્રોનીય રચના અપવાદરૂપ છે અને તે [Ar] 3d⁵ 4s¹ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) લેન્થેનાઇડ તત્વોની ઓક્સિડેશન અવસ્થા +3 સામાન્ય છે.\n(ii) એક્ટિનાઇડ તત્વો રેડિયોસક્રિય હોય છે.\n(iii) d-બ્લોક તત્વો રંગીન સંયોજનો બનાવે છે.\n(iv) f-બ્લોક તત્વોની ચુંબકીય ગુણધર્મો નબળા હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, જ્યારે વિધાન (iv) ખોટું છે કારણ કે f-બ્લોક તત્વોની ચુંબકીય ગુણધર્મો પ્રબળ હોય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "d-બ્લોક તત્ત્વોના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ તત્ત્વોને સંક્રાંતિ તત્ત્વો કહે છે.", "આ તત્ત્વોના બાહ્યતમ કોશમાં ઇલેક્ટ્રોન d-ઓર્બિટલમાં ભરાય છે.", "આ તત્ત્વોના બધા જ સભ્યો ધાતુ છે.", "આ તત્ત્વોના સંયોજનો રંગીન હોતા નથી."], "ans": 3, "exp": "d-બ્લોક તત્ત્વોના સંયોજનો સામાન્ય રીતે રંગીન હોય છે કારણ કે d-ઓર્બિટલમાં ઇલેક્ટ્રોન સંક્રમણને લીધે પ્રકાશનું શોષણ થાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીના તત્ત્વોમાં નીચેનામાંથી કયું લક્ષણ જોવા મળતું નથી?", "opts": ["આ તત્ત્વોના પરમાણુ કદમાં ક્રમશઃ ઘટાડો થાય છે.", "આ તત્ત્વોના +3 ઓક્સિડેશન અવસ્થા સામાન્ય છે.", "આ તત્ત્વોના સંયોજનો રંગીન હોય છે.", "આ તત્ત્વોના બાહ્યતમ કોશમાં f-ઓર્બિટલમાં ઇલેક્ટ્રોન ભરાય છે."], "ans": 3, "exp": "લેન્થેનાઇડ શ્રેણીના તત્ત્વોમાં ઇલેક્ટ્રોન 4f-ઓર્બિટલમાં ભરાય છે, બાહ્યતમ કોશમાં નહીં.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું તત્ત્વ d-બ્લોકનું નથી પરંતુ f-બ્લોકનું છે?", "opts": ["ઝિંક (Zn)", "સ્કેન્ડિયમ (Sc)", "યુરેનિયમ (U)", "કોપર (Cu)"], "ans": 2, "exp": "યુરેનિયમ એ એક્ટિનાઇડ શ્રેણીનું તત્ત્વ છે, જે f-બ્લોકમાં આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ સંકોચનના સંદર્ભમાં નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેન્થેનાઇડ શ્રેણીમાં પરમાણુ કદ વધે છે.", "લેન્થેનાઇડ સંકોચનને કારણે ત્રીજી અને ચોથી સંક્રાંતિ શ્રેણીના તત્ત્વોના પરમાણુ કદ સમાન થાય છે.", "લેન્થેનાઇડ સંકોચનને કારણે f-ઓર્બિટલમાં ઇલેક્ટ્રોન ભરાવાનું બંધ થાય છે.", "લેન્થેનાઇડ સંકોચન માત્ર લેન્થેનાઇડ શ્રેણી પૂરી થયા પછી જોવા મળે છે."], "ans": 1, "exp": "લેન્થેનાઇડ સંકોચનને કારણે ત્રીજી અને ચોથી સંક્રાંતિ શ્રેણીના તત્ત્વોના પરમાણુ કદ લગભગ સમાન થાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું તત્ત્વ સૌથી વધુ ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે?", "opts": ["મેંગેનીઝ (Mn)", "આયર્ન (Fe)", "કોબાલ્ટ (Co)", "નિકલ (Ni)"], "ans": 0, "exp": "મેંગેનીઝ +7 સુધીની ઓક્સિડેશન અવસ્થા દર્શાવી શકે છે, જે અન્ય તત્ત્વો કરતાં વધુ છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ d-બ્લોકનું નથી પરંતુ તેની ઇલેક્ટ્રોનીય રચના (n-1)d¹⁰ ns² પ્રકારની છે?", "opts": ["ઝિંક (Zn)", "કેડમિયમ (Cd)", "પારો (Hg)", "કોપર (Cu)"], "ans": 3, "exp": "કોપર (Cu)ની ઇલેક્ટ્રોનીય રચના [Ar] 3d¹⁰ 4s¹ છે, જે d-બ્લોકનું તત્વ છે. બાકીના તત્વોની રચના (n-1)d¹⁰ ns² પ્રકારની છે પરંતુ d-બ્લોકમાં નથી.", "chapter": "d અને f-બ્લોક તત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીમાં પરમાણ્વીય ક્રમાંક વધતાં પરમાણ્વીય ત્રિજ્યા ઘટવાનું કારણ શું છે?", "opts": ["ઇલેક્ટ્રોન-ઇલેક્ટ્રોન અપાકર્ષણ વધે છે", "ન્યુક્લિયર ચાર્જ વધે છે અને 4f ઇલેક્ટ્રોન નબળું શીલ્ડિંગ કરે છે", "ઇલેક્ટ્રોનનું ઉમેરણ 5d કક્ષકમાં થાય છે", "આંતરપરમાણ્વીય આકર્ષણ બળ ઘટે છે"], "ans": 1, "exp": "લેન્થેનાઇડ સંકોચનનું કારણ ન્યુક્લિયર ચાર્જમાં વધારો અને 4f ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ છે, જે પરમાણ્વીય ત્રિજ્યામાં ઘટાડો કરે છે.", "chapter": "d અને f-બ્લોક તત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ f-બ્લોકનું નથી પરંતુ તેની ઇલેક્ટ્રોનીય રચના [Xe] 4f¹⁴ 5d¹ 6s² છે?", "opts": ["લ્યુટેશિયમ (Lu)", "હાફનિયમ (Hf)", "લેન્થેનમ (La)", "ઇટર્બિયમ (Yb)"], "ans": 1, "exp": "હાફનિયમ (Hf)ની ઇલેક્ટ્રોનીય રચના [Xe] 4f¹⁴ 5d² 6s² છે, જે d-બ્લોકનું તત્વ છે. લ્યુટેશિયમ (Lu)ની રચના [Xe] 4f¹⁴ 5d¹ 6s² છે પરંતુ તે f-બ્લોકનું છેલ્લું તત્વ છે.", "chapter": "d અને f-બ્લોક તત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીના તત્ત્વોની ઇલેક્ટ્રોનીય રચના લખતી વખતે 4f અને 5d કક્ષકોની ઊર્જા ક્રમમાં કયો ફેરફાર જોવા મળે છે?", "opts": ["4f કક્ષકની ઊર્જા 5d કરતાં વધુ હોય છે", "5d કક્ષકની ઊર્જા 4f કરતાં વધુ હોય છે", "4f અને 5d કક્ષકોની ઊર્જા લગભગ સમાન હોય છે", "લેન્થેનાઇડ શ્રેણીમાં 5d કક્ષક ભરાતી નથી"], "ans": 1, "exp": "લેન્થેનાઇડ શ્રેણીમાં 5d કક્ષકની ઊર્જા 4f કરતાં થોડી વધુ હોય છે, તેથી 6s કક્ષક ભરાયા પછી 4f કક્ષક ભરાવા લાગે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્ત્વ લેન્થેનાઇડ સંકોચનનું ઉદાહરણ નથી?", "opts": ["Zr અને Hf", "Nb અને Ta", "Mo અને W", "Cr અને Mn"], "ans": 3, "exp": "લેન્થેનાઇડ સંકોચનને કારણે Zr-Hf, Nb-Ta અને Mo-W ના પરમાણ્વીય કદ લગભગ સમાન હોય છે, પરંતુ Cr અને Mn એ d-બ્લોકના પ્રથમ શ્રેણીના તત્ત્વો છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક્ટિનાઇડ શ્રેણીના તત્ત્વોમાં કયું તત્ત્વ કુદરતી રીતે મળતું નથી અને માનવસર્જિત છે?", "opts": ["થોરિયમ (Th)", "યુરેનિયમ (U)", "પ્લુટોનિયમ (Pu)", "એક્ટિનિયમ (Ac)"], "ans": 2, "exp": "પ્લુટોનિયમ (Pu) એ કુદરતી રીતે મળતું નથી અને તેને પરમાણુ રિએક્ટરમાં કૃત્રિમ રીતે ઉત્પન્ન કરવામાં આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિકલ્પોમાંથી કયું વિધાન લેન્થેનાઇડ તત્ત્વો માટે ખોટું છે?", "opts": ["લેન્થેનાઇડ તત્ત્વો +3 ઓક્સિડેશન અવસ્થા દર્શાવે છે", "લેન્થેનાઇડ તત્ત્વો રંગીન આયનો બનાવે છે", "લેન્થેનાઇડ તત્ત્વો મુખ્યત્વે રેડિયોએક્ટિવ હોય છે", "લેન્થેનાઇડ તત્ત્વોના ચુંબકીય ગુણધર્મો હોય છે"], "ans": 2, "exp": "લેન્થેનાઇડ તત્ત્વો મુખ્યત્વે રેડિયોએક્ટિવ હોતા નથી, પરંતુ એક્ટિનાઇડ તત્ત્વો રેડિયોએક્ટિવ હોય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ લેન્થેનાઇડ શ્રેણીનું નથી પરંતુ d-બ્લોક તત્વ છે?", "opts": ["સેરિયમ (Ce)", "ગેડોલિનિયમ (Gd)", "ઇટ્રિયમ (Y)", "ડિસ્પ્રોસિયમ (Dy)"], "ans": 2, "exp": "ઇટ્રિયમ (Y) ની ઇલેક્ટ્રોનીય રચના [Kr] 4d¹ 5s² છે, જે d-બ્લોક તત્વ છે, જ્યારે બાકીનાં તત્વો લેન્થેનાઇડ શ્રેણીનાં છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) લેન્થેનાઇડ સંકોચનને કારણે Zr અને Hf નાં પરમાણ્વીય કદ લગભગ સમાન હોય છે.\n(ii) Ce⁴⁺ નો ઇલેક્ટ્રોનીય રચના Xe જેવો છે.\n(iii) લેન્થેનાઇડ તત્વો મુખ્યત્વે +3 ઓક્સિડેશન અવસ્થા દર્શાવે છે.\n(iv) Th નો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "(i), (ii) અને (iii) સાચાં છે. Th પણ f-બ્લોક તત્વ છે અને પરમાણુ ઊર્જા ઉત્પાદનમાં ઉપયોગી છે, પરંતુ તે લેન્થેનાઇડ નથી.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ સંકોચનનું મુખ્ય કારણ શું છે?", "opts": ["4f ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ અસર", "5d ઇલેક્ટ્રોનનું પ્રબળ શીલ્ડિંગ અસર", "6s ઇલેક્ટ્રોનનું નબળું શીલ્ડિંગ અસર", "3d ઇલેક્ટ્રોનનું પ્રબળ શીલ્ડિંગ અસર"], "ans": 0, "exp": "4f ઇલેક્ટ્રોનનું શીલ્ડિંગ અસર ખૂબ જ નબળું હોય છે, જેના કારણે કેન્દ્રીય આકર્ષણ વધે છે અને પરમાણ્વીય કદ ઘટે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક્ટિનાઇડ શ્રેણીના તત્ત્વો માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["તેઓ રેડિયોએક્ટિવ છે.", "તેઓ 5f કક્ષક ભરે છે.", "તેઓ બધા કૃત્રિમ રીતે ઉત્પન્ન થાય છે.", "થોરિયમ અને યુરેનિયમ કુદરતી રીતે મળી આવે છે."], "ans": 2, "exp": "એક્ટિનાઇડ શ્રેણીના પ્રથમ ચાર તત્ત્વો (થોરિયમ, પ્રોટેક્ટિનિયમ, યુરેનિયમ અને નેપ્ચ્યુનિયમ) કુદરતી રીતે મળી આવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "{'assertion': 'Cr ની ઇલેક્ટ્રોનીય રચના [Ar] 3d⁵ 4s¹ છે.', 'reason': 'અર્ધપૂર્ણ d-કક્ષક વધુ સ્થિરતા પ્રદાન કરે છે.'}", "opts": ["અસર્શન અને કારણ બંને સાચાં છે અને કારણ એ અસર્શનની સાચી સમજૂતી છે.", "અસર્શન અને કારણ બંને સાચાં છે પરંતુ કારણ એ અસર્શનની સાચી સમજૂતી નથી.", "અસર્શન સાચું છે પરંતુ કારણ ખોટું છે.", "અસર્શન ખોટું છે પરંતુ કારણ સાચું છે."], "ans": 0, "exp": "Cr ની ઇલેક્ટ્રોનીય રચના [Ar] 3d⁵ 4s¹ છે કારણ કે અર્ધપૂર્ણ d-કક્ષક વધુ સ્થિરતા આપે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ લેન્થેનાઇડ શ્રેણીનું નથી પરંતુ તેની ઇલેક્ટ્રોનીય રચના 4f શ્રેણી સાથે સંકળાયેલી છે?", "opts": ["લ્યુટીશિયમ (Lu)", "લેન્થેનમ (La)", "સેરિયમ (Ce)", "ગેડોલિનિયમ (Gd)"], "ans": 1, "exp": "લેન્થેનમ (La) ની ઇલેક્ટ્રોનીય રચના [Xe] 5d¹ 6s² છે, જે 4f શ્રેણી સાથે સંકળાયેલી નથી, જ્યારે તે લેન્થેનાઇડ શ્રેણીનો પ્રથમ સભ્ય ગણાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો લેન્થેનાઇડ સંકોચન સંબંધિત સાચાં છે?\n(i) લેન્થેનાઇડ શ્રેણીમાં પરમાણ્વીય ત્રિજ્યા ક્રમશઃ ઘટતી જાય છે.\n(ii) લેન્થેનાઇડ સંકોચનને કારણે Zr અને Hf ની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે.\n(iii) લેન્થેનાઇડ સંકોચનને કારણે d-બ્લોક તત્વોના ગુણધર્મોમાં વધુ સમાનતા જોવા મળે છે.\n(iv) લેન્થેનાઇડ સંકોચનનું મુખ્ય કારણ 4f ઇલેક્ટ્રોનનું નબળું શિલ્ડિંગ છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે. વિધાન (iii) અંશતઃ સાચું છે, પરંતુ તે મુખ્યત્વે d-બ્લોક તત્વોના ગુણધર્મોમાં સમાનતા માટે જવાબદાર નથી.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "f-બ્લોક તત્વોમાં 'એક્ટિનાઇડ સંકોચન'નું મુખ્ય કારણ શું છે?", "opts": ["5f-કક્ષકોનું નબળું શિલ્ડિંગ", "6d-કક્ષકોનું ભરાવું", "7s-કક્ષકોનું સંકોચન", "ન્યુક્લિયર ચાર્જમાં ઘટાડો"], "ans": 0, "exp": "એક્ટિનાઇડ શ્રેણીમાં 5f-કક્ષકોનું નબળું શિલ્ડિંગ અને વધતો ન્યુક્લિયર ચાર્જ પરમાણ્વીય ત્રિજ્યામાં ઘટાડો કરે છે, જેને એક્ટિનાઇડ સંકોચન કહે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું તત્ત્વ +3 ઓક્સિડેશન અવસ્થા સિવાય +4 ઓક્સિડેશન અવસ્થા પણ દર્શાવે છે?", "opts": ["લેન્થેનમ (La)", "સેરિયમ (Ce)", "નિયોડીમિયમ (Nd)", "યુરોપિયમ (Eu)"], "ans": 1, "exp": "સેરિયમ (Ce) +3 ઓક્સિડેશન અવસ્થા ઉપરાંત +4 ઓક્સિડેશન અવસ્થા પણ દર્શાવે છે, કારણ કે તેની ઇલેક્ટ્રોનીય રચના [Xe] 4f¹ 5d¹ 6s² છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લઈને કેટલાં વિધાનો સાચાં છે?\n(i) લેન્થેનાઇડ તત્ત્વોના રંગીન આયનો તેમના f-f સંક્રમણને કારણે હોય છે.\n(ii) એક્ટિનાઇડ તત્ત્વો રેડિયોસક્રિય હોય છે.\n(iii) લેન્થેનાઇડ સંકોચનને કારણે Zr અને Hf ની પરમાણુ ત્રિજ્યા લગભગ સમાન હોય છે.\n(iv) લેન્થેનાઇડ તત્ત્વો મુખ્યત્વે +2 ઓક્સિડેશન અવસ્થા દર્શાવે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, જ્યારે વિધાન (iv) ખોટું છે કારણ કે લેન્થેનાઇડ તત્ત્વો મુખ્યત્વે +3 ઓક્સિડેશન અવસ્થા દર્શાવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્વ +3 ઓક્સિડેશન અવસ્થા દર્શાવતું નથી?", "opts": ["સ્કેન્ડિયમ (Sc)", "ઇટ્રિયમ (Y)", "લ્યુટેશિયમ (Lu)", "યુરેનિયમ (U)"], "ans": 3, "exp": "યુરેનિયમ (U) એ એક્ટિનાઇડ શ્રેણીનું તત્વ છે અને તે મુખ્યત્વે +4 અને +6 ઓક્સિડેશન અવસ્થા દર્શાવે છે, જ્યારે +3 ઓક્સિડેશન અવસ્થા દર્શાવતું નથી.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) લેન્થેનાઇડ તત્વો રંગીન આયનો બનાવે છે.\n(ii) લેન્થેનાઇડ તત્વો મુખ્યત્વે +2 ઓક્સિડેશન અવસ્થા દર્શાવે છે.\n(iii) લેન્થેનાઇડ સંકોચનને કારણે Zr અને Hfની પરમાણ્વીય ત્રિજ્યા લગભગ સમાન હોય છે.\n(iv) લેન્થેનાઇડ તત્વોનો ઉપયોગ લેસર બનાવવામાં થાય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (iii) અને (iv) સાચાં છે. લેન્થેનાઇડ તત્વો મુખ્યત્વે +3 ઓક્સિડેશન અવસ્થા દર્શાવે છે, તેથી વિધાન (ii) ખોટું છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયા તત્ત્વની સૌથી વધુ ઓક્સિડેશન અવસ્થા +7 છે?", "opts": ["મેંગેનીઝ (Mn)", "ક્રોમિયમ (Cr)", "આયર્ન (Fe)", "કોબાલ્ટ (Co)"], "ans": 0, "exp": "મેંગેનીઝ (Mn) ની સૌથી વધુ ઓક્સિડેશન અવસ્થા +7 છે, જે KMnO₄ માં જોવા મળે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું તત્ત્વ એક્ટિનાઇડ શ્રેણીનું છે અને તેનો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે?", "opts": ["થોરિયમ (Th)", "યુરેનિયમ (U)", "પ્લુટોનિયમ (Pu)", "આપેલ તમામ"], "ans": 3, "exp": "થોરિયમ, યુરેનિયમ અને પ્લુટોનિયમ એ એક્ટિનાઇડ શ્રેણીના તત્ત્વો છે અને તેનો ઉપયોગ પરમાણુ ઊર્જા ઉત્પાદનમાં થાય છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}, {"q": "લેન્થેનાઇડ શ્રેણીના તત્ત્વોમાં નીચેનામાંથી કયું તત્ત્વ +4 ઓક્સિડેશન અવસ્થા દર્શાવતું નથી?", "opts": ["સેરિયમ (Ce)", "પ્રેસીઓડિમિયમ (Pr)", "નિયોડિમિયમ (Nd)", "ટર્બિયમ (Tb)"], "ans": 2, "exp": "લેન્થેનાઇડ શ્રેણીમાં સેરિયમ, પ્રેસીઓડિમિયમ અને ટર્બિયમ +4 ઓક્સિડેશન અવસ્થા દર્શાવે છે, જ્યારે નિયોડિમિયમ માત્ર +3 ઓક્સિડેશન અવસ્થા જ દર્શાવે છે.", "chapter": "d અને f-બ્લોક તત્ત્વો", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "d અને f-બ્લોક તત્ત્વો Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
