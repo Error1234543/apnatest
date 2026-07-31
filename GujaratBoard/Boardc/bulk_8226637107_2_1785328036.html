@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિદ્યુતરસાયણ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>વિદ્યુતરસાયણ Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "વિદ્યુતરાસાયણિક કોષમાં કેથોડ પર શું થાય છે?", "opts": ["ઑક્સિડેશન", "રિડક્શન", "ઉભય પ્રક્રિયા", "કોઈ પ્રક્રિયા થતી નથી"], "ans": 1, "exp": "કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે, જ્યાં ધન આયનો ઇલેક્ટ્રોન મેળવીને તટસ્થ પરમાણુમાં ફેરવાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ વિદ્યુતનું સુવાહક નથી?", "opts": ["ગ્રેફાઇટ", "તાંબુ", "સોડિયમ ક્લોરાઇડ (NaCl) નું પિગળેલું સ્વરૂપ", "સોડિયમ ક્લોરાઇડ (NaCl) નું ઘન સ્વરૂપ"], "ans": 3, "exp": "સોડિયમ ક્લોરાઇડનું ઘન સ્વરૂપ આયનોને ગતિ કરવા દેતું નથી, તેથી તે વિદ્યુતનું સુવાહક નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "ડેનિયલ કોષમાં Zn|Zn²⁺ અને Cu²⁺|Cu વિદ્યુતધ્રુવોનો પ્રમાણિત વિદ્યુતધ્રુવ પોટેન્શિયલ અનુક્રમે -0.76 V અને +0.34 V છે. આ કોષનો પ્રમાણિત કોષ પોટેન્શિયલ (E°cell) કેટલો હશે?", "opts": ["1.10 V", "0.42 V", "-1.10 V", "-0.42 V"], "ans": 0, "exp": "E°cell = E°cathode - E°anode = 0.34 V - (-0.76 V) = 1.10 V.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. વિદ્યુતવિભાજનમાં એનોડ પર ઑક્સિડેશન થાય છે.\n2. વિદ્યુતરાસાયણિક કોષમાં રેડોક્ષ પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે.\n3. વિદ્યુતવિભાજનમાં કેથોડ પર રિડક્શન થાય છે.\n4. વિદ્યુતરાસાયણિક કોષમાં બાહ્ય પરિપથમાં ઇલેક્ટ્રોન એનોડથી કેથોડ તરફ વહે છે.", "opts": ["1", "2", "3", "4"], "ans": 3, "exp": "બધાં ચાર વિધાનો સાચાં છે, કારણ કે તે વિદ્યુતરસાયણના મૂળભૂત સિદ્ધાંતોને અનુરૂપ છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન વિદ્યુતવિભાજન દરમિયાન એનોડ પર ઑક્સિડાઇઝ થશે નહીં?", "opts": ["NaCl (પિગળેલું)", "H₂O", "CuSO₄ (જલીય)", "AgNO₃ (જલીય)"], "ans": 1, "exp": "પાણી (H₂O) એનોડ પર ઑક્સિડાઇઝ થતું નથી, કારણ કે તેના કરતાં ક્લોરાઇડ (Cl⁻) અથવા અન્ય આયનો વધુ સરળતાથી ઑક્સિડાઇઝ થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ વિદ્યુતવિભાજ્ય નથી?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "સલ્ફ્યુરિક એસિડ (H₂SO₄)", "ગ્લુકોઝ (C₆H₁₂O₆)", "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH)"], "ans": 2, "exp": "ગ્લુકોઝ વિદ્યુતવિભાજ્ય નથી કારણ કે તે પાણીમાં આયનોમાં વિભાજિત થતો નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. વિદ્યુતરાસાયણિક કોષમાં ઍનોડ પર ઑક્સિડેશન થાય છે.\n2. ડેનિયલ કોષમાં ઝિંક ઍનોડ તરીકે વર્તે છે.\n3. વિદ્યુતવિભાજન દરમિયાન કેથોડ પર હંમેશાં હાઇડ્રોજન વાયુ ઉત્પન્ન થાય છે.\n4. વિદ્યુતરાસાયણિક કોષમાં બાહ્ય પરિપથમાં ઇલેક્ટ્રોન ઍનોડથી કેથોડ તરફ વહે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. વિધાન 3 ખોટું છે કારણ કે કેથોડ પર હંમેશાં હાઇડ્રોજન ઉત્પન્ન થતો નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25°C તાપમાને Zn²⁺|Zn વિદ્યુતધ્રુવનો પ્રમાણિત વિદ્યુતધ્રુવ પોટેન્શિયલ -0.76 V છે. જો Zn²⁺ આયનની સાંદ્રતા 0.1 M હોય, તો નર્ન્સ્ટ સમીકરણનો ઉપયોગ કરીને વિદ્યુતધ્રુવ પોટેન્શિયલ શોધો. (R = 8.314 J/mol·K, F = 96500 C/mol)", "opts": ["-0.79 V", "-0.73 V", "-0.82 V", "-0.70 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ: E = E° - (RT/nF) ln[Zn²⁺]. ગણતરી કરતાં E = -0.76 - (0.059/2) log(0.1) = -0.79 V.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો વિદ્યુતરાસાયણિક કોષનો પ્રકાર નથી?", "opts": ["ગેલ્વેનિક કોષ", "વિદ્યુતવિભાજન કોષ", "ઇંધણ કોષ", "ફોટોઇલેક્ટ્રિક કોષ"], "ans": 3, "exp": "ફોટોઇલેક્ટ્રિક કોષ વિદ્યુતરાસાયણિક કોષ નથી, તે પ્રકાશ ઊર્જાનું વિદ્યુત ઊર્જામાં રૂપાંતર કરે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કેથોડ પર કઈ પ્રક્રિયા થાય છે?", "opts": ["ઑક્સિડેશન", "રિડક્શન", "ઉદાસીનકરણ", "વિઘટન"], "ans": 1, "exp": "કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે, જ્યાં ઇલેક્ટ્રોન મેળવીને આયનો અથવા અણુઓનું રિડક્શન થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વિદ્યુતરાસાયણિક શ્રેણી માટે ખોટું છે?", "opts": ["વધુ ધન E° મૂલ્ય ધરાવતા તત્ત્વો વધુ સક્રિય રિડક્શનકર્તા હોય છે.", "વધુ ઋણ E° મૂલ્ય ધરાવતા તત્ત્વો વધુ સક્રિય ઑક્સિડેશનકર્તા હોય છે.", "ધાતુઓની પ્રતિક્રિયાત્મકતા વિદ્યુતરાસાયણિક શ્રેણી પર આધારિત છે.", "વિદ્યુતરાસાયણિક શ્રેણીમાં Li સૌથી વધુ ઋણ E° મૂલ્ય ધરાવે છે."], "ans": 0, "exp": "વધુ ધન E° મૂલ્ય ધરાવતા તત્ત્વો વધુ સક્રિય ઑક્સિડેશનકર્તા હોય છે, રિડક્શનકર્તા નહીં.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "ડેનિયલ કોષમાં Zn|Zn²⁺(1M)||Cu²⁺(1M)|Cu માટે પ્રમાણિત કોષ પોટેન્શિયલ (E°cell) કેટલો હોય છે? (E°Zn²⁺/Zn = -0.76 V, E°Cu²⁺/Cu = +0.34 V)", "opts": ["1.10 V", "0.42 V", "-1.10 V", "-0.42 V"], "ans": 0, "exp": "E°cell = E°Cathode - E°Anode = 0.34 V - (-0.76 V) = 1.10 V.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન ફેરાડેના વિદ્યુતવિભાજનના નિયમો માટે સાચું નથી?", "opts": ["વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતભારના પ્રમાણમાં હોય છે.", "સમાન વિદ્યુતભારથી મુક્ત થતા પદાર્થોના દળ તેમના તુલ્યભારના પ્રમાણમાં હોય છે.", "વિદ્યુતવિભાજન માટે ઓછામાં ઓછું 1 ફેરાડે વિદ્યુતભાર જરૂરી છે.", "1 ફેરાડે વિદ્યુતભાર 1 મોલ ઇલેક્ટ્રોનનું વહન કરે છે."], "ans": 2, "exp": "ફેરાડેના નિયમો મુજબ, વિદ્યુતવિભાજન માટે ઓછામાં ઓછી વિદ્યુતભારની જરૂરિયાત નક્કી થતી નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલા વિધાનો વિદ્યુતરાસાયણિક કોષ માટે સાચાં છે?\n(1) એનોડ પર ઑક્સિડેશન થાય છે.\n(2) કેથોડ પર રિડક્શન થાય છે.\n(3) કોષમાં ઇલેક્ટ્રોનનું વહન બાહ્ય પરિપથમાં થાય છે.\n(4) કોષમાં આયનોનું વહન વિદ્યુતવિભાજ્ય દ્વારા થાય છે.", "opts": ["1", "2", "3", "4"], "ans": 3, "exp": "આપેલા ચારેય વિધાનો વિદ્યુતરાસાયણિક કોષ માટે સાચાં છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયું વિધાન ખોટું છે?", "opts": ["એનોડ પર ઑક્સિડેશન પ્રક્રિયા થાય છે", "કેથોડ પર રિડક્શન પ્રક્રિયા થાય છે", "ઇલેક્ટ્રોનનું વહન બાહ્ય પરિપથમાં થાય છે", "આંતરિક પરિપથમાં આયનોનું વહન થતું નથી"], "ans": 3, "exp": "વિદ્યુતરાસાયણિક કોષમાં આંતરિક પરિપથમાં આયનોનું વહન થાય છે, જે વિદ્યુતપ્રવાહને જાળવી રાખે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ પ્રમાણિત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) માટે યોગ્ય નથી?", "opts": ["પ્લેટિનમ ઇલેક્ટ્રોડ", "1 M HCl દ્રાવણ", "H₂ વાયુનું 1 atm દબાણ", "કોપર ઇલેક્ટ્રોડ"], "ans": 3, "exp": "પ્રમાણિત હાઇડ્રોજન ઇલેક્ટ્રોડ માટે પ્લેટિનમ ઇલેક્ટ્રોડ, 1 M HCl દ્રાવણ અને H₂ વાયુનું 1 atm દબાણ જરૂરી છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25°C તાપમાને Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu કોષનો પ્રમાણિત કોષ પોટેન્શિયલ 1.10 V છે. જો Zn²⁺ની સાંદ્રતા 0.1 M કરવામાં આવે, તો કોષ પોટેન્શિયલ પર શું અસર થશે? (E° Zn²⁺/Zn = -0.76 V, E° Cu²⁺/Cu = +0.34 V)", "opts": ["વધશે", "ઘટશે", "સમાન રહેશે", "શૂન્ય થઈ જશે"], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, Zn²⁺ની સાંદ્રતા ઘટાડતાં કોષ પોટેન્શિયલ ઘટશે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન ફેરાડેના વિદ્યુતવિભાજનના નિયમો માટે ખોટું છે?", "opts": ["વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતભારના સમપ્રમાણમાં હોય છે", "સમાન વિદ્યુતભારથી મુક્ત થતા વિવિધ પદાર્થોના દળ તેમના તુલ્યભારના સમપ્રમાણમાં હોય છે", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ તાપમાન પર આધારિત છે", "1 ફેરાડે વિદ્યુતભાર 1 મોલ ઇલેક્ટ્રોનનું વહન કરે છે"], "ans": 2, "exp": "ફેરાડેના નિયમો મુજબ, મુક્ત થતા પદાર્થનું દળ તાપમાન પર આધારિત નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક ઑક્સિડેશન પ્રક્રિયા માટે જવાબદાર છે?", "opts": ["એનોડ", "કેથોડ", "લવણસેતુ", "વિદ્યુતવિભાજ્ય દ્રાવણ"], "ans": 0, "exp": "એનોડ પર ઑક્સિડેશન પ્રક્રિયા થાય છે, જ્યાં ઇલેક્ટ્રોન મુક્ત થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25°C તાપમાને Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu કોષનો પ્રમાણિત વિદ્યુતધ્રુવ પોટૅન્શિયલ 1.10 V છે. જો Zn²⁺ ની સાંદ્રતા 0.1 M અને Cu²⁺ ની સાંદ્રતા 0.01 M કરવામાં આવે, તો નવો કોષ પોટૅન્શિયલ શું હશે? (R = 8.314 J mol⁻¹ K⁻¹, F = 96500 C mol⁻¹)", "opts": ["1.04 V", "1.16 V", "1.07 V", "1.13 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણનો ઉપયોગ કરીને ગણતરી કરતાં, E = E° - (RT/2F) ln([Zn²⁺]/[Cu²⁺]) = 1.10 - 0.03 = 1.04 V મળે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વિદ્યુતવિભાજન માટે સાચું નથી?", "opts": ["વિદ્યુતવિભાજન દરમિયાન ઍનોડ પર ઑક્સિડેશન થાય છે.", "વિદ્યુતવિભાજન માટે બાહ્ય વિદ્યુતપ્રવાહની જરૂર પડે છે.", "વિદ્યુતવિભાજન દરમિયાન કેથોડ પર રિડક્શન થાય છે.", "વિદ્યુતવિભાજન માત્ર પીગળેલા વિદ્યુતવિભાજ્યમાં જ શક્ય છે."], "ans": 3, "exp": "વિદ્યુતવિભાજન પીગળેલા તેમજ જલીય વિદ્યુતવિભાજ્ય દ્રાવણમાં પણ શક્ય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં સાચાં છે?\n(i) વિદ્યુતરાસાયણિક કોષમાં રેડોક્સ પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે.\n(ii) વિદ્યુતવિભાજન દરમિયાન ઍનોડ ધનભારિત હોય છે.\n(iii) કોષ પોટૅન્શિયલ હંમેશાં ધન હોય છે.\n(iv) વિદ્યુતરાસાયણિક શ્રેણીમાં ઉપરની ધાતુઓ વધુ પ્રતિક્રિયાત્મક હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે, જ્યારે (iii) ખોટું છે કારણ કે કોષ પોટૅન્શિયલ ગેલ્વેનિક કોષ માટે ધન હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "ડેનિયલ કોષમાં Zn | Zn²⁺ (1M) || Cu²⁺ (1M) | Cu નો પ્રમાણિત કોષ પોટેન્શિયલ (E°cell) 1.10 V છે. જો Zn²⁺ ની સાંદ્રતા 0.1 M અને Cu²⁺ ની સાંદ્રતા 0.01 M કરવામાં આવે, તો નવો કોષ પોટેન્શિયલ (Ecell) કેટલો હશે? (R = 8.314 J mol⁻¹ K⁻¹, F = 96500 C mol⁻¹, T = 298 K)", "opts": ["1.04 V", "1.16 V", "1.07 V", "1.13 V"], "ans": 0, "exp": "નેર્ન્સ્ટ સમીકરણનો ઉપયોગ કરીને ગણતરી કરતાં Ecell = E°cell - (RT/2F) ln([Zn²⁺]/[Cu²⁺]) = 1.10 - 0.03 = 1.04 V મળે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન વિદ્યુતનું સુવાહક નથી?", "opts": ["ગ્રેફાઇટ", "સોડિયમ ક્લોરાઇડ (NaCl) નું પિગળેલ સ્વરૂપ", "સોડિયમ ક્લોરાઇડ (NaCl) નું ઘન સ્વરૂપ", "તાંબાનો તાર"], "ans": 2, "exp": "સોડિયમ ક્લોરાઇડનું ઘન સ્વરૂપ આયનોને ગતિ કરવા માટે મુક્ત ન હોવાથી વિદ્યુતનું સુવાહક નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક ઍનોડ તરીકે કાર્ય કરે છે?", "opts": ["જે પદાર્થનું ઑક્સિડેશન થાય છે તે", "જે પદાર્થનું રિડક્શન થાય છે તે", "જે પદાર્થ વિદ્યુતનું વહન કરે છે તે", "જે પદાર્થ કોષમાં ઉર્જા ઉત્પન્ન કરે છે તે"], "ans": 0, "exp": "ઍનોડ પર ઑક્સિડેશન પ્રક્રિયા થાય છે, તેથી જે પદાર્થનું ઑક્સિડેશન થાય છે તે ઍનોડ તરીકે કાર્ય કરે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વિદ્યુતરાસાયણિક કોષ માટે ખોટું છે?", "opts": ["કોષમાં ઍનોડ પર ઑક્સિડેશન થાય છે", "કોષમાં કેથોડ પર રિડક્શન થાય છે", "કોષમાં વિદ્યુતપ્રવાહ બાહ્ય પરિપથમાંથી આંતરિક દ્રાવણ તરફ વહે છે", "કોષમાં વિદ્યુતપ્રવાહ આંતરિક દ્રાવણમાંથી બાહ્ય પરિપથ તરફ વહે છે"], "ans": 2, "exp": "વિદ્યુતરાસાયણિક કોષમાં વિદ્યુતપ્રવાહ આંતરિક દ્રાવણમાંથી બાહ્ય પરિપથ તરફ વહે છે, બાહ્ય પરિપથમાંથી આંતરિક દ્રાવણ તરફ નહીં.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "{'text': 'નીચેના વિધાનો ધ્યાનમાં લો:', 'statements': ['વિદ્યુતરાસાયણિક કોષમાં ઍનોડ પર હંમેશા ઑક્સિડેશન થાય છે.', 'વિદ્યુતવિભાજન કોષમાં કેથોડ પર હંમેશા રિડક્શન થાય છે.', 'પ્રમાણિત વિદ્યુતધ્રુવ પોટેન્શિયલ (E°) નું મૂલ્ય તાપમાન પર આધારિત નથી.', 'વિદ્યુતરાસાયણિક કોષમાં વિદ્યુતપ્રવાહ બાહ્ય પરિપથમાં ઍનોડથી કેથોડ તરફ વહે છે.'], 'question': 'ઉપરોક્ત વિધાનોમાંથી કેટલાં વિધાનો સાચાં છે?'}", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. વિધાન 3 ખોટું છે કારણ કે E° તાપમાન પર આધારિત છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu કોષ માટે E°cell = 1.10 V છે. જો Zn²⁺ ની સાંદ્રતા વધારવામાં આવે તો Ecell નું મૂલ્ય શું થશે?", "opts": ["વધશે", "ઘટશે", "સમાન રહેશે", "શૂન્ય થશે"], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, Zn²⁺ ની સાંદ્રતા વધતાં Ecell નું મૂલ્ય ઘટશે કારણ કે લોગારિધમિક પદ નકારાત્મક બને છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ વિદ્યુતવિભાજન દરમિયાન ઍનોડ પર ઑક્સિડાઇઝ થશે નહીં?", "opts": ["Cl⁻", "Br⁻", "SO₄²⁻", "I⁻"], "ans": 2, "exp": "SO₄²⁻ આયનનું ઑક્સિડેશન થતું નથી કારણ કે તેનું ઑક્સિડેશન પોટેન્શિયલ ખૂબ જ ઊંચું હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) વિદ્યુતરાસાયણિક કોષમાં ઍનોડ ઋણ ધ્રુવ હોય છે.\n(ii) વિદ્યુતવિભાજન કોષમાં કેથોડ ધન ધ્રુવ હોય છે.\n(iii) વિદ્યુતરાસાયણિક કોષમાં રાસાયણિક ઊર્જાનું વિદ્યુત ઊર્જામાં રૂપાંતર થાય છે.\n(iv) વિદ્યુતવિભાજન કોષમાં વિદ્યુત ઊર્જાનું રાસાયણિક ઊર્જામાં રૂપાંતર થાય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i) અને (iii) સાચાં છે. વિદ્યુતવિભાજન કોષમાં કેથોડ ઋણ ધ્રુવ હોય છે અને વિદ્યુતરાસાયણિક કોષમાં રાસાયણિક ઊર્જાનું વિદ્યુત ઊર્જામાં રૂપાંતર થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક ઑક્સિડેશન પામે છે?", "opts": ["એનોડ", "કેથોડ", "વિદ્યુતવિભાજ્ય દ્રાવણ", "લવણસેતુ"], "ans": 0, "exp": "એનોડ પર ઑક્સિડેશન પ્રક્રિયા થાય છે, જ્યાં ઇલેક્ટ્રોન મુક્ત થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. વિદ્યુતરાસાયણિક કોષમાં એનોડ પર રિડક્શન થાય છે.\n2. કોષ પોટેન્શિયલ (Ecell) ધન હોય તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે.\n3. વિદ્યુતવિભાજન દરમિયાન કેથોડ પર ઑક્સિડેશન થાય છે.\n4. પ્રમાણિત હાઇડ્રોજન ઇલેક્ટ્રોડનો પોટેન્શિયલ શૂન્ય ગણવામાં આવે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 1, "exp": "વિધાન 2 અને 4 સાચાં છે. વિધાન 1 અને 3 ખોટાં છે કારણ કે એનોડ પર ઑક્સિડેશન અને કેથોડ પર રિડક્શન થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25°C તાપમાને Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu કોષનું પ્રમાણિત કોષ પોટેન્શિયલ (E°cell) કેટલું છે? (E°Zn²⁺/Zn = -0.76 V, E°Cu²⁺/Cu = +0.34 V)", "opts": ["1.10 V", "0.42 V", "0.76 V", "-1.10 V"], "ans": 0, "exp": "E°cell = E°Cathode - E°Anode = 0.34 V - (-0.76 V) = 1.10 V.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિદ્યુતરાસાયણિક કોષ માટે સાચાં છે?\n(i) કોષમાં ઍનોડ ધન ધ્રુવ હોય છે.\n(ii) કોષમાં કેથોડ ઋણ ધ્રુવ હોય છે.\n(iii) કોષમાં ઑક્સિડેશન ઍનોડ પર થાય છે.\n(iv) કોષમાં રિડક્શન કેથોડ પર થાય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 1, "exp": "માત્ર વિધાન (iii) અને (iv) સાચાં છે. ઍનોડ ઋણ ધ્રુવ અને કેથોડ ધન ધ્રુવ હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન ફેરાડેના વિદ્યુતવિભાજનના પ્રથમ નિયમને યોગ્ય રીતે વર્ણવે છે?", "opts": ["વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતભારના સમપ્રમાણમાં હોય છે.", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતપ્રવાહના સમપ્રમાણમાં હોય છે.", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ સમયના સમપ્રમાણમાં હોય છે.", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતપ્રતિકારના સમપ્રમાણમાં હોય છે."], "ans": 0, "exp": "ફેરાડેનો પ્રથમ નિયમ જણાવે છે કે મુક્ત થતા પદાર્થનું દળ વિદ્યુતભાર (Q = It) ના સમપ્રમાણમાં હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) વિદ્યુતરાસાયણિક કોષમાં રાસાયણિક ઊર્જા વિદ્યુત ઊર્જામાં રૂપાંતરિત થાય છે.\n(ii) વિદ્યુતવિભાજન કોષમાં વિદ્યુત ઊર્જા રાસાયણિક ઊર્જામાં રૂપાંતરિત થાય છે.\n(iii) ગૅલ્વેનિક કોષમાં એનોડ ધન ધ્રુવ હોય છે.\n(iv) વિદ્યુતવિભાજન દરમિયાન કેથોડ પર ઑક્સિડેશન થાય છે.", "opts": ["2", "3", "1", "4"], "ans": 0, "exp": "વિધાન (i) અને (ii) સાચાં છે. વિધાન (iii) અને (iv) ખોટાં છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક ઇલેક્ટ્રૉનનું વહન કરે છે?", "opts": ["ઇલેક્ટ્રોલાઇટ", "બાહ્ય પરિપથ", "આંતરિક પરિપથ", "ઉત્સેચક"], "ans": 1, "exp": "વિદ્યુતરાસાયણિક કોષમાં ઇલેક્ટ્રૉનનું વહન બાહ્ય પરિપથ દ્વારા થાય છે, જ્યારે આયનો આંતરિક પરિપથમાં ગતિ કરે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ વિદ્યુતવિભાજન દરમિયાન કૅથોડ પર મુક્ત થતો નથી?", "opts": ["સોડિયમ ધાતુ (Na)", "હાઇડ્રોજન વાયુ (H₂)", "કૉપર ધાતુ (Cu)", "ઑક્સિજન વાયુ (O₂)"], "ans": 3, "exp": "ઑક્સિજન વાયુ એનોડ પર મુક્ત થાય છે, જ્યારે કૅથોડ પર ધાતુઓ અથવા હાઇડ્રોજન વાયુ મુક્ત થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરસાયણમાં 'ફેરેડેનો પ્રથમ નિયમ' કયા સંબંધને વ્યક્ત કરે છે?", "opts": ["વિદ્યુતપ્રવાહ અને સમય વચ્ચેના સંબંધને", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થના જથ્થા અને પસાર થતા વિદ્યુતભાર વચ્ચેના સંબંધને", "વિદ્યુતધ્રુવોના પોટેન્શિયલ અને તાપમાન વચ્ચેના સંબંધને", "વિદ્યુતવિભાજન કોષમાં ઉત્પન્ન થતી ઉષ્મા અને વિદ્યુતપ્રવાહ વચ્ચેના સંબંધને"], "ans": 1, "exp": "ફેરેડેનો પ્રથમ નિયમ જણાવે છે કે વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનો જથ્થો પસાર થતા વિદ્યુતભારના સમપ્રમાણમાં હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક ઇલેક્ટ્રૉનનું વહન કરે છે પરંતુ તે પોતે રાસાયણિક ફેરફારમાં ભાગ લેતો નથી?", "opts": ["ઇલેક્ટ્રોલાઇટ", "ઉપચયન ઇલેક્ટ્રોડ", "અપચયન ઇલેક્ટ્રોડ", "લવણસેતુ"], "ans": 3, "exp": "લવણસેતુ ઇલેક્ટ્રૉનનું વહન કરતો નથી, પરંતુ આયનોનું વહન કરી વિદ્યુત તટસ્થતા જાળવે છે અને તે પોતે રાસાયણિક ફેરફારમાં ભાગ લેતો નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન વિદ્યુતવિભાજ્ય નથી?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "સલ્ફ્યુરિક એસિડ (H₂SO₄)", "ગ્લુકોઝ (C₆H₁₂O₆)", "પોટેશિયમ હાઇડ્રોક્સાઇડ (KOH)"], "ans": 2, "exp": "ગ્લુકોઝ કાર્બનિક સંયોજન છે અને તે જલીય દ્રાવણમાં આયનો ઉત્પન્ન કરતું નથી, તેથી તે વિદ્યુતવિભાજ્ય નથી.", "chapter": "વિદ્યુતરસાયણ", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M60 60 L80 40 L100 60 L120 40 L140 60 L120 80 L100 60 L80 80 Z' fill='none' stroke='black' stroke-width='2'/><text x='50' y='65' font-family='Arial' font-size='12'>O</text><text x='85' y='35' font-family='Arial' font-size='10'>OH</text><text x='145' y='65' font-family='Arial' font-size='10'>OH</text><text x='115' y='85' font-family='Arial' font-size='10'>OH</text><text x='75' y='85' font-family='Arial' font-size='10'>OH</text><text x='95' y='55' font-family='Arial' font-size='10'>OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. વિદ્યુતરાસાયણિક કોષમાં ઍનોડ પર ઓક્સિડેશન થાય છે.\n2. વિદ્યુતવિભાજન દરમિયાન કૅથોડ પર રિડક્શન થાય છે.\n3. પ્રમાણિત હાઇડ્રોજન ઇલેક્ટ્રોડનો પોટેન્શિયલ 0 V છે.\n4. વિદ્યુતરાસાયણિક કોષમાં લવણસેતુ ઇલેક્ટ્રૉનનું વહન કરે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન 1, 2 અને 3 સાચાં છે. વિધાન 4 ખોટું છે કારણ કે લવણસેતુ આયનોનું વહન કરે છે, ઇલેક્ટ્રૉનનું નહીં.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu કોષનો પ્રમાણિત વિદ્યુતધ્રુવ પોટેન્શિયલ (E°cell) 1.10 V છે. જો Zn²⁺ ની સાંદ્રતા વધારવામાં આવે તો E°cell પર શું અસર થશે?", "opts": ["E°cell વધશે.", "E°cell ઘટશે.", "E°cell અચળ રહેશે.", "E°cell શૂન્ય થશે."], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, Zn²⁺ ની સાંદ્રતા વધતાં E°cell ઘટશે કારણ કે પ્રક્રિયા ઓછી સ્વયંસ્ફુરિત બનશે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયો પદાર્થ પ્રમાણિત હાઇડ્રોજન ઇલેક્ટ્રોડ (SHE) સાથે સરખામણી કરતાં વધુ ધન વિદ્યુતધ્રુવ પોટેન્શિયલ ધરાવે છે?", "opts": ["Li⁺ | Li", "Na⁺ | Na", "Ag⁺ | Ag", "K⁺ | K"], "ans": 2, "exp": "Ag⁺ | Ag નો પ્રમાણિત વિદ્યુતધ્રુવ પોટેન્શિયલ +0.80 V છે, જે SHE કરતાં વધુ ધન છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n1. વિદ્યુતરાસાયણિક કોષમાં ઍનોડ ઋણ ધ્રુવ હોય છે.\n2. વિદ્યુતવિભાજન કોષમાં કૅથોડ ધન ધ્રુવ હોય છે.\n3. વિદ્યુતરાસાયણિક કોષમાં રેડોક્સ પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે.\n4. વિદ્યુતવિભાજન કોષમાં બાહ્ય વિદ્યુતસ્રોતની જરૂર પડે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન 1 અને 3 સાચાં છે. વિધાન 2 ખોટું છે કારણ કે વિદ્યુતવિભાજન કોષમાં કૅથોડ ઋણ ધ્રુવ હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરસાયણમાં કયો નિયમ કહે છે કે વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતભારના પ્રમાણમાં હોય છે?", "opts": ["ફેરેડેનો પ્રથમ નિયમ", "ફેરેડેનો બીજો નિયમ", "ઓમનો નિયમ", "કિર્ચોફનો નિયમ"], "ans": 0, "exp": "ફેરેડેનો પ્રથમ નિયમ જણાવે છે કે વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતભારના પ્રમાણમાં હોય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયો પદાર્થ વિદ્યુતવિભાજન દરમિયાન એનોડ પર ઑક્સિડાઇઝ થતો નથી?", "opts": ["Cl⁻", "SO₄²⁻", "Br⁻", "I⁻"], "ans": 1, "exp": "SO₄²⁻ એનોડ પર ઑક્સિડાઇઝ થતો નથી, કારણ કે તેનું ઑક્સિડેશન પોટેન્શિયલ ખૂબ ઊંચું છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિદ્યુતરાસાયણિક કોષ માટે સાચાં છે?\n1. એનોડ પર રિડક્શન થાય છે.\n2. કેથોડ પર ઑક્સિડેશન થાય છે.\n3. વિદ્યુતપ્રવાહ બાહ્ય પરિપથમાં એનોડથી કેથોડ તરફ વહે છે.\n4. લવણસેતુ આયનોના વહન માટે ઉપયોગી છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "માત્ર વિધાન 3 અને 4 સાચાં છે. એનોડ પર ઑક્સિડેશન અને કેથોડ પર રિડક્શન થાય છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "વિદ્યુતરાસાયણિક કોષમાં કયો ઘટક વિદ્યુતપ્રવાહનું વહન કરે છે પરંતુ તે પોતે રાસાયણિક ફેરફારમાં ભાગ લેતો નથી?", "opts": ["ઇલેક્ટ્રોડ", "વિદ્યુતવિભાજ્ય દ્રાવણ", "સોલ્ટ બ્રિજ", "બાહ્ય પરિપથ"], "ans": 2, "exp": "સોલ્ટ બ્રિજ વિદ્યુતપ્રવાહનું વહન કરે છે પરંતુ તે પોતે રાસાયણિક ક્રિયામાં ભાગ લેતો નથી, તે માત્ર આયનોના સંતુલન માટે કાર્ય કરે છે.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન ફેરાડેના વિદ્યુતવિભાજનના બીજા નિયમ સાથે સુસંગત નથી?", "opts": ["વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ તેના તુલ્યભારના સમપ્રમાણમાં હોય છે.", "સમાન વિદ્યુતજથ્થા દ્વારા મુક્ત થતા જુદા જુદા પદાર્થોના દળ તેમના અણુભારના સમપ્રમાણમાં હોય છે.", "વિદ્યુતવિભાજન દરમિયાન મુક્ત થતા પદાર્થનું દળ વિદ્યુતજથ્થાના સમપ્રમાણમાં હોય છે.", "એક ફેરાડે વિદ્યુતજથ્થા દ્વારા એક ગ્રામ તુલ્યભાર પદાર્થ મુક્ત થાય છે."], "ans": 1, "exp": "ફેરાડેના બીજા નિયમ મુજબ, સમાન વિદ્યુતજથ્થા દ્વારા મુક્ત થતા પદાર્થોના દળ તેમના તુલ્યભારના સમપ્રમાણમાં હોય છે, અણુભારના નહીં.", "chapter": "વિદ્યુતરસાયણ", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "વિદ્યુતરસાયણ Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
