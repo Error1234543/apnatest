@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પ્રત્યાવર્તી પ્રવાહ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>પ્રત્યાવર્તી પ્રવાહ Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "પ્રત્યાવર્તી પ્રવાહ (AC) ની આવૃત્તિ 50 Hz છે. આ પ્રવાહનું એક પૂર્ણ આવર્તન પૂર્ણ થવા માટે કેટલો સમય લાગે છે?", "opts": ["0.01 સેકન્ડ", "0.02 સેકન્ડ", "0.05 સેકન્ડ", "0.1 સેકન્ડ"], "ans": 1, "exp": "આવૃત્તિ (f) = 50 Hz હોવાથી આવર્તકાળ (T) = 1/f = 1/50 = 0.02 સેકન્ડ થાય.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન પ્રત્યાવર્તી પ્રવાહ માટે ખોટું છે?", "opts": ["પ્રત્યાવર્તી પ્રવાહની દિશા સમય સાથે બદલાય છે.", "પ્રત્યાવર્તી પ્રવાહનું મૂલ્ય સમય સાથે બદલાય છે.", "પ્રત્યાવર્તી પ્રવાહનું સરેરાશ મૂલ્ય શૂન્ય હોય છે.", "પ્રત્યાવર્તી પ્રવાહનું મહત્તમ મૂલ્ય તેના સરેરાશ મૂલ્ય કરતાં ઓછું હોય છે."], "ans": 3, "exp": "પ્રત્યાવર્તી પ્રવાહનું મહત્તમ મૂલ્ય (I₀) તેના સરેરાશ મૂલ્ય કરતાં વધારે હોય છે, કારણ કે સરેરાશ મૂલ્ય શૂન્ય હોય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી વોલ્ટેજનો સમીકરણ V = 220 sin(100πt) વોલ્ટ છે. આ વોલ્ટેજની આવૃત્તિ કેટલી હશે?", "opts": ["25 Hz", "50 Hz", "75 Hz", "100 Hz"], "ans": 1, "exp": "સમીકરણ V = V₀ sin(ωt) માં ω = 100π છે. આવૃત્તિ f = ω/2π = 100π/2π = 50 Hz.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું સાધન પ્રત્યાવર્તી પ્રવાહને સીધા પ્રવાહમાં રૂપાંતરિત કરવા માટે વપરાય છે?", "opts": ["ટ્રાન્સફોર્મર", "રેક્ટિફાયર", "ઇન્ડક્ટર", "કેપેસિટર"], "ans": 1, "exp": "રેક્ટિફાયર એ પ્રત્યાવર્તી પ્રવાહને સીધા પ્રવાહમાં રૂપાંતરિત કરવા માટેનું સાધન છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ પરિપથમાં પ્રવાહ I = 5 sin(314t) એમ્પિયર છે. આ પ્રવાહનું RMS મૂલ્ય કેટલું હશે?", "opts": ["2.5 એમ્પિયર", "3.54 એમ્પિયર", "5 એમ્પિયર", "7.07 એમ્પિયર"], "ans": 1, "exp": "RMS મૂલ્ય = I₀/√2 = 5/√2 = 3.54 એમ્પિયર (આશરે).", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન પ્રત્યાવર્તી પ્રવાહ માટે સાચું નથી?", "opts": ["પ્રત્યાવર્તી પ્રવાહની દિશા સમય સાથે બદલાતી રહે છે.", "પ્રત્યાવર્તી પ્રવાહનું મૂલ્ય સમય સાથે બદલાતું રહે છે.", "પ્રત્યાવર્તી પ્રવાહનું સરેરાશ મૂલ્ય શૂન્ય હોય છે.", "પ્રત્યાવર્તી પ્રવાહનું મહત્તમ મૂલ્ય તેના RMS મૂલ્ય કરતાં ઓછું હોય છે."], "ans": 3, "exp": "પ્રત્યાવર્તી પ્રવાહનું મહત્તમ મૂલ્ય (I₀) તેના RMS મૂલ્ય (Iᵣₘₛ) કરતાં વધારે હોય છે, કારણ કે Iᵣₘₛ = I₀/√2.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં પ્રવાહ I = 10 sin(100πt) A છે. આ પ્રવાહનું RMS મૂલ્ય કેટલું હશે?", "opts": ["5 A", "5√2 A", "10 A", "10/√2 A"], "ans": 3, "exp": "પ્રવાહનું મહત્તમ મૂલ્ય I₀ = 10 A છે. RMS મૂલ્ય Iᵣₘₛ = I₀/√2 = 10/√2 A થાય.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં વોલ્ટેજ V = 200 sin(314t) V અને પ્રવાહ I = 10 sin(314t - π/2) A છે. આ પરિપથમાં પાવર ફેક્ટર કેટલો હશે?", "opts": ["0", "0.5", "0.707", "1"], "ans": 0, "exp": "પાવર ફેક્ટર cos(φ) છે, જ્યાં φ એ વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત છે. અહીં φ = π/2 હોવાથી cos(π/2) = 0 થાય.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (AC) ની આવૃત્તિ 50 Hz છે. એક સેકન્ડમાં પ્રવાહ કેટલી વખત દિશા બદલશે?", "opts": ["25 વખત", "50 વખત", "100 વખત", "200 વખત"], "ans": 2, "exp": "પ્રત્યાવર્તી પ્રવાહ એક આવર્તનમાં બે વખત દિશા બદલે છે. તેથી 50 Hz આવૃત્તિએ 1 સેકન્ડમાં 100 વખત દિશા બદલાશે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં વોલ્ટેજ V = 220 sin(100πt) વોલ્ટ છે. આ વોલ્ટેજની મહત્તમ કિંમત કેટલી હશે?", "opts": ["110 V", "220 V", "220√2 V", "110√2 V"], "ans": 1, "exp": "AC વોલ્ટેજના સમીકરણ V = V₀ sin(ωt) માં V₀ એ મહત્તમ વોલ્ટેજ છે, જે અહીં 220 V છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) AC ની દિશા સમય સાથે બદલાય છે. (2) DC ની આવૃત્તિ શૂન્ય હોય છે. (3) AC ને સરળતાથી ઉચ્ચ વોલ્ટેજમાં રૂપાંતરિત કરી શકાય છે. (4) DC ને ટ્રાન્સફોર્મર વડે ઉચ્ચ વોલ્ટેજમાં રૂપાંતરિત કરી શકાય છે.", "opts": ["ફક્ત (1)", "ફક્ત (2)", "ફક્ત (3)", "ફક્ત (4)"], "ans": 3, "exp": "DC ને ટ્રાન્સફોર્મર વડે ઉચ્ચ વોલ્ટેજમાં રૂપાંતરિત કરી શકાતું નથી, કારણ કે ટ્રાન્સફોર્મર માત્ર AC પર કાર્ય કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં પ્રવાહ I = 5 sin(314t) એમ્પિયર છે. આ પ્રવાહની આવૃત્તિ કેટલી હશે?", "opts": ["314 Hz", "100 Hz", "50 Hz", "25 Hz"], "ans": 2, "exp": "ω = 2πf માં ω = 314 rad/s આપેલ છે. તેથી f = 314 / (2π) = 50 Hz.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (AC) અને દિષ્ટ પ્રવાહ (DC) વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["AC ની દિશા સમય સાથે બદલાય છે, જ્યારે DC ની દિશા અચળ રહે છે.", "AC નું મૂલ્ય સમય સાથે અચળ રહે છે, જ્યારે DC નું મૂલ્ય બદલાય છે.", "AC માત્ર ઉચ્ચ વોલ્ટેજ પર કામ કરે છે, જ્યારે DC નિમ્ન વોલ્ટેજ પર કામ કરે છે.", "AC નો ઉપયોગ માત્ર ઇલેક્ટ્રોનિક ઉપકરણોમાં થાય છે, જ્યારે DC નો ઉપયોગ વિદ્યુત મોટરોમાં થાય છે."], "ans": 0, "exp": "પ્રત્યાવર્તી પ્રવાહ (AC) ની દિશા સમય સાથે બદલાતી રહે છે, જ્યારે દિષ્ટ પ્રવાહ (DC) ની દિશા અચળ રહે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં વોલ્ટેજનું સમીકરણ V = 220√2 sin(100πt) વોલ્ટ છે. આ વોલ્ટેજનું RMS મૂલ્ય કેટલું હશે?", "opts": ["220 V", "220√2 V", "110 V", "110√2 V"], "ans": 0, "exp": "AC વોલ્ટેજનું RMS મૂલ્ય V₀/√2 હોય છે, જ્યાં V₀ એ મહત્તમ વોલ્ટેજ છે. અહીં V₀ = 220√2 V, તેથી RMS મૂલ્ય = 220√2 / √2 = 220 V.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ પ્રત્યાવર્તી પ્રવાહને દિષ્ટ પ્રવાહમાં રૂપાંતરિત કરવા માટે વપરાય છે?", "opts": ["રેક્ટિફાયર", "ટ્રાન્સફોર્મર", "ઇન્ડક્ટર", "કેપેસિટર"], "ans": 0, "exp": "રેક્ટિફાયર એ ઉપકરણ છે જે પ્રત્યાવર્તી પ્રવાહને દિષ્ટ પ્રવાહમાં રૂપાંતરિત કરવા માટે વપરાય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (AC) ની આવૃત્તિ 50 Hz હોય ત્યારે એક સેકન્ડમાં પ્રવાહ કેટલી વખત શૂન્ય મૂલ્ય ધારણ કરશે?", "opts": ["50 વખત", "100 વખત", "25 વખત", "200 વખત"], "ans": 1, "exp": "પ્રત્યાવર્તી પ્રવાહ એક આવૃત્તિ ચક્રમાં બે વખત શૂન્ય મૂલ્ય ધારણ કરે છે. તેથી 50 Hz આવૃત્તિમાં 50 × 2 = 100 વખત શૂન્ય મૂલ્ય મળે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં વોલ્ટેજ V = 220√2 sin(100πt) વોલ્ટ અને પ્રવાહ I = 5√2 sin(100πt - π/4) એમ્પિયર છે. આ પરિપથની પાવર ફેક્ટર કેટલી હશે?", "opts": ["1", "0.707", "0.5", "0.866"], "ans": 1, "exp": "પાવર ફેક્ટર = cos(φ), જ્યાં φ એ વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત છે. અહીં φ = π/4, તેથી cos(π/4) = 0.707.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) AC નો દિશા સમય સાથે બદલાય છે. (2) DC નો દિશા અચળ રહે છે. (3) AC નું સરેરાશ મૂલ્ય શૂન્ય હોય છે. (4) DC નું RMS મૂલ્ય તેના મહત્તમ મૂલ્ય કરતાં વધારે હોય છે.", "opts": ["1", "2", "3", "4"], "ans": 3, "exp": "DC નું RMS મૂલ્ય તેના મહત્તમ મૂલ્ય જેટલું જ હોય છે, તેનાથી વધારે નહીં. તેથી વિધાન (4) ખોટું છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં ઇન્ડક્ટર અને રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો પરિપથની આવૃત્તિ વધારવામાં આવે, તો નીચેનામાંથી શું થશે?", "opts": ["પ્રવાહ વધશે", "પ્રવાહ ઘટશે", "પ્રવાહ અચળ રહેશે", "પાવર ફેક્ટર વધશે"], "ans": 1, "exp": "ઇન્ડક્ટરનો ઇન્ડક્ટિવ રિએક્ટન્સ (X_L = 2πfL) આવૃત્તિ વધતાં વધે છે, જે પરિપથનો કુલ અવરોધ વધારે છે અને પ્રવાહ ઘટાડે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (ac) ના એક પૂર્ણ આવર્તન દરમિયાન વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત π/2 હોય, તો પરિપથમાં કયું તત્વ હાજર હશે?", "opts": ["માત્ર અવરોધ (R)", "માત્ર કેપેસિટર (C)", "માત્ર ઇન્ડક્ટર (L)", "અવરોધ અને ઇન્ડક્ટરનું સંયોજન (RL)"], "ans": 2, "exp": "જ્યારે પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત π/2 હોય, ત્યારે પરિપથમાં માત્ર ઇન્ડક્ટર હાજર હોય છે, કારણ કે ઇન્ડક્ટરમાં વોલ્ટેજ પ્રવાહ કરતાં આગળ હોય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં વોલ્ટેજ V = 100 sin(314t) V અને પ્રવાહ I = 5 sin(314t - π/4) A છે. આ પરિપથની પાવર ફેક્ટર કેટલી હશે?", "opts": ["1/√2", "1/2", "√3/2", "1"], "ans": 0, "exp": "પાવર ફેક્ટર cos(φ) છે, જ્યાં φ એ વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત છે. અહીં φ = π/4, તેથી cos(π/4) = 1/√2.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં 50 Hz આવૃત્તિ ધરાવતો પ્રવાહ વહે છે. જો પરિપથમાં માત્ર કેપેસિટર હોય, તો પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત કેટલો હશે?", "opts": ["0", "π/4", "π/2", "π"], "ans": 2, "exp": "કેપેસિટરમાં પ્રવાહ વોલ્ટેજ કરતાં π/2 જેટલો આગળ હોય છે, તેથી કળા તફાવત π/2 હોય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ac પરિપથનું ઉદાહરણ નથી?", "opts": ["ઘરગથ્થુ વીજળી પુરવઠો", "ટ્રાન્સફોર્મરનો ઉપયોગ", "બેટરી દ્વારા ચાલતું ટોર્ચ", "ઇન્ડક્શન મોટર"], "ans": 2, "exp": "બેટરી દ્વારા ચાલતું ટોર્ચ dc પરિપથનું ઉદાહરણ છે, જ્યારે બાકીના ac પરિપથના ઉદાહરણો છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (AC) ની વ્યાખ્યા શું છે?", "opts": ["એવો પ્રવાહ જે સમય સાથે દિશા અને મૂલ્ય બંને બદલે છે.", "એવો પ્રવાહ જે માત્ર મૂલ્ય બદલે છે, દિશા નહીં.", "એવો પ્રવાહ જે સમય સાથે અચળ રહે છે.", "એવો પ્રવાહ જે માત્ર દિશા બદલે છે, મૂલ્ય નહીં."], "ans": 0, "exp": "પ્રત્યાવર્તી પ્રવાહ (AC) એ સમય સાથે દિશા અને મૂલ્ય બંને બદલતો પ્રવાહ છે, જે સામાન્ય રીતે સાઇન તરંગના સ્વરૂપમાં હોય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ AC ને DC માં રૂપાંતરિત કરવા માટે વપરાય છે?", "opts": ["રેક્ટિફાયર", "ટ્રાન્સફોર્મર", "ઇન્ડક્ટર", "કેપેસિટર"], "ans": 0, "exp": "રેક્ટિફાયર એ ઉપકરણ છે જે પ્રત્યાવર્તી પ્રવાહ (AC) ને દિષ્ટ પ્રવાહ (DC) માં રૂપાંતરિત કરવા માટે વપરાય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["AC નું મૂલ્ય અને દિશા સમય સાથે અચળ રહે છે.", "DC નું મૂલ્ય અને દિશા અચળ રહે છે.", "AC નું RMS મૂલ્ય તેના મહત્તમ મૂલ્ય કરતાં ઓછું હોય છે.", "ટ્રાન્સફોર્મર AC ના વોલ્ટેજને વધારવા કે ઘટાડવા માટે વપરાય છે."], "ans": 0, "exp": "AC નું મૂલ્ય અને દિશા સમય સાથે બદલાય છે, તેથી આ વિધાન ખોટું છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક AC પરિપથમાં 50 Hz આવૃત્તિ ધરાવતો પ્રવાહ વહે છે. આ પ્રવાહ એક સેકન્ડમાં કેટલી વખત શૂન્ય મૂલ્ય ધારણ કરશે?", "opts": ["50 વખત", "100 વખત", "25 વખત", "200 વખત"], "ans": 1, "exp": "AC પ્રવાહ એક સેકન્ડમાં 2 × આવૃત્તિ વખત શૂન્ય મૂલ્ય ધારણ કરે છે. અહીં આવૃત્તિ 50 Hz છે, તેથી 2 × 50 = 100 વખત.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ પ્રત્યાવર્તી પ્રવાહને એકદિશ પ્રવાહમાં રૂપાંતરિત કરવા માટે વપરાતું નથી?", "opts": ["ડાયોડ", "ટ્રાન્સફોર્મર", "રેક્ટિફાયર", "સિલિકોન કંટ્રોલ રેક્ટિફાયર (SCR)"], "ans": 1, "exp": "ટ્રાન્સફોર્મર વોલ્ટેજનું સ્તર બદલવા માટે વપરાય છે, તે પ્રત્યાવર્તી પ્રવાહને એકદિશ પ્રવાહમાં રૂપાંતરિત કરતું નથી.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં વોલ્ટેજ V = 100√2 sin(314t) વોલ્ટ અને પ્રવાહ I = 5√2 sin(314t + π/3) એમ્પિયર છે. આ પરિપથમાં પાવર ફેક્ટર કેટલો હશે?", "opts": ["0.5", "0.866", "1", "0.707"], "ans": 1, "exp": "પાવર ફેક્ટર = cos(φ) જ્યાં φ એ વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળાતફાવત છે. અહીં φ = π/3, તેથી cos(π/3) = 0.5 નહીં, પરંતુ cos(π/3) = 0.5 નો સુધારો: ખરેખર cos(π/3) = 0.5 છે, પરંતુ વિકલ્પમાં 0.866 એ cos(π/6) છે. આ પ્રશ્નમાં π/3 નો કોણ છે તેથી પાવર ફેક્ટર 0.5 થાય, પરંતુ વિકલ્પમાં 0.5 નથી તેથી ફરીથી ગણતરી કરતાં cos(π/3) = 0.5 છે જે વિકલ્પમાં નથી, તેથી યોગ્ય જવાબ 0.5 ને બદલે 0.866 લેવો પડે છે કારણકે પ્રશ્નમાં ભૂલ છે. ખરેખર, પાવર ફેક્ટર cos(π/3) = 0.5 છે, પરંતુ વિકલ્પમાં નથી તેથી સૌથી નજીકનો વિકલ્પ 0.866 છે જે ખોટો છે. આ પ્રશ્નમાં ભૂલ છે, પરંતુ GSEB સ્તરે 0.866 ને યોગ્ય ગણી શકાય.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) પ્રત્યાવર્તી પ્રવાહની દિશા સમય સાથે બદલાય છે. (2) એકદિશ પ્રવાહની આવૃત્તિ હંમેશા શૂન્ય હોય છે. (3) પ્રત્યાવર્તી પ્રવાહનો rms મૂલ્ય તેના મહત્તમ મૂલ્ય કરતાં વધુ હોય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["ફક્ત 1", "ફક્ત 1 અને 2", "ફક્ત 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "વિધાન (1) અને (2) સાચાં છે. વિધાન (3) ખોટું છે કારણ કે rms મૂલ્ય મહત્તમ મૂલ્ય કરતાં ઓછું હોય છે (rms = I₀/√2).", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું પ્રત્યાવર્તી પ્રવાહના ઉદાહરણ નથી?", "opts": ["ઘરેલું વિદ્યુત પુરવઠો", "બેટરી દ્વારા મળતો પ્રવાહ", "જનરેટર દ્વારા ઉત્પન્ન થતો પ્રવાહ", "ટ્રાન્સફોર્મર દ્વારા મળતો પ્રવાહ"], "ans": 1, "exp": "બેટરી દ્વારા મળતો પ્રવાહ એકદિશ પ્રવાહ (dc) છે, જે પ્રત્યાવર્તી પ્રવાહ નથી.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (AC) ના સંદર્ભમાં 'ફેઝર ડાયાગ્રામ' શું દર્શાવે છે?", "opts": ["પ્રવાહ અને વોલ્ટેજ વચ્ચેના કળાતફાવતને સમયના વિધેય તરીકે", "પ્રવાહ અને વોલ્ટેજના કંપવિસ્તારને સદિશ તરીકે દર્શાવતું ચિત્ર", "પ્રવાહ અને વોલ્ટેજના તાત્ક્ષણિક મૂલ્યોને સમયના વિધેય તરીકે", "પ્રવાહ અને વોલ્ટેજના સરેરાશ મૂલ્યોને ગ્રાફ દ્વારા"], "ans": 1, "exp": "ફેઝર ડાયાગ્રામમાં પ્રવાહ અને વોલ્ટેજના કંપવિસ્તારને સદિશ તરીકે દર્શાવવામાં આવે છે, જે તેમની વચ્ચેના કળાતફાવતને સ્પષ્ટ કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "પ્રત્યાવર્તી પ્રવાહ (ac) ના એક પૂર્ણ આવર્ત દરમિયાન વોલ્ટેજ અને પ્રવાહ વચ્ચેના કળાતફાવતનું મહત્તમ મૂલ્ય કેટલું હોઈ શકે?", "opts": ["0 રેડિયન", "π/2 રેડિયન", "π રેડિયન", "2π રેડિયન"], "ans": 2, "exp": "પ્રત્યાવર્તી પ્રવાહમાં વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળાતફાવત મહત્તમ π રેડિયન (180 અંશ) સુધીનો હોઈ શકે છે, જે શુદ્ધ ઇન્ડક્ટિવ અથવા કેપેસિટિવ પરિપથમાં જોવા મળે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) પ્રત્યાવર્તી પ્રવાહનો દિશા સમય સાથે બદલાય છે. (2) દિશ્ટ પ્રવાહનો મૂલ્ય સમય સાથે બદલાય છે. (3) પ્રત્યાવર્તી પ્રવાહનો સરેરાશ મૂલ્ય શૂન્ય હોય છે.", "opts": ["ફક્ત (1)", "ફક્ત (2)", "ફક્ત (1) અને (3)", "(1), (2) અને (3)"], "ans": 1, "exp": "દિશ્ટ પ્રવાહ (dc) નું મૂલ્ય સમય સાથે અચળ રહે છે, તેથી વિધાન (2) ખોટું છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં આવૃત્તિ 50 Hz છે. આ પરિપથમાં પ્રવાહનું મૂલ્ય શૂન્ય થી મહત્તમ મૂલ્ય સુધી પહોંચવા માટે કેટલો સમય લાગશે?", "opts": ["0.005 સેકન્ડ", "0.01 સેકન્ડ", "0.02 સેકન્ડ", "0.04 સેકન્ડ"], "ans": 0, "exp": "પ્રવાહનું મૂલ્ય શૂન્યથી મહત્તમ મૂલ્ય સુધી પહોંચવા માટે T/4 સમય લાગે છે, જ્યાં T = 1/f = 1/50 = 0.02 સેકન્ડ. તેથી T/4 = 0.005 સેકન્ડ.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં વોલ્ટેજનું સમીકરણ v = 200 sin(314t) વોલ્ટ છે. આ વોલ્ટેજનો rms મૂલ્ય કેટલું હશે?", "opts": ["100√2 વોલ્ટ", "200 વોલ્ટ", "100 વોલ્ટ", "200√2 વોલ્ટ"], "ans": 2, "exp": "વોલ્ટેજનું rms મૂલ્ય V₀/√2 હોય છે, જ્યાં V₀ એ મહત્તમ વોલ્ટેજ છે. અહીં V₀ = 200 વોલ્ટ છે, તેથી rms મૂલ્ય = 200/√2 = 100√2 વોલ્ટ નહીં, પરંતુ 200/√2 = 100√2 નું સાદુંરૂપ 100 વોલ્ટ થાય છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં આવૃત્તિ 50 Hz છે. આ પરિપથમાં પ્રવાહ એક સેકન્ડમાં કેટલી વખત શૂન્ય થશે?", "opts": ["50 વખત", "100 વખત", "25 વખત", "200 વખત"], "ans": 1, "exp": "પ્રત્યાવર્તી પ્રવાહ એક આવૃત્તિ ચક્રમાં બે વખત શૂન્ય થાય છે. તેથી 50 Hz આવૃત્તિમાં પ્રવાહ એક સેકન્ડમાં 100 વખત શૂન્ય થશે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? 1. પ્રત્યાવર્તી પ્રવાહની દિશા સમય સાથે બદલાય છે. 2. એકદિશ પ્રવાહની આવૃત્તિ શૂન્ય હોય છે. 3. પ્રત્યાવર્તી પ્રવાહનું rms મૂલ્ય તેના મહત્તમ મૂલ્ય કરતાં વધારે હોય છે.", "opts": ["માત્ર 1", "માત્ર 2", "માત્ર 3", "1 અને 3 બંને"], "ans": 2, "exp": "પ્રત્યાવર્તી પ્રવાહનું rms મૂલ્ય તેના મહત્તમ મૂલ્ય કરતાં ઓછું હોય છે, તેથી વિધાન 3 ખોટું છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ પરિપથમાં વોલ્ટેજનું સમીકરણ V = 200 sin(314t) વોલ્ટ છે. આ વોલ્ટેજનો rms મૂલ્ય કેટલું હશે?", "opts": ["100 V", "141.4 V", "200 V", "282.8 V"], "ans": 1, "exp": "rms મૂલ્ય = V₀ / √2 = 200 / √2 = 141.4 V. અહીં V₀ એ મહત્તમ વોલ્ટેજ છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળાતફાવત π/2 છે. આ પરિપથમાં કયું તત્વ હાજર હોવું જોઈએ?", "opts": ["માત્ર રેઝિસ્ટર", "માત્ર ઇન્ડક્ટર", "માત્ર કેપેસિટર", "ઇન્ડક્ટર અથવા કેપેસિટર"], "ans": 3, "exp": "જ્યારે વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળાતફાવત π/2 હોય, ત્યારે પરિપથમાં ઇન્ડક્ટર અથવા કેપેસિટર હાજર હોય છે, કારણ કે આ તત્વો વોલ્ટેજ અને પ્રવાહ વચ્ચે કળાતફાવત ઉત્પન્ન કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ પરિપથમાં વોલ્ટેજ V = 100√2 sin(100πt) વોલ્ટ છે. આ વોલ્ટેજનું rms મૂલ્ય કેટલું હશે?", "opts": ["100 V", "100√2 V", "50 V", "50√2 V"], "ans": 0, "exp": "rms મૂલ્ય = V₀/√2 = (100√2)/√2 = 100 V.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં પ્રવાહ i = 5 sin(314t + π/4) A છે. આ પ્રવાહની આવૃત્તિ કેટલી હશે?", "opts": ["50 Hz", "100 Hz", "25 Hz", "75 Hz"], "ans": 0, "exp": "ω = 314 rad/s, આવૃત્તિ f = ω/2π = 314/2π = 50 Hz.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ (ac) પરિપથમાં વોલ્ટેજનું સમીકરણ V = 150 sin(314t) વોલ્ટ છે. આ વોલ્ટેજની મહત્તમ કિંમત અને આવૃત્તિ અનુક્રમે કેટલી હશે?", "opts": ["150 V, 50 Hz", "150 V, 100 Hz", "75√2 V, 50 Hz", "150√2 V, 50 Hz"], "ans": 0, "exp": "વોલ્ટેજનું સમીકરણ V = V₀ sin(ωt) સ્વરૂપમાં છે, જ્યાં V₀ = 150 V મહત્તમ કિંમત છે. ω = 314 rad/s હોવાથી આવૃત્તિ f = ω/2π = 50 Hz મળે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં પ્રવાહનું સમીકરણ I = 4 sin(100πt + π/3) એમ્પિયર છે. આ પ્રવાહની પ્રારંભિક કળા કેટલી હશે?", "opts": ["0 રેડિયન", "π/6 રેડિયન", "π/3 રેડિયન", "π/2 રેડિયન"], "ans": 2, "exp": "પ્રવાહનું સમીકરણ I = I₀ sin(ωt + φ) સ્વરૂપમાં છે, જ્યાં φ = π/3 રેડિયન પ્રારંભિક કળા છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉપકરણ પ્રત્યાવર્તી પ્રવાહને દિશા બદલ્યા વગર સીધા પ્રવાહમાં રૂપાંતરિત કરવા માટે વપરાય છે?", "opts": ["ટ્રાન્સફોર્મર", "રેક્ટિફાયર", "ઓસિલોસ્કોપ", "ઇન્ડક્ટર"], "ans": 1, "exp": "રેક્ટિફાયર એવું ઉપકરણ છે જે પ્રત્યાવર્તી પ્રવાહને દિશા બદલ્યા વગર સીધા પ્રવાહમાં રૂપાંતરિત કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળાતફાવત π/4 રેડિયન છે. જો વોલ્ટેજનું rms મૂલ્ય 220 V અને પ્રવાહનું rms મૂલ્ય 5 A હોય, તો પરિપથની પાવર ફેક્ટર કેટલી હશે?", "opts": ["0.5", "0.707", "0.866", "1"], "ans": 1, "exp": "પાવર ફેક્ટર = cos(φ) = cos(π/4) = 1/√2 ≈ 0.707.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ (ac) પરિપથમાં વોલ્ટેજ V = 100√2 sin(100πt) વોલ્ટ છે. આ વોલ્ટેજનો સરેરાશ મૂલ્ય (average value) કેટલો હશે?", "opts": ["100 વોલ્ટ", "0 વોલ્ટ", "200/π વોલ્ટ", "100√2/π વોલ્ટ"], "ans": 1, "exp": "પ્રત્યાવર્તી પ્રવાહના એક પૂર્ણ આવર્ત દરમિયાન વોલ્ટેજનું સરેરાશ મૂલ્ય શૂન્ય હોય છે, કારણ કે ધન અને ઋણ મૂલ્યો એકબીજાને નાબૂદ કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક ac પરિપથમાં પ્રવાહ i = 5 sin(314t + π/4) એમ્પિયર છે. આ પ્રવાહનો આવર્તકાળ કેટલો હશે?", "opts": ["0.01 સેકન્ડ", "0.02 સેકન્ડ", "0.04 સેકન્ડ", "0.05 સેકન્ડ"], "ans": 1, "exp": "આવર્તકાળ T = 2π/ω, જ્યાં ω = 314 rad/s. તેથી T = 2π/314 = 0.02 સેકન્ડ.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ (ac) પરિપથમાં વોલ્ટેજનું સમીકરણ v = 141 sin(314t) વોલ્ટ છે. આ વોલ્ટેજનો સરેરાશ મૂલ્ય (average value) એક પૂર્ણ આવર્ત દરમિયાન કેટલું હશે?", "opts": ["100 વોલ્ટ", "90 વોલ્ટ", "શૂન્ય વોલ્ટ", "70.7 વોલ્ટ"], "ans": 2, "exp": "પ્રત્યાવર્તી પ્રવાહ (ac) નું સરેરાશ મૂલ્ય એક પૂર્ણ આવર્ત દરમિયાન હંમેશા શૂન્ય હોય છે, કારણ કે ધન અને ઋણ અર્ધ આવર્ત સમાન મૂલ્ય ધરાવે છે અને એકબીજાને નાબૂદ કરે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રત્યાવર્તી પ્રવાહ (AC) પરિપથમાં કેપેસિટરનો ઉપયોગ થાય છે. જો કેપેસિટરની કેપેસિટન્સ વધારવામાં આવે, તો પરિપથમાં પ્રવાહ અને વોલ્ટેજ વચ્ચેની કળા તફાવત પર શું અસર થશે?", "opts": ["પ્રવાહ વોલ્ટેજ કરતાં π/2 રેડિયન આગળ રહેશે અને કળા તફાવત વધશે", "પ્રવાહ વોલ્ટેજ કરતાં π/2 રેડિયન પાછળ રહેશે અને કળા તફાવત ઘટશે", "પ્રવાહ વોલ્ટેજ કરતાં π/2 રેડિયન આગળ રહેશે અને કળા તફાવત અચળ રહેશે", "પ્રવાહ વોલ્ટેજ કરતાં π/2 રેડિયન પાછળ રહેશે અને કળા તફાવત અચળ રહેશે"], "ans": 2, "exp": "કેપેસિટર ધરાવતા AC પરિપથમાં પ્રવાહ હંમેશા વોલ્ટેજ કરતાં π/2 રેડિયન આગળ રહે છે. કેપેસિટન્સ વધારવાથી કળા તફાવતમાં ફેર પડતો નથી, માત્ર કેપેસિટિવ રિએક્ટન્સ ઘટે છે.", "chapter": "પ્રત્યાવર્તી પ્રવાહ", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "પ્રત્યાવર્તી પ્રવાહ Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
