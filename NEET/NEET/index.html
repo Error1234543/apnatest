@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEET Premium Preparation Platform</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            --physics-grad: linear-gradient(135deg, #3b82f6, #2563eb);
+            --chemistry-grad: linear-gradient(135deg, #10b981, #059669);
+            --biology-grad: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .logo svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--border);
+            color: var(--text-main);
+        }
+
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border-radius: 9999px;
+            border: 1px solid var(--border);
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+            font-weight: 500;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .breadcrumb-item {
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-item:hover {
+            color: var(--primary);
+        }
+
+        .breadcrumb-active {
+            color: var(--text-main);
+        }
+
+        .breadcrumb-separator {
+            color: var(--border);
+        }
+
+        main {
+            padding: 1.5rem 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            min-height: calc(100vh - 150px);
+        }
+
+        /* Views */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Grid Layouts */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Subject Cards */
+        .subject-card {
+            background-color: var(--surface);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .subject-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .subject-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .subject-icon svg { width: 24px; height: 24px; fill: currentColor; }
+        .subject-physics .subject-icon { background: var(--physics-grad); }
+        .subject-chemistry .subject-icon { background: var(--chemistry-grad); }
+        .subject-biology .subject-icon { background: var(--biology-grad); }
+
+        .subject-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .subject-stats { font-size: 0.875rem; color: var(--text-muted); display: flex; gap: 1rem;}
+
+        /* Quick Links */
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .quick-btn {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .quick-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Chapter Cards */
+        .chapter-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chapter-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+        }
+
+        .chapter-info h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .chapter-info p { font-size: 0.8rem; color: var(--text-muted); }
+
+        /* Resource Cards */
+        .resource-card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            transition: var(--transition);
+        }
+
+        .resource-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .resource-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .resource-title { font-size: 1rem; font-weight: 600; }
+        
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            white-space: nowrap;
+        }
+
+        .badge-Test, .badge-MCQ { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .badge-Notes { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .badge-Revision, .badge-Formula { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .badge-Important, .badge-Tricks { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+        .badge-Practice { background-color: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
+
+        .resource-meta { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-btn {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover { border-color: var(--primary); color: var(--text-main); }
+        .filter-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+        }
+
+        @media (min-width: 768px) {
+            header { flex-direction: row; align-items: center; }
+            .search-container { max-width: 400px; margin-left: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <div class="logo" onclick="navigate('home')">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                NEET Hub
+            </div>
+            <button class="theme-toggle" id="themeBtn" aria-label="Toggle Dark Mode">
+                <svg id="moonIcon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg id="sunIcon" viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" style="display:none;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+            </button>
+        </div>
+        <div class="search-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search chapters, tests, notes...">
+        </div>
+    </header>
+
+    <div class="breadcrumbs" id="breadcrumbs">
+        <!-- Dynamically injected -->
+    </div>
+
+    <main>
+        <!-- Home View -->
+        <div id="view-home" class="view active">
+            <div class="quick-links">
+                <div class="quick-btn" onclick="navigate('all-tests')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    All Tests
+                </div>
+                <div class="quick-btn" onclick="navigate('all-resources')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    All Resources
+                </div>
+            </div>
+
+            <h2 class="section-title">Subjects</h2>
+            <div class="grid-cards" id="subject-cards">
+                <!-- Dynamically injected -->
+            </div>
+        </div>
+
+        <!-- Subject View -->
+        <div id="view-subject" class="view">
+            <h2 class="section-title" id="subject-title">Chapters</h2>
+            <div class="grid-cards" id="chapter-cards">
+                <!-- Dynamically injected -->
+            </div>
+        </div>
+
+        <!-- Chapter View -->
+        <div id="view-chapter" class="view">
+            <h2 class="section-title" id="chapter-title">Resources</h2>
+            <div class="grid-cards" id="resource-cards">
+                <!-- Dynamically injected -->
+            </div>
+        </div>
+
+        <!-- Filtered/Search View (All Tests, All Resources, Search) -->
+        <div id="view-filtered" class="view">
+            <h2 class="section-title" id="filtered-title">Results</h2>
+            <div class="filters" id="filters-container">
+                <!-- Filters injected here -->
+            </div>
+            <div class="grid-cards" id="filtered-cards">
+                <!-- Dynamically injected -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- 1. DATA GENERATION ---
+        // Raw dataset derived perfectly from ZIP structure constraints[cite: 1]
+        const rawData = {
+            "Chemistry": {
+                "Structure_of_Atom": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "d_and_f_Block_Elements": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "p-Block_Elements": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points",
+                "s-Block_Elements": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Amines": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points",
+                "Biomolecules": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Haloalkanes_and_Haloarenes": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Redox_Reactions": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,short_notes",
+                "Polymers": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Organic_Chemistry_Basic_Principles": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points",
+                "States_of_Matter": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Classification_of_Elements_and_Periodicity": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Chemistry_in_Everyday_Life": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Environmental_Chemistry": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Thermodynamics": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Chemical_Kinetics": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Hydrogen": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Hydrocarbons": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Surface_Chemistry": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Some_p-Block_Elements": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Equilibrium": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Coordination_Compounds": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Electrochemistry": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "General_Principles_of_Isolation_of_Elements": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Alcohols_Phenols_and_Ethers": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Aldehydes_Ketones_and_Carboxylic_Acids": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Solid_State": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,exam_tricks,important_questions,important_points,short_notes",
+                "Some_Basic_Concepts_of_Chemistry": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Chemical_Bonding_and_Molecular_Structure": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Solutions": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes"
+            },
+            "Physics": {
+                "Electronic_Devices": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Current_Electricity": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Atoms_and_Nuclei": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,exam_tricks,important_questions,important_points,short_notes",
+                "Behaviour_of_Perfect_Gas_and_Kinetic_Theory": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Optics": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Electromagnetic_Induction_and_Alternating_Currents": "quick_revision,mcq_practice,topic_test,handwriting_notes,exam_tricks,important_questions,important_points,short_notes",
+                "Gravitation": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Communication_Systems": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Magnetic_Effects_of_Current_and_Magnetism": "full_notes,mcq_practice,topic_test,handwriting_notes,exam_tricks,short_notes",
+                "Kinematics": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Physical_World_and_Measurement": "quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Work_Energy_and_Power": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Dual_Nature_of_Matter_and_Radiation": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Oscillations_and_Waves": "mcq_practice,mcq_test_50,topic_test,handwriting_notes,exam_tricks,important_points,short_notes",
+                "Motion_of_System_of_Particles_and_Rigid_Body": "mcq_practice,mcq_test_50,topic_test,chapter_test,important_questions,short_notes",
+                "Electromagnetic_Waves": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,important_questions,short_notes",
+                "Electrostatics": "full_notes,quick_revision,formula_sheet,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes"
+            },
+            "Biology": {
+                "Respiration_in_Plants": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Biomolecules": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Structural_Organisation_in_Animals": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Microbes_in_Human_Welfare": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Plant_Growth_and_Development": "quick_revision,mcq_practice,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Plant_Kingdom": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Animal_Kingdom": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Biotechnology_Principles_and_Processes": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Ecosystem": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Locomotion_and_Movement": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Evolution": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Breathing_and_Exchange_of_Gases": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_points,short_notes",
+                "Body_Fluids_and_Circulation": "full_notes,quick_revision,mcq_practice,topic_test,handwriting_notes,chapter_test,exam_tricks,important_points,short_notes",
+                "Human_Reproduction": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Cell_Cycle_and_Cell_Division": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Organisms_and_Populations": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Anatomy_of_Flowering_Plants": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Reproductive_Health": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Cell_The_Unit_of_Life": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Biodiversity_and_Conservation": "full_notes,quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Transport_in_Plants": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Strategies_for_Enhancement_in_Food_Production": "quick_revision,mcq_practice,mcq_test_50,topic_test,handwriting_notes,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Digestion_and_Absorption": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes",
+                "Biotechnology_and_its_Applications": "quick_revision,mcq_practice,mcq_test_50,topic_test,chapter_test,exam_tricks,important_questions,important_points,short_notes"
+            }
+        };
+
+        const allResources = [];
+        const allChapters = [];
+        const subjectStats = { Physics: {ch:0, rs:0}, Chemistry: {ch:0, rs:0}, Biology: {ch:0, rs:0} };
+
+        // Parse human readable names and types
+        Object.keys(rawData).forEach(subject => {
+            Object.keys(rawData[subject]).forEach(chapterFolder => {
+                let chapterName = chapterFolder.replace(/_/g, ' ').replace(/-/g, '-');
+                allChapters.push({ subject, chapterFolder, chapterName });
+                subjectStats[subject].ch++;
+
+                const files = rawData[subject][chapterFolder].split(',');
+                files.forEach(file => {
+                    let resourceName = file.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                    if (file === 'mcq_test_50') resourceName = 'MCQ Test – 50 Questions';
+                    if (file === 'mcq_practice') resourceName = 'MCQ Practice';
+                    
+                    let type = 'Practice';
+                    if (file.includes('test') || file.includes('mcq')) type = 'Test';
+                    if (file === 'mcq_practice') type = 'MCQ';
+                    if (file.includes('notes')) type = 'Notes';
+                    if (file.includes('revision')) type = 'Revision';
+                    if (file.includes('formula')) type = 'Formula';
+                    if (file.includes('tricks')) type = 'Tricks';
+                    if (file.includes('important')) type = 'Important';
+
+                    // PATH UPDATED AS PER INSTRUCTIONS: index.html is located at the same level as Physics, Chemistry, Biology
+                    allResources.push({
+                        subject,
+                        chapter: chapterName,
+                        chapterFolder,
+                        name: resourceName,
+                        type,
+                        path: `${subject}/${chapterFolder}/${file}.html`,
+                        searchString: `${subject} ${chapterName} ${resourceName} ${type}`.toLowerCase()
+                    });
+                    subjectStats[subject].rs++;
+                });
+            });
+        });
+
+        // --- 2. APPLICATION STATE ---
+        let currentPath = { view: 'home', subject: null, chapter: null, filter: 'All' };
+        
+        // --- 3. UI RENDERING ---
+        function renderHome() {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-home').classList.add('active');
+            renderBreadcrumbs();
+            
+            const container = document.getElementById('subject-cards');
+            container.innerHTML = '';
+            
+            const icons = {
+                Physics: '<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+                Chemistry: '<path d="M9 3H15M10 9H14M3 21H21M5 21V9a3 3 0 0 1 3-3V3M16 21V9a3 3 0 0 0-3-3V3"/>',
+                Biology: '<path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v12M8 10l8 4M8 14l8-4"/>'
+            };
+
+            ['Physics', 'Chemistry', 'Biology'].forEach(sub => {
+                container.innerHTML += `
+                    <div class="subject-card subject-${sub.toLowerCase()}" onclick="navigate('subject', '${sub}')">
+                        <div class="subject-icon">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none">${icons[sub]}</svg>
+                        </div>
+                        <div class="subject-title">${sub}</div>
+                        <div class="subject-stats">
+                            <span>${subjectStats[sub].ch} Chapters</span>
+                            <span>${subjectStats[sub].rs} Resources</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderSubject(subject) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-subject').classList.add('active');
+            document.getElementById('subject-title').innerText = `${subject} Chapters`;
+            renderBreadcrumbs();
+
+            const container = document.getElementById('chapter-cards');
+            container.innerHTML = '';
+            const chapters = allChapters.filter(c => c.subject === subject);
+            
+            chapters.forEach(ch => {
+                const count = allResources.filter(r => r.chapterFolder === ch.chapterFolder).length;
+                container.innerHTML += `
+                    <div class="chapter-card" onclick="navigate('chapter', '${subject}', '${ch.chapterFolder}')">
+                        <div class="chapter-info">
+                            <h3>${ch.chapterName}</h3>
+                            <p>${count} Resources</p>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" color="var(--text-muted)"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </div>
+                `;
+            });
+        }
+
+        function renderChapter(subject, chapterFolder) {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-chapter').classList.add('active');
+            renderBreadcrumbs();
+
+            const chName = allChapters.find(c => c.chapterFolder === chapterFolder).chapterName;
+            document.getElementById('chapter-title').innerText = chName;
+
+            const container = document.getElementById('resource-cards');
+            container.innerHTML = '';
+            const resources = allResources.filter(r => r.chapterFolder === chapterFolder);
+            
+            resources.forEach(res => {
+                container.innerHTML += `
+                    <a href="${res.path}" class="resource-card">
+                        <div class="resource-header">
+                            <span class="resource-title">${res.name}</span>
+                            <span class="badge badge-${res.type.replace(' ', '-')}">${res.type}</span>
+                        </div>
+                        <div class="resource-meta">${res.subject} &rarr; ${res.chapter}</div>
+                    </a>
+                `;
+            });
+        }
+
+        function renderFiltered(viewType, filter = 'All', searchQuery = '') {
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-filtered').classList.add('active');
+            renderBreadcrumbs();
+
+            let results = [];
+            let title = '';
+            const filtersContainer = document.getElementById('filters-container');
+            filtersContainer.innerHTML = '';
+
+            if (viewType === 'search') {
+                title = `Search Results: "${searchQuery}"`;
+                results = allResources.filter(r => r.searchString.includes(searchQuery.toLowerCase()));
+            } else if (viewType === 'all-tests') {
+                title = 'All Tests & Practice';
+                const testResources = allResources.filter(r => r.type.includes('Test') || r.type.includes('MCQ') || r.type.includes('Practice'));
+                
+                // Add Filters
+                const filters = ['All', 'Physics', 'Chemistry', 'Biology', 'Chapter Test', 'Topic Test', 'MCQ'];
+                filters.forEach(f => {
+                    filtersContainer.innerHTML += `<button class="filter-btn ${filter === f ? 'active' : ''}" onclick="navigate('all-tests', null, null, '${f}')">${f}</button>`;
+                });
+
+                results = testResources.filter(r => {
+                    if (filter === 'All') return true;
+                    if (['Physics', 'Chemistry', 'Biology'].includes(filter)) return r.subject === filter;
+                    return r.type.includes(filter) || r.name.includes(filter);
+                });
+            } else if (viewType === 'all-resources') {
+                title = 'All Resources';
+                const filters = ['All', 'Physics', 'Chemistry', 'Biology', 'Notes', 'Revision', 'Important'];
+                filters.forEach(f => {
+                    filtersContainer.innerHTML += `<button class="filter-btn ${filter === f ? 'active' : ''}" onclick="navigate('all-resources', null, null, '${f}')">${f}</button>`;
+                });
+
+                results = allResources.filter(r => {
+                    if (filter === 'All') return true;
+                    if (['Physics', 'Chemistry', 'Biology'].includes(filter)) return r.subject === filter;
+                    return r.type.includes(filter);
+                });
+            }
+
+            document.getElementById('filtered-title').innerText = title;
+            const container = document.getElementById('filtered-cards');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = `<div class="empty-state">No resources found.</div>`;
+                return;
+            }
+
+            results.forEach(res => {
+                container.innerHTML += `
+                    <a href="${res.path}" class="resource-card">
+                        <div class="resource-header">
+                            <span class="resource-title">${res.name}</span>
+                            <span class="badge badge-${res.type.replace(' ', '-')}">${res.type}</span>
+                        </div>
+                        <div class="resource-meta">${res.subject} &rarr; ${res.chapter}</div>
+                    </a>
+                `;
+            });
+        }
+
+        function renderBreadcrumbs() {
+            const bc = document.getElementById('breadcrumbs');
+            let html = `<span class="breadcrumb-item ${currentPath.view==='home' ? 'breadcrumb-active':''}" onclick="navigate('home')">Home</span>`;
+            
+            if (currentPath.view === 'subject' || currentPath.view === 'chapter') {
+                html += `<span class="breadcrumb-separator">&rarr;</span>`;
+                html += `<span class="breadcrumb-item ${currentPath.view==='subject' ? 'breadcrumb-active':''}" onclick="navigate('subject', '${currentPath.subject}')">${currentPath.subject}</span>`;
+            }
+            if (currentPath.view === 'chapter') {
+                const chName = allChapters.find(c => c.chapterFolder === currentPath.chapter).chapterName;
+                html += `<span class="breadcrumb-separator">&rarr;</span>`;
+                html += `<span class="breadcrumb-item breadcrumb-active">${chName}</span>`;
+            }
+            if (currentPath.view === 'all-tests') {
+                html += `<span class="breadcrumb-separator">&rarr;</span><span class="breadcrumb-item breadcrumb-active">All Tests</span>`;
+            }
+            if (currentPath.view === 'all-resources') {
+                html += `<span class="breadcrumb-separator">&rarr;</span><span class="breadcrumb-item breadcrumb-active">All Resources</span>`;
+            }
+            if (currentPath.view === 'search') {
+                html += `<span class="breadcrumb-separator">&rarr;</span><span class="breadcrumb-item breadcrumb-active">Search</span>`;
+            }
+            bc.innerHTML = html;
+        }
+
+        // --- 4. NAVIGATION LOGIC ---
+        function navigate(view, subject = null, chapter = null, filter = 'All') {
+            document.getElementById('searchInput').value = '';
+            currentPath = { view, subject, chapter, filter };
+            
+            window.scrollTo(0,0);
+            
+            if (view === 'home') renderHome();
+            else if (view === 'subject') renderSubject(subject);
+            else if (view === 'chapter') renderChapter(subject, chapter);
+            else if (view === 'all-tests' || view === 'all-resources') renderFiltered(view, filter);
+        }
+
+        // --- 5. SEARCH LOGIC ---
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const q = e.target.value.trim();
+            if (q.length > 0) {
+                currentPath = { view: 'search', subject: null, chapter: null, filter: 'All' };
+                renderFiltered('search', 'All', q);
+            } else {
+                navigate('home');
+            }
+        });
+
+        // --- 6. THEME LOGIC ---
+        const themeBtn = document.getElementById('themeBtn');
+        const moon = document.getElementById('moonIcon');
+        const sun = document.getElementById('sunIcon');
+        
+        let isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        function updateTheme() {
+            if (isDark) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                moon.style.display = 'none';
+                sun.style.display = 'block';
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                moon.style.display = 'block';
+                sun.style.display = 'none';
+            }
+        }
+        
+        themeBtn.addEventListener('click', () => {
+            isDark = !isDark;
+            updateTheme();
+        });
+
+        // Init
+        updateTheme();
+        renderHome();
+    </script>
+</body>
+</html>
