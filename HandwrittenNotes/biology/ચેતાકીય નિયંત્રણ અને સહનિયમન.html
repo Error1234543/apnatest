@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PrepGrid | Chapter 19 - Neural Control and Coordination (NEET UG 2026)</title>
+    <style>
+        /* CSS Variables - Premium UI Theme */
+        :root {
+            /* Light Theme */
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-alt: #f1f5f9;
+            --bg-surface-hover: #e2e8f0;
+            
+            --text-main: #0f172a;
+            --text-muted: #475569;
+            --text-light: #94a3b8;
+            
+            --primary: #4f46e5;      /* Indigo */
+            --primary-light: #e0e7ff;
+            --primary-dark: #3730a3;
+            
+            --secondary: #0ea5e9;    /* Sky Blue */
+            --secondary-light: #e0f2fe;
+            
+            --accent: #8b5cf6;       /* Violet */
+            --accent-light: #ede9fe;
+            
+            --success: #10b981;
+            --success-light: #d1fae5;
+            
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+
+            --border-color: #cbd5e1;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Gujarati MT', 'Shruti';
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --bg-body: #09090b;
+            --bg-surface: #18181b;
+            --bg-surface-alt: #27272a;
+            --bg-surface-hover: #3f3f46;
+            
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-light: #64748b;
+            
+            --primary: #818cf8;
+            --primary-light: #312e81;
+            --primary-dark: #c7d2fe;
+
+            --secondary: #38bdf8;
+            --secondary-light: #0c4a6e;
+            
+            --accent: #a78bfa;
+            --accent-light: #4c1d95;
+            
+            --success: #34d399;
+            --success-light: #064e3b;
+            
+            --warning: #fbbf24;
+            --warning-light: #78350f;
+            
+            --danger: #f87171;
+            --danger-light: #7f1d1d;
+
+            --border-color: #3f3f46;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        }
+
+        /* Base Styles */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Reading Progress */
+        #progress-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 1000;
+            background: transparent;
+        }
+        #progress-bar {
+            height: 100%; width: 0%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            transition: width 0.1s ease-out;
+        }
+
+        /* Header */
+        header {
+            position: fixed; top: 0; left: 0; right: 0; height: 70px;
+            background: rgba(var(--bg-surface-rgb), 0.85);
+            background-color: var(--bg-surface);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; z-index: 900; box-shadow: var(--shadow-sm);
+        }
+        .brand { display: flex; flex-direction: column; justify-content: center; }
+        .brand-name { font-size: 1.25rem; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; line-height: 1.2;}
+        .brand-name span { color: var(--primary); }
+        .brand-sub { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .header-controls { display: flex; align-items: center; gap: 0.75rem; }
+        .icon-btn {
+            background: var(--bg-surface-alt); border: 1px solid var(--border-color);
+            color: var(--text-main); width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .icon-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+        .icon-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* Search Bar */
+        .search-container {
+            position: fixed; top: 70px; left: 0; right: 0; background: var(--bg-surface);
+            padding: 1rem 5%; border-bottom: 1px solid var(--border-color); box-shadow: var(--shadow-md);
+            transform: translateY(-100%); visibility: hidden; opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 890;
+        }
+        .search-container.active { transform: translateY(0); visibility: visible; opacity: 1; }
+        .search-input-wrapper { max-width: 800px; margin: 0 auto; position: relative; }
+        .search-input {
+            width: 100%; padding: 0.75rem 1rem 0.75rem 2.5rem; border-radius: 99px;
+            border: 2px solid var(--border-color); background: var(--bg-surface-alt);
+            color: var(--text-main); font-size: 1rem; transition: border-color 0.2s; outline: none;
+        }
+        .search-input:focus { border-color: var(--primary); }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); width: 16px; }
+
+        /* Layout */
+        .main-wrapper {
+            display: grid; grid-template-columns: 1fr; gap: 2rem;
+            max-width: 1300px; margin: 90px auto 3rem; padding: 0 5%;
+        }
+        @media (min-width: 1024px) {
+            .main-wrapper { grid-template-columns: 280px 1fr; }
+        }
+
+        /* Sidebar (TOC) */
+        .sidebar { display: none; }
+        @media (min-width: 1024px) {
+            .sidebar { display: block; position: sticky; top: 90px; height: calc(100vh - 120px); overflow-y: auto; }
+            .sidebar::-webkit-scrollbar { width: 4px; }
+            .sidebar::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        }
+        .toc-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; }
+        .toc-title { font-size: 0.9rem; text-transform: uppercase; font-weight: 800; color: var(--primary); margin-bottom: 1rem; letter-spacing: 0.5px; }
+        .toc-list { list-style: none; }
+        .toc-item { margin-bottom: 0.25rem; }
+        .toc-link {
+            display: block; padding: 0.5rem 0.75rem; color: var(--text-muted); text-decoration: none;
+            font-size: 0.9rem; font-weight: 500; border-radius: var(--radius-sm); transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        .toc-link:hover { background: var(--bg-surface-alt); color: var(--text-main); }
+        .toc-link.active { background: var(--primary-light); color: var(--primary); border-left-color: var(--primary); font-weight: 700; }
+
+        /* Mobile Nav Overlay */
+        .mobile-nav-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+            z-index: 998; opacity: 0; visibility: hidden; transition: opacity 0.3s;
+        }
+        .mobile-nav-overlay.active { opacity: 1; visibility: visible; }
+        .mobile-nav {
+            position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--bg-surface);
+            z-index: 999; padding: 1.5rem; overflow-y: auto; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
+        }
+        .mobile-nav.active { left: 0; }
+        .mobile-nav-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1rem;}
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: var(--text-main); cursor: pointer; }
+
+        /* Content Area */
+        .content { min-width: 0; }
+        
+        .chapter-header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: var(--radius-lg); padding: 3rem 2rem; color: #fff;
+            box-shadow: var(--shadow-md); margin-bottom: 2.5rem; position: relative; overflow: hidden;
+            text-align: center;
+        }
+        .chapter-header::before {
+            content: ''; position: absolute; top: 0; right: 0; width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+            transform: translate(30%, -30%); border-radius: 50%; pointer-events: none;
+        }
+        .badge {
+            display: inline-block; padding: 0.25rem 0.75rem; background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(4px); border-radius: 99px; font-size: 0.75rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.3);
+        }
+        .chapter-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; line-height: 1.2; margin-bottom: 0.5rem; }
+        .chapter-subtitle { font-size: 1.2rem; font-weight: 500; opacity: 0.9; }
+
+        /* Typography & Components inside content */
+        section { scroll-margin-top: 90px; margin-bottom: 2.5rem; }
+        .card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; box-shadow: var(--shadow-sm); }
+        
+        h2 { font-size: 1.5rem; font-weight: 800; color: var(--primary); border-bottom: 2px solid var(--primary-light); padding-bottom: 0.5rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;}
+        h3 { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin: 1.5rem 0 0.75rem; }
+        h4 { font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 1rem 0 0.5rem; }
+        
+        p { margin-bottom: 1rem; color: var(--text-muted); }
+        ul, ol { margin-bottom: 1.25rem; padding-left: 1.5rem; color: var(--text-muted); }
+        li { margin-bottom: 0.5rem; }
+        
+        strong { font-weight: 700; color: var(--text-main); }
+        em { font-style: italic; color: var(--text-muted); }
+        .eng { font-family: monospace; font-size: 0.85em; background: var(--bg-surface-alt); border: 1px solid var(--border-color); padding: 0.1rem 0.4rem; border-radius: 4px; color: var(--primary); font-weight: 600; }
+        mark { background-color: rgba(245, 158, 11, 0.3); color: inherit; padding: 0 4px; border-radius: 2px; }
+
+        /* Alerts/Callouts */
+        .callout {
+            display: flex; gap: 1rem; padding: 1.25rem; border-radius: var(--radius-md);
+            background: var(--bg-surface-alt); border-left: 4px solid var(--primary); margin: 1.5rem 0;
+        }
+        .callout.neet { border-left-color: var(--primary); background: var(--primary-light); }
+        .callout.neet .callout-title { color: var(--primary-dark); }
+        .callout.danger { border-left-color: var(--danger); background: var(--danger-light); }
+        .callout.danger .callout-title { color: var(--danger); }
+        .callout.success { border-left-color: var(--success); background: var(--success-light); }
+        .callout.success .callout-title { color: var(--success); }
+        
+        .callout-icon { font-size: 1.5rem; line-height: 1; flex-shrink: 0;}
+        .callout-content { flex-grow: 1; }
+        .callout-title { font-weight: 800; font-size: 1.05rem; margin-bottom: 0.25rem; }
+        .callout p { margin-bottom: 0; font-size: 0.95rem; color: var(--text-main); }
+        .callout ul { margin-bottom: 0; color: var(--text-main);}
+
+        /* Tables */
+        .table-responsive { overflow-x: auto; margin: 1.5rem 0; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 600px; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--border-color); font-size: 0.95rem; }
+        th { background: var(--bg-surface-alt); font-weight: 700; color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        tbody tr:nth-child(even) { background: rgba(var(--bg-surface-alt-rgb), 0.3); }
+        
+        /* Collapsible (Accordion) */
+        .collapsible-wrapper { border: 1px solid var(--border-color); border-radius: var(--radius-md); margin-bottom: 1rem; overflow: hidden; background: var(--bg-surface); }
+        .collapsible-btn {
+            width: 100%; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-surface); border: none; font-size: 1.05rem; font-weight: 700; color: var(--text-main);
+            cursor: pointer; transition: background 0.2s; text-align: left;
+        }
+        .collapsible-btn:hover { background: var(--bg-surface-alt); }
+        .collapsible-icon { transition: transform 0.3s; font-size: 0.8rem; }
+        .collapsible-btn.active .collapsible-icon { transform: rotate(180deg); }
+        .collapsible-btn.active { border-bottom: 1px solid var(--border-color); background: var(--bg-surface-alt); color: var(--primary); }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: var(--bg-surface); }
+        .collapsible-inner { padding: 1.25rem; }
+
+        /* Diagrams Container */
+        .diagram-container {
+            background: var(--bg-surface-alt); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+            padding: 2rem; margin: 2rem 0; display: flex; flex-direction: column; align-items: center; overflow-x: auto;
+        }
+        .diagram-title { font-size: 0.9rem; text-transform: uppercase; font-weight: 800; color: var(--text-muted); margin-bottom: 1.5rem; letter-spacing: 1px;}
+        
+        /* Flowchart / Sequence CSS */
+        .flow-seq { display: flex; align-items: center; flex-wrap: wrap; justify-content: center; gap: 0.5rem; margin: 1rem 0; }
+        .flow-box { background: var(--bg-surface); border: 2px solid var(--primary); border-radius: var(--radius-sm); padding: 0.5rem 1rem; font-weight: 700; text-align: center; color: var(--text-main); box-shadow: var(--shadow-sm); }
+        .flow-arrow { font-weight: bold; color: var(--text-muted); font-size: 1.2rem; }
+
+        /* SVG Styling */
+        svg { max-width: 100%; height: auto; }
+        .svg-text { fill: var(--text-main); font-family: var(--font-family); font-size: 14px; font-weight: 600;}
+        .svg-text-small { fill: var(--text-muted); font-family: var(--font-family); font-size: 12px; }
+        .svg-line { stroke: var(--text-main); stroke-width: 2; }
+        .svg-bg { fill: var(--bg-surface); stroke: var(--border-color); stroke-width: 2; }
+        .svg-highlight { fill: var(--primary-light); stroke: var(--primary); stroke-width: 2; }
+
+        /* Back to Top */
+        #backToTop {
+            position: fixed; bottom: 2rem; right: 2rem; width: 50px; height: 50px; border-radius: 50%;
+            background: var(--primary); color: white; border: none; cursor: pointer; box-shadow: var(--shadow-lg);
+            display: flex; align-items: center; justify-content: center; z-index: 900;
+            opacity: 0; visibility: hidden; transition: all 0.3s; transform: translateY(20px);
+        }
+        #backToTop.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        #backToTop:hover { background: var(--primary-dark); transform: translateY(-3px); }
+        #backToTop svg { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Search Highlight utility */
+        .search-highlight { background-color: var(--warning); color: #000; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
+    <header>
+        <div class="brand">
+            <div class="brand-name">Prep<span>Grid</span></div>
+            <div class="brand-sub">Official Academy</div>
+        </div>
+        <div class="header-controls">
+            <button class="icon-btn" id="searchToggle" title="Search Notes">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </button>
+            <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+                <!-- Moon icon (default) -->
+                <svg id="moonIcon" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-3.03 0-5.5-2.47-5.5-5.5 0-1.82.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+                <!-- Sun icon (hidden by default) -->
+                <svg id="sunIcon" style="display:none;" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41.39.39 1.03.39 1.41 0l1.06-1.06z"/></svg>
+            </button>
+            <button class="icon-btn" id="mobileMenuBtn" style="display:flex;">
+                <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="search-container" id="searchContainer">
+        <div class="search-input-wrapper">
+            <svg class="search-icon" viewBox="0 0 24 24"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" class="search-input" id="searchInput" placeholder="Search in Chapter 19 (e.g., Neuron, Synapse...)">
+        </div>
+    </div>
+
+    <!-- Mobile Nav Overlay -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <nav class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-header">
+            <div class="brand-name">Chapter <span>Index</span></div>
+            <button class="close-btn" id="closeMobileNav">&times;</button>
+        </div>
+        <ul class="toc-list" id="mobileTocList">
+            <!-- Populated via JS -->
+        </ul>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="toc-card">
+                <div class="toc-title">Table of Contents</div>
+                <ul class="toc-list" id="desktopTocList">
+                    <!-- Populated via JS -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content" id="mainContent">
+            
+            <div class="chapter-header">
+                <div class="badge">NEET UG 2026 | Biology</div>
+                <h1 class="chapter-title">Neural Control and Coordination</h1>
+                <div class="chapter-subtitle">ચેતાકીય નિયંત્રણ અને સહનિયમન</div>
+            </div>
+
+            <div class="callout danger">
+                <div class="callout-icon">🍻</div>
+                <div class="callout-content">
+                    <div class="callout-title">BETTER PREPATION </div>
+                    <p>LOADING......</p>
+                </div>
+            </div>
+
+            <!-- SECTION 1: Introduction -->
+            <section id="introduction" class="card search-section">
+                <h2>1. પ્રસ્તાવના (Introduction to Coordination)</h2>
+                <p>આપણા શરીરમાં વિવિધ અંગો એકબીજા સાથે મળીને કાર્ય કરે છે. આ ક્રિયાને <strong>સહનિયમન (Coordination)</strong> કહે છે. સહનિયમન એવી પ્રક્રિયા છે જેના દ્વારા બે અથવા વધુ અંગો એકબીજા સાથે પ્રતિક્રિયા કરે છે અને એકબીજાના કાર્યોમાં પૂરક બને છે.</p>
+                <p>મનુષ્યમાં સહનિયમન માટે બે તંત્રો જવાબદાર છે:</p>
+                <ol>
+                    <li><strong>ચેતાતંત્ર (Nervous System):</strong> આ તંત્ર ઝડપી, બિંદુ-થી-બિંદુ (point-to-point) જોડાણ પૂરું પાડે છે. ચેતાકીય નિયમન ખૂબ જ <strong>ઝડપી અને અલ્પજીવી (Short-lived)</strong> હોય છે.</li>
+                    <li><strong>અંતઃસ્ત્રાવી તંત્ર (Endocrine System):</strong> અંતઃસ્ત્રાવો દ્વારા રાસાયણિક સંકલન કરે છે. તે ધીમું પણ <strong>લાંબા ગાળાની (Long-lasting)</strong> અસર ધરાવે છે.</li>
+                </ol>
+            </section>
+
+            <!-- SECTION 2: Neural Tissue & Neuron -->
+            <section id="neural-tissue" class="card search-section">
+                <h2>2. ચેતાકોષની રચના (Structure of Neuron)</h2>
+                <p>ચેતાતંત્રનો રચનાત્મક અને ક્રિયાત્મક એકમ <strong>ચેતાકોષ <span class="eng">(Neuron)</span></strong> છે. તે ઉત્તેજનાને ગ્રહણ કરવાની, વહન કરવાની અને પ્રતિચાર આપવાની ક્ષમતા ધરાવે છે.</p>
+                
+                <p>ચેતાકોષ મુખ્યત્વે ત્રણ ભાગોનો બનેલો છે:</p>
+                <ul>
+                    <li><strong>કોષકાય <span class="eng">(Cell body / Cyton)</span>:</strong> તેમાં કોષકેન્દ્ર, કોષરસ અને વિશિષ્ટ કણિકાઓ આવેલી હોય છે જેને <strong>નિઝલની કણિકાઓ <span class="eng">(Nissl's granules)</span></strong> કહે છે (જે RER અને રિબોઝોમ્સની બનેલી છે અને પ્રોટીન સંશ્લેષણનું કાર્ય કરે છે).</li>
+                    <li><strong>શિખાતંતુ <span class="eng">(Dendrites)</span>:</strong> કોષકાયમાંથી નીકળતા ટૂંકા અને શાખિત તંતુઓ. તે ઉત્તેજનાને <strong>કોષકાય તરફ</strong> વહન કરે છે. (તેમાં પણ નિઝલની કણિકાઓ હોય છે).</li>
+                    <li><strong>અક્ષતંતુ <span class="eng">(Axon)</span>:</strong> કોષકાયમાંથી નીકળતો એક લાંબો તંતુ. તે ઉત્તેજનાને <strong>કોષકાયથી દૂર (ચેતોપાગમ તરફ)</strong> લઈ જાય છે. અક્ષતંતુના અંતિમ છેડાઓ શાખિત હોય છે, જેને ચેતાંતો કહે છે. તેના ફૂલેલા ભાગને <strong>સિનેપ્ટિક નોબ <span class="eng">(Synaptic knob)</span></strong> કહે છે, જેમાં ચેતાપ્રેષક દ્રવ્યો (Neurotransmitters) ભરેલી પુટિકાઓ હોય છે.</li>
+                </ul>
+
+                <div class="diagram-container">
+                    <div class="diagram-title">Diagram: Structure of a Neuron</div>
+                    <svg viewBox="0 0 500 200" style="max-width: 500px; width: 100%;">
+                        <!-- Cyton -->
+                        <circle cx="80" cy="100" r="30" class="svg-highlight" fill-opacity="0.2"/>
+                        <circle cx="80" cy="100" r="10" fill="var(--text-main)"/> <!-- Nucleus -->
+                        <text x="80" y="55" text-anchor="middle" class="svg-text">Cell Body / Cyton</text>
+                        <!-- Dendrites -->
+                        <path d="M 55 80 Q 30 60 40 40 M 105 80 Q 130 60 120 40 M 55 120 Q 30 140 40 160 M 105 120 Q 130 140 120 160" fill="none" class="svg-line"/>
+                        <text x="35" y="30" text-anchor="middle" class="svg-text-small">Dendrites</text>
+                        <!-- Axon -->
+                        <line x1="110" y1="100" x2="400" y2="100" class="svg-line" stroke-width="4"/>
+                        <text x="250" y="85" text-anchor="middle" class="svg-text">Axon (અક્ષતંતુ)</text>
+                        <!-- Myelin Sheath -->
+                        <rect x="130" y="92" width="50" height="16" rx="4" class="svg-bg" fill="var(--secondary-light)"/>
+                        <rect x="200" y="92" width="50" height="16" rx="4" class="svg-bg" fill="var(--secondary-light)"/>
+                        <rect x="270" y="92" width="50" height="16" rx="4" class="svg-bg" fill="var(--secondary-light)"/>
+                        <rect x="340" y="92" width="50" height="16" rx="4" class="svg-bg" fill="var(--secondary-light)"/>
+                        <text x="295" y="130" text-anchor="middle" class="svg-text-small">Myelin Sheath</text>
+                        <!-- Node of Ranvier -->
+                        <line x1="260" y1="120" x2="260" y2="105" stroke="var(--text-muted)" stroke-width="1"/>
+                        <text x="260" y="135" text-anchor="middle" class="svg-text-small">Node of Ranvier</text>
+                        <!-- Axon Terminals -->
+                        <path d="M 400 100 L 440 60 M 400 100 L 440 100 M 400 100 L 440 140" fill="none" class="svg-line"/>
+                        <circle cx="440" cy="60" r="4" fill="var(--accent)"/>
+                        <circle cx="440" cy="100" r="4" fill="var(--accent)"/>
+                        <circle cx="440" cy="140" r="4" fill="var(--accent)"/>
+                        <text x="440" y="45" text-anchor="middle" class="svg-text-small">Synaptic Knob</text>
+                    </svg>
+                </div>
+
+                <h3>ચેતાકોષના પ્રકારો (Types of Neurons based on structure)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th>પ્રકાર (Type)</th>
+                            <th>રચના</th>
+                            <th>ઉદાહરણ (NEET Focus)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>એકધ્રુવીય <span class="eng">Unipolar</span></strong></td>
+                            <td>માત્ર એક જ અક્ષતંતુ (કોઈ શિખાતંતુ નહીં).</td>
+                            <td>ભ્રૂણાવસ્થા (Embryonic stage) માં.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>દ્વિધ્રુવીય <span class="eng">Bipolar</span></strong></td>
+                            <td>એક અક્ષતંતુ અને એક શિખાતંતુ.</td>
+                            <td>આંખની નેત્રપટલ (Retina of eye) માં.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>બહુધ્રુવીય <span class="eng">Multipolar</span></strong></td>
+                            <td>એક અક્ષતંતુ અને બે કે તેથી વધુ શિખાતંતુ.</td>
+                            <td>બૃહદ્ મસ્તિષ્ક બાહ્યક (Cerebral cortex) માં.</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="callout neet">
+                    <div class="callout-icon">📌</div>
+                    <div class="callout-content">
+                        <div class="callout-title">મજ્જિત અને અમજ્જિત ચેતાતંતુ (Myelinated vs Non-myelinated)</div>
+                        <p><strong>શ્વાનનો કોષ (Schwann cell)</strong> બંને પ્રકારના તંતુઓમાં જોવા મળે છે. પરંતુ, મજ્જિત તંતુઓમાં તે અક્ષતંતુની આસપાસ મજ્જાપડ (Myelin sheath) બનાવે છે, જ્યારે અમજ્જિતમાં તે મજ્જાપડ બનાવતો નથી. મજ્જાપડની વચ્ચેના ખુલ્લા ભાગને <strong>રેન્વિયરની ગાંઠ <span class="eng">(Node of Ranvier)</span></strong> કહે છે.</p>
+                        <ul style="margin-top: 0.5rem; margin-bottom:0;">
+                            <li><strong>મજ્જિત (Myelinated):</strong> કરોડરજ્જુ અને મસ્તિષ્ક ચેતાઓમાં. (વેગ વધુ).</li>
+                            <li><strong>અમજ્જિત (Non-myelinated):</strong> સ્વયંવર્તી અને દૈહિક ચેતાતંત્રમાં.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 3: Nerve Impulse -->
+            <section id="nerve-impulse" class="card search-section">
+                <h2>3. ઉર્મિવેગનું નિર્માણ અને વહન (Generation & Conduction of Nerve Impulse)</h2>
+                <p>ચેતાકોષો ઉત્તેજનાશીલ કોષો છે કારણ કે તેમના પટલ ધ્રુવીય (Polarized) અવસ્થામાં હોય છે.</p>
+
+                <h3>1. વિશ્રામી કલાવીજસ્થિતિમાન (Resting Potential)</h3>
+                <p>જ્યારે ચેતાકોષ કોઈપણ ઉર્મિવેગનું વહન કરતો નથી (આરામની અવસ્થા), ત્યારે:</p>
+                <ul>
+                    <li>અક્ષતંતુનું પટલ K+ આયનો માટે <strong>વધુ પ્રવેશશીલ</strong> અને Na+ આયનો માટે <strong>લગભગ અપ્રવેશશીલ</strong> હોય છે.</li>
+                    <li>પટલની અંદરની બાજુ ઋણભારિત પ્રોટીન અને K+ ની માત્રા વધુ હોય છે.</li>
+                    <li>પટલની બહારની બાજુ Na+ ની માત્રા વધુ હોય છે.</li>
+                    <li>આ સાંદ્રતા ઢોળાંશ <strong>સોડિયમ-પોટેશિયમ પંપ (Na+/K+ Pump)</strong> દ્વારા જળવાય છે (જે 3 Na+ બહાર ફેંકે છે અને 2 K+ અંદર લાવે છે).</li>
+                    <li>પરિણામે, પટલની બહાર ધન (+) અને અંદર ઋણ (-) વીજભાર સર્જાય છે. આ તફાવતને <strong>Resting Membrane Potential (-70 mV)</strong> કહે છે.</li>
+                </ul>
+
+                <h3>2. સક્રિય કલાવીજસ્થિતિમાન (Action Potential / Depolarisation)</h3>
+                <p>જ્યારે ઉત્તેજના આપવામાં આવે છે, ત્યારે તે સ્થાને પટલ અચાનક <strong>Na+ માટે પ્રવેશશીલ</strong> બની જાય છે. Na+ ઝડપથી અંદર ધસી આવે છે. આથી વીજભાર ઉલટાઈ જાય છે (બહાર ઋણ અને અંદર ધન). આ અવસ્થાને <strong>વિધ્રુવીકરણ (Depolarisation)</strong> અને આ વીજસ્થિતિમાનને <strong>Action Potential (ઉર્મિવેગ)</strong> કહે છે.</p>
+
+                <h3>3. પુનઃધ્રુવીકરણ (Repolarisation)</h3>
+                <p>Na+ ની પ્રવેશશીલતા ક્ષણિક હોય છે. તરત જ K+ ની પ્રવેશશીલતા વધે છે અને K+ પટલની બહાર જાય છે. આનાથી ફરી પાછો અંદર ઋણ અને બહાર ધન વીજભાર સ્થપાય છે. ચેતાકોષ નવો ઉર્મિવેગ લેવા તૈયાર થાય છે.</p>
+
+                <div class="callout neet">
+                    <div class="callout-icon">⚡</div>
+                    <div class="callout-content">
+                        <div class="callout-title">સળંગ વહન vs કૂદકામય વહન (Saltatory Conduction)</div>
+                        <p>અમજ્જિત તંતુઓમાં ઉર્મિવેગનું વહન આખા પટલ પર સળંગ થાય છે (ધીમું). જ્યારે <strong>મજ્જિત (Myelinated)</strong> તંતુઓમાં મજ્જાપડ અવાહક (Insulator) હોવાથી, આયનોની આપલે માત્ર <strong>રેન્વિયરની ગાંઠ</strong> સ્થાને જ થાય છે. આથી ઉર્મિવેગ એક ગાંઠથી બીજી ગાંઠ પર કૂદકો મારે છે. આને <strong>Saltatory conduction</strong> કહે છે, જે ખૂબ <strong>ઝડપી (Faster)</strong> હોય છે.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: Synapse -->
+            <section id="synapse" class="card search-section">
+                <h2>4. ચેતોપાગમ (Synapse)</h2>
+                <p>એક ચેતાકોષમાંથી બીજા ચેતાકોષમાં ઉર્મિવેગનું વહન જે જોડાણ સ્થાનેથી થાય છે તેને <strong>ચેતોપાગમ <span class="eng">(Synapse)</span></strong> કહે છે. તે પૂર્વ-ચેતોપાગમીય (Presynaptic) અને પશ્ચ-ચેતોપાગમીય (Postsynaptic) કોષના પટલથી બને છે. તેની વચ્ચેની જગ્યાને સિનેપ્ટિક ક્લેફ્ટ (Synaptic cleft) કહે છે.</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th>લક્ષણ</th>
+                            <th>વિદ્યુતીય ચેતોપાગમ (Electrical Synapse)</th>
+                            <th>રાસાયણિક ચેતોપાગમ (Chemical Synapse)</th>
+                        </tr>
+                        <tr>
+                            <td><strong>પટલ વચ્ચેનું અંતર</strong></td>
+                            <td>ખૂબ જ ઓછું (લગભગ જોડાયેલા).</td>
+                            <td>સિનેપ્ટિક ક્લેફ્ટ (Cleft) દ્વારા છૂટા પડેલા.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>વહનની રીત</strong></td>
+                            <td>વિદ્યુત પ્રવાહ સીધો એક કોષમાંથી બીજામાં જાય છે.</td>
+                            <td><strong>ચેતાપ્રેષક દ્રવ્યો (Neurotransmitters)</strong> દ્વારા.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ઝડપ (Speed)</strong></td>
+                            <td>ખૂબ જ <strong>ઝડપી</strong>.</td>
+                            <td>વિદ્યુતીય કરતાં ધીમું.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>મનુષ્યમાં હાજરી</strong></td>
+                            <td>આપણા તંત્રમાં ખૂબ જ ભાગ્યે જ જોવા મળે છે.</td>
+                            <td>મોટાભાગના ચેતોપાગમ આ પ્રકારના હોય છે.</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <h3>રાસાયણિક ચેતોપાગમની ક્રિયાવિધિ (Mechanism)</h3>
+                <div class="flow-seq">
+                    <div class="flow-box">ઉર્મિવેગ ચેતાંત સુધી પહોંચે</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">સિનેપ્ટિક પુટિકાઓ પટલ સાથે જોડાય</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">Neurotransmitter મુક્ત થાય</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">પશ્ચ-પટલના ગ્રાહી (Receptors) સાથે જોડાય</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">આયન માર્ગો ખુલે (નવો ઉર્મિવેગ સર્જાય)</div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: Human Nervous System -->
+            <section id="nervous-system" class="card search-section">
+                <h2>5. માનવ ચેતાતંત્ર (Human Nervous System)</h2>
+                <p>માનવ ચેતાતંત્રને બે મુખ્ય ભાગોમાં વહેંચવામાં આવે છે:</p>
+                <ol>
+                    <li><strong>મધ્યસ્થ ચેતાતંત્ર <span class="eng">(CNS - Central Nervous System)</span>:</strong> મગજ (Brain) અને કરોડરજ્જુ (Spinal Cord) નો સમાવેશ. આ માહિતી પ્રક્રિયા (Processing) અને નિયંત્રણનું મુખ્ય કેન્દ્ર છે.</li>
+                    <li><strong>પરિઘવર્તી ચેતાતંત્ર <span class="eng">(PNS - Peripheral Nervous System)</span>:</strong> CNS સાથે જોડાયેલી તમામ ચેતાઓ (મસ્તિષ્ક અને કરોડરજ્જુ ચેતાઓ). તેના બે પ્રકારના તંતુઓ છે:
+                        <ul>
+                            <li><strong>અંતર્વાહી (Afferent/Sensory):</strong> અંગોથી CNS તરફ માહિતી લાવે.</li>
+                            <li><strong>બહિર્વાહી (Efferent/Motor):</strong> CNS થી અંગો (સ્નાયુ/ગ્રંથિ) તરફ આદેશો લઈ જાય.</li>
+                        </ul>
+                    </li>
+                </ol>
+
+                <h3>PNS ના બે મુખ્ય વિભાગો:</h3>
+                <ul>
+                    <li><strong>દૈહિક ચેતાતંત્ર <span class="eng">(Somatic Nervous System)</span>:</strong> CNS થી ઐચ્છિક (Voluntary) સ્નાયુઓ (કંકાલ સ્નાયુઓ) સુધી આદેશોનું વહન કરે છે.</li>
+                    <li><strong>સ્વયંવર્તી ચેતાતંત્ર <span class="eng">(Autonomic Nervous System - ANS)</span>:</strong> CNS થી અનૈચ્છિક અંગો (સરળ સ્નાયુઓ, હૃદય, ગ્રંથિઓ) સુધી આદેશોનું વહન કરે છે.</li>
+                </ul>
+            </section>
+
+            <!-- SECTION 6: Brain -->
+            <section id="brain" class="card search-section">
+                <h2>6. મધ્યસ્થ ચેતાતંત્ર: મગજ (Brain)</h2>
+                <p>મગજ એ આપણા શરીરનું આદેશ અને નિયંત્રણ કેન્દ્ર છે. તે ખોપરી (Skull / Cranium) માં સુરક્ષિત છે. મગજની ફરતે 3 રક્ષણાત્મક આવરણો (Cranial meninges) આવેલા છે: (બહારથી અંદર તરફ) <strong>ડ્યુરા મેટર (Dura mater)</strong>, <strong>એરેક્નોઇડ (Arachnoid)</strong> અને <strong>પિયા મેટર (Pia mater)</strong>.</p>
+                
+                <p>મગજને ત્રણ મુખ્ય ભાગોમાં વહેંચવામાં આવે છે:</p>
+
+                <h3>6.1 અગ્ર મગજ (Forebrain)</h3>
+                <p>બૃહદ્ મસ્તિષ્ક (Cerebrum), થેલેમસ અને હાઇપોથેલેમસનો બનેલો છે.</p>
+                <ul>
+                    <li><strong>બૃહદ્ મસ્તિષ્ક <span class="eng">(Cerebrum)</span>:</strong> મગજનો સૌથી મોટો ભાગ. તે ઊંડી ખાંચ દ્વારા ડાબા અને જમણા <strong>બૃહદ્ મસ્તિષ્ક ગોળાર્ધ (Cerebral hemispheres)</strong> માં વહેંચાયેલ છે. આ ગોળાર્ધો <strong>કોર્પસ કેલોસમ <span class="eng">(Corpus callosum)</span></strong> નામના ચેતાપટ્ટાથી જોડાયેલા હોય છે. બહારનો ભાગ (બાહ્યક) ગ્રે મેટર (Grey matter) નો અને અંદરનો ભાગ વ્હાઈટ મેટર (White matter) નો બનેલો છે. તે ઐચ્છિક હલનચલન, યાદશક્તિ, તર્ક અને વાણીનું કેન્દ્ર છે.</li>
+                    <li><strong>થેલેમસ <span class="eng">(Thalamus)</span>:</strong> સંવેદી અને ચાલક માહિતીનું મુખ્ય રિલે સેન્ટર (Coordinating centre).</li>
+                    <li><strong>હાઇપોથેલેમસ <span class="eng">(Hypothalamus)</span>:</strong> થેલેમસના તળિયે. તે <strong>શરીરનું તાપમાન, ભૂખ અને તરસ</strong> નું નિયંત્રણ કરે છે. અંતઃસ્ત્રાવી તંત્ર (પિટ્યુટરી ગ્રંથિ) નું પણ નિયંત્રણ કરે છે.</li>
+                    <li><mark>નોંધ:</mark> મગજનો અંદરનો ભાગ (Amygdala, Hippocampus વગેરે) હાઇપોથેલેમસ સાથે મળીને <strong>લિમ્બિક સિસ્ટમ (Limbic system)</strong> બનાવે છે, જે <strong>લાગણીઓ (Emotions - ગુસ્સો, ડર, આનંદ)</strong> અને જાતીય વર્તણૂકનું નિયંત્રણ કરે છે.</li>
+                </ul>
+
+                <h3>6.2 મધ્ય મગજ (Midbrain)</h3>
+                <p>થેલેમસ/હાઇપોથેલેમસ અને પશ્વ મગજના પોન્સ વચ્ચે આવેલું છે. તેની પૃષ્ઠ બાજુએ 4 ગોળાકાર ઉપસેલા ભાગો હોય છે, જેને <strong>કોર્પોરા ક્વાડ્રિજેમિના <span class="eng">(Corpora quadrigemina)</span></strong> કહે છે.</p>
+
+                <h3>6.3 પશ્વ મગજ (Hindbrain)</h3>
+                <p>પોન્સ (સેતુ), અનુમસ્તિષ્ક અને લંબમજ્જાનો બનેલો છે.</p>
+                <ul>
+                    <li><strong>પોન્સ <span class="eng">(Pons)</span>:</strong> મગજના વિવિધ ભાગોને જોડતા ચેતાતંતુઓ ધરાવે છે. શ્વસન નિયમનમાં મદદ કરે છે.</li>
+                    <li><strong>અનુમસ્તિષ્ક <span class="eng">(Cerebellum)</span>:</strong> તેની સપાટી ખૂબ જ ગડીમય (Convoluted) હોય છે. તે <strong>શરીરનું સંતુલન (Balance) અને ઐચ્છિક સ્નાયુઓનું સંકલન</strong> જાળવે છે.</li>
+                    <li><strong>લંબમજ્જા <span class="eng">(Medulla oblongata)</span>:</strong> કરોડરજ્જુ સાથે જોડાયેલ છે. તેમાં શ્વસન, રુધિરાભિસરણ (Cardiovascular) અને જઠરાંત્રીય સ્ત્રાવોના <strong>અનૈચ્છિક નિયંત્રણ કેન્દ્રો</strong> આવેલા છે.</li>
+                </ul>
+                <div class="callout success">
+                    <div class="callout-icon">🧠</div>
+                    <div class="callout-content">
+                        <p><strong>Brain Stem (મસ્તિષ્ક સ્તંભ):</strong> મધ્ય મગજ, પોન્સ અને લંબમજ્જા ભેગા મળીને મસ્તિષ્ક સ્તંભ બનાવે છે. તે મગજ અને કરોડરજ્જુ વચ્ચેનું જોડાણ છે.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: Reflex Action & Spinal Cord -->
+            <section id="reflex-action" class="card search-section">
+                <h2>7. કરોડરજ્જુ અને પરાવર્તી ક્રિયા (Spinal Cord & Reflex Action)</h2>
+                
+                <h3>પરાવર્તી ક્રિયા <span class="eng">(Reflex Action)</span></h3>
+                <p>બાહ્ય ઉત્તેજના સામે <strong>સ્વયંસ્ફુરિત (Involuntary), અચેતન (Unconscious) અને અત્યંત ઝડપી</strong> પ્રતિચારને પરાવર્તી ક્રિયા કહે છે, જેમાં મધ્યસ્થ ચેતાતંત્ર (ખાસ કરીને કરોડરજ્જુ) નો ભાગ ભજવાય છે. (દા.ત. ગરમ વસ્તુને અડકતા હાથ ખેંચી લેવો, ગોઠણનો આંચકો - Knee jerk reflex).</p>
+
+                <h3>પરાવર્તી કમાન (Reflex Arc)</h3>
+                <p>આ ક્રિયાનો માર્ગ ઓછામાં ઓછો એક સંવેદી (Afferent) અને એક ચાલક (Efferent) ચેતાકોષ ધરાવે છે. માર્ગ નીચે મુજબ છે:</p>
+                <div class="flow-seq">
+                    <div class="flow-box">ગ્રાહી અંગ (Receptor)</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">સંવેદી ચેતાકોષ (Afferent path)</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box" style="border-color:var(--accent);">CNS (કરોડરજ્જુ / Interneuron)</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">ચાલક ચેતાકોષ (Efferent path)</div>
+                    <div class="flow-arrow">&rarr;</div>
+                    <div class="flow-box">પ્રતિચારક અંગ (Effector - સ્નાયુ)</div>
+                </div>
+            </section>
+
+            <!-- SECTION 8: ANS -->
+            <section id="ans" class="card search-section">
+                <h2>8. સ્વયંવર્તી ચેતાતંત્ર (Autonomic Nervous System)</h2>
+                <p>ANS અનૈચ્છિક અંગો (હૃદય, પાચનતંત્ર, રુધિરવાહિનીઓ) નું નિયંત્રણ કરે છે. તેના બે મુખ્ય ભાગ છે, જે એકબીજાની વિરુદ્ધ (Antagonistic) કાર્ય કરે છે:</p>
+                
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th>અસર થતું અંગ</th>
+                            <th>અનુકંપી ચેતાતંત્ર (Sympathetic) <br><span style="font-size:0.8rem; font-weight:normal;">"Fight or Flight" (કટોકટીમાં)</span></th>
+                            <th>પરાનુકંપી ચેતાતંત્ર (Parasympathetic) <br><span style="font-size:0.8rem; font-weight:normal;">"Rest and Digest" (આરામમાં)</span></th>
+                        </tr>
+                        <tr>
+                            <td><strong>હૃદયના ધબકારા (Heart rate)</strong></td>
+                            <td style="color:var(--danger); font-weight:bold;">વધે છે</td>
+                            <td style="color:var(--success); font-weight:bold;">ઘટે છે (સામાન્ય થાય)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>પાચન ક્રિયા (Digestion)</strong></td>
+                            <td>અવરોધાય છે (ધીમી પડે)</td>
+                            <td>પ્રેરાય છે (વધે છે)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>શ્વસનનળી (Bronchi)</strong></td>
+                            <td>પહોળી થાય છે (Dilates)</td>
+                            <td>સાંકડી થાય છે (Constricts)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>લાળરસનો સ્ત્રાવ (Salivation)</strong></td>
+                            <td>ઘટે છે (મોં સુકાય)</td>
+                            <td>વધે છે</td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+
+            <!-- PREMIUM NEET REVISION -->
+            <section id="neet-revision" class="card search-section" style="border: 2px solid var(--primary); background: rgba(var(--primary-light), 0.1);">
+                <h2 style="border-bottom: none; justify-content: center; font-size: 2rem;">🚀 NEET Premium Revision</h2>
+                
+                <div class="collapsible-wrapper">
+                    <button class="collapsible-btn">
+                        <span>🔥 NEET Focus: Common Confusions (ગુંચવણભર્યા મુદ્દા)</span>
+                        <span class="collapsible-icon">▼</span>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <ul style="list-style-type: none; padding: 0;">
+                                <li style="margin-bottom: 1rem;"><strong>આ બંને એકસરખા નથી — Cerebrum vs Cerebellum:</strong> 
+                                    <br><em>Cerebrum (બૃહદ્ મસ્તિષ્ક):</em> અગ્ર મગજનો ભાગ, ઐચ્છિક કાર્યો, વિચારવું, મેમરી.
+                                    <br><em>Cerebellum (અનુમસ્તિષ્ક):</em> પશ્વ મગજનો ભાગ, શરીરનું સંતુલન (Balance) અને સ્નાયુઓનું સંકલન.</li>
+                                <li style="margin-bottom: 1rem;"><strong>આ બંને એકસરખા નથી — Thalamus vs Hypothalamus:</strong> 
+                                    <br><em>Thalamus:</em> સંવેદી અને ચાલક સંદેશાઓનું રિલે સેન્ટર (Relay center).
+                                    <br><em>Hypothalamus:</em> તાપમાન નિયમન (Thermoregulation), ભૂખ, તરસ અને અંતઃસ્ત્રાવી નિયંત્રણ.</li>
+                                <li><strong>Sodium-Potassium Pump:</strong> તે <strong>3 Na+ બહાર</strong> અને <strong>2 K+ અંદર</strong> મોકલે છે. (વિશ્રામી અવસ્થા જાળવવા). આ પ્રક્રિયા સક્રિય (Active) છે અને ATP વાપરે છે.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-wrapper">
+                    <button class="collapsible-btn">
+                        <span>⚡ Rapid Revision Cards (ઝડપી રિવિઝન)</span>
+                        <span class="collapsible-icon">▼</span>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                            <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--primary);">
+                                <h4 style="color: var(--primary-dark); margin-top: 0;">Resting Membrane Potential</h4>
+                                <p style="margin-bottom:0;">આશરે <strong>-70 mV</strong>. પટલની બહાર Na+ વધુ, અંદર K+ વધુ અને ઋણભારિત પ્રોટીન હોય છે.</p>
+                            </div>
+                            <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--accent);">
+                                <h4 style="color: var(--accent); margin-top: 0;">Corpus Callosum</h4>
+                                <p style="margin-bottom:0;">બે બૃહદ્ મસ્તિષ્ક ગોળાર્ધોને જોડતો ચેતાતંતુઓનો પટ્ટો. (ફક્ત સસ્તનોની લાક્ષણિકતા).</p>
+                            </div>
+                            <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--success);">
+                                <h4 style="color: var(--success); margin-top: 0;">Limbic System</h4>
+                                <p style="margin-bottom:0;">Hypothalamus સાથે મળીને જાતીય વર્તણૂક અને લાગણીઓ (ભય, ખુશી) નું નિયંત્રણ કરે છે.</p>
+                            </div>
+                            <div style="background: var(--bg-surface-alt); padding: 1rem; border-radius: var(--radius-sm); border-left: 4px solid var(--warning);">
+                                <h4 style="color: var(--warning); margin-top: 0;">Saltatory Conduction</h4>
+                                <p style="margin-bottom:0;">મજ્જિત ચેતાતંતુઓમાં ઉર્મિવેગનું નોડ ઓફ રેન્વિયર પરથી કૂદકા મારતું અને <strong>ઝડપી વહન</strong>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="collapsible-wrapper">
+                    <button class="collapsible-btn">
+                        <span>✅ NEET પહેલાં શું યાદ રાખવું? (Final Checklist)</span>
+                        <span class="collapsible-icon">▼</span>
+                    </button>
+                    <div class="collapsible-content">
+                        <div class="collapsible-inner">
+                            <ul style="margin-bottom: 0;">
+                                <li>નેત્રપટલ (Retina) માં <strong>Bipolar (દ્વિધ્રુવીય)</strong> ચેતાકોષ જોવા મળે છે.</li>
+                                <li>બૃહદ્ મસ્તિષ્ક બાહ્યક (Cerebral Cortex) માં <strong>Multipolar</strong> ચેતાકોષ હોય છે.</li>
+                                <li>ડિપોલરાઇઝેશન (Depolarisation) માટે <strong>Na+ આયનો અંદર પ્રવેશવા (Influx)</strong> જવાબદાર છે.</li>
+                                <li>રિપોલરાઇઝેશન (Repolarisation) માટે <strong>K+ આયનો બહાર જવા (Efflux)</strong> જવાબદાર છે.</li>
+                                <li>મેડ્યુલા ઓબ્લોન્ગાટા (Medulla oblongata) શ્વસન, હૃદયના ધબકારા અને ગેસ્ટ્રિક સ્ત્રાવનું નિયંત્રણ કરે છે.</li>
+                                <li><mark>Sense Organs (આંખ અને કાન) NEET 2026 ના નવા સિલેબસમાં નથી, તેથી તેના પર સમય ન બગાડવો.</mark></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <footer style="text-align: center; padding: 2rem 0; color: var(--text-muted); font-size: 0.9rem;">
+                <p>&copy; 2026 PrepGrid Official ACADEMY. All Rights Reserved.</p>
+                <p>Designed for NEET UG 2026. Strictly based on the rationalised NCERT syllabus.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" aria-label="Back to top">
+        <svg viewBox="0 0 24 24"><path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/></svg>
+    </button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Theme Toggle Logic
+            const themeBtn = document.getElementById('themeToggle');
+            const sunIcon = document.getElementById('sunIcon');
+            const moonIcon = document.getElementById('moonIcon');
+            const htmlElement = document.documentElement;
+
+            function setTheme(isDark) {
+                if (isDark) {
+                    htmlElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    sunIcon.style.display = 'block';
+                    moonIcon.style.display = 'none';
+                } else {
+                    htmlElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    sunIcon.style.display = 'none';
+                    moonIcon.style.display = 'block';
+                }
+            }
+
+            // Check saved theme or system preference
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                setTheme(true);
+            } else {
+                setTheme(false);
+            }
+
+            themeBtn.addEventListener('click', () => {
+                const isDark = htmlElement.getAttribute('data-theme') === 'dark';
+                setTheme(!isDark);
+            });
+
+            // 2. TOC Generation and Scroll Highlighting
+            const desktopTocList = document.getElementById('desktopTocList');
+            const mobileTocList = document.getElementById('mobileTocList');
+            const sections = document.querySelectorAll('.search-section');
+
+            sections.forEach(section => {
+                const h2 = section.querySelector('h2');
+                if (h2) {
+                    const id = section.id;
+                    const text = h2.innerText.split(' (')[0]; // Simplify title for TOC
+                    
+                    const liDesktop = document.createElement('li');
+                    liDesktop.className = 'toc-item';
+                    liDesktop.innerHTML = `<a href="#${id}" class="toc-link">${text}</a>`;
+                    desktopTocList.appendChild(liDesktop);
+
+                    const liMobile = document.createElement('li');
+                    liMobile.className = 'toc-item';
+                    liMobile.innerHTML = `<a href="#${id}" class="toc-link">${text}</a>`;
+                    mobileTocList.appendChild(liMobile);
+                }
+            });
+
+            const tocLinks = document.querySelectorAll('.toc-link');
+
+            // 3. Scroll Events (Progress bar, Back to top, TOC active state)
+            const progressBar = document.getElementById('progress-bar');
+            const backToTop = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', () => {
+                let scrollPos = window.scrollY || document.documentElement.scrollTop;
+                let calcHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                let scrollVal = (scrollPos / calcHeight) * 100;
+                progressBar.style.width = scrollVal + '%';
+
+                if (scrollPos > 300) {
+                    backToTop.classList.add('show');
+                } else {
+                    backToTop.classList.remove('show');
+                }
+
+                // Highlight TOC
+                let currentSection = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop - 120; // Offset for sticky header
+                    if (scrollPos >= sectionTop) {
+                        currentSection = section.getAttribute('id');
+                    }
+                });
+
+                tocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentSection}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            backToTop.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // 4. Mobile Navigation
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileNav = document.getElementById('mobileNav');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            const closeMobileNav = document.getElementById('closeMobileNav');
+
+            function toggleMobileMenu() {
+                mobileNav.classList.toggle('active');
+                mobileNavOverlay.classList.toggle('active');
+            }
+
+            mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            closeMobileNav.addEventListener('click', toggleMobileMenu);
+            mobileNavOverlay.addEventListener('click', toggleMobileMenu);
+
+            // Close menu on link click
+            document.querySelectorAll('#mobileTocList .toc-link').forEach(link => {
+                link.addEventListener('click', toggleMobileMenu);
+            });
+
+            // 5. Collapsible Sections
+            const collapsibles = document.querySelectorAll('.collapsible-btn');
+            collapsibles.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                    } else {
+                        content.style.maxHeight = content.scrollHeight + "px";
+                    }
+                });
+            });
+
+            // 6. Search Functionality
+            const searchToggle = document.getElementById('searchToggle');
+            const searchContainer = document.getElementById('searchContainer');
+            const searchInput = document.getElementById('searchInput');
+            
+            searchToggle.addEventListener('click', () => {
+                searchContainer.classList.toggle('active');
+                if(searchContainer.classList.contains('active')) {
+                    searchInput.focus();
+                } else {
+                    searchInput.value = '';
+                    performSearch('');
+                }
+            });
+
+            // Save original HTML for search reset
+            const originalContent = new Map();
+            sections.forEach(sec => originalContent.set(sec.id, sec.innerHTML));
+
+            function performSearch(query) {
+                query = query.toLowerCase().trim();
+                
+                sections.forEach(sec => {
+                    // Reset to original HTML
+                    sec.innerHTML = originalContent.get(sec.id);
+                    
+                    if (query.length < 2) {
+                        sec.style.display = 'block'; // Show all if query is empty
+                        return;
+                    }
+
+                    const textContent = sec.innerText.toLowerCase();
+                    if (textContent.includes(query)) {
+                        sec.style.display = 'block';
+                        // Highlight matching text (Basic implementation for text nodes)
+                        highlightText(sec, query);
+                    } else {
+                        sec.style.display = 'none';
+                    }
+                });
+
+                // Re-bind collapsible events if HTML was reset
+                document.querySelectorAll('.collapsible-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        this.classList.toggle('active');
+                        const content = this.nextElementSibling;
+                        if (content.style.maxHeight) {
+                            content.style.maxHeight = null;
+                        } else {
+                            content.style.maxHeight = content.scrollHeight + "px";
+                        }
+                    });
+                });
+            }
+
+            function highlightText(element, query) {
+                const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                const nodesToReplace = [];
+                
+                while (node = walker.nextNode()) {
+                    if (node.nodeValue.toLowerCase().includes(query)) {
+                        // Skip text inside scripts, styles, or SVG
+                        if (!['SCRIPT', 'STYLE', 'SVG', 'PATH', 'TEXT', 'CIRCLE', 'RECT', 'LINE'].includes(node.parentNode.nodeName)) {
+                            nodesToReplace.push(node);
+                        }
+                    }
+                }
+
+                nodesToReplace.forEach(n => {
+                    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    const wrapper = document.createElement('span');
+                    wrapper.innerHTML = n.nodeValue.replace(regex, '<mark class="search-highlight">$1</mark>');
+                    n.parentNode.replaceChild(wrapper, n);
+                });
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                performSearch(e.target.value);
+            });
+
+        });
+    </script>
+</body>
+</html>
