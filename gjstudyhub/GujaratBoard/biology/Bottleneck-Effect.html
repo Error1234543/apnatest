@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bottleneck Effect</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Bottleneck Effect</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Bottleneck Effect</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક નાનકડા ટાપુ પર વસતી પક્ષીઓની જાતિમાં અચાનક વાવાઝોડાને કારણે મોટી સંખ્યામાં પક્ષીઓ મૃત્યુ પામે છે. બાકી બચેલા પક્ષીઓમાં જનીનિક વિવિધતા અગાઉ કરતાં નોંધપાત્ર રીતે ઘટી જાય છે. આ ઘટનાને ઉત્ક્રાંતિના સંદર્ભમાં શું કહેવાય?", "opts": ["સ્થાપક અસર (Founder Effect)", "બોટલનેક અસર (Bottleneck Effect)", "જનીન પ્રવાહ (Gene Flow)", "કુદરતી પસંદગી (Natural Selection)"], "ans": 1, "exp": "આ પ્રશ્નમાં વસ્તીના કદમાં અચાનક ઘટાડો થવાથી જનીનિક વિવિધતામાં ઘટાડો થાય છે, જે બોટલનેક અસર (Bottleneck Effect)નું ઉદાહરણ છે. સ્થાપક અસરમાં નવી વસ્તી થોડાક સભ્યો દ્વારા સ્થાપિત થાય છે, જ્યારે જનીન પ્રવાહમાં જનીનો એક વસ્તીમાંથી બીજી વસ્તીમાં સ્થળાંતરિત થાય છે. કુદરતી પસંદગી એ પર્યાવરણીય પરિબળો દ્વારા થતી પ્રક્રિયા છે, જે અહીં લાગુ પડતી નથી. તેથી સાચો જવાબ B છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસરના પરિણામે નીચેનામાંથી કયું પરિબળ સૌથી વધુ પ્રભાવિત થાય છે?", "opts": ["વસ્તીનું કદ (Population Size)", "જનીનિક વિવિધતા (Genetic Diversity)", "પ્રજનન દર (Reproduction Rate)", "પર્યાવરણીય અનુકૂલન (Environmental Adaptation)"], "ans": 1, "exp": "બોટલનેક અસરમાં વસ્તીના કદમાં અચાનક ઘટાડો થવાથી જનીનિક વિવિધતા સૌથી વધુ પ્રભાવિત થાય છે, કારણ કે બાકી રહેલા સભ્યોમાં જનીનોની વિવિધતા મર્યાદિત થઈ જાય છે. વસ્તીનું કદ ઘટે છે પરંતુ તે પ્રાથમિક પરિબળ નથી. પ્રજનન દર અને પર્યાવરણીય અનુકૂલન પરોક્ષ રીતે પ્રભાવિત થઈ શકે છે, પરંતુ સીધો પ્રભાવ જનીનિક વિવિધતા પર પડે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ બોટલનેક અસરનું નથી?", "opts": ["જ્વાળામુખી વિસ્ફોટને કારણે એક ટાપુ પરની વનસ્પતિની વસ્તીમાં ઘટાડો", "શિકારને કારણે ચિત્તાની વસ્તીમાં અચાનક ઘટાડો", "એક નવી વસાહતમાં થોડાક માનવો દ્વારા વસ્તીની શરૂઆત", "રોગચાળાને કારણે એક પ્રાણી જાતિની વસ્તીમાં મોટાપાયે મૃત્યુ"], "ans": 2, "exp": "અહીં વિકલ્પ C સ્થાપક અસર (Founder Effect)નું ઉદાહરણ છે, જ્યાં નવી વસ્તી થોડાક સભ્યો દ્વારા સ્થાપિત થાય છે. બાકીના વિકલ્પો બોટલનેક અસરના ઉદાહરણો છે, જ્યાં વસ્તીના કદમાં અચાનક ઘટાડો થવાથી જનીનિક વિવિધતા ઘટે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસરના પરિણામે વસ્તીમાં જનીનિક વિવિધતા ઘટવાથી નીચેનામાંથી કયું પરિણામ સંભવિત નથી?", "opts": ["વસ્તીની રોગપ્રતિકારક ક્ષમતામાં ઘટાડો", "નવી પ્રજાતિઓનું નિર્માણ", "જનીનોની આવૃત્તિમાં અચાનક ફેરફાર", "વસ્તીનું સંપૂર્ણ લુપ્ત થવું"], "ans": 1, "exp": "બોટલનેક અસરથી જનીનિક વિવિધતા ઘટે છે, જે વસ્તીની રોગપ્રતિકારક ક્ષમતામાં ઘટાડો, જનીનોની આવૃત્તિમાં ફેરફાર અને લુપ્ત થવાનું જોખમ વધારે છે. પરંતુ નવી પ્રજાતિઓનું નિર્માણ (સ્પીસીએશન) એ લાંબા ગાળાની ઉત્ક્રાંતિ પ્રક્રિયા છે, જે બોટલનેક અસરના તાત્કાલિક પરિણામ તરીકે સંભવિત નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક પ્રાણી જાતિની વસ્તીમાં બોટલનેક અસરને કારણે જનીનિક વિવિધતા ઘટી જાય છે. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["વસ્તીમાં હાનિકારક જનીનોની આવૃત્તિ વધી શકે છે", "વસ્તીની અનુકૂલન ક્ષમતા વધી જાય છે", "વસ્તી પર્યાવરણીય પરિવર્તન સામે વધુ સંવેદનશીલ બને છે", "વસ્તીમાં જનીનિક ડ્રિફ્ટની અસર વધી જાય છે"], "ans": 1, "exp": "બોટલનેક અસરથી જનીનિક વિવિધતા ઘટવાથી વસ્તીની અનુકૂલન ક્ષમતા ઘટે છે, નહીં કે વધે. હાનિકારક જનીનોની આવૃત્તિ વધી શકે છે, વસ્તી પર્યાવરણીય પરિવર્તન સામે સંવેદનશીલ બને છે, અને જનીનિક ડ્રિફ્ટની અસર વધી જાય છે. તેથી વિકલ્પ B ખોટું છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી વસ્તીમાં જનીનિક વિવિધતામાં ઘટાડો થવા પાછળનું મુખ્ય કારણ કયું છે?", "opts": ["વસ્તીનું કદ અચાનક ઘટી જવાથી અલેલ્સની સંખ્યામાં ઘટાડો થાય છે.", "પ્રાકૃતિક પસંદગીના દબાણમાં વધારો થાય છે.", "મ્યુટેશનના દરમાં અચાનક વધારો થાય છે.", "જનીનિક વહન (gene flow)માં વધારો થાય છે."], "ans": 0, "exp": "બોટલનેક અસરમાં વસ્તીનું કદ અચાનક ઘટી જવાથી અલેલ્સની સંખ્યામાં ઘટાડો થાય છે, જેના કારણે જનીનિક વિવિધતામાં ઘટાડો થાય છે. પ્રાકૃતિક પસંદગી (B) બોટલનેક અસરનું કારણ નથી, પરંતુ તે તેના પરિણામ રૂપે થઈ શકે. મ્યુટેશન (C) અને જનીનિક વહન (D) બોટલનેક અસરના મુખ્ય કારણો નથી, પરંતુ તેઓ જનીનિક વિવિધતાને પ્રભાવિત કરી શકે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી વસ્તીમાં નીચેનામાંથી કયું પરિણામ સૌથી ઓછું સંભવિત છે?", "opts": ["જનીનિક વિવિધતામાં ઘટાડો", "હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો", "નવી જાતિઓનું નિર્માણ", "વસ્તીની અનુકૂલનક્ષમતામાં ઘટાડો"], "ans": 2, "exp": "બોટલનેક અસર પછી જનીનિક વિવિધતામાં ઘટાડો (A), હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો (B), અને વસ્તીની અનુકૂલનક્ષમતામાં ઘટાડો (D) સૌથી સંભવિત પરિણામો છે. નવી જાતિઓનું નિર્માણ (C) બોટલનેક અસરનું સીધું પરિણામ નથી, કારણ કે તે માટે લાંબા ગાળાની ઉત્ક્રાંતિ પ્રક્રિયા અને પ્રજનન અલગત્વ જરૂરી છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વસ્તીમાં બોટલનેક અસર પછી, જનીનિક વિવિધતાને પુનઃસ્થાપિત કરવા માટે નીચેનામાંથી કયો પરિબળ સૌથી અસરકારક છે?", "opts": ["પ્રાકૃતિક પસંદગી", "જનીનિક વહન", "મ્યુટેશન", "જનીનિક વહન અને મ્યુટેશન બંને"], "ans": 2, "exp": "બોટલનેક અસર પછી જનીનિક વિવિધતાને પુનઃસ્થાપિત કરવા માટે મ્યુટેશન (C) સૌથી અસરકારક પરિબળ છે, કારણ કે તે નવા અલેલ્સનું સર્જન કરે છે. પ્રાકૃતિક પસંદગી (A) અલેલ્સની આવૃત્તિમાં ફેરફાર કરે છે, પરંતુ નવા અલેલ્સ સર્જતી નથી. જનીનિક વહન (B) અલેલ્સને અન્ય વસ્તીમાંથી લાવી શકે છે, પરંતુ તે માટે અન્ય વસ્તીનું અસ્તિત્વ જરૂરી છે. જનીનિક વહન અને મ્યુટેશન બંને (D) અસરકારક હોવા છતાં, મ્યુટેશન એકલું જ સૌથી અસરકારક છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસરના સંદર્ભમાં, 'ફાઉન્ડર અસર' સાથે નીચેનામાંથી કયો તફાવત સાચો છે?", "opts": ["બોટલનેક અસરમાં વસ્તીનું કદ ઘટે છે, જ્યારે ફાઉન્ડર અસરમાં નવી વસ્તી સ્થાપિત થાય છે.", "બોટલનેક અસરમાં જનીનિક વિવિધતા ઘટે છે, જ્યારે ફાઉન્ડર અસરમાં તે વધે છે.", "બોટલનેક અસર પ્રાકૃતિક આફતને કારણે થાય છે, જ્યારે ફાઉન્ડર અસર માનવીય હસ્તક્ષેપને કારણે થાય છે.", "બોટલનેક અસરમાં હાનિકારક અલેલ્સની આવૃત્તિમાં ઘટાડો થાય છે, જ્યારે ફાઉન્ડર અસરમાં તે વધે છે."], "ans": 0, "exp": "બોટલનેક અસરમાં વસ્તીનું કદ અચાનક ઘટી જવાથી જનીનિક વિવિધતામાં ઘટાડો થાય છે, જ્યારે ફાઉન્ડર અસરમાં થોડી સંખ્યામાં જીવો નવી વસ્તી સ્થાપિત કરે છે, જેના કારણે જનીનિક વિવિધતામાં ઘટાડો થાય છે. પરંતુ મુખ્ય તફાવત એ છે કે બોટલનેક અસરમાં વસ્તીનું કદ ઘટે છે, જ્યારે ફાઉન્ડર અસરમાં નવી વસ્તી સ્થાપિત થાય છે. બાકીના વિકલ્પો (B, C, D) સાચા નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી, વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો થવા પાછળનું મુખ્ય કારણ કયું છે?", "opts": ["હાનિકારક અલેલ્સ ધરાવતા જીવોની જીવનક્ષમતા વધી જાય છે.", "વસ્તીનું કદ ઘટવાથી હાનિકારક અલેલ્સની સંભાવના વધી જાય છે.", "પ્રાકૃતિક પસંદગી હાનિકારક અલેલ્સને પસંદ કરે છે.", "મ્યુટેશનના દરમાં વધારો થાય છે."], "ans": 1, "exp": "બોટલનેક અસર પછી વસ્તીનું કદ ઘટવાથી હાનિકારક અલેલ્સની સંભાવના વધી જાય છે, કારણ કે થોડી સંખ્યામાં જીવો બચી જાય છે અને તેમાં હાનિકારક અલેલ્સની આવૃત્તિ વધી શકે છે. હાનિકારક અલેલ્સ ધરાવતા જીવોની જીવનક્ષમતા (A) ઘટી જાય છે, પ્રાકૃતિક પસંદગી (C) હાનિકારક અલેલ્સને પસંદ કરતી નથી, અને મ્યુટેશન (D) હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો કરતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક વિવિધતાનું મૂલ્યાંકન કરવા માટે નીચેનામાંથી કયો સૂચક સૌથી યોગ્ય છે?", "opts": ["અલેલિક આવૃત્તિ (Allele Frequency)માં થતો ફેરફાર", "હેટરોઝાયગસ વ્યક્તિઓની સંખ્યા", "હોમોઝાયગસ વ્યક્તિઓની ટકાવારી", "જનીનિક ડ્રિફ્ટનો દર"], "ans": 0, "exp": "બોટલનેક અસર પછી, જનીનિક વિવિધતાનું મૂલ્યાંકન કરવા માટે અલેલિક આવૃત્તિ (Allele Frequency)માં થતો ફેરફાર સૌથી યોગ્ય સૂચક છે. કારણ કે બોટલનેક અસરને કારણે વસ્તીમાં અલેલિક આવૃત્તિમાં અચાનક અને મોટા પાયે ફેરફાર થાય છે, જે જનીનિક વિવિધતાનું સીધું માપન છે. બાકીના વિકલ્પો: B) હેટરોઝાયગસ વ્યક્તિઓની સંખ્યા અને C) હોમોઝાયગસ વ્યક્તિઓની ટકાવારી એ વિવિધતાને આંશિક રીતે દર્શાવે છે, પરંતુ સીધું માપન નથી. D) જનીનિક ડ્રિફ્ટનો દર એ બોટલનેક અસરનું કારણ છે, મૂલ્યાંકનનો સૂચક નહીં.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક વિવિધતાને પુનઃસ્થાપિત કરવા માટે નીચેનામાંથી કયો પરિબળ સૌથી અસરકારક નથી?", "opts": ["મ્યુટેશનનો દર વધારો", "વસ્તીનું કદ વધારો", "જનીનિક ડ્રિફ્ટનો દર ઘટાડો", "પ્રવાસી જીવોનો આગમન"], "ans": 2, "exp": "બોટલનેક અસર પછી, જનીનિક વિવિધતાને પુનઃસ્થાપિત કરવા માટે જનીનિક ડ્રિફ્ટનો દર ઘટાડો (C) સૌથી અસરકારક નથી. કારણ કે જનીનિક ડ્રિફ્ટ એ બોટલનેક અસરનું મુખ્ય કારણ છે, અને તેને ઘટાડવો એ વિવિધતાને પુનઃસ્થાપિત કરવા માટે સીધો ઉપાય નથી. A) મ્યુટેશનનો દર વધારો, B) વસ્તીનું કદ વધારો, અને D) પ્રવાસી જીવોનો આગમન એ બધા જનીનિક વિવિધતાને પુનઃસ્થાપિત કરવા માટે અસરકારક પરિબળો છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "બોટલનેક અસરના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે", "બોટલનેક અસર પછી, વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિ વધી શકે છે", "બોટલનેક અસરને કારણે વસ્તીમાં નવી જાતિઓનું નિર્માણ થાય છે", "બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક ડ્રિફ્ટનો દર વધે છે"], "ans": 2, "exp": "બોટલનેક અસરને કારણે વસ્તીમાં નવી જાતિઓનું નિર્માણ થાય છે (C) એ વિધાન સાચું નથી. બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે (A), હાનિકારક અલેલ્સની આવૃત્તિ વધી શકે છે (B), અને જનીનિક ડ્રિફ્ટનો દર વધે છે (D). નવી જાતિઓનું નિર્માણ એ ઉત્ક્રાંતિનો લાંબા ગાળાનો પરિણામ છે, બોટલનેક અસરનો સીધો પરિણામ નહીં.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "બોટલનેક અસરના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે, પરંતુ તે કાયમી નથી", "બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે, અને તે કાયમી છે", "બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા વધે છે", "બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતામાં કોઈ ફેરફાર થતો નથી"], "ans": 0, "exp": "બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે, પરંતુ તે કાયમી નથી (A). કારણ કે બોટલનેક અસર પછી, મ્યુટેશન, પ્રવાસી જીવોનો આગમન, અને વસ્તીનું કદ વધારો જેવા પરિબળો દ્વારા જનીનિક વિવિધતાને પુનઃસ્થાપિત કરી શકાય છે. B) એ વિધાન ખોટું છે કારણ કે જનીનિક વિવિધતાનો ઘટાડો કાયમી નથી. C) અને D) એ વિધાનો પણ ખોટા છે કારણ કે બોટલનેક અસરને કારણે જનીનિક વિવિધતા ઘટે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "એક નાના જંગલ વિસ્તારમાં રહેતી હરણની વસ્તીમાં અચાનક જંગલમાં લાગેલી આગને કારણે મોટી સંખ્યામાં હરણોનો નાશ થાય છે. આ ઘટના બાદ બચી ગયેલી વસ્તીમાં જનીનિક વિવિધતા ઘટી જાય છે અને કેટલાક દુર્લભ અલેલ્સ સંપૂર્ણપણે નાશ પામે છે. આ પરિસ્થિતિમાં, બોટલનેક અસરના પરિણામે નીચેનામાંથી કયું પરિણામ લાંબાગાળે સૌથી વધુ સંભવિત છે, પરંતુ તેનું કારણ માત્ર બોટલનેક અસર નથી?", "opts": ["વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો થવો, કારણ કે જનીનિક ડ્રિફ્ટને લીધે", "વસ્તીમાં નવી પ્રજાતિઓનું નિર્માણ થવું, કારણ કે ભૌગોલિક અલગીકરણ ઉદ્ભવે છે", "વસ્તીમાં જનીનિક વિવિધતા વધવી, કારણ કે નવી પરિવર્તનો ઉત્પન્ન થાય છે", "વસ્તીમાં સંતતિના આનુવંશિક રોગોનું પ્રમાણ વધવું, કારણ કે ઇનબ્રીડિંગ વધે છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. બોટલનેક અસરને કારણે વસ્તીનું કદ ઘટી જાય છે, જેના પરિણામે ઇનબ્રીડિંગ (સગપણમાં પ્રજનન) વધે છે. ઇનબ્રીડિંગને કારણે હાનિકારક અલેલ્સનું પ્રમાણ વધે છે અને આનુવંશિક રોગોનું જોખમ વધે છે. જોકે, આ પરિણામનું મુખ્ય કારણ બોટલનેક અસર નહીં, પરંતુ ઇનબ્રીડિંગ છે. વિકલ્પ A ખોટો છે કારણ કે હાનિકારક અલેલ્સની આવૃત્તિમાં વધારો બોટલનેક અસરને કારણે થાય છે, પરંતુ પ્રશ્નમાં 'માત્ર બોટલનેક અસર નહીં' એવું પૂછવામાં આવ્યું છે. વિકલ્પ B ખોટો છે કારણ કે નવી પ્રજાતિઓનું નિર્માણ ભૌગોલિક અલગીકરણ અને લાંબા સમયગાળાની ઉત્ક્રાંતિ પ્રક્રિયાને કારણે થાય છે, માત્ર બોટલનેક અસરથી નહીં. વિકલ્પ C ખોટો છે કારણ કે બોટલનેક અસર પછી જનીનિક વિવિધતા ઘટે છે, વધતી નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક ડ્રિફ્ટના પ્રભાવને લીધે નીચેનામાંથી કયું પરિણામ સંભવિત છે?", "opts": ["વસ્તીમાં નવી જનીનિક વિવિધતાનો ઉદભવ થાય છે.", "વસ્તીમાં અલેલ્સની આવૃત્તિમાં અચાનક પરિવર્તન થાય છે.", "વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિ ઘટે છે.", "વસ્તીમાં જનીનિક વિવિધતા તરત જ પૂર્વવત્ થઈ જાય છે."], "ans": 1, "exp": "બોટલનેક અસર પછી, જનીનિક ડ્રિફ્ટના પ્રભાવને લીધે વસ્તીમાં અલેલ્સની આવૃત્તિમાં અચાનક પરિવર્તન થાય છે. વિકલ્પ A ખોટો છે કારણ કે બોટલનેક અસરથી જનીનિક વિવિધતા ઘટે છે, નવી વિવિધતા ઉદભવતી નથી. વિકલ્પ C ખોટો છે કારણ કે હાનિકારક અલેલ્સની આવૃત્તિ વધી શકે છે. વિકલ્પ D ખોટો છે કારણ કે જનીનિક વિવિધતા તરત જ પૂર્વવત્ થતી નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક ડ્રિફ્ટની અસર સૌથી વધુ ક્યારે જોવા મળે છે?", "opts": ["વસ્તીનો આકાર મોટો હોય ત્યારે", "વસ્તીનો આકાર નાનો હોય ત્યારે", "વસ્તીમાં જનીનિક વિવિધતા વધારે હોય ત્યારે", "વસ્તીમાં પ્રજનન દર ઓછો હોય ત્યારે"], "ans": 1, "exp": "બોટલનેક અસર પછી વસ્તીનો આકાર નાનો થઈ જાય છે, જેથી જનીનિક ડ્રિફ્ટની અસર સૌથી વધુ જોવા મળે છે. જનીનિક ડ્રિફ્ટ એટલે જનીનિક વિવિધતામાં અચાનક થતો ફેરફાર, જે નાની વસ્તીમાં વધુ પ્રભાવી થાય છે. A) મોટી વસ્તીમાં જનીનિક ડ્રિફ્ટની અસર ઓછી હોય છે. C) જનીનિક વિવિધતા વધારે હોય ત્યારે ડ્રિફ્ટની અસર ઓછી થાય છે. D) પ્રજનન દર ઓછો હોવા છતાં, વસ્તીનો આકાર નાનો હોવાને કારણે જનીનિક ડ્રિફ્ટની અસર વધુ પ્રભાવી થાય છે, પરંતુ મુખ્ય કારણ વસ્તીનો નાનો આકાર છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક નાના ટાપુ પર વસતી દેડકાની જાતિમાં અચાનક આવેલા સુનામીને કારણે મૂળ વસ્તીના માત્ર 5% જીવિત રહે છે. આ ઘટના બાદ, વસ્તીમાં જનીનિક વિવિધતા ઘટી જાય છે અને કેટલાક દુર્લભ અલેલ્સ સંપૂર્ણપણે અદૃશ્ય થઈ જાય છે. આ પરિસ્થિતિમાં, નીચેનામાંથી કયું વિધાન બોટલનેક અસરના લાંબા ગાળાના પરિણામ માટે સૌથી વધુ યોગ્ય છે?", "opts": ["વસ્તીમાં નવી જનીનિક વિવિધતા ઉત્પન્ન થવા માટે મ્યુટેશન એકમાત્ર પરિબળ બની રહેશે.", "વસ્તીમાં જનીનિક ડ્રિફ્ટની અસર ઓછી થશે કારણ કે વસ્તીનું કદ વધશે.", "વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિ વધવાની સંભાવના રહેશે કારણ કે જનીનિક વિવિધતા ઓછી છે.", "વસ્તીમાં પ્રાકૃતિક પસંદગીની અસર વધુ પ્રભાવશાળી બનશે કારણ કે જનીનિક વિવિધતા વધશે."], "ans": 2, "exp": "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક વિવિધતા ઘટી જાય છે, જેના કારણે હાનિકારક અલેલ્સની આવૃત્તિ વધવાની સંભાવના રહે છે (ઓપ્શન C સાચું છે). મ્યુટેશન એકલું જનીનિક વિવિધતા પુનઃસ્થાપિત કરી શકતું નથી (A ખોટું). જનીનિક ડ્રિફ્ટની અસર નાની વસ્તીમાં વધુ પ્રબળ હોય છે, ભલે વસ્તીનું કદ પછીથી વધે (B ખોટું). પ્રાકૃતિક પસંદગીની અસર જનીનિક વિવિધતા ઓછી હોય ત્યારે ઘટે છે, નહીં કે વધે (D ખોટું).", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક વનસ્પતિ જાતિની વસ્તીમાં અચાનક આવેલા દુષ્કાળને કારણે મૂળ વસ્તીના માત્ર 10% વ્યક્તિઓ જીવિત રહે છે. આ ઘટના બાદ, વસ્તીમાં જનીનિક વિવિધતા ઘટી જાય છે અને કેટલાક દુર્લભ અલેલ્સની આવૃત્તિ વધી જાય છે. આ પરિસ્થિતિમાં, નીચેનામાંથી કયું વિધાન બોટલનેક અસરના સંદર્ભમાં ખોટું છે?", "opts": ["બોટલનેક અસર પછી, વસ્તીમાં જનીનિક ડ્રિફ્ટની અસર વધુ પ્રબળ બને છે.", "બોટલનેક અસરને કારણે વસ્તીમાં હાનિકારક અલેલ્સની આવૃત્તિ ઘટી જાય છે.", "બોટલનેક અસર પછી, વસ્તીમાં જનીનિક વિવિધતા ઘટવાથી પ્રજનન ક્ષમતા પર અસર થઈ શકે છે.", "બોટલનેક અસરને કારણે વસ્તીમાં કેટલાક દુર્લભ અલેલ્સની આવૃત્તિ વધી શકે છે."], "ans": 1, "exp": "બોટલનેક અસરને કારણે હાનિકારક અલેલ્સની આવૃત્તિ ઘટતી નથી, પરંતુ વધી શકે છે (ઓપ્શન B ખોટું છે). બોટલનેક અસર પછી જનીનિક ડ્રિફ્ટની અસર વધુ પ્રબળ બને છે (A સાચું). જનીનિક વિવિધતા ઘટવાથી પ્રજનન ક્ષમતા પર અસર થઈ શકે છે (C સાચું). કેટલાક દુર્લભ અલેલ્સની આવૃત્તિ વધી શકે છે (D સાચું).", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક નાના જળાશયમાં રહેતી માછલીઓની વસ્તીમાં અચાનક રાસાયણિક પ્રદૂષણને કારણે મૂળ વસ્તીના માત્ર 5% વ્યક્તિઓ જીવિત રહે છે. આ ઘટના બાદ, જીવિત રહેલી વસ્તીમાં નીચેનામાંથી કયું પરિણામ બોટલનેક અસર સાથે સંકળાયેલું નથી?", "opts": ["જનીનિક વિવિધતામાં નોંધપાત્ર ઘટાડો થવો", "હાનિકારક અલેલ્સની આવૃત્તિમાં આકસ્મિક વધારો થવો", "વસ્તીના કદમાં ઝડપી વધારો થવો અને જનીનિક વિવિધતાનું તાત્કાલિક પુનઃસ્થાપન થવું", "જનીનિક ડ્રિફ્ટની અસર વધુ પ્રબળ બનવી"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. બોટલનેક અસર પછી વસ્તીના કદમાં ઝડપી વધારો થતો નથી અને જનીનિક વિવિધતાનું તાત્કાલિક પુનઃસ્થાપન પણ થતું નથી. બોટલનેક અસરને કારણે વસ્તીમાં જનીનિક વિવિધતા ઘટે છે અને હાનિકારક અલેલ્સની આવૃત્તિમાં આકસ્મિક વધારો થઈ શકે છે (વિકલ્પ A અને B). વધુમાં, જનીનિક ડ્રિફ્ટની અસર પણ વધુ પ્રબળ બને છે (વિકલ્પ D). જ્યારે વસ્તીનું કદ વધે ત્યારે પણ જનીનિક વિવિધતા ધીમે ધીમે જ પુનઃસ્થાપિત થાય છે, જે તાત્કાલિક નથી થતું.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
