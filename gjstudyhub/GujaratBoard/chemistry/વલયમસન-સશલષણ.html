@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિલિયમસન સંશ્લેષણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વિલિયમસન સંશ્લેષણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વિલિયમસન સંશ્લેષણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં આલ્કાઇલ હેલાઇડ સાથે કયો પ્રક્રિયક ઉપયોગમાં લેવાય છે જેથી ઇથર બને છે, પરંતુ જો આલ્કાઇલ હેલાઇડ તૃતીયક હોય તો મુખ્ય નીપજ શું મળે છે?", "opts": ["આલ્કોહોલ અને આલ્કીનનું મિશ્રણ", "ઇથર અને આલ્કીનનું મિશ્રણ", "માત્ર આલ્કીન", "માત્ર ઇથર"], "ans": 2, "exp": "વિલિયમસન સંશ્લેષણમાં આલ્કાઇલ હેલાઇડ અને આલ્કોક્સાઇડ આયન વચ્ચે પ્રક્રિયા થઈ ઇથર બને છે. પરંતુ જો આલ્કાઇલ હેલાઇડ તૃતીયક હોય, તો તે E2 વિલોપન પ્રક્રિયા તરફ વળે છે અને મુખ્ય નીપજ આલ્કીન બને છે. આથી વિકલ્પ C સાચો છે. વિકલ્પ A અને Bમાં આલ્કોહોલ અને ઇથરનું મિશ્રણ ખોટું છે કારણ કે આલ્કોહોલ અહીં પ્રક્રિયક નથી. વિકલ્પ D ખોટો છે કારણ કે તૃતીયક આલ્કાઇલ હેલાઇડ ઇથર બનાવતું નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન વિલિયમસન સંશ્લેષણ દ્વારા બનાવી શકાય નહીં? (કારણ આપો)", "opts": ["CH₃-O-CH₂CH₃", "(CH₃)₃C-O-CH₃", "C₆H₅-O-CH₃", "CH₃CH₂-O-CH₂CH₃"], "ans": 1, "exp": "વિલિયમસન સંશ્લેષણમાં તૃતીયક આલ્કાઇલ હેલાઇડનો ઉપયોગ થતો નથી કારણ કે તે E2 વિલોપન પ્રક્રિયા દ્વારા આલ્કીન બનાવે છે. વિકલ્પ Bમાં (CH₃)₃C- સમૂહ તૃતીયક હોવાથી તે ઇથર બનાવી શકતું નથી. બાકીના વિકલ્પો પ્રાથમિક અથવા દ્વિતીયક આલ્કાઇલ હેલાઇડ સાથે બને છે. આથી વિકલ્પ B સાચો છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણમાં સોડિયમ મેથોક્સાઇડ (CH₃ONa) સાથે નીચેના પૈકી કયા સંયોજનની પ્રક્રિયા કરતાં મુખ્ય નીપજ તરીકે ઇથર મળશે નહીં?", "opts": ["CH₃CH₂Br", "(CH₃)₂CHBr", "(CH₃)₃CBr", "C₆H₅CH₂Br"], "ans": 2, "exp": "તૃતીયક આલ્કાઇલ હેલાઇડ (વિકલ્પ C) વિલિયમસન સંશ્લેષણમાં E2 વિલોપન પ્રક્રિયા દ્વારા આલ્કીન બનાવે છે, ઇથર નહીં. બાકીના વિકલ્પો પ્રાથમિક અથવા દ્વિતીયક હોવાથી ઇથર બનાવે છે. આથી વિકલ્પ C સાચો છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "એક વિદ્યાર્થીએ વિલિયમસન સંશ્લેષણ દ્વારા ઇથાઇલ મેથાઇલ ઇથર બનાવવા માટે CH₃ONa સાથે CH₃CH₂Brની પ્રક્રિયા કરી. પરંતુ તેને મુખ્ય નીપજ તરીકે ઇથેન મળ્યો. આનું સંભવિત કારણ શું હોઈ શકે?", "opts": ["પ્રક્રિયામાં પાણીની હાજરી હતી", "પ્રક્રિયક તરીકે CH₃CH₂ONa નો ઉપયોગ થયો હતો", "પ્રક્રિયા ઉચ્ચ તાપમાને કરવામાં આવી હતી", "આલ્કાઇલ હેલાઇડ તૃતીયક હતો"], "ans": 0, "exp": "વિલિયમસન સંશ્લેષણમાં જો પાણીની હાજરી હોય, તો આલ્કોક્સાઇડ આયનનું પ્રોટોનેશન થઈ આલ્કોહોલ બને છે, જે આગળ આલ્કાઇલ હેલાઇડ સાથે પ્રક્રિયા કરી ઇથેન બનાવી શકે છે. વિકલ્પ B ખોટો છે કારણ કે CH₃CH₂ONaનો ઉપયોગ કરવાથી ઇથર બને. વિકલ્પ C અને D ખોટા છે કારણ કે ઉચ્ચ તાપમાન અથવા તૃતીયક આલ્કાઇલ હેલાઇડ આલ્કીન બનાવે છે, ઇથેન નહીં.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેના વિધાનો પૈકી કયું વિલિયમસન સંશ્લેષણ માટે ખોટું છે?\n(1) આ પ્રક્રિયા SN2 ક્રિયાવિધિ દ્વારા થાય છે.\n(2) આ પ્રક્રિયામાં આલ્કાઇલ હેલાઇડ પ્રાથમિક હોવું જરૂરી છે.\n(3) આ પ્રક્રિયામાં આલ્કોક્સાઇડ આયન ન્યુક્લિયોફાઇલ તરીકે કાર્ય કરે છે.\n(4) આ પ્રક્રિયા દ્વારા ડાયઆલ્કાઇલ ઇથર બનાવી શકાય છે.", "opts": ["માત્ર 2", "માત્ર 2 અને 4", "માત્ર 1 અને 3", "માત્ર 4"], "ans": 0, "exp": "વિધાન 2 ખોટું છે કારણ કે વિલિયમસન સંશ્લેષણમાં આલ્કાઇલ હેલાઇડ પ્રાથમિક અથવા દ્વિતીયક હોઈ શકે છે, પરંતુ તૃતીયક નહીં. બાકીના વિધાનો સાચાં છે: વિધાન 1 (SN2 ક્રિયાવિધિ), વિધાન 3 (આલ્કોક્સાઇડ આયન ન્યુક્લિયોફાઇલ), અને વિધાન 4 (ડાયઆલ્કાઇલ ઇથર બને છે). આથી વિકલ્પ A સાચો છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણમાં તૃતીયક આલ્કાઇલ હેલાઇડનો ઉપયોગ કરતાં મુખ્યત્વે કઈ આડપેદાશ મળે છે?", "opts": ["આલ્કીન", "આલ્કોહોલ", "ઇથર", "એસ્ટર"], "ans": 0, "exp": "તૃતીયક આલ્કાઇલ હેલાઇડ વિલિયમસન સંશ્લેષણમાં E2 વિલોપન પ્રક્રિયા તરફ વળે છે, કારણ કે તે સ્ટેરિક અવરોધને કારણે Sₙ2 પ્રક્રિયા માટે પ્રતિકૂળ હોય છે. આથી મુખ્યત્વે આલ્કીન (અસંતૃપ્ત હાઇડ્રોકાર્બન) બને છે. બાકીના વિકલ્પો (આલ્કોહોલ, ઇથર, એસ્ટર) આ પ્રક્રિયામાં મુખ્ય પેદાશ તરીકે મળતા નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણમાં સોડિયમ ફિનોક્સાઇડ (C₆H₅ONa) સાથે આઇસોપ્રોપાઇલ બ્રોમાઇડની પ્રક્રિયા કરતાં મુખ્યત્વે કઈ પેદાશ મળે છે?", "opts": ["આઇસોપ્રોપાઇલ ફિનાઇલ ઇથર", "પ્રોપીન", "ફિનોલ", "આઇસોપ્રોપાઇલ આલ્કોહોલ"], "ans": 1, "exp": "આઇસોપ્રોપાઇલ બ્રોમાઇડ એ દ્વિતીયક આલ્કાઇલ હેલાઇડ છે, જે વિલિયમસન સંશ્લેષણમાં E2 વિલોપન પ્રક્રિયા તરફ વળે છે અને પ્રોપીન (આલ્કીન) બને છે. ઇથર બનવાની Sₙ2 પ્રક્રિયા સ્ટેરિક અવરોધને કારણે મુશ્કેલ બને છે. બાકીના વિકલ્પો આ પ્રક્રિયામાં મુખ્ય પેદાશ તરીકે મળતા નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણમાં નીચેના પૈકી કયા સંયોજનનો ઉપયોગ કરતાં પ્રક્રિયા સૌથી ઝડપી થાય છે?", "opts": ["મિથાઇલ ક્લોરાઇડ", "ઇથાઇલ બ્રોમાઇડ", "આઇસોબ્યુટાઇલ આયોડાઇડ", "ટર્ટ-બ્યુટાઇલ ક્લોરાઇડ"], "ans": 0, "exp": "મિથાઇલ ક્લોરાઇડ પ્રાથમિક આલ્કાઇલ હેલાઇડ છે અને તેમાં સ્ટેરિક અવરોધ સૌથી ઓછો હોય છે, જે Sₙ2 પ્રક્રિયા માટે સૌથી અનુકૂળ છે. ઇથાઇલ બ્રોમાઇડ પણ પ્રાથમિક છે, પરંતુ ક્લોરાઇડ કરતાં ઓછો પ્રતિક્રિયાત્મક છે. આઇસોબ્યુટાઇલ આયોડાઇડ દ્વિતીયક છે અને ટર્ટ-બ્યુટાઇલ ક્લોરાઇડ તૃતીયક છે, જે Sₙ2 માટે પ્રતિકૂળ છે.", "ref": "Std 12 - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણમાં આલ્કાઇલ હેલાઇડ સાથે સોડિયમ આલ્કોક્સાઇડની પ્રક્રિયા દરમિયાન નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["આ પ્રક્રિયા Sₙ2 ક્રિયાવિધિ દ્વારા થાય છે.", "તૃતીયક આલ્કાઇલ હેલાઇડનો ઉપયોગ કરતાં ઇથર મુખ્ય પેદાશ તરીકે મળે છે.", "પ્રક્રિયામાં આલ્કોક્સાઇડ આયન ન્યુક્લિયોફાઇલ તરીકે કાર્ય કરે છે.", "પ્રક્રિયા માટે ધ્રુવીય અપ્રોટિક દ્રાવક અનુકૂળ છે."], "ans": 1, "exp": "તૃતીયક આલ્કાઇલ હેલાઇડ વિલિયમસન સંશ્લેષણમાં E2 વિલોપન પ્રક્રિયા તરફ વળે છે અને ઇથર મુખ્ય પેદાશ તરીકે મળતો નથી. બાકીના વિધાનો સાચાં છે: Sₙ2 ક્રિયાવિધિ, આલ્કોક્સાઇડ આયન ન્યુક્લિયોફાઇલ તરીકે કાર્ય કરે છે, અને ધ્રુવીય અપ્રોટિક દ્રાવક પ્રક્રિયા માટે અનુકૂળ છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ (CH3)3CBr ની સોડિયમ ઇથોક્સાઇડ (C2H5ONa) સાથે પ્રક્રિયા કરવામાં આવે છે, ત્યારે મુખ્ય ઉત્પાદન કયું મળે છે?", "opts": ["ટર્શિયરી બ્યુટાઇલ ઇથાઇલ ઇથર (CH3)3COC2H5", "આઇસોબ્યુટિલીન (CH2=C(CH3)2)", "ટર્શિયરી બ્યુટાઇલ આલ્કોહોલ (CH3)3COH", "ઇથાઇલ બ્યુટાઇલ ઇથર (C2H5OC4H9)"], "ans": 1, "exp": "વિલિયમસન સંશ્લેષણમાં ટર્શિયરી આલ્કાઇલ હેલાઇડનો ઉપયોગ કરતાં મુખ્યત્વે વિઘટન (elimination) પ્રક્રિયા થાય છે, જેમાં આલ્કીન બને છે. ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ (CH3)3CBr ની સોડિયમ ઇથોક્સાઇડ સાથે પ્રક્રિયામાં આઇસોબ્યુટિલીન (CH2=C(CH3)2) મળે છે. આમ, વિકલ્પ B સરખો છે. વિકલ્પ A (ટર્શિયરી બ્યુટાઇલ ઇથાઇલ ઇથર) ખોટો છે કારણ કે ટર્શિયરી હેલાઇડમાં SN2 પ્રક્રિયા અવરોધિત હોય છે. વિકલ્પ C (ટર્શિયરી બ્યુટાઇલ આલ્કોહોલ) ખોટો છે કારણ કે આલ્કોહોલ બનવા માટે હાઇડ્રોક્સાઇડ આયનની જરૂર હોય છે, ન કે આલ્કોક્સાઇડ. વિકલ્પ D (ઇથાઇલ બ્યુટાઇલ ઇથર) ખોટો છે કારણ કે આ સંરચના પ્રક્રિયા દરમિયાન બનતી નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે બેન્ઝાઇલ ક્લોરાઇડ (C6H5CH2Cl) ની સોડિયમ મેથોક્સાઇડ (CH3ONa) સાથે પ્રક્રિયા કરવામાં આવે છે, ત્યારે મુખ્ય ઉત્પાદન કયું મળે છે?", "opts": ["બેન્ઝાઇલ મેથાઇલ ઇથર (C6H5CH2OCH3)", "બેન્ઝાઇલ આલ્કોહોલ (C6H5CH2OH)", "ટોલ્યુઇન (C6H5CH3)", "ફિનોલ (C6H5OH)"], "ans": 0, "exp": "વિલિયમસન સંશ્લેષણમાં, આલ્કાઇલ હેલાઇડ (બેન્ઝાઇલ ક્લોરાઇડ) અને આલ્કોક્સાઇડ આયન (CH3O-) વચ્ચે SN2 પ્રક્રિયા થાય છે, જેમાં હેલોજનને આલ્કોક્સાઇડ દ્વારા પ્રતિસ્થાપિત કરવામાં આવે છે. અહીં, બેન્ઝાઇલ ક્લોરાઇડ સાથે CH3ONa ની પ્રક્રિયાથી બેન્ઝાઇલ મેથાઇલ ઇથર (C6H5CH2OCH3) બને છે. બેન્ઝાઇલ આલ્કોહોલ (B) હાઇડ્રોલિસિસથી બને, ટોલ્યુઇન (C) રિડક્શનથી બને, અને ફિનોલ (D) બેન્ઝિન રિંગ પરના હેલોજનના પ્રતિસ્થાપનથી બને, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, નીચેના પૈકી કયા આલ્કાઇલ હેલાઇડનો ઉપયોગ કરતાં E2 ક્રિયાવિધિ પ્રબળ બને છે, પરિણામે ઇથર બનવાને બદલે એલ્કીન મળે છે?", "opts": ["CH3Br (મિથાઇલ બ્રોમાઇડ)", "CH3CH2Br (ઇથાઇલ બ્રોમાઇડ)", "(CH3)2CHBr (આઇસોપ્રોપાઇલ બ્રોમાઇડ)", "(CH3)3CBr (ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ)"], "ans": 3, "exp": "ટર્શિયરી આલ્કાઇલ હેલાઇડ (D) જેવા કે (CH3)3CBr માં, કાર્બન પર હેલોજન જોડાયેલું હોય તે કાર્બન ત્રિપરમાણુક છે, જેથી SN2 પ્રક્રિયા અવરોધાય છે અને E2 ક્રિયાવિધિ પ્રબળ બને છે. પરિણામે, ઇથર બનવાને બદલે એલ્કીન (આઇસોબ્યુટિલીન) મળે છે. મિથાઇલ (A) અને ઇથાઇલ (B) હેલાઇડમાં SN2 પ્રક્રિયા સરળતાથી થાય છે, જ્યારે આઇસોપ્રોપાઇલ (C) મધ્યવર્તી ક્ષમતા ધરાવે છે, પરંતુ ટર્શિયરી હેલાઇડમાં E2 પ્રબળ હોય છે.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે ફિનોક્સાઇડ આયન (C6H5O-) ની આલ્કાઇલ હેલાઇડ સાથે પ્રક્રિયા કરવામાં આવે છે, ત્યારે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["પ્રક્રિયા SN2 ક્રિયાવિધિ દ્વારા થાય છે.", "ફિનોક્સાઇડ આયન એક મજબૂત ન્યુક્લિયોફિલ છે.", "ઉત્પાદન તરીકે ફિનાઇલ આલ્કાઇલ ઇથર મળે છે.", "પ્રક્રિયા દરમિયાન રિએરેંજમેન્ટ થઈ શકે છે."], "ans": 0, "exp": "ફિનોક્સાઇડ આયન (C6H5O-) એક મજબૂત ન્યુક્લિયોફિલ છે (B) અને તે આલ્કાઇલ હેલાઇડ સાથે પ્રક્રિયા કરી ફિનાઇલ આલ્કાઇલ ઇથર બનાવે છે (C). જોકે, ફિનોક્સાઇડ આયન એક બલ્કી ન્યુક્લિયોફિલ હોવાથી, તે SN2 પ્રક્રિયા કરતાં SN1 પ્રક્રિયા અથવા E2 પ્રક્રિયા તરફ વલણ ધરાવે છે, ખાસ કરીને તૃતીયક આલ્કાઇલ હેલાઇડ સાથે, જેમાં રિએરેંજમેન્ટ થઈ શકે છે (D). તેથી, વિધાન (A) ખોટું છે કારણ કે પ્રક્રિયા મુખ્યત્વે SN2 દ્વારા થતી નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, નીચેના પૈકી કયા સંયોજનનો ઉપયોગ કરતાં ઇથરનું સૌથી ઓછું પ્રમાણ મળે છે?", "opts": ["CH3CH2Br + C2H5ONa", "CH3Br + CH3ONa", "(CH3)2CHBr + CH3ONa", "(CH3)3CBr + C2H5ONa"], "ans": 3, "exp": "ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ (D) સાથે પ્રક્રિયા કરતાં, E2 ક્રિયાવિધિ પ્રબળ બને છે, જેમાં ઇથર બનવાને બદલે એલ્કીન (આઇસોબ્યુટિલીન) મળે છે. આ કારણથી, ઇથરનું પ્રમાણ સૌથી ઓછું હોય છે. મિથાઇલ (B) અને ઇથાઇલ (A) હેલાઇડમાં SN2 પ્રક્રિયા સરળતાથી થાય છે, જ્યારે આઇસોપ્રોપાઇલ (C) મધ્યવર્તી ક્ષમતા ધરાવે છે, પરંતુ ટર્શિયરી હેલાઇડમાં ઇથરનું પ્રમાણ સૌથી ઓછું હોય છે.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "નીચેના પૈકી કયા સંયોજનની વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં સોડિયમ ફિનોક્સાઇડ (C₆H₅ONa) સાથે પ્રક્રિયા કરતાં મુખ્ય નીપજ તરીકે ઇથર મળવાની શક્યતા સૌથી ઓછી છે અને તેનું કારણ શું છે?", "opts": ["CH₃CH₂Br (ઇથાઇલ બ્રોમાઇડ) - કારણ કે પ્રાથમિક આલ્કાઇલ હેલાઇડ હોવાથી Sₙ2 ક્રિયાવિધિ સરળતાથી થાય છે", "(CH₃)₂CHBr (આઇસોપ્રોપાઇલ બ્રોમાઇડ) - કારણ કે દ્વિતીયક આલ્કાઇલ હેલાઇડ હોવાથી E2 નિર્જલીકરણ પ્રક્રિયા પ્રભાવી બને છે", "(CH₃)₃CBr (ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ) - કારણ કે તૃતીયક આલ્કાઇલ હેલાઇડ હોવાથી E2 નિર્જલીકરણ પ્રક્રિયા મુખ્ય બને છે", "C₆H₅CH₂Cl (બેન્ઝાઇલ ક્લોરાઇડ) - કારણ કે બેન્ઝાઇલ હેલાઇડ હોવાથી કાર્બોકેટાયન મધ્યવર્તી બને છે અને પુનર્વ્યવસ્થા થાય છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. વિલિયમસન સંશ્લેષણમાં બેન્ઝાઇલ ક્લોરાઇડ (C₆H₅CH₂Cl) નો ઉપયોગ કરતાં કાર્બોકેટાયન મધ્યવર્તી બને છે, જે સ્થાયી હોવાથી પુનર્વ્યવસ્થા થઈ શકે છે અને ઇથર નીપજ મળવાની શક્યતા ઘટે છે. વિકલ્પ A માં પ્રાથમિક આલ્કાઇલ હેલાઇડ હોવાથી Sₙ2 ક્રિયાવિધિ સરળતાથી થાય છે અને ઇથર મળે છે. વિકલ્પ B અને C માં દ્વિતીયક અને તૃતીયક આલ્કાઇલ હેલાઇડ હોવાથી E2 નિર્જલીકરણ પ્રક્રિયા પ્રભાવી બને છે, પરંતુ બેન્ઝાઇલ હેલાઇડમાં કાર્બોકેટાયનની સ્થાયિતા વધુ હોવાથી ઇથર નીપજ ઓછી મળે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે સોડિયમ ઇથોક્સાઇડ (C2H5ONa) સાથે 1-બ્રોમોપ્રોપેન (CH3CH2CH2Br) ની પ્રક્રિયા કરવામાં આવે, ત્યારે મુખ્ય ઉત્પાદન કયું હશે અને તે કયા ક્રિયાવિધિ દ્વારા બને છે?", "opts": ["CH3CH2CH2OC2H5, SN2 ક્રિયાવિધિ", "CH3CH2CH2OC2H5, E2 ક્રિયાવિધિ", "CH3CH=CH2, E2 ક્રિયાવિધિ", "CH3CH2CH2OH, SN1 ક્રિયાવિધિ"], "ans": 0, "exp": "વિલિયમસન સંશ્લેષણમાં પ્રાથમિક આલ્કાઇલ હેલાઇડ (1-બ્રોમોપ્રોપેન) સાથે સોડિયમ ઇથોક્સાઇડની પ્રક્રિયા SN2 ક્રિયાવિધિ દ્વારા થાય છે, જેમાં ઇથોક્સાઇડ આયન (C2H5O-) બ્રોમિનને બદલીને ઇથર (CH3CH2CH2OC2H5) બનાવે છે. વિકલ્પ B ખોટો છે કારણ કે E2 ક્રિયાવિધિ મુખ્યત્વે તૃતીયક આલ્કાઇલ હેલાઇડમાં થાય છે. વિકલ્પ Cમાં અસંતૃપ્ત હાઇડ્રોકાર્બન (CH3CH=CH2) બને છે, જે આ પ્રક્રિયામાં નથી બનતું. વિકલ્પ Dમાં આલ્કોહોલ (CH3CH2CH2OH) બને છે, જે વિલિયમસન સંશ્લેષણનું ઉત્પાદન નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે સોડિયમ મેથોક્સાઇડ (CH3ONa) સાથે બેન્ઝાઇલ ક્લોરાઇડ (C6H5CH2Cl) ની પ્રક્રિયા કરવામાં આવે, ત્યારે મુખ્ય ઉત્પાદન કયું હશે?", "opts": ["C6H5CH2OCH3", "C6H5CH2CH2OCH3", "C6H5OCH3", "C6H5CH2OH"], "ans": 0, "exp": "બેન્ઝાઇલ ક્લોરાઇડ (C6H5CH2Cl) સોડિયમ મેથોક્સાઇડ (CH3ONa) સાથે વિલિયમસન સંશ્લેષણ દ્વારા બેન્ઝાઇલ મેથાઇલ ઇથર (C6H5CH2OCH3) બનાવે છે. વિકલ્પ B ખોટો છે કારણ કે તે બેન્ઝાઇલ ઇથાઇલ ઇથર છે, જે આ પ્રક્રિયામાં નથી બનતું. વિકલ્પ C ખોટો છે કારણ કે તે એનિસોલ (C6H5OCH3) છે, જે ફિનોક્સાઇડ આયન સાથે પ્રક્રિયા દ્વારા બને છે. વિકલ્પ D ખોટો છે કારણ કે તે બેન્ઝાઇલ આલ્કોહોલ છે, જે આ પ્રક્રિયામાં નથી બનતું.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે સોડિયમ ફિનોક્સાઇડ (C6H5ONa) સાથે ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ ((CH3)3CBr) ની પ્રક્રિયા કરવામાં આવે, ત્યારે મુખ્ય ઉત્પાદન કયું હશે?", "opts": ["(CH3)3COC6H5", "(CH3)2C=CH2", "(CH3)3COH", "C6H5OH"], "ans": 1, "exp": "ટર્શિયરી બ્યુટાઇલ બ્રોમાઇડ ((CH3)3CBr) સોડિયમ ફિનોક્સાઇડ (C6H5ONa) સાથે વિલિયમસન સંશ્લેષણમાં મુખ્યત્વે E2 ક્રિયાવિધિ દ્વારા આઇસોબ્યુટિલીન ((CH3)2C=CH2) બનાવે છે, કારણ કે ટર્શિયરી આલ્કાઇલ હેલાઇડમાં E2 ક્રિયાવિધિ પ્રબળ હોય છે. વિકલ્પ A ખોટો છે કારણ કે ટર્શિયરી બ્યુટાઇલ ફિનોક્સાઇડ બનવાને બદલે E2 ક્રિયાવિધિ થાય છે. વિકલ્પ C ખોટો છે કારણ કે તે ટર્શિયરી બ્યુટાઇલ આલ્કોહોલ છે, જે આ પ્રક્રિયામાં નથી બનતું. વિકલ્પ D ખોટો છે કારણ કે તે ફિનોલ છે, જે આ પ્રક્રિયામાં નથી બનતું.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે સોડિયમ ઇથોક્સાઇડ (C₂H₅ONa) સાથે ૨-બ્રોમોબ્યુટેન (CH₃CH₂CHBrCH₃) ની પ્રક્રિયા કરવામાં આવે, ત્યારે મુખ્ય ઉત્પાદન કયું હશે?", "opts": ["ઇથાઇલ ૨-બ્યુટાઇલ ઇથર (CH₃CH₂OCH(CH₃)CH₂CH₃)", "૧-બ્યુટીન (CH₃CH₂CH=CH₂)", "૨-બ્યુટીન (CH₃CH=CHCH₃)", "ઇથાઇલ ટર્શિયરી બ્યુટાઇલ ઇથર (CH₃CH₂OC(CH₃)₃)"], "ans": 2, "exp": "વિલિયમસન સંશ્લેષણમાં સોડિયમ ઇથોક્સાઇડ (C₂H₅ONa) સાથે ૨-બ્રોમોબ્યુટેન (CH₃CH₂CHBrCH₃) ની પ્રક્રિયા થતાં, બ્રોમિન આયન (Br⁻) નીકળી જાય છે અને કાર્બન પર ધન વીજભાર ઉત્પન્ન થાય છે. આ કાર્બન સ્થાયી રીતે E2 ક્રિયાવિધિ દ્વારા બેઇજ્જત (elimination) પ્રક્રિયા કરે છે, જેમાં ૨-બ્યુટીન (CH₃CH=CHCH₃) બને છે. આલ્કોક્સાઇડ આયન (C₂H₅O⁻) એક મજબૂત ક્ષારક છે, જે E2 પ્રક્રિયાને પ્રોત્સાહન આપે છે. આથી મુખ્ય ઉત્પાદન ૨-બ્યુટીન (CH₃CH=CHCH₃) હશે. વિકલ્પ A (ઇથર) ખોટો છે કારણ કે ૨-બ્રોમોબ્યુટેન એક દ્વિતીયક આલ્કાઇલ હેલાઇડ છે, જે E2 પ્રક્રિયા તરફ વધુ પ્રવૃત્ત થાય છે. વિકલ્પ B (૧-બ્યુટીન) ખોટો છે કારણ કે તે ૨-બ્રોમોબ્યુટેનની પ્રક્રિયામાં બનતું નથી. વિકલ્પ D (ટર્શિયરી ઇથર) ખોટો છે કારણ કે તે ટર્શિયરી આલ્કાઇલ હેલાઇડની પ્રક્રિયામાં બનશે, પરંતુ અહીં દ્વિતીયક હેલાઇડ છે.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરીન", "ch": ""}, {"q": "વિલિયમસન સંશ્લેષણ પ્રક્રિયામાં, જ્યારે સોડિયમ ફિનોક્સાઇડ (C₆H₅ONa) સાથે બેન્ઝાઇલ ક્લોરાઇડ (C₆H₅CH₂Cl) ની પ્રક્રિયા કરવામાં આવે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["મુખ્ય ઉત્પાદન ફિનાઇલ બેન્ઝાઇલ ઇથર (C₆H₅OCH₂C₆H₅) હશે અને પ્રક્રિયા SN2 ક્રિયાવિધિ દ્વારા થશે.", "મુખ્ય ઉત્પાદન બેન્ઝાઇલ ફિનાઇલ ઇથર (C₆H₅CH₂OC₆H₅) હશે અને પ્રક્રિયા E2 ક્રિયાવિધિ દ્વારા થશે.", "મુખ્ય ઉત્પાદન બેન્ઝાઇલ આલ્કોહોલ (C₆H₅CH₂OH) હશે કારણ કે ફિનોક્સાઇડ આયન નિર્બળ ક્ષારક છે.", "મુખ્ય ઉત્પાદન બેન્ઝિન (C₆H₆) અને ફિનોલ (C₆H₅OH) હશે કારણ કે ક્લોરાઇડ આયન નીકળી જાય છે."], "ans": 0, "exp": "બેન્ઝાઇલ ક્લોરાઇડ (C₆H₅CH₂Cl) એક પ્રાથમિક આલ્કાઇલ હેલાઇડ છે, જે SN2 પ્રક્રિયા માટે પ્રવૃત્ત છે. સોડિયમ ફિનોક્સાઇડ (C₆H₅ONa) સાથે તેની પ્રક્રિયા થતાં ફિનોક્સાઇડ આયન (C₆H₅O⁻) બેન્ઝાઇલ ક્લોરાઇડ પર ન્યુક્લિયોફિલિક હુમલો કરે છે, જેથી ફિનાઇલ બેન્ઝાઇલ ઇથર (C₆H₅OCH₂C₆H₅) બને છે. આ પ્રક્રિયા SN2 ક્રિયાવિધિ દ્વારા થાય છે કારણ કે બેન્ઝાઇલ કાર્બન પર હુમલો સરળતાથી થઈ શકે છે. વિકલ્પ B ખોટો છે કારણ કે E2 પ્રક્રિયા માટે ટર્શિયરી અથવા દ્વિતીયક હેલાઇડ જરૂરી છે, અને અહીં પ્રાથમિક હેલાઇડ છે. વિકલ્પ C ખોટો છે કારણ કે ફિનોક્સાઇડ આયન મજબૂત ક્ષારક છે, પરંતુ અહીં SN2 પ્રક્રિયા થાય છે. વિકલ્પ D ખોટો છે કારણ કે બેન્ઝિન અને ફિનોલ બનવા માટે ક્લોરાઇડ આયન નીકળી જવું જરૂરી નથી, અને આ પ્રક્રિયા વિલિયમસન સંશ્લેષણમાં બનતી નથી.", "ref": "Std 12 - અભ્યાસક્રમ 16: હેલોએલ્કેન અને હેલોએરીન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
