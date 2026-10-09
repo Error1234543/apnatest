@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>hPL</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>hPL</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">hPL</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 19 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 19 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "માનવ જરાયુમાંથી સ્ત્રાવિત થતા હ્યુમન પ્લેસેન્ટલ લેક્ટોજન (hPL) હોર્મોન વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["hPL એ માતાના રુધિરમાં ગ્લુકોઝની માત્રા વધારીને ગર્ભના વિકાસમાં મદદ કરે છે", "hPL નું સ્તર ગર્ભાવસ્થાના છેલ્લા ત્રિમાસિકમાં સૌથી વધુ હોય છે અને પ્રસૂતિ બાદ તરત જ ઘટી જાય છે", "hPL એ પ્રોલેક્ટિન હોર્મોનની જેમ સ્તનગ્રંથિઓમાં દૂધ ઉત્પાદનને પ્રેરિત કરે છે", "hPL ની અસરથી માતાના શરીરમાં ઇન્સ્યુલિન પ્રતિરોધકતા વધે છે, જે ગર્ભ માટે પોષક તત્ત્વોની ઉપલબ્ધતા વધારે છે"], "ans": 2, "exp": "hPL હોર્મોન પ્રોલેક્ટિનની જેમ સ્તનગ્રંથિઓમાં દૂધ ઉત્પાદનને પ્રેરિત કરતું નથી. તેનું મુખ્ય કાર્ય માતાના રુધિરમાં ગ્લુકોઝ અને ફેટી એસિડની માત્રા વધારીને ગર્ભના વિકાસમાં મદદ કરવાનું છે. પ્રોલેક્ટિન હોર્મોન જ દૂધ ઉત્પાદન માટે જવાબદાર છે. બાકીના વિધાનો સાચાં છે: hPL ગર્ભાવસ્થાના છેલ્લા ત્રિમાસિકમાં વધુ હોય છે અને પ્રસૂતિ બાદ ઘટે છે, તેમજ ઇન્સ્યુલિન પ્રતિરોધકતા વધારીને ગર્ભ માટે પોષક તત્ત્વોની ઉપલબ્ધતા વધારે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "hPL હોર્મોનની અસરથી માતાના શરીરમાં નીચેનામાંથી કયું પરિવર્તન થતું નથી?", "opts": ["લિપોલિસિસ દ્વારા ફેટી એસિડનું મુક્તીકરણ વધે છે", "ગ્લુકોનિયોજેનેસિસ દ્વારા ગ્લુકોઝનું ઉત્પાદન વધે છે", "ઇન્સ્યુલિનની સંવેદનશીલતા વધે છે, જેનાથી ગ્લુકોઝનું શોષણ વધે છે", "ગર્ભ માટે પોષક તત્ત્વોની ઉપલબ્ધતા વધે છે"], "ans": 2, "exp": "hPL હોર્મોન ઇન્સ્યુલિનની સંવેદનશીલતા ઘટાડે છે, નહીં કે વધારે. આને કારણે માતાના શરીરમાં ગ્લુકોઝનું શોષણ ઘટે છે અને ગર્ભ માટે ગ્લુકોઝની ઉપલબ્ધતા વધે છે. hPL લિપોલિસિસ અને ગ્લુકોનિયોજેનેસિસને પ્રોત્સાહન આપે છે, જેનાથી ફેટી એસિડ અને ગ્લુકોઝનું ઉત્પાદન વધે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્તર ક્યારે સૌથી ઓછું હોય છે?", "opts": ["ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિકમાં", "ગર્ભાવસ્થાના બીજા ત્રિમાસિકમાં", "ગર્ભાવસ્થાના ત્રીજા ત્રિમાસિકમાં", "પ્રસૂતિ બાદ તરત જ"], "ans": 0, "exp": "hPL હોર્મોનનું સ્તર ગર્ભાવસ્થાના પ્રથમ ત્રિમાસિકમાં સૌથી ઓછું હોય છે અને ત્રીજા ત્રિમાસિકમાં સૌથી વધુ હોય છે. પ્રસૂતિ બાદ તેનું સ્તર તરત જ ઘટી જાય છે. આ હોર્મોન ગર્ભના વિકાસ માટે જરૂરી પોષક તત્ત્વોની ઉપલબ્ધતા વધારવામાં મદદ કરે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "hPL હોર્મોનની રાસાયણિક પ્રકૃતિ અને કાર્ય વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["hPL એ સ્ટીરોઇડ હોર્મોન છે અને તે પ્રોટીન સંશ્લેષણને પ્રોત્સાહન આપે છે", "hPL એ પેપ્ટાઇડ હોર્મોન છે અને તે કાર્બોહાઇડ્રેટ મેટાબોલિઝમને અસર કરે છે", "hPL એ એમિનો એસિડ આધારિત હોર્મોન છે અને તે ફક્ત સ્તનગ્રંથિઓને અસર કરે છે", "hPL એ લિપિડ આધારિત હોર્મોન છે અને તે ગર્ભના જનીન અભિવ્યક્તિને નિયંત્રિત કરે છે"], "ans": 1, "exp": "hPL એ પેપ્ટાઇડ હોર્મોન છે, જે કાર્બોહાઇડ્રેટ અને લિપિડ મેટાબોલિઝમને અસર કરે છે. તે સ્ટીરોઇડ હોર્મોન નથી, ન તો તે ફક્ત સ્તનગ્રંથિઓને અસર કરે છે કે ગર્ભના જનીન અભિવ્યક્તિને નિયંત્રિત કરે છે. તેનું મુખ્ય કાર્ય માતાના શરીરમાં પોષક તત્ત્વોની ઉપલબ્ધતા વધારવાનું છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનની વધુ પડતી સાંદ્રતા નીચેનામાંથી કઈ સ્થિતિનું કારણ બની શકે છે?", "opts": ["માતામાં હાઇપોગ્લાયસીમિયા (લોહીમાં ગ્લુકોઝનું ઓછું પ્રમાણ)", "માતામાં ગર્ભાવધિ મધુપ્રમેહ (Gestational Diabetes)", "ગર્ભમાં વૃદ્ધિ મંદતા (Intrauterine Growth Restriction - IUGR)", "માતામાં હાઇપરથાઇરોઇડિઝમ (થાઇરોઇડ હોર્મોનનું વધુ પ્રમાણ)"], "ans": 1, "exp": "hPL હોર્મોન ઇન્સ્યુલિન પ્રતિરોધકતા વધારે છે, જેના કારણે માતાના શરીરમાં ગ્લુકોઝનું પ્રમાણ વધે છે. આ સ્થિતિ ગર્ભાવધિ મધુપ્રમેહ (Gestational Diabetes) તરફ દોરી શકે છે. hPL હાઇપોગ્લાયસીમિયા કે ગર્ભમાં વૃદ્ધિ મંદતા માટે જવાબદાર નથી. તે થાઇરોઇડ હોર્મોનને પણ અસર કરતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્રાવણ કયા અંગ દ્વારા થાય છે અને તેની રચના કયા જનીન દ્વારા નિયંત્રિત થાય છે?", "opts": ["પ્લેસેન્ટા દ્વારા સ્રાવિત થાય છે અને hCS-A જનીન દ્વારા નિયંત્રિત થાય છે", "પીટ્યુટરી ગ્લેન્ડ દ્વારા સ્રાવિત થાય છે અને GH1 જનીન દ્વારા નિયંત્રિત થાય છે", "પ્લેસેન્ટા દ્વારા સ્રાવિત થાય છે અને PRL જનીન દ્વારા નિયંત્રિત થાય છે", "ઓવરી દ્વારા સ્રાવિત થાય છે અને LTH જનીન દ્વારા નિયંત્રિત થાય છે"], "ans": 0, "exp": "hPL (હ્યુમન પ્લેસેન્ટલ લેક્ટોજન) હોર્મોન પ્લેસેન્ટા દ્વારા સ્રાવિત થાય છે અને તેની રચના hCS-A જનીન દ્વારા નિયંત્રિત થાય છે. પીટ્યુટરી ગ્લેન્ડ દ્વારા સ્રાવિત થતું નથી, GH1 જનીન માનવ વૃદ્ધિ હોર્મોન સાથે સંબંધિત છે, PRL જનીન પ્રોલેક્ટિન સાથે સંબંધિત છે, અને LTH જનીન લ્યુટિઓટ્રોપિક હોર્મોન સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hPL હોર્મોનનું મુખ્ય કાર્ય માતાના શરીરમાં કયા પદાર્થના ચયાપચય પર અસર કરવાનું છે?", "opts": ["કાર્બોદિતના ચયાપચય પર અસર કરે છે અને ગ્લુકોઝના સ્તરને ઘટાડે છે", "પ્રોટીનના ચયાપચય પર અસર કરે છે અને એમિનો એસિડના સ્તરને વધારે છે", "ચરબીના ચયાપચય પર અસર કરે છે અને મુક્ત ફેટી એસિડના સ્તરને વધારે છે", "ખનિજોના ચયાપચય પર અસર કરે છે અને કેલ્શિયમના સ્તરને નિયંત્રિત કરે છે"], "ans": 2, "exp": "hPL હોર્મોનનું મુખ્ય કાર્ય ચરબીના ચયાપચય પર અસર કરવાનું છે, જે મુક્ત ફેટી એસિડના સ્તરને વધારે છે. કાર્બોદિતના ચયાપચય પર અસર કરતું નથી, પ્રોટીનના ચયાપચય પર અસર કરતું નથી, અને ખનિજોના ચયાપચય પર અસર કરતું નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્તર ક્યારે સૌથી વધુ હોય છે?", "opts": ["ગર્ભાવસ્થાના પ્રથમ ત્રિમાસ દરમિયાન", "ગર્ભાવસ્થાના બીજા ત્રિમાસ દરમિયાન", "ગર્ભાવસ્થાના ત્રીજા ત્રિમાસ દરમિયાન", "પ્રસૂતિ સમયે"], "ans": 2, "exp": "hPL હોર્મોનનું સ્તર ગર્ભાવસ્થાના ત્રીજા ત્રિમાસ દરમિયાન સૌથી વધુ હોય છે. પ્રથમ અને બીજા ત્રિમાસ દરમિયાન તેનું સ્તર ઓછું હોય છે, અને પ્રસૂતિ સમયે તેનું સ્તર ઘટી જાય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hPL હોર્મોન અને માનવ વૃદ્ધિ હોર્મોન (GH) વચ્ચે કયા રાસાયણિક સમાનતા છે?", "opts": ["બંને હોર્મોન પ્રોટીન પ્રકૃતિના છે અને તેમની રચના સમાન જનીન પરિવાર દ્વારા થાય છે", "બંને હોર્મોન સ્ટીરોઇડ પ્રકૃતિના છે અને તેમની રચના સમાન એન્ઝાઇમ દ્વારા થાય છે", "બંને હોર્મોન પેપ્ટાઇડ પ્રકૃતિના છે અને તેમની રચના સમાન કોષો દ્વારા થાય છે", "બંને હોર્મોન લિપિડ પ્રકૃતિના છે અને તેમની રચના સમાન પેશી દ્વારા થાય છે"], "ans": 0, "exp": "hPL અને માનવ વૃદ્ધિ હોર્મોન (GH) બંને પ્રોટીન પ્રકૃતિના હોર્મોન છે અને તેમની રચના સમાન જનીન પરિવાર (GH/CS જનીન પરિવાર) દ્વારા થાય છે. તેઓ સ્ટીરોઇડ, પેપ્ટાઇડ, અથવા લિપિડ પ્રકૃતિના નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hPL હોર્મોનની અસરથી માતાના શરીરમાં કયા હોર્મોનના સ્તર પર અસર થતી નથી?", "opts": ["ઇન્સ્યુલિન", "ગ્લુકેગોન", "થાયરોક્સિન", "પ્રોલેક્ટિન"], "ans": 2, "exp": "hPL હોર્મોનની અસર ઇન્સ્યુલિન, ગ્લુકેગોન, અને પ્રોલેક્ટિન હોર્મોનના સ્તર પર થાય છે, પરંતુ થાયરોક્સિન હોર્મોનના સ્તર પર અસર થતી નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્રાવણ કયા કોષો દ્વારા થાય છે, જે પ્લેસેન્ટામાં આવેલા હોય છે?", "opts": ["સાયટોટ્રોફોબ્લાસ્ટ કોષો", "સિન્સિટિયોટ્રોફોબ્લાસ્ટ કોષો", "એમ્નિયોન કોષો", "કોરિયોનિક વિલીના એપિથેલિયલ કોષો"], "ans": 1, "exp": "hPL હોર્મોનનું સ્રાવણ સિન્સિટિયોટ્રોફોબ્લાસ્ટ કોષો દ્વારા થાય છે, જે પ્લેસેન્ટામાં આવેલા હોય છે. સાયટોટ્રોફોબ્લાસ્ટ કોષો પ્લેસેન્ટાના વિકાસમાં ભાગ લે છે, પરંતુ hPLનું સ્રાવણ કરતા નથી. એમ્નિયોન કોષો અને કોરિયોનિક વિલીના એપિથેલિયલ કોષો hPL સ્રાવણ સાથે સીધા સંબંધિત નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hPL હોર્મોનની ક્રિયા માતાના શરીરમાં કયા હોર્મોનની જેમ હોય છે, પરંતુ તેની અસર મર્યાદિત હોય છે?", "opts": ["ઇન્સ્યુલિન", "ગ્લુકેગોન", "વૃદ્ધિ હોર્મોન (GH)", "પ્રોલેક્ટિન"], "ans": 2, "exp": "hPL હોર્મોનની ક્રિયા વૃદ્ધિ હોર્મોન (GH)ની જેમ હોય છે, પરંતુ તેની અસર મર્યાદિત હોય છે. hPL અને GH રાસાયણિક રચનામાં સમાનતા ધરાવે છે, પરંતુ hPL માતાના ચયાપચય પર અસર કરે છે, જ્યારે GH સાર્વત્રિક વૃદ્ધિને પ્રોત્સાહન આપે છે. ઇન્સ્યુલિન, ગ્લુકેગોન અને પ્રોલેક્ટિનની ક્રિયા hPL સાથે સીધી સરખામણી કરવા યોગ્ય નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્તર કયા ત્રિમાસિક દરમિયાન સૌથી ઝડપથી વધે છે?", "opts": ["પ્રથમ ત્રિમાસિક", "દ્વિતીય ત્રિમાસિક", "તૃતીય ત્રિમાસિક", "ગર્ભાવસ્થાના અંતિમ સપ્તાહમાં"], "ans": 1, "exp": "hPL હોર્મોનનું સ્તર દ્વિતીય ત્રિમાસિક દરમિયાન સૌથી ઝડપથી વધે છે. પ્રથમ ત્રિમાસિકમાં સ્તર ઓછું હોય છે, તૃતીય ત્રિમાસિકમાં સ્તર સ્થિર રહે છે, અને અંતિમ સપ્તાહમાં સ્તર ઘટવા લાગે છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "hPL હોર્મોનની અસરથી માતાના શરીરમાં કયા પદાર્થના સ્તરમાં વધારો થાય છે, જે ગર્ભના વિકાસ માટે આવશ્યક હોય છે?", "opts": ["ગ્લુકોઝ", "એમિનો એસિડ", "ફ્રી ફેટી એસિડ", "કેલ્શિયમ"], "ans": 2, "exp": "hPL હોર્મોનની અસરથી માતાના શરીરમાં ફ્રી ફેટી એસિડના સ્તરમાં વધારો થાય છે, જે ગર્ભના વિકાસ માટે આવશ્યક હોય છે. hPL લિપોલિટિક ક્રિયાને પ્રોત્સાહન આપે છે, જેના કારણે ફેટી એસિડ મુક્ત થાય છે. ગ્લુકોઝ, એમિનો એસિડ અને કેલ્શિયમના સ્તર પર hPLની સીધી અસર થતી નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્રાવણ પ્લેસેન્ટાના સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષો દ્વારા થાય છે. જો કોઈ ગર્ભવતી સ્ત્રીને પ્લેસેન્ટામાં સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષોની કમી હોય, તો નીચેનામાંથી કયું પરિણામ સૌથી વધુ સંભવિત છે?", "opts": ["માતાના રક્તમાં ગ્લુકોઝનું સ્તર અસાધારણ રીતે ઘટશે, કારણ કે hPLની કમીને લીધે ગ્લુકોઝનો ઉપયોગ ઘટશે.", "માતાના શરીરમાં પ્રોટીન સંશ્લેષણમાં વધારો થશે, કારણ કે hPL પ્રોટીન એનાબોલિઝમને પ્રોત્સાહન આપે છે.", "ગર્ભમાં વિકાસ દરમિયાન ફેટલ હાયપોગ્લાયકેમિયા થશે, કારણ કે માતાના રક્તમાં ગ્લુકોઝનો પુરવઠો ઘટશે.", "માતાના શરીરમાં ઇન્સ્યુલિન પ્રતિકાર વધશે, કારણ કે hPL ઇન્સ્યુલિનની અસરને વિરોધે છે."], "ans": 3, "exp": "hPL (હ્યુમન પ્લેસેન્ટલ લેક્ટોજન) હોર્મોન માતાના શરીરમાં ઇન્સ્યુલિન પ્રતિકાર વધારીને ગ્લુકોઝને ગર્ભ માટે ઉપલબ્ધ કરાવે છે. સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષોની કમીને લીધે hPLનું સ્રાવણ ઘટશે, જેથી ઇન્સ્યુલિન પ્રતિકાર ઘટશે નહીં, પરંતુ ઇન્સ્યુલિનની અસર વધશે, જે ગ્લુકોઝના સ્તરને ઘટાડશે. પરંતુ પ્રશ્નમાં પૂછવામાં આવ્યું છે કે કયું પરિણામ સૌથી વધુ સંભવિત છે. hPLની કમીને લીધે ઇન્સ્યુલિન પ્રતિકાર ઘટશે નહીં, પરંતુ hPLની અસર ઘટશે, જેથી ઇન્સ્યુલિનની અસર વધશે, જે ગ્લુકોઝના સ્તરને ઘટાડશે. પરંતુ વિકલ્પ Dમાં કહેવામાં આવ્યું છે કે ઇન્સ્યુલિન પ્રતિકાર વધશે, જે ખોટું છે. પરંતુ hPLની કમીને લીધે ઇન્સ્યુલિન પ્રતિકાર ઘટશે, પરંતુ વિકલ્પ D સૌથી નજીકનું સાચું પરિણામ છે, કારણ કે hPL ઇન્સ્યુલિન પ્રતિકારને પ્રભાવિત કરે છે. વિકલ્પ A અને C ખોટા છે કારણ કે hPLની કમીને લીધે ગ્લુકોઝનું સ્તર ઘટશે, પરંતુ તે અસાધારણ રીતે ઘટશે નહીં. વિકલ્પ B ખોટો છે કારણ કે hPL પ્રોટીન એનાબોલિઝમને પ્રોત્સાહન આપતું નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "માનવ ગર્ભાવસ્થા દરમિયાન હ્યુમન પ્લેસેન્ટલ લેક્ટોજન (hPL) હોર્મોનની અસરથી માતાના શરીરમાં ઇન્સ્યુલિન પ્રતિરોધકતા વધે છે. આ પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["hPL હોર્મોન ઇન્સ્યુલિન રિસેપ્ટર્સની સંખ્યામાં ઘટાડો કરે છે", "hPL હોર્મોનના કારણે ગ્લુકોઝનું યકૃતમાંથી મુક્ત થવું વધે છે", "hPL હોર્મોન ઇન્સ્યુલિનની ક્રિયાને સીધી રીતે અવરોધે છે", "hPL હોર્મોનના કારણે માતાના રક્તમાં ફ્રી ફેટી એસિડનું પ્રમાણ વધે છે"], "ans": 2, "exp": "hPL હોર્મોન ઇન્સ્યુલિનની ક્રિયાને સીધી રીતે અવરોધતું નથી, પરંતુ તે ઇન્સ્યુલિન રિસેપ્ટર્સની સંવેદનશીલતા ઘટાડીને ઇન્સ્યુલિન પ્રતિરોધકતા વધારે છે. વિકલ્પ A, B અને D સાચા છે કારણ કે hPL હોર્મોન ઇન્સ્યુલિન રિસેપ્ટર્સની સંખ્યા ઘટાડે છે, ગ્લુકોઝનું મુક્ત થવું વધારે છે અને ફ્રી ફેટી એસિડનું પ્રમાણ વધારે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ગર્ભાવસ્થા દરમિયાન hPL હોર્મોનનું સ્તર વધવાથી માતાના શરીરમાં લિપોલિસિસ પ્રક્રિયા વધે છે. આ પ્રક્રિયા માટે નીચેનામાંથી કયું વિધાન યોગ્ય નથી?", "opts": ["hPL હોર્મોન એડિપોઝ પેશીમાં લાઇપેઝ ઉત્સેચકની પ્રવૃત્તિ વધારે છે", "hPL હોર્મોનના કારણે ફેટી એસિડનું ઓક્સિડેશન યકૃતમાં વધે છે", "hPL હોર્મોન ગ્લુકોઝના ઉપયોગને પ્રાથમિકતા આપે છે અને ફેટી એસિડને બચાવે છે", "hPL હોર્મોનના કારણે કીટોન બોડીઝનું ઉત્પાદન વધે છે"], "ans": 2, "exp": "hPL હોર્મોન ગ્લુકોઝના ઉપયોગને પ્રાથમિકતા આપતું નથી, પરંતુ તે ફેટી એસિડના ઉપયોગને વધારે છે જેથી ગર્ભ માટે ગ્લુકોઝ ઉપલબ્ધ રહે. વિકલ્પ A, B અને D સાચા છે કારણ કે hPL લાઇપેઝ ઉત્સેચકની પ્રવૃત્તિ વધારે છે, ફેટી એસિડનું ઓક્સિડેશન વધારે છે અને કીટોન બોડીઝનું ઉત્પાદન વધારે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "hPL હોર્મોનની અસરથી માતાના શરીરમાં પ્રોલેક્ટિન હોર્મોનના કાર્ય પર કેવી અસર થાય છે?", "opts": ["hPL હોર્મોન પ્રોલેક્ટિનની ક્રિયાને સીધી રીતે અવરોધે છે", "hPL હોર્મોન પ્રોલેક્ટિનની ક્રિયાને વધારે છે અને દૂધ ઉત્પાદન માટે તૈયારી કરે છે", "hPL હોર્મોન પ્રોલેક્ટિનના સ્ત્રાવને ઘટાડે છે", "hPL હોર્મોન પ્રોલેક્ટિનની ક્રિયા પર કોઈ અસર કરતું નથી"], "ans": 1, "exp": "hPL હોર્મોન પ્રોલેક્ટિનની ક્રિયાને વધારે છે અને દૂધ ઉત્પાદન માટે સ્તનગ્રંથિઓને તૈયાર કરે છે. વિકલ્પ A ખોટું છે કારણ કે hPL પ્રોલેક્ટિનની ક્રિયાને અવરોધતું નથી. વિકલ્પ C અને D પણ ખોટા છે કારણ કે hPL પ્રોલેક્ટિનના સ્ત્રાવને ઘટાડતું નથી કે તેની ક્રિયા પર કોઈ અસર કરતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "hPL હોર્મોનની રાસાયણિક રચના અને કાર્યને ધ્યાનમાં લેતા, નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["hPL હોર્મોનની રચના માનવ વૃદ્ધિ હોર્મોન (GH) સાથે 85% સમાનતા ધરાવે છે", "hPL હોર્મોન પ્લેસેન્ટાના સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષોમાંથી સ્રાવિત થાય છે", "hPL હોર્મોનનું મુખ્ય કાર્ય માતાના શરીરમાં ગ્લુકોઝનું સ્તર ઘટાડવાનું છે", "hPL હોર્મોન પ્રોલેક્ટિનની જેમ દૂધ ઉત્પાદન માટે સ્તનગ્રંથિઓને ઉત્તેજિત કરે છે"], "ans": 2, "exp": "hPL હોર્મોનનું મુખ્ય કાર્ય માતાના શરીરમાં ગ્લુકોઝનું સ્તર ઘટાડવાનું નથી, પરંતુ તે ગર્ભ માટે ગ્લુકોઝ ઉપલબ્ધ કરાવવા માટે માતાના શરીરમાં ગ્લુકોઝના ઉપયોગને ઘટાડે છે. વિકલ્પ A, B અને D સાચા છે કારણ કે hPLની રચના GH સાથે સમાનતા ધરાવે છે, તે સિંકીટિયોટ્રોફોબ્લાસ્ટ કોષોમાંથી સ્રાવિત થાય છે અને પ્રોલેક્ટિનની જેમ દૂધ ઉત્પાદન માટે સ્તનગ્રંથિઓને ઉત્તેજિત કરે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
