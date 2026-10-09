@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>આણ્વિક આધારો આનુવંશિકતા Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>આણ્વિક આધારો આનુવંશિકતા Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "DNA ના બંધારણમાં નાઇટ્રોજન બેઇઝ, ડીઓક્સિરાઇબોઝ શર્કરા અને ફોસ્ફેટ સમૂહ વચ્ચે કયો બંધ જોવા મળે છે?", "opts": ["ગ્લાયકોસિડિક બંધ", "ફોસ્ફોડાયએસ્ટર બંધ", "હાઇડ્રોજન બંધ", "પેપ્ટાઇડ બંધ"], "ans": 1, "exp": "DNA માં શર્કરા અને ફોસ્ફેટ સમૂહ વચ્ચે ફોસ્ફોડાયએસ્ટર બંધ રચાય છે, જે ન્યુક્લિઓટાઇડ્સને જોડે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન DNA પ્રતિકૃતિ માટે ખોટું છે?", "opts": ["DNA પ્રતિકૃતિ અર્ધરૂઢિગત (Semi-conservative) હોય છે.", "DNA પ્રતિકૃતિ માટે DNA પોલિમરેઝ ઉત્સેચક જરૂરી છે.", "DNA પ્રતિકૃતિ દરમિયાન બંને સ્ટ્રેન્ડ એકસાથે પ્રતિકૃતિ પામે છે.", "DNA પ્રતિકૃતિ માટે પ્રાઇમરની જરૂર પડે છે."], "ans": 2, "exp": "DNA પ્રતિકૃતિ દરમિયાન બંને સ્ટ્રેન્ડ એકસાથે પ્રતિકૃતિ પામતા નથી; લેગિંગ સ્ટ્રેન્ડ અલગ રીતે પ્રતિકૃતિ પામે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જો એક DNA સ્ટ્રેન્ડનો ક્રમ 5'-ATGC-3' હોય, તો તેના પૂરક RNA સ્ટ્રેન્ડનો ક્રમ કયો હશે?", "opts": ["5'-UACG-3'", "5'-TACG-3'", "5'-GCAU-3'", "5'-CGUA-3'"], "ans": 0, "exp": "DNA નો પૂરક RNA સ્ટ્રેન્ડ બનાવતી વખતે થાઇમિન (T) ને યુરેસિલ (U) વડે બદલવામાં આવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું જનીન અભિવ્યક્તિ (Gene Expression) નું પગલું નથી?", "opts": ["પ્રતિકૃતિ (Replication)", "પ્રત્યાંકન (Transcription)", "અનુવાદ (Translation)", "પ્રોસેસિંગ (Processing)"], "ans": 0, "exp": "પ્રતિકૃતિ એ DNA ની નકલ બનાવવાની પ્રક્રિયા છે, જ્યારે જનીન અભિવ્યક્તિ પ્રત્યાંકન અને અનુવાદ દ્વારા થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે? (1) tRNA એ એમિનો એસિડને રિબોઝોમ સુધી લાવે છે. (2) rRNA એ રિબોઝોમનું બંધારણીય ઘટક છે. (3) mRNA એ જનીનની માહિતી વહન કરે છે. (4) snRNA એ DNA પ્રતિકૃતિમાં ભાગ લે છે.", "opts": ["ફક્ત (1)", "ફક્ત (4)", "ફક્ત (2) અને (3)", "ફક્ત (1) અને (4)"], "ans": 1, "exp": "snRNA એ RNA સ્પ્લાઇસિંગમાં ભાગ લે છે, DNA પ્રતિકૃતિમાં નહીં.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએના બેવડા કુંતલ (double helix) મોડેલની શોધ કોણે કરી હતી?", "opts": ["ગ્રેગર મેન્ડલ", "જેમ્સ વૉટ્સન અને ફ્રાન્સિસ ક્રિક", "થોમસ હન્ટ મોર્ગન", "રોઝાલિન્ડ ફ્રેન્કલિન"], "ans": 1, "exp": "જેમ્સ વૉટ્સન અને ફ્રાન્સિસ ક્રિકે ૧૯૫૩માં ડીએનએના બેવડા કુંતલ મોડેલની શોધ કરી હતી, જે માટે તેમને નોબેલ પુરસ્કાર મળ્યો હતો.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ડીએનએ અને આરએનએ માટે ખોટું છે?", "opts": ["ડીએનએમાં ડીઓક્સિરાઇબોઝ શર્કરા હોય છે, જ્યારે આરએનએમાં રાઇબોઝ શર્કરા હોય છે.", "ડીએનએમાં થાઇમિન બેઇઝ હોય છે, જ્યારે આરએનએમાં યુરેસિલ બેઇઝ હોય છે.", "ડીએનએ એકલ-કુંતલ અને આરએનએ બેવડા કુંતલ રચના ધરાવે છે.", "ડીએનએ અને આરએનએ બંને ન્યુક્લિઓટાઇડ્સના બનેલા હોય છે."], "ans": 2, "exp": "ડીએનએ સામાન્ય રીતે બેવડા કુંતલ રચના ધરાવે છે, જ્યારે આરએનએ એકલ-કુંતલ રચના ધરાવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું જનીન અભિવ્યક્તિ (gene expression)નું પ્રથમ પગલું છે?", "opts": ["ટ્રાન્સલેશન", "ટ્રાન્સક્રિપ્શન", "રેપ્લિકેશન", "પ્રોટીન ફોલ્ડિંગ"], "ans": 1, "exp": "જનીન અભિવ્યક્તિનું પ્રથમ પગલું ટ્રાન્સક્રિપ્શન છે, જેમાં ડીએનએમાંથી આરએનએનું સંશ્લેષણ થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો વાંચો અને કેટલાં વિધાનો સાચાં છે?\n(૧) ડીએનએ પોલિમરેઝ ઉત્સેચક ડીએનએના સંશ્લેષણમાં મદદ કરે છે.\n(૨) આરએનએ પોલિમરેઝ ઉત્સેચક ટ્રાન્સક્રિપ્શનમાં ભાગ લે છે.\n(૩) લાઇગેઝ ઉત્સેચક ડીએનએના ટુકડાઓને જોડે છે.\n(૪) હેલિકેઝ ઉત્સેચક ડીએનએના કુંતલને ખોલે છે.", "opts": ["એક પણ નહીં", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "વિધાન (૧), (૨), (૩) અને (૪) બધાં જ સાચાં છે. ડીએનએ પોલિમરેઝ, આરએનએ પોલિમરેઝ, લાઇગેઝ અને હેલિકેઝ ઉત્સેચકો અનુક્રમે ડીએનએ સંશ્લેષણ, ટ્રાન્સક્રિપ્શન, ટુકડાઓ જોડવા અને કુંતલ ખોલવામાં ભાગ લે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએના બેવડા કુંતલમય બંધારણની શોધ કોણે કરી હતી?", "opts": ["ગ્રેગર મેન્ડલ", "જેમ્સ વોટસન અને ફ્રાન્સિસ ક્રિક", "થોમસ હન્ટ મોર્ગન", "ફ્રેડરિક મીશર"], "ans": 1, "exp": "જેમ્સ વોટસન અને ફ્રાન્સિસ ક્રિકે ૧૯૫૩માં ડીએનએના બેવડા કુંતલમય બંધારણની શોધ કરી હતી.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જો એક ડીએનએના કુંતલમાં ૨૦% એડેનીન બેઇઝ હોય, તો તેમાં ગ્વાનિન બેઇઝનું પ્રમાણ કેટલું હશે?", "opts": ["૨૦%", "૩૦%", "૪૦%", "૧૦%"], "ans": 1, "exp": "એડેનીન અને થાઇમિન સમાન પ્રમાણમાં હોય છે, તેથી ગ્વાનિન અને સાઇટોસિન પણ સમાન પ્રમાણમાં હોય છે. કુલ ૧૦૦%માંથી ૨૦% એડેનીન બાદ બાકીના ૮૦%માં ગ્વાનિન અને સાઇટોસિન સમાન હોવાથી ગ્વાનિન ૩૦% થાય.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું જનીન અભિવ્યક્તિનું નિયંત્રણ કરતું નથી?", "opts": ["પ્રમોટર જનીન", "ઓપરેટર જનીન", "રેગ્યુલેટર જનીન", "સંરચનાત્મક જનીન"], "ans": 3, "exp": "સંરચનાત્મક જનીન પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે, પરંતુ તે જનીન અભિવ્યક્તિનું નિયંત્રણ કરતું નથી.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (૧) ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએનું નિર્માણ થાય છે. (૨) ટ્રાન્સલેશન દરમિયાન આરએનએમાંથી પ્રોટીનનું નિર્માણ થાય છે. (૩) રિવર્સ ટ્રાન્સક્રિપ્શન વાઇરસમાં જોવા મળે છે. (૪) ડીએનએ રેપ્લિકેશન કોષવિભાજન પહેલાં થાય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં વિધાનો સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "વિધાન (૧), (૨), (૩) અને (૪) બધાં સાચાં છે, પરંતુ પ્રશ્નમાં માત્ર ત્રણ વિધાનો સાચાં હોવાનું કહેવામાં આવ્યું છે, તેથી યોગ્ય જવાબ ચાર છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએના બંધારણમાં નાઇટ્રોજન બેઇઝની જોડી કઈ રીતે બને છે?", "opts": ["એડેનીન થાયમીન સાથે હાઇડ્રોજન બંધથી જોડાય છે", "ગ્વાનીન સાયટોસીન સાથે ફોસ્ફોડાયએસ્ટર બંધથી જોડાય છે", "એડેનીન ગ્વાનીન સાથે હાઇડ્રોજન બંધથી જોડાય છે", "થાયમીન સાયટોસીન સાથે કોવેલેન્ટ બંધથી જોડાય છે"], "ans": 0, "exp": "ડીએનએમાં એડેનીન (A) થાયમીન (T) સાથે બે હાઇડ્રોજન બંધથી અને ગ્વાનીન (G) સાયટોસીન (C) સાથે ત્રણ હાઇડ્રોજન બંધથી જોડાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ડીએનએ પ્રતિકૃતિ માટે ખોટું છે?", "opts": ["પ્રતિકૃતિ અર્ધરૂઢિગત (semi-conservative) હોય છે", "પ્રતિકૃતિ દરમિયાન હેલિકેઝ ઉત્સેચક ડીએનએના બેવડા હેલિક્સને ખોલે છે", "ડીએનએ પોલિમરેઝ ઉત્સેચક નવી શૃંખલા ૩' → ૫' દિશામાં સંશ્લેષિત કરે છે", "ઓકાઝાકી ટુકડાઓ લેગિંગ શૃંખલા પર રચાય છે"], "ans": 2, "exp": "ડીએનએ પોલિમરેઝ ઉત્સેચક નવી શૃંખલા ૫' → ૩' દિશામાં સંશ્લેષિત કરે છે, ૩' → ૫' દિશામાં નહીં.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જો એક ડીએનએ શૃંખલાનો ક્રમ ૫'-ATGCGTA-૩' હોય, તો તેની પૂરક શૃંખલાનો ક્રમ કયો હશે?", "opts": ["૫'-TACGCAT-૩'", "૫'-UACGCAU-૩'", "૩'-TACGCAT-૫'", "૩'-UACGCAU-૫'"], "ans": 2, "exp": "ડીએનએની પૂરક શૃંખલા ૩' → ૫' દિશામાં બને છે અને થાયમીન (T) એડેનીન (A) સાથે તથા સાયટોસીન (C) ગ્વાનીન (G) સાથે જોડાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં સાચાં છે?\n(૧) ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએનું સંશ્લેષણ થાય છે.\n(૨) ટ્રાન્સલેશન દરમિયાન આરએનએમાંથી પ્રોટીનનું સંશ્લેષણ થાય છે.\n(૩) ટ્રાન્સફર આરએનએ (tRNA) એમિનો એસિડને રિબોઝોમ સુધી લાવે છે.\n(૪) રિબોઝોમલ આરએનએ (rRNA) ટ્રાન્સક્રિપ્શનમાં ભાગ લે છે.", "opts": ["૧", "૨", "૩", "૪"], "ans": 2, "exp": "વિધાન (૧), (૨) અને (૩) સાચાં છે. વિધાન (૪) ખોટું છે કારણ કે rRNA ટ્રાન્સલેશનમાં ભાગ લે છે, ટ્રાન્સક્રિપ્શનમાં નહીં.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની પ્રતિકૃતિ (Replication) દરમિયાન, નીચેનામાંથી કયો ઉત્સેચક નવી ડીએનએ શૃંખલાના સંશ્લેષણ માટે જરૂરી નથી?", "opts": ["ડીએનએ પોલિમરેઝ (DNA Polymerase)", "હેલિકેઝ (Helicase)", "લાઈગેઝ (Ligase)", "પ્રોટીએઝ (Protease)"], "ans": 3, "exp": "પ્રોટીએઝ એ પ્રોટીનના વિઘટન માટે જવાબદાર ઉત્સેચક છે, જે ડીએનએ પ્રતિકૃતિ માટે જરૂરી નથી. બાકીના ઉત્સેચકો પ્રતિકૃતિ પ્રક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ડીએનએ (DNA) અને આરએનએ (RNA) વચ્ચેનો મુખ્ય તફાવત દર્શાવતું નથી?", "opts": ["ડીએનએમાં ડીઓક્સિરિબોઝ શર્કરા હોય છે, જ્યારે આરએનએમાં રિબોઝ શર્કરા હોય છે.", "ડીએનએ દ્વિસૂત્રીય હોય છે, જ્યારે આરએનએ એકસૂત્રીય હોય છે.", "ડીએનએમાં થાઇમિન બેઇઝ હોય છે, જ્યારે આરએનએમાં યુરેસિલ બેઇઝ હોય છે.", "ડીએનએ પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે, જ્યારે આરએનએ વારસાગત માહિતીનું વહન કરે છે."], "ans": 3, "exp": "ડીએનએ વારસાગત માહિતીનું વહન કરે છે, જ્યારે આરએનએ પ્રોટીન સંશ્લેષણમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. આથી વિકલ્પ ૪ ખોટો છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જો એક ડીએનએ શૃંખલાનો ક્રમ 5'-ATGCGTA-3' હોય, તો તેની પૂરક શૃંખલાનો ક્રમ કયો હશે?", "opts": ["5'-TACGCAT-3'", "5'-UACGCAU-3'", "3'-TACGCAT-5'", "3'-UACGCAU-5'"], "ans": 2, "exp": "ડીએનએની પૂરક શૃંખલા એન્ટિપેરેલલ અને પૂરક બેઇઝ જોડીના સિદ્ધાંત પર આધારિત હોય છે. આથી પૂરક શૃંખલા 3'-TACGCAT-5' હશે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું જનીન અભિવ્યક્તિ (Gene Expression) નું નિયંત્રણ કરતું નથી?", "opts": ["પ્રમોટર (Promoter)", "ઓપરેટર (Operator)", "રિપ્રેસર પ્રોટીન (Repressor Protein)", "હિસ્ટોન પ્રોટીન (Histone Protein)"], "ans": 3, "exp": "હિસ્ટોન પ્રોટીન ક્રોમેટિનના બંધારણમાં મદદ કરે છે, પરંતુ તે જનીન અભિવ્યક્તિનું સીધું નિયંત્રણ કરતું નથી. બાકીના વિકલ્પો જનીન અભિવ્યક્તિના નિયંત્રણમાં ભાગ ભજવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની પ્રતિકૃતિ (Replication) દરમિયાન હેલિકેઝ ઉત્સેચકનું મુખ્ય કાર્ય શું છે?", "opts": ["ન્યુક્લિઓટાઇડ્સને જોડવું", "ડીએનએના બે સેરને અલગ કરવા", "આરએનએ પ્રાઇમર બનાવવું", "ડીએનએના ટુકડાઓને જોડવા"], "ans": 1, "exp": "હેલિકેઝ ઉત્સેચક ડીએનએના બે સેરને અલગ કરીને પ્રતિકૃતિ માટે એક-સેરવાળું ટેમ્પલેટ તૈયાર કરે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જો એક ડીએનએના ટુકડામાં 30% એડેનિન હોય, તો તે ટુકડામાં ગ્વાનિનનું પ્રમાણ કેટલું હશે?", "opts": ["20%", "30%", "40%", "70%"], "ans": 0, "exp": "એડેનિન અને થાઇમિન સમાન પ્રમાણમાં હોય છે, તેથી ગ્વાનિન અને સાઇટોસિન પણ સમાન પ્રમાણમાં હોય છે. કુલ 100% - (30% + 30%) = 40%, તેથી ગ્વાનિન 20% હશે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન જનીન અભિવ્યક્તિ (Gene Expression) માટે ખોટું છે?", "opts": ["ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએ બને છે", "ટ્રાન્સલેશન દરમિયાન આરએનએમાંથી પ્રોટીન બને છે", "ટ્રાન્સક્રિપ્શન કોષરસમાં થાય છે", "ટ્રાન્સલેશન રિબોઝોમ પર થાય છે"], "ans": 2, "exp": "ટ્રાન્સક્રિપ્શન કોષકેન્દ્રમાં થાય છે, જ્યારે ટ્રાન્સલેશન કોષરસમાં રિબોઝોમ પર થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયો ઉત્સેચક ડીએનએ પ્રતિકૃતિ દરમિયાન ઓકાઝાકી ટુકડાઓને જોડવાનું કાર્ય કરે છે?", "opts": ["હેલિકેઝ", "ડીએનએ પોલિમરેઝ", "ડીએનએ લિગેઝ", "ટોપોઆઇસોમરેઝ"], "ans": 2, "exp": "ડીએનએ લિગેઝ ઉત્સેચક ઓકાઝાકી ટુકડાઓને જોડીને સતત ડીએનએ સેર બનાવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ડીએનએ રેપ્લિકેશન માટે ખોટું છે?", "opts": ["રેપ્લિકેશન અર્ધ-રૂઢિગત (semi-conservative) પ્રક્રિયા છે", "ડીએનએ પોલિમરેઝ ઉત્સેચક નવી શૃંખલા ૫' → ૩' દિશામાં સંશ્લેષિત કરે છે", "લીડિંગ શૃંખલા સતત સંશ્લેષિત થાય છે જ્યારે લેગિંગ શૃંખલા અસતત ઓકાઝાકી ટુકડાઓમાં સંશ્લેષિત થાય છે", "રેપ્લિકેશન દરમિયાન આરએનએ પ્રાઇમરની જરૂર પડતી નથી"], "ans": 3, "exp": "ડીએનએ રેપ્લિકેશન દરમિયાન આરએનએ પ્રાઇમરની જરૂર પડે છે, જે ડીએનએ પોલિમરેઝને નવી શૃંખલા સંશ્લેષણ શરૂ કરવા માટે જરૂરી છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ટ્રાન્સક્રિપ્શન માટે સાચું નથી?", "opts": ["ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએ સંશ્લેષિત થાય છે", "આરએનએ પોલિમરેઝ ઉત્સેચક ટ્રાન્સક્રિપ્શનની પ્રક્રિયા શરૂ કરે છે", "ટ્રાન્સક્રિપ્શન દરમિયાન થાયમીન (T) ના સ્થાને યુરેસિલ (U) આવે છે", "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએની બંને શૃંખલાઓનો ઉપયોગ થાય છે"], "ans": 3, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએની માત્ર એક શૃંખલા (ટેમ્પલેટ શૃંખલા) નો ઉપયોગ થાય છે, બંને શૃંખલાઓનો નહીં.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું જોડકું જનીન અભિવ્યક્તિ (gene expression) ના બે મુખ્ય તબક્કાઓને સાચી રીતે દર્શાવે છે?", "opts": ["પ્રતિકૃતિ અને અનુવાદ", "ટ્રાન્સક્રિપ્શન અને પ્રતિકૃતિ", "ટ્રાન્સક્રિપ્શન અને અનુવાદ", "અનુવાદ અને પ્રોટીન ફોલ્ડિંગ"], "ans": 2, "exp": "જનીન અભિવ્યક્તિના બે મુખ્ય તબક્કાઓ ટ્રાન્સક્રિપ્શન (ડીએનએથી આરએનએ) અને અનુવાદ (આરએનએથી પ્રોટીન) છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનાં વિધાનોમાંથી કેટલાં સાચાં છે?\n1. ડીએનએ લિગેઝ ઉત્સેચક નવા ન્યુક્લિયોટાઇડ્સને જોડે છે.\n2. ઓકાઝાકી ટુકડાઓ લેગિંગ શૃંખલા પર બને છે.\n3. ડીએનએ પોલિમરેઝ ઉત્સેચક માત્ર ૫'→૩' દિશામાં કાર્ય કરે છે.\n4. પ્રાઇમર આરએનએના ટૂંકા ટુકડા હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન ૨, ૩ અને ૪ સાચાં છે. વિધાન ૧ ખોટું છે કારણ કે ડીએનએ લિગેઝ નવા ન્યુક્લિયોટાઇડ્સને જોડતું નથી, પરંતુ ઓકાઝાકી ટુકડાઓને જોડે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ના બંધારણમાં એડેનીન (A) ની ટકાવારી 30% હોય, તો ગ્વાનીન (G) ની ટકાવારી કેટલી હશે?", "opts": ["20%", "30%", "40%", "15%"], "ans": 0, "exp": "ડીએનએમાં એડેનીન (A) અને થાઇમિન (T) ની ટકાવારી સમાન હોય છે, તેમજ ગ્વાનીન (G) અને સાઇટોસિન (C) ની ટકાવારી સમાન હોય છે. અહીં A = 30% હોવાથી T = 30%, બાકીના 40% G અને C વચ્ચે વહેંચાય છે, તેથી G = 20%.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએના એક સ્ટ્રેન્ડનો ક્રમ 3'-TACGGATTC-5' હોય, તો તેના પૂરક આરએનએનો ક્રમ કયો હશે?", "opts": ["5'-AUGCCUAAG-3'", "5'-ATGCCTAAG-3'", "3'-AUGCCUAAG-5'", "5'-UACGGUAUC-3'"], "ans": 0, "exp": "ટ્રાન્સક્રિપ્શનમાં ડીએનએના 3'→5' સ્ટ્રેન્ડ પરથી આરએનએનું સંશ્લેષણ 5'→3' દિશામાં થાય છે. થાઇમિન (T) ને બદલે યુરેસિલ (U) આવે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની રચનામાં નાઇટ્રોજન બેઇઝની જોડી કઈ રીતે બને છે?", "opts": ["એડેનીન (A) થાઇમીન (T) સાથે અને ગ્વાનીન (G) સાઇટોસીન (C) સાથે હાઇડ્રોજન બંધથી જોડાય છે", "એડેનીન (A) સાઇટોસીન (C) સાથે અને ગ્વાનીન (G) થાઇમીન (T) સાથે હાઇડ્રોજન બંધથી જોડાય છે", "એડેનીન (A) ગ્વાનીન (G) સાથે અને થાઇમીન (T) સાઇટોસીન (C) સાથે હાઇડ્રોજન બંધથી જોડાય છે", "એડેનીન (A) યુરેસિલ (U) સાથે અને ગ્વાનીન (G) સાઇટોસીન (C) સાથે હાઇડ્રોજન બંધથી જોડાય છે"], "ans": 0, "exp": "ડીએનએમાં એડેનીન (A) હંમેશા થાઇમીન (T) સાથે બે હાઇડ્રોજન બંધથી અને ગ્વાનીન (G) સાઇટોસીન (C) સાથે ત્રણ હાઇડ્રોજન બંધથી જોડાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએનું સંશ્લેષણ કરતો ઉત્સેચક કયો છે?", "opts": ["ડીએનએ પોલિમરેઝ", "આરએનએ પોલિમરેઝ", "લાઇગેઝ", "હેલિકેઝ"], "ans": 1, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક ડીએનએ ટેમ્પલેટમાંથી આરએનએનું સંશ્લેષણ કરે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની રચનામાં નાઇટ્રોજન બેઇઝના જોડકાં કયા નિયમ અનુસાર બને છે?", "opts": ["ચારગાફનો નિયમ (Chargaff's rule)", "હાર્ડી-વેઇનબર્ગનો નિયમ (Hardy-Weinberg principle)", "સેન્ટ્રલ ડોગ્મા (Central Dogma)", "પાયરિમિડીન-પ્યુરિન જોડકાંનો નિયમ (Pyrimidine-Purine pairing rule)"], "ans": 3, "exp": "ડીએનએમાં એડેનીન (A) થાઇમિન (T) સાથે અને ગ્વાનીન (G) સાઇટોસિન (C) સાથે હાઇડ્રોજન બંધથી જોડાય છે, જે પાયરિમિડીન-પ્યુરિન જોડકાંનો નિયમ છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ટ્રાન્સક્રિપ્શન (Transcription) માટે ખોટું છે?", "opts": ["ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએનું સંસ્લેષણ થાય છે.", "ટ્રાન્સક્રિપ્શન માટે આરએનએ પોલિમરેઝ ઉત્સેચક જરૂરી છે.", "ટ્રાન્સક્રિપ્શન દરમિયાન થાઇમિનના સ્થાને યુરેસિલ આવે છે.", "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએની બંને શૃંખલાઓનો ઉપયોગ થાય છે."], "ans": 3, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએની માત્ર એક શૃંખલા (ટેમ્પલેટ શૃંખલા)નો ઉપયોગ થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ટ્રાન્સક્રિપ્શન (પ્રતિકૃતિ) માટે ખોટું છે?", "opts": ["ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએના બંને સ્ટ્રેન્ડનો ઉપયોગ થાય છે", "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક કાર્ય કરે છે", "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ સ્ટ્રેન્ડ ડીએનએના ટેમ્પલેટ સ્ટ્રેન્ડને પૂરક હોય છે", "ટ્રાન્સક્રિપ્શન દરમિયાન થાઇમિનના સ્થાને યુરેસિલ આવે છે"], "ans": 0, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએનો માત્ર એક સ્ટ્રેન્ડ (ટેમ્પલેટ સ્ટ્રેન્ડ) ઉપયોગમાં લેવાય છે, બંને સ્ટ્રેન્ડ નહીં.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉત્સેચક ડીએનએ પ્રતિકૃતિ (replication) માટે જવાબદાર નથી?", "opts": ["ડીએનએ પોલિમરેઝ", "હેલિકેઝ", "લાઇગેઝ", "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ"], "ans": 3, "exp": "રેસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ એ જનીન ઇજનેરી માટે ઉપયોગી ઉત્સેચક છે, ડીએનએ પ્રતિકૃતિમાં ભાગ લેતું નથી.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની રચના કયા એકમોના બનેલી હોય છે?", "opts": ["એમિનો એસિડ", "ન્યુક્લિઓટાઇડ", "ગ્લુકોઝ", "ફૅટી એસિડ"], "ans": 1, "exp": "ડીએનએ ન્યુક્લિઓટાઇડના બનેલું હોય છે, જેમાં શર્કરા, ફોસ્ફેટ અને નાઇટ્રોજન બેઇઝનો સમાવેશ થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન અભિવ્યક્તિ (gene expression) ના પ્રથમ તબક્કામાં કયું કાર્ય થાય છે?", "opts": ["ટ્રાન્સલેશન", "ટ્રાન્સક્રિપ્શન", "રેપ્લિકેશન", "પ્રોટીન ફોલ્ડિંગ"], "ans": 1, "exp": "જનીન અભિવ્યક્તિનો પ્રથમ તબક્કો ટ્રાન્સક્રિપ્શન છે, જેમાં ડીએનએમાંથી આરએનએનું સંશ્લેષણ થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું આરએનએ (RNA) પ્રોટીન સંશ્લેષણમાં સીધી રીતે ભાગ લેતું નથી?", "opts": ["mRNA", "tRNA", "rRNA", "siRNA"], "ans": 3, "exp": "siRNA જનીન અભિવ્યક્તિના નિયંત્રણમાં ભાગ લે છે, પરંતુ પ્રોટીન સંશ્લેષણમાં સીધી રીતે ભાગ લેતું નથી.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક કઈ દિશામાં કાર્ય કરે છે?", "opts": ["5' → 3' દિશામાં", "3' → 5' દિશામાં", "બંને દિશામાં", "કોઈ ચોક્કસ દિશા નહીં"], "ans": 0, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક 5' → 3' દિશામાં કાર્ય કરે છે અને આરએનએ શૃંખલાનું નિર્માણ કરે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન જનીન અભિવ્યક્તિ (gene expression) માટે સાચું નથી?", "opts": ["ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએનું નિર્માણ થાય છે", "ટ્રાન્સલેશન દરમિયાન એમઆરએનએમાંથી પ્રોટીનનું નિર્માણ થાય છે", "ટ્રાન્સક્રિપ્શન અને ટ્રાન્સલેશન બંને કોષકેન્દ્રમાં થાય છે", "ટીઆરએનએ એમિનો એસિડને રિબોઝોમ પર લાવે છે"], "ans": 2, "exp": "ટ્રાન્સક્રિપ્શન કોષકેન્દ્રમાં થાય છે, જ્યારે ટ્રાન્સલેશન કોષરસમાં રિબોઝોમ પર થાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "એક ડીએનએ શૃંખલાનો ક્રમ 5'-ATGCGTA-3' છે. તેની પૂરક શૃંખલાનો ક્રમ કયો હશે?", "opts": ["5'-TACGCAT-3'", "3'-TACGCAT-5'", "5'-UACGCAU-3'", "3'-UACGCAU-5'"], "ans": 1, "exp": "ડીએનએની પૂરક શૃંખલા 3' → 5' દિશામાં બને છે અને એડેનીન (A) થાઇમીન (T) સાથે તથા ગ્વાનીન (G) સાયટોસીન (C) સાથે જોડાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની રચનામાં નાઇટ્રોજન બેઇઝની જોડી બનાવતી હાઇડ્રોજન બોન્ડની સંખ્યા કેટલી હોય છે?", "opts": ["એડેનીન અને થાઇમિન વચ્ચે ૨, ગ્વાનીન અને સાઇટોસિન વચ્ચે ૩", "એડેનીન અને થાઇમિન વચ્ચે ૩, ગ્વાનીન અને સાઇટોસિન વચ્ચે ૨", "એડેનીન અને થાઇમિન વચ્ચે ૧, ગ્વાનીન અને સાઇટોસિન વચ્ચે ૨", "એડેનીન અને થાઇમિન વચ્ચે ૨, ગ્વાનીન અને સાઇટોસિન વચ્ચે ૧"], "ans": 0, "exp": "ડીએનએમાં એડેનીન (A) અને થાઇમિન (T) વચ્ચે બે હાઇડ્રોજન બોન્ડ બને છે, જ્યારે ગ્વાનીન (G) અને સાઇટોસિન (C) વચ્ચે ત્રણ હાઇડ્રોજન બોન્ડ બને છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની પ્રતિકૃતિ (replication) દરમિયાન ઓકાઝાકી ટુકડાઓ (Okazaki fragments) કયા સ્ટ્રેન્ડ પર બને છે?", "opts": ["લીડિંગ સ્ટ્રેન્ડ (Leading strand)", "લેગિંગ સ્ટ્રેન્ડ (Lagging strand)", "બંને સ્ટ્રેન્ડ પર સમાન રીતે", "ડીએનએના કોઈપણ સ્ટ્રેન્ડ પર બનતા નથી"], "ans": 1, "exp": "ડીએનએની પ્રતિકૃતિ દરમિયાન લેગિંગ સ્ટ્રેન્ડ પર ડિસકન્ટિન્યુઅસ રીતે ઓકાઝાકી ટુકડાઓ બને છે, જે પછીથી ડીએનએ લાઇગેઝ ઉત્સેચક વડે જોડાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ડીએનએ (DNA) ની રચનામાં ન્યુક્લિઓટાઇડ્સ કયા પ્રકારના બંધ વડે જોડાયેલા હોય છે?", "opts": ["હાઇડ્રોજન બંધ", "ફોસ્ફોડાઇએસ્ટર બંધ", "પેપ્ટાઇડ બંધ", "ગ્લાયકોસિડિક બંધ"], "ans": 1, "exp": "ડીએનએની શૃંખલામાં ન્યુક્લિઓટાઇડ્સ ફોસ્ફેટ જૂથ અને શર્કરાના કાર્બન વચ્ચે ફોસ્ફોડાઇએસ્ટર બંધ વડે જોડાયેલા હોય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક કયા પ્રકારના આરએનએનું સંશ્લેષણ કરે છે?", "opts": ["ફક્ત mRNA", "ફક્ત tRNA", "ફક્ત rRNA", "mRNA, tRNA અને rRNA"], "ans": 3, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક mRNA, tRNA અને rRNA ત્રણેય પ્રકારના આરએનએનું સંશ્લેષણ કરે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "એક ડીએનએ શૃંખલાનો ક્રમ ૫' - ATGCGT - ૩' છે. તેની પૂરક શૃંખલાનો ક્રમ કયો હશે?", "opts": ["૫' - TACGCA - ૩'", "૩' - TACGCA - ૫'", "૫' - UACGCA - ૩'", "૩' - UACGCA - ૫'"], "ans": 1, "exp": "ડીએનએની પૂરક શૃંખલા એડેનિન (A) ને થાઇમિન (T) અને ગ્વાનિન (G) ને સાઇટોસિન (C) સાથે જોડી બનાવે છે, અને તે ૩' → ૫' દિશામાં લખાય છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ડીએનએ (DNA)ની અર્ધરૂઢિગત (semi-conservative) પ્રતિકૃતિ માટે ખોટું છે?", "opts": ["પ્રતિકૃતિ દરમિયાન દરેક નવી ડીએનએ શૃંખલા એક મૂળ શૃંખલા અને એક નવી સંશ્લેષિત શૃંખલા ધરાવે છે.", "પ્રતિકૃતિ પૂર્ણ થયા બાદ દરેક ડીએનએ અણુમાં એક મૂળ શૃંખલા જળવાઈ રહે છે.", "પ્રતિકૃતિ દરમિયાન હેલિકેઝ ઉત્સેચક ડીએનએ શૃંખલાને અલગ કરે છે.", "પ્રતિકૃતિ દરમિયાન બંને મૂળ શૃંખલાઓ નાશ પામે છે અને સંપૂર્ણ નવી શૃંખલાઓ બને છે."], "ans": 3, "exp": "ડીએનએની અર્ધરૂઢિગત પ્રતિકૃતિમાં દરેક નવી ડીએનએ શૃંખલા એક મૂળ શૃંખલા અને એક નવી સંશ્લેષિત શૃંખલા ધરાવે છે, જેમાં મૂળ શૃંખલાઓ નાશ પામતી નથી.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ઉત્સેચક ટ્રાન્સક્રિપ્શન દરમિયાન ડીએનએમાંથી આરએનએ (RNA)ના સંશ્લેષણ માટે જવાબદાર છે?", "opts": ["ડીએનએ પોલિમરેઝ", "આરએનએ પોલિમરેઝ", "લાઇગેઝ", "હેલિકેઝ"], "ans": 1, "exp": "ટ્રાન્સક્રિપ્શન દરમિયાન આરએનએ પોલિમરેઝ ઉત્સેચક ડીએનએ ટેમ્પલેટમાંથી આરએનએનું સંશ્લેષણ કરે છે.", "chapter": "આણ્વિક આધારો આનુવંશિકતા", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "આણ્વિક આધારો આનુવંશિકતા Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
