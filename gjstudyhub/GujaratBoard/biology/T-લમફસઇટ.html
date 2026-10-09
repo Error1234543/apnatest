@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T-લિમ્ફોસાઇટ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>T-લિમ્ફોસાઇટ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">T-લિમ્ફોસાઇટ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં CD8 રિસેપ્ટર હાજર હોય છે અને તેનો મુખ્ય કાર્ય કયો છે?", "opts": ["હેલ્પર T-કોષ, જે B-કોષોને ઉત્તેજિત કરે છે", "સાયટોટોક્સિક T-કોષ, જે વાયરસ-સંક્રમિત કોષોને નષ્ટ કરે છે", "રેગ્યુલેટરી T-કોષ, જે પ્રતિરક્ષા પ્રતિક્રિયાને નિયંત્રિત કરે છે", "મેમરી T-કોષ, જે ભવિષ્યમાં સંક્રમણ સામે રક્ષણ આપે છે"], "ans": 1, "exp": "CD8 રિસેપ્ટર સાયટોટોક્સિક T-કોષ (Cytotoxic T-cells) પર હાજર હોય છે, જે વાયરસ અથવા કૅન્સરગ્રસ્ત કોષોને ઓળખીને નષ્ટ કરે છે. હેલ્પર T-કોષ (A) પર CD4 રિસેપ્ટર હોય છે, રેગ્યુલેટરી T-કોષ (C) પ્રતિરક્ષા પ્રતિક્રિયાને દબાણ કરે છે, અને મેમરી T-કોષ (D) લાંબા ગાળાનું રોગપ્રતિકારક સ્મરણ જાળવે છે પરંતુ CD8 સ્પષ્ટપણે સાયટોટોક્સિક T-કોષ સાથે સંકળાયેલ છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સના પરિપક્વન દરમિયાન થાયમસમાં કયો પ્રક્રિયા ઘટે છે જેથી સ્વ-પ્રતિજન સામે પ્રતિક્રિયા ન થાય?", "opts": ["ક્લોનલ સિલેક્શન", "ક્લોનલ ડિલીશન", "સોમેટિક હાઇપરમ્યુટેશન", "વી-ડી-જે રિકોમ્બિનેશન"], "ans": 1, "exp": "થાયમસમાં T-કોષોનું પરિપક્વન દરમિયાન ક્લોનલ ડિલીશન (Clonal Deletion) થાય છે, જેમાં સ્વ-પ્રતિજનને ઓળખતા T-કોષોને નષ્ટ કરવામાં આવે છે, જેથી સ્વ-પ્રતિરક્ષા રોગો ટાળી શકાય. ક્લોનલ સિલેક્શન (A) સક્રિય T-કોષોનું વર્ધન કરે છે, સોમેટિક હાઇપરમ્યુટેશન (C) B-કોષોમાં થાય છે, અને વી-ડી-જે રિકોમ્બિનેશન (D) T-કોષ રિસેપ્ટરના જનીનીય પુનર્ગઠન સાથે સંકળાયેલ છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સ દ્વારા સ્રાવવામાં આવતા કયા સાયટોકાઇનનું કાર્ય મેક્રોફેજને સક્રિય કરવાનું છે?", "opts": ["ઇન્ટરલ્યુકિન-2 (IL-2)", "ઇન્ટરફેરોન-ગામા (IFN-γ)", "ટ્યુમર નેક્રોસિસ ફેક્ટર-આલ્ફા (TNF-α)", "ટ્રાન્સફોર્મિંગ ગ્રોથ ફેક્ટર-બીટા (TGF-β)"], "ans": 1, "exp": "ઇન્ટરફેરોન-ગામા (IFN-γ) એ T-લિમ્ફોસાઇટ્સ (ખાસ કરીને Th1 કોષો) દ્વારા સ્રાવવામાં આવતું સાયટોકાઇન છે, જે મેક્રોફેજને સક્રિય કરે છે અને તેની ફેગોસાઇટિક ક્ષમતા વધારે છે. IL-2 (A) T-કોષોના પ્રસરણ માટે જવાબદાર છે, TNF-α (C) સોજો અને કોષ વિનાશ સાથે સંકળાયેલ છે, અને TGF-β (D) પ્રતિરક્ષા પ્રતિક્રિયાને દબાણ કરે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "કયા પ્રકારના T-લિમ્ફોસાઇટ્સમાં TCR (T-Cell Receptor) ની રચના α અને β શૃંખલાથી બનેલી હોય છે?", "opts": ["γδ T-કોષ", "αβ T-કોષ", "NKT-કોષ", "મેમરી T-કોષ"], "ans": 1, "exp": "αβ T-કોષો (B) ના TCRમાં α અને β શૃંખલા હોય છે, જે મેજર હિસ્ટોકોમ્પેટિબિલિટી કોમ્પ્લેક્સ (MHC) સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. γδ T-કોષ (A) ના TCRમાં γ અને δ શૃંખલા હોય છે, NKT-કોષ (C) લિપિડ પ્રતિજનને ઓળખે છે, અને મેમરી T-કોષ (D) એ પહેલાં સંપર્કમાં આવેલા પ્રતિજનનું સ્મરણ ધરાવે છે પરંતુ TCRની રચના આધારિત વર્ગીકરણ નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની પ્રતિક્રિયા દરમિયાન કયો અણુ MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખી શકે છે?", "opts": ["CD4", "CD8", "CD28", "CD45"], "ans": 1, "exp": "CD8 (B) એ T-લિમ્ફોસાઇટ્સ પરનો કો-રિસેપ્ટર છે જે MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. CD4 (A) MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે, CD28 (C) કોષીય સક્રિયતામાં ભાગ લે છે, અને CD45 (D) ટાયરોઝિન ફોસ્ફેટેઝ એનઝાઇમ છે જે સિગ્નલ ટ્રાન્સડક્શનમાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં CD4 રિસેપ્ટર હાજર હોય છે અને તે કયા પ્રકારના પ્રતિજનને ઓળખે છે?", "opts": ["સહાયક T-કોષ (Th કોષ), MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજન", "સાયટોટોક્સિક T-કોષ, MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજન", "નિયામક T-કોષ (Treg), સ્વ-પ્રતિજન", "મેમરી T-કોષ, મુક્ત પ્રતિજન"], "ans": 0, "exp": "સહાયક T-કોષ (Th કોષ) પર CD4 રિસેપ્ટર હાજર હોય છે અને તે MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. સાયટોટોક્સિક T-કોષ પર CD8 રિસેપ્ટર હોય છે અને તે MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. નિયામક T-કોષ (Treg) સ્વ-પ્રતિજન સામે પ્રતિક્રિયા અટકાવે છે, પરંતુ CD4 રિસેપ્ટર ધરાવે છે. મેમરી T-કોષ પ્રતિજનને ઓળખી શકે છે, પરંતુ તે CD4 અથવા CD8 રિસેપ્ટર ધરાવે છે, મુક્ત પ્રતિજનને નહીં.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની પ્રતિક્રિયા દરમિયાન કયો અણુ MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે?", "opts": ["CD8 રિસેપ્ટર", "CD4 રિસેપ્ટર", "TCR (αβ)", "BCR (B-Cell Receptor)"], "ans": 1, "exp": "CD4 રિસેપ્ટર MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. CD8 રિસેપ્ટર MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. TCR (αβ) પ્રતિજનને ઓળખે છે, પરંતુ તે MHC ક્લાસ I અથવા II સાથે જોડાયેલ હોઈ શકે છે. BCR (B-Cell Receptor) B-કોષો દ્વારા પ્રતિજનને ઓળખવા માટે વપરાય છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો:\n(1) T-લિમ્ફોસાઇટ્સના પરિપક્વન દરમિયાન થાયમસમાં નકારાત્મક પસંદગી દ્વારા સ્વ-પ્રતિક્રિયાશીલ કોષોનો નાશ થાય છે.\n(2) ગૅમા-ડેલ્ટા (γδ) T-લિમ્ફોસાઇટ્સમાં TCR (T-Cell Receptor) ની રચના α અને β શૃંખલાથી થાય છે.\n(3) નૈસર્ગિક કિલર T-કોષો (Natural Killer T-Cells) MHC ક્લાસ I અણુ વગરના કોષોને પણ ઓળખી શકે છે.\n(4) T-લિમ્ફોસાઇટ્સના પરિપક્વન દરમિયાન CD4 અને CD8 બંને રિસેપ્ટર ધરાવતા કોષોને ડબલ પોઝિટિવ કોષો કહે છે.", "opts": ["વિધાન 1, 3 અને 4 સાચાં છે, વિધાન 2 ખોટું છે", "વિધાન 1 અને 3 સાચાં છે, વિધાન 2 અને 4 ખોટાં છે", "વિધાન 2 અને 4 સાચાં છે, વિધાન 1 અને 3 ખોટાં છે", "વિધાન 1, 2 અને 3 સાચાં છે, વિધાન 4 ખોટું છે"], "ans": 0, "exp": "વિધાન 1 સાચું છે કારણ કે થાયમસમાં નકારાત્મક પસંદગી દ્વારા સ્વ-પ્રતિક્રિયાશીલ T-લિમ્ફોસાઇટ્સનો નાશ થાય છે. વિધાન 2 ખોટું છે કારણ કે ગૅમા-ડેલ્ટા (γδ) T-લિમ્ફોસાઇટ્સમાં TCR ની રચના γ અને δ શૃંખલાથી થાય છે, α અને β શૃંખલાથી નહીં. વિધાન 3 સાચું છે કારણ કે નૈસર્ગિક કિલર T-કોષો MHC ક્લાસ I અણુ વગરના કોષોને પણ ઓળખી શકે છે. વિધાન 4 સાચું છે કારણ કે T-લિમ્ફોસાઇટ્સના પરિપક્વન દરમિયાન CD4 અને CD8 બંને રિસેપ્ટર ધરાવતા કોષોને ડબલ પોઝિટિવ કોષો કહે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક પ્રયોગમાં જાણવા મળ્યું કે કેટલાક T-લિમ્ફોસાઇટ્સમાં TCR (T-Cell Receptor) ની રચના γ અને δ શૃંખલાથી થાય છે. આ પ્રકારના T-લિમ્ફોસાઇટ્સની વિશેષતા શું છે જે તેમને અન્ય T-લિમ્ફોસાઇટ્સથી અલગ પાડે છે?", "opts": ["આ કોષો માત્ર MHC ક્લાસ II અણુ સાથે જોડાયેલ પ્રતિજનને ઓળખે છે", "આ કોષો પરંપરાગત MHC અણુઓ વગરના પ્રતિજનને પણ ઓળખી શકે છે અને શ્લેષ્મ પેશીઓમાં વધુ પ્રમાણમાં જોવા મળે છે", "આ કોષો CD8 રિસેપ્ટર ધરાવે છે અને વાઇરસથી સંક્રમિત કોષોનો નાશ કરે છે", "આ કોષો માત્ર થાયમસમાં જ પરિપક્વ થાય છે અને રુધિરમાં પ્રવેશતા નથી"], "ans": 1, "exp": "γδ T-લિમ્ફોસાઇટ્સ પરંપરાગત MHC અણુઓ વગરના પ્રતિજનને પણ ઓળખી શકે છે અને શ્લેષ્મ પેશીઓમાં વધુ પ્રમાણમાં જોવા મળે છે. વિકલ્પ A ખોટો છે કારણ કે γδ T-કોષો MHC ક્લાસ II અણુ સાથે જોડાયેલ પ્રતિજનને ઓળખતા નથી. વિકલ્પ C ખોટો છે કારણ કે γδ T-કોષો CD8 રિસેપ્ટર ધરાવતા નથી. વિકલ્પ D ખોટો છે કારણ કે γδ T-કોષો થાયમસ ઉપરાંત અન્ય પેશીઓમાં પણ પરિપક્વ થઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીના રુધિરમાં T-લિમ્ફોસાઇટ્સની સંખ્યામાં અસામાન્ય ઘટાડો જોવા મળ્યો છે. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["દર્દીને વાઇરલ સંક્રમણ સામે પ્રતિકાર કરવામાં મુશ્કેલી પડી શકે છે કારણ કે CD8+ T-કોષોની સંખ્યા ઘટી શકે છે", "દર્દીના શરીરમાં એન્ટિબોડીનું ઉત્પાદન અસરગ્રસ્ત થશે નહીં કારણ કે B-લિમ્ફોસાઇટ્સ સ્વતંત્ર રીતે કાર્ય કરે છે", "દર્દીને કોષીય પ્રતિરક્ષા (Cell-Mediated Immunity) નબળી પડી શકે છે કારણ કે T-લિમ્ફોસાઇટ્સ આ પ્રતિરક્ષામાં મુખ્ય ભૂમિકા ભજવે છે", "દર્દીના શરીરમાં મેક્રોફેજની સક્રિયતા ઘટી શકે છે કારણ કે T-લિમ્ફોસાઇટ્સ દ્વારા સ્રાવિત સાયટોકાઇન મેક્રોફેજને સક્રિય કરે છે"], "ans": 1, "exp": "વિકલ્પ B ખોટો છે કારણ કે B-લિમ્ફોસાઇટ્સનું એન્ટિબોડી ઉત્પાદન T-લિમ્ફોસાઇટ્સ (ખાસ કરીને CD4+ T-કોષો) દ્વારા સહાયક સંકેતો પર આધારિત છે. તેથી T-લિમ્ફોસાઇટ્સની સંખ્યામાં ઘટાડો એન્ટિબોડી ઉત્પાદનને અસર કરશે. વિકલ્પ A, C અને D સાચાં છે કારણ કે T-લિમ્ફોસાઇટ્સ વાઇરલ સંક્રમણ સામે પ્રતિકાર, કોષીય પ્રતિરક્ષા અને મેક્રોફેજની સક્રિયતામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં CD3 કોમ્પ્લેક્સ હાજર હોય છે અને તેનો મુખ્ય કાર્ય શું છે?", "opts": ["સહાયક T-કોષો (Th)માં, તે TCR સિગ્નલિંગને સક્રિય કરે છે", "સાયટોટોક્સિક T-કોષો (Tc)માં, તે પ્રતિજનને ઓળખીને કોષને નાશ કરે છે", "રેગ્યુલેટરી T-કોષો (Treg)માં, તે ઇમ્યુન ટોલેરન્સ જાળવે છે", "મેમરી T-કોષોમાં, તે દ્વિતીયક ઇમ્યુન પ્રતિક્રિયાને વેગ આપે છે"], "ans": 0, "exp": "CD3 કોમ્પ્લેક્સ T-લિમ્ફોસાઇટ્સની તમામ ઉપપ્રકારોમાં હાજર હોય છે અને તેનો મુખ્ય કાર્ય TCR (T-Cell Receptor) દ્વારા સિગ્નલિંગને સક્રિય કરવાનો છે. સહાયક T-કોષો (Th)માં CD3, TCR સાથે જોડાઈને સિગ્નલ ટ્રાન્સડક્શનમાં મદદ કરે છે. બાકીના વિકલ્પો અસત્ય છે કારણ કે CD3 કોમ્પ્લેક્સ ફક્ત TCR સિગ્નલિંગ સાથે સંબંધિત છે, પ્રતિજન ઓળખ અથવા કોષને નાશ કરવાનો સીધો કાર્ય નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં γδ TCR (T-Cell Receptor) જોવા મળે છે અને તેની મુખ્ય ભૂમિકા કઈ છે?", "opts": ["સાયટોટોક્સિક T-લિમ્ફોસાઇટ્સ, જે વાયરસ સંક્રમિત કોષોને નષ્ટ કરે છે", "હેલ્પર T-લિમ્ફોસાઇટ્સ, જે B-કોષોને સક્રિય કરે છે", "γδ T-લિમ્ફોસાઇટ્સ, જે મુખ્યત્વે મ્યુકોઝલ સપાટી પરના પ્રતિજનને ઓળખીને પ્રતિક્રિયા આપે છે", "રેગ્યુલેટરી T-લિમ્ફોસાઇટ્સ, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવે છે"], "ans": 2, "exp": "γδ T-લિમ્ફોસાઇટ્સમાં γ અને δ શૃંખલાથી બનેલ TCR હોય છે, જે મુખ્યત્વે મ્યુકોઝલ સપાટી (જેવા કે આંતરડા, શ્વસનમાર્ગ) પરના પ્રતિજનને ઓળખીને પ્રતિક્રિયા આપે છે. A વિકલ્પ ખોટો છે કારણ કે સાયટોટોક્સિક T-લિમ્ફોસાઇટ્સમાં αβ TCR હોય છે. B વિકલ્પ ખોટો છે કારણ કે હેલ્પર T-લિમ્ફોસાઇટ્સમાં CD4 રિસેપ્ટર હોય છે અને તે B-કોષોને સક્રિય કરે છે, પરંતુ તેના TCR αβ પ્રકારના હોય છે. D વિકલ્પ ખોટો છે કારણ કે રેગ્યુલેટરી T-લિમ્ફોસાઇટ્સ પણ αβ TCR ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એક દર્દીમાં T-લિમ્ફોસાઇટ્સની ક્રિયાશીલતામાં ઘટાડો જોવા મળ્યો છે. નીચેના પૈકી કયું કારણ આ પરિસ્થિતિ માટે જવાબદાર નથી?", "opts": ["થાયમસના અપૂર્ણ વિકાસને લીધે T-લિમ્ફોસાઇટ્સનું પરિપક્વન યોગ્ય રીતે થતું નથી", "HIV સંક્રમણને લીધે CD4+ T-લિમ્ફોસાઇટ્સની સંખ્યામાં ઘટાડો થયો છે", "બોન મેરોમાં હીમોપોઇટિક સ્ટેમ કોષોની ઉત્પત્તિમાં ઘટાડો થયો છે", "મેડ્યુલરી થાયમિક એપિથેલિયલ કોષોના નાશને લીધે પોઝિટિવ સિલેક્શન યોગ્ય રીતે થતું નથી"], "ans": 2, "exp": "T-લિમ્ફોસાઇટ્સનું પરિપક્વન થાયમસમાં થાય છે, બોન મેરોમાં નહીં. બોન મેરો હીમોપોઇટિક સ્ટેમ કોષોની ઉત્પત્તિ માટે જવાબદાર છે, પરંતુ T-લિમ્ફોસાઇટ્સનું પરિપક્વન થાયમસમાં થાય છે. A વિકલ્પ સાચો છે કારણ કે થાયમસના અપૂર્ણ વિકાસને લીધે T-લિમ્ફોસાઇટ્સનું પરિપક્વન અટકે છે. B વિકલ્પ સાચો છે કારણ કે HIV મુખ્યત્વે CD4+ T-લિમ્ફોસાઇટ્સને નષ્ટ કરે છે. D વિકલ્પ સાચો છે કારણ કે મેડ્યુલરી થાયમિક એપિથેલિયલ કોષો પોઝિટિવ સિલેક્શનમાં મહત્વની ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો: (1) γδ T-લિમ્ફોસાઇટ્સને MHC મોલેક્યુલ્સની જરૂર પડતી નથી પ્રતિજન ઓળખવા માટે. (2) CD8+ T-લિમ્ફોસાઇટ્સ મુખ્યત્વે MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખે છે. (3) હેલ્પર T-લિમ્ફોસાઇટ્સ મુખ્યત્વે MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે.", "opts": ["ફક્ત (1) અને (2) સાચા છે", "ફક્ત (2) અને (3) સાચા છે", "ફક્ત (1) અને (3) સાચા છે", "(1), (2) અને (3) બધા સાચા છે"], "ans": 3, "exp": "બધા જ વિધાનો સાચા છે. (1) γδ T-લિમ્ફોસાઇટ્સને MHC મોલેક્યુલ્સની જરૂર પડતી નથી કારણ કે તેઓ પ્રતિજનને સીધા જ ઓળખી શકે છે. (2) CD8+ T-લિમ્ફોસાઇટ્સ મુખ્યત્વે MHC ક્લાસ I સાથે જોડાયેલ પ્રતિજનને ઓળખે છે, જે વાયરસ સંક્રમિત કોષો અથવા કૅન્સર કોષો પર જોવા મળે છે. (3) હેલ્પર T-લિમ્ફોસાઇટ્સ (CD4+) મુખ્યત્વે MHC ક્લાસ II સાથે જોડાયેલ પ્રતિજનને ઓળખે છે, જે એન્ટિજન-પ્રસ્તુત કરનારા કોષો (જેવા કે મેક્રોફેજ, B-કોષો) પર જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં 'ડબલ નેગેટિવ' (CD4- CD8-) ફિનોટાઇપ જોવા મળે છે અને તેની મુખ્ય ભૂમિકા કઈ છે?", "opts": ["સાયટોટોક્સિક T-લિમ્ફોસાઇટ્સ, જે કૅન્સર કોષોને નષ્ટ કરે છે", "હેલ્પર T-લિમ્ફોસાઇટ્સ, જે સાયટોકાઇન સ્રાવીને પ્રતિરક્ષા પ્રતિક્રિયાને ઉત્તેજિત કરે છે", "γδ T-લિમ્ફોસાઇટ્સ, જે મ્યુકોઝલ ઇમ્યુનિટીમાં ભાગ લે છે", "રેગ્યુલેટરી T-લિમ્ફોસાઇટ્સ, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવીને સ્વ-સહિષ્ણુતા જાળવે છે"], "ans": 3, "exp": "ડબલ નેગેટિવ (CD4- CD8-) T-લિમ્ફોસાઇટ્સ મુખ્યત્વે રેગ્યુલેટરી T-લિમ્ફોસાઇટ્સ (Treg) હોય છે, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવીને સ્વ-સહિષ્ણુતા જાળવે છે અને ઓટોઇમ્યુન રોગોને અટકાવે છે. A વિકલ્પ ખોટો છે કારણ કે સાયટોટોક્સિક T-લિમ્ફોસાઇટ્સ CD8+ હોય છે. B વિકલ્પ ખોટો છે કારણ કે હેલ્પર T-લિમ્ફોસાઇટ્સ CD4+ હોય છે. C વિકલ્પ ખોટો છે કારણ કે γδ T-લિમ્ફોસાઇટ્સના ફિનોટાઇપમાં CD4 અને CD8ની હાજરી અથવા ગેરહાજરી વિશે કોઈ નિયમ નથી, પરંતુ તેઓ મુખ્યત્વે મ્યુકોઝલ ઇમ્યુનિટીમાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં 'નેચરલ કિલર T-કોષ' (NKT-કોષ) તરીકે ઓળખાય છે અને તે કયા પ્રકારના પ્રતિજનને ઓળખે છે?", "opts": ["αβ T-કોષ, જે લિપિડ પ્રતિજનને CD1 અણુ સાથે ઓળખે છે", "γδ T-કોષ, જે પ્રોટીન પ્રતિજનને MHC ક્લાસ I સાથે ઓળખે છે", "CD4+ T-કોષ, જે કાર્બોદિત પ્રતિજનને MHC ક્લાસ II સાથે ઓળખે છે", "CD8+ T-કોષ, જે વાયરલ પ્રતિજનને MHC ક્લાસ I સાથે ઓળખે છે"], "ans": 0, "exp": "NKT-કોષ (નેચરલ કિલર T-કોષ) αβ T-કોષની એક વિશેષ ઉપપ્રકાર છે, જે લિપિડ પ્રતિજનને CD1 અણુ સાથે ઓળખે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) γδ T-કોષ લિપિડ પ્રતિજનને ઓળખતો નથી, C) CD4+ T-કોષ પ્રોટીન પ્રતિજનને MHC ક્લાસ II સાથે ઓળખે છે, D) CD8+ T-કોષ વાયરલ પ્રતિજનને MHC ક્લાસ I સાથે ઓળખે છે પરંતુ NKT-કોષ નથી.", "ref": "Std 12 - પ્રકરણ 8: મનુષ્યની પ્રતિરક્ષા વ્યવસ્થા", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં 'રેગ્યુલેટરી T-કોષ' (Treg) તરીકે ઓળખાય છે અને તેનો મુખ્ય કાર્ય કયો છે?", "opts": ["CD4+ CD25+ T-કોષ, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવે છે", "CD8+ CD28- T-કોષ, જે સાયટોટોક્સિક પ્રતિક્રિયા વડે કોષને નષ્ટ કરે છે", "γδ T-કોષ, જે સાયટોકાઇન સ્રાવે છે", "CD4+ TH1 કોષ, જે મેક્રોફેજને સક્રિય કરે છે"], "ans": 0, "exp": "રેગ્યુલેટરી T-કોષ (Treg) CD4+ CD25+ T-કોષ છે, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) CD8+ CD28- T-કોષ સાયટોટોક્સિક પ્રતિક્રિયા કરે છે, C) γδ T-કોષ સાયટોકાઇન સ્રાવે છે પરંતુ Treg નથી, D) CD4+ TH1 કોષ મેક્રોફેજને સક્રિય કરે છે પરંતુ Treg નથી.", "ref": "Std 12 - પ્રકરણ 8: મનુષ્યની પ્રતિરક્ષા વ્યવસ્થા", "ch": ""}, {"q": "T-લિમ્ફોસાઇટ્સની કયી ઉપપ્રકારમાં 'મેમરી T-કોષ' તરીકે ઓળખાય છે અને તેનો મુખ્ય ગુણધર્મ કયો છે?", "opts": ["CD4+ T-કોષ, જે પ્રથમ પ્રતિક્રિયા દરમિયાન બને છે અને લાંબા સમય સુધી ટકી રહે છે", "CD8+ T-કોષ, જે દ્વિતીય પ્રતિક્રિયા દરમિયાન તરત જ પ્રતિક્રિયા આપે છે", "γδ T-કોષ, જે પ્રતિજનની પ્રથમ ઓળખ દરમિયાન બને છે", "CD4+ CD25+ T-કોષ, જે પ્રતિરક્ષા પ્રતિક્રિયાને દબાવે છે"], "ans": 1, "exp": "મેમરી T-કોષ CD8+ T-કોષ છે, જે દ્વિતીય પ્રતિક્રિયા દરમિયાન તરત જ પ્રતિક્રિયા આપે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે: A) CD4+ T-કોષ મેમરી T-કોષ નથી, C) γδ T-કોષ મેમરી T-કોષ નથી, D) CD4+ CD25+ T-કોષ રેગ્યુલેટરી T-કોષ છે.", "ref": "Std 12 - પ્રકરણ 8: મનુષ્યની પ્રતિરક્ષા વ્યવસ્થા", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન T-લિમ્ફોસાઇટ્સની 'સહાયક T-કોષ (Helper T-cell)' ઉપપ્રકાર વિશે સાચું નથી?", "opts": ["તે CD4 રિસેપ્ટર ધરાવે છે અને MHC ક્લાસ II પ્રતિજનને ઓળખે છે.", "તે સાયટોકાઇન્સ જેવા કે IL-2, IFN-γ અને IL-4 સ્રાવે છે.", "તે સીધી રીતે પેથોજેનને નષ્ટ કરે છે જેમ કે સાયટોટોક્સિક T-કોષ કરે છે.", "તે B-કોષોને સક્રિય કરવામાં મદદ કરે છે."], "ans": 2, "exp": "સહાયક T-કોષ (Helper T-cell) CD4 રિસેપ્ટર ધરાવે છે અને MHC ક્લાસ II પ્રતિજનને ઓળખે છે (A સાચું). તે સાયટોકાઇન્સ જેવા કે IL-2, IFN-γ અને IL-4 સ્રાવે છે (B સાચું). તે B-કોષોને સક્રિય કરવામાં મદદ કરે છે (D સાચું). પરંતુ તે સીધી રીતે પેથોજેનને નષ્ટ કરતું નથી, તે કામ સાયટોટોક્સિક T-કોષ (CD8+) કરે છે (C ખોટું).", "ref": "Std 12 - પ્રકરણ 8: માનવ પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એક દર્દીમાં T-લિમ્ફોસાઇટ્સની ક્રિયાશીલતામાં અસાધારણ ઘટાડો જોવા મળ્યો છે. આ દર્દીમાં નીચેના પૈકી કયા હોર્મોનના સ્તરમાં વધારો થવાની શક્યતા સૌથી વધુ છે, જ્યારે તેની પ્રતિરક્ષાતંત્રની ક્રિયાશીલતા પર અસર થાય છે?", "opts": ["ઇન્સ્યુલિન", "કોર્ટિસોલ", "થાયરોક્સિન", "એડ્રિનેલિન"], "ans": 1, "exp": "સાચો વિકલ્પ B) કોર્ટિસોલ છે. કોર્ટિસોલ એક ગ્લુકોકોર્ટિકોઇડ હોર્મોન છે જે અતિશય તણાવ અથવા ક્રોનિક ઇન્ફ્લેમેશન દરમિયાન સ્રાવવામાં આવે છે અને તે T-લિમ્ફોસાઇટ્સની ક્રિયાશીલતાને દબાવી શકે છે, જેના કારણે પ્રતિરક્ષાતંત્રની ક્રિયાશીલતામાં ઘટાડો થાય છે. ઇન્સ્યુલિન (A) ગ્લુકોઝના ચયાપચયને નિયંત્રિત કરે છે અને પ્રતિરક્ષાતંત્ર સાથે સીધી અસર કરતું નથી. થાયરોક્સિન (C) ચયાપચયને નિયંત્રિત કરે છે પરંતુ T-લિમ્ફોસાઇટ્સની ક્રિયાશીલતા પર સીધી અસર કરતું નથી. એડ્રિનેલિન (D) તાત્કાલિક તણાવ પ્રતિક્રિયામાં ભાગ લે છે પરંતુ T-લિમ્ફોસાઇટ્સની ક્રિયાશીલતા પર લાંબા ગાળાની અસર કરતું નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
