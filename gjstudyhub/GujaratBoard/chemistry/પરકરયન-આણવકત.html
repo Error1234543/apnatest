@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પ્રક્રિયાની આણ્વિકતા</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પ્રક્રિયાની આણ્વિકતા</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પ્રક્રિયાની આણ્વિકતા</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે કોષમાં ગ્લૂકોઝનું ઓક્સિડેશન થાય છે ત્યારે ATPનું ઉત્પાદન કયા અંગિકમાં સૌથી વધુ થાય છે ?", "opts": ["ગ્લાયકોલાઇસિસ દરમિયાન સાયટોપ્લાઝમમાં", "ક્રેબ્સ ચક્ર દરમિયાન માઇટોકોન્ડ્રિયામાં", "ઇલેક્ટ્રોન પરિવહન સાંકળ દરમિયાન માઇટોકોન્ડ્રિયાની આંતરિક પટલ પર", "કોષરસમાં લેક્ટિક એસિડ બનતી વખતે"], "ans": 2, "exp": "ATPનું સૌથી વધુ ઉત્પાદન ઇલેક્ટ્રોન પરિવહન સાંકળ (ETC) દરમિયાન માઇટોકોન્ડ્રિયાની આંતરિક પટલ પર થાય છે, જ્યાં પ્રોટોન ગ્રેડિયન્ટ દ્વારા ATP સિનથેઝ એન્જાઇમ કામ કરે છે. ગ્લાયકોલાઇસિસ (A) અને ક્રેબ્સ ચક્ર (B)માં ATPનું ઉત્પાદન ઓછું હોય છે, જ્યારે લેક્ટિક એસિડ બનવું (D) એ એરોબિક શ્વસનનો ભાગ નથી અને ATP ઉત્પન્ન કરતું નથી.", "ref": "Std 11 - અધ્યાય 14: શ્વસન અને ઉર્જા વહન", "ch": ""}, {"q": "કોષીય શ્વસનની પ્રક્રિયામાં, કયા પગલામાં CO2 મુક્ત થાય છે ?", "opts": ["ગ્લાયકોલાઇસિસ દરમિયાન", "પાયરૂવેટનું એસિટાઇલ-CoAમાં રૂપાંતરણ દરમિયાન", "ક્રેબ્સ ચક્રના પ્રથમ પગલામાં", "ઇલેક્ટ્રોન પરિવહન સાંકળ દરમિયાન"], "ans": 1, "exp": "CO2નું મુક્ત થવું પાયરૂવેટના એસિટાઇલ-CoAમાં રૂપાંતરણ દરમિયાન (B) થાય છે, જ્યારે પાયરૂવેટ ડિકાર્બોક્સિલેશન પામે છે. ગ્લાયકોલાઇસિસ (A)માં CO2 મુક્ત થતું નથી, ક્રેબ્સ ચક્ર (C)માં પણ CO2 મુક્ત થાય છે પરંતુ પ્રશ્ન પ્રથમ પગલા વિશે છે, અને ETC (D)માં CO2 મુક્ત થતું નથી.", "ref": "Std 11 - અધ્યાય 14: શ્વસન અને ઉર્જા વહન", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની કલવિન ચક્ર પ્રક્રિયામાં, કયા અણુનું કાર્બન ડાયોક્સાઇડ સાથે સૌપ્રથમ સંકલન થાય છે ?", "opts": ["રિબ્યુલોઝ-1,5-બાઇસફોસ્ફેટ (RuBP)", "3-ફોસ્ફોગ્લિસેરિક એસિડ (3-PGA)", "ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ (G3P)", "રિબ્યુલોઝ-5-ફોસ્ફેટ"], "ans": 0, "exp": "કલવિન ચક્રમાં, CO2 સૌપ્રથમ રિબ્યુલોઝ-1,5-બાઇસફોસ્ફેટ (RuBP) સાથે સંકલન પામે છે અને 3-ફોસ્ફોગ્લિસેરિક એસિડ (3-PGA) બનાવે છે. RuBP (A) એ CO2નો પ્રથમ સ્વીકારક છે. 3-PGA (B) અને G3P (C) પછીના પગલાંમાં બનતા અણુઓ છે, જ્યારે રિબ્યુલોઝ-5-ફોસ્ફેટ (D) ચક્રના પુનઃનિર્માણમાં ભાગ લે છે.", "ref": "Std 11 - અધ્યાય 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "કોષીય શ્વસન દરમિયાન, કયા અણુનું સીધું ઓક્સિડેશન થતું નથી પરંતુ તેના વહન દ્વારા ATP ઉત્પન્ન થાય છે ?", "opts": ["ગ્લૂકોઝ", "NAD+", "FAD", "પાયરૂવેટ"], "ans": 1, "exp": "NAD+ (B) સીધું ઓક્સિડેશન પામતું નથી, પરંતુ તે ઇલેક્ટ્રોન વહનકર્તા તરીકે કામ કરે છે અને ઇલેક્ટ્રોન પરિવહન સાંકળ દ્વારા ATP ઉત્પન્ન કરવામાં મદદ કરે છે. ગ્લૂકોઝ (A), FAD (C), અને પાયરૂવેટ (D) સીધું ઓક્સિડેશન પામે છે.", "ref": "Std 11 - અધ્યાય 14: શ્વસન અને ઉર્જા વહન", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની પ્રકાશ-અવલંબી પ્રક્રિયામાં, કયા અણુનું ઉત્પાદન થતું નથી ?", "opts": ["ATP", "NADPH", "O2", "ગ્લૂકોઝ"], "ans": 3, "exp": "પ્રકાશ-અવલંબી પ્રક્રિયામાં ATP (A), NADPH (B), અને O2 (C) ઉત્પન્ન થાય છે, પરંતુ ગ્લૂકોઝ (D) કલવિન ચક્ર (પ્રકાશ-સ્વતંત્ર પ્રક્રિયા) દરમિયાન બને છે.", "ref": "Std 11 - અધ્યાય 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની પ્રક્રિયામાં, જ્યારે ક્લોરોફિલ અણુ પ્રકાશ શોષે છે, ત્યારે કયા ઇલેક્ટ્રોન વાહક તંત્રમાં ઇલેક્ટ્રોનનું સ્થળાંતર થાય છે, જેના કારણે ATP અને NADPHનું નિર્માણ થાય છે?", "opts": ["સાયટોક્રોમ b6f સંકીર્ણ", "ફોટોસિસ્ટમ I અને II વચ્ચેનું પ્લાસ્ટોક્વિનોન", "ફેરેડોક્સિન-NADP+ રિડક્ટેઝ", "ATP સિંથેઝ"], "ans": 1, "exp": "પ્રકાશસંશ્લેષણની પ્રક્રિયામાં, ક્લોરોફિલ દ્વારા શોષાયેલા પ્રકાશના કારણે ઇલેક્ટ્રોન ઉત્તેજિત થાય છે અને ફોટોસિસ્ટમ II થી ફોટોસિસ્ટમ I સુધી પ્લાસ્ટોક્વિનોન (PQ) દ્વારા વહન પામે છે. આ પ્રક્રિયામાં, PQ ઇલેક્ટ્રોન વાહક તંત્રનો ભાગ છે અને તેના કારણે પ્રોટોન ગ્રેડિયન્ટ ઉત્પન્ન થાય છે, જે ATP સિંથેઝ દ્વારા ATP નિર્માણમાં મદદ કરે છે. સાયટોક્રોમ b6f સંકીર્ણ પણ ઇલેક્ટ્રોન વહનમાં ભાગ લે છે, પરંતુ PQ એ પ્રાથમિક વાહક છે. ફેરેડોક્સિન-NADP+ રિડક્ટેઝ અને ATP સિંથેઝ એ નિર્માણ પ્રક્રિયાના પગલા છે, પરંતુ ઇલેક્ટ્રોન વહન માટેના વાહક તંત્રમાં નહીં.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "કોષીય શ્વસનની પ્રક્રિયામાં, જ્યારે પાયરૂવેટનું એસિટાઇલ-CoAમાં રૂપાંતર થાય છે, ત્યારે કયા વિટામિન-વ્યુત્પન્ન સહઉત્સેચકની જરૂર પડે છે?", "opts": ["થાયમિન પાયરોફોસ્ફેટ (TPP)", "ફ્લેવિન એડિનિન ડાયન્યુક્લિયોટાઇડ (FAD)", "નિકોટિનએમાઇડ એડિનિન ડાયન્યુક્લિયોટાઇડ (NAD+)", "લિપોઇક એસિડ"], "ans": 3, "exp": "પાયરૂવેટનું એસિટાઇલ-CoAમાં રૂપાંતર પાયરૂવેટ ડિહાઇડ્રોજનેઝ સંકીર્ણ દ્વારા થાય છે, જેમાં લિપોઇક એસિડ એ મુખ્ય સહઉત્સેચક તરીકે કામ કરે છે. TPP, FAD, અને NAD+ પણ કોષીય શ્વસનમાં મહત્વની ભૂમિકા ભજવે છે, પરંતુ પાયરૂવેટના ઓક્સિડેશન માટે લિપોઇક એસિડ જરૂરી છે.", "ref": "Std 11 - પ્રકરણ 14: શ્વસન", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની કલવિન ચક્ર પ્રક્રિયામાં, કયા ઉત્સેચક દ્વારા 3-ફોસ્ફોગ્લિસરેટનું ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટમાં રૂપાંતર થાય છે?", "opts": ["રૂબિસ્કો (RuBisCO)", "ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ ડિહાઇડ્રોજનેઝ (G3PDH)", "ફોસ્ફોગ્લિસરેટ કિનેઝ", "ટ્રાયોઝ ફોસ્ફેટ આઇસોમરેઝ"], "ans": 2, "exp": "કલવિન ચક્રમાં, 3-ફોસ્ફોગ્લિસરેટનું ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટમાં રૂપાંતર ફોસ્ફોગ્લિસરેટ કિનેઝ દ્વારા થાય છે, જેમાં ATPનો ઉપયોગ થાય છે. રૂબિસ્કો CO2 ફિક્સેશન માટે જવાબદાર છે, જ્યારે G3PDH અને ટ્રાયોઝ ફોસ્ફેટ આઇસોમરેઝ અન્ય પગલાઓમાં ભાગ લે છે.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "કોષીય શ્વસન દરમિયાન, ઇલેક્ટ્રોન વહન શૃંખલામાં, કયા સંકીર્ણમાં સાયનાઇડ બંધન થવાના કારણે ઇલેક્ટ્રોન વહન અટકી જાય છે?", "opts": ["સંકીર્ણ I (NADH ડિહાઇડ્રોજનેઝ)", "સંકીર્ણ II (સક્સિનેટ ડિહાઇડ્રોજનેઝ)", "સંકીર્ણ III (સાયટોક્રોમ bc1)", "સંકીર્ણ IV (સાયટોક્રોમ c ઓક્સિડેઝ)"], "ans": 3, "exp": "સાયનાઇડ સાયટોક્રોમ c ઓક્સિડેઝ (સંકીર્ણ IV) સાથે બંધન કરે છે, જેના કારણે ઇલેક્ટ્રોન વહન શૃંખલામાં અંતિમ પગલું અટકી જાય છે. આથી ઓક્સિજનને ઇલેક્ટ્રોન મળવા બંધ થાય છે અને ATP નિર્માણ અટકી જાય છે. અન્ય સંકીર્ણો (I, II, III) સાયનાઇડથી અસરગ્રસ્ત થતાં નથી.", "ref": "Std 11 - પ્રકરણ 14: શ્વસન", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની પ્રક્રિયામાં, જ્યારે પ્રકાશ-અવલંબી પ્રક્રિયા (લાઇટ રિએક્શન) દરમિયાન પાણીનું વિઘટન થાય છે, ત્યારે મુક્ત થતા ઓક્સિજનનો સ્રોત કયો છે?", "opts": ["CO2", "H2O", "ક્લોરોફિલ", "ગ્લૂકોઝ"], "ans": 1, "exp": "પ્રકાશ-અવલંબી પ્રક્રિયામાં, પાણીનું વિઘટન (ફોટોલાઇસિસ) થાય છે, જેમાં H2O અણુમાંથી ઓક્સિજન મુક્ત થાય છે. આ ઓક્સિજન પ્રકાશસંશ્લેષણની ઉપજ તરીકે બહાર પડે છે. CO2, ક્લોરોફિલ, અને ગ્લૂકોઝ ઓક્સિજનના સ્રોત નથી.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "નીચેના પૈકી કઈ પ્રક્રિયા એક આણ્વિક પ્રક્રિયા (unimolecular reaction) છે, પરંતુ તેની આણ્વિકતા એક નથી?", "opts": ["રેડિયોએક્ટિવ ક્ષય (Radioactive decay)", "એસિટોનનું પ્રકાશીય વિઘટન (Photolysis of acetone)", "નાઇટ્રોજન ડાયોક્સાઇડનું વિઘટન (Decomposition of NO₂)", "હાઇડ્રોજન પેરોક્સાઇડનું ઉત્સેચકીય વિઘટન (Enzymatic decomposition of H₂O₂)"], "ans": 1, "exp": "એસિટોનનું પ્રકાશીય વિઘટન એક આણ્વિક પ્રક્રિયા છે કારણ કે તેમાં માત્ર એક જ પ્રક્રિયક અણુ ભાગ લે છે, પરંતુ તેની આણ્વિકતા એક નથી કારણ કે પ્રક્રિયા દર પ્રકાશની તીવ્રતા પર આધારિત હોય છે, જે બાહ્ય પરિબળ છે. રેડિયોએક્ટિવ ક્ષય એક આણ્વિક પ્રક્રિયા છે અને તેની આણ્વિકતા પણ એક છે. NO₂નું વિઘટન દ્વિ-આણ્વિક પ્રક્રિયા છે. H₂O₂નું ઉત્સેચકીય વિઘટન પણ દ્વિ-આણ્વિક પ્રક્રિયા છે કારણ કે તેમાં ઉત્સેચક પણ ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રક્રિયા માટે પ્રાયોગિક રીતે નક્કી કરેલ વેગ નિયમ v = k[A]²[B] છે. જો પ્રક્રિયા એક જ તબક્કામાં થતી હોય, તો તેની આણ્વિકતા કેટલી હશે?", "opts": ["1", "2", "3", "આણ્વિકતા નક્કી કરી શકાય નહીં"], "ans": 2, "exp": "જો પ્રક્રિયા એક જ તબક્કામાં થતી હોય અને વેગ નિયમ v = k[A]²[B] હોય, તો તેનો અર્થ એ છે કે પ્રક્રિયામાં બે A અણુ અને એક B અણુ ભાગ લે છે. આથી, પ્રક્રિયાની આણ્વિકતા 3 છે. જો પ્રક્રિયા બહુતબક્કીય હોય, તો આણ્વિકતા નક્કી કરી શકાય નહીં, પરંતુ પ્રશ્નમાં એક જ તબક્કાની વાત છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "નીચેના પૈકી કઈ પ્રક્રિયામાં આણ્વિકતા અને વેગ નિયમનો ક્રમ સમાન નથી?", "opts": ["2NO + O₂ → 2NO₂", "CH₃CHO → CH₄ + CO (ઉષ્મીય વિઘટન)", "2HI → H₂ + I₂ (ઉષ્મીય વિઘટન)", "2N₂O₅ → 4NO₂ + O₂"], "ans": 0, "exp": "2NO + O₂ → 2NO₂ પ્રક્રિયામાં આણ્વિકતા 3 છે (બે NO અને એક O₂), પરંતુ તેનો વેગ નિયમ v = k[NO]²[O₂] છે, જે આણ્વિકતા સાથે સુસંગત છે. જો કે, કેટલીક પરિસ્થિતિઓમાં આ પ્રક્રિયા બહુતબક્કીય હોઈ શકે છે, જેના કારણે વેગ નિયમનો ક્રમ આણ્વિકતા કરતાં અલગ હોઈ શકે છે. બાકીની પ્રક્રિયાઓમાં આણ્વિકતા અને વેગ નિયમનો ક્રમ સમાન છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રક્રિયા માટે વેગ નિયમ v = k[A][B]² છે. જો પ્રક્રિયક Aની સાંદ્રતા બમણી કરવામાં આવે અને Bની સાંદ્રતા અડધી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલો બદલાશે?", "opts": ["અડધો થશે", "બમણો થશે", "ચાર ગણો થશે", "બદલાશે નહીં"], "ans": 0, "exp": "વેગ નિયમ v = k[A][B]² મુજબ, જો Aની સાંદ્રતા બમણી કરવામાં આવે, તો વેગ બમણો થશે. પરંતુ Bની સાંદ્રતા અડધી કરવામાં આવે, તો વેગ (1/2)² = 1/4 ગણો થશે. આથી, કુલ વેગ બમણો × 1/4 = 1/2 ગણો થશે, એટલે કે અડધો થશે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "નીચેના પૈકી કઈ પ્રક્રિયા માટે આણ્વિકતા અને વેગ નિયમનો ક્રમ હંમેશા સમાન હોય છે, પછી ભલે તે એક તબક્કામાં થતી હોય કે બહુતબક્કીય હોય?", "opts": ["એક આણ્વિક પ્રક્રિયા (Unimolecular reaction)", "દ્વિ-આણ્વિક પ્રક્રિયા (Bimolecular reaction)", "ત્રિ-આણ્વિક પ્રક્રિયા (Termolecular reaction)", "ઉપરોક્તમાંથી કોઈ નહીં"], "ans": 0, "exp": "એક આણ્વિક પ્રક્રિયામાં માત્ર એક જ પ્રક્રિયક અણુ ભાગ લે છે, તેથી તેનો વેગ નિયમ હંમેશા v = k[A] હોય છે, જે આણ્વિકતા સાથે સુસંગત છે. દ્વિ-આણ્વિક અને ત્રિ-આણ્વિક પ્રક્રિયાઓમાં, જો પ્રક્રિયા બહુતબક્કીય હોય, તો વેગ નિયમનો ક્રમ આણ્વિકતા કરતાં અલગ હોઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રક્રિયા માટે પ્રાયોગિક રીતે વેગ નિયમ v = k[A]²[B] મળે છે. આ પ્રક્રિયાની આણ્વિકતા કેટલી હશે?", "opts": ["2", "3", "1", "આણ્વિકતા નક્કી કરી શકાય નહીં"], "ans": 3, "exp": "પ્રક્રિયાની આણ્વિકતા એ પ્રક્રિયાના પ્રાથમિક તબક્કામાં ભાગ લેતા અણુઓની સંખ્યા છે, જે પ્રાયોગિક વેગ નિયમ પરથી સીધી નક્કી કરી શકાતી નથી. વેગ નિયમ માત્ર પ્રાયોગિક અવલોકન છે, જ્યારે આણ્વિકતા પ્રક્રિયાના પ્રાથમિક તબક્કાના મિકેનિઝમ પર આધારિત છે. તેથી આણ્વિકતા નક્કી કરી શકાય નહીં. વિકલ્પ A અને B વેગ નિયમના ક્રમને આધારે છે, જે આણ્વિકતા નથી. વિકલ્પ C ખોટો છે કારણ કે આણ્વિકતા 1 હોવાની સંભાવના નથી.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "નીચેની પ્રક્રિયાઓ પૈકી કઈ પ્રક્રિયા એક આણ્વિક (unimolecular) છે, પરંતુ તેનો વેગ નિયમ દ્વિ-આણ્વિક (bimolecular) દેખાય છે?", "opts": ["NH₄NO₂ → N₂ + 2H₂O", "2NO + O₂ → 2NO₂", "CH₃COOC₂H₅ + H₂O → CH₃COOH + C₂H₅OH (આમ્લ ઉદ્દીપક હાજરીમાં)", "2HI → H₂ + I₂"], "ans": 2, "exp": "પ્રક્રિયા C એ એસ્ટરનું જળવિભાજન છે, જે સામાન્ય રીતે એક આણ્વિક પ્રક્રિયા છે, પરંતુ આમ્લ ઉદ્દીપક હાજરીમાં તેનો વેગ નિયમ દ્વિ-આણ્વિક દેખાય છે કારણ કે પાણી પણ વેગ નિયમમાં સામેલ થાય છે. વિકલ્પ A એક આણ્વિક છે અને તેનો વેગ નિયમ પણ એક આણ્વિક છે. વિકલ્પ B દ્વિ-આણ્વિક છે અને તેનો વેગ નિયમ પણ દ્વિ-આણ્વિક છે. વિકલ્પ D દ્વિ-આણ્વિક છે અને તેનો વેગ નિયમ પણ દ્વિ-આણ્વિક છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રક્રિયા માટે પ્રાયોગિક વેગ નિયમ v = k[A][B] મળે છે. જો પ્રક્રિયક Aની સાંદ્રતા બમણી કરવામાં આવે અને પ્રક્રિયક Bની સાંદ્રતા અડધી કરવામાં આવે, તો પ્રક્રિયાનો વેગ શું થશે?", "opts": ["બમણો થશે", "અડધો થશે", "અપરિવર્તિત રહેશે", "ચાર ગણો થશે"], "ans": 2, "exp": "વેગ નિયમ v = k[A][B] મુજબ, જો [A] બમણી થાય તો વેગ બમણો થાય, પરંતુ [B] અડધી થાય તો વેગ અડધો થાય. આ બંને ફેરફારોનો સંયુક્ત પ્રભાવ વેગને અપરિવર્તિત રાખશે. વિકલ્પ A અને B માત્ર એક જ પરિવર્તનને ધ્યાનમાં લે છે. વિકલ્પ D ખોટો છે કારણ કે વેગ ચાર ગણો થતો નથી.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "નીચેની પ્રક્રિયાઓ પૈકી કઈ પ્રક્રિયામાં આણ્વિકતા અને વેગ નિયમનો ક્રમ સમાન નથી, કારણ કે પ્રક્રિયા બહુતબક્કીય (multistep) છે?", "opts": ["2NO₂ → 2NO + O₂", "NO + O₃ → NO₂ + O₂", "2HI → H₂ + I₂ (ઉષ્મીય વિઘટન)", "CH₃CHO → CH₄ + CO (ઉષ્મીય વિઘટન)"], "ans": 3, "exp": "પ્રક્રિયા D એ એસિટાલ્ડિહાઇડનું ઉષ્મીય વિઘટન છે, જે બહુતબક્કીય પ્રક્રિયા છે અને તેનો વેગ નિયમ આણ્વિકતા કરતાં અલગ છે. વિકલ્પ A અને B એકતબક્કીય પ્રક્રિયાઓ છે જ્યાં આણ્વિકતા અને વેગ નિયમનો ક્રમ સમાન છે. વિકલ્પ C પણ એકતબક્કીય પ્રક્રિયા છે જ્યાં આણ્વિકતા અને વેગ નિયમનો ક્રમ સમાન છે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}, {"q": "એક પ્રક્રિયા માટે પ્રાયોગિક વેગ નિયમ v = k[A]²[B]⁰ મળે છે. આ પ્રક્રિયાની આણ્વિકતા કેટલી હોવાની સંભાવના સૌથી વધુ છે?", "opts": ["1", "2", "3", "આણ્વિકતા વેગ નિયમ પરથી નક્કી કરી શકાતી નથી"], "ans": 1, "exp": "વેગ નિયમ v = k[A]²[B]⁰ સૂચવે છે કે પ્રક્રિયા માત્ર A પર આધારિત છે અને B પર નહીં. આ પ્રક્રિયા એક આણ્વિક (unimolecular) હોઈ શકે છે, જો તેનો પ્રાથમિક તબક્કો માત્ર એક અણુ Aનો સમાવેશ કરતો હોય. વિકલ્પ B અને C ખોટા છે કારણ કે વેગ નિયમમાં Bનો ક્રમ શૂન્ય છે. વિકલ્પ D ખોટો છે કારણ કે આણ્વિકતા અંદાજિત કરી શકાય છે, ભલે ચોક્કસ નક્કી ન થઈ શકે.", "ref": "Std 12 - પ્રકરણ 4: રાસાયણિક ગતિશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
