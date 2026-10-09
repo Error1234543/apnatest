@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ચુંબકીય ગુણધર્મો</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ચુંબકીય ગુણધર્મો</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ચુંબકીય ગુણધર્મો</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક પદાર્થને ચુંબકીય ક્ષેત્રમાં મૂકતાં તેનું ચુંબકીય ક્ષેત્રની દિશામાં પ્રબળતાથી આકર્ષણ થાય છે, પરંતુ તેને ગરમ કરતાં તેનું આકર્ષણ ઘટે છે. આ પદાર્થ કયા પ્રકારનો ચુંબકીય ગુણધર્મ ધરાવે છે?", "opts": ["પ્રતિલોહચુંબકીય (Antiferromagnetic)", "લોહચુંબકીય (Ferromagnetic)", "અનુચુંબકીય (Paramagnetic)", "પ્રતિચુંબકીય (Diamagnetic)"], "ans": 1, "exp": "આ પદાર્થ લોહચુંબકીય (Ferromagnetic) છે કારણ કે તે ચુંબકીય ક્ષેત્રમાં પ્રબળતાથી આકર્ષાય છે. ગરમ કરતાં તેનું આકર્ષણ ઘટે છે કારણ કે ક્યૂરી તાપમાનથી ઉપર તે અનુચુંબકીય બની જાય છે. પ્રતિલોહચુંબકીય પદાર્થો ચુંબકીય ક્ષેત્રમાં નબળું આકર્ષણ દર્શાવે છે અને તેમનું ચુંબકત્વ તાપમાન સાથે વધતું નથી. અનુચુંબકીય પદાર્થો નબળું આકર્ષણ દર્શાવે છે અને તેમનું ચુંબકત્વ તાપમાન વધતાં ઘટે છે. પ્રતિચુંબકીય પદાર્થો ચુંબકીય ક્ષેત્રથી અપાકર્ષાય છે.", "ref": "Std 12 - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "ch": ""}, {"q": "નીચેનામાંથી કયો પદાર્થ પ્રતિલોહચુંબકીય ગુણધર્મ ધરાવતો નથી?", "opts": ["MnO", "Fe₃O₄", "Cr₂O₃", "FeO"], "ans": 1, "exp": "Fe₃O₄ (મેગ્નેટાઇટ) લોહચુંબકીય ગુણધર્મ ધરાવે છે, પ્રતિલોહચુંબકીય નહીં. MnO, Cr₂O₃ અને FeO પ્રતિલોહચુંબકીય પદાર્થો છે કારણ કે તેમના આયનોના ચુંબકીય ચાકમાત્રા એકબીજાની વિરુદ્ધ દિશામાં ગોઠવાય છે, જેના કારણે ચોખ્ખું ચુંબકત્વ શૂન્ય થાય છે. Fe₃O₄માં આયનોની ગોઠવણી એવી રીતે હોય છે કે તે લોહચુંબકીય બને છે.", "ref": "Std 12 - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન લોહચુંબકીય પદાર્થો માટે ખોટું છે?", "opts": ["તેમનું ચુંબકત્વ ક્યૂરી તાપમાનથી ઉપર અદૃશ્ય થઈ જાય છે", "તેમના ડોમેઇન એક જ દિશામાં ગોઠવાયેલા હોય છે", "તેમનું ચુંબકત્વ તાપમાન વધતાં વધે છે", "તેઓ કાયમી ચુંબક બનાવવા માટે ઉપયોગી છે"], "ans": 2, "exp": "લોહચુંબકીય પદાર્થોનું ચુંબકત્વ તાપમાન વધતાં ઘટે છે, વધતું નથી. ક્યૂરી તાપમાનથી ઉપર તેમનું ચુંબકત્વ અદૃશ્ય થઈ જાય છે અને તેઓ અનુચુંબકીય બની જાય છે. તેમના ડોમેઇન એક જ દિશામાં ગોઠવાયેલા હોય છે અને તેઓ કાયમી ચુંબક બનાવવા માટે ઉપયોગી છે.", "ref": "Std 12 - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "ch": ""}, {"q": "એક પદાર્થને ચુંબકીય ક્ષેત્રમાં મૂકતાં તેનું નબળું આકર્ષણ થાય છે, પરંતુ તેને ગરમ કરતાં તેનું આકર્ષણ વધે છે. આ પદાર્થ કયા પ્રકારનો હોઈ શકે?", "opts": ["પ્રતિલોહચુંબકીય (Antiferromagnetic)", "અનુચુંબકીય (Paramagnetic)", "પ્રતિચુંબકીય (Diamagnetic)", "ફેરીચુંબકીય (Ferrimagnetic)"], "ans": 3, "exp": "આ પદાર્થ ફેરીચુંબકીય (Ferrimagnetic) છે કારણ કે તે ચુંબકીય ક્ષેત્રમાં નબળું આકર્ષણ દર્શાવે છે અને તેનું ચુંબકત્વ તાપમાન વધતાં વધે છે. પ્રતિલોહચુંબકીય પદાર્થોનું ચુંબકત્વ તાપમાન સાથે વધતું નથી. અનુચુંબકીય પદાર્થોનું ચુંબકત્વ તાપમાન વધતાં ઘટે છે. પ્રતિચુંબકીય પદાર્થો અપાકર્ષણ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "ch": ""}, {"q": "જ્યારે એક લોહચુંબકીય પદાર્થને ચુંબકીય ક્ષેત્રમાં મૂકવામાં આવે છે, ત્યારે તેના અણુઓની ચુંબકીય ડોમેનની ગોઠવણી કેવી રીતે બદલાય છે અને તેના પરિણામે શું થાય છે?", "opts": ["ડોમેન ચુંબકીય ક્ષેત્રની દિશામાં ગોઠવાય છે અને પદાર્થ પ્રબળ ચુંબકીય ગુણધર્મ ધરાવે છે", "ડોમેન ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં ગોઠવાય છે અને પદાર્થ પ્રતિલોહચુંબકીય ગુણધર્મ ધરાવે છે", "ડોમેન અસરગ્રસ્ત થતાં નથી અને પદાર્થનો ચુંબકીય ગુણધર્મ અચળ રહે છે", "ડોમેન યાદચ્છિક રીતે ગોઠવાય છે અને પદાર્થનો ચુંબકીય ગુણધર્મ નબળો પડે છે"], "ans": 0, "exp": "લોહચુંબકીય પદાર્થોમાં, ચુંબકીય ક્ષેત્રની હાજરીમાં અણુઓની ચુંબકીય ડોમેન ચુંબકીય ક્ષેત્રની દિશામાં ગોઠવાય છે, જેથી પદાર્થ પ્રબળ ચુંબકીય ગુણધર્મ ધરાવે છે. વિકલ્પ A સરખો છે કારણ કે તે આ વર્તણૂકને સરખી રીતે વર્ણવે છે. વિકલ્પ B ખોટો છે કારણ કે લોહચુંબકીય પદાર્થો પ્રતિલોહચુંબકીય ગુણધર્મ ધરાવતા નથી. વિકલ્પ C ખોટો છે કારણ કે ડોમેન ચુંબકીય ક્ષેત્રથી અસરગ્રસ્ત થાય છે. વિકલ્પ D ખોટો છે કારણ કે ડોમેન યાદચ્છિક રીતે ગોઠવાતા નથી, પરંતુ ચુંબકીય ક્ષેત્રની દિશામાં ગોઠવાય છે.", "ref": "Std 12 - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણા", "ch": ""}, {"q": "એક ચુંબકીય પદાર્થને ગરમ કરતાં તેનો ચુંબકીય ગુણધર્મ ઘટે છે. આ ઘટાડાનું મુખ્ય કારણ કયું છે?", "opts": ["અણુઓની ગતિ વધવાને કારણે ચુંબકીય ડોમેનનો ક્રમબદ્ધ ગોઠવણી નાશ પામે છે", "ઉષ્મા ઉર્જા ચુંબકીય ડોમેનને મજબૂત બનાવે છે", "પદાર્થના ઇલેક્ટ્રોનની સ્પિન ગતિ સ્થિર થાય છે", "પદાર્થનું અણુ વજન ઘટે છે"], "ans": 0, "exp": "ગરમ કરવાને કારણે અણુઓની ગતિ વધે છે, જેથી ચુંબકીય ડોમેનનો ક્રમબદ્ધ ગોઠવણી નાશ પામે છે અને ચુંબકીય ગુણધર્મ ઘટે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે ઉષ્મા ઉર્જા ચુંબકીય ડોમેનને મજબૂત બનાવતી નથી, ઇલેક્ટ્રોનની સ્પિન ગતિ સ્થિર થતી નથી, અને અણુ વજન ઘટતું નથી.", "ref": "Std 12 - Chapter 15: ચુંબકીય ગુણધર્મો અને પદાર્થો", "ch": ""}, {"q": "ફેરોમેગ્નેટિક પદાર્થોની ચુંબકીય પારગમ્યતા (μ) કયા તાપમાને અચાનક ઘટી જાય છે?", "opts": ["ક્યૂરી તાપમાન", "ડેબાય તાપમાન", "બોઝ-આઈનસ્ટાઈન તાપમાન", "નીયોન તાપમાન"], "ans": 0, "exp": "ફેરોમેગ્નેટિક પદાર્થોની ચુંબકીય પારગમ્યતા ક્યૂરી તાપમાને અચાનક ઘટી જાય છે. ડેબાય તાપમાન, બોઝ-આઈનસ્ટાઈન તાપમાન, અને નીયોન તાપમાન આ ઘટનાથી સંબંધિત નથી.", "ref": "Std 12 - Chapter 15: ચુંબકીય ગુણધર્મો અને પદાર્થો", "ch": ""}, {"q": "પરમાણુ ક્રમાંક 26 ધરાવતા પદાર્થનું ચુંબકીય ગુણધર્મ કયું હશે?", "opts": ["ફેરોમેગ્નેટિક", "પેરામેગ્નેટિક", "ડાયામેગ્નેટિક", "એન્ટીફેરોમેગ્નેટિક"], "ans": 0, "exp": "પરમાણુ ક્રમાંક 26 ધરાવતો પદાર્થ લોખંડ (Fe) છે, જે ફેરોમેગ્નેટિક ગુણધર્મ ધરાવે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે લોખંડ પેરામેગ્નેટિક, ડાયામેગ્નેટિક, અથવા એન્ટીફેરોમેગ્નેટિક નથી.", "ref": "Std 12 - Chapter 15: ચુંબકીય ગુણધર્મો અને પદાર્થો", "ch": ""}, {"q": "ચુંબકીય ક્ષેત્રમાં મૂકેલા પદાર્થમાં પ્રેરિત થતું ચુંબકીય ક્ષેત્ર મૂળ ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં હોય તો તે પદાર્થ કયા પ્રકારનો છે?", "opts": ["ડાયામેગ્નેટિક", "પેરામેગ્નેટિક", "ફેરોમેગ્નેટિક", "એન્ટીફેરોમેગ્નેટિક"], "ans": 0, "exp": "ડાયામેગ્નેટિક પદાર્થોમાં પ્રેરિત ચુંબકીય ક્ષેત્ર મૂળ ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં હોય છે. પેરામેગ્નેટિક અને ફેરોમેગ્નેટિક પદાર્થોમાં પ્રેરિત ક્ષેત્ર મૂળ ક્ષેત્રની દિશામાં જ હોય છે, જ્યારે એન્ટીફેરોમેગ્નેટિક પદાર્થો માટે આ વિધાન લાગુ પડતું નથી.", "ref": "Std 12 - Chapter 15: ચુંબકીય ગુણધર્મો અને પદાર્થો", "ch": ""}, {"q": "એક પદાર્થનું ચુંબકીય સંવેદનશીલતા (χ) નકારાત્મક અને ખૂબ જ નાનું હોય તો તે પદાર્થ કયા પ્રકારનો છે?", "opts": ["ડાયામેગ્નેટિક", "પેરામેગ્નેટિક", "ફેરોમેગ્નેટિક", "પ્રતિલોહચુંબકીય"], "ans": 0, "exp": "ડાયામેગ્નેટિક પદાર્થોનું ચુંબકીય સંવેદનશીલતા (χ) નકારાત્મક અને ખૂબ જ નાનું હોય છે. પેરામેગ્નેટિક અને ફેરોમેગ્નેટિક પદાર્થોનું χ ધન હોય છે, જ્યારે પ્રતિલોહચુંબકીય પદાર્થો માટે આ વિધાન લાગુ પડતું નથી.", "ref": "Std 12 - Chapter 15: ચુંબકીય ગુણધર્મો અને પદાર્થો", "ch": ""}, {"q": "જ્યારે એક પદાર્થને ચુંબકીય ક્ષેત્રમાં મૂકવામાં આવે છે ત્યારે તેના અણુઓની ચુંબકીય ડોમેનની ગોઠવણી બદલાય છે. નીચેનામાંથી કયો પદાર્થ આ પ્રક્રિયામાં સૌથી વધુ પ્રતિક્રિયા આપશે?", "opts": ["એલ્યુમિનિયમ", "કોપર", "નિકેલ", "બિસ્મથ"], "ans": 2, "exp": "નિકેલ એક ફેરોમેગ્નેટિક પદાર્થ છે, જે ચુંબકીય ક્ષેત્રમાં મૂકતાં તેના અણુઓની ચુંબકીય ડોમેન એક જ દિશામાં ગોઠવાય છે, જેથી તે સૌથી વધુ પ્રતિક્રિયા આપે છે. એલ્યુમિનિયમ અને કોપર પ્રતિલોહચુંબકીય છે, જ્યારે બિસ્મથ અતિચુંબકીય છે, જે ચુંબકીય ક્ષેત્રમાં નબળી પ્રતિક્રિયા આપે છે.", "ref": "Std 12 - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણા", "ch": ""}, {"q": "ચુંબકીય પારગમ્યતા (μ) અને ચુંબકીય સંવેદનશીલતા (χ) વચ્ચેનો સંબંધ કયો છે?", "opts": ["μ = 1 + χ", "μ = χ / (1 + χ)", "μ = 1 - χ", "μ = χ"], "ans": 0, "exp": "ચુંબકીય પારગમ્યતા (μ) અને ચુંબકીય સંવેદનશીલતા (χ) વચ્ચેનો સંબંધ μ = 1 + χ છે. બાકીના વિકલ્પો અશુદ્ધ છે અને ભૌતિકશાસ્ત્રના મૂળભૂત સૂત્રો સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણા", "ch": ""}, {"q": "નીચેનામાંથી કયો પદાર્થ ઉચ્ચ તાપમાને ફેરોમેગ્નેટિક ગુણધર્મ ગુમાવી શકે છે?", "opts": ["લોખંડ", "એલ્યુમિનિયમ", "સોનું", "ચાંદી"], "ans": 0, "exp": "લોખંડ એક ફેરોમેગ્નેટિક પદાર્થ છે, જે ઉચ્ચ તાપમાને (ક્યુરી તાપમાન) તેનો ચુંબકીય ગુણધર્મ ગુમાવી શકે છે. એલ્યુમિનિયમ, સોનું અને ચાંદી પ્રતિલોહચુંબકીય અથવા અતિચુંબકીય પદાર્થો છે, જે ફેરોમેગ્નેટિક ગુણધર્મ ધરાવતા નથી.", "ref": "Std 12 - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણા", "ch": ""}, {"q": "નીચેનામાંથી કયો પદાર્થ અતિચુંબકીય ગુણધર્મ ધરાવે છે?", "opts": ["લોખંડ", "કોબાલ્ટ", "બિસ્મથ", "નિકેલ"], "ans": 2, "exp": "બિસ્મથ એક અતિચુંબકીય પદાર્થ છે, જે ચુંબકીય ક્ષેત્રમાં નબળી પ્રતિક્રિયા આપે છે. લોખંડ, કોબાલ્ટ અને નિકેલ ફેરોમેગ્નેટિક પદાર્થો છે, જે ચુંબકીય ક્ષેત્રમાં પ્રબળ પ્રતિક્રિયા આપે છે.", "ref": "Std 12 - અધ્યાય 6: વિદ્યુતચુંબકીય પ્રેરણા", "ch": ""}, {"q": "એક પદાર્થની ચુંબકીય સંવેદનશીલતા (χ) નું મૂલ્ય -1.8×10⁻⁵ છે. આ પદાર્થને નબળા બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકતાં તેનું વર્તન કેવું હશે અને તેના માટે નીચેનામાંથી કયું વિધાન યોગ્ય નથી?", "opts": ["આ પદાર્થ પ્રતિલોહચુંબકીય ગુણધર્મ ધરાવે છે અને તે બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં નબળું ચુંબકન પ્રાપ્ત કરશે.", "આ પદાર્થનું ચુંબકીય ક્ષેત્રમાં મૂકતાં તેનું ચુંબકન મૂળ ક્ષેત્રની વિરુદ્ધ દિશામાં થશે, પરંતુ તેનું મૂલ્ય ખૂબ જ ઓછું હશે.", "આ પદાર્થને ગરમ કરતાં તેની પ્રતિલોહચુંબકીયતા વધશે કારણ કે અણુઓની ગોઠવણી વધુ અસ્તવ્યસ્ત બનશે.", "આ પદાર્થની ચુંબકીય પારગમ્યતા (μ) નું મૂલ્ય μ₀ કરતાં થોડુંક ઓછું હશે, જ્યાં μ₀ શૂન્યાવકાશની પારગમ્યતા છે."], "ans": 2, "exp": "પ્રતિલોહચુંબકીય પદાર્થોની ચુંબકીય સંવેદનશીલતા (χ) નકારાત્મક અને ખૂબ જ નાની હોય છે, જે આ પ્રશ્નમાં આપેલ મૂલ્ય સાથે સુસંગત છે. વિકલ્પ A અને B સાચાં છે કારણ કે પ્રતિલોહચુંબકીય પદાર્થો બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં નબળું ચુંબકન પ્રાપ્ત કરે છે. વિકલ્પ D પણ સાચો છે કારણ કે μ = μ₀(1+χ) સૂત્ર મુજબ, χ નકારાત્મક હોવાથી μ < μ₀ થશે. વિકલ્પ C ખોટો છે કારણ કે પ્રતિલોહચુંબકીય પદાર્થોને ગરમ કરતાં તેમની પ્રતિલોહચુંબકીયતા ઘટે છે, કારણ કે ઉષ્મીય ગતિને લીધે અણુઓની ગોઠવણી વધુ અસ્તવ્યસ્ત બને છે, જે પ્રતિલોહચુંબકીય ગુણધર્મને નબળો પાડે છે.", "ref": "Std 12 - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "ch": ""}, {"q": "એક પદાર્થનું ચુંબકીય સંવેદનશીલતા (χ) ધન હોય અને તેનું મૂલ્ય તાપમાનના વર્ગના વ્યસ્ત પ્રમાણમાં હોય, તો તે પદાર્થ કયા પ્રકારનો હશે?", "opts": ["લોહચુંબકીય", "અનુલોહચુંબકીય", "પ્રતિલોહચુંબકીય", "ફેરીમેગ્નેટિક"], "ans": 1, "exp": "અનુલોહચુંબકીય પદાર્થોનું ચુંબકીય સંવેદનશીલતા (χ) ધન હોય છે અને તે તાપમાનના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે (χ ∝ 1/T²). લોહચુંબકીય પદાર્થોનું χ ખૂબ જ મોટું અને ધન હોય છે, પરંતુ તે તાપમાન પર આધારિત નથી. પ્રતિલોહચુંબકીય પદાર્થોનું χ નકારાત્મક હોય છે. ફેરીમેગ્નેટિક પદાર્થોનું χ ધન હોય છે, પરંતુ તે તાપમાનના વર્ગના વ્યસ્ત પ્રમાણમાં નથી.", "ref": "Std 12 - ભૌતિક વિજ્ઞાન: અધ્યાય 5 - ચુંબકત્વ અને પદાર્થ", "ch": ""}, {"q": "જ્યારે એક લોહચુંબકીય પદાર્થને તેના ક્યૂરી તાપમાનથી ઉપર ગરમ કરવામાં આવે છે, ત્યારે તેના અણુઓની ચુંબકીય ક્ષણો કેવી રીતે ગોઠવાય છે?", "opts": ["ચુંબકીય ક્ષેત્રની દિશામાં સંરેખિત થાય છે", "ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં સંરેખિત થાય છે", "યાદચ્છિક રીતે ગોઠવાય છે", "સંપૂર્ણપણે નાશ પામે છે"], "ans": 2, "exp": "ક્યૂરી તાપમાનથી ઉપર ગરમ કરવામાં આવતાં લોહચુંબકીય પદાર્થના અણુઓની ચુંબકીય ક્ષણો યાદચ્છિક રીતે ગોઠવાય છે, કારણ કે થર્મલ ઉર્જા ચુંબકીય ક્રિયાઓ કરતાં પ્રબળ બને છે. આથી પદાર્થ તેના લોહચુંબકીય ગુણધર્મ ગુમાવે છે. વિકલ્પ A અને B ક્યૂરી તાપમાનથી નીચેના વર્તનને દર્શાવે છે, જ્યારે વિકલ્પ D અશક્ય છે કારણ કે ચુંબકીય ક્ષણો નાશ પામતી નથી, પરંતુ યાદચ્છિક ગોઠવણી ધારણ કરે છે.", "ref": "Std 12 - ભૌતિક વિજ્ઞાન: અધ્યાય 5 - ચુંબકત્વ અને પદાર્થ", "ch": ""}, {"q": "નીચેનામાંથી કયો પદાર્થ ફેરીમેગ્નેટિક ગુણધર્મ ધરાવે છે?", "opts": ["લોખંડ", "નિકેલ", "મેગ્નેટાઇટ (Fe₃O₄)", "બિસ્મથ"], "ans": 2, "exp": "મેગ્નેટાઇટ (Fe₃O₄) એક ફેરીમેગ્નેટિક પદાર્થ છે, જેમાં અણુઓની ચુંબકીય ક્ષણો વિરુદ્ધ દિશામાં સંરેખિત થાય છે, પરંતુ તેનું પરિણામી ચુંબકીય ક્ષણ શૂન્ય નથી. લોખંડ અને નિકેલ લોહચુંબકીય પદાર્થો છે, જ્યારે બિસ્મથ પ્રતિલોહચુંબકીય પદાર્થ છે.", "ref": "Std 12 - ભૌતિક વિજ્ઞાન: અધ્યાય 5 - ચુંબકત્વ અને પદાર્થ", "ch": ""}, {"q": "એક પદાર્થનું ચુંબકીય પારગમ્યતા (μ) અને ચુંબકીય સંવેદનશીલતા (χ) વચ્ચેનો સંબંધ μ = μ₀(1 + χ) છે. જો એક પદાર્થ માટે μ = 1.00002 અને μ₀ = 4π × 10⁻⁷ H/m હોય, તો તે પદાર્થ કયા પ્રકારનો હશે?", "opts": ["લોહચુંબકીય", "અનુલોહચુંબકીય", "પ્રતિલોહચુંબકીય", "અતિચુંબકીય"], "ans": 1, "exp": "μ = μ₀(1 + χ) મુજબ, χ = (μ/μ₀) - 1 = (1.00002 / 4π × 10⁻⁷) - 1 ≈ 7957.7 (ખૂબ જ નાનું ધન મૂલ્ય). અનુલોહચુંબકીય પદાર્થોનું χ ધન અને ખૂબ જ નાનું હોય છે. લોહચુંબકીય પદાર્થોનું χ ખૂબ જ મોટું હોય છે, પ્રતિલોહચુંબકીય પદાર્થોનું χ નકારાત્મક હોય છે, અને અતિચુંબકીય પદાર્થોનું χ ખૂબ જ મોટું અને ધન હોય છે.", "ref": "Std 12 - ભૌતિક વિજ્ઞાન: અધ્યાય 5 - ચુંબકત્વ અને પદાર્થ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ફેરોમેગ્નેટિક પદાર્થો માટે ખરું નથી?", "opts": ["તેઓ કાયમી ચુંબક બનાવી શકે છે", "તેઓના અણુઓમાં અસંતુલિત ઇલેક્ટ્રોન હોય છે", "તેઓનું ચુંબકીય સંવેદનશીલતા (χ) નકારાત્મક હોય છે", "તેઓનું ચુંબકીય પારગમ્યતા (μ) ખૂબ જ ઉચ્ચ હોય છે"], "ans": 2, "exp": "ફેરોમેગ્નેટિક પદાર્થોનું ચુંબકીય સંવેદનશીલતા (χ) ધન અને ખૂબ જ મોટું હોય છે, નકારાત્મક નહીં. વિકલ્પ A, B, અને D ફેરોમેગ્નેટિક પદાર્થો માટે ખરા છે: તેઓ કાયમી ચુંબક બનાવી શકે છે, તેઓના અણુઓમાં અસંતુલિત ઇલેક્ટ્રોન હોય છે, અને તેઓનું μ ખૂબ જ ઉચ્ચ હોય છે.", "ref": "Std 12 - ભૌતિક વિજ્ઞાન: અધ્યાય 5 - ચુંબકત્વ અને પદાર્થ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
