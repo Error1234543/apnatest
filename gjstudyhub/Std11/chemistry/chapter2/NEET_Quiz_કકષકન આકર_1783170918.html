@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - કક્ષકોના આકાર</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 કક્ષકોના આકાર</span>
+                <span>🎯 Hard</span>
+                <span>📝 25 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષમાં ઇલેક્ટ્રોનની ઉર્જા સ્તરમાં ફેરફાર થાય છે, ત્યારે કયા કક્ષકના આકારમાં સૌથી વધુ પરિવર્તન જોવા મળે છે ?", "options": ["A) s-kakshak (ગોળાકાર)", "B) p-kakshak (ડમ્બલ આકાર)", "C) d-kakshak (ક્લોવર પાંદડા આકાર)", "D) f-kakshak (જટિલ બહુ-પાંખી આકાર)"], "correct": 3, "explanation": "f-kakshakનો આકાર સૌથી જટિલ હોય છે અને ઇલેક્ટ્રોનની ઉર્જા સ્તરમાં ફેરફાર થતાં તેનો આકાર નોંધપાત્ર રીતે બદલાય છે. s-kakshak હંમેશા ગોળાકાર રહે છે, p-kakshak ડમ્બલ આકાર ધરાવે છે, અને d-kakshak ક્લોવર પાંદડા જેવો હોય છે, પરંતુ f-kakshakમાં સૌથી વધુ જટિલતા અને પરિવર્તનશીલતા જોવા મળે છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 1}, {"question": "કયા કક્ષકમાં ઇલેક્ટ્રોનનું પ્રોબેબિલિટી વિતરણ સમમિત નથી અને તેનો આકાર અસમમિત દેખાય છે ?", "options": ["A) 1s", "B) 2p", "C) 3d", "D) 4f"], "correct": 2, "explanation": "3d કક્ષકમાં ઇલેક્ટ્રોનનું પ્રોબેબિલિટી વિતરણ અસમમિત હોય છે, જ્યારે 1s ગોળાકાર અને સમમિત હોય છે, 2p ડમ્બલ આકાર ધરાવે છે પરંતુ સમમિત હોય છે, અને 4f જટિલ હોય છે પરંતુ તેનું વિતરણ સમમિત જ રહે છે. 3d કક્ષકમાં અસમમિતતા જોવા મળે છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 2}, {"question": "જો કોઈ પરમાણુમાં n=4 અને l=2 હોય, તો તે કયા કક્ષક સાથે સંબંધિત છે અને તેનો આકાર કયો હશે ?", "options": ["A) 4s, ગોળાકાર", "B) 4p, ડમ્બલ આકાર", "C) 4d, ક્લોવર પાંદડા આકાર", "D) 4f, જટિલ બહુ-પાંખી આકાર"], "correct": 2, "explanation": "n=4 અને l=2 માટે, કક્ષક 4d હોય છે, અને તેનો આકાર ક્લોવર પાંદડા જેવો હોય છે. 4s ગોળાકાર હોય છે, 4p ડમ્બલ આકાર ધરાવે છે, અને 4f જટિલ બહુ-પાંખી આકાર ધરાવે છે, પરંતુ l=2 માટે d-kakshak હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 3}, {"question": "કયા કક્ષકમાં ઇલેક્ટ્રોનનું પ્રોબેબિલિટી વિતરણ બે લોબ્સમાં વિભાજિત થાય છે અને તે વચ્ચે એક નોડલ પ્લેન હોય છે ?", "options": ["A) s-kakshak", "B) p-kakshak", "C) d-kakshak", "D) f-kakshak"], "correct": 1, "explanation": "p-kakshakમાં ઇલેક્ટ્રોનનું પ્રોબેબિલિટી વિતરણ બે લોબ્સમાં વિભાજિત થાય છે અને તે વચ્ચે એક નોડલ પ્લેન હોય છે. s-kakshak ગોળાકાર હોય છે, d-kakshak ક્લોવર પાંદડા આકાર ધરાવે છે, અને f-kakshak જટિલ બહુ-પાંખી આકાર ધરાવે છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 4}, {"question": "કયા કક્ષકનો આકાર 'ડબલ ડમ્બલ' તરીકે ઓળખાય છે અને તે કયા ઉર્જા સ્તરથી શરૂ થાય છે ?", "options": ["A) d-kakshak, n=3", "B) f-kakshak, n=4", "C) p-kakshak, n=2", "D) s-kakshak, n=1"], "correct": 0, "explanation": "d-kakshakનો આકાર 'ડબલ ડમ્બલ' તરીકે ઓળખાય છે અને તે n=3 ઉર્જા સ્તરથી શરૂ થાય છે. f-kakshak n=4થી શરૂ થાય છે પરંતુ તેનો આકાર જટિલ બહુ-પાંખી હોય છે, p-kakshak n=2થી શરૂ થાય છે અને ડમ્બલ આકાર ધરાવે છે, અને s-kakshak n=1થી શરૂ થાય છે અને ગોળાકાર હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 5}, {"question": "એક પરમાણુમાં 4f કક્ષકમાં રહેલા ઇલેક્ટ્રોન માટે ક્વોન્ટમ આંકો n=4, l=3 અને m_l=-2 છે. આ કક્ષકનો આકાર કયો હશે અને તેના માટે કેટલા નોડલ પ્લેન હશે?", "options": ["A) આકાર ગોળાકાર, 3 નોડલ પ્લેન", "B) આકાર ડમ્બલ આકાર, 2 નોડલ પ્લેન", "C) આકાર જટિલ લોબ્સ સાથેનો, 3 નોડલ પ્લેન", "D) આકાર ચાર પાંખિયો, 4 નોડલ પ્લેન"], "correct": 2, "explanation": "4f કક્ષક માટે l=3 હોવાથી તેનો આકાર જટિલ લોબ્સ સાથેનો હોય છે (NCERT Class XI - અધ્યાય 2: પરમાણુનું બંધારણ). f-કક્ષક માટે l=3 હોવાથી નોડલ પ્લેનની સંખ્યા પણ 3 હોય છે. ગોળાકાર આકાર s-કક્ષક માટે (l=0), ડમ્બલ આકાર p-કક્ષક માટે (l=1) અને ચાર પાંખિયો આકાર d-કક્ષક માટે (l=2) હોય છે, તેથી અન્ય વિકલ્પો ખોટા છે.", "ncert_ref": "Class XI - અધ્યાય 2: પરમાણુનું બંધારણ", "difficulty": "Hard", "num": 6}, {"question": "એક પરમાણુમાં 5d કક્ષક માટે ઇલેક્ટ્રોનની સંભાવના વિતરણની ચર્ચા કરવામાં આવે છે. આ કક્ષક માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) 5d કક્ષકમાં કુલ 5 નોડલ સપાટીઓ હોય છે", "B) 5d કક્ષકનો આકાર ચાર પાંખિયો હોય છે", "C) 5d કક્ષક માટે કોણીય વેગમાન ક્વોન્ટમ આંક (l) 2 છે", "D) 5d કક્ષકમાં રેડિયલ નોડની સંખ્યા 2 હોય છે"], "correct": 0, "explanation": "5d કક્ષક માટે n=5 અને l=2 હોવાથી કુલ નોડલ સપાટીઓની સંખ્યા n-l-1 = 5-2-1 = 2 (રેડિયલ નોડ) + l = 2 (કોણીય નોડ) = 4 હોય છે, નહીં કે 5 (NCERT Class XI - અધ્યાય 2). ચાર પાંખિયો આકાર d-કક્ષક માટે સાચો છે, l=2 પણ સાચું છે, અને રેડિયલ નોડની સંખ્યા પણ 2 છે.", "ncert_ref": "Class XI - અધ્યાય 2: પરમાણુનું બંધારણ", "difficulty": "Hard", "num": 7}, {"question": "એક વિદ્યાર્થી પરમાણુમાં ઇલેક્ટ્રોનના કક્ષકોના આકારનું અવલોકન કરે છે અને નોંધે છે કે એક કક્ષકમાં ઇલેક્ટ્રોનની સંભાવના વિતરણ એક જ દિશામાં લંબાયેલું છે અને તેનો આકાર અસમમિત છે. આ કક્ષક માટે નીચેનામાંથી કયું સંયોજન સાચું નથી?", "options": ["A) આ કક્ષક p_x કક્ષક હોઈ શકે છે", "B) આ કક્ષક માટે કોણીય વેગમાન ક્વોન્ટમ આંક (l) 1 છે", "C) આ કક્ષકમાં નોડલ પ્લેનની સંખ્યા 1 છે", "D) આ કક્ષક માટે મેગ્નેટિક ક્વોન્ટમ આંક (m_l) 0 હોઈ શકે છે"], "correct": 3, "explanation": "p-કક્ષક માટે l=1 અને તેનો આકાર ડમ્બલ જેવો હોય છે જે એક દિશામાં લંબાયેલો હોય છે (NCERT Class XI - અધ્યાય 2). p_x કક્ષક માટે m_l=±1 હોય છે, m_l=0 નહીં. p-કક્ષક માટે નોડલ પ્લેનની સંખ્યા 1 હોય છે, તેથી અન્ય વિકલ્પો સાચા છે.", "ncert_ref": "Class XI - અધ્યાય 2: પરમાણુનું બંધારણ", "difficulty": "Hard", "num": 8}, {"question": "એક પરમાણુમાં 6s કક્ષક માટે ઇલેક્ટ્રોનની સંભાવના વિતરણની ચર્ચા કરવામાં આવે છે. આ કક્ષક માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) 6s કક્ષકનો આકાર ગોળાકાર છે અને તેમાં 5 રેડિયલ નોડ હોય છે", "B) 6s કક્ષકનો આકાર ડમ્બલ જેવો છે અને તેમાં 2 નોડલ પ્લેન હોય છે", "C) 6s કક્ષક માટે કોણીય વેગમાન ક્વોન્ટમ આંક (l) 1 છે", "D) 6s કક્ષકમાં ઇલેક્ટ્રોનની સંભાવના વિતરણ સમમિત નથી"], "correct": 0, "explanation": "s-કક્ષક માટે l=0 હોવાથી તેનો આકાર ગોળાકાર હોય છે (NCERT Class XI - અ્યાય 2). 6s કક્ષક માટે રેડિયલ નોડની સંખ્યા n-l-1 = 6-0-1 = 5 હોય છે. ડમ્બલ આકાર p-કક્ષક માટે છે, l=1 પણ ખોટું છે, અને s-કક્ષકનું વિતરણ સમમિત હોય છે.", "ncert_ref": "Class XI - અધ્યાય 2: પરમાણુનું બંધારણ", "difficulty": "Hard", "num": 9}, {"question": "એક પરમાણુમાં 3d_{z²} કક્ષક માટે ઇલેક્ટ્રોનની સંભાવના વિતરણનું અવલોકન કરવામાં આવે છે. આ કક્ષક માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) 3d_{z²} કક્ષકનો આકાર ડબલ ડમ્બલ જેવો છે પરંતુ z-અક્ષ પર કેન્દ્રિત છે", "B) 3d_{z²} કક્ષક માટે મેગ્નેટિક ક્વોન્ટમ આંક (m_l) 0 છે", "C) 3d_{z²} કક્ષકમાં નોડલ કોનની સંખ્યા 2 છે", "D) 3d_{z²} કક્ષક માટે કોણીય વેગમાન ક્વોન્ટમ આંક (l) 2 છે"], "correct": 0, "explanation": "3d_{z²} કક્ષકનો આકાર ડબલ ડમ્બલ જેવો નથી, પરંતુ તે ડમ્બલ અને રિંગનો સંયોજન છે જે z-અક્ષ પર કેન્દ્રિત હોય છે (NCERT Class XI - અધ્યાય 2). m_l=0 સાચું છે, નોડલ કોનની સંખ્યા 2 છે, અને l=2 પણ સાચું છે. તેથી વિકલ્પ A ખોટો છે.", "ncert_ref": "Class XI - અધ્યાય 2: પરમાણુનું બંધારણ", "difficulty": "Hard", "num": 10}, {"question": "જ્યારે પરમાણુમાં 4d કક્ષકની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયો ક્વોન્ટમ આંક સૌથી યોગ્ય રીતે તેના આકારને વ્યાખ્યાયિત કરે છે અને તેનો આકાર કેવો હોય છે?", "options": ["A) n=4, l=1; આકાર ગોળાકાર હોય છે", "B) n=4, l=2; આકાર ક્લોવરલીફ જેવો હોય છે", "C) n=4, l=0; આકાર ડમ્બલ જેવો હોય છે", "D) n=4, l=3; આકાર અત્યંત જટિલ અને બહુ-લોબ્ડ હોય છે"], "correct": 1, "explanation": "4d કક્ષક માટે, મુખ્ય ક્વોન્ટમ આંક n=4 અને અઝિમુથલ ક્વોન્ટમ આંક l=2 હોય છે. l=2 દર્શાવે છે કે આ d-કક્ષક છે, અને d-કક્ષકોનો આકાર ક્લોવરલીફ (ચાર લોબ્સ) જેવો હોય છે. A) ખોટું છે કારણ કે l=1 s-કક્ષક નહીં પણ p-કક્ષક દર્શાવે છે, અને તે ડમ્બલ આકાર ધરાવે છે. C) ખોટું છે કારણ કે l=0 s-કક્ષક દર્શાવે છે, જે ગોળાકાર હોય છે. D) ખોટું છે કારણ કે l=3 f-કક્ષક દર્શાવે છે, જે અત્યંત જટિલ હોય છે, પરંતુ 4d માટે l=2 હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 11}, {"question": "નીચેનામાંથી કયો કક્ષકનો આકાર 'ડમ્બલ' નથી, પરંતુ તેનું પ્રોબેબિલિટી વિતરણ અસમમિત છે અને તે બે લોબ્સમાં વિભાજિત થાય છે?", "options": ["A) p_x કક્ષક", "B) p_y કક્ષક", "C) d_{xy} કક્ષક", "D) d_{z^2} કક્ષક"], "correct": 3, "explanation": "d_{z^2} કક્ષકનો આકાર 'ડમ્બલ' નથી, પરંતુ તેનું પ્રોબેબિલિટી વિતરણ અસમમિત છે અને તે એક લોબ અને એક રિંગ જેવી રચના ધરાવે છે. p_x અને p_y કક્ષકોનો આકાર 'ડમ્બલ' હોય છે. d_{xy} કક્ષકનો આકાર ચાર લોબ્સ ધરાવે છે, જે ક્લોવરલીફ જેવો દેખાય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 12}, {"question": "જ્યારે પરમાણુમાં 3d કક્ષકની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયો કક્ષકનો આકાર 'ડબલ ડમ્બલ' તરીકે ઓળખાય છે?", "options": ["A) d_{xy}", "B) d_{xz}", "C) d_{z^2}", "D) d_{x^2-y^2}"], "correct": 3, "explanation": "d_{x^2-y^2} કક્ષકનો આકાર 'ડબલ ડમ્બલ' તરીકે ઓળખાય છે, કારણ કે તે બે ડમ્બલ આકારના લોબ્સ ધરાવે છે, જે x અને y અક્ષ પર સ્થિત હોય છે. d_{xy}, d_{xz} કક્ષકોનો આકાર ચાર લોબ્સ ધરાવે છે, જ્યારે d_{z^2} કક્ષકનો આકાર અસમમિત હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 13}, {"question": "નીચેનામાંથી કયો કક્ષકનો આકાર ગોળાકાર નથી, પરંતુ તેનું પ્રોબેબિલિટી વિતરણ સમમિત છે?", "options": ["A) 1s કક્ષક", "B) 2s કક્ષક", "C) 2p કક્ષક", "D) 3d કક્ષક"], "correct": 1, "explanation": "2s કક્ષકનો આકાર ગોળાકાર નથી, પરંતુ તેનું પ્રોબેબિલિટી વિતરણ સમમિત છે. 1s કક્ષકનો આકાર ગોળાકાર હોય છે. 2p કક્ષકનો આકાર ડમ્બલ જેવો હોય છે, અને 3d કક્ષકનો આકાર ક્લોવરલીફ જેવો હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 14}, {"question": "જ્યારે પરમાણુમાં f-કક્ષકની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયો ક્વોન્ટમ આંક સૌથી યોગ્ય રીતે તેના આકારને વ્યાખ્યાયિત કરે છે અને તેનો આકાર કેવો હોય છે?", "options": ["A) n=4, l=3; આકાર અત્યંત જટિલ અને બહુ-લોબ્ડ હોય છે", "B) n=3, l=2; આકાર ક્લોવરલીફ જેવો હોય છે", "C) n=5, l=0; આકાર ગોળાકાર હોય છે", "D) n=4, l=1; આકાર ડમ્બલ જેવો હોય છે"], "correct": 0, "explanation": "f-કક્ષક માટે, અઝિમુથલ ક્વોન્ટમ આંક l=3 હોય છે, અને તેનો આકાર અત્યંત જટિલ અને બહુ-લોબ્ડ હોય છે. B) ખોટું છે કારણ કે l=2 d-કક્ષક દર્શાવે છે. C) ખોટું છે કારણ કે l=0 s-કક્ષક દર્શાવે છે. D) ખોટું છે કારણ કે l=1 p-કક્ષક દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 15}, {"question": "પરમાણુમાં 4f કક્ષકના આકાર વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) 4f કક્ષકનો આકાર સંપૂર્ણપણે સમમિત હોય છે અને તેને 8 લોબ્સમાં વિભાજિત કરી શકાય છે.", "B) 4f કક્ષકનો આકાર અસમમિત હોય છે અને તેને 7 લોબ્સમાં વિભાજિત કરી શકાય છે, પરંતુ તેનો આકાર n અને l ના મૂલ્ય પર આધાર રાખે છે.", "C) 4f કક્ષકનો આકાર ગોળાકાર હોય છે અને તેનું પ્રોબેબિલિટી વિતરણ સરળ રીતે સમજી શકાય છે.", "D) 4f કક્ષકનો આકાર ડમ્બલ જેવો હોય છે અને તેને 2 લોબ્સમાં વિભાજિત કરી શકાય છે."], "correct": 1, "explanation": "4f કક્ષકનો આકાર અસમમિત હોય છે અને તેને 7 લોબ્સમાં વિભાજિત કરી શકાય છે. આ કક્ષકનો આકાર n=4 અને l=3 પર આધાર રાખે છે. વિકલ્પ A ખોટો છે કારણ કે 4f કક્ષક સંપૂર્ણપણે સમમિત નથી. વિકલ્પ C ખોટો છે કારણ કે 4f કક્ષક ગોળાકાર નથી. વિકલ્પ D ખોટો છે કારણ કે 4f કક્ષક ડમ્બલ જેવો નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 16}, {"question": "પરમાણુમાં 5f કક્ષકનો આકાર કયા રૂપમાં દર્શાવી શકાય છે, જ્યારે તેની તુલના 4f કક્ષક સાથે કરવામાં આવે છે?", "options": ["A) 5f કક્ષકનો આકાર 4f કક્ષક કરતાં વધુ જટિલ અને બહુ-લોબ્ડ હોય છે, જેમાં 8 લોબ્સ હોવાની શક્યતા રહે છે.", "B) 5f કક્ષકનો આકાર 4f કક્ષક જેવો જ હોય છે, પરંતુ તેનું કદ મોટું હોય છે.", "C) 5f કક્ષકનો આકાર ગોળાકાર હોય છે, જ્યારે 4f કક્ષકનો આકાર ડમ્બલ જેવો હોય છે.", "D) 5f કક્ષકનો આકાર ડમ્બલ જેવો હોય છે, જ્યારે 4f કક્ષકનો આકાર બહુ-લોબ્ડ હોય છે."], "correct": 0, "explanation": "5f કક્ષકનો આકાર 4f કક્ષક કરતાં વધુ જટિલ અને બહુ-લોબ્ડ હોય છે, જેમાં 8 લોબ્સ હોવાની શક્યતા રહે છે. આ કારણ છે કે f-કક્ષકોનો આકાર l=3 માટે જટિલ હોય છે અને n વધતાં તેનો આકાર વધુ જટિલ બને છે. બાકીના વિકલ્પો ખોટા છે કારણ કે 5f અને 4f કક્ષકો બંને જટિલ બહુ-લોબ્ડ આકાર ધરાવે છે, ગોળાકાર અથવા ડમ્બલ નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 17}, {"question": "જ્યારે પરમાણુમાં d કક્ષકોની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયો કક્ષકનો આકાર 'ક્લોવર લીફ' તરીકે ઓળખાય છે?", "options": ["A) d_xy", "B) d_xz", "C) d_yz", "D) d_x²-y²"], "correct": 3, "explanation": "d_x²-y² કક્ષકનો આકાર 'ક્લોવર લીફ' તરીકે ઓળખાય છે કારણ કે તે ચાર લોબ્સ ધરાવે છે જે x અને y અક્ષોની દિશામાં સ્થિત હોય છે. બાકીના વિકલ્પો (d_xy, d_xz, d_yz)નો આકાર ડમ્બલ જેવો હોય છે, જે ચાર લોબ્સ ધરાવે છે પરંતુ તે 'ક્લોવર લીફ' જેવો દેખાતો નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 18}, {"question": "જ્યારે પરમાણુમાં f-કક્ષકોની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) f-કક્ષકોનો આકાર હંમેશા ગોળાકાર હોય છે.", "B) f-કક્ષકોનો આકાર હંમેશા ડમ્બલ જેવો હોય છે.", "C) f-કક્ષકોનો આકાર બહુ-લોબ્ડ અને જટિલ હોય છે, જેમાં 8 લોબ્સ હોવાની શક્યતા રહે છે.", "D) f-કક્ષકોનો આકાર હંમેશા અસમમિત હોય છે."], "correct": 2, "explanation": "f-કક્ષકોનો આકાર બહુ-લોબ્ડ અને જટિલ હોય છે, જેમાં 8 લોબ્સ હોવાની શક્યતા રહે છે. આ કારણ છે કે f-કક્ષકો માટે l=3 હોય છે, જે તેમને જટિલ આકાર આપે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે f-કક્ષકોનો આકાર ગોળાકાર, ડમ્બલ જેવો અથવા હંમેશા અસમમિત નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 19}, {"question": "પરમાણુમાં 4d કક્ષક માટે નીચેનામાંથી કયું વિધાન સત્ય છે, જ્યારે તેના આકાર અને પ્રોબેબિલિટી વિતરણની ચર્ચા કરવામાં આવે છે?", "options": ["A) 4d કક્ષકનો આકાર 'ડબલ ડમ્બલ' જેવો હોય છે અને તેનું પ્રોબેબિલિટી વિતરણ ચાર લોબ્સમાં વિભાજિત થાય છે.", "B) 4d કક્ષકનો આકાર ગોળાકાર હોય છે અને તેનું પ્રોબેબિલિટી વિતરણ સમમિત હોય છે.", "C) 4d કક્ષકનો આકાર 'ડમ્બલ' જેવો હોય છે અને તેનું પ્રોબેબિલિટી વિતરણ બે લોબ્સમાં વિભાજિત થાય છે.", "D) 4d કક્ષકનો આકાર અસમમિત હોય છે અને તેનું પ્રોબેબિલિટી વિતરણ આઠ લોબ્સમાં વિભાજિત થાય છે."], "correct": 0, "explanation": "4d કક્ષક (l=2) માટે, તેનો આકાર 'ડબલ ડમ્બલ' જેવો હોય છે, જેમાં ચાર લોબ્સ હોય છે. આ કક્ષકનું પ્રોબેબિલિટી વિતરણ પણ ચાર લોબ્સમાં વિભાજિત થાય છે. વિકલ્પ A સત્ય છે. વિકલ્પ B ખોટો છે કારણ કે 4d કક્ષક ગોળાકાર નથી. વિકલ્પ C ખોટો છે કારણ કે 4d કક્ષકનો આકાર 'ડમ્બલ' નથી, પરંતુ 'ડબલ ડમ્બલ' છે. વિકલ્પ D ખોટો છે કારણ કે 4d કક્ષકનું પ્રોબેબિલિટી વિતરણ આઠ લોબ્સમાં નથી વિભાજિત થતું.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 20}, {"question": "પરમાણુમાં 4f કક્ષકના આકાર વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) 4f કક્ષકોનો આકાર બહુ જટિલ અને બહુ-લોબ્ડ હોય છે.", "B) 4f કક્ષકોના આકારમાં 8 લોબ્સ હોય છે, જેમાંથી 2 લોબ્સ વિરુદ્ધ દિશામાં હોય છે.", "C) 4f કક્ષકોનો આકાર સંપૂર્ણપણે સમમિત હોય છે અને તેને 'ડબલ ડમ્બલ' તરીકે ઓળખવામાં આવે છે.", "D) 4f કક્ષકોનો આકાર n અને l ક્વોન્ટમ આંકો પર આધારિત હોય છે."], "correct": 2, "explanation": "4f કક્ષકોનો આકાર બહુ જટિલ અને બહુ-લોબ્ડ હોય છે, જેમાં 8 લોબ્સ હોય છે, પરંતુ તેને 'ડબલ ડમ્બલ' તરીકે ઓળખવામાં આવતું નથી. 'ડબલ ડમ્બલ' આકાર d કક્ષકો (જેમ કે d_z2) સાથે સંબંધિત છે. વિકલ્પ A, B, અને D સાચા છે કારણ કે 4f કક્ષકોનો આકાર જટિલ હોય છે, 8 લોબ્સ ધરાવે છે, અને n અને l ક્વોન્ટમ આંકો પર આધારિત હોય છે.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 21}, {"question": "પરમાણુમાં f-કક્ષકોની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) f-કક્ષકોનો આકાર સરળ અને સમમિત હોય છે.", "B) f-કક્ષકોનો આકાર બહુ જટિલ અને બહુ-લોબ્ડ હોય છે.", "C) f-કક્ષકોનો આકાર હંમેશા ગોળાકાર હોય છે.", "D) f-કક્ષકોનો આકાર હંમેશા ડમ્બલ જેવો હોય છે."], "correct": 1, "explanation": "f-કક્ષકોનો આકાર બહુ જટિલ અને બહુ-લોબ્ડ હોય છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે f-કક્ષકોનો આકાર સરળ, ગોળાકાર, અથવા ડમ્બલ જેવો નથી.", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 22}, {"question": "પરમાણુમાં 4f કક્ષકોના આકાર વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) 4f કક્ષકોના આકારો સરળ ગોળાકાર હોય છે અને તેને સરળતાથી દર્શાવી શકાય છે.", "B) 4f કક્ષકોના આકારો જટિલ હોય છે અને તેને 'ડબલ ડમ્બલ' તરીકે ઓળખવામાં આવે છે.", "C) 4f કક્ષકોના આકારો 8 લોબ્સ ધરાવે છે અને તે અસમમિત હોય છે.", "D) 4f કક્ષકોના આકારો 7 લોબ્સ ધરાવે છે અને તે સમમિત હોય છે."], "correct": 2, "explanation": "4f કક્ષકોના આકારો જટિલ હોય છે અને તે 8 લોબ્સ ધરાવે છે, જે અસમમિત હોય છે. વિકલ્પ A ખોટો છે કારણ કે 4f કક્ષકો ગોળાકાર નથી. વિકલ્પ B ખોટો છે કારણ કે 'ડબલ ડમ્બલ' d-કક્ષકો સાથે સંબંધિત છે. વિકલ્પ D ખોટો છે કારણ કે 4f કક્ષકો 7 લોબ્સ નથી ધરાવતા.", "ncert_ref": "Class XII - Chapter 2: રાસાયણિક ગતિશીલતા અને પરમાણુની રચના", "difficulty": "Hard", "num": 23}, {"question": "જ્યારે પરમાણુમાં d-કક્ષકોની વાત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયો કક્ષકનો આકાર 'ડમ્બલ' નથી?", "options": ["A) d_xy", "B) d_xz", "C) d_yz", "D) d_z²"], "correct": 3, "explanation": "d_z² કક્ષકનો આકાર 'ડમ્બલ' નથી, પરંતુ તે એક લંબગોળ આકાર ધરાવે છે જેમાં એક રિંગ અને બે લોબ્સ હોય છે. વિકલ્પ A, B, અને C ખોટા છે કારણ કે d_xy, d_xz, અને d_yz કક્ષકોનો આકાર 'ડમ્બલ' હોય છે.", "ncert_ref": "Class XII - Chapter 2: રાસાયણિક ગતિશીલતા અને પરમાણુની રચના", "difficulty": "Hard", "num": 24}, {"question": "પરમાણુમાં 4f કક્ષકોના આકાર વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) 4f કક્ષકોના આકારો અત્યંત જટિલ અને બહુ-લોબવાળા હોય છે, જેમાં 8 લોબ્સ હોય છે.", "B) 4f કક્ષકોનો આકાર 'ડબલ ડમ્બલ' તરીકે ઓળખાય છે, જેમ કે d કક્ષકોના આકાર.", "C) 4f કક્ષકોના આકારો અસમમિત હોય છે અને તેના પ્રોબેબિલિટી વિતરણમાં ઉચ્ચ અને નીચા પ્રદેશો હોય છે.", "D) 4f કક્ષકોના આકારો n=4 અને l=3 ક્વોન્ટમ આંકો દ્વારા નિર્ધારિત થાય છે."], "correct": 1, "explanation": "વિકલ્પ B ખોટો છે કારણ કે 'ડબલ ડમ્બલ' આકાર d કક્ષકો (l=2) સાથે સંબંધિત છે, ન કે f કક્ષકો (l=3) સાથે. f કક્ષકોના આકારો અત્યંત જટિલ અને બહુ-લોબવાળા હોય છે, જેમાં 8 લોબ્સ હોય છે (વિકલ્પ A સત્ય). તેઓ અસમમિત હોય છે અને ઉચ્ચ-નીચા પ્રદેશો ધરાવે છે (વિકલ્પ C સત્ય). 4f કક્ષકોના ક્વોન્ટમ આંકો n=4 અને l=3 હોય છે (વિકલ્પ D સત્ય).", "ncert_ref": "Class XI - Chapter 2: પરમાણુની રચના", "difficulty": "Hard", "num": 25}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
