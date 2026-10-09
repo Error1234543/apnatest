@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દ્રાવણો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>દ્રાવણો Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "નીચેના પૈકી કયું દ્રાવણ આદર્શ દ્રાવણનું ઉદાહરણ છે?", "opts": ["ઇથેનોલ અને પાણી", "બેન્ઝિન અને ટોલ્યુઇન", "એસિટોન અને ક્લોરોફોર્મ", "હાઇડ્રોક્લોરિક એસિડ અને પાણી"], "ans": 1, "exp": "બેન્ઝિન અને ટોલ્યુઇનના અણુઓ વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો લગભગ સમાન હોવાથી તે આદર્શ દ્રાવણ બનાવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 180 ગ્રામ પાણીમાં 34.2 ગ્રામ સુક્રોઝ ઓગાળતાં મળતા દ્રાવણની મોલાલિટી શું હશે? (સુક્રોઝનું આણ્વીય દળ = 342 ગ્રામ/મોલ)", "opts": ["0.55 m", "0.65 m", "0.75 m", "0.85 m"], "ans": 0, "exp": "મોલાલિટી = દ્રાવ્યના મોલ / દ્રાવકનું વજન (kg) = (34.2/342) / 0.180 = 0.55 m.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન રાઉલ્ટના નિયમ માટે ખોટું છે?", "opts": ["દ્રાવણમાં દરેક ઘટકનું આંશિક બાષ્પદબાણ તેના મોલ અંશના સમપ્રમાણમાં હોય છે.", "આ નિયમ માત્ર આદર્શ દ્રાવણો માટે જ લાગુ પડે છે.", "આ નિયમ બિન-આદર્શ દ્રાવણો માટે પણ સંપૂર્ણ રીતે લાગુ પડે છે.", "દ્રાવણનું કુલ બાષ્પદબાણ દરેક ઘટકના આંશિક બાષ્પદબાણના સરવાળા બરાબર હોય છે."], "ans": 2, "exp": "રાઉલ્ટનો નિયમ માત્ર આદર્શ દ્રાવણો માટે જ લાગુ પડે છે, બિન-આદર્શ દ્રાવણો માટે નહીં.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા દ્રાવણોમાંથી કયું દ્રાવણ અભિસરણ દબાણ દર્શાવશે નહીં?", "opts": ["સુક્રોઝનું જલીય દ્રાવણ", "યુરિયાનું જલીય દ્રાવણ", "સોડિયમ ક્લોરાઇડનું જલીય દ્રાવણ", "ગ્લુકોઝનું બેન્ઝિનમાં દ્રાવણ"], "ans": 3, "exp": "અભિસરણ દબાણ માત્ર અર્ધપારગમ્ય પટલ દ્વારા અલગ કરાયેલા દ્રાવણોમાં જ જોવા મળે છે, બેન્ઝિનમાં ગ્લુકોઝનું દ્રાવણ આ શરત પૂરી કરતું નથી.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન હાઇડ્રોજન બંધ બનાવી શકે નહીં?", "opts": ["પાણી (H₂O)", "ઇથેનોલ (C₂H₅OH)", "એમોનિયા (NH₃)", "મિથેન (CH₄)"], "ans": 3, "exp": "મિથેનમાં હાઇડ્રોજન પરમાણુ કાર્બન સાથે જોડાયેલા હોવાથી તે હાઇડ્રોજન બંધ બનાવી શકતું નથી.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-family='Arial' font-size='14'>CH₄</text><circle cx='110' cy='60' r='20' fill='none' stroke='black' stroke-width='1.5'/><line x1='90' y1='60' x2='70' y2='40' stroke='black' stroke-width='1.5'/><line x1='90' y1='60' x2='70' y2='80' stroke='black' stroke-width='1.5'/><line x1='130' y1='60' x2='150' y2='40' stroke='black' stroke-width='1.5'/><line x1='130' y1='60' x2='150' y2='80' stroke='black' stroke-width='1.5'/><text x='60' y='35' font-family='Arial' font-size='12'>H</text><text x='60' y='90' font-family='Arial' font-size='12'>H</text><text x='155' y='35' font-family='Arial' font-size='12'>H</text><text x='155' y='90' font-family='Arial' font-size='12'>H</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું દ્રાવણ આદર્શ દ્રાવણ નથી?", "opts": ["બેન્ઝિન અને ટોલ્યુઇનનું દ્રાવણ", "ઇથેનોલ અને મિથેનોલનું દ્રાવણ", "હેક્ઝેન અને હેપ્ટેનનું દ્રાવણ", "ઇથેનોલ અને પાણીનું દ્રાવણ"], "ans": 3, "exp": "ઇથેનોલ અને પાણી વચ્ચે આંતરઆણ્વીય આકર્ષણ બળો જુદા હોવાથી તે આદર્શ દ્રાવણ નથી.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 18 ગ્રામ ગ્લુકોઝ (C₆H₁₂O₆) 90 ગ્રામ પાણીમાં ઓગાળેલ છે. આ દ્રાવણની મોલાલિટી શું હશે? (ગ્લુકોઝનું મોલર દળ = 180 ગ્રામ/મોલ)", "opts": ["0.5 મોલ/કિગ્રા", "1.0 મોલ/કિગ્રા", "1.5 મોલ/કિગ્રા", "2.0 મોલ/કિગ્રા"], "ans": 1, "exp": "મોલાલિટી = દ્રાવ્યના મોલ / દ્રાવકનું દળ (કિગ્રા) = (18/180) / 0.09 = 1.0 મોલ/કિગ્રા.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન રાઉલ્ટના નિયમ માટે સાચું નથી?", "opts": ["દ્રાવણમાં દ્રાવકનું બાષ્પ દબાણ દ્રાવકના મોલ અંશના સમપ્રમાણમાં હોય છે.", "આ નિયમ માત્ર આદર્શ દ્રાવણો માટે જ લાગુ પડે છે.", "દ્રાવણમાં દ્રાવ્યનું બાષ્પ દબાણ દ્રાવ્યના મોલ અંશના સમપ્રમાણમાં હોય છે.", "આ નિયમ બિન-આદર્શ દ્રાવણો માટે પણ લાગુ પડે છે."], "ans": 3, "exp": "રાઉલ્ટનો નિયમ માત્ર આદર્શ દ્રાવણો માટે જ લાગુ પડે છે, બિન-આદર્શ દ્રાવણો માટે નહીં.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું સંયોજન પાણીમાં ઉત્તમ વિદ્યુતવાહક દ્રાવણ બનાવે છે?", "opts": ["સુક્રોઝ (C₁₂H₂₂O₁₁)", "ગ્લુકોઝ (C₆H₁₂O₆)", "સોડિયમ ક્લોરાઇડ (NaCl)", "યુરિયા (NH₂CONH₂)"], "ans": 2, "exp": "સોડિયમ ક્લોરાઇડ આયનીય સંયોજન છે, જે પાણીમાં આયનો બનાવી વિદ્યુતનું વહન કરે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણનું ઑસ્મોટિક દબાણ π = CRT સમીકરણ વડે દર્શાવાય છે. અહીં 'R' શું દર્શાવે છે?", "opts": ["દ્રાવ્યનું દળ", "વાયુ અચળાંક", "દ્રાવણનું કદ", "તાપમાન"], "ans": 1, "exp": "'R' એ વાયુ અચળાંક છે, જેનું મૂલ્ય 0.0821 લિટર·એટમ/મોલ·કે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું દ્રાવણ આદર્શ દ્રાવણ નથી?", "opts": ["બેન્ઝિન અને ટોલ્યુઇનનું દ્રાવણ", "ઇથેનોલ અને મિથેનોલનું દ્રાવણ", "હેક્ઝેન અને હેપ્ટેનનું દ્રાવણ", "ઇથેનોલ અને પાણીનું દ્રાવણ"], "ans": 3, "exp": "ઇથેનોલ અને પાણી વચ્ચે હાઇડ્રોજન બોન્ડિંગ થાય છે, જે આદર્શ દ્રાવણના નિયમોથી વિચલન કરાવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 0.1 M ગ્લુકોઝ દ્રાવણનું અભિસરણ દબાણ કેટલું હશે? (R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["2.45 atm", "2.05 atm", "2.24 atm", "2.35 atm"], "ans": 0, "exp": "અભિસરણ દબાણ π = CRT = 0.1 × 0.0821 × 298 = 2.45 atm.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં સૌથી વધુ દ્રાવ્યતા ધરાવે છે?", "opts": ["CH₃OH (મિથેનોલ)", "C₂H₅OH (ઇથેનોલ)", "C₆H₁₄ (હેક્ઝેન)", "C₆H₆ (બેન્ઝિન)"], "ans": 0, "exp": "મિથેનોલમાં હાઇડ્રોક્સિલ સમૂહ હોવાથી તે પાણી સાથે હાઇડ્રોજન બોન્ડ બનાવી શકે છે, તેથી સૌથી વધુ દ્રાવ્ય છે.", "chapter": "દ્રાવણો", "svg": "<svg viewBox='0 0 220 120' width='220' height='120'><text x='10' y='30' font-size='14'>CH₃OH</text><line x1='60' y1='40' x2='80' y2='40' stroke='black'/><line x1='80' y1='40' x2='100' y2='20' stroke='black'/><text x='105' y='15' font-size='12'>H</text><line x1='80' y1='40' x2='100' y2='60' stroke='black'/><text x='105' y='65' font-size='12'>OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(1) દ્રાવણનું ઉત્કલનબિંદુ શુદ્ધ દ્રાવક કરતાં વધારે હોય છે.\n(2) દ્રાવણનું ઠારબિંદુ શુદ્ધ દ્રાવક કરતાં નીચું હોય છે.\n(3) અભિસરણ દબાણ માત્ર આયનિક દ્રાવણોમાં જ ઉદ્ભવે છે.\n(4) દ્રાવણની સાંદ્રતા વધારતાં તેનું બાષ્પદબાણ ઘટે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન (1), (2) અને (4) સાચાં છે. વિધાન (3) ખોટું છે કારણ કે અભિસરણ દબાણ બિન-આયનિક દ્રાવણોમાં પણ ઉદ્ભવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યના મોલ અંશ 0.2 છે. જો દ્રાવણનું કુલ દબાણ 1.2 atm હોય, તો દ્રાવ્યનું બાષ્પદબાણ કેટલું હશે? (રાઉલ્ટના નિયમ મુજબ)", "opts": ["0.24 atm", "0.96 atm", "0.30 atm", "1.00 atm"], "ans": 0, "exp": "રાઉલ્ટના નિયમ મુજબ, દ્રાવ્યનું બાષ્પદબાણ = મોલ અંશ × કુલ દબાણ = 0.2 × 1.2 atm = 0.24 atm.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 100 ગ્રામ પાણીમાં 36 ગ્રામ ગ્લુકોઝ (C₆H₁₂O₆) ઓગળેલું છે. આ દ્રાવણનું ઑસ્મોટિક દબાણ કેટલું હશે? (R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["4.92 atm", "2.46 atm", "9.84 atm", "1.23 atm"], "ans": 0, "exp": "ગ્લુકોઝનું મોલ = 36/180 = 0.2 mol, દ્રાવણનું કદ ≈ 0.1 L, π = CRT = (0.2/0.1) × 0.0821 × 298 = 4.92 atm.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L70 40 L90 60 L110 40 L130 60 L150 40 L170 60 L150 80 L130 100 L110 80 L90 100 L70 80 Z' fill='none' stroke='black' stroke-width='2'/><text x='45' y='35' font-size='12'>O</text><text x='175' y='35' font-size='12'>OH</text><text x='65' y='75' font-size='12'>OH</text><text x='115' y='75' font-size='12'>OH</text><text x='135' y='115' font-size='12'>OH</text><text x='85' y='115' font-size='12'>OH</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન અભિસરણ દબાણ માટે ખોટું છે?", "opts": ["અભિસરણ દબાણ દ્રાવણની સાંદ્રતા પર આધારિત છે.", "અભિસરણ દબાણ તાપમાન સાથે વધે છે.", "અભિસરણ દબાણ દ્રાવ્યના પ્રકાર પર આધારિત નથી.", "અભિસરણ દબાણ દ્રાવકના પ્રકાર પર આધારિત છે."], "ans": 3, "exp": "અભિસરણ દબાણ દ્રાવકના પ્રકાર પર આધારિત નથી, માત્ર દ્રાવ્યની સાંદ્રતા અને તાપમાન પર આધારિત છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 5.85 ગ્રામ NaCl 500 ગ્રામ પાણીમાં ઓગળેલું છે. આ દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) કેટલું હશે? (Kf = 1.86 K kg mol⁻¹)", "opts": ["0.372 K", "0.744 K", "0.186 K", "1.488 K"], "ans": 0, "exp": "NaClનું મોલ = 5.85/58.5 = 0.1 mol, મોલાલિટી = 0.1/0.5 = 0.2 m, ΔTf = i × Kf × m = 2 × 1.86 × 0.2 = 0.744 K (પરંતુ NaCl સંપૂર્ણ વિયોજન ન કરે તેથી i ≈ 1.8, ΔTf ≈ 0.372 K).", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યના મોલ અને દ્રાવકના કિલોગ્રામની સંખ્યાનો ગુણોત્તર શું કહેવાય છે?", "opts": ["મોલ અંશ", "મોલાલિટી", "મોલારિટી", "સામાન્યતા"], "ans": 1, "exp": "દ્રાવ્યના મોલ અને દ્રાવકના કિલોગ્રામની સંખ્યાનો ગુણોત્તર મોલાલિટી તરીકે ઓળખાય છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું દ્રાવણ આદર્શ દ્રાવણનું ઉદાહરણ નથી?", "opts": ["બેન્ઝિન અને ટોલ્યુઇનનું દ્રાવણ", "ઇથેનોલ અને પાણીનું દ્રાવણ", "હેક્ઝેન અને હેપ્ટેનનું દ્રાવણ", "ઇથાઇલ બ્રોમાઇડ અને ઇથાઇલ આયોડાઇડનું દ્રાવણ"], "ans": 1, "exp": "ઇથેનોલ અને પાણીના દ્રાવણમાં આંતરઆણ્વીય આકર્ષણ બળો અલગ હોવાથી તે આદર્શ દ્રાવણ નથી.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન રાઉલ્ટના નિયમ માટે ખોટું છે?", "opts": ["દ્રાવણનું બાષ્પદબાણ દ્રાવકના મોલ અંશના સમપ્રમાણમાં હોય છે.", "આ નિયમ માત્ર આદર્શ દ્રાવણો માટે જ લાગુ પડે છે.", "દ્રાવ્યના મોલ અંશ વધતા દ્રાવણનું બાષ્પદબાણ વધે છે.", "આ નિયમ બિન-આદર્શ દ્રાવણોમાં પણ લાગુ પડી શકે છે, પરંતુ વિચલન જોવા મળે છે."], "ans": 2, "exp": "રાઉલ્ટના નિયમ મુજબ દ્રાવ્યના મોલ અંશ વધતા દ્રાવણનું બાષ્પદબાણ ઘટે છે, નહીં કે વધે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં ઓછું દ્રાવ્ય છે?", "opts": ["ગ્લુકોઝ (C₆H₁₂O₆)", "સોડિયમ ક્લોરાઇડ (NaCl)", "કેલ્શિયમ કાર્બોનેટ (CaCO₃)", "ઇથેનોલ (C₂H₅OH)"], "ans": 2, "exp": "કેલ્શિયમ કાર્બોનેટ આયનીય સંયોજન હોવા છતાં પાણીમાં ઓછું દ્રાવ્ય છે કારણ કે તેની જાળીદાર રચના મજબૂત હોય છે.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-size='14'>Ca²⁺</text><text x='100' y='30' font-size='14'>CO₃²⁻</text><circle cx='20' cy='60' r='15' fill='none' stroke='black'/><path d='M35 60 L85 60 L85 30 L115 30 L115 90 L85 90 L85 60 L35 60 Z' fill='none' stroke='black'/><text x='50' y='75' font-size='12'>CaCO₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 180 ગ્રામ પાણીમાં 34.2 ગ્રામ સુક્રોઝ (C₁₂H₂₂O₁₁) ઓગાળવામાં આવે છે. આ દ્રાવણનું ઑસ્મોટિક દબાણ (π) 27°C તાપમાને કેટલું હશે? (R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["2.46 atm", "4.92 atm", "1.23 atm", "3.69 atm"], "ans": 1, "exp": "π = CRT સૂત્ર મુજબ, સુક્રોઝનું મોલર દળ 342 g/mol છે. મોલારિટી (C) = 34.2/342 × 1000/180 = 0.555 M. π = 0.555 × 0.0821 × 300 = 4.92 atm.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 5% (w/w) યુરિયા (NH₂CONH₂) છે. આ દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) કેટલું હશે? (પાણી માટે Kf = 1.86 K kg mol⁻¹)", "opts": ["1.55 K", "3.10 K", "0.775 K", "2.325 K"], "ans": 0, "exp": "યુરિયાનું મોલર દળ 60 g/mol છે. મોલાલિટી (m) = (5/60) × 1000/95 = 0.877 m. ΔTf = Kf × m = 1.86 × 0.877 = 1.55 K.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-size='14'>NH₂</text><line x1='40' y1='25' x2='60' y2='25' stroke='black'/><text x='65' y='30' font-size='14'>C=O</text><line x1='95' y1='25' x2='115' y2='25' stroke='black'/><text x='120' y='30' font-size='14'>NH₂</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું દ્રાવણ સૌથી વધુ ઑસ્મોટિક દબાણ ધરાવશે? (બધા દ્રાવણો સમાન તાપમાને છે)", "opts": ["0.1 M ગ્લુકોઝ (C₆H₁₂O₆)", "0.1 M સોડિયમ ક્લોરાઇડ (NaCl)", "0.1 M કેલ્શિયમ ક્લોરાઇડ (CaCl₂)", "0.1 M યુરિયા (NH₂CONH₂)"], "ans": 2, "exp": "CaCl₂ સૌથી વધુ આયનો (3) ઉત્પન્ન કરે છે, તેથી તેનું ઑસ્મોટિક દબાણ સૌથી વધુ હશે (π ∝ iC, જ્યાં i = વાન્ટ હૉફ ફેક્ટર).", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) રાઉલ્ટના નિયમ મુજબ દ્રાવણનું બાષ્પદબાણ દ્રાવ્યના મોલ અંશના સમપ્રમાણમાં હોય છે. (2) અભિસરણ દબાણ માત્ર અવનયન ગુણધર્મ છે. (3) દ્રાવણનું ઉત્કલનબિંદુ શુદ્ધ દ્રાવક કરતાં ઓછું હોય છે. (4) વિરલ દ્રાવણો માટે રાઉલ્ટનો નિયમ લાગુ પડે છે. ઉપરના વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 1, "exp": "વિધાન (1) અને (4) સાચાં છે. વિધાન (2) અને (3) ખોટાં છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં ઓગળીને આયનીય દ્રાવણ બનાવે છે પરંતુ તેનું દ્રાવણ વિદ્યુતનું અવાહક નથી?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "ગ્લુકોઝ (C₆H₁₂O₆)", "એસિટિક એસિડ (CH₃COOH)", "યુરિયા (NH₂CONH₂)"], "ans": 2, "exp": "એસિટિક એસિડ આયનો બનાવે છે પરંતુ તે નબળો વિદ્યુતવિભાજ્ય હોવાથી વિદ્યુતનું અવાહક છે.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L70 40 L90 60 L70 80 Z' fill='none' stroke='black' stroke-width='2'/><text x='30' y='65' font-size='12'>CH₃</text><text x='100' y='55' font-size='12'>C</text><text x='130' y='45' font-size='12'>O</text><text x='130' y='75' font-size='12'>OH</text><line x1='90' y1='60' x2='110' y2='50' stroke='black' stroke-width='2'/><line x1='90' y1='60' x2='110' y2='70' stroke='black' stroke-width='2'/></svg>", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 18 ગ્રામ ગ્લુકોઝ (C₆H₁₂O₆) 90 ગ્રામ પાણીમાં ઓગળેલું છે. આ દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) કેટલું હશે? (પાણી માટે Kf = 1.86 K kg mol⁻¹)", "opts": ["1.86 K", "2.07 K", "1.03 K", "0.93 K"], "ans": 1, "exp": "ΔTf = Kf × m = 1.86 × (18/180)/0.09 = 2.07 K.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 6 ગ્રામ યુરિયા (NH₂CONH₂) 50 ગ્રામ પાણીમાં ઓગાળેલ છે. આ દ્રાવણનું મોલાલિટી (molality) શું હશે? (યુરિયાનું મોલર દળ = 60 g/mol)", "opts": ["1 m", "2 m", "0.5 m", "0.2 m"], "ans": 1, "exp": "મોલાલિટી = (દ્રાવ્યના મોલ / દ્રાવકનું દળ (kg)) = (6/60) / 0.05 = 2 m.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(1) અભિસરણ દબાણ એ કોલિગેટિવ ગુણધર્મ છે.\n(2) રાઉલ્ટના નિયમ મુજબ દ્રાવણનું બાષ્પદબાણ દ્રાવ્યના મોલ અંશના સમપ્રમાણમાં હોય છે.\n(3) ઠારબિંદુ અવનયન અને ઉત્કલનબિંદુ ઉન્નયન બંને કોલિગેટિવ ગુણધર્મો છે.\n(4) વાન્ટ હૉફ અવયવ (i) એ વિદ્યુતવિભાજ્ય દ્રાવણ માટે હંમેશાં 1 કરતાં વધુ હોય છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન (1) અને (3) સાચાં છે. વિધાન (2)માં દ્રાવણનું બાષ્પદબાણ દ્રાવકના મોલ અંશના સમપ્રમાણમાં હોય છે, અને વિધાન (4)માં વાન્ટ હૉફ અવયવ બિન-વિદ્યુતવિભાજ્ય માટે 1 હોય છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન પાણીમાં ઓગળતું નથી પરંતુ કાર્બનિક દ્રાવકોમાં સારી રીતે ઓગળે છે?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "ગ્લુકોઝ (C₆H₁₂O₆)", "બેન્ઝોઇક એસિડ (C₆H₅COOH)", "નેપ્થેલિન (C₁₀H₈)"], "ans": 3, "exp": "નેપ્થેલિન અધ્રુવીય સંયોજન છે, જે પાણીમાં અદ્રાવ્ય છે પરંતુ કાર્બનિક દ્રાવકોમાં દ્રાવ્ય છે.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M60 40 L100 40 L120 60 L120 100 L100 120 L60 120 L40 100 L40 60 Z' fill='none' stroke='black' stroke-width='2'/><path d='M100 40 L140 40 L160 60 L160 100 L140 120 L100 120' fill='none' stroke='black' stroke-width='2'/><line x1='100' y1='40' x2='120' y2='60' stroke='black' stroke-width='2'/><line x1='100' y1='120' x2='120' y2='100' stroke='black' stroke-width='2'/><line x1='60' y1='40' x2='40' y2='60' stroke='black' stroke-width='2'/><line x1='60' y1='120' x2='40' y2='100' stroke='black' stroke-width='2'/></svg>", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યના મોલ અંશ 0.2 છે. જો દ્રાવણનું કુલ બાષ્પદબાણ 760 mmHg હોય અને શુદ્ધ દ્રાવકનું બાષ્પદબાણ 800 mmHg હોય, તો દ્રાવ્યનું બાષ્પદબાણ શું હશે?", "opts": ["400 mmHg", "600 mmHg", "200 mmHg", "આપેલ માહિતીથી શક્ય નથી"], "ans": 3, "exp": "રાઉલ્ટના નિયમ મુજબ, દ્રાવણનું બાષ્પદબાણ = દ્રાવકનું બાષ્પદબાણ × દ્રાવકનો મોલ અંશ + દ્રાવ્યનું બાષ્પદબાણ × દ્રાવ્યનો મોલ અંશ. અહીં દ્રાવ્યનું બાષ્પદબાણ આપેલ નથી, તેથી ગણતરી શક્ય નથી.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 1 લિટર પાણીમાં 1 મોલ યૂરિયા (NH₂CONH₂) ઓગાળતાં દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) 1.86 °C મળે છે. જો 2 લિટર પાણીમાં 2 મોલ યૂરિયા ઓગાળવામાં આવે તો ઠારબિંદુ અવનયન (ΔTf) કેટલું હશે?", "opts": ["0.93 °C", "1.86 °C", "3.72 °C", "5.58 °C"], "ans": 1, "exp": "ઠારબિંદુ અવનયન દ્રાવ્યના મોલની સંખ્યા પર આધારિત છે, દ્રાવકના જથ્થા પર નહીં. તેથી ΔTf = 1.86 °C રહેશે.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-size='14'>NH₂</text><text x='40' y='30' font-size='14'>-C-</text><text x='70' y='20' font-size='14'>O</text><text x='70' y='40' font-size='14'>||</text><text x='90' y='30' font-size='14'>NH₂</text><line x1='50' y1='30' x2='65' y2='25' stroke='black'/><line x1='50' y1='30' x2='65' y2='35' stroke='black'/></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["ઑસ્મોટિક દબાણ એ કોલિગેટિવ ગુણધર્મ છે.", "ઠારબિંદુ અવનયન એ કોલિગેટિવ ગુણધર્મ નથી.", "ઉત્કલનબિંદુ ઉન્નયન એ કોલિગેટિવ ગુણધર્મ છે.", "બાષ્પદબાણ અવનયન એ કોલિગેટિવ ગુણધર્મ છે."], "ans": 1, "exp": "ઠારબિંદુ અવનયન પણ કોલિગેટિવ ગુણધર્મ છે, કારણ કે તે દ્રાવ્યના કણોની સંખ્યા પર આધારિત છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યનું વજન 5% છે. જો દ્રાવણનું કુલ વજન 200 ગ્રામ હોય, તો દ્રાવ્યનું વજન શું હશે?", "opts": ["5 ગ્રામ", "10 ગ્રામ", "15 ગ્રામ", "20 ગ્રામ"], "ans": 1, "exp": "5% દ્રાવ્ય એટલે 200 ગ્રામના 5% = 10 ગ્રામ દ્રાવ્ય.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું દ્રાવણ હાઇપરટોનિક દ્રાવણ છે?", "opts": ["0.1 M NaCl દ્રાવણ", "0.9% (w/v) NaCl દ્રાવણ", "5% (w/v) ગ્લુકોઝ દ્રાવણ", "10% (w/v) NaCl દ્રાવણ"], "ans": 3, "exp": "10% (w/v) NaCl દ્રાવણમાં ઓસ્મોટિક દબાણ વધારે હોય છે, જે હાઇપરટોનિક દ્રાવણ છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ઓસ્મોટિક દબાણ એ અર્ધપારગમ્ય પટલ દ્વારા દ્રાવકના પ્રવાહને રોકવા માટે જરૂરી દબાણ છે.", "ઓસ્મોટિક દબાણ દ્રાવણની સાંદ્રતા પર આધારિત નથી.", "ઓસ્મોટિક દબાણનું મૂલ્ય દ્રાવણના તાપમાન પર આધારિત છે.", "ઓસ્મોટિક દબાણની ગણતરી માટે વાન્ટ હૉફનું સમીકરણ π = iCRT વપરાય છે."], "ans": 1, "exp": "ઓસ્મોટિક દબાણ દ્રાવણની સાંદ્રતા પર સીધું આધારિત છે, તેથી આ વિધાન ખોટું છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25°C તાપમાને 1 લિટર પાણીમાં 0.1 મોલ ગ્લુકોઝ ઓગળેલ છે. આ દ્રાવણનું ઓસ્મોટિક દબાણ કેટલું હશે? (R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["2.44 atm", "1.22 atm", "0.61 atm", "4.88 atm"], "ans": 0, "exp": "π = CRT = 0.1 × 0.0821 × 298 = 2.44 atm.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L70 40 L90 60 L110 40 L130 60 L150 40 L170 60 L150 80 L130 60 L110 80 L90 60 L70 80 Z' fill='none' stroke='black' stroke-width='2'/><text x='30' y='65' font-size='12'>C</text><text x='70' y='35' font-size='12'>O</text><text x='110' y='35' font-size='12'>O</text><text x='150' y='35' font-size='12'>O</text><text x='190' y='65' font-size='12'>(OH)</text></svg>", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 1 લિટર પાણીમાં 34.2 ગ્રામ સુક્રોઝ (C₁₂H₂₂O₁₁) ઓગાળતાં બનતા દ્રાવણનું ઑસ્મોટિક દબાણ કેટલું હશે? (R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["1.23 atm", "2.46 atm", "0.615 atm", "4.92 atm"], "ans": 1, "exp": "સુક્રોઝનું મોલર દળ 342 ગ્રામ/મોલ છે. મોલારિટી = 0.1 M. ઑસ્મોટિક દબાણ π = CRT = 0.1 × 0.0821 × 298 = 2.446 atm ≈ 2.46 atm.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યનું વજન 10% છે. જો દ્રાવણનું કુલ વજન 200 ગ્રામ હોય, તો દ્રાવણની મોલાલિટી કેટલી હશે? (દ્રાવ્યનું મોલર દળ = 60 ગ્રામ/મોલ)", "opts": ["1.85 m", "0.925 m", "2.78 m", "3.70 m"], "ans": 0, "exp": "દ્રાવ્યનું વજન = 20 ગ્રામ, દ્રાવકનું વજન = 180 ગ્રામ. મોલાલિટી = (20/60) / 0.18 = 1.85 m.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 5% w/w ગ્લુકોઝ (C₆H₁₂O₆) છે. આ દ્રાવણનું ઓસ્મોટિક દબાણ 25°C તાપમાને કેટલું હશે? (ગ્લુકોઝનું આણ્વીય દળ = 180 g/mol, R = 0.0821 L atm K⁻¹ mol⁻¹)", "opts": ["6.84 atm", "3.42 atm", "1.71 atm", "0.85 atm"], "ans": 0, "exp": "ઓસ્મોટિક દબાણ π = CRT. 5% w/w ગ્લુકોઝ એટલે 5 ગ્રામ ગ્લુકોઝ 100 ગ્રામ દ્રાવણમાં, જે લગભગ 5 ગ્રામ/100 મિલી = 50 ગ્રામ/લિટર થાય. M = 50/180 = 0.278 M. π = 0.278 × 0.0821 × 298 ≈ 6.84 atm.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંયોજનોમાંથી કયું સંયોજન પાણીમાં ઓગળીને આયનીય દ્રાવણ બનાવે છે પરંતુ તેનું દ્રાવણ વીજળીનું વહન કરતું નથી?", "opts": ["NaCl", "CH₃COOH", "C₆H₁₂O₆ (ગ્લુકોઝ)", "BaSO₄"], "ans": 3, "exp": "BaSO₄ પાણીમાં ઓગળતું નથી પરંતુ તે આયનીય સંયોજન છે. તેના દ્રાવણમાં આયનો હોતા નથી તેથી વીજળીનું વહન થતું નથી.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-size='14'>Ba²⁺</text><text x='80' y='30' font-size='14'>SO₄²⁻</text><line x1='30' y1='30' x2='70' y2='30' stroke='black' stroke-width='2'/><circle cx='100' cy='60' r='25' fill='none' stroke='black' stroke-width='1'/><text x='85' y='65' font-size='12'>BaSO₄</text><text x='10' y='90' font-size='10'>ઓગળતું નથી</text></svg>", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 5 ગ્રામ યૂરિયા (NH₂CONH₂) 75 ગ્રામ પાણીમાં ઓગળેલ છે. આ દ્રાવણનું ઠારબિંદુ અવનયન (ΔTf) 2.0 K છે. જો પાણીનો મોલલ ઠારબિંદુ અવનયન અચળાંક (Kf) 1.86 K·kg·mol⁻¹ હોય, તો યૂરિયાનું આણ્વીય દળ કેટલું હશે?", "opts": ["60 ગ્રામ/મોલ", "30 ગ્રામ/મોલ", "45 ગ્રામ/મોલ", "90 ગ્રામ/મોલ"], "ans": 0, "exp": "ΔTf = Kf × m ⇒ m = ΔTf / Kf = 2.0 / 1.86 = 1.075 mol/kg. યૂરિયાનું આણ્વીય દળ = દળ / (મોલ × દ્રાવકનું દળ) = 5 / (1.075 × 0.075) ≈ 60 ગ્રામ/મોલ.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='10' y='30' font-size='14'>NH₂</text><line x1='40' y1='25' x2='70' y2='25' stroke='black'/><text x='75' y='30' font-size='14'>C=O</text><line x1='105' y1='25' x2='135' y2='25' stroke='black'/><text x='140' y='30' font-size='14'>NH₂</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું દ્રાવણ આદર્શ દ્રાવણ તરીકે વર્તે છે?", "opts": ["ઇથેનોલ અને પાણી", "બેન્ઝિન અને ટોલ્યુઇન", "એસિટોન અને ક્લોરોફોર્મ", "હાઇડ્રોક્લોરિક એસિડ અને પાણી"], "ans": 1, "exp": "બેન્ઝિન અને ટોલ્યુઇનના અણુઓ વચ્ચે આંતરઆણ્વિક આકર્ષણ બળો લગભગ સમાન હોવાથી તે આદર્શ દ્રાવણ તરીકે વર્તે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન ઓસ્મોટિક દબાણ માટે ખોટું છે?", "opts": ["ઓસ્મોટિક દબાણ દ્રાવણની સાંદ્રતા પર આધારિત છે.", "ઓસ્મોટિક દબાણ તાપમાન પર આધારિત નથી.", "ઓસ્મોટિક દબાણ અર્ધપારગમ્ય પટલની હાજરીમાં ઉદ્ભવે છે.", "ઓસ્મોટિક દબાણ વાન્ટ હૉફના સમીકરણ વડે દર્શાવી શકાય છે."], "ans": 1, "exp": "ઓસ્મોટિક દબાણ તાપમાન પર આધારિત છે, કારણ કે વાન્ટ હૉફનું સમીકરણ π = CRT છે, જેમાં T તાપમાન દર્શાવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં ગ્લુકોઝ (C₆H₁₂O₆) અને યૂરિયા (NH₂CONH₂) સમાન મોલલ સાંદ્રતામાં ઓગળેલા છે. નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["બંને દ્રાવણોનું ઠારબિંદુ અવનયન સમાન હશે.", "ગ્લુકોઝ દ્રાવણનું ઠારબિંદુ અવનયન વધુ હશે.", "યૂરિયા દ્રાવણનું ઠારબિંદુ અવનયન વધુ હશે.", "બંને દ્રાવણોનું ઉત્કલનબિંદુ ઉન્નયન સમાન હશે."], "ans": 0, "exp": "ઠારબિંદુ અવનયન (ΔTf) મોલલ સાંદ્રતા પર આધારિત છે, જે બંને દ્રાવણોમાં સમાન હોવાથી ΔTf પણ સમાન હશે.", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L70 40 L90 60 L110 40 L130 60 L150 40 L170 60' stroke='black' fill='none'/><text x='60' y='35' font-size='12'>O</text><text x='80' y='65' font-size='12'>OH</text><text x='100' y='35' font-size='12'>O</text><text x='120' y='65' font-size='12'>OH</text><text x='140' y='35' font-size='12'>O</text><text x='160' y='65' font-size='12'>OH</text><text x='180' y='55' font-size='12'>CH₂OH</text><path d='M40 80 L60 80 L60 60' stroke='black'/><path d='M180 80 L200 80 L200 60' stroke='black'/></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું દ્રાવણ અસ્થાયી છે અને અલગ થવાની વૃત્તિ ધરાવે છે?", "opts": ["સંતૃપ્ત દ્રાવણ", "અતિસંતૃપ્ત દ્રાવણ", "અસંતૃપ્ત દ્રાવણ", "આદર્શ દ્રાવણ"], "ans": 1, "exp": "અતિસંતૃપ્ત દ્રાવણમાં દ્રાવ્યનું પ્રમાણ સંતૃપ્ત દ્રાવણ કરતાં વધુ હોવાથી તે અસ્થાયી હોય છે અને અલગ થવાની વૃત્તિ ધરાવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં 5.85 ગ્રામ NaCl 500 ગ્રામ પાણીમાં ઓગળેલું છે. આ દ્રાવણની મોલાલિટી શું હશે? (NaClનું આણ્વીય દળ = 58.5 ગ્રામ/મોલ)", "opts": ["0.1 મોલ/કિગ્રા", "0.2 મોલ/કિગ્રા", "0.4 મોલ/કિગ્રા", "0.5 મોલ/કિગ્રા"], "ans": 1, "exp": "મોલાલિટી = દ્રાવ્યના મોલ / દ્રાવકનું વજન (કિગ્રા) = (5.85/58.5)/0.5 = 0.2 મોલ/કિગ્રા.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}, {"q": "25 °C તાપમાને 0.1 મોલલ યુરિયા (NH₂CONH₂) દ્રાવણનું ઠારબિંદુ અવનયન ΔTf કેટલું થશે? (પાણી માટે Kf = 1.86 K·kg·mol⁻¹)", "opts": ["0.0186 °C", "0.186 °C", "1.86 °C", "0.093 °C"], "ans": 1, "exp": "ΔTf = Kf × m = 1.86 × 0.1 = 0.186 °C", "chapter": "દ્રાવણો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><text x='80' y='30' font-size='14'>NH₂</text><line x1='95' y1='35' x2='110' y2='35' stroke='black'/><text x='110' y='30' font-size='12'>C</text><line x1='110' y1='35' x2='110' y2='50' stroke='black'/><line x1='105' y1='55' x2='115' y2='55' stroke='black'/><text x='95' y='65' font-size='14'>O</text><line x1='110' y1='50' x2='125' y2='35' stroke='black'/><text x='130' y='30' font-size='14'>NH₂</text></svg>", "subject": "CHEMISTRY"}, {"q": "એક દ્રાવણમાં દ્રાવ્યના કણોનું કદ 1 nm થી 1000 nm ની વચ્ચે હોય તો તે દ્રાવણને શું કહે છે?", "opts": ["સત્ય દ્રાવણ", "કલિલ દ્રાવણ", "નિલંબન", "આદર્શ દ્રાવણ"], "ans": 1, "exp": "દ્રાવ્યના કણોનું કદ 1 nm થી 1000 nm ની વચ્ચે હોય તો તેને કલિલ દ્રાવણ કહે છે, જે ટિંડલ અસર દર્શાવે છે.", "chapter": "દ્રાવણો", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "દ્રાવણો Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
