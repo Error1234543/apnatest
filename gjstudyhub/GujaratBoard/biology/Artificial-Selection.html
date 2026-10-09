@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artificial Selection</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Artificial Selection</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Artificial Selection</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "કૃત્રિમ પસંદગી દ્વારા ઉત્પન્ન થયેલી નવી જાતિઓમાં કયું લક્ષણ સૌથી વધુ સ્થિર રહે છે?", "opts": ["પર્યાવરણીય અનુકૂલન માટેની સંવેદનશીલતા", "ઉચ્ચ ઉત્પાદકતા સાથે સંકળાયેલ જનીન", "બહુ-જનીન લક્ષણોની અભિવ્યક્તિ", "પ્રજનન દરમાં અચાનક ઘટાડો"], "ans": 1, "exp": "કૃત્રિમ પસંદગીમાં, ઉચ્ચ ઉત્પાદકતા સાથે સંકળાયેલ જનીન (B) સૌથી વધુ સ્થિર રહે છે કારણ કે પસંદગી પ્રક્રિયા દરમિયાન આ જનીન પર સતત દબાણ રહે છે. પર્યાવરણીય અનુકૂલન (A) પર્યાવરણના ફેરફાર સાથે બદલાઈ શકે છે. બહુ-જનીન લક્ષણો (C) વધુ જટિલ હોવાથી સ્થિરતા ઓછી હોય છે. પ્રજનન દરમાં ઘટાડો (D) પસંદગીના લક્ષણ ન હોવાથી અસ્થિર રહે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી ગાયની જાતમાં દૂધના ઉત્પાદનમાં વધારો થાય છે. આમાં કયો સિદ્ધાંત લાગુ પડે છે?", "opts": ["પ્રાકૃતિક પસંદગી", "જનીન વહન", "સંકરણ", "દિશાત્મક પસંદગી"], "ans": 3, "exp": "દિશાત્મક પસંદગી (D) કૃત્રિમ પસંદગીનો એક પ્રકાર છે જ્યાં માનવી દ્વારા એક ચોક્કસ દિશામાં (ઉદા. દૂધના ઉત્પાદનમાં વધારો) લક્ષણોની પસંદગી કરવામાં આવે છે. પ્રાકૃતિક પસંદગી (A) પર્યાવરણ દ્વારા થાય છે. જનીન વહન (B) અને સંકરણ (C) કૃત્રિમ પસંદગીના સિદ્ધાંતો નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા ઉત્પન્ન થયેલી નવી જાતિમાં કયું લક્ષણ પેઢી દર પેઢી સ્થિર રહેતું નથી?", "opts": ["એક જનીન દ્વારા નિયંત્રિત લક્ષણ", "બહુ જનીન દ્વારા નિયંત્રિત લક્ષણ", "સંપૂર્ણ પ્રભાવી લક્ષણ", "લિંગ સાથે સંકળાયેલ લક્ષણ"], "ans": 1, "exp": "બહુ જનીન દ્વારા નિયંત્રિત લક્ષણ (B) પેઢી દર પેઢી સ્થિર રહેતું નથી કારણ કે તેના પર પર્યાવરણ અને જનીન પારસ્પરિક ક્રિયાઓનો પ્રભાવ રહે છે. એક જનીન દ્વારા નિયંત્રિત લક્ષણ (A), સંપૂર્ણ પ્રભાવી લક્ષણ (C), અને લિંગ સાથે સંકળાયેલ લક્ષણ (D) સામાન્ય રીતે સ્થિર રહે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી પાકની જાતમાં, કયું લક્ષણ સૌથી ઓછું પસંદ કરવામાં આવે છે?", "opts": ["રોગપ્રતિકારક શક્તિ", "ઉચ્ચ પોષક મૂલ્ય", "ઓછી પકવવાની અવધિ", "ઓછું બીયાં ઉત્પાદન"], "ans": 3, "exp": "ઓછું બીયાં ઉત્પાદન (D) કૃત્રિમ પસંદગી દ્વારા ઓછું પસંદ કરવામાં આવે છે કારણ કે તે પાકની ઉત્પાદકતામાં ઘટાડો કરે છે. રોગપ્રતિકારક શક્તિ (A), ઉચ્ચ પોષક મૂલ્ય (B), અને ઓછી પકવવાની અવધિ (C) વાણિજ્યિક દૃષ્ટિએ ફાયદાકારક હોવાથી પસંદ કરવામાં આવે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા ઉત્પન્ન થયેલી જાતિમાં, કયા પ્રકારના જનીન વિકલ્પ (મ્યુટેશન) ને સૌથી ઓછી તક મળે છે?", "opts": ["લાભદાયી મ્યુટેશન", "તટસ્થ મ્યુટેશન", "હાનિકારક મ્યુટેશન", "પ્રભાવી મ્યુટેશન"], "ans": 2, "exp": "હાનિકારક મ્યુટેશન (C) કૃત્રિમ પસંદગી દ્વારા ઉત્પન્ન થયેલી જાતિમાં સૌથી ઓછી તક મળે છે કારણ કે આવા મ્યુટેશન ધરાવતા જીવો પસંદગી પ્રક્રિયામાં ટકી શકતા નથી. લાભદાયી મ્યુટેશન (A) પસંદ કરવામાં આવે છે, તટસ્થ મ્યુટેશન (B) કોઈ પ્રભાવ ન ધરાવતાં ટકી શકે છે, અને પ્રભાવી મ્યુટેશન (D) પસંદગી દરમિયાન જોવા મળી શકે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી કુતરાની જાતમાં, જો સતત પેઢીદરપેઢી મોટા કદના કુતરાઓની પસંદગી કરવામાં આવે, તો લાંબા ગાળે કયું પરિણામ જોવા મળશે?", "opts": ["કુતરાઓનો સરેરાશ કદ ઘટશે કારણ કે પ્રાકૃતિક પસંદગી તેને સંતુલિત કરશે", "કુતરાઓનો સરેરાશ કદ વધશે પરંતુ જનીનિક વિવિધતા ઘટશે", "કુતરાઓનો કદ સ્થિર રહેશે કારણ કે જનીનિક સીમા સિધ્ધ થઈ ગઈ હશે", "કુતરાઓમાં નવા લક્ષણો ઉદ્ભવશે કારણ કે પર્યાવરણીય દબાણ વધશે"], "ans": 1, "exp": "કૃત્રિમ પસંદગી દ્વારા સતત મોટા કદની પસંદગી કરવાથી સરેરાશ કદ વધશે, પરંતુ જનીનિક વિવિધતા ઘટશે કારણ કે ફક્ત ચોક્કસ જનીનો ધરાવતા પ્રાણીઓની પસંદગી થશે. A) ખોટું છે કારણ કે પ્રાકૃતિક પસંદગી અહીં પ્રભાવી નથી. C) ખોટું છે કારણ કે જનીનિક સીમા સિધ્ધ થતી નથી, પરંતુ વિવિધતા ઘટે છે. D) ખોટું છે કારણ કે નવા લક્ષણો પર્યાવરણીય દબાણથી નહીં, પરંતુ મ્યુટેશનથી ઉદ્ભવે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી મકાઈની જાતમાં, જો ફક્ત મીઠા દાણાવાળી વનસ્પતિઓની પસંદગી કરવામાં આવે, તો લાંબા ગાળે કયું પરિણામ જોવા મળશે?", "opts": ["મીઠા દાણાવાળી વનસ્પતિઓની સંખ્યા ઘટશે કારણ કે તે ઓછી ફળદ્રુપ હશે", "મીઠા દાણાવાળી વનસ્પતિઓની સંખ્યા વધશે પરંતુ તે રોગો પ્રત્યે વધુ સંવેદનશીલ બનશે", "મીઠા દાણાવાળી વનસ્પતિઓની સંખ્યા સ્થિર રહેશે કારણ કે જનીનિક સંતુલન સિધ્ધ થશે", "મીઠા દાણાવાળી વનસ્પતિઓમાં નવા રંગો ઉદ્ભવશે"], "ans": 1, "exp": "કૃત્રિમ પસંદગી દ્વારા ફક્ત મીઠા દાણાવાળી વનસ્પતિઓની પસંદગી કરવાથી તેની સંખ્યા વધશે, પરંતુ જનીનિક વિવિધતા ઘટવાથી તે રોગો પ્રત્યે વધુ સંવેદનશીલ બનશે. A) ખોટું છે કારણ કે ફળદ્રુપતા પર અસર થતી નથી. C) ખોટું છે કારણ કે જનીનિક સંતુલન સિધ્ધ થતું નથી. D) ખોટું છે કારણ કે નવા રંગો મ્યુટેશનથી ઉદ્ભવે, કૃત્રિમ પસંદગીથી નહીં.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી કુક્કુટપાલકીની જાતમાં, જો સતત અંડા ઉત્પાદન વધારવા માટે પસંદગી કરવામાં આવે, તો કયું પરિણામ અનપેક્ષિત હશે?", "opts": ["કુક્કુટપાલકીનું વજન ઘટશે કારણ કે શરીરનું ઊર્જા અંડા ઉત્પાદન તરફ વપરાશે", "કુક્કુટપાલકીનું આયુષ્ય વધશે કારણ કે તે વધુ સ્વસ્થ બનશે", "કુક્કુટપાલકીનું માંસનું પ્રમાણ વધશે", "કુક્કુટપાલકીની રોગપ્રતિકારક શક્તિ વધશે"], "ans": 0, "exp": "સતત અંડા ઉત્પાદન વધારવા માટે પસંદગી કરવાથી કુક્કુટપાલકીનું વજન ઘટશે કારણ કે શરીરનું ઊર્જા અંડા ઉત્પાદન તરફ વપરાશે. B) ખોટું છે કારણ કે આયુષ્ય ઘટશે. C) ખોટું છે કારણ કે માંસનું પ્રમાણ ઘટશે. D) ખોટું છે કારણ કે રોગપ્રતિકારક શક્તિ ઘટશે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી ગાયની જાતમાં, જો ફક્ત દૂધના ઉત્પાદનમાં વધારો કરવા માટે પસંદગી કરવામાં આવે, તો કયું લક્ષણ અનિચ્છનીય રૂપે વિકસી શકે?", "opts": ["ગાયનું કદ ઘટશે", "ગાયની પ્રજનન ક્ષમતા ઘટશે", "ગાયનું વજન વધશે", "ગાયની રોગપ્રતિકારક શક્તિ વધશે"], "ans": 1, "exp": "ફક્ત દૂધના ઉત્પાદનમાં વધારો કરવા માટે પસંદગી કરવાથી ગાયની પ્રજનન ક્ષમતા ઘટી શકે કારણ કે શરીરનું ઊર્જા દૂધ ઉત્પાદન તરફ વપરાશે. A) ખોટું છે કારણ કે કદ ઘટશે નહીં. C) ખોટું છે કારણ કે વજન વધશે નહીં. D) ખોટું છે કારણ કે રોગપ્રતિકારક શક્તિ ઘટશે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી ફૂલની જાતમાં, જો ફક્ત મોટા અને રંગીન ફૂલોની પસંદગી કરવામાં આવે, તો કયું પરિણામ જોવા મળશે?", "opts": ["ફૂલોનું પરાગનયન સરળ બનશે", "ફૂલોની સંખ્યા ઘટશે કારણ કે વનસ્પતિ તેના વિકાસ પર ધ્યાન કેન્દ્રિત કરશે", "ફૂલોની ગંધ ઘટશે કારણ કે ઊર્જા રંગ અને કદ તરફ વપરાશે", "ફૂલોની આયુષ્ય વધશે"], "ans": 2, "exp": "ફક્ત મોટા અને રંગીન ફૂલોની પસંદગી કરવાથી ફૂલોની ગંધ ઘટશે કારણ કે વનસ્પતિનું ઊર્જા રંગ અને કદ તરફ વપરાશે. A) ખોટું છે કારણ કે પરાગનયન સરળ બનશે નહીં. B) ખોટું છે કારણ કે ફૂલોની સંખ્યા ઘટશે નહીં. D) ખોટું છે કારણ કે ફૂલોની આયુષ્ય વધશે નહીં.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક જાતમાં, જો સતત પેઢીદરપેઢી લાંબા કાનવાળા ખીસકોલીની પસંદગી કરવામાં આવે, તો કયું પરિણામ સૌથી ઓછું શક્ય છે?", "opts": ["લાંબા કાનના જનીનની આવૃત્તિ વસ્તીમાં વધશે", "ખીસકોલીની કાનની લંબાઈમાં વંશપરંપરાગત વૈવિધ્ય ઘટશે", "લાંબા કાનના લક્ષણ માટે હેટરોઝાયગસ જનીનપ્રકાર ધરાવતા ખીસકોલીની સંખ્યા વધશે", "કાનની લંબાઈ સાથે સંબંધિત જનીનમાં નવા મ્યુટેશનની શક્યતા ઘટશે"], "ans": 3, "exp": "કૃત્રિમ પસંદગી દરમિયાન, સતત પસંદગી કરવાથી લાંબા કાનના જનીનની આવૃત્તિ વધશે (A યોગ્ય), વૈવિધ્ય ઘટશે (B યોગ્ય), અને હેટરોઝાયગસ જનીનપ્રકાર ધરાવતા પ્રાણીઓની સંખ્યા વધી શકે (C યોગ્ય). પરંતુ મ્યુટેશનની શક્યતા પસંદગી દ્વારા પ્રભાવિત થતી નથી, તે યાદચ્છિક રીતે થાય છે. તેથી D પરિણામ સૌથી ઓછું શક્ય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક વનસ્પતિ જાતમાં, જો ફક્ત મોટા ફળો ધરાવતી વનસ્પતિઓની પસંદગી કરવામાં આવે, તો કયું વિધાન ખોટું છે?", "opts": ["મોટા ફળોના લક્ષણ માટે ડોમિનન્ટ એલિલની આવૃત્તિ વધશે", "ફળના કદ સાથે સંબંધિત જનીનમાં જનીનિક વૈવિધ્ય ઘટશે", "મોટા ફળો ધરાવતી વનસ્પતિઓમાં પ્રજનન ક્ષમતા ઘટશે", "પસંદગી દબાણ હેઠળ, ફળના કદ માટે નવા ફિનોટાઇપ્સ ઉદ્ભવી શકે"], "ans": 2, "exp": "કૃત્રિમ પસંદગી દરમિયાન, ડોમિનન્ટ એલિલની આવૃત્તિ વધશે (A યોગ્ય), જનીનિક વૈવિધ્ય ઘટશે (B યોગ્ય), અને નવા ફિનોટાઇપ્સ ઉદ્ભવી શકે (D યોગ્ય). પરંતુ પ્રજનન ક્ષમતા ઘટવાનું કોઈ કારણ નથી, તે પસંદગી સાથે સંબંધિત નથી. તેથી C ખોટું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક પાકની જાતમાં, જો ફક્ત રોગપ્રતિકારકતા ધરાવતી વનસ્પતિઓની પસંદગી કરવામાં આવે, તો કયું પરિણામ સૌથી ઓછું શક્ય છે?", "opts": ["રોગપ્રતિકારકતા માટેના જનીનની આવૃત્તિ વધશે", "રોગપ્રતિકારકતા સાથે સંબંધિત જનીનમાં જનીનિક વૈવિધ્ય ઘટશે", "રોગપ્રતિકારકતા ધરાવતી વનસ્પતિઓમાં પ્રજનન ક્ષમતા ઘટશે", "રોગપ્રતિકારકતા માટેના જનીનમાં નવા એલિલ્સ ઉદ્ભવી શકે"], "ans": 2, "exp": "કૃત્રિમ પસંદગી દરમિયાન, રોગપ્રતિકારકતા માટેના જનીનની આવૃત્તિ વધશે (A યોગ્ય), જનીનિક વૈવિધ્ય ઘટશે (B યોગ્ય), અને નવા એલિલ્સ ઉદ્ભવી શકે (D યોગ્ય). પરંતુ પ્રજનન ક્ષમતા ઘટવાનું કોઈ કારણ નથી, તે પસંદગી સાથે સંબંધિત નથી. તેથી C સૌથી ઓછું શક્ય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n(1) કૃત્રિમ પસંદગી દરમિયાન, માનવ દ્વારા પસંદ કરાયેલા લક્ષણો હંમેશા પ્રાકૃતિક પસંદગી માટે લાભદાયી હોય છે.\n(2) કૃત્રિમ પસંદગી દ્વારા વિકસિત જાતિઓમાં જનીનિક વિવિધતા ઘટી શકે છે, જે પર્યાવરણીય ફેરફારો સામે સંવેદનશીલ બનાવે છે.\n(3) કૃત્રિમ પસંદગી માત્ર પ્રાણીઓમાં જ શક્ય છે, વનસ્પતિઓમાં નહીં.\n(4) કૃત્રિમ પસંદગી દ્વારા વિકસિત લક્ષણો હંમેશા વારસાગત હોય છે અને પેઢી દર પેઢી સ્થિર રહે છે.", "opts": ["ફક્ત (2) સાચું છે", "(1) અને (2) સાચાં છે", "(2) અને (4) સાચાં છે", "(1), (2) અને (3) સાચાં છે"], "ans": 0, "exp": "(1) ખોટું છે કારણ કે કૃત્રિમ પસંદગી દ્વારા પસંદ કરાયેલા લક્ષણો પ્રાકૃતિક પસંદગી માટે હંમેશા લાભદાયી હોતા નથી. ઉદાહરણ તરીકે, મોટા કદના ફળો ધરાવતી વનસ્પતિઓ પ્રાકૃતિક પર્યાવરણમાં ટકી શકતી નથી.\n(2) સાચું છે કારણ કે કૃત્રિમ પસંદગી દરમિયાન જનીનિક વિવિધતા ઘટે છે, જે પર્યાવરણીય ફેરફારો સામે પ્રતિકાર ઘટાડે છે.\n(3) ખોટું છે કારણ કે કૃત્રિમ પસંદગી વનસ્પતિઓમાં પણ શક્ય છે, જેમ કે મકાઈ અને ઘઉંની જાતો.\n(4) ખોટું છે કારણ કે કૃત્રિમ પસંદગી દ્વારા વિકસિત લક્ષણો હંમેશા સ્થિર રહેતા નથી, કેટલાક લક્ષણો પર્યાવરણીય અસરોને કારણે બદલાઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક ખેડૂત કૃત્રિમ પસંદગી દ્વારા મકાઈની નવી જાત વિકસાવવા માંગે છે, જેમાં ઉચ્ચ કાર્બોદિત ધરાવતા દાણા અને રોગપ્રતિકારકતા બંને લક્ષણો હોય. આ પ્રક્રિયામાં નીચેનામાંથી કયું પગલું સૌથી ઓછું અસરકારક સાબિત થશે?", "opts": ["ફક્ત ઉચ્ચ કાર્બોદિત ધરાવતી વનસ્પતિઓની પસંદગી કરીને તેમનું પરસ્પર પરાગનયન કરાવવું", "રોગપ્રતિકારકતા ધરાવતી વનસ્પતિઓની પસંદગી કરીને તેમનું પરસ્પર પરાગનયન કરાવવું", "ઉચ્ચ કાર્બોદિત અને રોગપ્રતિકારકતા બંને લક્ષણો ધરાવતી વનસ્પતિઓની પસંદગી કરીને તેમનું પરસ્પર પરાગનયન કરાવવું", "જનીન ઇજનેરીનો ઉપયોગ કરીને બંને લક્ષણો ધરાવતા જનીનોનું સ્થાનાંતરણ કરવું"], "ans": 0, "exp": "A) સૌથી ઓછું અસરકારક છે કારણ કે ફક્ત ઉચ્ચ કાર્બોદિત ધરાવતી વનસ્પતિઓની પસંદગી કરવાથી રોગપ્રતિકારકતા લક્ષણ વિકસિત થશે નહીં. કૃત્રિમ પસંદગીમાં બંને લક્ષણો માટે પસંદગી જરૂરી છે.\nB) ખોટું છે કારણ કે આ પગલું રોગપ્રતિકારકતા માટે અસરકારક છે, પરંતુ કાર્બોદિત લક્ષણને અવગણે છે.\nC) ખોટું નથી કારણ કે બંને લક્ષણો ધરાવતી વનસ્પતિઓની પસંદગી કરવાથી ઇચ્છિત પરિણામ મળી શકે છે.\nD) ખોટું નથી કારણ કે જનીન ઇજનેરીનો ઉપયોગ આધુનિક પદ્ધતિ છે જે બંને લક્ષણોનું સ્થાનાંતરણ કરી શકે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ અને Std 12 - પ્રકરણ 9: વ્યૂહરચના અને ઉન્નતિ", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક કુતરાની જાતમાં, જો સતત પેઢીદરપેઢી ફક્ત લાંબા કાનવાળા કુતરાઓની પસંદગી કરવામાં આવે, તો લાંબા ગાળે શું થશે?", "opts": ["કાનની લંબાઈમાં વધારો થશે અને કાનની આકારમાં પણ ફેરફાર થશે", "કાનની લંબાઈમાં વધારો થશે પરંતુ કાનની આકારમાં કોઈ ફેરફાર થશે નહીં", "કાનની લંબાઈમાં વધારો થશે પરંતુ કાનની સ્વાસ્થ્ય પર અસર પડશે", "કાનની લંબાઈમાં વધારો થશે અને કાનની સ્વાસ્થ્ય પર કોઈ અસર પડશે નહીં"], "ans": 0, "exp": "સાચો વિકલ્પ A છે. કૃત્રિમ પસંદગી દ્વારા ફક્ત લાંબા કાનવાળા કુતરાઓની પસંદગી કરવાથી કાનની લંબાઈમાં વધારો થશે, પરંતુ કાનની આકારમાં પણ ફેરફાર થઈ શકે છે કારણ કે લાંબા કાન સાથે જોડાયેલા અન્ય જનીનો પણ પસંદ થઈ શકે છે. વિકલ્પ B ખોટો છે કારણ કે કાનની આકારમાં ફેરફાર થઈ શકે છે. વિકલ્પ C ખોટો છે કારણ કે કાનની સ્વાસ્થ્ય પર અસર પડી શકે છે, પરંતુ તે નિશ્ચિત નથી. વિકલ્પ D ખોટો છે કારણ કે કાનની સ્વાસ્થ્ય પર અસર પડી શકે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક ફૂલની જાતમાં, જો ફક્ત મોટા અને રંગીન ફૂલોની પસંદગી કરવામાં આવે, તો લાંબા ગાળે શું થશે?", "opts": ["ફૂલોનો આકાર મોટો થશે પરંતુ રંગમાં કોઈ ફેરફાર થશે નહીં", "ફૂલોનો આકાર મોટો થશે અને રંગ પણ વધુ તીવ્ર થશે", "ફૂલોનો આકાર મોટો થશે પરંતુ રંગ ફિક્કો પડશે", "ફૂલોનો આકાર મોટો થશે અને ફૂલની સંખ્યા ઘટશે"], "ans": 1, "exp": "સાચો વિકલ્પ B છે. કૃત્રિમ પસંદગી દ્વારા ફક્ત મોટા અને રંગીન ફૂલોની પસંદગી કરવાથી ફૂલોનો આકાર મોટો થશે અને રંગ પણ વધુ તીવ્ર થશે, કારણ કે આ લક્ષણો એકબીજા સાથે સહસંબંધ ધરાવી શકે છે. વિકલ્પ A ખોટો છે કારણ કે રંગમાં ફેરફાર થઈ શકે છે. વિકલ્પ C ખોટો છે કારણ કે રંગ ફિક્કો પડવાની કોઈ ખાતરી નથી. વિકલ્પ D ખોટો છે કારણ કે ફૂલની સંખ્યા ઘટવાની કોઈ ખાતરી નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "કૃત્રિમ પસંદગી દ્વારા વિકસાવેલી એક પાકની જાતમાં, જો ફક્ત મોટા ફળો ધરાવતી વનસ્પતિઓની પસંદગી કરવામાં આવે, તો લાંબા ગાળે શું થશે?", "opts": ["ફળોનો આકાર મોટો થશે પરંતુ ફળની ગુણવત્તા ઘટશે", "ફળોનો આકાર મોટો થશે અને ફળની ગુણવત્તા પણ સુધરશે", "ફળોનો આકાર મોટો થશે પરંતુ વનસ્પતિની વૃદ્ધિ દર ઘટશે", "ફળોનો આકાર મોટો થશે અને વનસ્પતિની રોગપ્રતિકારકતા ઘટશે"], "ans": 0, "exp": "સાચો વિકલ્પ A છે. કૃત્રિમ પસંદગી દ્વારા ફક્ત મોટા ફળો ધરાવતી વનસ્પતિઓની પસંદગી કરવાથી ફળોનો આકાર મોટો થશે, પરંતુ ફળની ગુણવત્તા ઘટી શકે છે કારણ કે મોટા ફળો સાથે જોડાયેલા જનીનો ગુણવત્તા પર અસર કરી શકે છે. વિકલ્પ B ખોટો છે કારણ કે ફળની ગુણવત્તા ઘટી શકે છે. વિકલ્પ C ખોટો છે કારણ કે વનસ્પતિની વૃદ્ધિ દર ઘટવાની કોઈ ખાતરી નથી. વિકલ્પ D ખોટો છે કારણ કે વનસ્પતિની રોગપ્રતિકારકતા ઘટવાની કોઈ ખાતરી નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો:\n(1) કૃત્રિમ પસંદગી દરમિયાન, માનવ દ્વારા પસંદ કરાયેલા લક્ષણો હંમેશા પ્રાકૃતિક પસંદગી માટે લાભદાયી હોય છે.\n(2) કૃત્રિમ પસંદગી દ્વારા વિકસિત જાતિઓમાં જનીનિક વિવિધતા ઘટી શકે છે.\n(3) કૃત્રિમ પસંદગી માત્ર પ્રાણીઓમાં જ શક્ય છે, વનસ્પતિઓમાં નહીં.", "opts": ["વિધાન (1) અને (2) સાચાં છે, (3) ખોટું છે", "વિધાન (1) અને (3) ખોટાં છે, (2) સાચું છે", "વિધાન (2) અને (3) સાચાં છે, (1) ખોટું છે", "ત્રણેય વિધાનો સાચાં છે"], "ans": 1, "exp": "વિધાન (1) ખોટું છે કારણ કે કૃત્રિમ પસંદગી દ્વારા પસંદ કરાયેલા લક્ષણો પ્રાકૃતિક પસંદગી માટે હંમેશા લાભદાયી ન પણ હોય (દા.ત. વધુ દૂધ ઉત્પાદન માટેની ગાયની જાતમાં પ્રજનનક્ષમતા ઘટી શકે છે). વિધાન (2) સાચું છે કારણ કે કૃત્રિમ પસંદગી દરમિયાન ચોક્કસ લક્ષણો માટેની પસંદગી જનીનિક વિવિધતા ઘટાડે છે. વિધાન (3) ખોટું છે કારણ કે કૃત્રિમ પસંદગી વનસ્પતિઓમાં પણ લાગુ પડે છે (દા.ત. મકાઈ, ઘઉંની જાતો).", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક ખેડૂત કૃત્રિમ પસંદગી દ્વારા ટામેટાંની નવી જાત વિકસાવવા માંગે છે, જેમાં મોટા ફળો અને રોગપ્રતિકારકતા બંને લક્ષણો હોય. આ પ્રક્રિયામાં નીચેનામાંથી કયું પરિણામ સૌથી ઓછું સંભવિત છે?", "opts": ["મોટા ફળો ધરાવતી વનસ્પતિઓમાં રોગપ્રતિકારકતા જનીનોની ગેરહાજરી હોઈ શકે છે", "બંને લક્ષણો ધરાવતી વનસ્પતિઓમાં પ્રજનનક્ષમતા ઘટી શકે છે", "કૃત્રિમ પસંદગી દ્વારા બંને લક્ષણો એકસાથે સંપૂર્ણ રીતે વિકસિત થઈ શકે છે", "રોગપ્રતિકારકતા ધરાવતી વનસ્પતિઓમાં ફળોનું કદ નાનું હોઈ શકે છે"], "ans": 2, "exp": "કૃત્રિમ પસંદગી દ્વારા બંને લક્ષણો એકસાથે સંપૂર્ણ રીતે વિકસિત થવું મુશ્કેલ છે કારણ કે જનીનો વચ્ચે સંબંધ હોઈ શકે છે (લિન્કેજ) અથવા એક લક્ષણની પસંદગી બીજા લક્ષણને અસર કરી શકે છે. વિકલ્પ A, B અને D વાસ્તવિક પરિસ્થિતિઓ દર્શાવે છે જ્યારે વિકલ્પ C અત્યંત અસંભવિત છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાઓ, પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
