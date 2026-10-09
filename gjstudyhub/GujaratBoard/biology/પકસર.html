@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પુંકેસર</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પુંકેસર</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પુંકેસર</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "પુંકેસરની રચના દરમિયાન નીચેનામાંથી કયો હોર્મોન મુખ્ય ભૂમિકા ભજવે છે, જ્યારે તેના અભાવે પુંકેસરનું રૂપાંતરણ અટકી જાય છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "જિબરેલિન હોર્મોન પુંકેસરના રૂપાંતરણમાં મુખ્ય ભૂમિકા ભજવે છે. ઓક્સિન (A) વૃદ્ધિ અને કોષવિભાજનમાં મદદ કરે છે, પરંતુ પુંકેસરના રૂપાંતરણમાં નહીં. સાયટોકાઇનિન (C) કોષવિભાજનને પ્રોત્સાહન આપે છે, પરંતુ પુંકેસરના વિકાસમાં નહીં. એબ્સિસિક એસિડ (D) વૃદ્ધિને અટકાવે છે, જ્યારે જિબરેલિન (B) પુંકેસરના વિકાસને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "પુંકેસરમાં પરાગકોષની રચના કયા પ્રકારના કોષવિભાજન દ્વારા થાય છે?", "opts": ["સમસૂત્રી કોષવિભાજન", "અર્ધસૂત્રી કોષવિભાજન - I", "અર્ધસૂત્રી કોષવિભાજન - II", "અમિતોસિસ"], "ans": 1, "exp": "પરાગકોષની રચના અર્ધસૂત્રી કોષવિભાજન - I દ્વારા થાય છે, જેમાં ક્રોમોસોમની સંખ્યા અડધી થાય છે. સમસૂત્રી કોષવિભાજન (A) સોમેટિક કોષોમાં થાય છે. અર્ધસૂત્રી કોષવિભાજન - II (C) પરાગકોષમાં થતું નથી, પરંતુ પરાગરજના નિર્માણમાં થાય છે. અમિતોસિસ (D) પ્રોકેરિયોટ્સમાં થાય છે.", "ref": "Std 12 - પ્રકરણ 4: કોષવિભાજન", "ch": ""}, {"q": "પુંકેસરમાં પરાગનલિકાની વૃદ્ધિ દરમિયાન નીચેનામાંથી કયો પદાર્થ પરાગકોષની દીવાલને તોડવામાં મદદ કરે છે?", "opts": ["પેક્ટિનેઝ", "સેલ્યુલેઝ", "એમાઇલેઝ", "પ્રોટિયેઝ"], "ans": 0, "exp": "પરાગનલિકાની વૃદ્ધિ દરમિયાન પેક્ટિનેઝ ઉત્સેચક પરાગકોષની દીવાલને તોડવામાં મદદ કરે છે, જેમાં પેક્ટિન હાજર હોય છે. સેલ્યુલેઝ (B) સેલ્યુલોઝને તોડે છે, એમાઇલેઝ (C) સ્ટાર્ચને તોડે છે, અને પ્રોટિયેઝ (D) પ્રોટીનને તોડે છે.", "ref": "Std 12 - પ્રકરણ 2: વનસ્પતિ શરીરક્રિયા", "ch": ""}, {"q": "પુંકેસરમાં પરાગરજના નિર્માણ દરમિયાન કયા તબક્કે DNAનું દુપ્લિકેશન થાય છે?", "opts": ["પરાગમાતૃકોષ", "પ્રથમ મિયોટિક વિભાજન પહેલા", "દ્વિતીય મિયોટિક વિભાજન પહેલા", "પરાગકોષના નિર્માણ પછી"], "ans": 1, "exp": "પરાગરજના નિર્માણ દરમિયાન DNAનું દુપ્લિકેશન પ્રથમ મિયોટિક વિભાજન (અર્ધસૂત્રી કોષવિભાજન - I) પહેલા થાય છે. પરાગમાતૃકોષ (A)માં DNA દુપ્લિકેશન થતું નથી. દ્વિતીય મિયોટિક વિભાજન (C) પહેલા DNA દુપ્લિકેશન થતું નથી, અને પરાગકોષના નિર્માણ પછી (D) પણ DNA દુપ્લિકેશન થતું નથી.", "ref": "Std 12 - પ્રકરણ 4: કોષવિભાજન", "ch": ""}, {"q": "પુંકેસરમાં પરાગનલિકાની વૃદ્ધિ દરમિયાન નીચેનામાંથી કયો હોર્મોન પરાગનલિકાની લંબાઈને પ્રભાવિત કરે છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "ઇથિલીન"], "ans": 0, "exp": "પરાગનલિકાની વૃદ્ધિ દરમિયાન ઓક્સિન હોર્મોન પરાગનલિકાની લંબાઈને પ્રભાવિત કરે છે. જિબરેલિન (B) પુંકેસરના રૂપાંતરણમાં મદદ કરે છે, સાયટોકાઇનિન (C) કોષવિભાજનને પ્રોત્સાહન આપે છે, અને ઇથિલીન (D) ફળના પાકવામાં મદદ કરે છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "પુંકેસરના વિકાસ દરમિયાન, નીચેનામાંથી કયો તબક્કો 'માઇક્રોસ્પોરોજેનેસિસ' તરીકે ઓળખાય છે, જ્યારે મેગાસ્પોર મધ્યસ્થી (Megaspore Mother Cell) નું કોષવિભાજન થાય છે?", "opts": ["પરાગકોષના નિર્માણ પહેલાંનું મિટોટિક વિભાજન", "પરાગરજ કોષમાં હેપ્લોઈડ કોષોનું નિર્માણ", "પરાગાશયમાં ડિપ્લોઈડ માઇક્રોસ્પોર મધ્યસ્થી કોષનું મિયોસિસ દ્વારા વિભાજન", "પરાગનલિકાની વૃદ્ધિ દરમિયાનનું સાયટોકાઇનિસિસ"], "ans": 2, "exp": "પુંકેસરમાં 'માઇક્રોસ્પોરોજેનેસિસ' એ મેગાસ્પોર મધ્યસ્થી કોષ (Microspore Mother Cell) નું મિયોસિસ દ્વારા વિભાજન થવાનો તબક્કો છે, જેમાં ડિપ્લોઈડ કોષોમાંથી હેપ્લોઈડ માઇક્રોસ્પોર (પરાગરજ) નિર્માણ થાય છે. વિકલ્પ A મિટોટિક વિભાજન છે, જે માઇક્રોસ્પોરોજેનેસિસ નથી. વિકલ્પ B પરાગરજ કોષમાં હેપ્લોઈડ કોષોનું નિર્માણ છે, પરંતુ તે માઇક્રોસ્પોરોજેનેસિસ નહીં પરંતુ તે પછીનો તબક્કો છે. વિકલ્પ D પરાગનલિકાની વૃદ્ધિ સાથે સંબંધિત છે, માઇક્રોસ્પોરોજેનેસિસ નહીં.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "પુંકેસરમાં પરાગકોષની રચના દરમિયાન, નીચેનામાંથી કયો કોષ 'જનન કોષ' (Generative Cell) અને 'નલિકા કોષ' (Tube Cell) માં વિભાજિત થાય છે?", "opts": ["માઇક્રોસ્પોર મધ્યસ્થી કોષ", "એકકોષીય પરાગરજ", "દ્વિકોષીય પરાગરજ", "ત્રિકોષીય પરાગરજ"], "ans": 1, "exp": "પુંકેસરમાં, એકકોષીય પરાગરજ (Uninucleate Pollen Grain) મિટોટિક વિભાજન દ્વારા 'જનન કોષ' અને 'નલિકા કોષ' માં વિભાજિત થાય છે, જે દ્વિકોષીય પરાગરજનું નિર્માણ કરે છે. વિકલ્પ A (માઇક્રોસ્પોર મધ્યસ્થી કોષ) મિયોસિસ દ્વારા વિભાજિત થાય છે, પરંતુ તે જનન કોષ અને નલિકા કોષમાં નહીં. વિકલ્પ C અને D અગાઉના તબક્કા છે અથવા પછીના તબક્કા છે.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "પુંકેસરમાં પરાગનલિકાની વૃદ્ધિ દરમિયાન, નીચેનામાંથી કયો પદાર્થ પરાગકોષની દીવાલને પચાવીને પરાગનલિકાની વૃદ્ધિને સહાય કરે છે?", "opts": ["સેલ્યુલેઝ", "પેક્ટિનેઝ", "એમાઇલેઝ", "પ્રોટીએજ"], "ans": 1, "exp": "પરાગનલિકાની વૃદ્ધિ દરમિયાન, પરાગકોષની દીવાલ મુખ્યત્વે પેક્ટિન અને હેમિસેલ્યુલોઝ ધરાવે છે. 'પેક્ટિનેઝ' ઉત્સેચક પેક્ટિનને તોડીને પરાગનલિકાની વૃદ્ધિને સહાય કરે છે. સેલ્યુલેઝ (A) સેલ્યુલોઝને તોડે છે, પરંતુ પરાગકોષની દીવાલમાં સેલ્યુલોઝ નહીંવત્ પ્રમાણમાં હોય છે. એમાઇલેઝ (C) સ્ટાર્ચને તોડે છે, જે અહીં લાગુ પડતું નથી. પ્રોટીએજ (D) પ્રોટીનને તોડે છે, જે પરાગકોષની દીવાલમાં નહીં હોય.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "પુંકેસરમાં પરાગરજના વિકાસ દરમિયાન, નીચેનામાંથી કયો તબક્કો 'ટેટ્રાડ' તરીકે ઓળખાય છે?", "opts": ["માઇક્રોસ્પોર મધ્યસ્થી કોષનું મિયોસિસ I પછીનું સ્ટેજ", "માઇક્રોસ્પોર મધ્યસ્થી કોષનું મિયોસિસ II પછીનું સ્ટેજ", "પરાગરજ કોષનું મિટોટિક વિભાજન પછીનું સ્ટેજ", "પરાગનલિકાની વૃદ્ધિ દરમિયાનનું સ્ટેજ"], "ans": 1, "exp": "'ટેટ્રાડ' તબક્કો માઇક્રોસ્પોર મધ્યસ્થી કોષનું મિયોસિસ II પૂર્ણ થયા પછીનો તબક્કો છે, જ્યારે ચાર હેપ્લોઈડ માઇક્રોસ્પોર (પરાગરજ) નિર્માણ થાય છે. વિકલ્પ A મિયોસિસ I પછીનો તબક્કો છે, જ્યારે ડિપ્લોઈડ કોષો વહેંચાયેલા હોય છે, પરંતુ ટેટ્રાડ નથી. વિકલ્પ C અને D પરાગરજના વિકાસના પછીના તબક્કા છે.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "પુંકેસરમાં પરાગકોષની રચના દરમિયાન, નીચેનામાંથી કયો હોર્મોન પરાગરજના પરિપક્વતામાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "પુંકેસરમાં પરાગરજના પરિપક્વતામાં 'જિબરેલિન' હોર્મોન મહત્વની ભૂમિકા ભજવે છે. ઓક્સિન (A) પરાગનલિકાની વૃદ્ધિને પ્રભાવિત કરે છે, પરંતુ પરાગરજના પરિપક્વતામાં નહીં. સાયટોકાઇનિન (C) કોષવિભાજનને પ્રોત્સાહન આપે છે, પરંતુ પરાગરજના પરિપક્વતામાં તેની ભૂમિકા મર્યાદિત છે. એબ્સિસિક એસિડ (D) વિકાસને અવરોધે છે, પરાગરજના પરિપક્વતામાં નહીં.", "ref": "Std 12 - અધ્યાય 2: પુષ્પી વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "પુંકેસરના વિકાસ દરમિયાન, જ્યારે માઇક્રોસ્પોર મધર સેલ (MMC)માં ક્રોમોઝોમલ ક્રોસિંગ ઓવર થાય છે, ત્યારે નીચેનામાંથી કયો તબક્કો ચાલી રહ્યો હોવો જોઈએ?", "opts": ["લેપ્ટોટિન", "જાયગોટિન", "પેકીટિન", "ડાયકાઇનેસિસ"], "ans": 3, "exp": "ક્રોમોઝોમલ ક્રોસિંગ ઓવર પેકીટિન તબક્કામાં થાય છે, જ્યારે હોમોલોગસ વર્ણસૂત્રો જોડાયેલા હોય છે. લેપ્ટોટિનમાં વર્ણસૂત્રો કન્ડેન્સ થવાનું શરૂ કરે છે, જાયગોટિનમાં સિનેપ્સિસ થાય છે, અને ડાયકાઇનેસિસમાં વર્ણસૂત્રો સંપૂર્ણ રીતે કન્ડેન્સ થઈ જાય છે અને ક્રોસિંગ ઓવર પૂર્ણ થઈ ગયું હોય છે. પરંતુ ક્રોસિંગ ઓવરની પ્રક્રિયા પેકીટિન તબક્કામાં જ થાય છે.", "ref": "Std 12 - અધ્યાય 2: જનન (પ્રજનન)", "ch": ""}, {"q": "પુંકેસરમાં પરાગકોષના વિકાસ દરમિયાન, જ્યારે પરાગરજના કોષમાં 'યુ' આકારની નલિકા બનાવવા માટે કોષદીવાલનો પચાવો થાય છે, ત્યારે નીચેનામાંથી કયો ઉત્સેચક મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["એમાઇલેઝ", "સેલ્યુલેઝ", "પ્રોટિયેઝ", "લાયપેઝ"], "ans": 1, "exp": "પરાગકોષની દીવાલ મુખ્યત્વે સેલ્યુલોઝની બનેલી હોય છે, અને તેને પચાવવા માટે સેલ્યુલેઝ ઉત્સેચક જવાબદાર હોય છે. એમાઇલેઝ કાર્બોદિતને તોડે છે, પ્રોટિયેઝ પ્રોટીનને તોડે છે, અને લાયપેઝ ચરબીને તોડે છે. પરાગનલિકાની વૃદ્ધિ દરમિયાન સેલ્યુલેઝ પરાગકોષની દીવાલને પચાવીને પરાગનલિકાની વૃદ્ધિને સહાય કરે છે.", "ref": "Std 12 - અધ્યાય 2: જનન (પ્રજનન)", "ch": ""}, {"q": "પુંકેસરમાં પરાગરજના વિકાસ દરમિયાન, નીચેનામાંથી કયો તબક્કો 'હેપ્લોઈડ' કોષોનું નિર્માણ કરે છે, જ્યારે ડિપ્લોઈડ કોષોમાંથી મેઈઓસિસ દ્વારા વિભાજન થાય છે?", "opts": ["માઇક્રોસ્પોરોજેનેસિસ", "મેગાસ્પોરોજેનેસિસ", "પરાગકોષ વિકાસ", "પરાગનલિકા વિકાસ"], "ans": 0, "exp": "માઇક્રોસ્પોરોજેનેસિસ દરમિયાન, ડિપ્લોઈડ માઇક્રોસ્પોર મધર સેલ (MMC)માં મેઈઓસિસ દ્વારા વિભાજન થાય છે અને હેપ્લોઈડ માઇક્રોસ્પોરનું નિર્માણ થાય છે. મેગાસ્પોરોજેનેસિસ મહિલા પ્રજનન અંગ સાથે સંબંધિત છે, પરાગકોષ વિકાસ અને પરાગનલિકા વિકાસ તો પરાગરજના પછીના તબક્કાઓ છે.", "ref": "Std 12 - અધ્યાય 2: જનન (પ્રજનન)", "ch": ""}, {"q": "પુંકેસરમાં પરાગકોષની રચના દરમિયાન, જ્યારે જનન કોષ (Generative Cell) અને નલિકા કોષ (Tube Cell)નું નિર્માણ થાય છે, ત્યારે નીચેનામાંથી કયો કોષવિભાજન પ્રકાર જવાબદાર હોય છે?", "opts": ["મેઈઓસિસ - I", "મેઈઓસિસ - II", "માઇટોસિસ", "અમાઇટોસિસ"], "ans": 2, "exp": "પરાગકોષમાં જનન કોષ અને નલિકા કોષનું નિર્માણ માઇટોસિસ દ્વારા થાય છે. મેઈઓસિસ - I અને મેઈઓસિસ - II તો માઇક્રોસ્પોર મધર સેલ (MMC)માં થાય છે, જ્યારે અમાઇટોસિસ તો પ્રોકેરિયોટ્સમાં થાય છે. પરાગકોષના વિકાસ દરમિયાન, હેપ્લોઈડ કોષમાં માઇટોસિસ થાય છે.", "ref": "Std 12 - અધ્યાય 2: જનન (પ્રજનન)", "ch": ""}, {"q": "પુંકેસરના વિકાસ દરમિયાન, જ્યારે પરાગરજના કોષમાં 'પોલર ન્યુક્લીય' બનાવવા માટે કોષકેન્દ્રનું વિભાજન થાય છે, ત્યારે નીચેનામાંથી કયો તબક્કો ચાલી રહ્યો હોવો જોઈએ?", "opts": ["પ્રોફેઝ - I", "મેટાફેઝ - I", "એનાફેઝ - I", "ટેલોફેઝ - I"], "ans": 3, "exp": "પોલર ન્યુક્લીયનું નિર્માણ ટેલોફેઝ - I દરમિયાન થાય છે, જ્યારે કોષકેન્દ્રનું વિભાજન પૂર્ણ થાય છે અને બે હેપ્લોઈડ કોષકેન્દ્ર બનાવે છે. પ્રોફેઝ - I, મેટાફેઝ - I, અને એનાફેઝ - I તબક્કાઓમાં કોષકેન્દ્રનું વિભાજન પૂર્ણ થતું નથી.", "ref": "Std 12 - અધ્યાય 2: જનન (પ્રજનન)", "ch": ""}, {"q": "પુંકેસરમાં પરાગરજના વિકાસ દરમિયાન, જ્યારે પરાગકોષમાં 'યુ' આકારની નલિકા બનાવવા માટે કોષકેન્દ્રનું વિભાજન થાય છે, ત્યારે નીચેનામાંથી કયો પ્રક્રિયા સક્રિય થાય છે?", "opts": ["મિયોટિક વિભાજન", "માયટોટિક વિભાજન", "એમિટોસિસ", "એન્ડોમિટોસિસ"], "ans": 1, "exp": "પરાગકોષમાં 'યુ' આકારની નલિકા બનાવવા માટે કોષકેન્દ્રનું વિભાજન માયટોટિક વિભાજન દ્વારા થાય છે, કારણ કે પરાગકોષ હેપ્લોઈડ હોય છે અને તેની વૃદ્ધિ માટે માયટોસિસ જરૂરી છે. મિયોસિસ હેપ્લોઈડ કોષોનું નિર્માણ કરે છે, એમિટોસિસ અપૂર્ણ વિભાજન છે, અને એન્ડોમિટોસિસ કોષકેન્દ્રનું બહુગુણિત વિભાજન છે.", "ref": "Std 12 - અધ્યાય 1: પ્રજનન", "ch": ""}, {"q": "આવૃત બીજધારી વનસ્પતિઓમાં પુંકેસરના વિકાસ દરમિયાન, નીચેનામાંથી કયું વિધાન 'ટેપેટમ' પેશી માટે ખોટું છે?", "opts": ["ટેપેટમ પેશી પરાગરજના પોષણ માટે જરૂરી પોષક તત્વો પૂરા પાડે છે", "ટેપેટમ પેશી પરાગરજની દીવાલના નિર્માણમાં મદદ કરે છે, જેમાં 'સ્પોરોપોલેનિન'નું સંશ્લેષણ થાય છે", "ટેપેટમ પેશી પરાગરજના વિકાસ દરમિયાન 'માઇટોકોન્ડ્રિયા' અને 'રાઇબોઝોમ્સ'નું નિર્માણ કરે છે, જે પરાગરજને સ્વતંત્ર કોષ તરીકે કાર્ય કરવામાં મદદ કરે છે", "ટેપેટમ પેશી પરાગરજના વિકાસ પછી સંપૂર્ણપણે નાશ પામે છે અને પરાગાશયમાંથી અદૃશ્ય થઈ જાય છે"], "ans": 2, "exp": "ટેપેટમ પેશી પરાગરજના પોષણ અને દીવાલના નિર્માણમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે, પરંતુ તે 'માઇટોકોન્ડ્રિયા' કે 'રાઇબોઝોમ્સ'નું નિર્માણ કરતી નથી. આ અંગો પરાગરજના પોતાના કોષકેન્દ્ર દ્વારા નિર્માણ પામે છે. ટેપેટમ પેશી પરાગરજના વિકાસ પછી અવશેષરૂપે રહે છે, પરંતુ સંપૂર્ણપણે નાશ પામતી નથી. તેથી વિકલ્પ C ખોટું છે, જ્યારે અન્ય વિકલ્પો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પુંકેસરના 'એન્ડોથેસિયમ' સ્તર માટે યોગ્ય નથી?", "opts": ["એન્ડોથેસિયમ સ્તર પરાગાશયના ખુલવા માટે જવાબદાર છે, કારણ કે તેની કોષદીવાલમાં રેડિયલ સ્થૂળતા હોય છે", "એન્ડોથેસિયમ સ્તર પરાગરજના વિકાસ દરમિયાન 'કેલોઝ'નું સંશ્લેષણ કરે છે, જે પરાગરજને અલગ કરવામાં મદદ કરે છે", "એન્ડોથેસિયમ સ્તર પરાગાશયની દીવાલમાં સ્થિત છે અને તેની કોષીય રચના 'ફાઇબર' જેવી હોય છે", "એન્ડોથેસિયમ સ્તર પરાગાશયના સૂકાવાથી ખુલવામાં મદદ કરે છે, જે પરાગરજના પ્રસરણ માટે જરૂરી છે"], "ans": 1, "exp": "એન્ડોથેસિયમ સ્તર પરાગાશયની દીવાલમાં સ્થિત છે અને તેની કોષદીવાલમાં રેડિયલ સ્થૂળતા હોય છે, જે પરાગાશયના ખુલવામાં મદદ કરે છે. પરંતુ 'કેલોઝ'નું સંશ્લેષણ ટેપેટમ પેશી દ્વારા થાય છે, એન્ડોથેસિયમ દ્વારા નહીં. તેથી વિકલ્પ B ખોટું છે, જ્યારે અન્ય વિકલ્પો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પુંકેસરના વિકાસ દરમિયાન, 'માઇક્રોસ્પોરોજેનેસિસ' પ્રક્રિયામાં નીચેનામાંથી કયું પરિવર્તન 'અપવાદરૂપ' છે?", "opts": ["માઇક્રોસ્પોર મધર સેલમાં 'મિયોસિસ' વિભાજન થાય છે, જે ચાર હેપ્લોઈડ માઇક્રોસ્પોર્સનું નિર્માણ કરે છે", "માઇક્રોસ્પોરોજેનેસિસ દરમિયાન 'ક્રોસિંગ ઓવર' થાય છે, જે જનીનિક વિવિધતા માટે જવાબદાર છે", "માઇક્રોસ્પોરોજેનેસિસ દરમિયાન 'સ્પોરોપોલેનિન'નું સંશ્લેષણ થાય છે, જે પરાગરજની દીવાલને મજબૂત બનાવે છે", "માઇક્રોસ્પોરોજેનેસિસ દરમિયાન 'સાયટોકાઇનેસિસ' એકસાથે થાય છે, જે ટેટ્રાડનું નિર્માણ કરે છે"], "ans": 2, "exp": "માઇક્રોસ્પોરોજેનેસિસ પ્રક્રિયામાં માઇક્રોસ્પોર મધર સેલમાં મિયોસિસ વિભાજન થાય છે, જે ચાર હેપ્લોઈડ માઇક્રોસ્પોર્સનું નિર્માણ કરે છે. આ પ્રક્રિયા દરમિયાન ક્રોસિંગ ઓવર થાય છે અને સાયટોકાઇનેસિસ એકસાથે થાય છે. પરંતુ 'સ્પોરોપોલેનિન'નું સંશ્લેષણ ટેપેટમ પેશી દ્વારા થાય છે, માઇક્રોસ્પોરોજેનેસિસ દરમિયાન નહીં. તેથી વિકલ્પ C અપવાદરૂપ છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "પરાગરજની દીવાલના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન 'એક્સાઇન' સ્તર માટે ખોટું છે?", "opts": ["એક્સાઇન સ્તર 'સ્પોરોપોલેનિન' નામના પદાર્થથી બનેલું છે, જે રાસાયણિક અને ભૌતિક પ્રતિકારકતા ધરાવે છે", "એક્સાઇન સ્તર પરાગરજને UV કિરણો અને સૂક્ષ્મજીવોના હુમલાથી રક્ષણ આપે છે", "એક્સાઇન સ્તર પરાગરજની દીવાલમાં 'પોલેન કિટ' નામનો પદાર્થ સંગ્રહિત કરે છે, જે પરાગરજને ભેજ જાળવવામાં મદદ કરે છે", "એક્સાઇન સ્તર પરાગરજની દીવાલમાં સ્થિત છે અને તેની રચના 'ટેપેટમ' પેશી દ્વારા નિયંત્રિત થાય છે"], "ans": 2, "exp": "એક્સાઇન સ્તર સ્પોરોપોલેનિનથી બનેલું છે અને તે પરાગરજને રક્ષણ આપે છે. પરંતુ 'પોલેન કિટ' ઇન્ટાઇન સ્તર સાથે સંકળાયેલ છે, એક્સાઇન સાથે નહીં. તેથી વિકલ્પ C ખોટું છે, જ્યારે અન્ય વિકલ્પો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
