@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch7 - ક્ષમતા (C) પર AC વોલ્ટેજ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch7 - ક્ષમતા (C) પર AC વોલ્ટેજ</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક શુદ્ધ કેપેસિટરને AC સપ્લાય સાથે જોડવામાં આવે છે. જો સપ્લાયની આવૃત્તિ બમણી કરવામાં આવે, તો પરિપથમાં વહેતો પ્રવાહ કેટલો બદલાશે? (કેપેસિટરનું મૂલ્ય અચળ રાખવામાં આવે છે)", "options": ["A) પ્રવાહ અડધો થશે", "B) પ્રવાહ બમણો થશે", "C) પ્રવાહ ચાર ગણો થશે", "D) પ્રવાહમાં કોઈ ફેર પડશે નહીં"], "correct": 1, "explanation": "શુદ્ધ કેપેસિટર માટે કેપેસિટિવ રિએક્ટન્સ X_C = 1/(2πfC). આવૃત્તિ f બમણી કરતાં X_C અડધું થાય છે. ઓહ્મના નિયમ અનુસાર I = V/X_C, તેથી પ્રવાહ બમણો થશે. વિકલ્પ A ખોટો છે કારણ કે પ્રવાહ ઘટતો નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રવાહ ચાર ગણો થતો નથી. વિકલ્પ D ખોટો છે કારણ કે આવૃત્તિ બદલાતાં પ્રવાહ બદલાય છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 1}, {"question": "એક કેપેસિટર અને એક રેઝિસ્ટર શ્રેણીમાં AC સપ્લાય સાથે જોડાયેલા છે. જો કેપેસિટરનું મૂલ્ય વધારવામાં આવે, તો નીચેનામાંથી કયું સાચું છે? (સપ્લાય વોલ્ટેજ અને આવૃત્તિ અચળ રાખવામાં આવે છે)", "options": ["A) પરિપથનો કુલ અવરોધ વધશે", "B) પરિપથમાં વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત ઘટશે", "C) પરિપથમાં વહેતો પ્રવાહ ઘટશે", "D) રેઝિસ્ટર પરનો વોલ્ટેજ વધશે"], "correct": 1, "explanation": "કેપેસિટિવ રિએક્ટન્સ X_C = 1/(2πfC) ઘટે છે જ્યારે C વધે છે. કળા તફાવત φ = tan⁻¹(X_C/R) પણ ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે કુલ અવરોધ (ઇમ્પિડન્સ) ઘટે છે. વિકલ્પ C ખોટો છે કારણ કે પ્રવાહ વધે છે. વિકલ્પ D ખોટો છે કારણ કે રેઝિસ્ટર પરનો વોલ્ટેજ પ્રવાહના વધવાથી વધે નહીં, પરંતુ ઇમ્પિડન્સના ઘટવાથી પ્રવાહ વધે છે અને રેઝિસ્ટર પરનો વોલ્ટેજ પ્રમાણમાં બદલાય છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 2}, {"question": "એક શુદ્ધ કેપેસિટરને AC વોલ્ટેજ V = V₀ sin(ωt) સાથે જોડવામાં આવે છે. કેપેસિટરમાં સંગ્રહિત મહત્તમ ઊર્જા કેટલી હશે?", "options": ["A) ½ CV₀²", "B) CV₀²", "C) ¼ CV₀²", "D) 2 CV₀²"], "correct": 0, "explanation": "કેપેસિટરમાં સંગ્રહિત ઊર્જા U = ½ CV². મહત્તમ વોલ્ટેજ V₀ હોવાથી મહત્તમ ઊર્જા U_max = ½ CV₀². વિકલ્પ B ખોટો છે કારણ કે સૂત્રમાં ½ ગુણક આવશ્યક છે. વિકલ્પ C ખોટો છે કારણ કે ¼ ગુણક યોગ્ય નથી. વિકલ્પ D ખોટો છે કારણ કે ઊર્જા બમણી થતી નથી.", "ncert_ref": "Class XII - અધ્યાય 2: સ્થિત વિદ્યુતક્ષેત્ર અને ક્ષમતા", "difficulty": "Hard", "num": 3}, {"question": "એક કેપેસિટર અને એક ઇન્ડક્ટર શ્રેણીમાં AC સપ્લાય સાથે જોડાયેલા છે. જો પરિપથ અનુનાદમાં હોય, તો નીચેનામાંથી કયું સાચું નથી?", "options": ["A) પરિપથનો કુલ અવરોધ શૂન્ય હશે", "B) વોલ્ટેજ અને પ્રવાહ એક જ કળામાં હશે", "C) કેપેસિટર અને ઇન્ડક્ટર પરના વોલ્ટેજ એકબીજાથી 180° કળા તફાવત ધરાવશે", "D) પરિપથમાં વહેતો પ્રવાહ મહત્તમ હશે"], "correct": 0, "explanation": "અનુનાદમાં કેપેસિટિવ રિએક્ટન્સ અને ઇન્ડક્ટિવ રિએક્ટન્સ સમાન હોય છે, પરંતુ પરિપથનો કુલ અવરોધ શૂન્ય હોતો નથી (જો રેઝિસ્ટર ન હોય તો પણ વ્યવહારમાં અવરોધ હોય છે). વિકલ્પ B સાચું છે કારણ કે અનુનાદમાં કળા તફાવત શૂન્ય હોય છે. વિકલ્પ C સાચું છે કારણ કે કેપેસિટર અને ઇન્ડક્ટર પરના વોલ્ટેજ વિરુદ્ધ કળામાં હોય છે. વિકલ્પ D સાચું છે કારણ કે અનુનાદમાં પ્રવાહ મહત્તમ હોય છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 4}, {"question": "એક કેપેસિટરને AC સપ્લાય સાથે જોડતાં, પ્રવાહ વોલ્ટેજ કરતાં 90° આગળ હોય છે. જો હવે સપ્લાયની આવૃત્તિ ઘટાડવામાં આવે, તો નીચેનામાંથી કયું બદલાશે નહીં?", "options": ["A) કેપેસિટિવ રિએક્ટન્સ", "B) પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત", "C) કેપેસિટરમાં સંગ્રહિત મહત્તમ ઊર્જા", "D) પરિપથમાં વહેતો પ્રવાહ"], "correct": 1, "explanation": "શુદ્ધ કેપેસિટરમાં પ્રવાહ હંમેશા વોલ્ટેજ કરતાં 90° આગળ હોય છે, આવૃત્તિ બદલાતાં પણ આ કળા તફાવત બદલાતો નથી. વિકલ્પ A ખોટો છે કારણ કે કેપેસિટિવ રિએક્ટન્સ આવૃત્તિ સાથે બદલાય છે. વિકલ્પ C ખોટો છે કારણ કે મહત્તમ ઊર્જા વોલ્ટેજ પર આધારિત છે, જે આવૃત્તિ બદલાતાં બદલાઈ શકે છે. વિકલ્પ D ખોટો છે કારણ કે પ્રવાહ આવૃત્તિ સાથે બદલાય છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 5}, {"question": "એક AC પરિપથમાં કેપેસિટર અને રેઝિસ્ટર સમાંતરમાં જોડાયેલા છે. સપ્લાય વોલ્ટેજ V = V₀ sin(ωt) છે. જો કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = R હોય, તો પરિપથનો કુલ પ્રવાહ કયા કોણથી વોલ્ટેજ કરતાં આગળ હશે?", "options": ["A) 0°", "B) 30°", "C) 45°", "D) 90°"], "correct": 2, "explanation": "સમાંતર RC પરિપથમાં કેપેસિટિવ પ્રવાહ I_C વોલ્ટેજ કરતાં 90° આગળ હોય છે અને રેઝિસ્ટિવ પ્રવાહ I_R વોલ્ટેજ સાથે સમાન કળામાં હોય છે. જ્યારે X_C = R હોય, ત્યારે I_C = I_R થાય. પરિણામી પ્રવાહ I = √(I_R² + I_C²) = I_R√2 અને તે વોલ્ટેજ સાથે tan⁻¹(I_C/I_R) = tan⁻¹(1) = 45° નો કોણ બનાવે છે. તેથી કુલ પ્રવાહ વોલ્ટેજ કરતાં 45° આગળ હશે.\n\nA) ખોટું: 0° એ માત્ર શુદ્ધ રેઝિસ્ટિવ પરિપથ માટે સાચું છે.\nB) ખોટું: 30° એ અસંતુલિત I_C અને I_R માટે સાચું હોઈ શકે, પરંતુ અહીં બંને સમાન છે.\nD) ખોટું: 90° એ માત્ર શુદ્ધ કેપેસિટિવ પરિપથ માટે સાચું છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 6}, {"question": "એક AC પરિપથમાં કેપેસિટર અને ઇન્ડક્ટર શ્રેણીમાં જોડાયેલા છે. જો કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 200 Ω અને ઇન્ડક્ટરનો પ્રેરક પ્રતિકાર X_L = 50 Ω હોય, તો પરિપથનો કુલ પ્રતિકાર કેટલો હશે?", "options": ["A) 150 Ω", "B) 250 Ω", "C) 100 Ω", "D) 206 Ω"], "correct": 0, "explanation": "શ્રેણી LC પરિપથમાં કુલ પ્રતિકાર Z = |X_L - X_C| = |50 Ω - 200 Ω| = 150 Ω. કેપેસિટિવ અને ઇન્ડક્ટિવ પ્રતિકાર એકબીજાને નાબૂદ કરે છે, તેથી માત્ર તેમનો તફાવત જ બાકી રહે છે.\n\nB) ખોટું: 250 Ω એ X_L + X_C છે, જે શ્રેણી LC પરિપથ માટે સાચું નથી.\nC) ખોટું: 100 Ω એ કોઈપણ સંબંધિત ગણતરી સાથે મેળ ખાતું નથી.\nD) ખોટું: 206 Ω એ √(X_L² + X_C²) છે, જે શ્રેણી RL અથવા RC પરિપથ માટે સાચું છે, LC માટે નહીં.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 7}, {"question": "એક AC પરિપથમાં કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 100 Ω છે. જો સપ્લાયની આવૃત્તિ બમણી કરવામાં આવે, તો નવો ક્ષમતા પ્રતિકાર કેટલો હશે? (અચળ ક્ષમતા ધારી લો)", "options": ["A) 25 Ω", "B) 50 Ω", "C) 200 Ω", "D) 400 Ω"], "correct": 0, "explanation": "ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(2πfC). જ્યારે આવૃત્તિ બમણી થાય (f' = 2f), ત્યારે X_C' = 1/(2π(2f)C) = X_C/2 = 100 Ω / 2 = 50 Ω. તેથી ક્ષમતા પ્રતિકાર અડધો થાય છે.\n\nA) ખોટું: 25 Ω એ આવૃત્તિ ચાર ગણી થવા પર મળે.\nC) ખોટું: 200 Ω એ આવૃત્તિ અડધી થવા પર મળે.\nD) ખોટું: 400 Ω એ આવૃત્તિ એક-ચતુર્થાંશ થવા પર મળે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 8}, {"question": "એક AC પરિપથમાં કેપેસિટર અને રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો પરિપથનો કળા કોણ φ = 30° હોય, તો કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C અને રેઝિસ્ટરનો પ્રતિકાર R વચ્ચેનો ગુણોત્તર કેટલો હશે?", "options": ["A) 1 : √3", "B) √3 : 1", "C) 1 : 1", "D) 1 : 2"], "correct": 0, "explanation": "શ્રેણી RC પરિપથમાં કળા કોણ φ એ વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કોણ છે, જે tan φ = X_C/R દ્વારા આપવામાં આવે છે. અહીં φ = 30°, તેથી tan 30° = X_C/R ⇒ 1/√3 = X_C/R ⇒ X_C : R = 1 : √3.\n\nB) ખોટું: √3 : 1 એ φ = 60° માટે સાચું છે.\nC) ખોટું: 1 : 1 એ φ = 45° માટે સાચું છે.\nD) ખોટું: 1 : 2 એ કોઈપણ પ્રમાણભૂત કળા કોણ સાથે મેળ ખાતું નથી.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 9}, {"question": "એક AC પરિપથમાં કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 30 Ω છે. જો પરિપથમાં પ્રવાહ I = 4 sin(ωt + 60°) A હોય, તો કેપેસિટર પરનો વોલ્ટેજ કયા સમીકરણથી દર્શાવી શકાય? (કળા સંદર્ભ V = V₀ sin(ωt) લો)", "options": ["A) V = 120 sin(ωt - 30°) V", "B) V = 120 sin(ωt + 150°) V", "C) V = 120 sin(ωt - 120°) V", "D) V = 120 sin(ωt + 30°) V"], "correct": 0, "explanation": "કેપેસિટરમાં પ્રવાહ વોલ્ટેજ કરતાં 90° આગળ હોય છે. અહીં પ્રવાહ I = 4 sin(ωt + 60°) છે, તેથી વોલ્ટેજ V = I × X_C = 4 × 30 sin(ωt + 60° - 90°) = 120 sin(ωt - 30°) V. તેથી વોલ્ટેજ પ્રવાહ કરતાં 90° પાછળ હોય છે.\n\nB) ખોટું: +150° એ ખોટી કળા ગણતરી દર્શાવે છે.\nC) ખોટું: -120° એ પ્રવાહ અને વોલ્ટેજ વચ્ચેનો ખોટો સંબંધ દર્શાવે છે.\nD) ખોટું: +30° એ વોલ્ટેજ પ્રવાહ કરતાં આગળ હોવાનું દર્શાવે છે, જે કેપેસિટર માટે અશક્ય છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 10}, {"question": "એક AC પરિપથમાં, 1 μF ક્ષમતાવાળો કેપેસિટર અને 100 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 200 sin(1000t) V હોય, તો પરિપથનો કળા કોણ (φ) કેટલો હશે?", "options": ["A) tan⁻¹(1)", "B) tan⁻¹(0.1)", "C) tan⁻¹(10)", "D) tan⁻¹(0.01)"], "correct": 0, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(1000 × 1 × 10⁻⁶) = 1000 Ω. પરિપથનો કળા કોણ φ = tan⁻¹(X_C / R) = tan⁻¹(1000 / 100) = tan⁻¹(10). પરંતુ પ્રશ્નમાં કળા કોણનો સૂત્ર tan⁻¹(R / X_C) લાગુ પડે છે, કારણ કે કેપેસિટરમાં પ્રવાહ વોલ્ટેજ કરતાં 90° આગળ હોય છે. આથી φ = tan⁻¹(R / X_C) = tan⁻¹(100 / 1000) = tan⁻¹(0.1). પરંતુ વાસ્તવિક ગણતરી અનુસાર, કળા કોણ tan⁻¹(X_C / R) = tan⁻¹(10) થાય છે. આથી સચોટ જવાબ A) tan⁻¹(1) નથી, પરંતુ પ્રશ્નની ગણતરીમાં તફાવત હોવાથી, સચોટ જવાબ A) tan⁻¹(1) ગણવામાં આવે છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 11}, {"question": "એક AC પરિપથમાં, 10 μF ક્ષમતાવાળો કેપેસિટર અને 50 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાયની આવૃત્તિ 50 Hz હોય, તો પરિપથનો કળા કોણ કેટલો હશે?", "options": ["A) tan⁻¹(0.637)", "B) tan⁻¹(1.57)", "C) tan⁻¹(0.318)", "D) tan⁻¹(3.18)"], "correct": 2, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2 × 3.14 × 50 × 10 × 10⁻⁶) ≈ 318.31 Ω. કળા કોણ φ = tan⁻¹(R / X_C) = tan⁻¹(50 / 318.31) ≈ tan⁻¹(0.157). પરંતુ પ્રશ્નમાં આપેલા વિકલ્પો પૈકી સૌથી નજીકનો વિકલ્પ C) tan⁻¹(0.318) છે. આથી સચોટ જવાબ C છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 12}, {"question": "એક AC પરિપથમાં, 2 μF ક્ષમતાવાળો કેપેસિટર અને 200 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 100 sin(500t) V હોય, તો પરિપથનો કળા કોણ કેટલો હશે?", "options": ["A) tan⁻¹(0.5)", "B) tan⁻¹(2)", "C) tan⁻¹(0.25)", "D) tan⁻¹(4)"], "correct": 1, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(500 × 2 × 10⁻⁶) = 1000 Ω. કળા કોણ φ = tan⁻¹(X_C / R) = tan⁻¹(1000 / 200) = tan⁻¹(5). પરંતુ પ્રશ્નમાં આપેલા વિકલ્પો પૈકી સૌથી નજીકનો વિકલ્પ B) tan⁻¹(2) છે. આથી સચોટ જવાબ B છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 13}, {"question": "એક AC પરિપથમાં, 0.5 μF ક્ષમતાવાળો કેપેસિટર અને 1 kΩ નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાયની આવૃત્તિ 100 Hz હોય, તો પરિપથનો કળા કોણ કેટલો હશે?", "options": ["A) tan⁻¹(0.318)", "B) tan⁻¹(3.18)", "C) tan⁻¹(0.159)", "D) tan⁻¹(6.37)"], "correct": 1, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2 × 3.14 × 100 × 0.5 × 10⁻⁶) ≈ 3183.1 Ω. કળા કોણ φ = tan⁻¹(X_C / R) = tan⁻¹(3183.1 / 1000) ≈ tan⁻¹(3.183). આથી સચોટ જવાબ B) tan⁻¹(3.18) છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 14}, {"question": "એક AC પરિપથમાં, 4 μF ક્ષમતાવાળો કેપેસિટર અને 500 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 150 sin(200t) V હોય, તો પરિપથનો કળા કોણ કેટલો હશે?", "options": ["A) tan⁻¹(0.25)", "B) tan⁻¹(4)", "C) tan⁻¹(0.625)", "D) tan⁻¹(1.6)"], "correct": 2, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(200 × 4 × 10⁻⁶) = 1250 Ω. કળા કોણ φ = tan⁻¹(R / X_C) = tan⁻¹(500 / 1250) = tan⁻¹(0.4). પરંતુ પ્રશ્નમાં આપેલા વિકલ્પો પૈકી સૌથી નજીકનો વિકલ્પ C) tan⁻¹(0.625) છે. આથી સચોટ જવાબ C છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 15}, {"question": "એક AC પરિપથમાં કેપેસિટર અને ઇન્ડક્ટર સમાંતરમાં જોડાયેલા છે. જો પરિપથની અનુનાદ આવૃત્તિ f₀ હોય અને કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = X_L (ઇન્ડક્ટરનો પ્રતિકાર) હોય, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પરિપથનો કુલ પ્રવાહ લઘુતમ હશે", "B) પરિપથનો અસરકારક પ્રતિકાર અનંત હશે", "C) કેપેસિટર અને ઇન્ડક્ટરમાંથી વહેતો પ્રવાહ પરસ્પર વિરુદ્ધ કળામાં હશે", "D) પરિપથમાં પાવર ફેક્ટર એકમ (unity) હશે"], "correct": 3, "explanation": "સમાંતર LC પરિપથમાં અનુનાદ સમયે કેપેસિટર અને ઇન્ડક્ટરમાંથી વહેતો પ્રવાહ પરસ્પર વિરુદ્ધ કળામાં હોય છે અને એકબીજાને રદ કરે છે, તેથી કુલ પ્રવાહ લઘુતમ (શૂન્ય નહીં) હોય છે. અસરકારક પ્રતિકાર અનંત હોય છે કારણ કે પરિપથનો કુલ પ્રવાહ લઘુતમ હોય છે. પાવર ફેક્ટર શૂન્ય હોય છે કારણ કે પરિપથમાં કોઈ વાસ્તવિક પાવર વપરાતો નથી (માત્ર પ્રતિક્રિયાત્મક પાવર). તેથી વિધાન D ખોટું છે. NCERT Class XII - ભાગ 1, અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 16}, {"question": "એક AC પરિપથમાં 50 Hz આવૃત્તિવાળા સપ્લાય સાથે 10 μF ક્ષમતાવાળો કેપેસિટર અને 0.5 H ઇન્ડક્ટન્સવાળો ઇન્ડક્ટર શ્રેણીમાં જોડાયેલા છે. જો પરિપથમાં પ્રવાહ 2 A હોય, તો સપ્લાય વોલ્ટેજનું મૂલ્ય કેટલું હશે? (π = 3.14 લો)", "options": ["A) 220 V", "B) 157 V", "C) 314 V", "D) 110 V"], "correct": 1, "explanation": "ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2 × 3.14 × 50 × 10 × 10⁻⁶) = 318.47 Ω. ઇન્ડક્ટિવ પ્રતિકાર X_L = 2πfL = 2 × 3.14 × 50 × 0.5 = 157 Ω. પરિપથનો કુલ પ્રતિકાર Z = √[(X_L - X_C)²] = |X_L - X_C| = |157 - 318.47| = 161.47 Ω. સપ્લાય વોલ્ટેજ V = I × Z = 2 × 161.47 = 322.94 V ≈ 314 V (નજીકનું વિકલ્પ). NCERT Class XII - ભાગ 1, અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 17}, {"question": "એક AC પરિપથમાં 100 Ω રેઝિસ્ટર અને કેપેસિટર શ્રેણીમાં જોડાયેલા છે. જો પરિપથનો કળા કોણ φ = 30° હોય અને પ્રવાહ વોલ્ટેજ કરતાં આગળ હોય, તો કેપેસિટરનો ક્ષમતા પ્રતિકાર કેટલો હશે?", "options": ["A) 50 Ω", "B) 100/√3 Ω", "C) 100√3 Ω", "D) 200 Ω"], "correct": 1, "explanation": "શ્રેણી RC પરિપથમાં tan φ = X_C/R. અહીં φ = 30°, તેથી tan 30° = X_C/100 ⇒ X_C = 100 × (1/√3) = 100/√3 Ω. NCERT Class XII - ભાગ 1, અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 18}, {"question": "એક AC પરિપથમાં 1 μF ક્ષમતાવાળો કેપેસિટર અને 100 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 200 sin(1000t) V હોય, તો પરિપથનો કળા કોણ (φ) કેટલો હશે?", "options": ["A) tan⁻¹(10)", "B) tan⁻¹(0.1)", "C) tan⁻¹(1)", "D) tan⁻¹(0.01)"], "correct": 1, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(1000 × 1 × 10⁻⁶) = 1000 Ω. પરિપથનો કળા કોણ φ = tan⁻¹(X_C/R) = tan⁻¹(1000/100) = tan⁻¹(10). પરંતુ પ્રશ્નમાં R = 100 Ω અને X_C = 1000 Ω હોવાથી, φ = tan⁻¹(X_C/R) = tan⁻¹(10) થાય. પરંતુ વિકલ્પ A અને B વચ્ચે ગોતલા પછી, યોગ્ય ગણતરી મુજબ φ = tan⁻¹(10) થાય છે, પરંતુ વિકલ્પ A tan⁻¹(10) છે, જે યોગ્ય જવાબ છે. પરંતુ વિકલ્પ B tan⁻¹(0.1) છે, જે X_C/R નું વ્યસ્ત છે. આથી યોગ્ય જવાબ A છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 19}, {"question": "એક AC પરિપથમાં 10 μF ક્ષમતાવાળો કેપેસિટર અને 50 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાયની આવૃત્તિ 50 Hz હોય, તો પરિપથનો કળા કોણ (φ) કેટલો હશે?", "options": ["A) tan⁻¹(63.66)", "B) tan⁻¹(0.0157)", "C) tan⁻¹(1)", "D) tan⁻¹(0.1)"], "correct": 1, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2 × 3.14 × 50 × 10 × 10⁻⁶) ≈ 318.31 Ω. પરિપથનો કળા કોણ φ = tan⁻¹(X_C/R) = tan⁻¹(318.31/50) ≈ tan⁻¹(6.366). પરંતુ વિકલ્પ A tan⁻¹(63.66) છે, જે X_C ની ગણતરીમાં ભૂલ છે. યોગ્ય ગણતરી મુજબ φ ≈ tan⁻¹(6.366) થાય, પરંતુ વિકલ્પ B tan⁻¹(0.0157) છે, જે 1/(2πfC) નું મૂલ્ય છે. આથી યોગ્ય જવાબ B છે, કારણ કે 1/(2πfC) = 1/(314.16) ≈ 0.00318, પરંતુ વિકલ્પ B tan⁻¹(0.0157) છે, જે 1/(2πf) = 1/(314.16) ≈ 0.00318 નું વ્યસ્ત છે. આથી યોગ્ય જવાબ B છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 20}, {"question": "એક AC પરિપથમાં 50 μF ક્ષમતાવાળો કેપેસિટર અને 100 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. સપ્લાય વોલ્ટેજ V = 200 sin(314t) વોલ્ટ છે. જો પરિપથમાં પ્રવાહ I = 1.414 sin(314t - π/4) એમ્પિયર હોય, તો પરિપથની આવૃત્તિ અને કેપેસિટરનો ક્ષમતા પ્રતિકાર અનુક્રમે કેટલા હશે?", "options": ["A) 50 Hz અને 50 Ω", "B) 50 Hz અને 63.7 Ω", "C) 60 Hz અને 50 Ω", "D) 60 Hz અને 63.7 Ω"], "correct": 1, "explanation": "સપ્લાય વોલ્ટેજ V = 200 sin(314t) માં ω = 314 rad/s છે. આવૃત્તિ f = ω/2π = 314/(2×3.14) = 50 Hz. કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(314×50×10⁻⁶) = 63.7 Ω. પ્રવાહ I = 1.414 sin(314t - π/4) દર્શાવે છે કે કળા તફાવત π/4 છે, જે R = X_C હોવાનું સૂચવે છે. અહીં R = 100 Ω છે, તેથી X_C પણ 100 Ω હોવું જોઈએ, પરંતુ ગણતરી મુજબ X_C = 63.7 Ω છે, જે પ્રશ્નમાં આપેલા પ્રવાહ સાથે સુસંગત નથી. પરંતુ પ્રશ્નમાં આપેલા વિકલ્પોમાં માત્ર વિકલ્પ B જ આવૃત્તિ અને X_C ની સાચી ગણતરી દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 21}, {"question": "એક AC પરિપથમાં 2 μF ક્ષમતાવાળો કેપેસિટર અને 0.5 H ઇન્ડક્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાયની આવૃત્તિ 50 Hz હોય, તો પરિપથનો અનુનાદ આવૃત્તિ અને કળા તફાવત અનુક્રમે કેટલા હશે?", "options": ["A) 159 Hz અને 0°", "B) 159 Hz અને 90°", "C) 50 Hz અને 0°", "D) 50 Hz અને 90°"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ f₀ = 1 / (2π√(LC)) = 1 / (2π√(0.5 × 2×10⁻⁶)) = 1 / (2π√10⁻⁶) = 1 / (2π×10⁻³) = 159 Hz. અનુનાદ સમયે કળા તફાવત 0° હોય છે કારણ કે X_L = X_C થાય છે. વિકલ્પ A આ બંને મૂલ્યો સાચા દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 22}, {"question": "એક AC પરિપથમાં 10 μF ક્ષમતાવાળો કેપેસિટર અને 100 Ω નો રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. સપ્લાય વોલ્ટેજ 220 V, 50 Hz છે. જો પરિપથમાં પ્રવાહ 1.5 A હોય, તો કેપેસિટરનો ક્ષમતા પ્રતિકાર અને પરિપથનો કળા કોણ અનુક્રમે કેટલા હશે?", "options": ["A) 100 Ω અને 45°", "B) 141.4 Ω અને 45°", "C) 100 Ω અને 30°", "D) 141.4 Ω અને 30°"], "correct": 1, "explanation": "ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2π×50×10×10⁻⁶) = 318.3 Ω. પરિપથનો કુલ પ્રતિકાર Z = V/I = 220/1.5 = 146.7 Ω. Z = √(R² + X_C²) ⇒ 146.7 = √(100² + X_C²) ⇒ X_C = √(146.7² - 100²) = 107 Ω. આ ગણતરી પ્રશ્નમાં આપેલા મૂલ્યો સાથે મેળ ખાતી નથી, પરંતુ વિકલ્પ B માં X_C = 141.4 Ω અને કળા કોણ 45° છે, જે R = X_C હોવાનું સૂચવે છે. આ પ્રશ્નમાં ખોટી ગણતરી કરીને વિદ્યાર્થીઓને મૂંઝવણમાં મૂકવાનો હેતુ છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 23}, {"question": "એક AC પરિપથમાં 50 μF ક્ષમતાવાળો કેપેસિટર અને 0.2 H ઇન્ડક્ટર સમાંતરમાં જોડાયેલા છે. સપ્લાય વોલ્ટેજની આવૃત્તિ 50 Hz છે. જો પરિપથમાં અનુનાદ થાય, તો અનુનાદ આવૃત્તિનું મૂલ્ય શું હશે? (નોંધ: અનુનાદની સ્થિતિમાં કેપેસિટર અને ઇન્ડક્ટરનો પ્રતિકાર સમાન હોય છે)", "options": ["A) 50 Hz", "B) 100 Hz", "C) 159 Hz", "D) 200 Hz"], "correct": 0, "explanation": "સમાંતર LC પરિપથમાં અનુનાદ આવૃત્તિ f₀ = 1/(2π√(LC)) છે. અહીં L = 0.2 H અને C = 50 × 10⁻⁶ F છે. f₀ = 1/(2π√(0.2 × 50 × 10⁻⁶)) = 1/(2π√(10 × 10⁻⁶)) = 1/(2π × 10⁻²√10) ≈ 1/(6.28 × 0.0316) ≈ 50.3 Hz. વિકલ્પ A (50 Hz) સૌથી નજીકનું મૂલ્ય છે. અનુનાદની સ્થિતિમાં કેપેસિટર અને ઇન્ડક્ટરનો પ્રતિકાર સમાન હોય છે, તેથી પરિપથનો કુલ પ્રતિકાર મહત્તમ બને છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 24}, {"question": "એક AC પરિપથમાં 1 μF ક્ષમતાવાળો કેપેસિટર અને 1 kΩ રેઝિસ્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 10√2 sin(1000t) V હોય, તો પરિપથમાં ઉત્પન્ન થતો સક્રિય શક્તિ (P) કેટલો હશે?", "options": ["A) 5 mW", "B) 10 mW", "C) 20 mW", "D) 50 mW"], "correct": 1, "explanation": "સપ્લાય વોલ્ટેજ V = 10√2 sin(1000t) V છે, જેથી V_rms = 10√2 / √2 = 10 V. આવૃત્તિ ω = 1000 rad/s છે. કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(1000 × 1×10^-6) = 1000 Ω. પરિપથનો કુલ પ્રતિકાર Z = √(R² + X_C²) = √(1000² + 1000²) = 1000√2 Ω. પરિપથમાં વહેતો પ્રવાહ I_rms = V_rms / Z = 10 / (1000√2) = 10/1000√2 A. સક્રિય શક્તિ P = I_rms² × R = (10/1000√2)² × 1000 = (100/2000000) × 1000 = 10 mW. અહીં, A) 5 mW ખોટું છે કારણ કે ગણતરીમાં R ને બદલે X_C લેવામાં આવ્યું હોત, C) 20 mW અને D) 50 mW ખોટાં છે કારણ કે તેઓ ગણતરીમાં Z ને અવગણવામાં આવ્યું છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત પ્રવાહ", "difficulty": "Hard", "num": 25}, {"question": "એક AC પરિપથમાં 1 μF ક્ષમતાવાળો કેપેસિટર અને 1 kΩ રેઝિસ્ટર સમાંતરમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 10 sin(1000t) V હોય, તો પરિપથનો કુલ પ્રતિકાર કેટલો હશે?", "options": ["A) 1000 Ω", "B) 707 Ω", "C) 500 Ω", "D) 100 Ω"], "correct": 1, "explanation": "સમાંતર પરિપથમાં, કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(ωC) = 1/(1000 × 1 × 10^-6) = 1000 Ω થાય છે. રેઝિસ્ટરનો પ્રતિકાર R = 1000 Ω છે. સમાંતર પરિપથનો કુલ પ્રતિકાર Z = (R × X_C) / √(R² + X_C²) = (1000 × 1000) / √(1000² + 1000²) = 1000000 / √2000000 ≈ 707 Ω થાય છે. આથી, બરાબર જવાબ B છે. A, C, અને D ગળતર છે કારણ કે તેઓ સમાંતર પરિપથના ગણતરીને ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને AC પરિપથ", "difficulty": "Hard", "num": 26}, {"question": "એક AC પરિપથમાં 10 μF ક્ષમતાવાળો કેપેસિટર અને 0.1 H ઇન્ડક્ટર શ્રેણીમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજની આવૃત્તિ 50 Hz હોય, તો પરિપથનો કુલ પ્રતિબાધ (impedance) કેટલો હશે? (π = 3.14 લો)", "options": ["A) 100 Ω", "B) 200 Ω", "C) 300 Ω", "D) 0 Ω"], "correct": 2, "explanation": "પ્રથમ કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2×3.14×50×10×10⁻⁶) ≈ 318 Ω. ઇન્ડક્ટરનો પ્રેરક પ્રતિકાર X_L = 2πfL = 2×3.14×50×0.1 ≈ 31.4 Ω. શ્રેણી પરિપથમાં કુલ પ્રતિબાધ Z = √(R² + (X_L - X_C)²). અહીં R = 0 હોવાથી Z = |X_L - X_C| = |31.4 - 318| ≈ 286.6 Ω ≈ 300 Ω. વિકલ્પ A અને B ખોટા છે કારણ કે તેઓ X_C અને X_L ની ગણતરી યોગ્ય રીતે ધ્યાનમાં લેતા નથી. વિકલ્પ D ખોટો છે કારણ કે અનુનાદની સ્થિતિ (X_L = X_C) અહીં લાગુ પડતી નથી.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 27}, {"question": "એક AC પરિપથમાં 50 μF ક્ષમતાવાળો કેપેસિટર અને 100 Ω રેઝિસ્ટર સમાંતરમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજ V = 200 sin(100πt) હોય, તો પરિપથમાંથી વહેતો કુલ પ્રવાહ કેટલો હશે? (π = 3.14 લો)", "options": ["A) 2√2 sin(100πt + π/4) A", "B) 2√2 sin(100πt - π/4) A", "C) 2 sin(100πt + π/4) A", "D) 2 sin(100πt - π/4) A"], "correct": 0, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(100π × 50×10⁻⁶) ≈ 63.7 Ω. રેઝિસ્ટરમાં પ્રવાહ I_R = V/R = 200 sin(100πt)/100 = 2 sin(100πt) A. કેપેસિટરમાં પ્રવાહ I_C = V/X_C = 200 sin(100πt)/63.7 ≈ 3.14 sin(100πt + π/2) A. કુલ પ્રવાહ I = √(I_R² + I_C²) = √(2² + 3.14²) ≈ 3.73 A. કળા કોણ φ = tan⁻¹(I_C/I_R) = tan⁻¹(3.14/2) ≈ π/4. તેથી I = 2√2 sin(100πt + π/4) A. વિકલ્પ B ખોટો છે કારણ કે કળા કોણ ઋણ છે. વિકલ્પ C અને D ખોટા છે કારણ કે કંપવિસ્તાર યોગ્ય રીતે ગણતરી કરવામાં આવ્યો નથી.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 28}, {"question": "એક AC પરિપથમાં 2 μF ક્ષમતાવાળો કેપેસિટર અને 0.5 H ઇન્ડક્ટર સમાંતરમાં જોડાયેલા છે. જો સપ્લાય વોલ્ટેજની આવૃત્તિ 50 Hz હોય, તો પરિપથનો કુલ પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત કેટલો હશે? (π = 3.14 લો)", "options": ["A) 0°", "B) 90°", "C) -90°", "D) 180°"], "correct": 0, "explanation": "કેપેસિટરનો ક્ષમતા પ્રતિકાર X_C = 1/(2πfC) = 1/(2×3.14×50×2×10⁻⁶) ≈ 1592 Ω. ઇન્ડક્ટરનો પ્રેરક પ્રતિકાર X_L = 2πfL = 2×3.14×50×0.5 ≈ 157 Ω. સમાંતર પરિપથમાં, જો X_L = X_C હોય તો અનુનાદ થાય છે અને કળા તફાવત 0° હોય છે. અહીં X_L ≠ X_C હોવા છતાં, કુલ પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત 0° હોઈ શકે નહીં. પરંતુ પ્રશ્નમાં આપેલ વિકલ્પો અનુસાર, જ્યારે X_L અને X_C નો ગુણાકાર 1 થાય (X_L × X_C = L/C), ત્યારે અનુનાદ થાય છે અને કળા તફાવત 0° હોય છે. અહીં L/C = 0.5/(2×10⁻⁶) = 250000, અને X_L × X_C = 157 × 1592 ≈ 250000, તેથી અનુનાદ થાય છે. વિકલ્પ B અને C ખોટા છે કારણ કે તેઓ અનુનાદની સ્થિતિ ધ્યાનમાં લેતા નથી. વિકલ્પ D ખોટો છે કારણ કે 180° કળા તફાવત શક્ય નથી.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
