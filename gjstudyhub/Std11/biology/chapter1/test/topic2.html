@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;font-family:'JetBrains Mono',monospace;}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.download-bar{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.toast{position:fixed;bottom:20px;right:18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 15px;font-size:12px;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:var(--success);color:var(--success);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">Quiz</div>
+    <h1>My Quiz</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+
+    
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div class="panel-title" style="margin-bottom:3px;">My Quiz</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">
+          Q<span id="cur-num">1</span> of <span id="tot-num">?</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 Practice</div>
+        <div class="meta-badge" id="timer-badge" style="display:none">⏱️ —</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/>
+          <stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <div class="download-bar">
+      <button class="btn btn-outline" onclick="restartQuiz()">↺ Try Again</button>
+      <button class="btn" onclick="downloadResults()">⬇ Results Download</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q":"પૃથ્વી પર હાજર સજીવોના વિવિધ પ્રકારો, તેમની સંખ્યા અને તેમની વચ્ચે જોવા મળતી ભિન્નતાને શું કહે છે?","opts":["વસ્તીગીચતા","જૈવવિવિધતા (Biodiversity)","જીવવર્તુળ","પર્યાવરણીય અનુકૂલન"],"ans":1},{"q":"જૈવવિવિધતા (Biodiversity) શબ્દ કોના દ્વારા લોકપ્રિય કરવામાં આવ્યો હતો?","opts":["કેરોલસ લીનિયસ","એડવર્ડ વિલ્સન (Edward Wilson)","આર. એચ. વ્હાઇટેકર","ચાર્લ્સ ડાર્વિન"],"ans":1},{"q":"હાલમાં પૃથ્વી પર અંદાજિત કેટલી જાતિઓ (Species) ઓળખાયેલી અને વર્ણવાયેલી છે?","opts":["2 થી 1.5 મિલિયન","7 થી 1.8 મિલિયન (17 થી 18 લાખ)","0 મિલિયનથી વધુ","મિલિયન"],"ans":1},{"q":"વિશ્વના જુદા જુદા પ્રદેશોમાં એક જ સજીવને ત્યાંની સ્થાનિક ભાષા પ્રમાણે અલગ નામે ઓળખવામાં આવે, તેવા નામને શું કહેવાય?","opts":["વૈજ્ઞાનિક નામ","સ્થાનિક નામ કે પ્રાદેશિક નામ (Local name)","સાર્વત્રિક નામ","આંતરરાષ્ટ્રીય નામ"],"ans":1},{"q":"સ્થાનિક નામોના કારણે વૈજ્ઞાનિક અભ્યાસમાં થતી ગૂંચવણો દૂર કરવા માટે કઈ પ્રક્રિયા અનિવાર્ય બની?","opts":["વસ્તી ગણતરી","સાર્વત્રિક વૈજ્ઞાનિક નામકરણ (Nomenclature)","માત્ર ક્ષેત્ર મુલાકાત","વનસ્પતિઓનો નાશ કરવો"],"ans":1},{"q":"સજીવ વિશ્વમાં ઓળખાયેલી કુલ જાતિઓમાંથી આશરે કેટલા ટકા જાતિઓ માત્ર પ્રાણીઓની છે?","opts":["આશરે 50%","આશરે 70%","આશરે 22%","આશરે 90%"],"ans":1},{"q":"પ્રાણી સૃષ્ટિમાં સૌથી વધુ વિવિધતા અને સંખ્યા ધરાવતું જૂથ કયું છે?","opts":["મૃદુકાય (Mollusca)","કીટકો / સંધિપાદ (Insecta / Arthropoda)","પક્ષીઓ","સ્તનધારીઓ"],"ans":1},{"q":"વનસ્પતિ સૃષ્ટિમાં (ફૂગ અને લીલ સહિત) સૌથી વધુ વિવિધતા કયા જૂથમાં જોવા મળે છે?","opts":["દ્વિઅંગી વનસ્પતિઓ","આવૃત બીજધારી વનસ્પતિઓ (Angiosperms) અને ફૂગ","ત્રિઅંગી વનસ્પતિઓ","અનાવૃત બીજધારી વનસ્પતિઓ"],"ans":1},{"q":"સજીવોના બાહ્ય લક્ષણોના આધારે તેમની વિવિધતાનો અભ્યાસ વિજ્ઞાનની કઈ શાખામાં થાય છે?","opts":["અંતસ્થ રચનાશાસ્ત્ર (Anatomy)","બાહ્ય આકારવિદ્યા (Morphology)","કોષવિદ્યા (Cytology)","પરિસ્થિતિવિદ્યા"],"ans":1},{"q":"સજીવોના આંતરિક બંધારણ અને પેશીઓની વિવિધતાનો અભ્યાસ એટલે શું?","opts":["બાહ્ય આકારવિદ્યા","અંતસ્થ રચનાશાસ્ત્ર (Anatomy)","ભ્રૂણવિદ્યા","જીવરસાયણશાસ્ત્ર"],"ans":1},{"q":"સજીવોની વિવિધતા, તેમના પ્રકારો અને તેમની વચ્ચેના ઉત્ક્રાંતિ સંબંધોના પદ્ધતિસરના અભ્યાસને શું કહે છે?","opts":["ટેક્સોનોમી","પદ્ધતિસરનું વિજ્ઞાન (Systematics)","ઇકોલોજી","સાયટોલોજી"],"ans":1},{"q":"'Systematics' શબ્દ કઈ ભાષાના શબ્દ 'Systema' પરથી લેવામાં આવ્યો છે?","opts":["ગ્રીક","લેટિન (Latin)","અંગ્રેજી","ફ્રેન્ચ"],"ans":1},{"q":"કેરોલસ લીનિયસે સજીવોની વિવિધતા અને વર્ગીકરણના આધારે લખેલા કયા પુસ્તકનું શીર્ષક 'Systema Naturae' રાખ્યું હતું?","opts":["જનરા પ્લાન્ટેરમ","સિસ્ટમા નેચુરી (Systema Naturae)","સ્પીસીઝ પ્લાન્ટેરમ","ઓરિજિન ઓફ સ્પીસીઝ"],"ans":1},{"q":"જૈવવિવિધતામાં જોવા મળતી વિવિધતા કયા ત્રણ સ્તરે મુખ્યત્વે અભ્યાસ કરવામાં આવે છે?","opts":["જનીન વિવિધતા, જાતિ વિવિધતા અને નિવસનતંત્ર વિવિધતા","વજન, કદ અને રંગની વિવિધતા","માત્ર ખોરાક અને રહેઠાણની વિવિધતા","માત્ર વનસ્પતિ અને પ્રાણીઓની વિવિધતા"],"ans":0},{"q":"પૃથ્વી પર સૌથી વધુ જૈવવિવિધતા અને સજીવોની વિવિધતા કયા ભૌગોલિક વિસ્તારમાં જોવા મળે છે?","opts":["ધ્રુવ પ્રદેશોમાં (Polar regions)","ઉષ્ણકટિબંધીય વર્ષાવનોમાં (Tropical Rainforests)","ગરમ રણ પ્રદેશોમાં","સમશીતોષ્ણ ઘાસના મેદાનોમાં"],"ans":1},{"q":"દક્ષિણ અમેરિકાના કયા જંગલો સજીવોની અદ્ભુત વિવિધતા માટે પ્રખ્યાત છે અને તેને 'પૃથ્વીના ફેફસાં' કહેવાય છે?","opts":["ગીરના જંગલો","એમેઝોન વર્ષાવનો (Amazon Rainforests)","સુંદરવનના જંગલો","તાઈગા જંગલો"],"ans":1},{"q":"સજીવોમાં જોવા મળતી વિવિધતાનું મુખ્ય કુદરતી કારણ કયું છે?","opts":["કૃત્રિમ પસંદગી","પર્યાવરણીય અનુકૂલન અને ઉત્ક્રાંતિ (Evolution)","માત્ર પ્રયોગશાળાના પ્રયોગો","સજીવોનું કદ ઘટવું"],"ans":1},{"q":"આધુનિક વર્ગીકરણ વિજ્ઞાન (Modern Taxonomy) ના અભ્યાસમાં સજીવની કઈ માહિતીનો આધાર લેવામાં આવે છે?","opts":["બાહ્ય અને આંતરિક રચના","કોષની રચના અને વિકાસ પ્રક્રિયા","સજીવની પરિસ્થિતિકીય માહિતી","આપેલા તમામ"],"ans":3},{"q":"'ટેક્સોનોમી' (Taxonomy - વર્ગીકરણ વિજ્ઞાન) શબ્દ સૌપ્રથમ કયા વૈજ્ઞાનિક દ્વારા આપવામાં આવ્યો હતો?","opts":["કેરોલસ લીનિયસ","એ. પી. ડી કન્ડોલે (A. P. de Candolle)","એરિસ્ટોટલ","થિયોફ્રાસ્ટસ"],"ans":1},{"q":"સજીવોની વિવિધતાને વ્યવસ્થિત રીતે સમજવા માટે ટેક્સોનોમીના પાયાના ચાર સોપાનનો સાચો ક્રમ કયો છે?","opts":["નામકરણ → વર્ગીકરણ → ઓળખવિધિ → લક્ષણીકરણ","લક્ષણીકરણ → ઓળખવિધિ → નામકરણ → વર્ગીકરણ","વર્ગીકરણ → નામકરણ → લક્ષણીકરણ → ઓળખવિધિ","ઓળખવિધિ → નામકરણ → લક્ષણીકરણ → વર્ગીકરણ"],"ans":1},{"q":"સજીવ વિશ્વમાં વનસ્પતિઓની વિવિધતાના સચોટ અને વૈજ્ઞાનિક નામકરણ માટે કઈ સંસ્થા નિયમો બનાવે છે?","opts":["ICZN","ICBN (International Code for Botanical Nomenclature)","IUCN","WHO"],"ans":1},{"q":"પ્રાણીઓની વિવિધતા અને તેમના વૈજ્ઞાનિક નામકરણ માટે કઈ આંતરરાષ્ટ્રીય સંસ્થા કાર્યરત છે?","opts":["ICBN","ICZN (International Code for Zoological Nomenclature)","UNESCO","WWM"],"ans":1},{"q":"ભારત દેશ વિશ્વના કુલ જમીન વિસ્તારનો માત્ર 2.4% ભાગ ધરાવે છે, છતાં તે વિશ્વની કુલ જૈવવિવિધતાના આશરે કેટલા ટકા હિસ્સો ધરાવે છે?","opts":["4%","1%","%","%"],"ans":1},{"q":"કોઈ ચોક્કસ ભૌગોલિક વિસ્તાર પૂરતી જ મર્યાદિત હોય અને વિશ્વમાં અન્ય ક્યાંય કુદરતી રીતે ન જોવા મળે તેવી જાતિને શું કહેવાય?","opts":["વિદેશી જાતિ (Exotic species)","સ્થાનિક જાતિ (Endemic species)","લુપ્ત જાતિ","સાર્વત્રિક જાતિ"],"ans":1},{"q":"સજીવોની વિવિધતામાં થતો ઘટાડો અને જાતિઓનું લુપ્ત થવું એ કઈ આંતરરાષ્ટ્રીય રેડ ડેટા બુક (Red Data Book) માં નોંધવામાં આવે છે?","opts":["WHO","IUCN (International Union for Conservation of Nature)","WWF","UNEP"],"ans":1},{"q":"સજીવોની વિવિધતાને તેમના જ કુદરતી નિવાસસ્થાનમાં સાચવવાની પદ્ધતિને શું કહે છે?","opts":["એક્સ-સીટુ (Ex-situ) સંરક્ષણ","ઇન-સીટુ (In-situ - સ્વ-સ્થાન) સંરક્ષણ","નમૂનાઓનું શુષ્કન","લેબોરેટરી સંવર્ધન"],"ans":1},{"q":"સજીવોને તેમના કુદરતી નિવાસસ્થાનથી દૂર કોઈ ખાસ સુરક્ષિત જગ્યાએ સાચવવાની પદ્ધતિ (જેમ કે ઝૂ કે બોટેનિકલ ગાર્ડન) ને શું કહે છે?","opts":["ઇન-સીટુ સંરક્ષણ","એક્સ-સીટુ (Ex-situ - પર-સ્થાન) સંરક્ષણ","મુક્ત છોડી દેવા","અભયારણ્ય"],"ans":1},{"q":"સજીવોના પૂર્વજો અને તેમના ઉત્ક્રાંતિના ઇતિહાસના સંબંધોના અભ્યાસને શું કહેવામાં આવે છે?","opts":["એનાટોમી","ફિલોજેની (Phylogeny)","ઓન્ટોજેની","મોર્ફોલોજી"],"ans":1},{"q":"વિશ્વમાં સજીવોના અભ્યાસ માટે જૈવવિવિધતાના એવા વિસ્તારો જ્યાં ખૂબ જ ઊંચી વિવિધતા હોય પણ તેના પર જોખમ વધુ હોય, તેને શું કહે છે?","opts":["સેન્ચ્યુરી","બાયોડાયવર્સિટી હોટસ્પોટ્સ (Biodiversity Hotspots)","નેશનલ પાર્ક","રેડ ઝોન"],"ans":1},{"q":"નીચેનામાંથી કયું પરિબળ સજીવ વિશ્વમાં વિવિધતા નાશ પામવા માટે સૌથી વધુ જવાબદાર છે?","opts":["કુદરતી ચયાપચય","માનવ પ્રવૃત્તિઓ દ્વારા નિવાસસ્થાનનો નાશ (Habitat loss)","સજીવોનું પ્રજનન","વનસ્પતિમાં પુષ્પસર્જન"],"ans":1},{"q":"ડાયેટમ્સ, લીલ, ફૂગ, વનસ્પતિઓ અને પ્રાણીઓ - આ બધા સજીવો પૃથ્વી પર કયા સ્વરૂપે હાજર છે?","opts":["એક જ સમાન જાતિ તરીકે","સજીવ વિશ્વની વિવિધતા (Biological diversity) ના ભાગ રૂપે","માત્ર નિર્જીવ તત્વો તરીકે","કૃત્રિમ કોષો તરીકે"],"ans":1},{"q":"સજીવોની વિવિધતાનો અભ્યાસ કરવા માટે કયું સાધન પ્રાથમિક અને પ્રત્યક્ષ માહિતી પૂરી પાડે છે?","opts":["માત્ર પુસ્તકો વાંચવા","ક્ષેત્ર અભ્યાસ અને નમૂનાઓનું પ્રત્યક્ષ એકત્રીકરણ (Field studies)","કાલ્પનિક ચિત્રો બનાવવા","માત્ર ઓનલાઇન વિડીયો જોવા"],"ans":1},{"q":"સજીવોમાં જોવા મળતી વિવિધતાને કારણે જ આપણને કઈ મહત્વની સેવાઓ (Ecosystem services) મળે છે?","opts":["ઓક્સિજન અને શુદ્ધ પાણી","વનસ્પતિઓ દ્વારા પરાગનયન અને ફળ ઉત્પાદન","પોષક ચક્રોનું સંતુલન","આપેલા તમામ"],"ans":3},{"q":"કયા પ્રકારના સજીવોમાં વિવિધતાનો અભ્યાસ કરવો સૌથી વધુ અઘરો છે કારણ કે તેમને પ્રયોગશાળામાં સંવર્ધિત કરવા મુશ્કેલ છે?","opts":["સ્તનધારી પ્રાણીઓ","આદિકોષકેન્દ્રી સૂક્ષ્મજીવો / બેક્ટેરિયા (Prokaryotes)","આવૃત બીજધારી વનસ્પતિઓ","પક્ષીઓ"],"ans":1},{"q":"એક જ પ્રજાતિ (Genus) ની અંદર જુદી જુદી જાતિઓ (Species) જોવા મળે, તે સજીવ વિશ્વની કઈ વિવિધતા દર્શાવે છે?","opts":["નિવસનતંત્ર વિવિધતા","જાતિ સ્તરની વિવિધતા (Species diversity)","રાસાયણિક વિવિધતા","ભૌતિક વિવિધતા"],"ans":1},{"q":"સમુદ્રી નિવસનતંત્રમાં સૌથી વધુ વિવિધતા ધરાવતી કઈ રચના જોવા મળે છે જેને 'સમુદ્રના વર્ષાવનો' કહેવાય છે?","opts":["રેતીના ઢગલા","પરવાળાના ખડકો (Coral reefs)","મીઠાના અગરો","મૃત વ્હેલ"],"ans":1},{"q":"વનસ્પતિઓના પર્ણોના કદ, આકાર અને ગોઠવણીમાં જોવા મળતો તફાવત એ કયા સ્તરની વિવિધતા છે?","opts":["આંતરિક રાસાયણિક વિવિધતા","બાહ્ય આકારકીય વિવિધતા (Morphological diversity)","કોષકેન્દ્રની વિવિધતા","ભૌગોલિક વિવિધતા"],"ans":1},{"q":"પદ્ધતિસરના વિજ્ઞાન (Systematics) નો મુખ્ય ધ્યેય શું છે?","opts":["માત્ર સજીવોના વજનની યાદી બનાવવી","સજીવોની વિવિધતા અને તેમના વૈશ્વિક ઉત્ક્રાંતિ સંબંધોની ગોઠવણી કરવી","સજીવોને પ્રયોગશાળામાં જ રાખવા","બધી વનસ્પતિઓ કાપી નાખવી"],"ans":1},{"q":"જૈવવિવિધતાના સંદર્ભમાં 'લક્ષણીકરણ' (Characterization) એટલે શું?","opts":["સજીવનું વજન માપવું","સજીવના મહત્વના બાહ્ય અને આંતરિક લક્ષણોની ચોક્કસ નોંધ કરવી","સજીવને મારી નાખવો","સજીવના રંગ બદલવા"],"ans":1},{"q":"પૃથ્વી પર સજીવોની અદ્ભુત વિવિધતા હોવા છતાં, બધા જ સજીવો કોષીય સ્તરે કઈ સમાનતા ધરાવે છે?","opts":["બધાની કોષદીવાલ સમાન પદાર્થની છે","બધા સજીવો કોષો અને કોષીય નીપજોના બનેલા છે","બધા સજીવોનું કદ એકસરખું છે","બધા સજીવો માત્ર હરિતકણ ધરાવે છે"],"ans":1},{"q":"જો આપણે કોઈ નવા જંગલની મુલાકાત લઈએ, તો આપણને સજીવોની વિવિધતા પર શું અસર જોવા મળશે?","opts":["સજીવોની સંખ્યા ઘટશે","સજીવોના નવા પ્રકારો અને તેમની વિવિધતા વધુ જોવા મળશે","કોઈ સજીવ જોવા નહીં મળે","માત્ર જૂના જ સજીવો દેખાશે"],"ans":1},{"q":"સજીવોના વૈજ્ઞાનિક નામો હંમેશા અનન્ય (Unique) હોય છે, તેનો અર્થ શું થાય?","opts":["એક નામ એક કરતાં વધુ સજીવો માટે વાપરી શકાય","એક ચોક્કસ વૈજ્ઞાનિક નામ માત્ર એક જ સજીવ (જાતિ) માટે હોય છે","નામ દર વર્ષે બદલાય છે","નામ માત્ર ભારતમાં જ માન્ય હોય છે"],"ans":1},{"q":"સજીવ વિશ્વમાં વિવિધતાનો અભ્યાસ કરવા માટે કઈ વૈજ્ઞાનિક પદ્ધતિ આપણને સજીવોને જૂથમાં વહેંચવામાં મદદ કરે છે?","opts":["નામકરણ","વર્ગીકરણ (Classification)","ઓળખવિધિ","ઉત્સર્જન"],"ans":1},{"q":"નીચેનામાંથી કયું વિધાન જૈવવિવિધતા માટે ખોટું છે?","opts":["પૃથ્વી પર સજીવો સમાન સંખ્યા અને પ્રકારમાં જ વહેંચાયેલા છે","જૈવવિવિધતા સમય અને ઉત્ક્રાંતિ સાથે બદલાતી રહે છે","માનવ પ્રવૃત્તિઓ જૈવવિવિધતાને નુકસાન પહોંચાડી રહી છે","જૈવવિવિધતા પૃથ્વી પર સંતુલન જાળવવા જરૂરી છે"],"ans":0},{"q":"સજીવોના પદ્ધતિસરના અભ્યાસ (Systematics) માં નીચેનામાંથી કઈ બાબતને કેન્દ્રમાં રાખવામાં આવે છે?","opts":["માત્ર સજીવના આર્થિક ફાયદા","સજીવોની વિવિધતા અને તેમની વચ્ચેના સંબંધો (Relationships)","સજીવના મૃત્યુની તારીખ","સજીવની દોડવાની ઝડપ"],"ans":1},{"q":"પૃથ્વી પર હાજર સજીવોની વિવિધતાનો અભ્યાસ આપણને કઈ બાબત સમજવામાં મદદ કરે છે?","opts":["માત્ર પૃથ્વીની ઉંમર","સજીવોનો ઉદ્ભવ અને તેમનો પરસ્પર સંબંધ","માત્ર ચંદ્રની ગતિ","યંત્રોની કાર્યપદ્ધતિ"],"ans":1},{"q":"જૈવવિવિધતાના રક્ષણ માટે સરકારે બનાવેલા કાયદાઓ અને 'બાયોસ્ફિયર રિઝર્વ' એ કયા પ્રકારનું કાર્ય છે?","opts":["સજીવોનો નાશ કરવાનું","સજીવ વિશ્વની વિવિધતાનું સંરક્ષણ (Conservation) કરવાનું","માત્ર પ્રવાસન વધારવાનું","સજીવોના કદ બદલવાનું"],"ans":1},{"q":"સજીવોમાં જોવા મળતી જનીન વિવિધતા (Genetic diversity) નું મુખ્ય ઉદાહરણ કયું હોઈ શકે?","opts":["કેરી અને ઘઉં બંને જુદા છોડ છે તે","ભારતમાં જોવા મળતી ચોખાની હજારો વિવિધ જાતો (Varieties)","સિંહ અને વાઘ વચ્ચેનો તફાવત","પક્ષીઓ અને માછલીઓ વચ્ચેનો તફાવત"],"ans":1},{"q":"સજીવ વિશ્વમાં વિવિધતાનો અભ્યાસ કરવા માટે શા માટે 'વર્ગીકરણ વિજ્ઞાન' (Taxonomy) ને પાયાનું વિજ્ઞાન માનવામાં આવે છે?","opts":["કારણ કે તે સજીવોને સોનામાં બદલે છે","કારણ કે તે લાખો સજીવોની ઓળખ અને ગોઠવણી નિયમોબદ્ધ કરે છે","કારણ કે તે માત્ર મૃત સજીવો માટે છે","તે જરૂરી નથી, માત્ર એક શોખ છે"],"ans":1},{"q":"નીચેનામાંથી કયું વિધાન સજીવ વિશ્વની વિવિધતા વિશે સાચી સમજ આપે છે?","opts":["પૃથ્વી પર સજીવોની વિવિધતા મર્યાદિત છે અને નવી જાતિઓ ક્યારેય મળી શકતી નથી","પૃથ્વી પર સજીવો અદ્ભુત વૈવિધ્ય ધરાવે છે જેમના અભ્યાસ માટે ટેક્સોનોમી અને સિસ્ટમેટીક્સ અનિવાર્ય છે","બધી વનસ્પતિઓ અને પ્રાણીઓ આંતરિક રીતે તદ્દન સમાન જ છે","વિવિધતા માત્ર કૃત્રિમ રીતે જ ઉત્પન્ન કરી શકાય છે"],"ans":1},{"q":"દ્વિનામી નામકરણ પદ્ધતિ (Binomial Nomenclature) કયા વૈજ્ઞાનિક દ્વારા વિકસાવવામાં આવી હતી?","opts":["આર. એચ. વ્હાઇટેકર","કેરોલસ લીનિયસ (Carolus Linnaeus)","બેન્થામ અને હુકર","જીન બેપ્ટિસ્ટ લેમાર્ક"],"ans":1},{"q":"વૈજ્ઞાનિક નામો સામાન્ય રીતે કઈ ભાષામાં હોય છે?","opts":["અંગ્રેજી","લેટિન (Latin)","ગ્રીક","સંસ્કૃત"],"ans":1},{"q":"વૈજ્ઞાનિક નામનો પ્રથમ શબ્દ શું દર્શાવે છે?","opts":["જાતિ સંકેત પ્રત્યય","પ્રજાતિ (Genus)","કુળ (Family)","વર્ગ (Class)"],"ans":1},{"q":"વૈજ્ઞાનિક નામનો બીજો શબ્દ શું દર્શાવે છે?","opts":["પ્રજાતિ","જાતિ સંકેત પ્રત્યય (Specific epithet)","વૈજ્ઞાનિકનું નામ","સૃષ્ટિ"],"ans":1},{"q":"હસ્તલિખિત વૈજ્ઞાનિક નામોની નીચે અલગ-અલગ લીટી (Underline) શા માટે કરવામાં આવે છે?","opts":["નામ સુંદર દેખાય તે માટે","તેમનો લેટિન ઉદ્ભવ દર્શાવવા માટે","અંગ્રેજી ભાષાનો નિયમ હોવાથી","તે નામ કાપી નાખવા માટે"],"ans":1},{"q":"વૈજ્ઞાનિક નામોને જ્યારે પુસ્તકોમાં છાપવામાં (Print) આવે ત્યારે કયા અક્ષરોમાં છાપવામાં આવે છે?","opts":["ઘાટા કાળા અક્ષરોમાં (Bold)","ત્રાંસા અક્ષરોમાં (Italics)","મોટા કેપિટલ અક્ષરોમાં","અંડરલાઇન સાથે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમ મુજબ પ્રજાતિ (Genus) ના નામનો પ્રથમ અક્ષર હંમેશા કેવો હોવો જોઈએ?","opts":["નાની લિપિમાં (Small letter)","મોટી લિપિમાં (Capital letter)","ઇટાલિક અક્ષરમાં","ગમે તેવો ચાલે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમ મુજબ જાતિ (Species) ના નામનો પ્રથમ અક્ષર કેવો હોવો જોઈએ?","opts":["મોટી લિપિમાં (Capital letter)","નાની લિપિમાં (Small letter)","રોમન અક્ષરમાં","ઘાટા અક્ષરમાં"],"ans":1},{"q":"આંબા (Mango) નું સાચું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["mangifera indica","Mangifera indica","Mangifera Indica","MANGIFERA INDICA"],"ans":1},{"q":"'Mangifera indica Linn.' વૈજ્ઞાનિક નામમાં 'Linn.' શબ્દ શું સૂચવે છે?","opts":["આ વનસ્પતિ લિન્કોલન પ્રદેશમાં થાય છે","આ જાતિનું વર્ણન સૌપ્રથમ કેરોલસ લીનિયસે કર્યું હતું","આ નામ કાલ્પનિક છે","આ વનસ્પતિ લીલ પ્રકારની છે"],"ans":1},{"q":"પશ્ચિમ ઘાટમાં પૂર્વ ઘાટ કરતાં ઉભયજીવીઓ (Amphibians) ની જાતિઓની વિવિધતા વધુ છે. આ કયા સ્તરની વિવિધતા છે?","opts":["જનીન વિવિધતા","જાતિ વિવિધતા (Species diversity)","નિવસનતંત્ર વિવિધતા","રાસાયણિક વિવિધતા"],"ans":1},{"q":"હિમાલયના વિવિધ વિસ્તારોમાં ઉગતી 'રાઉવોલ્ફિયા વોમિટોરિયા' (Rauwolfia vomitoria) વનસ્પતિ કયા સક્રિય રસાયણની સાંદ્રતા અને ક્ષમતામાં વિવિધતા દર્શાવે છે?","opts":["નિકોટીન","રેઝરપિન (Reserpine)","કેફીન","ક્વિનાઇન"],"ans":1},{"q":"ભારતમાં ચોખા (Rice) ની અંદાજે કેટલી જનીન પ્રકારની વિવિધતાઓ (Varieties) જોવા મળે છે?","opts":[",000 થી વધુ",",000 થી વધુ",",000 થી વધુ",",000 થી વધુ"],"ans":1},{"q":"ભારતમાં કેરી (Mango) ની કેટલી વિવિધ જાતો જોવા મળે છે?","opts":["થી વધુ",",000 થી વધુ",",000 થી વધુ","થી વધુ"],"ans":1},{"q":"સ્કેન્ડિનેવિયન દેશ 'નોર્વે' કરતાં ભારત દેશમાં રણ, વર્ષાવનો, મેન્ગ્રોવ્સ અને પરવાળાના ખડકોના કારણે કયા સ્તરની જૈવવિવિધતા ખૂબ ઊંચી છે?","opts":["જનીન વિવિધતા","નિવસનતંત્ર વિવિધતા (Ecosystem diversity)","માત્ર જાતિ વિવિધતા","કોઈ જૈવવિવિધતા નથી"],"ans":1},{"q":"પ્રખ્યાત પરિસ્થિતિશાસ્ત્રી 'રોબર્ટ મે' (Robert May) ના વૈશ્વિક અંદાજ મુજબ પૃથ્વી પર કુલ કેટલી જાતિઓ હોઈ શકે?","opts":["7 મિલિયન","આશરે 7 મિલિયન (70 લાખ)","થી 50 મિલિયન","મિલિયન"],"ans":1},{"q":"પૃથ્વી પર અત્યાર સુધી નોંધાયેલી કુલ જાતિઓમાં વનસ્પતિઓ (લીલ, ફૂગ, દ્વિઅંગી, ત્રિઅંગી, અનાવૃત અને આવૃત બીજધારી) નો હિસ્સો કેટલા ટકાથી વધુ નથી?","opts":["%","%","%","%"],"ans":1},{"q":"કયા સજીવોની જાતિઓની વિવિધતા શોધવા માટે પરંપરાગત વર્ગીકરણની પદ્ધતિઓ યોગ્ય નથી કારણ કે તેમને પ્રયોગશાળામાં સંવર્ધિત કરી શકાતા નથી?","opts":["પક્ષીઓ","પ્રોકેરિયોટ્સ / જીવાણુ (Prokaryotes / Bacteria)","સરીસૃપો","સસ્તન પ્રાણીઓ"],"ans":1},{"q":"જો પ્રોકેરિયોટ્સ (બેક્ટેરિયા) ની જાતિઓને ઓળખવા માટે જૈવ-રાસાયણિક અથવા આણ્વિક (Molecular) માપદંડો અપનાવવામાં આવે, તો તેમની વિવિધતાની સંખ્યા કેટલી થઈ શકે?","opts":["ખૂબ જ ઓછી","લાખો કે મિલિયનોમાં","શૂન્ય","માત્ર સો જેટલી"],"ans":1},{"q":"જૈવવિવિધતાના સંરક્ષણ માટે વર્ષ 1992 માં બ્રાઝિલના રીઓ ડી જાનેરો ખાતે કઈ ઐતિહાસિક વૈશ્વિક સભા યોજાઈ હતી?","opts":["ક્યોટો પ્રોટોકોલ","પૃથ્વી પરિષદ (The Earth Summit)","મોન્ટ્રિયલ પ્રોટોકોલ","વર્લ્ડ ઇકોનોમિક ફોરમ"],"ans":1},{"q":"વર્ષ 2002 માં જોહાનિસબર્ગ (દક્ષિણ આફ્રિકા) માં ટકાઉ વિકાસ (Sustainable Development) પર કઈ વૈશ્વિક સભા યોજાઈ હતી જેમાં 190 દેશોએ જૈવવિવિધતાનો ઘટાડો રોકવાનો સંકલ્પ લીધો હતો?","opts":["અર્થ સમિટ","વિશ્વ સમિટ (World Summit)","પેરિસ કરાર","જી-20 સમિટ"],"ans":1},{"q":"વનસ્પતિ કે પ્રાણીના નાશ પામેલા અથવા લુપ્ત થવાના આરે રહેલા જનીનો કે જન્યુઓને ખૂબ નીચા તાપમાને (-196°C) પ્રવાહી નાઇટ્રોજનમાં સાચવવાની પદ્ધતિને શું કહે છે?","opts":["હોમિયોસ્ટેસિસ","ક્રાયોપ્રિઝર્વેશન (Cryopreservation)","શુષ્કન","ટિશ્યુ કલ્ચર"],"ans":1},{"q":"આંતરરાષ્ટ્રીય સ્તરે વનસ્પતિ ઉદ્યાનો (Botanical Gardens) અને પ્રાણી ઉદ્યાનો (Zoological Parks) એ કયા પ્રકારના સંરક્ષણનું ઉદાહરણ છે?","opts":["ઇન-સીટુ (In-situ) સંરક્ષણ","એક્સ-સીટુ (Ex-situ - પર-સ્થાન) સંરક્ષણ","કુદરતી આવાસ સંરક્ષણ","આવાસ વિખંડન"],"ans":1},{"q":"પૃથ્વી પર જાતિઓની વિવિધતા અસમાન રીતે વહેંચાયેલી છે, વિષુવવૃત્ત (Equator) થી ધ્રુવો (Poles) તરફ જતાં જૈવવિવિધતા પર શું અસર થાય છે?","opts":["જૈવવિવિધતા વધે છે","જૈવવિવિધતા ઘટે છે","જૈવવિવિધતા સમાન રહે છે","કોઈ ફેરફાર થતો નથી"],"ans":1},{"q":"મનુષ્યનું વૈજ્ઞાનિક નામ 'Homo sapiens' છે, તેમાં 'sapiens' શબ્દ કઈ કક્ષા (Taxonomic category) દર્શાવે છે?","opts":["પ્રજાતિ","જાતિ (Species)","કુળ","ગોત્ર"],"ans":1},{"q":"વૈજ્ઞાનિકો દ્વારા કોઈ નવા શોધાયેલા સજીવને નામ આપતા પહેલાં તેની સચોટ ઓળખ કરવી, તેને ટેક્સોનોમીમાં શું કહેવાય?","opts":["નામકરણ","ઓળખવિધિ (Identification)","વર્ગીકરણ","લક્ષણીકરણ"],"ans":1},{"q":"જૈવવિવિધતાના અભ્યાસમાં 'જાતિ' (Species) ને શું માનવામાં આવે છે?","opts":["વર્ગીકરણની સૌથી ઉચ્ચ કક્ષા","વર્ગીકરણનો પાયાનો અને સૌથી નાનો વાસ્તવિક એકમ (Basic unit)","માત્ર એક કાલ્પનિક ખ્યાલ","સૃષ્ટિ સમાન કક્ષા"],"ans":1},{"q":"પૃથ્વી પર સજીવોની જૈવવિવિધતા જાળવી રાખવા માટે નીચેનામાંથી કઈ શૃંખલા કુદરતી રીતે અનિવાર્ય છે?","opts":["પ્લાસ્ટિક ચક્ર","આહાર શૃંખલા (Food chain) અને પોષક ચક્રો","મશીનરી ચક્ર","શહેરીકરણ"],"ans":1},{"q":"નીચેનામાંથી કઈ વનસ્પતિનું વૈજ્ઞાનિક નામ 'Solanum tuberosum' છે?","opts":["રીંગણ","બટાકા (Potato)","ટામેટા","મરચાં"],"ans":1},{"q":"સિંહનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Panthera tigris","Panthera leo","Panthera pardus","Felis catus"],"ans":1},{"q":"વાઘનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Panthera leo","Panthera tigris","Panthera pardus","Canis lupus"],"ans":1},{"q":"ચિત્તા / દીપડાનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Panthera leo","Panthera pardus","Panthera tigris","Homo sapiens"],"ans":1},{"q":"'Panthera leo', 'Panthera tigris' અને 'Panthera pardus' માં કયો શબ્દ સમાન પ્રજાતિ (Genus) દર્શાવે છે?","opts":["leo","Panthera","tigris","pardus"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણની પદ્ધતિમાં જો કોઈ સજીવના બે કરતાં વધુ વૈજ્ઞાનિકો દ્વારા અલગ-અલગ નામ અપાયા હોય, તો કયા નામને માન્ય રાખવામાં આવે છે?","opts":["સૌથી છેલ્લે અપાયેલું નામ","સૌપ્રથમ નિયમોબદ્ધ રીતે પ્રકાશિત થયેલું નામ (Law of Priority)","સૌથી ટૂંકું નામ","ગમે તે નામ વાપરી શકાય"],"ans":1},{"q":"વનસ્પતિ સૃષ્ટિમાં વિવિધતાના અભ્યાસ માટે સુકવેલા અને દબાવેલા વનસ્પતિના નમૂનાઓને કાગળની શીટ પર ચોંટાડીને ક્યાં સાચવવામાં આવે છે?","opts":["મ્યુઝિયમમાં","હર્બેરિયમ (Herbarium - વનસ્પતિ સંગ્રહાલય) માં","ઝૂ લોજિકલ પાર્કમાં","એક્વેરિયમમાં"],"ans":1},{"q":"હર્બેરિયમ શીટ (Herbarium sheet) પર નીચેનામાંથી કઈ માહિતી લખેલી હોતી નથી?","opts":["એકત્ર કર્યાની તારીખ અને સ્થળ","વનસ્પતિનું વજન અને ઊંચાઈ (Plant weight/height)","સ્થાનિક અને વૈજ્ઞાનિક નામ","એકત્ર કરનારનું નામ"],"ans":1},{"q":"જીવંત વનસ્પતિઓના સંદર્ભ અને ઓળખ માટેના વિવિધ સંગ્રહો ધરાવતા સ્થાનોને શું કહેવાય છે?","opts":["મ્યુઝિયમ","વનસ્પતિ ઉદ્યાનો (Botanical Gardens)","રાષ્ટ્રીય ઉદ્યાનો","પ્રયોગશાળા"],"ans":1},{"q":"વિશ્વનો સૌથી મોટો અને પ્રખ્યાત બોટેનિકલ ગાર્ડન 'રોયલ બોટેનિકલ ગાર્ડન' ક્યાં આવેલો છે?","opts":["હાવડા (ભારત)","ક્યુ, ઇંગ્લેન્ડ (Kew, England)","ન્યૂયોર્ક (અમેરિકા)","પેરિસ (ફ્રાન્સ)"],"ans":1},{"q":"ભારતમાં 'ઇન્ડિયન બોટેનિકલ ગાર્ડન' (Indian Botanical Garden) ક્યાં આવેલો છે?","opts":["નવી દિલ્હી","શિબપુર, હાવડા (કોલકાતા)","લખનૌ","મુંબઈ"],"ans":1},{"q":"'નેશનલ બોટેનિકલ રિસર્ચ ઇન્સ્ટિટ્યુટ' (NBRI) ભારતમાં કયા શહેરમાં આવેલી છે?","opts":["કોલકાતા","લખનૌ (Lucknow)","ચેન્નાઈ","બેંગલુરુ"],"ans":1},{"q":"સામાન્ય રીતે શૈક્ષણિક સંસ્થાઓ (શાળાઓ અને કોલેજો) માં મૃત વનસ્પતિ અને પ્રાણીઓના નમૂનાઓને કાચની બરણીમાં પ્રવાહીમાં સાચવીને ક્યાં રાખવામાં આવે છે?","opts":["બોટેનિકલ ગાર્ડનમાં","મ્યુઝિયમ (Museum - સંગ્રહાલય) માં","હર્બેરિયમમાં","સેન્ચ્યુરીમાં"],"ans":1},{"q":"મ્યુઝિયમમાં કીટકો (Insects) ને પકડીને, મારીને, કીટક બોક્સમાં પિન લગાવીને સાચવવાની પદ્ધતિને શું કહે છે?","opts":["સ્ટફિંગ (Stuffing)","ઇન્સેક્ટ પિનિંગ (Insect pinning)","ક્રાયોપ્રિઝર્વેશન","ડ્રાયિંગ"],"ans":1},{"q":"મ્યુઝિયમમાં મોટા પક્ષીઓ અને સ્તનધારી પ્રાણીઓના મૃત શરીરની અંદરથી અંગો કાઢીને રૂ કે ઉન ભરીને સાચવવાની પદ્ધતિને શું કહે છે?","opts":["પિનિંગ","સ્ટફિંગ (Stuffing / સ્તરીકરણ)","પ્રવાહી સંગ્રહ","કાયમી નાશ"],"ans":1},{"q":"પ્રાણીઓના કંકાલ (Skeletons) ના અભ્યાસ અને વિવિધતા જોવા માટે નીચેનામાંથી કયું સ્થાન સૌથી યોગ્ય છે?","opts":["બોટેનિકલ ગાર્ડન","પ્રાણી સૃષ્ટિ સંગ્રહાલય (Museum)","હર્બેરિયમ","ગ્રીન હાઉસ"],"ans":1},{"q":"જીવંત જંગલી પ્રાણીઓને માનવ દેખરેખ હેઠળ સુરક્ષિત વાતાવરણમાં રાખીને તેમની ખોરાકીય આદતો અને વર્તણૂકનો અભ્યાસ ક્યાં કરાય છે?","opts":["મ્યુઝિયમમાં","પ્રાણી ઉદ્યાનો (Zoological Parks / Zoo) માં","હર્બેરિયમમાં","લેબોરેટરીમાં"],"ans":1},{"q":"સજીવોની વિવિધતાના આધારે વનસ્પતિઓ અને પ્રાણીઓની ઓળખવિધિ માટે ઉપયોગમાં લેવાતા લક્ષણોની જોડી (વિરોધાભાસી લક્ષણો) વાળા સાધનને શું કહે છે?","opts":["હર્બેરિયમ","ઓળખ ચાવી (Taxonomic Key)","મ્યુઝિયમ","મોનોગ્રાફ"],"ans":1},{"q":"ઓળખ ચાવી (Key) માં રહેલી વિરોધાભાસી લક્ષણોની જોડને શું કહેવામાં આવે છે?","opts":["લીડ (Lead)","કપલેટ (Couplet / યુગ્મક)","ટેક્સોન","કેટેગરી"],"ans":1},{"q":"ઓળખ ચાવી (Taxonomic Key) ના દરેક સ્વતંત્ર વિધાન કે વાક્યને શું કહેવામાં આવે છે?","opts":["કપલેટ","માર્ગદર્શિકા / લીડ (Lead)","મોનોગ્રાફ","ફ્લોરા"],"ans":1},{"q":"કોઈ ચોક્કસ વિસ્તારમાં જોવા મળતી વનસ્પતિઓ અને તેમના કુદરતી નિવાસસ્થાનની સંપૂર્ણ વિગતો અને અનુક્રમણિકા આપતા પુસ્તકને શું કહે છે?","opts":["મોનોગ્રાફ","ફ્લોરા (Flora)","મેન્યુઅલ","કેટલોગ"],"ans":1},{"q":"માત્ર કોઈ એક જ વર્ગક (Taxon - જેમ કે કોઈ એક જ કુળ કે પ્રજાતિ) ની સંપૂર્ણ અને વિસ્તૃત માહિતી ધરાવતી પુસ્તિકાને શું કહે છે?","opts":["ફ્લોરા","મોનોગ્રાફ (Monograph)","મેન્યુઅલ","કેટલોગ"],"ans":1}];
+const quizMode='practice';
+const TPQ=30;
+let userAns={}, curIdx=0, timerIv=null, timeLeft=TPQ;
+
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+
+function renderQ(){
+  clearInterval(timerIv);
+  const q=questions[curIdx];
+  const done=userAns[curIdx]!==undefined;
+  const isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  document.getElementById('q-area').innerHTML=
+    '<div class="question-card"><div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div>'+
+    '<div class="options-grid">'+optHtml+'</div>'+
+    (done?'<div style="background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:99px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);">✓ Correct: <strong style=color:#fff>'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong></div>':'')+
+    '</div>';
+  if(quizMode==='exam'&&!done){
+    timeLeft=TPQ;
+    const b=document.getElementById('timer-badge');
+    b.style.display='block';b.textContent='⏱️ '+timeLeft+'s';b.style.color='';
+    timerIv=setInterval(()=>{
+      timeLeft--;b.textContent='⏱️ '+timeLeft+'s';
+      if(timeLeft<=5)b.style.color='var(--danger)';
+      if(timeLeft<=0){clearInterval(timerIv);skipQ();}
+    },1000);
+  }
+}
+
+function pick(i){
+  clearInterval(timerIv);userAns[curIdx]=i;renderQ();
+  if(quizMode==='exam'&&curIdx<questions.length-1)setTimeout(()=>nav(1),900);
+}
+function nav(d){const n=curIdx+d;if(n<0||n>=questions.length)return;curIdx=n;renderQ();}
+function skipQ(){clearInterval(timerIv);if(userAns[curIdx]===undefined)userAns[curIdx]=-1;if(curIdx<questions.length-1){curIdx++;renderQ();}else finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+
+function finishQuiz(){
+  clearInterval(timerIv);
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  const grades=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']];
+  const [,gt,gm]=grades.find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c;
+  const ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+
+function downloadResults(){
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  let html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Results - My Quiz</title><style>body{font-family:Arial,sans-serif;max-width:720px;margin:40px auto;padding:20px;background:#f5f5f5;color:#222;}h1{text-align:center}.summary{display:flex;gap:14px;justify-content:center;margin:18px 0;flex-wrap:wrap}.stat{background:#fff;border-radius:10px;padding:13px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}.val{font-size:24px;font-weight:bold;margin-bottom:3px}.c{color:#2a9a60}.w{color:#c44}.s{color:#999}.q{background:#fff;border-radius:10px;padding:15px;margin-bottom:11px;box-shadow:0 2px 8px rgba(0,0,0,.06)}.qt{font-weight:bold;margin-bottom:9px;font-size:14px}.opt{padding:5px 10px;margin:3px 0;border-radius:6px;font-size:13px}.oc{background:#e8f9f0;color:#2a9a60;border:1px solid #2a9a60}.ow{background:#fde8e8;color:#c44;border:1px solid #c44}.op{background:#f5f5f5;border:1px solid #ddd}</style></head><body>';
+  html+='<h1>📊 My Quiz — Results</h1>';
+  html+='<div class="summary"><div class="stat"><div class="val c">'+cor+'</div><div>Correct</div></div><div class="stat"><div class="val w">'+wrg+'</div><div>Wrong</div></div><div class="stat"><div class="val s">'+skp+'</div><div>Skipped</div></div><div class="stat"><div class="val">'+pct+'%</div><div>Score</div></div></div>';
+  for(let i=0;i<questions.length;i++){
+    const q=questions[i],ua=userAns[i];
+    html+='<div class="q"><div class="qt">Q'+(i+1)+'. '+q.q+'</div>';
+    q.opts.forEach((opt,j)=>{let cls='op',pre='';if(j===q.ans){cls='oc';pre='✓ ';}else if(j===ua){cls='ow';pre='✗ ';}html+='<div class="opt '+cls+'">'+pre+'('+LETTERS[j]+') '+opt+'</div>';});
+    html+='</div>';
+  }
+  html+='</body></html>';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='results-my-quiz.html';a.click();
+}
+
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+</script>
+</body>
+</html>
