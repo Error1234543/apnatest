@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ઉત્સેચકો</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ઉત્સેચકો</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ઉત્સેચકો</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેનામાંથી કયો ઉત્સેચક તેના સબસ્ટ્રેટ સાથે સહ-ઉત્પાદન (cofactor) વગર કામ કરી શકે છે?", "opts": ["હેક્સોકિનેઝ", "કાર્બોક્સિપેપ્ટિડેઝ", "કેટલેઝ", "રાઇબોઝાઇમ"], "ans": 3, "exp": "રાઇબોઝાઇમ (RNA-આધારિત ઉત્સેચક) તેના સબસ્ટ્રેટ સાથે સહ-ઉત્પાદન વગર કામ કરે છે, કારણ કે તે રાસાયણિક પ્રક્રિયામાં સહાયક તત્વોની જરૂરિયાત વગર જ ક્રિયાશીલ હોય છે. હેક્સોકિનેઝને Mg²⁺, કાર્બોક્સિપેપ્ટિડેઝને Zn²⁺, અને કેટલેઝને Fe²⁺ જેવા સહ-ઉત્પાદનોની જરૂર પડે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની સક્રિય સ્થાન (active site) પર સબસ્ટ્રેટ બંધાય છે, ત્યારે કયો મોડલ સબસ્ટ્રેટ અને ઉત્સેચક વચ્ચેના આંતરક્રિયાનું સૌથી યથાર્થ વર્ણન કરે છે?", "opts": ["કીલ-લૉક મોડલ", "ઇન્ડ્યુસ્ડ ફિટ મોડલ", "લૉક-એન્ડ-કી મોડલ", "સ્ટેટિક ફિટ મોડલ"], "ans": 1, "exp": "ઇન્ડ્યુસ્ડ ફિટ મોડલ અનુસાર, ઉત્સેચકની સક્રિય સ્થાન સબસ્ટ્રેટના આગમન પછી તેના આકારને અનુરૂપ બનાવે છે, જ્યારે કીલ-લૉક મોડલ (A અને C) સબસ્ટ્રેટ અને ઉત્સેચક વચ્ચે સંપૂર્ણ પૂરકતા ધારે છે, જે વાસ્તવિકતામાં ઓછું સચોટ છે. સ્ટેટિક ફિટ મોડલ (D) અસ્તિત્વમાં નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક પ્રકાશસંશ્લેષણ દરમિયાન CO₂ ને ફિક્સ કરવામાં મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["રુબિસ્કો (RuBisCO)", "PEP કાર્બોક્સિલેઝ", "કાર્બોનિક એનહાઇડ્રેઝ", "એલ્ડોલેઝ"], "ans": 0, "exp": "રુબિસ્કો (RuBisCO) પ્રકાશસંશ્લેષણના કેલ્વિન ચક્ર દરમિયાન CO₂ ને ફિક્સ કરવા માટે જવાબદાર મુખ્ય ઉત્સેચક છે. PEP કાર્બોક્સિલેઝ C4 છોડમાં CO₂ ફિક્સેશનમાં ભાગ લે છે, કાર્બોનિક એનહાઇડ્રેઝ CO₂ અને H₂O વચ્ચેના સંતુલનમાં મદદ કરે છે, જ્યારે એલ્ડોલેઝ ગ્લાયકોલાઇસિસમાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 10: છોડમાં શ્વસન અને પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "ઉત્સેચકની ક્રિયાશીલતાને અવરોધતી નીચેનામાંથી કઈ પરિસ્થિતિ ઉત્સેચકને અપરિવર્તનશીલ નિષ્ક્રિય કરે છે?", "opts": ["તાપમાનમાં અચાનક વધારો", "pHમાં અચાનક ફેરફાર", "ભારે ધાતુના આયનની હાજરી", "સબસ્ટ્રેટની અછત"], "ans": 0, "exp": "તાપમાનમાં અચાનક વધારો ઉત્સેચકની પ્રોટીન સંરચનાને નાશ કરે છે, જેને ડીનેચરલાઇઝેશન કહેવાય છે, અને તે અપરિવર્તનશીલ હોય છે. pHમાં ફેરફાર (B) અને ભારે ધાતુના આયન (C) અસ્થાયી રીતે અવરોધી શકે છે, જ્યારે સબસ્ટ્રેટની અછત (D) ક્રિયાશીલતાને અસર કરે છે પરંતુ ઉત્સેચકને નિષ્ક્રિય કરતું નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેના સબસ્ટ્રેટ પર કામ કરતી વખતે પાણીના અણુને વાપરે છે?", "opts": ["એમાઇલેઝ", "લાઇપેઝ", "પ્રોટિયેઝ", "કેટલેઝ"], "ans": 2, "exp": "પ્રોટિયેઝ પ્રોટીનના હાઇડ્રોલિસિસ માટે પાણીના અણુનો ઉપયોગ કરે છે (હાઇડ્રોલેઝ ઉત્સેચક તરીકે). એમાઇલેઝ (A) કાર્બોદિતોના હાઇડ્રોલિસિસ માટે, લાઇપેઝ (B) ચરબીના હાઇડ્રોલિસિસ માટે પાણી વાપરે છે, પરંતુ કેટલેઝ (D) હાઇડ્રોજન પેરોક્સાઇડના વિઘટન માટે પાણી વાપરતું નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા માટે ધાતુ આયન (metal ion) ની હાજરી અતિ આવશ્યક છે, પરંતુ તે ધાતુ આયન ઉત્સેચકના સક્રિય સ્થાનમાં સીધું જ બંધાય છે નહીં, પરંતુ સબસ્ટ્રેટ સાથે જોડાઈને ઉત્સેચક-સબસ્ટ્રેટ કોમ્પ્લેક્સને સ્થિર કરે છે?", "opts": ["કાર્બોનિક એનહાઇડ્રેઝ", "હેક્સોકિનેઝ", "કેટલેઝ", "એમાઇલેઝ"], "ans": 0, "exp": "કાર્બોનિક એનહાઇડ્રેઝ ઉત્સેચક તેની ક્રિયા માટે ઝિંક (Zn²⁺) ધાતુ આયનની હાજરી આવશ્યક છે. ઝિંક આયન સબસ્ટ્રેટ (CO₂) સાથે જોડાઈને ઉત્સેચક-સબસ્ટ્રેટ કોમ્પ્લેક્સને સ્થિર કરે છે, પરંતુ સીધું જ સક્રિય સ્થાનમાં બંધાય છે નહીં. હેક્સોકિનેઝ મેગ્નેશિયમ (Mg²⁺) ની હાજરી આવશ્યક છે, પરંતુ તે સીધું જ સક્રિય સ્થાનમાં બંધાય છે. કેટલેઝ અને એમાઇલેઝ ધાતુ આયન પર આધારિત નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની ક્રિયાશીલતા તાપમાનના વધારા સાથે વધે છે, પરંતુ એક નિશ્ચિત તાપમાન પછી અચાનક ઘટી જાય છે, ત્યારે આ ઘટના માટે નીચેનામાંથી કયું કારણ સૌથી યોગ્ય છે?", "opts": ["ઉત્સેચકના સક્રિય સ્થાનમાં સબસ્ટ્રેટ બંધનની ક્ષમતા ઘટી જાય છે", "ઉત્સેચકના પ્રોટીન સંરચનાનો વિકૃતીકરણ (denaturation) થાય છે", "સબસ્ટ્રેટના અણુઓની ગતિશીલતા ઘટી જાય છે", "ઉત્સેચક અને સબસ્ટ્રેટ વચ્ચેના વાન ડર વાલ્સ બળો કમજોર પડી જાય છે"], "ans": 1, "exp": "નિશ્ચિત તાપમાન પછી ઉત્સેચકની ક્રિયાશીલતા અચાનક ઘટી જવાનું મુખ્ય કારણ ઉત્સેચકના પ્રોટીન સંરચનાનો વિકૃતીકરણ (denaturation) છે. વિકૃતીકરણથી ઉત્સેચકનું સક્રિય સ્થાન નષ્ટ થાય છે, જ્યારે અન્ય વિકલ્પો (A, C, D) આ ઘટના માટે સીધું કારણ નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેના સબસ્ટ્રેટ પર કામ કરતી વખતે સબસ્ટ્રેટના કાર્બન-કાર્બન બંધને તોડીને બે અણુઓમાં વિભાજિત કરે છે, પરંતુ પાણીના અણુનો ઉપયોગ કરતો નથી?", "opts": ["લાઇપેઝ", "એમાઇલેઝ", "કેટલેઝ", "ડિકાર્બોક્સિલેઝ"], "ans": 3, "exp": "ડિકાર્બોક્સિલેઝ ઉત્સેચક સબસ્ટ્રેટના કાર્બન-કાર્બન બંધને તોડીને CO₂ ને દૂર કરે છે, પરંતુ પાણીના અણુનો ઉપયોગ કરતો નથી. લાઇપેઝ અને એમાઇલેઝ હાઇડ્રોલિસિસ ક્રિયા દ્વારા પાણીનો ઉપયોગ કરે છે, જ્યારે કેટલેઝ H₂O₂ ને પાણી અને O₂ માં વિભાજિત કરે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા માટે સહ-ઉત્સેચક (coenzyme) તરીકે NAD⁺ અથવા NADP⁺ ની હાજરી આવશ્યક છે?", "opts": ["હેક્સોકિનેઝ", "લેક્ટેટ ડિહાઇડ્રોજિનેઝ", "કેટલેઝ", "એમાઇલેઝ"], "ans": 1, "exp": "લેક્ટેટ ડિહાઇડ્રોજિનેઝ ઉત્સેચક તેની ક્રિયા માટે NAD⁺ અથવા NADP⁺ ની હાજરી આવશ્યક છે, કારણ કે તે ઓક્સિડેશન-રિડક્શન ક્રિયામાં ભાગ લે છે. હેક્સોકિનેઝ, કેટલેઝ અને એમાઇલેઝ આ સહ-ઉત્સેચક પર આધારિત નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની ક્રિયાશીલતા pH ના ફેરફાર સાથે બદલાય છે, ત્યારે નીચેનામાંથી કયો ઉત્સેચક અતિ આમ્લીય (pH ~2) વાતાવરણમાં સૌથી વધુ સક્રિય હોય છે?", "opts": ["પેપ્સિન", "ટ્રિપ્સિન", "એમાઇલેઝ", "કેટલેઝ"], "ans": 0, "exp": "પેપ્સિન ઉત્સેચક અતિ આમ્લીય વાતાવરણ (pH ~2) માં સૌથી વધુ સક્રિય હોય છે, કારણ કે તે પાચનતંત્રના આમ્લીય ભાગ (આમાશય) માં કામ કરે છે. ટ્રિપ્સિન આલ્કલીન વાતાવરણ (pH ~8) માં, એમાઇલેઝ તટસ્થ વાતાવરણ (pH ~7) માં, અને કેટલેઝ તટસ્થ વાતાવરણમાં સક્રિય હોય છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેના સબસ્ટ્રેટ સાથે બંધાયા પછી સબસ્ટ્રેટના બંધારણમાં ફેરફાર કર્યા વગર જ તેને વહેંચી દે છે?", "opts": ["લાયસેઝ (Lyase)", "આયસોમેરેઝ (Isomerase)", "હાઇડ્રોલેઝ (Hydrolase)", "ટ્રાન્સફરેઝ (Transferase)"], "ans": 0, "exp": "લાયસેઝ ઉત્સેચક સબસ્ટ્રેટ પર કામ કરતી વખતે સબસ્ટ્રેટના બંધારણમાં ફેરફાર કર્યા વગર જ તેને વહેંચી દે છે, જેમ કે ફ્યુમરેઝ (Fumarase) જે ફ્યુમરિક એસિડને મેલિક એસિડમાં રૂપાંતરિત કરે છે. આયસોમેરેઝ સબસ્ટ્રેટના આણ્વિક બંધારણમાં ફેરફાર કરે છે, હાઇડ્રોલેઝ પાણીના અણુનો ઉપયોગ કરીને સબસ્ટ્રેટને તોડે છે, અને ટ્રાન્સફરેઝ એક જૂથને એક સબસ્ટ્રેટથી બીજા સબસ્ટ્રેટ તરફ હસ્તાંતરિત કરે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે FAD ની જરૂરિયાત ધરાવે છે?", "opts": ["સુક્સિનિક ડિહાઇડ્રોજિનેઝ (Succinic dehydrogenase)", "લેક્ટેટ ડિહાઇડ્રોજિનેઝ (Lactate dehydrogenase)", "મેલેટ ડિહાઇડ્રોજિનેઝ (Malate dehydrogenase)", "આલ્કોહોલ ડિહાઇડ્રોજિનેઝ (Alcohol dehydrogenase)"], "ans": 0, "exp": "સુક્સિનિક ડિહાઇડ્રોજિનેઝ ઉત્સેચક તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે FAD ની જરૂરિયાત ધરાવે છે, જે ક્રેબ્સ ચક્ર દરમિયાન સુક્સિનેટને ફ્યુમરેટમાં રૂપાંતરિત કરે છે. લેક્ટેટ ડિહાઇડ્રોજિનેઝ, મેલેટ ડિહાઇડ્રોજિનેઝ, અને આલ્કોહોલ ડિહાઇડ્રોજિનેઝ એ નિકોટિનામાઇડ એડિનિન ડાયન્યુક્લિયોટાઇડ (NAD+) નો ઉપયોગ કરે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા માટે ધાતુ આયન તરીકે Zn²⁺ ની હાજરી જરૂરી છે?", "opts": ["કાર્બોનિક એનહાઇડ્રેઝ (Carbonic anhydrase)", "કેટલેઝ (Catalase)", "સાયટોક્રોમ ઓક્સિડેઝ (Cytochrome oxidase)", "પેરોક્સિડેઝ (Peroxidase)"], "ans": 0, "exp": "કાર્બોનિક એનહાઇડ્રેઝ ઉત્સેચક તેની ક્રિયા માટે ધાતુ આયન તરીકે Zn²⁺ ની હાજરી જરૂરી છે, જે કાર્બન ડાયોક્સાઇડ અને પાણી વચ્ચેની પ્રતિક્રિયાને વેગ આપે છે. કેટલેઝ, સાયટોક્રોમ ઓક્સિડેઝ, અને પેરોક્સિડેઝ અન્ય ધાતુ આયન જેવા કે Fe²⁺ અથવા Fe³⁺ નો ઉપયોગ કરે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા દરમિયાન સબસ્ટ્રેટના ક્લોરિન અણુને દૂર કરે છે, પરંતુ તેની ક્રિયા માટે હીમ (heme) સમૂહની જરૂર પડે છે?", "opts": ["કેટલેઝ (Catalase)", "સાયટોક્રોમ P450", "પર્ઓક્સિડેઝ (Peroxidase)", "કાર્બોક્સિપેપ્ટિડેઝ (Carboxypeptidase)"], "ans": 1, "exp": "સાયટોક્રોમ P450 ઉત્સેચક હીમ સમૂહ ધરાવે છે અને તે સબસ્ટ્રેટ પરના ક્લોરિન અણુને દૂર કરવા (ડીહેલોજેનેશન) માટે જાણીતો છે. કેટલેઝ અને પર્ઓક્સિડેઝ હીમ ધરાવે છે પરંતુ ક્લોરિન દૂર કરતાં નથી, જ્યારે કાર્બોક્સિપેપ્ટિડેઝ હીમ વગરનું ઉત્સેચક છે અને પ્રોટીન પાચનમાં ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની ક્રિયાશીલતા પર અવરોધક (inhibitor) નો પ્રભાવ જોવા મળે છે, ત્યારે નીચેનામાંથી કયા પ્રકારના અવરોધકમાં ઉત્સેચકની Vmax સમાન રહે છે પરંતુ Km વધે છે?", "opts": ["પ્રતિયોગી અવરોધક (Competitive inhibitor)", "અપ્રતિયોગી અવરોધક (Non-competitive inhibitor)", "અપરિવર્તનશીલ અવરોધક (Irreversible inhibitor)", "મિશ્ર અવરોધક (Mixed inhibitor)"], "ans": 0, "exp": "પ્રતિયોગી અવરોધક સબસ્ટ્રેટ સાથે સહ-સ્પર્ધા કરે છે અને ઉત્સેચકની સક્રિય સ્થાન પર બંધાય છે, જેથી Km (મિશેલિસ કૉન્સ્ટન્ટ) વધે છે પરંતુ Vmax (મહત્તમ વેગ) સમાન રહે છે. અપ્રતિયોગી અવરોધક Vmax ઘટાડે છે પરંતુ Km સમાન રહે છે, જ્યારે અપરિવર્તનશીલ અવરોધક ઉત્સેચકને કાયમી નિષ્ક્રિય કરે છે. મિશ્ર અવરોધકમાં Km અને Vmax બંને બદલાઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા દરમિયાન સબસ્ટ્રેટના સલ્ફર અણુને દૂર કરે છે, પરંતુ તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે PLP (પાયરીડોક્સલ ફોસ્ફેટ) ની જરૂરિયાત ધરાવે છે?", "opts": ["સિસ્ટીન ડી-સલ્ફરેઝ", "સલ્ફાઇડ ઓક્સિડેઝ", "સિસ્ટીન ડાયોક્સિજનેઝ", "ગ્લુટાથિયોન પર્ક્સિડેઝ"], "ans": 0, "exp": "સિસ્ટીન ડી-સલ્ફરેઝ ઉત્સેચક સબસ્ટ્રેટમાંથી સલ્ફર અણુને દૂર કરે છે અને તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે PLP (પાયરીડોક્સલ ફોસ્ફેટ) ની જરૂરિયાત ધરાવે છે. સલ્ફાઇડ ઓક્સિડેઝ સલ્ફાઇડને ઓક્સિડાઇઝ કરે છે, સિસ્ટીન ડાયોક્સિજનેઝ સિસ્ટીનને સલ્ફાઇટમાં રૂપાંતરિત કરે છે, અને ગ્લુટાથિયોન પર્ક્સિડેઝ હાઇડ્રોજન પેરોક્સાઇડને પાણીમાં રૂપાંતરિત કરે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની ક્રિયાશીલતા પર સબસ્ટ્રેટની સાંદ્રતા અને ઉત્સેચકની સાંદ્રતાનો પ્રભાવ જોવા મળે છે, ત્યારે નીચેનામાંથી કયો ગ્રાફ સિગ્મોઇડ (S-આકારનો) દર્શાવે છે?", "opts": ["માઇકેલિસ-મેન્ટન ગ્રાફ (V vs [S])", "લાઇનવિવર-બર્ક ગ્રાફ (1/V vs 1/[S])", "હિલ ગ્રાફ (log[V/(Vmax-V)] vs log[S])", "ઇડી-હોફસ્ટી ગ્રાફ (V vs V/[S])"], "ans": 2, "exp": "હિલ ગ્રાફ સિગ્મોઇડ (S-આકારનો) દર્શાવે છે, જે સહ-સબસ્ટ્રેટ બંધન અથવા સહ-ઉત્સેચકી ક્રિયાઓ દરમિયાન જોવા મળે છે. માઇકેલિસ-મેન્ટન ગ્રાફ હાઇપરબોલિક હોય છે, લાઇનવિવર-બર્ક ગ્રાફ રેખીય હોય છે, અને ઇડી-હોફસ્ટી ગ્રાફ પણ રેખીય હોય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા દરમિયાન સબસ્ટ્રેટના ફોસ્ફેટ સમૂહને હટાવે છે, પરંતુ તેની ક્રિયા માટે ધાતુ આયન તરીકે Mg2+ ની હાજરી જરૂરી છે?", "opts": ["એલ્કલાઇન ફોસ્ફેટેઝ", "એસિડ ફોસ્ફેટેઝ", "હેક્સોકિનેઝ", "ફોસ્ફોફ્રક્ટોકિનેઝ"], "ans": 0, "exp": "એલ્કલાઇન ફોસ્ફેટેઝ ઉત્સેચક સબસ્ટ્રેટમાંથી ફોસ્ફેટ સમૂહને હટાવે છે અને તેની ક્રિયા માટે Mg2+ ની હાજરી જરૂરી છે. એસિડ ફોસ્ફેટેઝ એસિડિક pH પર કામ કરે છે, હેક્સોકિનેઝ ગ્લુકોઝને ફોસ્ફોરાઇલેટ કરે છે, અને ફોસ્ફોફ્રક્ટોકિનેઝ ફ્રક્ટોઝ-6-ફોસ્ફેટને ફોસ્ફોરાઇલેટ કરે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "જ્યારે ઉત્સેચકની ક્રિયાશીલતા પર તાપમાનનો પ્રભાવ જોવા મળે છે, ત્યારે નીચેનામાંથી કયો ઉત્સેચક 80°C તાપમાને સક્રિય રહે છે?", "opts": ["ટાકા ડીએનએ પોલિમરેઝ", "હ્યુમન ડીએનએ પોલિમરેઝ", "રાઇબોન્યુક્લિએઝ A", "પેપ્સિન"], "ans": 0, "exp": "ટાકા ડીએનએ પોલિમરેઝ (Thermus aquaticus) 80°C તાપમાને સક્રિય રહે છે, કારણ કે તે થર્મોફિલિક બેક્ટેરિયામાંથી મેળવવામાં આવે છે. હ્યુમન ડીએનએ પોલિમરેઝ, રાઇબોન્યુક્લિએઝ A, અને પેપ્સિન મનુષ્યમાંથી મેળવવામાં આવે છે અને ઉચ્ચ તાપમાને નિષ્ક્રિય થાય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયો ઉત્સેચક તેની ક્રિયા દરમિયાન સબસ્ટ્રેટના એમિનો સમૂહને ટ્રાન્સફર કરે છે, પરંતુ તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે PLP (પાયરીડોક્સલ ફોસ્ફેટ) ની જરૂરિયાત ધરાવે છે?", "opts": ["ટ્રાન્સએમિનેઝ", "ડી-એમિનેઝ", "યુરિયેઝ", "એસ્પાર્ટેટ એમિનોટ્રાન્સફરેઝ"], "ans": 3, "exp": "એસ્પાર્ટેટ એમિનોટ્રાન્સફરેઝ ઉત્સેચક સબસ્ટ્રેટમાંથી એમિનો સમૂહને ટ્રાન્સફર કરે છે અને તેની ક્રિયા માટે સહ-ઉત્સેચક તરીકે PLP (પાયરીડોક્સલ ફોસ્ફેટ) ની જરૂરિયાત ધરાવે છે. ટ્રાન્સએમિનેઝ એમિનો સમૂહને ટ્રાન્સફર કરે છે પરંતુ PLP ની જરૂરિયાત ધરાવતો નથી, ડી-એમિનેઝ એમિનો સમૂહને દૂર કરે છે, અને યુરિયેઝ યુરિયાને અમોનિયામાં તોડે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ-અણુઓ અને ઉત્સેચકો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
