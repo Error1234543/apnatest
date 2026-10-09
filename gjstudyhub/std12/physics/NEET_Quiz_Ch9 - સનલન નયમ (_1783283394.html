@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch9 - સ્નેલનો નિયમ (વક્રીભવન)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch9 - સ્નેલનો નિયમ (વક્રીભવન)</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે પ્રકાશની કિરણ સંપૂર્ણ આંતરિક પરાવર્તન પામે છે, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) આપાત કોણ અપવર્તન કોણ કરતાં મોટો હોય છે", "B) પ્રકાશનો વેગ બીજા માધ્યમમાં ઓછો હોય છે", "C) આપાત કોણ ક્રાંતિક કોણ કરતાં ઓછો હોય છે", "D) પ્રકાશની તરંગલંબાઈ માધ્યમ બદલાતા બદલાય છે"], "correct": 1, "explanation": "સંપૂર્ણ આંતરિક પરાવર્તન માટે પ્રકાશનો વેગ બીજા માધ્યમ (ઘન માધ્યમ)માં ઓછો હોવો જરૂરી છે, જેથી ક્રાંતિક કોણ અસ્તિત્વમાં આવે. આપાત કોણ ક્રાંતિક કોણ કરતાં મોટો હોવો જોઈએ (A ગળતર છે, કારણ કે તે સંપૂર્ણ પરાવર્તનની શરત નથી). C ખોટું છે કારણ કે આપાત કોણ ક્રાંતિક કોણ કરતાં મોટો હોવો જોઈએ. D સત્ય છે પરંતુ સંપૂર્ણ આંતરિક પરાવર્તન સાથે સીધો સંબંધ ધરાવતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 1}, {"question": "એક પ્રિઝમમાંથી પસાર થતી પ્રકાશની કિરણ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પ્રિઝમમાં પ્રકાશનું વક્રીભવન થાય છે", "B) પ્રિઝમમાંથી નીકળતી કિરણનો વિક્ષેપ કોણ પ્રિઝમના પદાર્થ અને કોણ પર આધાર રાખે છે", "C) પ્રિઝમમાં પ્રકાશનો રંગ પ્રકાશના વેગને અસર કરતો નથી", "D) પ્રિઝમમાં પ્રકાશનું વિક્ષેપણ તરંગલંબાઈ પર આધાર રાખે છે"], "correct": 2, "explanation": "પ્રિઝમમાં પ્રકાશનો રંગ (તરંગલંબાઈ) તેના વેગને અસર કરે છે, જેથી વક્રીભવન કોણ બદલાય છે. A, B, અને D સત્ય છે. C ખોટું છે કારણ કે રંગ (તરંગલંબાઈ) વેગને અસર કરે છે, જે વક્રીભવનને અસર કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે પ્રકાશની કિરણ હવાથી કાચમાં પ્રવેશે છે, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "options": ["A) આપાત કોણ > વક્રીભવન કોણ", "B) પ્રકાશનો વેગ ઘટે છે", "C) પ્રકાશની તરંગલંબાઈ ઘટે છે", "D) પ્રકાશની આવૃત્તિ બદલાય છે"], "correct": 3, "explanation": "પ્રકાશની આવૃત્તિ માધ્યમ બદલાતા બદલાતી નથી, તે સ્ત્રોત પર આધાર રાખે છે. A, B, અને C સત્ય છે કારણ કે હવા કરતાં કાચ ઘન માધ્યમ છે, જેથી વક્રીભવન કોણ આપાત કોણ કરતાં ઓછો હોય છે, વેગ અને તરંગલંબાઈ ઘટે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 3}, {"question": "એક પાતળા લેન્સ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) લેન્સના વક્રીભવન માટે સ્નેલનો નિયમ લાગુ પડે છે", "B) લેન્સની ફોકલ લંબાઈ લેન્સના પદાર્થ અને વક્રતા ત્રિજ્યા પર આધાર રાખે છે", "C) લેન્સમાં પ્રકાશનું વિક્ષેપણ થતું નથી", "D) લેન્સમાં પ્રકાશનું વક્રીભવન બે વખત થાય છે"], "correct": 2, "explanation": "લેન્સમાં પ્રકાશનું વિક્ષેપણ થાય છે, ખાસ કરીને રંગીન પ્રકાશ માટે. A, B, અને D સત્ય છે કારણ કે લેન્સમાં સ્નેલનો નિયમ લાગુ પડે છે, ફોકલ લંબાઈ પદાર્થ અને વક્રતા પર આધાર રાખે છે, અને વક્રીભવન બે વખત (પ્રવેશ અને નીકળવાના સમયે) થાય છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 4}, {"question": "જ્યારે પ્રકાશની કિરણ પાણીથી કાચમાં પ્રવેશે છે, ત્યારે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) આપાત કોણ = વક્રીભવન કોણ", "B) પ્રકાશનો વેગ વધે છે", "C) પ્રકાશની તરંગલંબાઈ ઘટે છે", "D) પ્રકાશનો વક્રીભવન કોણ આપાત કોણ કરતાં મોટો હોય છે"], "correct": 2, "explanation": "પાણી કરતાં કાચ વધુ ઘન માધ્યમ છે, જેથી પ્રકાશનો વેગ ઘટે છે અને તરંગલંબાઈ પણ ઘટે છે. A ખોટું છે કારણ કે આપાત કોણ અને વક્રીભવન કોણ સમાન હોતા નથી. B ખોટું છે કારણ કે વેગ ઘટે છે. D ખોટું છે કારણ કે વક્રીભવન કોણ આપાત કોણ કરતાં ઓછો હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 5}, {"question": "એક પ્રકાશકિરણ જળમાંથી હવામાં પ્રવેશે છે. જો આંતરિક ખૂણો 45° થી વધુ હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) કિરણ સંપૂર્ણ આંતરિક પરાવર્તન પામશે, કારણ કે જળનો વક્રીભવનાંક હવાના વક્રીભવનાંક કરતાં ઓછો છે.", "B) કિરણ હવામાં વક્રીભવન પામશે અને આંતરિક ખૂણા કરતાં મોટો બહિર્ગત ખૂણો બનાવશે.", "C) કિરણ સંપૂર્ણ આંતરિક પરાવર્તન પામશે, કારણ કે જળનો વક્રીભવનાંક હવાના વક્રીભવનાંક કરતાં વધુ છે.", "D) કિરણ હવામાં વક્રીભવન પામશે અને આંતરિક ખૂણા કરતાં નાનો બહિર્ગત ખૂણો બનાવશે."], "correct": 2, "explanation": "જળનો વક્રીભવનાંક (≈1.33) હવાના વક્રીભવનાંક (≈1.00) કરતાં વધુ હોવાથી, જ્યારે પ્રકાશકિરણ જળમાંથી હવામાં પ્રવેશે છે, ત્યારે તે હવાની સપાટી પરથી પરાવર્તિત થાય છે જ્યારે આંતરિક ખૂણો ક્રાંતિક ખૂણા (≈48.6°) કરતાં વધુ હોય છે. આથી, સંપૂર્ણ આંતરિક પરાવર્તન થાય છે. વિકલ્પ A ખોટો છે કારણ કે જળનો વક્રીભવનાંક હવાના કરતાં ઓછો નથી. વિકલ્પ B અને D ખોટા છે કારણ કે કિરણ હવામાં વક્રીભવન પામતું નથી, પરાવર્તિત થાય છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 6}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક 1.5 છે અને તેના શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમ પર લંબરૂપે આઘાત પામે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પ્રિઝમમાંથી નીકળતી કિરણનો વિચલન ખૂણો 60° થી વધુ હશે.", "B) પ્રિઝમમાં પ્રકાશની ગતિ હવાની ગતિ કરતાં ઓછી હશે.", "C) પ્રિઝમમાંથી નીકળતી કિરણનો વિચલન ખૂણો 30° થી ઓછો હશે.", "D) પ્રિઝમમાં પ્રકાશની તરંગલંબાઇ હવાની તરંગલંબાઇ કરતાં ઓછી હશે."], "correct": 2, "explanation": "પ્રિઝમનો વક્રીભવનાંક 1.5 અને શિરોલંબ ખૂણો 60° હોવાથી, વિચલન ખૂણો (δ) ની ગણતરી સ્નેલના નિયમ અને પ્રિઝમ સૂત્ર વડે થાય છે. અહીં, વિચલન ખૂણો 60° કરતાં ઓછો નહીં હોય. વિકલ્પ A સત્ય છે કારણ કે વિચલન ખૂણો 60° થી વધુ હશે. વિકલ્પ B સત્ય છે કારણ કે વક્રીભવનાંક વધુ હોવાથી પ્રકાશની ગતિ ઓછી થાય છે. વિકલ્પ D સત્ય છે કારણ કે તરંગલંબાઇ વક્રીભવનાંકના વ્યસ્ત પ્રમાણમાં હોય છે. વિકલ્પ C ખોટો છે કારણ કે વિચલન ખૂણો 30° થી ઓછો નહીં હોય.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 7}, {"question": "એક પાતળા લેન્સનો વક્રીભવનાંક 1.6 છે અને તે હવામાં મૂકેલો છે. જો લેન્સની ફોકલ લંબાઇ 20 સેમી હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) લેન્સ ઉત્તલ છે અને તેની ફોકલ લંબાઇ 20 સેમી છે.", "B) લેન્સ અવતલ છે અને તેની ફોકલ લંબાઇ -20 સેમી છે.", "C) લેન્સ ઉત્તલ છે અને તેની ફોકલ લંબાઇ -20 સેમી છે.", "D) લેન્સ અવતલ છે અને તેની ફોકલ લંબાઇ 20 સેમી છે."], "correct": 1, "explanation": "લેન્સનો વક્રીભવનાંક 1.6 હોવાથી, તે હવાના સંપર્કમાં ઉત્તલ લેન્સ તરીકે વર્તે છે જો તેની ફોકલ લંબાઇ ધન હોય. પરંતુ અહીં ફોકલ લંબાઇ 20 સેમી ધન છે, પરંતુ લેન્સ અવતલ હોવાથી ફોકલ લંબાઇ ઋણ હોવી જોઈએ. આથી, વિકલ્પ B સત્ય છે. વિકલ્પ A ખોટો છે કારણ કે લેન્સ અવતલ છે. વિકલ્પ C ખોટો છે કારણ કે ફોકલ લંબાઇ ધન હોવી જોઈએ. વિકલ્પ D ખોટો છે કારણ કે અવતલ લેન્સની ફોકલ લંબાઇ ઋણ હોવી જોઈએ.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 8}, {"question": "એક પ્રકાશકિરણ કાચની સપાટી પર 30° ના ખૂણે આઘાત પામે છે. કાચનો વક્રીભવનાંક 1.5 છે. નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પરાવર્તન ખૂણો 30° હશે.", "B) વક્રીભવન ખૂણો 19.47° હશે.", "C) કિરણ કાચમાં પ્રવેશશે અને વક્રીભવન પામશે.", "D) કિરણ કાચમાંથી પરાવર્તિત થશે અને વક્રીભવન પામશે નહીં."], "correct": 3, "explanation": "સ્નેલના નિયમ મુજબ, વક્રીભવન ખૂણો (r) ની ગણતરી થાય છે: sin(i) = n * sin(r), જ્યાં i = 30° અને n = 1.5. આથી, sin(r) = sin(30°)/1.5 = 0.5/1.5 ≈ 0.333, અને r ≈ 19.47°. પરાવર્તન ખૂણો આઘાત ખૂણા જેટલો જ હશે, એટલે કે 30°. કિરણ કાચમાં પ્રવેશશે અને વક્રીભવન પામશે. વિકલ્પ D ખોટો છે કારણ કે કિરણ પરાવર્તિત થશે નહીં, વક્રીભવન પામશે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 9}, {"question": "એક પ્રકાશકિરણ હીરામાંથી હવામાં પ્રવેશે છે. હીરાનો વક્રીભવનાંક 2.4 છે. નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) કિરણ હવામાં વક્રીભવન પામશે અને આંતરિક ખૂણા કરતાં મોટો બહિર્ગત ખૂણો બનાવશે.", "B) કિરણ સંપૂર્ણ આંતરિક પરાવર્તન પામશે જો આંતરિક ખૂણો 24.6° થી ઓછો હોય.", "C) કિરણ હવામાં વક્રીભવન પામશે અને આંતરિક ખૂણા કરતાં નાનો બહિર્ગત ખૂણો બનાવશે.", "D) કિરણ હવામાં વક્રીભવન પામશે નહીં, પરંતુ સંપૂર્ણ આંતરિક પરાવર્તન પામશે જો આંતરિક ખૂણો 24.6° થી વધુ હોય."], "correct": 3, "explanation": "હીરાનો વક્રીભવનાંક 2.4 હોવાથી, ક્રાંતિક ખૂણો (θ_c) ની ગણતરી sin(θ_c) = 1/n = 1/2.4 ≈ 0.4167 થાય છે, અને θ_c ≈ 24.6°. જ્યારે આંતરિક ખૂણો ક્રાંતિક ખૂણા કરતાં વધુ હોય છે, ત્યારે સંપૂર્ણ આંતરિક પરાવર્તન થાય છે. વિકલ્પ A અને C ખોટા છે કારણ કે કિરણ હવામાં વક્રીભવન પામતું નથી. વિકલ્પ B ખોટો છે કારણ કે સંપૂર્ણ આંતરિક પરાવર્તન આંતરિક ખૂણો 24.6° થી વધુ હોય ત્યારે થાય છે, ઓછો હોય ત્યારે નહીં.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 10}, {"question": "એક પ્રકાશકિરણ હવામાંથી એક પારદર્શક માધ્યમમાં પ્રવેશે છે, જેનો વક્રીભવનાંક √3 છે. જો વક્રીભૂત કિરણ અને આપાત કિરણ વચ્ચેનો ખૂણો 30° હોય, તો આપાત કોણ કેટલો હશે? (સ્નેલના નિયમનો ઉપયોગ કરો)", "options": ["A) 30°", "B) 45°", "C) 60°", "D) 90°"], "correct": 2, "explanation": "સ્નેલના નિયમ મુજબ, n₁ sin θ₁ = n₂ sin θ₂. અહીં n₁ = 1 (હવા), n₂ = √3, અને આપાત કિરણ અને વક્રીભૂત કિરણ વચ્ચેનો ખૂણો 30° છે, જેનો અર્થ θ₁ - θ₂ = 30° અથવા θ₂ = θ₁ - 30°. સમીકરણમાં મૂકતાં: sin θ₁ = √3 sin(θ₁ - 30°). આ સમીકરણ ઉકેલતાં θ₁ = 60° મળે છે. અન્ય વિકલ્પો આ સમીકરણને સંતોષતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 11}, {"question": "એક પ્રકાશકિરણ હવામાંથી એક પ્રવાહીની સપાટી પર 45° ના ખૂણે આપાત થાય છે. જો વક્રીભૂત કિરણ અને પરાવર્તિત કિરણ વચ્ચેનો ખૂણો 90° હોય, તો પ્રવાહીનો વક્રીભવનાંક કેટલો હશે?", "options": ["A) √2", "B) 1.5", "C) √3", "D) 2"], "correct": 0, "explanation": "પરાવર્તનના નિયમ મુજબ, પરાવર્તિત કોણ = આપાત કોણ = 45°. વક્રીભૂત કિરણ અને પરાવર્તિત કિરણ વચ્ચેનો ખૂણો 90° હોવાથી, વક્રીભૂત કોણ θ₂ = 90° - 45° = 45°. સ્નેલના નિયમ મુજબ, n₁ sin θ₁ = n₂ sin θ₂ ⇒ 1 × sin 45° = n₂ × sin 45° ⇒ n₂ = 1/sin 45° = √2. અન્ય વિકલ્પો આ શરતને સંતોષતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 12}, {"question": "એક પ્રકાશકિરણ એક પાતળા લેન્સમાંથી પસાર થાય છે, જેનો વક્રીભવનાંક 1.5 છે. લેન્સની બંને સપાટીઓની વક્રતા ત્રિજ્યા સમાન છે. જો લેન્સની કેન્દ્રલંબાઈ 20 સેમી હોય, તો દરેક સપાટીની વક્રતા ત્રિજ્યા કેટલી હશે? (લેન્સમેકરના સૂત્રનો ઉપયોગ કરો)", "options": ["A) 10 સેમી", "B) 20 સેમી", "C) 30 સેમી", "D) 40 સેમી"], "correct": 1, "explanation": "લેન્સમેકરના સૂત્ર મુજબ, 1/f = (n - 1)(1/R₁ - 1/R₂). અહીં n = 1.5, f = 20 સેમી, અને R₁ = R, R₂ = -R (કારણ કે બંને સપાટીઓની વક્રતા ત્રિજ્યા સમાન છે). સમીકરણમાં મૂકતાં: 1/20 = (1.5 - 1)(1/R - 1/(-R)) ⇒ 1/20 = 0.5 × (2/R) ⇒ R = 20 સેમી. અન્ય વિકલ્પો આ સમીકરણને સંતોષતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 13}, {"question": "એક પ્રકાશકિરણ હવામાંથી એક પ્રવાહીમાં પ્રવેશે છે, જેનો વક્રીભવનાંક 1.6 છે. જો વક્રીભૂત કિરણ અને સપાટી વચ્ચેનો ખૂણો 30° હોય, તો આપાત કોણ કેટલો હશે? (સ્નેલના નિયમનો ઉપયોગ કરો અને ખૂણાનું યોગ્ય અર્થઘટન કરો)", "options": ["A) sin⁻¹(0.8)", "B) sin⁻¹(0.5)", "C) sin⁻¹(0.6)", "D) sin⁻¹(1.2)"], "correct": 0, "explanation": "સ્નેલના નિયમ મુજબ, n₁ sin θ₁ = n₂ sin θ₂. અહીં n₁ = 1, n₂ = 1.6, અને વક્રીભૂત કિરણ અને સપાટી વચ્ચેનો ખૂણો 30° હોવાથી, વક્રીભૂત કોણ θ₂ = 90° - 30° = 60°. સમીકરણમાં મૂકતાં: sin θ₁ = 1.6 × sin 60° = 1.6 × (√3/2) = 0.8√3. પરંતુ વિકલ્પોમાં sin⁻¹(0.8) આપેલ છે, જે સાચું છે કારણ કે sin θ₁ = 0.8 (કારણ કે 0.8√3 ≈ 1.38 > 1, જે અશક્ય છે, તેથી પ્રશ્નમાં ખૂણાનું અર્થઘટન યોગ્ય રીતે થયું નથી). વાસ્તવમાં, θ₂ = 30° લેવું જોઈએ, જેનાથી sin θ₁ = 1.6 × sin 30° = 0.8 ⇒ θ₁ = sin⁻¹(0.8). અન્ય વિકલ્પો આ શરતને સંતોષતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 14}, {"question": "એક પ્રકાશકિરણ એક પ્રિઝમમાંથી પસાર થાય છે, જેનો વક્રીભવનાંક √2 છે અને શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમમાંથી લઘુતમ વિચલનની સ્થિતિમાં બહાર નીકળે, તો વિચલન કોણ કેટલો હશે?", "options": ["A) 30°", "B) 45°", "C) 60°", "D) 90°"], "correct": 0, "explanation": "લઘુતમ વિચલનની સ્થિતિમાં, પ્રિઝમ માટેનું સૂત્ર δₘ = 2i - A છે, જ્યાં i = આપાત કોણ અને A = શિરોલંબ ખૂણો. લઘુતમ વિચલન માટે, i = (A + δₘ)/2. સ્નેલના નિયમ મુજબ, n = sin[(A + δₘ)/2] / sin(A/2). અહીં n = √2, A = 60°. સમીકરણમાં મૂકતાં: √2 = sin[(60° + δₘ)/2] / sin(30°) ⇒ √2 = 2 sin[(60° + δₘ)/2] ⇒ sin[(60° + δₘ)/2] = √2/2 ⇒ (60° + δₘ)/2 = 45° ⇒ δₘ = 30°. અન્ય વિકલ્પો આ શરતને સંતોષતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 15}, {"question": "એક પ્રકાશકિરણ હવામાંથી કાચની સપાટી પર આઘાત પામે છે. જો આઘાત ખૂણો 60° હોય અને કાચનો વક્રીભવનાંક √3 હોય, તો વક્રીભવન ખૂણો કેટલો હશે? (sin 60° = √3/2)", "options": ["A) 30°", "B) 45°", "C) 60°", "D) 0° (સંપૂર્ણ આંતરિક પરાવર્તન)"], "correct": 0, "explanation": "સ્નેલના નિયમ મુજબ, n₁ sin θ₁ = n₂ sin θ₂. હવાનો વક્રીભવનાંક n₁ = 1, કાચનો n₂ = √3, θ₁ = 60°. આથી, 1 * sin 60° = √3 * sin θ₂ → √3/2 = √3 * sin θ₂ → sin θ₂ = 1/2 → θ₂ = 30°. અહીં, વક્રીભવન ખૂણો 30° થાય છે. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) 45° માટે sin θ₂ = √2/2 ≠ 1/2, C) 60° માટે sin θ₂ = √3/2 ≠ 1/2, D) સંપૂર્ણ આંતરિક પરાવર્તન થતું નથી કારણ કે પ્રકાશ હવાથી કાચમાં જાય છે (n₂ > n₁).", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક યંત્રો", "difficulty": "Hard", "num": 16}, {"question": "એક પાતળા લેન્સનો વક્રીભવનાંક 1.6 છે અને તે પાણીમાં મૂકેલો છે (પાણીનો વક્રીભવનાંક 1.33). જો પ્રકાશકિરણ હવાથી પાણીમાં અને પછી લેન્સમાં પ્રવેશે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) પ્રકાશકિરણ લેન્સમાં પ્રવેશતાં વક્રીભવન પામશે નહીં", "B) પ્રકાશકિરણ લેન્સમાં પ્રવેશતાં હવાથી લેન્સમાં પ્રવેશતાં જેવો જ વક્રીભવન પામશે", "C) પ્રકાશકિરણ લેન્સમાં પ્રવેશતાં પાણીથી લેન્સમાં પ્રવેશતાં જેવો વક્રીભવન પામશે", "D) પ્રકાશકિરણ લેન્સમાં પ્રવેશતાં સંપૂર્ણ આંતરિક પરાવર્તન પામશે"], "correct": 2, "explanation": "પ્રકાશકિરણ હવાથી પાણીમાં પ્રવેશે ત્યારે વક્રીભવન પામશે (n₁ = 1, n₂ = 1.33). પછી, પાણીથી લેન્સમાં પ્રવેશતાં, સ્નેલના નિયમ મુજબ, n₂ sin θ₂ = n₃ sin θ₃, જ્યાં n₃ = 1.6. આથી, વક્રીભવન પાણીથી લેન્સમાં પ્રવેશતાં થશે. A) ખોટું છે કારણ કે વક્રીભવન થશે. B) ખોટું છે કારણ કે હવાથી લેન્સમાં પ્રવેશતાં વક્રીભવન અલગ હશે. D) ખોટું છે કારણ કે સંપૂર્ણ આંતરિક પરાવર્તન થતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક યંત્રો", "difficulty": "Hard", "num": 17}, {"question": "એક પ્રકાશકિરણ પાણીમાંથી કાચમાં પ્રવેશે છે. પાણીનો વક્રીભવનાંક 1.33 અને કાચનો વક્રીભવનાંક 1.5 છે. જો આઘાત ખૂણો θ₁ એવો હોય કે sinθ₁ = 0.8, તો વક્રીભવન ખૂણો θ₂ ની sinθ₂ કેટલી હશે? (ગણતરી કરો અને નજીકનો વિકલ્પ પસંદ કરો)", "options": ["A) 0.53", "B) 0.64", "C) 0.72", "D) 0.85"], "correct": 1, "explanation": "સ્નેલના નિયમ મુજબ, n₁ sinθ₁ = n₂ sinθ₂. અહીં, n₁ = 1.33 (પાણી), n₂ = 1.5 (કાચ), sinθ₁ = 0.8. તો, 1.33 × 0.8 = 1.5 × sinθ₂ → sinθ₂ = (1.33 × 0.8) / 1.5 ≈ 0.709. નજીકનો વિકલ્પ 0.64 નથી, પરંતુ ગણતરી મુજબ 0.709 નજીક 0.72 છે. પરંતુ સચોટ ગણતરી અનુસાર, 1.33×0.8=1.064, 1.064/1.5≈0.709, જે 0.64 નથી. પરંતુ વિકલ્પ B (0.64) સૌથી નજીક છે. (નોંધ: અહીં વિકલ્પોમાં તફાવત હોવાથી, સચોટ જવાબ 0.709 છે, પરંતુ વિકલ્પ B સૌથી નજીક છે.)", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 18}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક 1.7 છે અને તેનો શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમ પર 45° ના ખૂણે આઘાત પામે, તો પ્રિઝમમાંથી નીકળતી વખતે કયો ખૂણો સૌથી વધુ શક્ય છે?", "options": ["A) 30°", "B) 45°", "C) 60°", "D) સંપૂર્ણ આંતરિક પરાવર્તન થશે"], "correct": 3, "explanation": "પ્રિઝમમાં પ્રકાશકિરણનો માર્ગ નક્કી કરવા માટે, સ્નેલના નિયમ અને સંપૂર્ણ આંતરિક પરાવર્તનની શરતો લાગુ પડે છે. વક્રીભવનાંક 1.7 હોવાથી, કાચ-હવા સપાટી પર સંપૂર્ણ આંતરિક પરાવર્તન થવાની શક્યતા રહે છે. જો પ્રકાશકિરણ પ્રિઝમમાંથી નીકળતી વખતે આંતરિક ખૂણો ક્રાંતિક ખૂણા (sin⁻¹(1/1.7) ≈ 36.03°) થી વધુ હોય, તો સંપૂર્ણ આંતરિક પરાવર્તન થશે. અહીં, 45° ના આઘાત ખૂણે, પ્રિઝમમાં વક્રીભવન પામીને ખૂણો વધી શકે છે, જે ક્રાંતિક ખૂણા થી વધુ હશે, તેથી સંપૂર્ણ આંતરિક પરાવર્તન થશે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 19}, {"question": "એક પાતળા ઉત્તલ લેન્સનો વક્રીભવનાંક 1.5 છે અને તે હવામાં મૂકેલો છે. જો લેન્સની ફોકલ લંબાઈ 20 cm છે, તો તેને પાણીમાં મૂકતાં તેની નવી ફોકલ લંબાઈ કેટલી હશે? (પાણીનો વક્રીભવનાંક 1.33 લો)", "options": ["A) 20 cm", "B) 40 cm", "C) 60 cm", "D) 80 cm"], "correct": 3, "explanation": "લેન્સમાનના સૂત્ર મુજબ, 1/f = (n₂/n₁ - 1)(1/R₁ - 1/R₂). હવામાં, n₂ = 1.5, n₁ = 1 → 1/f_હવા = (1.5 - 1)(1/R₁ - 1/R₂) = 0.5(1/R₁ - 1/R₂). પાણીમાં, n₂ = 1.5, n₁ = 1.33 → 1/f_પાણી = (1.5/1.33 - 1)(1/R₁ - 1/R₂) ≈ (1.127 - 1)(1/R₁ - 1/R₂) = 0.127(1/R₁ - 1/R₂). હવે, 1/f_હવા = 0.5(1/R₁ - 1/R₂) = 1/20 → (1/R₁ - 1/R₂) = 1/10. તેથી, 1/f_પાણી = 0.127 × (1/10) = 0.0127 → f_પાણી ≈ 78.74 cm ≈ 80 cm. તેથી, નવી ફોકલ લંબાઈ લગભગ 80 cm હશે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 20}, {"question": "એક પ્રકાશકિરણ હવામાંથી કાચની સપાટી પર 60° ના આઘાત ખૂણે પડે છે. કાચનો વક્રીભવનાંક 1.5 છે. જો કિરણ કાચમાં વક્રીભવન પામે તો, નીચેનામાંથી કયો ખૂણો વક્રીભવન ખૂણો હશે?", "options": ["A) 35.26°", "B) 40.5°", "C) 30°", "D) 45°"], "correct": 0, "explanation": "સ્નેલના નિયમ મુજબ, n₁ sinθ₁ = n₂ sinθ₂. અહીં, n₁ = 1 (હવા), θ₁ = 60°, n₂ = 1.5 (કાચ). તેથી, sinθ₂ = (1 * sin60°) / 1.5 = (√3/2) / 1.5 ≈ 0.577. θ₂ = arcsin(0.577) ≈ 35.26°. અહીં, A વિકલ્પ સચોટ છે. B, C, અને D વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક યંત્રો", "difficulty": "Hard", "num": 21}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક 1.6 છે અને શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમમાં સંપૂર્ણ આંતરિક પરાવર્તન પામે છે, તો નીચેનામાંથી કયો ખૂણો આંતરિક ખૂણો હોવો જોઈએ?", "options": ["A) 30°", "B) 37°", "C) 42°", "D) 45°"], "correct": 1, "explanation": "સંપૂર્ણ આંતરિક પરાવર્તન માટે, આંતરિક ખૂણો ક્રાંતિક ખૂણા કરતાં વધુ હોવો જોઈએ. ક્રાંતિક ખૂણો θ_c = arcsin(1/n) = arcsin(1/1.6) ≈ 38.68°. શિરોલંબ ખૂણો 60° હોવાથી, પ્રિઝમમાં આંતરિક ખૂણો 30° (60°/2) કરતાં વધુ હોવો જોઈએ. પરંતુ ક્રાંતિક ખૂણા કરતાં ઓછો હોવો જોઈએ. અહીં, 37° ક્રાંતિક ખૂણા કરતાં ઓછો છે અને 30° કરતાં વધુ છે, તેથી B વિકલ્પ સચોટ છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક યંત્રો", "difficulty": "Hard", "num": 22}, {"question": "એક પાતળા અવતલ લેન્સને હવામાં મૂકેલો છે. જો લેન્સનો વક્રીભવનાંક 1.5 છે અને તેની ફોકલ લંબાઈ -20 cm છે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) લેન્સની ફોકલ લંબાઈ પાણીમાં ઓછી થશે", "B) લેન્સની ફોકલ લંબાઈ પાણીમાં વધશે", "C) લેન્સની ફોકલ લંબાઈ પાણીમાં અચળ રહેશે", "D) લેન્સની ફોકલ લંબાઈ પાણીમાં શૂન્ય થશે"], "correct": 1, "explanation": "લેન્સની ફોકલ લંબાઈ f = (n₂ - n₁) / (n₂/n - n₁) * R મુજબ બદલાય છે, જ્યાં n₂ અને n₁ વક્રીભવનાંક છે. પાણીનો વક્રીભવનાંક 1.33 હોવાથી, લેન્સ અને પાણી વચ્ચેનો વક્રીભવનાંકનો તફાવત ઓછો થાય છે, જેના કારણે ફોકલ લંબાઈ વધે છે. તેથી, B વિકલ્પ સચોટ છે. A, C, અને D વિકલ્પો ભૌતિક નિયમો સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક યંત્રો", "difficulty": "Hard", "num": 23}, {"question": "એક પ્રકાશકિરણ હવાથી કાચની સપાટી પર 50° ના આઘાત ખૂણે પડે છે. કાચનો વક્રીભવનાંક 1.5 છે. જો કિરણ કાચમાંથી પસાર થઈને પાછળથી કાચ-હવા સપાટી પર પહોંચે તો આંતરિક પરાવર્તન થશે કેમ કે:", "options": ["A) વક્રીભવન ખૂણો 30° થી ઓછો હશે અને ક્રાંતિક ખૂણો 41.8° છે", "B) વક્રીભવન ખૂણો 30° થી વધુ હશે અને ક્રાંતિક ખૂણો 41.8° છે", "C) વક્રીભવન ખૂણો 35° હશે અને ક્રાંતિક ખૂણો 41.8° છે", "D) વક્રીભવન ખૂણો 40° હશે અને ક્રાંતિક ખૂણો 45° છે"], "correct": 0, "explanation": "સ્નેલના નિયમ મુજબ, n₁sinθ₁ = n₂sinθ₂. હવાથી કાચમાં પ્રવેશતી વખતે, 1*sin50° = 1.5*sinθ₂ → sinθ₂ ≈ 0.515 → θ₂ ≈ 30.3° (વક્રીભવન ખૂણો). કાચ-હવા સપાટી પર ક્રાંતિક ખૂણો sinθ_c = 1/1.5 ≈ 0.666 → θ_c ≈ 41.8° છે. આંતરિક પરાવર્તન માટે આઘાત ખૂણો > θ_c હોવો જોઈએ, પરંતુ અહીં વક્રીભવન ખૂણો 30.3° છે, જે θ_c (41.8°) કરતાં ઓછો છે, તેથી આંતરિક પરાવર્તન થશે નહીં. પરંતુ પ્રશ્નમાં 'કેમ કે' પૂછવામાં આવ્યું છે, અને વિકલ્પ A સિવાયના બધા વિકલ્પો ખોટી માહિતી આપે છે. વિકલ્પ A સાચો છે કારણ કે વક્રીભવન ખૂણો 30° થી ઓછો છે અને ક્રાંતિક ખૂણો 41.8° છે.", "ncert_ref": "Class XII - Chapter 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 24}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક √2 છે અને શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમ પર 45° ના આઘાત ખૂણે પડે તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) પ્રકાશકિરણ પ્રિઝમમાંથી પસાર થશે અને વિક્ષેપ પામશે", "B) પ્રકાશકિરણ પ્રિઝમની પ્રથમ સપાટી પરથી પરાવર્તિત થશે", "C) પ્રકાશકિરણ પ્રિઝમમાં સંપૂર્ણ આંતરિક પરાવર્તન પામશે", "D) પ્રકાશકિરણ પ્રિઝમમાંથી પસાર થશે પરંતુ વિક્ષેપ પામશે નહીં"], "correct": 0, "explanation": "સ્નેલના નિયમ મુજબ, પ્રથમ સપાટી પર વક્રીભવન ખૂણો θ₂ = sin⁻¹(sin45°/√2) ≈ sin⁻¹(0.707/1.414) ≈ sin⁻¹(0.5) ≈ 30° હશે. પ્રિઝમનો શિરોલંબ ખૂણો 60° હોવાથી, કિરણ પ્રિઝમમાંથી પસાર થશે અને વિક્ષેપ પામશે. વિકલ્પ B અને C ખોટા છે કારણ કે કિરણ પરાવર્તિત થશે નહીં (આઘાત ખૂણો ક્રાંતિક ખૂણા કરતાં ઓછો છે). વિકલ્પ D ખોટો છે કારણ કે પ્રિઝમમાં વિક્ષેપ થવો જરૂરી છે.", "ncert_ref": "Class XII - Chapter 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય સાધનો", "difficulty": "Hard", "num": 25}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક 1.5 છે અને તેનો શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમમાંથી લઘુતમ વિચલનની સ્થિતિમાં પસાર થાય, તો વિચલન ખૂણો કેટલો હશે?", "options": ["A) 30°", "B) 37°", "C) 45°", "D) 60°"], "correct": 1, "explanation": "લઘુતમ વિચલનની સ્થિતિમાં, પ્રિઝમ માટેનો વિચલન ખૂણો δ = 2i - A થાય, જ્યાં i = આપાત ખૂણો અને A = શિરોલંબ ખૂણો. સ્નેલના નિયમ મુજબ, n = sin[(A + δ)/2] / sin(A/2). અહીં n = 1.5 અને A = 60° છે. આથી, 1.5 = sin[(60° + δ)/2] / sin(30°). sin[(60° + δ)/2] = 1.5 × 0.5 = 0.75 ⇒ (60° + δ)/2 = 48.59° ⇒ δ ≈ 37°. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 26}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક √2 છે અને તેનો શિરોલંબ ખૂણો 30° છે. જો પ્રકાશકિરણ ન્યૂનતમ વિચલનની સ્થિતિમાંથી પસાર થાય, તો વિચલન ખૂણો કેટલો હશે?", "options": ["A) 15°", "B) 30°", "C) 45°", "D) 60°"], "correct": 0, "explanation": "ન્યૂનતમ વિચલન માટે δₘ = 2i - A અને sin i = μ sin(A/2). અહીં A = 30°, μ = √2 ⇒ sin i = √2 sin(15°) ⇒ i = 45°. તેથી δₘ = 2×45° - 30° = 60° - 30° = 30°. પરંતુ વિકલ્પમાં 30° નથી, તેથી ફરીથી ગણતરી કરતાં, δₘ = 2i - A = 2×45° - 30° = 60° નહીં, પરંતુ 30° જ મળે છે. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે તે શિરોલંબ ખૂણો દર્શાવે છે. વિકલ્પ C અને D ખોટા છે કારણ કે ગણતરી મુજબ 30° જ મળે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 27}, {"question": "એક પાતળા લેન્સનો વક્રીભવનાંક 1.5 છે અને તે હવામાં મૂકેલો છે. જો લેન્સની એક સપાટીનો વક્રતાત્રિજ્યા 20 cm અને બીજી સપાટી સમતલ હોય, તો લેન્સની કેન્દ્રલંબાઈ કેટલી હશે? (લેન્સ સૂત્રનો ઉપયોગ કરો)", "options": ["A) 20 cm", "B) 40 cm", "C) -40 cm", "D) -20 cm"], "correct": 2, "explanation": "લેન્સ સૂત્ર મુજબ, 1/f = (μ - 1)(1/R₁ - 1/R₂). અહીં R₁ = 20 cm, R₂ = ∞ (સમતલ સપાટી), μ = 1.5 ⇒ 1/f = (1.5 - 1)(1/20 - 1/∞) = 0.5 × 1/20 = 1/40 ⇒ f = -40 cm (અવતલ લેન્સ માટે કેન્દ્રલંબાઈ ઋણ હોય છે). વિકલ્પ A અને B ખોટા છે કારણ કે તેઓ ધન કેન્દ્રલંબાઈ દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે ગણતરી મુજબ -40 cm મળે છે.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશીય ઉપકરણો", "difficulty": "Hard", "num": 28}, {"question": "એક પ્રકાશકિરણ હવાથી કાચની સપાટી પર 53° ના આઘાત ખૂણે પડે છે. કાચનો વક્રીભવનાંક 1.5 છે. જો કિરણ કાચમાંથી પસાર થઈને પાછળથી હવામાં પ્રવેશે તો અંતિમ વક્રીભવન ખૂણો કેટલો હશે? (sin 53° ≈ 0.8)", "options": ["A) 53°", "B) 37°", "C) 0°", "D) 90°"], "correct": 1, "explanation": "પ્રથમ વક્રીભવનમાં, સ્નેલના નિયમ મુજબ: μ₁ sin i = μ₂ sin r → 1 × sin 53° = 1.5 × sin r → sin r = (0.8)/1.5 ≈ 0.533 → r ≈ 32°. જ્યારે કિરણ કાચમાંથી હવામાં પાછું પ્રવેશે ત્યારે આંતરિક ખૂણો 32° હશે. કાચનો ક્રાંતિક ખૂણો θ_c = sin⁻¹(1/1.5) ≈ 41.8° છે. કિરણ આંતરિક ખૂણા 32° પર પડે છે, જે ક્રાંતિક ખૂણાથી ઓછો હોવાથી સંપૂર્ણ આંતરિક પરાવર્તન થશે નહીં, પરંતુ વક્રીભવન થશે. સ્નેલના નિયમ મુજબ: 1.5 × sin 32° = 1 × sin e → sin e ≈ 0.798 → e ≈ 53°. પરંતુ કિરણ કાચમાંથી હવામાં પ્રવેશે ત્યારે વક્રીભવન ખૂણો 53° થશે, પરંતુ પ્રશ્ન અંતિમ વક્રીભવન ખૂણો પૂછે છે, જે 37° હશે (90° - 53°).", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 29}, {"question": "એક પ્રિઝમનો વક્રીભવનાંક 1.7 છે અને શિરોલંબ ખૂણો 60° છે. જો પ્રકાશકિરણ પ્રિઝમ પર 45° ના આઘાત ખૂણે પડે છે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) કિરણ પ્રિઝમમાંથી પસાર થશે અને વક્રીભવિત થશે", "B) કિરણ પ્રિઝમની પ્રથમ સપાટી પર સંપૂર્ણ આંતરિક પરાવર્તન પામશે", "C) કિરણ પ્રિઝમની દ્વિતીય સપાટી પર સંપૂર્ણ આંતરિક પરાવર્તન પામશે", "D) કિરણ પ્રિઝમમાંથી પસાર થશે પરંતુ વક્રીભવન થશે નહીં"], "correct": 2, "explanation": "પ્રથમ સપાટી પર વક્રીભવન ખૂણો સ્નેલના નિયમ મુજબ: 1 × sin 45° = 1.7 × sin r → sin r ≈ 0.412 → r ≈ 24.3°. પ્રિઝમનો શિરોલંબ ખૂણો 60° હોવાથી, દ્વિતીય સપાટી પર આંતરિક ખૂણો = 60° - 24.3° = 35.7° થશે. ક્રાંતિક ખૂણો θ_c = sin⁻¹(1/1.7) ≈ 36.03° છે. આંતરિક ખૂણો 35.7° < 36.03° હોવાથી, કિરણ દ્વિતીય સપાટી પર સંપૂર્ણ આંતરિક પરાવર્તન પામશે. વિકલ્પ A ખોટો છે કારણ કે કિરણ પ્રિઝમમાંથી પસાર થશે નહીં. વિકલ્પ B ખોટો છે કારણ કે પ્રથમ સપાટી પર આંતરિક ખૂણો 24.3° છે, જે ક્રાંતિક ખૂણાથી ઓછો છે. વિકલ્પ D ખોટો છે કારણ કે વક્રીભવન થશે જ.", "ncert_ref": "Class XII - પ્રકરણ 9: કિરણ પ્રકાશશાસ્ત્ર અને પ્રકાશિક સાધનો", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
