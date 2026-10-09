@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ટેસ્ટ ક્રોસ (Test Cross)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ટેસ્ટ ક્રોસ (Test Cross)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ટેસ્ટ ક્રોસ (Test Cross)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ટેસ્ટ ક્રોસ દરમિયાન F1 પેઢીના વ્યક્તિને હોમોઝાયગસ રીસેસિવ (recessive) જનીનવાળા વ્યક્તિ સાથે ક્રોસ કરવામાં આવે છે. જો F2 પેઢીમાં ફિનોટાઇપિક રેશિયો 1:1 મળે, તો F1 વ્યક્તિની જનીન પ્રકાર (genotype) કઈ હશે?", "opts": ["હેટરોઝાયગસ (Heterozygous)", "હોમોઝાયગસ ડોમિનન્ટ (Homozygous Dominant)", "હોમોઝાયગસ રીસેસિવ (Homozygous Recessive)", "હેમીઝાયગસ (Hemizygous)"], "ans": 0, "exp": "ટેસ્ટ ક્રોસમાં F1 વ્યક્તિને રીસેસિવ હોમોઝાયગસ સાથે ક્રોસ કરવામાં આવે છે. જો F2 પેઢીમાં ફિનોટાઇપિક રેશિયો 1:1 મળે, તો F1 વ્યક્તિ હેટરોઝાયગસ હોવી જોઈએ, કારણ કે હેટરોઝાયગસ વ્યક્તિ સાથે રીસેસિવ હોમોઝાયગસ ક્રોસ થવાને કારણે 50% ડોમિનન્ટ અને 50% રીસેસિવ ફિનોટાઇપ મળે છે. બાકીના વિકલ્પો અયોગ્ય છે: B) હોમોઝાયગસ ડોમિનન્ટ ક્રોસ થવાને કારણે બધા સંતતો ડોમિનન્ટ ફિનોટાઇપ ધરાવશે. C) હોમોઝાયગસ રીસેસિવ ક્રોસ થવાને કારણે બધા સંતતો રીસેસિવ ફિનોટાઇપ ધરાવશે. D) હેમીઝાયગસ X-લિંક્ડ જનીન માટે લાગુ પડે, પરંતુ અહીં ટેસ્ટ ક્રોસ ઓટોસોમલ જનીન માટે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "મેન્ડલના એક પ્રયોગમાં, ટોલી પ્લાન્ટ (Tall plant)ને બટકા પ્લાન્ટ (Dwarf plant) સાથે ક્રોસ કરવામાં આવે છે અને F1 પેઢીના બધા પ્લાન્ટ ટોલી નીકળે છે. જો F1 પેઢીના પ્લાન્ટને ટેસ્ટ ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં કયો ફિનોટાઇપિક રેશિયો અપેક્ષિત છે?", "opts": ["3:1", "1:1", "1:2:1", "9:3:3:1"], "ans": 1, "exp": "F1 પેઢીના બધા પ્લાન્ટ ટોલી નીકળે છે, જે સૂચવે છે કે ટોલી ગુણ ડોમિનન્ટ છે અને F1 પેઢી હેટરોઝાયગસ (Tt) છે. ટેસ્ટ ક્રોસમાં, F1 (Tt)ને રીસેસિવ હોમોઝાયગસ (tt) સાથે ક્રોસ કરવામાં આવે છે, જેના પરિણામે F2 પેઢીમાં 1:1 ફિનોટાઇપિક રેશિયો (ટોલી:બટકા) મળે છે. A) 3:1 રેશિયો મોનોહાઇબ્રિડ ક્રોસમાં મળે છે. C) 1:2:1 જનીનપ્રકાર રેશિયો છે. D) 9:3:3:1 ડાયહાઇબ્રિડ ક્રોસમાં મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "ટેસ્ટ ક્રોસનો ઉપયોગ કયા હેતુ માટે થતો નથી?", "opts": ["જનીનપ્રકાર નક્કી કરવા", "ડોમિનન્ટ અને રીસેસિવ ગુણોની ઓળખ કરવા", "પુનરાવર્તિત જનીન (repeated genes)ની હાજરી ચકાસવા", "હેટરોઝાયગસ અને હોમોઝાયગસ વચ્ચે તફાવત કરવા"], "ans": 2, "exp": "ટેસ્ટ ક્રોસનો મુખ્ય ઉપયોગ જનીનપ્રકાર નક્કી કરવા (A), ડોમિનન્ટ અને રીસેસિવ ગુણોની ઓળખ કરવા (B), અને હેટરોઝાયગસ અને હોમોઝાયગસ વચ્ચે તફાવત કરવા (D) માટે થાય છે. પુનરાવર્તિત જનીનની હાજરી ચકાસવા માટે ટેસ્ટ ક્રોસ ઉપયોગી નથી, કારણ કે પુનરાવર્તિત જનીન (ઉદા. AAA અથવા aaa) માટે ટેસ્ટ ક્રોસનો અર્થ થતો નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "એક જીવમાં, કાળો રંગ (B) સફેદ રંગ (b) પર ડોમિનન્ટ છે. જો ટેસ્ટ ક્રોસ દરમિયાન કાળા રંગના વ્યક્તિને સફેદ રંગના હોમોઝાયગસ વ્યક્તિ સાથે ક્રોસ કરવામાં આવે અને સંતતોમાં કાળા અને સફેદ રંગના પ્લાન્ટ 50:50 પ્રમાણમાં મળે, તો કાળા રંગના વ્યક્તિનો જનીનપ્રકાર કયો હશે?", "opts": ["BB", "Bb", "bb", "BbB"], "ans": 1, "exp": "ટેસ્ટ ક્રોસમાં, જો સંતતોમાં 1:1 રેશિયો મળે, તો કાળા રંગનો વ્યક્તિ હેટરોઝાયગસ (Bb) હોવો જોઈએ. કારણ કે Bb × bb ક્રોસમાં 50% Bb (કાળો) અને 50% bb (સફેદ) સંતતો મળે છે. A) BB ક્રોસ થવાને કારણે બધા સંતતો કાળા (Bb) હશે. C) bb ક્રોસ થવાને કારણે બધા સંતતો સફેદ (bb) હશે. D) BbB અસ્તિત્વમાં નથી, કારણ કે જનીનપ્રકારમાં ફક્ત બે એલિલ્સ હોવા જોઈએ.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, જો F1 પેઢીનો વ્યક્તિ હોમોઝાયગસ ડોમિનન્ટ હોય, તો F2 પેઢીમાં કયો ફિનોટાઇપિક પરિણામ અપેક્ષિત છે?", "opts": ["બધા સંતતો ડોમિનન્ટ ફિનોટાઇપ ધરાવશે", "બધા સંતતો રીસેસિવ ફિનોટાઇપ ધરાવશે", "50% ડોમિનન્ટ અને 50% રીસેસિવ ફિનોટાઇપ ધરાવશે", "75% ડોમિનન્ટ અને 25% રીસેસિવ ફિનોટાઇપ ધરાવશે"], "ans": 0, "exp": "જો F1 પેઢીનો વ્યક્તિ હોમોઝાયગસ ડોમિનન્ટ (ઉદા. BB) હોય, તો ટેસ્ટ ક્રોસ (BB × bb) દરમિયાન બધા સંતતો હેટરોઝાયગસ (Bb) હશે અને ડોમિનન્ટ ફિનોટાઇપ ધરાવશે. B) રીસેસિવ ફિનોટાઇપ માત્ર ત્યારે મળે જો F1 રીસેસિવ હોમોઝાયગસ હોય. C) 50:50 રેશિયો હેટરોઝાયગસ F1 માટે લાગુ પડે. D) 75:25 રેશિયો મોનોહાઇબ્રિડ ક્રોસમાં મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, જો F1 પેઢીનો વ્યક્તિ હેટરોઝાયગસ (Bb) હોય અને તેને હોમોઝાયગસ રીસેસિવ (bb) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક રેશિયો કયો હશે?", "opts": ["1:1 (ડોમિનન્ટ:રીસેસિવ)", "3:1 (ડોમિનન્ટ:રીસેસિવ)", "1:2:1 (હોમોઝાયગસ ડોમિનન્ટ:હેટરોઝાયગસ:હોમોઝાયગસ રીસેસિવ)", "2:1 (ડોમિનન્ટ:રીસેસિવ)"], "ans": 0, "exp": "ટેસ્ટ ક્રોસમાં હેટરોઝાયગસ (Bb) અને હોમોઝાયગસ રીસેસિવ (bb) વચ્ચે ક્રોસ થતાં F2 પેઢીમાં ફિનોટાઇપિક રેશિયો 1:1 (ડોમિનન્ટ:રીસેસિવ) મળે છે. કારણ કે Bb x bb ક્રોસમાં 50% Bb (ડોમિનન્ટ ફિનોટાઇપ) અને 50% bb (રીસેસિવ ફિનોટાઇપ) ઉત્પન્ન થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે 3:1 રેશિયો મોનોહાઇબ્રિડ ક્રોસ (Bb x Bb) માટે લાગુ પડે છે, 1:2:1 જીનોટાઇપિક રેશિયો છે, અને 2:1 કોઈપણ સ્ટાન્ડર્ડ મેન્ડેલિયન ક્રોસમાં મળતું નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "ટેસ્ટ ક્રોસનો ઉપયોગ કરવા માટે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["તે જીનોટાઇપ નક્કી કરવા માટે ઉપયોગી છે.", "તે ડોમિનન્ટ ફિનોટાઇપ ધરાવતા વ્યક્તિના જીનોટાઇપની પુષ્ટિ કરે છે.", "તે હેટરોઝાયગસ અને હોમોઝાયગસ ડોમિનન્ટ વચ્ચે તફાવત કરે છે.", "તે નવા જનીનની શોધ માટે ઉપયોગી છે."], "ans": 3, "exp": "ટેસ્ટ ક્રોસનો મુખ્ય ઉપયોગ જીનોટાઇપ નક્કી કરવા, ડોમિનન્ટ ફિનોટાઇપ ધરાવતા વ્યક્તિના જીનોટાઇપની પુષ્ટિ કરવા અને હેટરોઝાયગસ અને હોમોઝાયગસ ડોમિનન્ટ વચ્ચે તફાવત કરવા માટે થાય છે. નવા જનીનની શોધ માટે ટેસ્ટ ક્રોસ ઉપયોગી નથી, તે માટે અન્ય પદ્ધતિઓ જેવી કે મ્યુટેશન એનાલિસિસ અથવા DNA સિક્વેન્સિંગ વપરાય છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "એક જીવમાં, લાલ રંગ (R) સફેદ રંગ (r) પર ડોમિનન્ટ છે. જો ટેસ્ટ ક્રોસ દરમિયાન F1 પેઢીનો વ્યક્તિ લાલ રંગ ધરાવે છે, તો તેના જીનોટાઇપની શક્યતા કયી હશે?", "opts": ["RR અથવા Rr", "Rr અથવા rr", "RR માત્ર", "rr માત્ર"], "ans": 0, "exp": "ટેસ્ટ ક્રોસમાં, જો F1 પેઢીનો વ્યક્તિ લાલ રંગ (ડોમિનન્ટ ફિનોટાઇપ) ધરાવે છે, તો તેનો જીનોટાઇપ RR અથવા Rr હોવો જોઈએ. કારણ કે RR અને Rr બંને ડોમિનન્ટ ફિનોટાઇપ દર્શાવે છે. Rr અથવા rr વિકલ્પ અયોગ્ય છે કારણ કે rr રીસેસિવ ફિનોટાઇપ દર્શાવે છે, અને RR માત્ર અથવા rr માત્ર અપૂર્ણ છે કારણ કે F1 પેઢી હેટરોઝાયગસ અથવા હોમોઝાયગસ ડોમિનન્ટ હોવાની શક્યતા રહે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, જો F1 પેઢીનો વ્યક્તિ હેટરોઝાયગસ (AaBb) હોય અને તેને હોમોઝાયગસ રીસેસિવ (aabb) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક રેશિયો કયો હશે? (ધારો કે A અને B જનીન સ્વતંત્ર રીતે વારસાગત થાય છે)", "opts": ["9:3:3:1", "1:1:1:1", "3:1", "1:2:1"], "ans": 1, "exp": "ટેસ્ટ ક્રોસમાં, જો F1 પેઢીનો વ્યક્તિ ડાયહાઇબ્રિડ હેટરોઝાયગસ (AaBb) હોય અને તેને હોમોઝાયગસ રીસેસિવ (aabb) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં ફિનોટાઇપિક રેશિયો 1:1:1:1 હશે. કારણ કે AaBb x aabb ક્રોસમાં ચાર પ્રકારના ગેમેટ્સ (AB, Ab, aB, ab) ઉત્પન્ન થાય છે, અને દરેક ગેમેટ aabb સાથે ક્રોસ થતાં અલગ ફિનોટાઇપ ધરાવતા સંતાનો ઉત્પન્ન થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે 9:3:3:1 ડાયહાઇબ્રિડ ક્રોસ (AaBb x AaBb) માટે લાગુ પડે છે, 3:1 મોનોહાઇબ્રિડ ક્રોસ માટે લાગુ પડે છે, અને 1:2:1 જીનોટાઇપિક રેશિયો છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા (Heredity and Variation)", "ch": ""}, {"q": "એક જીવમાં, લીલો રંગ (G) પીળો રંગ (g) પર ડોમિનન્ટ છે અને ગોળ આકાર (R) લંબગોળ આકાર (r) પર ડોમિનન્ટ છે. જો F1 પેઢીનો વ્યક્તિ ડાયહાયબ્રિડ (GgRr) હોય અને તેને ટેસ્ટ ક્રોસ (ggrr) સાથે ક્રોસ કરવામાં આવે, તો F2 પેઢીમાં લીલો અને ગોળ ફિનોટાઇપ ધરાવતા વ્યક્તિઓનું પ્રમાણ કેટલું હશે?", "opts": ["9:16", "3:16", "1:16", "4:16"], "ans": 1, "exp": "ડાયહાયબ્રિડ ક્રોસમાં, F1 પેઢીનો જનીનોટાઇપ GgRr હોય છે. ટેસ્ટ ક્રોસ (ggrr) સાથે ક્રોસ કરતા, F2 પેઢીમાં લીલો અને ગોળ ફિનોટાઇપ ધરાવતા વ્યક્તિઓનો જનીનોટાઇપ G_R_ હશે. ડાયહાયબ્રિડ ક્રોસમાં, G_R_ નું પ્રમાણ 9/16 હોય છે, પરંતુ ટેસ્ટ ક્રોસમાં, આ પ્રમાણ 3/16 હોય છે. આથી, સરનામું જવાબ 3:16 છે. A) 9:16 એ ડાયહાયબ્રિડ ક્રોસનું પ્રમાણ છે, C) 1:16 એ ગુણધર્મોના સંપૂર્ણ રીસેસિવ સ્વરૂપનું પ્રમાણ છે, D) 4:16 એ અપૂર્ણ ડોમિનન્સના કિસ્સામાં લાગુ પડે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, જો એક હેટરોઝાયગસ વ્યક્તિ (Aa) ને રીસેસિવ હોમોઝાયગસ (aa) સાથે ક્રોસ કરવામાં આવે અને F2 પેઢીમાં માત્ર ડોમિનન્ટ ફીનોટાઇપ જોવા મળે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["જીન A રીસેસિવ છે", "જીન a ડોમિનન્ટ છે", "હેટરોઝાયગસ વ્યક્તિમાં જીન A અને a વચ્ચે સંપૂર્ણ ડોમિનન્સ નથી", "ટેસ્ટ ક્રોસ દરમિયાન કોઈ મ્યુટેશન થયું છે"], "ans": 2, "exp": "જો F2 પેઢીમાં માત્ર ડોમિનન્ટ ફીનોટાઇપ જોવા મળે, તો તે સૂચવે છે કે હેટરોઝાયગસ વ્યક્તિમાં જીન A અને a વચ્ચે સંપૂર્ણ ડોમિનન્સ નથી, પરંતુ અસંપૂર્ણ ડોમિનન્સ અથવા કોડોમિનન્સ છે. વિકલ્પ A અને B ખોટા છે કારણ કે જીન A ડોમિનન્ટ છે અને જીન a રીસેસિવ છે. વિકલ્પ D ખોટો છે કારણ કે મ્યુટેશનનો અહીં કોઈ પુરાવો નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, જો એક હેટરોઝાયગસ વ્યક્તિ (AaBb) ને રીસેસિવ હોમોઝાયગસ (aabb) સાથે ક્રોસ કરવામાં આવે અને F2 પેઢીમાં 4 પ્રકારના ફીનોટાઇપ્સ જોવા મળે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["જીન A અને B વચ્ચે સંપૂર્ણ લિંકેજ છે", "જીન A અને B વચ્ચે કોઈ લિંકેજ નથી", "જીન A અને B વચ્ચે અસંપૂર્ણ લિંકેજ છે", "જીન A અને B વચ્ચે એપિસ્ટેસિસ છે"], "ans": 2, "exp": "જો F2 પેઢીમાં 4 પ્રકારના ફીનોટાઇપ્સ જોવા મળે, તો તે સૂચવે છે કે જીન A અને B વચ્ચે અસંપૂર્ણ લિંકેજ છે. સંપૂર્ણ લિંકેજ હોત, તો માત્ર 2 પ્રકારના ફીનોટાઇપ્સ જોવા મળતા (વિકલ્પ A ખોટો). કોઈ લિંકેજ ન હોત, તો 4 પ્રકારના ફીનોટાઇપ્સ મળતા, પરંતુ તે ડાયહાયબ્રિડ ક્રોસનો ગુણોત્તર હોત (વિકલ્પ B ખોટો). એપિસ્ટેસિસ હોત, તો ફીનોટાઇપિક ગુણોત્તર 9:3:3:1 અથવા અન્ય રૂપે હોત (વિકલ્પ D ખોટો).", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગતતા", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, હેટરોઝાયગસ ડાયહાયબ્રિડ (AaBb) વ્યક્તિને રીસેસિવ હોમોઝાયગસ (aabb) સાથે ક્રોસ કરવામાં આવે છે. જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 1:1:1:1 મળે છે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["જનીનો A અને B એકબીજા સાથે લિંકેજમાં છે અને સંપૂર્ણપણે જોડાયેલા છે.", "જનીનો A અને B એકબીજાથી સ્વતંત્ર રીતે વંશાનુગત થાય છે.", "જનીનો A અને B એક જ વર્ણસૂત્ર પર આવેલા છે અને ક્રોસિંગ ઓવર થતું નથી.", "જનીનો A અને B એકબીજા સાથે અપૂર્ણ ડોમિનન્સ દર્શાવે છે."], "ans": 1, "exp": "ટેસ્ટ ક્રોસમાં હેટરોઝાયગસ ડાયહાયબ્રિડ (AaBb)ને રીસેસિવ હોમોઝાયગસ (aabb) સાથે ક્રોસ કરવાથી જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 1:1:1:1 મળે છે, તો તે દર્શાવે છે કે જનીનો A અને B એકબીજાથી સ્વતંત્ર રીતે વંશાનુગત થાય છે (મેન્ડલનો સ્વતંત્ર વિતરણનો નિયમ). વિકલ્પ A અને C લિંકેજ અથવા ક્રોસિંગ ઓવરની અનુપસ્થિતિ સૂચવે છે, જે ગુણોત્તર 1:1:1:1 ને સમજાવી શકતું નથી. વિકલ્પ D અપૂર્ણ ડોમિનન્સ વિશે છે, જે આ કિસ્સામાં લાગુ પડતું નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાનુગત્ય અને વિવિધતા", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, એક હેટરોઝાયગસ વ્યક્તિ (AaBb)ને રીસેસિવ હોમોઝાયગસ (aabb) સાથે ક્રોસ કરવામાં આવે છે. જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 3:1 મળે છે, તો નીચેનામાંથી કયું કારણ હોઈ શકે?", "opts": ["જનીનો A અને B એક જ વર્ણસૂત્ર પર આવેલા છે અને ક્રોસિંગ ઓવર થતું નથી.", "જનીનો A અને B સ્વતંત્ર રીતે વંશાનુગત થાય છે.", "જનીન A ડોમિનન્ટ છે અને જનીન B રીસેસિવ છે.", "જનીનો A અને B અપૂર્ણ ડોમિનન્સ દર્શાવે છે."], "ans": 0, "exp": "જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 3:1 મળે છે, તો તે દર્શાવે છે કે જનીનો A અને B એક જ વર્ણસૂત્ર પર આવેલા છે અને ક્રોસિંગ ઓવર થતું નથી, જેથી તેઓ એકસાથે વંશાનુગત થાય છે. વિકલ્પ B સ્વતંત્ર વિતરણને સૂચવે છે, જે ગુણોત્તર 1:1:1:1 આપે છે. વિકલ્પ C અને D આ કિસ્સામાં લાગુ પડતાં નથી, કારણ કે ગુણોત્તર 3:1 લિંકેજ અથવા ક્રોસિંગ ઓવરની અનુપસ્થિતિ સૂચવે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાનુગત્ય અને વિવિધતા", "ch": ""}, {"q": "ટેસ્ટ ક્રોસ દરમિયાન, એક હેટરોઝાયગસ વ્યક્તિ (Aa)ને રીસેસિવ હોમોઝાયગસ (aa) સાથે ક્રોસ કરવામાં આવે છે. જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 1:2:1 મળે છે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["જનીન A પૂર્ણ ડોમિનન્સ દર્શાવે છે.", "જનીન A અપૂર્ણ ડોમિનન્સ દર્શાવે છે.", "જનીન A રીસેસિવ છે.", "જનીન A અને a એકબીજા સાથે સહ-ડોમિનન્ટ છે."], "ans": 1, "exp": "ટેસ્ટ ક્રોસમાં હેટરોઝાયગસ (Aa)ને રીસેસિવ હોમોઝાયગસ (aa) સાથે ક્રોસ કરવાથી જો F2 પેઢીમાં ફીનોટાઇપિક ગુણોત્તર 1:2:1 મળે છે, તો તે દર્શાવે છે કે જનીન A અપૂર્ણ ડોમિનન્સ દર્શાવે છે. વિકલ્પ A પૂર્ણ ડોમિનન્સ સૂચવે છે, જે ગુણોત્તર 1:1 આપે છે. વિકલ્પ C અને D આ કિસ્સામાં લાગુ પડતાં નથી, કારણ કે રીસેસિવ જનીન અથવા સહ-ડોમિનન્સ ગુણોત્તર 1:2:1 ને સમજાવી શકતું નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાનુગત્ય અને વિવિધતા", "ch": ""}, {"q": "એક વનસ્પતિમાં, લાલ ફૂલ (R) સફેદ ફૂલ (r) પર ડોમિનન્ટ છે અને ઊંચું છોડ (T) નીચું છોડ (t) પર ડોમિનન્ટ છે. એક વનસ્પતિ જે લાલ ફૂલ અને ઊંચું છોડ ધરાવે છે તેનું ટેસ્ટ ક્રોસ કરતાં સંતતિમાં 1:1:1:1 ગુણોત્તર મળે છે. આ વનસ્પતિનો જનીન પ્રકાર કયો હશે?", "opts": ["RRTT", "RrTT", "RrTt", "RRTt"], "ans": 2, "exp": "ટેસ્ટ ક્રોસમાં 1:1:1:1 ગુણોત્તર મળવો એ દર્શાવે છે કે વનસ્પતિ ડાયહાયબ્રિડ હેટરોઝાયગસ (RrTt) છે. જો વનસ્પતિ હોમોઝાયગસ ડોમિનન્ટ (RRTT) હોત તો બધી સંતતિ એકસરખી હોત. જો તે મોનોહાયબ્રિડ હેટરોઝાયગસ (RrTT અથવા RRTt) હોત તો ગુણોત્તર 1:1 મળત, 1:1:1:1 નહીં. તેથી વિકલ્પ C સાચો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રયોગમાં, ગોળ બીજ (R) કરતાં ખરબચડા બીજ (r) રીસેસિવ છે. એક વનસ્પતિ જે ગોળ બીજ ધરાવે છે તેનું ટેસ્ટ ક્રોસ કરતાં 50% ગોળ અને 50% ખરબચડા બીજવાળી સંતતિ મળે છે. જો આ વનસ્પતિને સ્વફલન કરાવવામાં આવે તો F2 પેઢીમાં ખરબચડા બીજવાળી વનસ્પતિઓનું પ્રમાણ કેટલું હશે?", "opts": ["0%", "25%", "50%", "75%"], "ans": 1, "exp": "ટેસ્ટ ક્રોસના પરિણામ પરથી વનસ્પતિ હેટરોઝાયગસ (Rr) હોવાનું સ્પષ્ટ થાય છે. સ્વફલન કરતાં F2 પેઢીમાં 3:1 ગુણોત્તર મળે છે, જેમાં 25% ખરબચડા બીજવાળી વનસ્પતિઓ (rr) હશે. વિકલ્પ B સાચો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ટેસ્ટ ક્રોસના સંદર્ભમાં ખોટું છે?", "opts": ["ટેસ્ટ ક્રોસમાં હંમેશા રીસેસિવ હોમોઝાયગસ વ્યક્તિનો ઉપયોગ થાય છે", "ટેસ્ટ ક્રોસનો ઉપયોગ ફક્ત ડોમિનન્ટ લક્ષણ ધરાવતા વ્યક્તિના જનીન પ્રકાર નક્કી કરવા થાય છે", "ટેસ્ટ ક્રોસ દ્વારા મળતી સંતતિના ગુણોત્તર પરથી વ્યક્તિનો જનીન પ્રકાર નક્કી થાય છે", "ટેસ્ટ ક્રોસનો ઉપયોગ રીસેસિવ લક્ષણ ધરાવતા વ્યક્તિના જનીન પ્રકાર નક્કી કરવા પણ થઈ શકે છે"], "ans": 3, "exp": "ટેસ્ટ ક્રોસનો ઉપયોગ રીસેસિવ લક્ષણ ધરાવતા વ્યક્તિના જનીન પ્રકાર નક્કી કરવા થતો નથી, કારણ કે રીસેસિવ લક્ષણ ધરાવતો વ્યક્તિ હંમેશા હોમોઝાયગસ (aa) હોય છે. તેથી વિકલ્પ D ખોટું છે. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રાણીમાં, કાળો રંગ (B) સફેદ રંગ (b) પર ડોમિનન્ટ છે. એક કાળા રંગના પ્રાણીનું ટેસ્ટ ક્રોસ કરતાં 100% કાળા રંગની સંતતિ મળે છે. જો આ પ્રાણીને સ્વફલન કરાવવામાં આવે તો F2 પેઢીમાં કાળા અને સફેદ રંગના પ્રાણીઓનું પ્રમાણ કેટલું હશે?", "opts": ["100% કાળા, 0% સફેદ", "75% કાળા, 25% સફેદ", "50% કાળા, 50% સફેદ", "100% સફેદ, 0% કાળા"], "ans": 0, "exp": "ટેસ્ટ ક્રોસમાં 100% કાળા રંગની સંતતિ મળવી એ દર્શાવે છે કે પ્રાણી હોમોઝાયગસ ડોમિનન્ટ (BB) છે. તેથી સ્વફલન કરતાં F2 પેઢીમાં પણ 100% કાળા રંગના પ્રાણીઓ મળશે. વિકલ્પ A સાચો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક વનસ્પતિમાં, પીળું બીજ (Y) લીલા બીજ (y) પર ડોમિનન્ટ છે અને ગોળ બીજ (R) ખરબચડા બીજ (r) પર ડોમિનન્ટ છે. એક વનસ્પતિ જે પીળા અને ગોળ બીજ ધરાવે છે તેનું ટેસ્ટ ક્રોસ કરતાં સંતતિમાં નીચેના ગુણોત્તર મળે છે: 40% પીળા-ગોળ, 40% લીલા-ખરબચડા, 10% પીળા-ખરબચડા, 10% લીલા-ગોળ. આ વનસ્પતિનો જનીન પ્રકાર કયો હશે અને આ પરિણામનું કારણ શું હોઈ શકે?", "opts": ["YyRr, સ્વતંત્ર વહેંચણીનો નિયમ", "YyRr, જનીન સંલગ્નતા (Gene Linkage)", "YYRR, સ્વતંત્ર વહેંચણીનો નિયમ", "YyRR, જનીન સંલગ્નતા (Gene Linkage)"], "ans": 1, "exp": "ટેસ્ટ ક્રોસના પરિણામમાં 1:1:1:1 ગુણોત્તર ન મળતા, પરંતુ પેરેન્ટલ પ્રકારોનું પ્રમાણ વધુ અને રિકોમ્બિનન્ટ પ્રકારોનું પ્રમાણ ઓછું મળવું એ જનીન સંલગ્નતાનું સૂચક છે. તેથી વનસ્પતિ હેટરોઝાયગસ ડાયહાયબ્રિડ (YyRr) છે અને જનીન સંલગ્નતા છે. વિકલ્પ B સાચો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
