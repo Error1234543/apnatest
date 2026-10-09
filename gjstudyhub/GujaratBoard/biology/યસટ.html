@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>યીસ્ટ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>યીસ્ટ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">યીસ્ટ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "યીસ્ટના કોષોમાં કયું લક્ષણ તેને બેક્ટેરિયાથી અલગ પાડે છે?", "opts": ["કોષકેન્દ્રની ગેરહાજરી", "કોષદીવાલમાં કાઇટિનની હાજરી", "પ્રકાશસંશ્લેષણ કરવાની ક્ષમતા", "અજૈવિક પોષણ"], "ans": 1, "exp": "યીસ્ટ એક યુકેરિયોટિક સૂક્ષ્મજીવ છે જેમાં વાસ્તવિક કોષકેન્દ્ર હોય છે, જ્યારે બેક્ટેરિયા પ્રોકેરિયોટિક હોય છે. યીસ્ટની કોષદીવાલમાં કાઇટિન હોય છે, જે ફૂગનું લક્ષણ છે અને તેને બેક્ટેરિયાથી અલગ પાડે છે. પ્રકાશસંશ્લેષણ યીસ્ટ કરી શકતું નથી અને તે મૃતોપજીવી પોષણ ધરાવે છે, જે બેક્ટેરિયામાં પણ જોવા મળે છે.", "ref": "Std 11 - પ્રકરણ 2: જૈવિક વર્ગીકરણ", "ch": ""}, {"q": "યીસ્ટમાં અલિંગી પ્રજનનનું મુખ્ય સ્વરૂપ કયું છે જે અન્ય ફૂગમાં સામાન્ય રીતે જોવા મળતું નથી?", "opts": ["બીજાણુ નિર્માણ", "કલિકાસર્જન", "ખંડન", "અંત:બીજાણુ નિર્માણ"], "ans": 0, "exp": "યીસ્ટમાં અલિંગી પ્રજનનનું મુખ્ય સ્વરૂપ કલિકાસર્જન છે, જેમાં માતૃકોષ પર નાની કલિકા ઉત્પન્ન થાય છે અને પછી તે અલગ થઈને નવો કોષ બનાવે છે. બીજાણુ નિર્માણ અને ખંડન અન્ય ફૂગમાં સામાન્ય છે, જ્યારે અંત:બીજાણુ નિર્માણ બેક્ટેરિયામાં જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "યીસ્ટના કોષોમાં ઇથેનોલ ઉત્પાદન દરમિયાન નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["આ પ્રક્રિયા અજારક શ્વસનનો એક પ્રકાર છે", "ગ્લુકોઝનું પૂર્ણ ઓક્સિડેશન થાય છે", "CO₂ વાયુ મુક્ત થાય છે", "આ પ્રક્રિયા ઝાયમેઝ ઉત્સેચક દ્વારા ઉત્પ્રેરિત થાય છે"], "ans": 1, "exp": "યીસ્ટમાં ઇથેનોલ ઉત્પાદન અજારક શ્વસન દ્વારા થાય છે, જેમાં ગ્લુકોઝનું અપૂર્ણ ઓક્સિડેશન થાય છે અને ઇથેનોલ તથા CO₂ ઉત્પન્ન થાય છે. આ પ્રક્રિયા ઝાયમેઝ ઉત્સેચક દ્વારા ઉત્પ્રેરિત થાય છે. ગ્લુકોઝનું પૂર્ણ ઓક્સિડેશન વાયુયુક્ત શ્વસનમાં થાય છે, જે અહીં થતું નથી.", "ref": "Std 11 - પ્રકરણ 14: શ્વસન અને ઊર્જા વિનિમય", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન યીસ્ટના વર્ણસૂત્રો માટે ખોટું છે?", "opts": ["યીસ્ટમાં રેખીય DNA વર્ણસૂત્રો હોય છે", "યીસ્ટના વર્ણસૂત્રો કોષકેન્દ્રમાં આવેલા હોય છે", "યીસ્ટમાં એક જ વર્ણસૂત્ર હોય છે જે વર્તુળાકાર હોય છે", "યીસ્ટના વર્ણસૂત્રો હિસ્ટોન પ્રોટીન સાથે જોડાયેલા હોય છે"], "ans": 2, "exp": "યીસ્ટ એક યુકેરિયોટિક સજીવ છે જેમાં બહુવિધ રેખીય DNA વર્ણસૂત્રો હોય છે જે કોષકેન્દ્રમાં આવેલા હોય છે અને હિસ્ટોન પ્રોટીન સાથે જોડાયેલા હોય છે. વર્તુળાકાર DNA પ્રોકેરિયોટ્સ (જેમ કે બેક્ટેરિયા)માં જોવા મળે છે, યીસ્ટમાં નહીં.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક્તાનો આણ્વિક આધાર", "ch": ""}, {"q": "યીસ્ટનો ઉપયોગ બ્રેડ બનાવવામાં થાય છે કારણ કે તે...", "opts": ["લેક્ટિક એસિડ ઉત્પન્ન કરે છે જે બ્રેડને નરમ બનાવે છે", "CO₂ ઉત્પન્ન કરે છે જે લોટને ફૂલાવે છે", "પ્રોટીનનું પાચન કરે છે જે બ્રેડને સ્વાદિષ્ટ બનાવે છે", "ઓક્સિજન શોષી લે છે જે બ્રેડને લાંબો સમય તાજી રાખે છે"], "ans": 1, "exp": "યીસ્ટ બ્રેડ બનાવવામાં ઉપયોગી છે કારણ કે તે અજારક શ્વસન દ્વારા CO₂ ઉત્પન્ન કરે છે, જે લોટમાં પરપોટા બનાવે છે અને બ્રેડને ફૂલાવે છે. લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થાય છે, પ્રોટીનનું પાચન યીસ્ટ કરતું નથી, અને ઓક્સિજન શોષણ બ્રેડની ગુણવત્તા સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 11 - પ્રકરણ 9: જૈવ અણુઓ", "ch": ""}, {"q": "યીસ્ટમાં કયા પ્રકારનું શ્વસન ચાલે છે જ્યારે તે ઓક્સિજનની અછતમાં હોય છે, પરંતુ તેના કોષીય શ્વસનના અંતિમ ઉત્પાદન તરીકે કાર્બન ડાયોક્સાઇડ અને ઇથેનોલ ઉત્પન્ન કરે છે?", "opts": ["વાયુરહિત શ્વસન (Anaerobic respiration)", "વાયુયુક્ત શ્વસન (Aerobic respiration)", "લેક્ટિક એસિડ કિણ્વન (Lactic acid fermentation)", "ફોટોરેસ્પિરેશન (Photorespiration)"], "ans": 0, "exp": "યીસ્ટ ઓક્સિજનની અછતમાં વાયુરહિત શ્વસન (અનએરોબિક રેસ્પિરેશન) દ્વારા ઇથેનોલ અને CO₂ ઉત્પન્ન કરે છે. વાયુયુક્ત શ્વસન (B) ઓક્સિજનની હાજરીમાં થાય છે. લેક્ટિક એસિડ કિણ્વન (C) મુખ્યત્વે પ્રાણીઓના સ્નાયુઓમાં થાય છે. ફોટોરેસ્પિરેશન (D) છોડમાં પ્રકાશસંશ્લેષણ સાથે સંબંધિત પ્રક્રિયા છે, યીસ્ટમાં નહીં.", "ref": "Std 11 - Chapter 14: શ્વસન અને ઉર્જા ઉત્પાદન", "ch": ""}, {"q": "યીસ્ટના કોષકેન્દ્રમાં કયા પ્રકારના વર્ણસૂત્રો જોવા મળે છે જે તેને અન્ય સૂક્ષ્મજીવોથી અલગ પાડે છે?", "opts": ["વર્તુળાકાર DNA વર્ણસૂત્રો", "રેખીય DNA વર્ણસૂત્રો", "RNA વર્ણસૂત્રો", "પ્લાઝમિડ વર્ણસૂત્રો"], "ans": 1, "exp": "યીસ્ટ એક યુકેરિયોટિક સૂક્ષ્મજીવ છે, જેમાં કોષકેન્દ્રમાં રેખીય DNA વર્ણસૂત્રો (B) જોવા મળે છે. વર્તુળાકાર DNA (A) પ્રોકેરિયોટ્સ (જેમ કે બેક્ટેરિયા)માં જોવા મળે છે. RNA વર્ણસૂત્રો (C) અસ્તિત્વમાં નથી, અને પ્લાઝમિડ (D) બેક્ટેરિયામાં જોવા મળે છે.", "ref": "Std 11 - Chapter 10: કોષ - જીવનની મૂળભૂત એકમ", "ch": ""}, {"q": "યીસ્ટમાં કયા ઉત્સેચકની હાજરી તેને કાર્બોદિતના કિણ્વન દ્વારા ઇથેનોલ ઉત્પાદનમાં મદદ કરે છે?", "opts": ["લેક્ટેઝ", "ઝાયમેઝ", "ઇનવર્ટેઝ", "કેટલેઝ"], "ans": 2, "exp": "યીસ્ટમાં ઇનવર્ટેઝ ઉત્સેચક (C) સુક્રોઝને ગ્લુકોઝ અને ફ્રક્ટોઝમાં તોડીને ઇથેનોલ કિણ્વનમાં મદદ કરે છે. લેક્ટેઝ (A) દૂધમાં લેક્ટોઝના પાચન માટે, ઝાયમેઝ (B) સ્ટાર્ચના પાચન માટે, અને કેટલેઝ (D) હાઇડ્રોજન પેરોક્સાઇડના વિઘટન માટે જવાબદાર છે.", "ref": "Std 12 - Chapter 3: જૈવ-રસાયણ અને ઉત્સેચકો", "ch": ""}, {"q": "યીસ્ટના જીવનચક્ર દરમિયાન, કયા તબક્કે તે અલિંગી પ્રજનન દ્વારા બડી ઉત્પન્ન કરે છે?", "opts": ["હેપ્લોઇડ તબક્કે", "ડિપ્લોઇડ તબક્કે", "ટેટ્રાપ્લોઇડ તબક્કે", "સ્પોર તબક્કે"], "ans": 0, "exp": "યીસ્ટ હેપ્લોઇડ તબક્કે (A) અલિંગી પ્રજનન દ્વારા બડી ઉત્પન્ન કરે છે. ડિપ્લોઇડ તબક્કે (B) તે લિંગી પ્રજનન દ્વારા સ્પોર બનાવે છે. ટેટ્રાપ્લોઇડ (C) અને સ્પોર તબક્કે (D) યીસ્ટના જીવનચક્રમાં અલિંગી પ્રજનન સાથે સંબંધિત નથી.", "ref": "Std 11 - Chapter 15: જીવનચક્ર અને પ્રજનન", "ch": ""}, {"q": "યીસ્ટમાં કયા પ્રકારના પેશી સંરચનાને કારણે તેના કોષભિત્તિમાં મજબૂતાઈ અને લવચીકતા આવે છે?", "opts": ["સેલ્યુલોઝ", "કાઇટિન", "ગ્લાયકોપ્રોટીન", "પેક્ટિન"], "ans": 2, "exp": "યીસ્ટના કોષભિત્તિમાં ગ્લાયકોપ્રોટીન (C) હાજર હોય છે, જે તેને મજબૂતાઈ અને લવચીકતા પ્રદાન કરે છે. સેલ્યુલોઝ (A) છોડના કોષભિત્તિમાં, કાઇટિન (B) ફૂગના કોષભિત્તિમાં, અને પેક્ટિન (D) છોડના મધ્યપટલમાં જોવા મળે છે.", "ref": "Std 11 - Chapter 10: કોષ - જીવનની મૂળભૂત એકમ", "ch": ""}, {"q": "યીસ્ટમાં કયા જનીનની હાજરી તેને લેક્ટોઝના ચયાપચય માટે અસમર્થ બનાવે છે, પરંતુ ગ્લુકોઝના ચયાપચય માટે સક્ષમ રાખે છે?", "opts": ["GAL4 જનીનની અભાવે લેક્ટોઝ ઓપેરોન સક્રિય થતું નથી", "LACZ જનીનની હાજરી હોવા છતાં યીસ્ટમાં લેક્ટોઝને તોડી શકાતું નથી", "HXT જનીન પરિવાર ગ્લુકોઝ પરિવહન માટે જવાબદાર છે, પરંતુ લેક્ટોઝ માટે નહીં", "URA3 જનીન લેક્ટોઝ ચયાપચયમાં અવરોધ ઉભો કરે છે"], "ans": 2, "exp": "યીસ્ટમાં HXT જનીન પરિવાર ગ્લુકોઝના પરિવહન માટે જવાબદાર છે, પરંતુ લેક્ટોઝના ચયાપચય માટે યીસ્ટ પાસે લેક્ટોઝને તોડવા માટેના ઉત્સેચક (જેમ કે β-ગેલેક્ટોઝિડેઝ) નથી. A ખોટું છે કારણ કે GAL4 જનીન લેક્ટોઝ ઓપેરોનને નિયંત્રિત કરે છે, પરંતુ યીસ્ટમાં લેક્ટોઝ ઓપેરોન જ નથી. B ખોટું છે કારણ કે LACZ જનીન બેક્ટેરિયામાં જોવા મળે છે, યીસ્ટમાં નહીં. D ખોટું છે કારણ કે URA3 જનીન યુરાસિલ સિંથેસિસ સાથે સંબંધિત છે, લેક્ટોઝ ચયાપચય સાથે નહીં.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "યીસ્ટના કોષભિત્તિમાં કયા પોલિસેકેરાઇડની હાજરી તેને પાણીના અભાવે પણ જીવિત રહેવામાં મદદ કરે છે?", "opts": ["સેલ્યુલોઝ", "કાઇટિન", "ગ્લાઇકોજન", "ટ્રેહેલોઝ"], "ans": 3, "exp": "ટ્રેહેલોઝ એક ડિસેકેરાઇડ છે જે યીસ્ટના કોષમાં સંગ્રહ પામે છે અને પાણીના અભાવે કોષને સુકાઈ જવાથી બચાવે છે. સેલ્યુલોઝ (A) વનસ્પતિ કોષભિત્તિમાં જોવા મળે છે. કાઇટિન (B) ફૂગના કોષભિત્તિમાં જોવા મળે છે, પરંતુ યીસ્ટમાં તેની હાજરી કોષને પાણીના અભાવે બચાવતી નથી. ગ્લાઇકોજન (C) એક સંગ્રહિત કાર્બોદિત છે, પરંતુ તે કોષભિત્તિમાં નથી અને પાણીના અભાવે સુરક્ષા પૂરી પાડતું નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "યીસ્ટમાં કયા પ્રકારના પ્રજનન દરમિયાન કલિકા (bud) નિર્માણ પહેલાં કોષકેન્દ્રનું વિભાજન થાય છે, પરંતુ કોષભિત્તિનું વિભાજન પછી થાય છે?", "opts": ["દ્વિભાજન", "કલિકા ઉત્પત્તિ", "બહુકલિકા ઉત્પત્તિ", "અંડકોષીય પ્રજનન"], "ans": 1, "exp": "કલિકા ઉત્પત્તિ (B)માં કોષકેન્દ્રનું વિભાજન કલિકા નિર્માણ પહેલાં થાય છે, પરંતુ કોષભિત્તિનું વિભાજન કલિકા નિર્માણ પછી થાય છે. દ્વિભાજન (A)માં કોષ અને કોષકેન્દ્ર બંને એકસાથે વિભાજિત થાય છે. બહુકલિકા ઉત્પત્તિ (C)માં એક જ કોષ પરથી ઘણી કલિકાઓ ઉત્પન્ન થાય છે. અંડકોષીય પ્રજનન (D) લિંગી પ્રજનન છે અને યીસ્ટમાં સામાન્ય રીતે જોવા મળતું નથી.", "ref": "Std 12 - અધ્યાય 3: જીવન ચક્ર અને પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન યીસ્ટના મિટોકોન્ડ્રિયા વિશે ખોટું છે?", "opts": ["યીસ્ટના મિટોકોન્ડ્રિયામાં તેના પોતાના DNA અને રાઇબોઝોમ્સ હોય છે", "યીસ્ટના મિટોકોન્ડ્રિયામાં ક્રેબ્સ ચક્ર થાય છે", "યીસ્ટના મિટોકોન્ડ્રિયામાં ઓક્સિડેટિવ ફોસ્ફોરાઇલેશન થતું નથી", "યીસ્ટના મિટોકોન્ડ્રિયામાં ઇલેક્ટ્રોન ટ્રાન્સપોર્ટ ચેઈન હોય છે"], "ans": 2, "exp": "યીસ્ટના મિટોકોન્ડ્રિયામાં ઓક્સિડેટિવ ફોસ્ફોરાઇલેશન થાય છે, જ્યારે ઓક્સિજન ઉપલબ્ધ હોય ત્યારે. A, B, અને D બધા સત્ય છે: મિટોકોન્ડ્રિયામાં પોતાના DNA અને રાઇબોઝોમ્સ હોય છે, ક્રેબ્સ ચક્ર થાય છે, અને ઇલેક્ટ્રોન ટ્રાન્સપોર્ટ ચેઈન હોય છે.", "ref": "Std 12 - અધ્યાય 5: કોષીય શ્વસન", "ch": ""}, {"q": "યીસ્ટમાં કયા હોર્મોન જેવા પદાર્થની હાજરી તેના કલિકા ઉત્પત્તિ દરમિયાન કોષચક્રને નિયંત્રિત કરે છે?", "opts": ["ઇન્સુલિન", "ગ્લુકેગોન", "સાયક્લિન", "એડ્રિનેલિન"], "ans": 2, "exp": "સાયક્લિન (C) કોષચક્રને નિયંત્રિત કરવા માટે જવાબદાર પ્રોટીન છે, જે કલિકા ઉત્પત્તિ દરમિયાન યીસ્ટમાં કોષવિભાજનને નિયંત્રિત કરે છે. ઇન્સુલિન (A) અને ગ્લુકેગોન (B) સસ્તન પ્રાણીઓમાં ગ્લુકોઝના ચયાપચય સાથે સંબંધિત છે. એડ્રિનેલિન (D) પ્રાણીઓમાં તણાવ પ્રતિભાવ સાથે સંબંધિત છે.", "ref": "Std 12 - અધ્યાય 3: જીવન ચક્ર અને પ્રજનન", "ch": ""}, {"q": "યીસ્ટમાં 'પેટ્રાઇટિક એસેક્સ્યુઅલ રિપ્રોડક્શન' દરમિયાન નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["બે કોષોના સંપર્કથી બનતી 'શક્યુલેટર' રચના દ્વારા જનીનીય વિનિમય થાય છે.", "આ પ્રક્રિયામાં કોષકેન્દ્રનું સંપૂર્ણ વિલીનીકરણ થાય છે અને હેપ્લોઈડ કોષો ઉત્પન્ન થાય છે.", "આ પ્રક્રિયા દરમિયાન કોષભિત્તિમાં 'કોન્જ્યુગેશન ટ્યુબ' નિર્માણ પામે છે.", "આ પ્રક્રિયા દ્વારા ઉત્પન્ન થતી સંતતિઓમાં જનીનીય વૈવિધ્ય જોવા મળે છે."], "ans": 1, "exp": "પેટ્રાઇટિક એસેક્સ્યુઅલ રિપ્રોડક્શન (Parasexual reproduction) દરમિયાન બે કોષો વચ્ચે પ્લાઝ્મોગેમી થાય છે, પરંતુ કોષકેન્દ્રનું વિલીનીકરણ થતું નથી, જેથી હેપ્લોઈડ કોષો ઉત્પન્ન થતાં નથી. આ પ્રક્રિયામાં જનીનીય વિનિમય થાય છે અને સંતતિઓમાં વૈવિધ્ય જોવા મળે છે. કોન્જ્યુગેશન ટ્યુબનું નિર્માણ થાય છે, પરંતુ કોષકેન્દ્રનું સંપૂર્ણ વિલીનીકરણ થતું નથી, જેથી વિકલ્પ B ખોટો છે.", "ref": "Std 12 - Chapter 2: સૂક્ષ્મજીવો અને તેના ઉપયોગ (મિક્રોઓર્ગેનિઝમ અને તેના એપ્લિકેશન્સ)", "ch": ""}, {"q": "યીસ્ટના કોષભિત્તિમાં જોવા મળતા 'મેનન' અને 'ગ્લુકન' ની ભૂમિકા વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["મેનન કોષભિત્તિને પાણી પ્રત્યે અવશોષક બનાવે છે.", "ગ્લુકન કોષભિત્તિને મજબૂતાઈ અને લવચીકતા પ્રદાન કરે છે.", "મેનન અને ગ્લુકન બંને પોલિસેકેરાઇડ છે જે કોષભિત્તિના ૫૦% જેટલો ભાગ બનાવે છે.", "મેનન કોષભિત્તિને રોગકારક સૂક્ષ્મજીવોથી બચાવે છે."], "ans": 0, "exp": "મેનન કોષભિત્તિને પાણી પ્રત્યે અવશોષક બનાવતું નથી, પરંતુ તે કોષભિત્તિને રોગકારક સૂક્ષ્મજીવોથી બચાવે છે અને કોષની ઓળખમાં મદદ કરે છે. ગ્લુકન કોષભિત્તિને મજબૂતાઈ અને લવચીકતા પ્રદાન કરે છે. મેનન અને ગ્લુકન બંને પોલિસેકેરાઇડ છે અને કોષભિત્તિના મહત્વપૂર્ણ ઘટકો છે. વિકલ્પ A ખોટો છે કારણ કે મેનન પાણી પ્રત્યે અવશોષક નથી.", "ref": "Std 12 - Chapter 2: સૂક્ષ્મજીવો અને તેના ઉપયોગ", "ch": ""}, {"q": "યીસ્ટમાં 'ગ્લાયકોલાઇસિસ' પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું ઉત્પાદન સીધું જ મિટોકોન્ડ્રિયામાં પ્રવેશ કરતું નથી?", "opts": ["પાયરૂવિક એસિડ", "NADH", "ATP", "FADH₂"], "ans": 2, "exp": "ગ્લાયકોલાઇસિસ દરમિયાન ઉત્પન્ન થતું ATP કોષરસમાં જ વપરાય છે અને સીધું જ મિટોકોન્ડ્રિયામાં પ્રવેશ કરતું નથી. પાયરૂવિક એસિડ, NADH, અને FADH₂ મિટોકોન્ડ્રિયામાં પ્રવેશ કરે છે જ્યાં તેઓ ક્રેબ્સ ચક્ર અને ઇલેક્ટ્રોન ટ્રાન્સપોર્ટ ચેઇનમાં ભાગ લે છે. વિકલ્પ C ખોટો છે કારણ કે ATP સીધું મિટોકોન્ડ્રિયામાં પ્રવેશ કરતું નથી.", "ref": "Std 12 - Chapter 3: કોષીય શ્વસન (Cellular Respiration)", "ch": ""}, {"q": "યીસ્ટમાં 'કલિકા ઉત્પત્તિ' (Budding) દરમિયાન નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["કલિકા ઉત્પત્તિ દરમિયાન માતૃકોષ અને કલિકા વચ્ચે કોષકેન્દ્રનું વિભાજન થાય છે.", "કલિકા ઉત્પત્તિ દરમિયાન કોષભિત્તિ અને કોષરસનું વિભાજન થાય છે, પરંતુ કોષકેન્દ્રનું વિભાજન થતું નથી.", "કલિકા ઉત્પત્તિ દ્વારા ઉત્પન્ન થતી સંતતિઓ માતૃકોષ જેવી જ જનીનીય રચના ધરાવે છે.", "કલિકા ઉત્પત્તિ દરમિયાન કલિકા માતૃકોષથી અલગ થાય તે પહેલાં કોષકેન્દ્રનું વિભાજન થાય છે."], "ans": 1, "exp": "કલિકા ઉત્પત્તિ દરમિયાન માતૃકોષ અને કલિકા વચ્ચે કોષકેન્દ્રનું વિભાજન થાય છે, જેથી કલિકા અને માતૃકોષ બંને કોષકેન્દ્ર ધરાવે છે. કોષભિત્તિ અને કોષરસનું વિભાજન પણ થાય છે. કલિકા ઉત્પત્તિ દ્વારા ઉત્પન્ન થતી સંતતિઓ માતૃકોષ જેવી જ જનીનીય રચના ધરાવે છે. વિકલ્પ B ખોટો છે કારણ કે કોષકેન્દ્રનું વિભાજન થાય છે.", "ref": "Std 12 - Chapter 2: સૂક્ષ્મજીવો અને તેના ઉપયોગ", "ch": ""}, {"q": "યીસ્ટમાં 'ઇથેનોલ કિણ્વન' દરમિયાન નીચેનામાંથી કયું ઉત્સેચક સીધું જ પાયરૂવિક એસિડને ઇથેનોલમાં રૂપાંતરિત કરે છે?", "opts": ["પાયરૂવેટ ડિકાર્બોક્સિલેઝ", "આલ્કોહોલ ડિહાઇડ્રોજનેઝ", "લેક્ટેટ ડિહાઇડ્રોજનેઝ", "એસિટાલ્ડિહાઇડ ડિકાર્બોક્સિલેઝ"], "ans": 1, "exp": "ઇથેનોલ કિણ્વન દરમિયાન પાયરૂવિક એસિડને ઇથેનોલમાં રૂપાંતરિત કરવા માટે આલ્કોહોલ ડિહાઇડ્રોજનેઝ ઉત્સેચક જવાબદાર છે. પાયરૂવેટ ડિકાર્બોક્સિલેઝ પાયરૂવિક એસિડને એસિટાલ્ડિહાઇડમાં રૂપાંતરિત કરે છે, જ્યારે લેક્ટેટ ડિહાઇડ્રોજનેઝ પાયરૂવિક એસિડને લેક્ટિક એસિડમાં રૂપાંતરિત કરે છે. એસિટાલ્ડિહાઇડ ડિકાર્બોક્સિલેઝ યીસ્ટમાં જોવા મળતું નથી. વિકલ્પ B સાચો છે.", "ref": "Std 12 - Chapter 3: કોષીય શ્વસન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
