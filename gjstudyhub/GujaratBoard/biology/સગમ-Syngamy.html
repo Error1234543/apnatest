@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સિંગેમી (Syngamy)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>સિંગેમી (Syngamy)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">સિંગેમી (Syngamy)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 19 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 19 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક પ્રયોગમાં બે જુદા-જુદા પ્રકારના એકકોષી પ્રાણીઓના કોષકેન્દ્રોનું સંયોજન કરાવીને નવો કોષ બનાવવામાં આવ્યો. આ પ્રક્રિયાને શું કહેવાય?", "opts": ["સિંગેમી (Syngamy)", "કોષકેન્દ્રીય સંયોજન (Karyogamy)", "પ્લાઝ્મોગેમી (Plasmogamy)", "કૃત્રિમ સંકરણ (Artificial Hybridization)"], "ans": 2, "exp": "સિંગેમી એ બે જનનકોષોના સંપૂર્ણ કોષોનું સંયોજન છે, જ્યારે પ્લાઝ્મોગેમીમાં માત્ર કોષરસનું સંયોજન થાય છે અને કોષકેન્દ્રો અલગ રહે છે. અહીં માત્ર કોષકેન્દ્રોનું સંયોજન થયું હોવાથી તે પ્લાઝ્મોગેમી છે. કોષકેન્દ્રીય સંયોજન (Karyogamy) એ પ્લાઝ્મોગેમી પછી થતી પ્રક્રિયા છે જેમાં કોષકેન્દ્રોનું સંયોજન થાય છે. કૃત્રિમ સંકરણ બહુકોષી સજીવોમાં કરવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "ફૂગમાં સિંગેમીની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["પ્લાઝ્મોગેમી પછી તરત જ કોષકેન્દ્રોનું સંયોજન થાય છે", "ડિકેરિયોટિક તબક્કો લાંબો સમય સુધી રહી શકે છે", "સિંગેમી પછી ડિપ્લોઇડ કોષકેન્દ્ર બને છે", "કેટલીક ફૂગમાં પ્લાઝ્મોગેમી અને કોષકેન્દ્રીય સંયોજન વચ્ચે સમયગાળો હોય છે"], "ans": 0, "exp": "ફૂગમાં પ્લાઝ્મોગેમી પછી તરત જ કોષકેન્દ્રોનું સંયોજન થતું નથી. તેના બદલે ડિકેરિયોટિક તબક્કો (બે અલગ કોષકેન્દ્રો ધરાવતો તબક્કો) લાંબો સમય સુધી રહે છે. સિંગેમી પછી જ ડિપ્લોઇડ કોષકેન્દ્ર બને છે. વિકલ્પ B, C અને D સાચાં છે.", "ref": "Std 11 - પ્રકરણ 2: જૈવિક વર્ગીકરણ", "ch": ""}, {"q": "નીચેનામાંથી કયા સજીવમાં સિંગેમીની પ્રક્રિયા બાહ્ય માધ્યમમાં થાય છે?", "opts": ["અમીબા (Amoeba)", "પેરામીશિયમ (Paramecium)", "સ્પાયરોગાયરા (Spirogyra)", "પ્લાઝ્મોડિયમ (Plasmodium)"], "ans": 2, "exp": "સ્પાયરોગાયરા (લીલ)માં સિંગેમી બાહ્ય માધ્યમ (પાણીમાં) થાય છે જ્યાં બે જનનકોષોનું સંયોજન થાય છે. અમીબા અને પેરામીશિયમમાં અંત:કોષીય પ્રજનન થાય છે. પ્લાઝ્મોડિયમમાં જટિલ જીવનચક્ર હોય છે જેમાં સિંગેમી મચ્છરના શરીરમાં થાય છે.", "ref": "Std 11 - પ્રકરણ 3: વનસ્પતિ સૃષ્ટિ", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું પરિવર્તન થતું નથી?", "opts": ["કોષરસનું સંયોજન", "કોષકેન્દ્રોનું સંયોજન", "વર્ણસૂત્રોની સંખ્યામાં બમણી થવી", "જનીનોનું પુનર્સંયોજન"], "ans": 3, "exp": "સિંગેમીમાં બે હેપ્લોઇડ કોષોનું સંયોજન થઈ ડિપ્લોઇડ કોષ બને છે, જેમાં વર્ણસૂત્રોની સંખ્યા બમણી થાય છે. જનીનોનું પુનર્સંયોજન મિયોસિસ દરમિયાન થાય છે, સિંગેમી દરમિયાન નહીં. વિકલ્પ A, B અને C સિંગેમી સાથે સંકળાયેલા છે.", "ref": "Std 12 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "એક પ્રયોગમાં બે જુદી-જુદી જાતિના વનસ્પતિ કોષોનું પ્રોટોપ્લાસ્ટ ફ્યુઝન કરાવીને સંકર કોષ બનાવવામાં આવ્યો. આ પ્રક્રિયાને શું કહી શકાય?", "opts": ["સિંગેમી", "પાર્થેનોજેનેસિસ", "સોમેટિક હાઇબ્રિડાઇઝેશન", "એપોમાઇક્સિસ"], "ans": 2, "exp": "સોમેટિક હાઇબ્રિડાઇઝેશનમાં બે જુદી જાતિના વનસ્પતિ કોષોના પ્રોટોપ્લાસ્ટનું સંયોજન કરાવીને સંકર કોષ બનાવવામાં આવે છે. સિંગેમી જનનકોષોના સંયોજન માટે છે. પાર્થેનોજેનેસિસ અને એપોમાઇક્સિસ એ અલિંગી પ્રજનનની પદ્ધતિઓ છે જેમાં ફલીકરણ વગર વિકાસ થાય છે.", "ref": "Std 12 - પ્રકરણ 3: વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા દરમિયાન બંને જનનકોષો (gametes) સમાન કદ અને આકાર ધરાવે છે, પરંતુ તેમના જનીનિક દ્રવ્યમાં ભિન્નતા હોય છે?", "opts": ["ક્લેમિડોમોનાસ (Chlamydomonas)", "સ્પાયરોગાયરા (Spirogyra)", "પેરામીશિયમ (Paramecium)", "પ્લાઝમોડિયમ (Plasmodium)"], "ans": 0, "exp": "ક્લેમિડોમોનાસમાં આઇસોગેમીટ્સ (isogametes) સમાન કદ અને આકાર ધરાવે છે, પરંતુ તેમના જનીનિક દ્રવ્યમાં ભિન્નતા હોય છે, જેને સિંગેમી કહે છે. સ્પાયરોગાયરામાં સ્કેલરીફોર્મ સંયુગ્મન (scalariform conjugation) થાય છે, જેમાં બંને કોષો સમાન દેખાય છે પરંતુ તે સિંગેમી નથી. પેરામીશિયમમાં કન્જુગેશન (conjugation) થાય છે, જે જનીનિક પુનર્સંયોજન માટે છે, પરંતુ તે સિંગેમી નથી. પ્લાઝમોડિયમમાં સિંગેમી મચ્છરના શરીરમાં થાય છે, પરંતુ તેના જનનકોષો અસમાન હોય છે.", "ref": "Std 11 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન ખોટું છે જ્યારે બે જનનકોષોના કોષકેન્દ્રોનું સંયોજન થાય છે?", "opts": ["કોષકેન્દ્રીય દ્રવ્યનું મિશ્રણ થાય છે, પરંતુ વર્ણસૂત્રોની સંખ્યા બમણી થતી નથી.", "DNA પ્રતિકૃતિકરણ (DNA replication) સિંગેમી પહેલાં થાય છે.", "સિંગેમી પછી તરત જ કોષવિભાજન થાય તે જરૂરી નથી.", "સિંગેમી દરમિયાન બંને જનનકોષોના કોષરસ (cytoplasm)નું પણ સંયોજન થાય છે."], "ans": 1, "exp": "સિંગેમી દરમિયાન DNA પ્રતિકૃતિકરણ થતું નથી, કારણ કે બંને જનનકોષોના કોષકેન્દ્રોનું સંયોજન થાય છે અને વર્ણસૂત્રોની સંખ્યા પુનઃસ્થાપિત થાય છે. વિકલ્પ A સાચું છે કારણ કે કોષકેન્દ્રીય દ્રવ્ય મિશ્રિત થાય છે, પરંતુ વર્ણસૂત્રોની સંખ્યા બમણી થતી નથી. વિકલ્પ C સાચું છે કારણ કે સિંગેમી પછી તરત જ કોષવિભાજન થાય તે જરૂરી નથી (દા.ત. ફૂગમાં). વિકલ્પ D સાચું છે કારણ કે મોટાભાગના કિસ્સામાં કોષરસનું પણ સંયોજન થાય છે.", "ref": "Std 12 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા **અંતઃકોષીય (intracellular)** રીતે થાય છે, પરંતુ **બાહ્ય માધ્યમમાં જનનકોષો મુક્ત થતા નથી**?", "opts": ["યીસ્ટ (Yeast)", "રાઈઝોપસ (Rhizopus)", "પેરામીશિયમ (Paramecium)", "વોલ્વોક્સ (Volvox)"], "ans": 2, "exp": "પેરામીશિયમમાં કન્જુગેશન દરમિયાન બે કોષો વચ્ચે જનીનિક દ્રવ્યનું આદાન-પ્રદાન થાય છે, જે અંતઃકોષીય રીતે થાય છે અને જનનકોષો બાહ્ય માધ્યમમાં મુક્ત થતા નથી. યીસ્ટમાં સિંગેમી બાહ્ય માધ્યમમાં થાય છે. રાઈઝોપસમાં જનનકોષો બાહ્ય માધ્યમમાં મુક્ત થાય છે. વોલ્વોક્સમાં જનનકોષો બાહ્ય માધ્યમમાં મુક્ત થાય છે.", "ref": "Std 11 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન **કયું પરિવર્તન હંમેશા થાય છે**, પરંતુ **કોષવિભાજન પહેલાં જરૂરી નથી**?", "opts": ["વર્ણસૂત્રોની સંખ્યામાં બમણો વધારો", "કોષકેન્દ્રીય પટલનું વિલયન (fusion of nuclear membranes)", "DNA પ્રતિકૃતિકરણ", "સેન્ટ્રોમિયરનું વિભાજન"], "ans": 1, "exp": "સિંગેમી દરમિયાન બંને જનનકોષોના કોષકેન્દ્રીય પટલનું વિલયન થાય છે, જે હંમેશા થાય છે. વર્ણસૂત્રોની સંખ્યામાં બમણો વધારો થતો નથી (વિકલ્પ A ખોટું). DNA પ્રતિકૃતિકરણ સિંગેમી પહેલાં થતું નથી (વિકલ્પ C ખોટું). સેન્ટ્રોમિયરનું વિભાજન સિંગેમી દરમિયાન થતું નથી (વિકલ્પ D ખોટું).", "ref": "Std 12 - પ્રકરણ 1: સજીવોમાં પ્રજનન", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા **ઝાયગોટ (zygote) નિર્માણ પછી તરત જ મિયોસિસ (meiosis) થાય છે**, જેના કારણે **દ્વિગુણિત (diploid) તબક્કો ખૂબ જ ટૂંકો હોય છે**?", "opts": ["માનવ (Human)", "ક્લેમિડોમોનાસ (Chlamydomonas)", "ડ્રોસોફિલા (Drosophila)", "પાઇન વૃક્ષ (Pine tree)"], "ans": 1, "exp": "ક્લેમિડોમોનાસમાં સિંગેમી પછી તરત જ ઝાયગોટમાં મિયોસિસ થાય છે, જેના કારણે દ્વિગુણિત તબક્કો ખૂબ જ ટૂંકો હોય છે. માનવ, ડ્રોસોફિલા અને પાઇન વૃક્ષમાં દ્વિગુણિત તબક્કો લાંબો હોય છે અને મિયોસિસ જનનકોષોના નિર્માણ સમયે થાય છે.", "ref": "Std 11 - પ્રકરણ 3: વનસ્પતિઓમાં પ્રજનન", "ch": ""}, {"q": "ફૂગના જીવનચક્ર દરમિયાન સિંગેમી પછી બનતો ઝાયગોટ કયા તબક્કે વિકસે છે અને તેની વૃદ્ધિ કયા પ્રકારની હોય છે?", "opts": ["તે તરત જ અંકુરિત થાય છે અને મિટોટિક વિભાજન દ્વારા વૃદ્ધિ પામે છે", "તે સુપ્ત અવસ્થામાં રહે છે અને મિયોસિસ દ્વારા વિભાજન પામે છે", "તે હેટેરોથેલિક થેલિયમમાં વિકસે છે અને કોષવિભાજન પહેલાં મિયોસિસ થાય છે", "તે ડિપ્લોઈડ અવસ્થામાં રહે છે અને પ્રથમ મિટોસિસ દ્વારા વિભાજન પામે છે"], "ans": 3, "exp": "ફૂગમાં સિંગેમી પછી બનતો ઝાયગોટ ડિપ્લોઈડ હોય છે અને તે પ્રથમ મિટોસિસ દ્વારા વિભાજન પામે છે. વિકલ્પ A ખોટો છે કારણ કે ઝાયગોટ તરત અંકુરિત થતો નથી. વિકલ્પ B ખોટો છે કારણ કે મિયોસિસ ઝાયગોટમાં થતું નથી. વિકલ્પ C ખોટો છે કારણ કે હેટેરોથેલિક થેલિયમમાં ઝાયગોટ વિકસતો નથી.", "ref": "Std 12 - પ્રકરણ 3: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયા સજીવમાં સિંગેમીની પ્રક્રિયા દરમિયાન બે જનનકોષોના સંયોજન પછી બનતો ઝાયગોટ તરત જ મિયોસિસ દ્વારા વિભાજન પામે છે?", "opts": ["ક્લેમાઇડોમોનાસ", "ફ્યુકસ", "સાયક્લોપ્સ", "વોલ્વોક્સ"], "ans": 0, "exp": "ક્લેમાઇડોમોનાસમાં સિંગેમી પછી બનતો ઝાયગોટ તરત જ મિયોસિસ દ્વારા વિભાજન પામે છે અને હેપ્લોઈડ સ્પોર્સ બનાવે છે. ફ્યુકસમાં ઝાયગોટ મિટોસિસ દ્વારા વિભાજન પામે છે. સાયક્લોપ્સ અને વોલ્વોક્સમાં ઝાયગોટ સુપ્ત અવસ્થામાં રહે છે.", "ref": "Std 12 - પ્રકરણ 3: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન સત્ય છે જ્યારે બે જનનકોષોના કોષકેન્દ્રોનું સંયોજન થાય છે?", "opts": ["કોષકેન્દ્રનું સંયોજન પહેલાં કોષરસનું સંયોજન થાય છે", "કોષકેન્દ્રનું સંયોજન પહેલાં કોષપટલનું વિઘટન થાય છે", "કોષકેન્દ્રનું સંયોજન પહેલાં વર્ણસૂત્રોનું વિઘટન થાય છે", "કોષકેન્દ્રનું સંયોજન પહેલાં કોષકેન્દ્રીય પડદો તૂટે છે"], "ans": 3, "exp": "સિંગેમી દરમિયાન કોષકેન્દ્રનું સંયોજન થવા પહેલાં કોષકેન્દ્રીય પડદો તૂટે છે. વિકલ્પ A, B, અને C ખોટા છે કારણ કે કોષરસનું સંયોજન, કોષપટલનું વિઘટન, અને વર્ણસૂત્રોનું વિઘટન કોષકેન્દ્રના સંયોજન પહેલાં થતું નથી.", "ref": "Std 12 - પ્રકરણ 3: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "ફૂગના જીવનચક્રમાં સિંગેમી પછી બનતો ઝાયગોટ નીચેનામાંથી કયા તબક્કે વિકસે છે અને તેની સાથે સંબંધિત કયું વિધાન સત્ય છે?", "opts": ["તે તરત જ અંકુરિત થાય છે અને મીઓસિસ દ્વારા હેપ્લોઇડ બીજાણુઓ ઉત્પન્ન કરે છે", "તે ડાયકેરિયોટિક તબક્કામાં પ્રવેશે છે અને મીટોસિસ દ્વારા વૃદ્ધિ પામે છે", "તે સૂપ્ત અવસ્થામાં રહે છે અને પર્યાવરણીય પરિબળો અનુકૂળ થયા પછી જ અંકુરિત થાય છે", "તે હેપ્લોઇડ રહે છે અને મીટોસિસ દ્વારા વૃદ્ધિ પામે છે"], "ans": 1, "exp": "ફૂગના જીવનચક્રમાં સિંગેમી પછી બનતો ઝાયગોટ ડાયકેરિયોટિક તબક્કામાં પ્રવેશે છે, જેમાં બે કોષકેન્દ્રો (ન્યુક્લિયસ) એકબીજા સાથે વિલીન થતાં નથી પરંતુ એક જ કોષમાં રહે છે. આ તબક્કા દરમિયાન કોષ મીટોસિસ દ્વારા વૃદ્ધિ પામે છે. વિકલ્પ A ખોટો છે કારણ કે ઝાયગોટ તરત જ અંકુરિત થતો નથી અને મીઓસિસ દ્વારા હેપ્લોઇડ બીજાણુઓ ઉત્પન્ન કરતો નથી. વિકલ્પ C ખોટો છે કારણ કે ઝાયગોટ સૂપ્ત અવસ્થામાં રહેતો નથી. વિકલ્પ D ખોટો છે કારણ કે ઝાયગોટ ડાયકેરિયોટિક હોવાથી ડિપ્લોઇડ હોય છે અને મીટોસિસ દ્વારા વૃદ્ધિ પામે છે.", "ref": "Std 12 - અધ્યાય 3: વનસ્પતિ જીવનચક્ર અને વંશવેલા", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા દરમિયાન **બંને જનનકોષોના કોષકેન્દ્રોનું સંયોજન તાત્કાલિક થતું નથી**, પરંતુ અમુક સમય માટે **દ્વિકોષકેન્દ્રી (dikaryon) તબક્કો** જોવા મળે છે?", "opts": ["પેરામીશિયમ (Paramecium)", "રાઈઝોપસ (Rhizopus)", "સ્પાયરોગાયરા (Spirogyra)", "પ્લાઝમોડિયમ (Plasmodium)"], "ans": 1, "exp": "રાઈઝોપસ (ફૂગ)માં સિંગેમીની પ્રક્રિયા દરમિયાન બંને જનનકોષોના કોષકેન્દ્રોનું સંયોજન તાત્કાલિક થતું નથી, પરંતુ અમુક સમય માટે દ્વિકોષકેન્દ્રી (dikaryon) તબક્કો જોવા મળે છે. આ તબક્કામાં બંને કોષકેન્દ્રો એક જ કોષમાં રહે છે પરંતુ સંયોજન થતું નથી. પેરામીશિયમમાં સંયુગ્મન (conjugation) દરમિયાન કોષકેન્દ્રોનું સંયોજન તાત્કાલિક થાય છે. સ્પાયરોગાયરામાં સિંગેમી તાત્કાલિક થાય છે અને પ્લાઝમોડિયમમાં સિંગેમીનો તબક્કો જુદી રીતે જોવા મળે છે.", "ref": "Std 11 - પ્રકરણ 2: જૈવિક વર્ગીકરણ", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન **વર્ણસૂત્રોની સંખ્યા** અંગે નીચેનામાંથી કયું વિધાન **ખોટું** છે?", "opts": ["બંને જનનકોષોના વર્ણસૂત્રોની સંખ્યા અડધી હોય છે.", "સિંગેમી પછી બનતા ઝાયગોટમાં વર્ણસૂત્રોની સંખ્યા પૂર્ણ (diploid) થાય છે.", "સિંગેમી દરમિયાન વર્ણસૂત્રોનું સંયોજન થતું નથી, માત્ર કોષકેન્દ્રોનું સંયોજન થાય છે.", "કેટલાક સજીવોમાં સિંગેમી પછી તરત જ વર્ણસૂત્રોનું દ્વિગુણન થાય છે."], "ans": 2, "exp": "સિંગેમીની પ્રક્રિયા દરમિયાન બંને જનનકોષોના કોષકેન્દ્રોનું સંયોજન થાય છે, જેના કારણે વર્ણસૂત્રોનું પણ સંયોજન થાય છે અને ઝાયગોટમાં વર્ણસૂત્રોની સંખ્યા પૂર્ણ (diploid) થાય છે. વિકલ્પ C ખોટું છે કારણ કે સિંગેમી દરમિયાન વર્ણસૂત્રોનું સંયોજન થાય છે, માત્ર કોષકેન્દ્રોનું સંયોજન નહીં. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 12 - પ્રકરણ 1: પ્રજનન", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા **અલિંગી પ્રજનનના ભાગરૂપે** થાય છે, પરંતુ **લિંગી પ્રજનનના ભાગરૂપે નહીં**?", "opts": ["યીસ્ટ (Yeast)", "પેરામીશિયમ (Paramecium)", "પ્લાઝમોડિયમ (Plasmodium)", "સ્પાયરોગાયરા (Spirogyra)"], "ans": 2, "exp": "પ્લાઝમોડિયમમાં સિંગેમીની પ્રક્રિયા અલિંગી પ્રજનનના ભાગરૂપે થાય છે, જેને **ઓકિનેટ (ookinete) તબક્કા** પછી જોવા મળે છે. આ પ્રક્રિયા લિંગી પ્રજનનના ભાગરૂપે નથી થતી. યીસ્ટ અને પેરામીશિયમમાં સિંગેમી લિંગી પ્રજનનના ભાગરૂપે થાય છે, જ્યારે સ્પાયરોગાયરામાં પણ લિંગી પ્રજનન દરમિયાન સિંગેમી થાય છે.", "ref": "Std 11 - પ્રકરણ 2: જૈવિક વર્ગીકરણ", "ch": ""}, {"q": "સિંગેમીની પ્રક્રિયા દરમિયાન **કોષરસ (cytoplasm)ના સંયોજન** અંગે નીચેનામાંથી કયું વિધાન **સાચું નથી**?", "opts": ["મોટાભાગના સજીવોમાં બંને જનનકોષોના કોષરસનું સંયોજન સિંગેમીની સાથે જ થાય છે.", "કેટલાક સજીવોમાં કોષરસનું સંયોજન સિંગેમી પછી થાય છે.", "ફૂગમાં કોષરસનું સંયોજન હંમેશા સિંગેમી પહેલાં થાય છે.", "પ્રાણીઓમાં કોષરસનું સંયોજન સામાન્ય રીતે સિંગેમીની સાથે જ થાય છે."], "ans": 2, "exp": "ફૂગમાં કોષરસનું સંયોજન હંમેશા સિંગેમી પહેલાં થતું નથી. ઘણી ફૂગોમાં **પ્લાઝમોગેમી (plasmogamy)** અને **કેરિયોગેમી (karyogamy)** અલગ-અલગ તબક્કે થાય છે, જેમાં પ્લાઝમોગેમી દરમિયાન કોષરસનું સંયોજન થાય છે અને પછી કેરિયોગેમી દરમિયાન કોષકેન્દ્રોનું સંયોજન થાય છે. તેથી વિકલ્પ C ખોટું છે. બાકીના વિકલ્પો સાચા છે.", "ref": "Std 11 - પ્રકરણ 2: જૈવિક વર્ગીકરણ", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવમાં સિંગેમીની પ્રક્રિયા **ઝાયગોટના નિર્માણ પછી તરત જ મિયોસિસ (meiosis) થતું નથી**, પરંતુ ઝાયગોટ અમુક સમય માટે **હેપ્લોઈડ (haploid) તબક્કામાં** રહે છે?", "opts": ["ક્લેમિડોમોનાસ (Chlamydomonas)", "યુલોથ્રિક્સ (Ulothrix)", "રાઈઝોપસ (Rhizopus)", "વોલ્વોક્સ (Volvox)"], "ans": 2, "exp": "રાઈઝોપસ (ફૂગ)માં સિંગેમી પછી બનતો ઝાયગોટ અમુક સમય માટે **હેપ્લોઈડ તબક્કામાં** રહે છે અને પછી મિયોસિસ થાય છે. આને **ઝાયગોટિક મિયોસિસ** કહે છે, પરંતુ ઝાયગોટ તરત જ મિયોસિસમાં જતો નથી. ક્લેમિડોમોનાસ, યુલોથ્રિક્સ અને વોલ્વોક્સમાં ઝાયગોટ તરત જ મિયોસિસમાં જાય છે.", "ref": "Std 12 - પ્રકરણ 1: પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
