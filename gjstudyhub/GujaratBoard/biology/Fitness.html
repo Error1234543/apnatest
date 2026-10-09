@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fitness</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Fitness</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Fitness</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ફિટનેસના સંદર્ભમાં, 'સંરચનાત્મક અનુકૂલન' (Structural Adaptation) અને 'ક્રિયાત્મક અનુકૂલન' (Functional Adaptation) વચ્ચેનો તફાવત કયો છે?", "opts": ["સંરચનાત્મક અનુકૂલન ફક્ત હાડકાંના આકારમાં ફેરફાર દર્શાવે છે, જ્યારે ક્રિયાત્મક અનુકૂલન ઉત્સેચકની ક્રિયાશીલતામાં ફેરફાર દર્શાવે છે.", "સંરચનાત્મક અનુકૂલન શરીરના ભૌતિક ગુણધર્મોમાં ફેરફાર કરે છે, જ્યારે ક્રિયાત્મક અનુકૂલન શરીરની આંતરિક પ્રક્રિયાઓમાં સુધારો કરે છે.", "સંરચનાત્મક અનુકૂલન ફક્ત વનસ્પતિઓમાં જોવા મળે છે, જ્યારે ક્રિયાત્મક અનુકૂલન ફક્ત પ્રાણીઓમાં જોવા મળે છે.", "સંરચનાત્મક અનુકૂલન અનુવંશિક નથી, જ્યારે ક્રિયાત્મક અનુકૂલન અનુવંશિક છે."], "ans": 1, "exp": "સંરચનાત્મક અનુકૂલન શરીરના ભૌતિક ગુણધર્મોમાં (જેમ કે હાડકાં, સ્નાયુઓ, અંગો) ફેરફાર કરે છે, જ્યારે ક્રિયાત્મક અનુકૂલન શરીરની આંતરિક પ્રક્રિયાઓ (જેમ કે ઉત્સેચકની ક્રિયાશીલતા, શ્વસન દર)માં સુધારો કરે છે. A) ખોટું છે કારણ કે સંરચનાત્મક અનુકૂલન ફક્ત હાડકાં સુધી મર્યાદિત નથી. C) ખોટું છે કારણ કે બંને પ્રકારના અનુકૂલન વનસ્પતિઓ અને પ્રાણીઓ બંનેમાં જોવા મળે છે. D) ખોટું છે કારણ કે બંને પ્રકારના અનુકૂલન અનુવંશિક હોઈ શકે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ફિટનેસના સંદર્ભમાં, 'હેટરોઝાઇગસ એડવાન્ટેજ' (Heterozygous Advantage) કયા રોગ સાથે સંકળાયેલ છે?", "opts": ["સિકલ સેલ એનિમિયા", "હિમોફિલિયા", "કલર બ્લાઇન્ડનેસ", "ડાઉન સિન્ડ્રોમ"], "ans": 0, "exp": "હેટરોઝાઇગસ એડવાન્ટેજ સિકલ સેલ એનિમિયા સાથે સંકળાયેલ છે, જ્યાં હેટરોઝાઇગસ વ્યક્તિ (HbA/HbS) મેલેરિયા પ્રત્યે પ્રતિરક્ષા ધરાવે છે. હિમોફિલિયા (B), કલર બ્લાઇન્ડનેસ (C), અને ડાઉન સિન્ડ્રોમ (D) સાથે હેટરોઝાઇગસ એડવાન્ટેજ સંકળાયેલ નથી.", "ref": "Std 12 - Chapter 5: અનુવંશિકતા અને વૈવિધ્યતા (Heredity and Variation)", "ch": ""}, {"q": "ફિટનેસને મહત્તમ કરવા માટે, કયા પરિબળોનો સમાવેશ 'ડાર્વિનિયન ફિટનેસ' (Darwinian Fitness) ની વ્યાખ્યામાં થાય છે?", "opts": ["ફક્ત જીવનકાળ", "ફક્ત સંતાનોની સંખ્યા", "જીવનકાળ અને સંતાનોની સંખ્યા બંને", "ફક્ત શારીરિક શક્તિ"], "ans": 2, "exp": "ડાર્વિનિયન ફિટનેસમાં જીવનકાળ અને સંતાનોની સંખ્યા બંનેનો સમાવેશ થાય છે, કારણ કે ફિટનેસ એ વ્યક્તિની પોતાની જીવનકાળ દરમિયાન અને પછીની પેઢીને જનીન પસાર કરવાની ક્ષમતા છે. A) અને B) અપૂર્ણ છે, જ્યારે D) સંપૂર્ણપણે અસંબદ્ધ છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ફિટનેસના સંદર્ભમાં, 'સ્ટેબલાઇઝિંગ સિલેક્શન' (Stabilizing Selection) નો ઉદ્દેશ્ય શું છે?", "opts": ["જનસંખ્યામાં નવી લાક્ષણિકતાઓનો વિકાસ કરવો", "જનસંખ્યામાં મધ્યમ લાક્ષણિકતાઓને પ્રોત્સાહન આપવો", "જનસંખ્યામાં ચરમ લાક્ષણિકતાઓને પ્રોત્સાહન આપવો", "જનસંખ્યામાં લાક્ષણિકતાઓનો નાશ કરવો"], "ans": 1, "exp": "સ્ટેબલાઇઝિંગ સિલેક્શનનો ઉદ્દેશ્ય જનસંખ્યામાં મધ્યમ લાક્ષણિકતાઓને પ્રોત્સાહન આપવો છે, જેથી જનસંખ્યા સ્થિર રહે. A) ડાઇરેક્શનલ સિલેક્શન સાથે સંકળાયેલ છે, C) ડિસરપ્ટિવ સિલેક્શન સાથે સંકળાયેલ છે, અને D) સંપૂર્ણપણે ખોટું છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ફિટનેસના સંદર્ભમાં, 'જનીન વહન' (Gene Flow) ની ભૂમિકા શું છે?", "opts": ["જનસંખ્યામાં જનીન વૈવિધ્યતાને ઘટાડવી", "જનસંખ્યામાં જનીન વૈવિધ્યતાને વધારવી", "જનસંખ્યામાં જનીન વૈવિધ્યતાને સ્થિર રાખવી", "જનસંખ્યામાં જનીન વૈવિધ્યતાને પૂર્ણપણે સમાપ્ત કરવી"], "ans": 1, "exp": "જનીન વહન (Gene Flow) જનસંખ્યામાં જનીન વૈવિધ્યતાને વધારે છે, કારણ કે તે એક જનસંખ્યાથી બીજી જનસંખ્યામાં જનીનનો વિનિમય કરે છે. A), C), અને D) ખોટા છે કારણ કે જનીન વહન વૈવિધ્યતાને ઘટાડતું નથી અથવા સ્થિર રાખતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે કોઈ જીવસૃષ્ટિના વસતીમાં 'ડાયરેક્શનલ સિલેક્શન' (Directional Selection) થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે દર્શાવે છે કે ફિટનેસ વક્ર કેવી રીતે બદલાય છે?", "opts": ["વસતીનું મધ્યમ મૂલ્ય સ્થિર રહે છે, પરંતુ વૈવિધ્ય ઘટે છે.", "વસતીનું મધ્યમ મૂલ્ય એક દિશામાં ખસે છે, અને ફિટનેસ વક્ર એકબાજુ વળી જાય છે.", "વસતીનું મધ્યમ મૂલ્ય સ્થિર રહે છે, પરંતુ ફિટનેસ વક્ર બે બાજુ વળી જાય છે.", "વસતીનું વૈવિધ્ય વધે છે, પરંતુ ફિટનેસ વક્ર સરળ રેખામાં રહે છે."], "ans": 1, "exp": "ડાયરેક્શનલ સિલેક્શનમાં, વસતીનું મધ્યમ મૂલ્ય એક દિશામાં ખસે છે, જેમ કે વધુ લાંબા ગરદનવાળા જિરાફની પસંદગી થવી. આથી ફિટનેસ વક્ર એકબાજુ વળી જાય છે. A) સ્ટેબલાઇઝિંગ સિલેક્શનનું લક્ષણ છે. C) પણ સ્ટેબલાઇઝિંગ સિલેક્શન સાથે સંકળાયેલ છે. D) ડાયરેક્શનલ સિલેક્શનમાં વૈવિધ્ય ઘટે છે, ફિટનેસ વક્ર સરળ રેખામાં રહેતો નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ફિટનેસના સંદર્ભમાં, 'બોટલનેક ઇફેક્ટ' (Bottleneck Effect) ની અસર કયા પરિબળ પર સૌથી વધુ પડે છે?", "opts": ["જનીન વૈવિધ્યમાં ઘટાડો", "જનીન વહનમાં વધારો", "પ્રજનન દરમાં વધારો", "પર્યાવરણીય અનુકૂલનમાં સુધારો"], "ans": 0, "exp": "બોટલનેક ઇફેક્ટમાં, વસતીનું કદ અચાનક ઘટવાથી જનીન વૈવિધ્યમાં ઘટાડો થાય છે. B) જનીન વહન બોટલનેક ઇફેક્ટ સાથે સીધો સંબંધ ધરાવતો નથી. C) પ્રજનન દરમાં વધારો બોટલનેક ઇફેક્ટનું પરિણામ નથી. D) પર્યાવરણીય અનુકૂલનમાં સુધારો બોટલનેક ઇફેક્ટની અસર નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન 'ફિટનેસ લેન્ડસ્કેપ' (Fitness Landscape) ની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["વસતીના સભ્યો વચ્ચે ફિટનેસના તફાવતને દર્શાવતો આલેખ", "જનીનના સંયોજન અને ફિટનેસ વચ્ચેનો સંબંધ દર્શાવતો બહુ-મિથ્યા આલેખ", "પર્યાવરણીય પરિબળો અને ફિટનેસ વચ્ચેનો સંબંધ દર્શાવતો ગ્રાફ", "વસતીના કદ અને ફિટનેસ વચ્ચેનો સંબંધ દર્શાવતો આલેખ"], "ans": 1, "exp": "ફિટનેસ લેન્ડસ્કેપ એ જનીનના સંયોજન અને ફિટનેસ વચ્ચેનો સંબંધ દર્શાવતો બહુ-મિથ્યા આલેખ છે. A) ફિટનેસના તફાવતને દર્શાવે છે પરંતુ ફિટનેસ લેન્ડસ્કેપની વ્યાખ્યા નથી. C) પર્યાવરણીય પરિબળો અને ફિટનેસ વચ્ચેનો સંબંધ ફિટનેસ લેન્ડસ્કેપ નથી. D) વસતીના કદ અને ફિટનેસ વચ્ચેનો સંબંધ ફિટનેસ લેન્ડસ્કેપ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે 'ફાઉન્ડર ઇફેક્ટ' (Founder Effect) થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે જોવા મળે છે?", "opts": ["નવી વસતીની જનીન રચના મૂળ વસતી જેવી જ રહે છે.", "નવી વસતીની જનીન રચના મૂળ વસતી કરતાં અલગ હોય છે, પરંતુ ફિટનેસ વધે છે.", "નવી વસતીની જનીન રચના મૂળ વસતી કરતાં અલગ હોય છે, અને ફિટનેસ ઘટે અથવા વધે છે.", "નવી વસતીની જનીન રચના મૂળ વસતી કરતાં અલગ હોય છે, પરંતુ ફિટનેસ સ્થિર રહે છે."], "ans": 2, "exp": "ફાઉન્ડર ઇફેક્ટમાં, નવી વસતીની જનીન રચના મૂળ વસતી કરતાં અલગ હોય છે, અને ફિટનેસ ઘટી અથવા વધી શકે છે. A) ફાઉન્ડર ઇફેક્ટમાં જનીન રચના અલગ હોય છે. B) ફિટનેસ વધે છે એ નિશ્ચિત નથી. D) ફિટનેસ સ્થિર રહેતી નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન 'ઇન્ક્લ્યુઝિવ ફિટનેસ' (Inclusive Fitness) ની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["જીવના પોતાના પ્રજનન દ્વારા મેળવેલ ફિટનેસ", "જીવના પોતાના પ્રજનન અને સગા વર્ગના સભ્યોના પ્રજનન દ્વારા મેળવેલ ફિટનેસ", "જીવના સગા વર્ગના સભ્યોના પ્રજનન દ્વારા મેળવેલ ફિટનેસ", "જીવના પર્યાવરણ સાથેના અનુકૂલન દ્વારા મેળવેલ ફિટનેસ"], "ans": 1, "exp": "ઇન્ક્લ્યુઝિવ ફિટનેસ એ જીવના પોતાના પ્રજનન અને સગા વર્ગના સભ્યોના પ્રજનન દ્વારા મેળવેલ ફિટનેસ છે. A) પોતાના પ્રજનન દ્વારા મેળવેલ ફિટનેસ એ ડાયરેક્ટ ફિટનેસ છે. C) સગા વર્ગના સભ્યોના પ્રજનન દ્વારા મેળવેલ ફિટનેસ એ ઇન્ડાયરેક્ટ ફિટનેસ છે. D) પર્યાવરણ સાથેના અનુકૂલન દ્વારા મેળવેલ ફિટનેસ ઇન્ક્લ્યુઝિવ ફિટનેસ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે કોઈ જાતિમાં 'ફિટનેસ ટ્રેડ-ઓફ' (Fitness Trade-off) જોવા મળે છે, ત્યારે નીચેનામાંથી કયો પરિસ્થિતિ સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["એક જ જનીનના બે એલિલ્સમાંથી એક એલિલ તમામ પર્યાવરણીય પરિસ્થિતિઓમાં સરખી ફિટનેસ ધરાવે છે.", "એક જીવમાં એક લક્ષણની ફિટનેસ વધારવાનું અન્ય લક્ષણની ફિટનેસ ઘટાડે છે.", "સંકરણ દ્વારા ઉત્પન્ન થયેલી સંતતિઓમાં ફિટનેસ હંમેશા માતાપિતા કરતાં વધુ હોય છે.", "જાતિમાં તમામ જીવોની ફિટનેસ સરખી હોય છે અને કોઈ પણ પરિવર્તન થતું નથી."], "ans": 1, "exp": "ફિટનેસ ટ્રેડ-ઓફ એટલે એક લક્ષણમાં સુધારો કરવાનું અન્ય લક્ષણની ફિટનેસ પર નકારાત્મક અસર પડે છે. ઉદાહરણ તરીકે, મોટા શીંગવાળા હરણોને પ્રજનનમાં ફાયદો થાય છે પરંતુ શિકારીઓથી બચવું મુશ્કેલ બને છે. A) ગળતર છે કારણ કે એલિલની ફિટનેસ પર્યાવરણ અનુસાર બદલાય છે. C) હેટરોઝાઇગસ એડવાન્ટેજના સંદર્ભમાં ખરું હોઈ શકે પરંતુ ટ્રેડ-ઓફ નહીં. D) અસંભવ છે કારણ કે ફિટનેસમાં વૈવિધ્ય હંમેશા જોવા મળે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન 'કિન સિલેક્શન' (Kin Selection) ની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["જ્યારે જીવ પોતાની ફિટનેસ વધારવા માટે પોતાના સંતાનોની સંરક્ષણ કરે છે.", "જ્યારે જીવ પોતાના જનીનને વહન કરનારા સગા સબંધીઓની ફિટનેસ વધારવા માટે પોતાની ફિટનેસ ઘટાડે છે.", "જ્યારે જીવ પોતાના જાતિગત લક્ષણોને અનુસરીને પ્રજનન કરે છે.", "જ્યારે જીવ પોતાના વસતીમાં સૌથી મજબૂત જીવોની પસંદગી કરે છે."], "ans": 1, "exp": "કિન સિલેક્શન એટલે જીવ પોતાના જનીનને શેર કરનારા સગા સબંધીઓની ફિટનેસ વધારવા માટે પોતાની ફિટનેસ ઘટાડે છે. ઉદાહરણ તરીકે, મધમાખીઓ પોતાની બહેનોની સંરક્ષણ કરે છે કારણ કે તેઓ પોતાના જનીનને વહન કરે છે. A) પોતાની ફિટનેસ વધારવા માટે સંતાનોની સંરક્ષણ કરવી એ સામાન્ય પ્રજનન વર્તણૂક છે. C) અને D) કિન સિલેક્શન સાથે સંકળાયેલા નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે કોઈ વસતીમાં 'ફ્રીક્વન્સી-ડેપેન્ડન્ટ સિલેક્શન' (Frequency-Dependent Selection) જોવા મળે છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે જોવા મળે છે?", "opts": ["વસતીમાં સૌથી સામાન્ય એલિલની ફ્રીક્વન્સી સતત વધતી જાય છે.", "વસતીમાં દુર્લભ એલિલની ફિટનેસ વધુ હોય છે અને તેની ફ્રીક્વન્સી વધે છે.", "વસતીમાં તમામ એલિલની ફ્રીક્વન્સી સરખી રહે છે.", "વસતીમાં એલિલની ફ્રીક્વન્સી પર્યાવરણ અનુસાર બદલાતી નથી."], "ans": 1, "exp": "ફ્રીક્વન્સી-ડેપેન્ડન્ટ સિલેક્શનમાં, દુર્લભ એલિલની ફિટનેસ વધુ હોય છે કારણ કે શિકારીઓ અથવા રોગો સામાન્ય એલિલ ધરાવતા જીવોને લક્ષ્ય બનાવે છે. ઉદાહરણ તરીકે, કેટલાક કીટકોમાં, દુર્લભ રંગના પેટર્ન ધરાવતા જીવો શિકારીઓથી બચી જાય છે. A) સામાન્ય એલિલની ફ્રીક્વન્સી વધતી નથી કારણ કે દુર્લભ એલિલને ફાયદો થાય છે. C) અને D) અસંભવ છે કારણ કે ફ્રીક્વન્સી-ડેપેન્ડન્ટ સિલેક્શનમાં ફ્રીક્વન્સી બદલાતી રહે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન 'બેલેન્સિંગ સિલેક્શન' (Balancing Selection) ની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["જ્યારે વસતીમાં એક એલિલની ફ્રીક્વન્સી 100% થાય છે.", "જ્યારે વસતીમાં હેટરોઝાઇગસ જીવોની ફિટનેસ હોમોઝાઇગસ જીવો કરતાં ઓછી હોય છે.", "જ્યારે વસતીમાં હેટરોઝાઇગસ જીવોની ફિટનેસ હોમોઝાઇગસ જીવો કરતાં વધુ હોય છે અને એલિલની ફ્રીક્વન્સી સંતુલિત રહે છે.", "જ્યારે વસતીમાં તમામ જીવોની ફિટનેસ સરખી હોય છે."], "ans": 2, "exp": "બેલેન્સિંગ સિલેક્શનમાં, હેટરોઝાઇગસ જીવોની ફિટનેસ હોમોઝાઇગસ જીવો કરતાં વધુ હોય છે, જેથી એલિલની ફ્રીક્વન્સી સંતુલિત રહે છે. ઉદાહરણ તરીકે, સિકલ સેલ એનિમિયામાં, હેટરોઝાઇગસ જીવો મેલેરિયા પ્રતિરોધક હોય છે. A) એલિલની ફ્રીક્વન્સી 100% થવી એ ફિક્સેશન છે. B) હેટરોઝાઇગસ એડવાન્ટેજ નથી. D) અસંભવ છે કારણ કે ફિટનેસમાં વૈવિધ્ય હંમેશા જોવા મળે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે કોઈ જાતિમાં 'સેક્સુઅલ સિલેક્શન' (Sexual Selection) થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે જોવા મળે છે?", "opts": ["નર અને માદા વચ્ચે કોઈ લક્ષણિક તફાવત જોવા મળતો નથી.", "નરમાં આકર્ષક લક્ષણો વિકસિત થાય છે જેથી માદા દ્વારા પસંદગી થાય છે.", "માદામાં આકર્ષક લક્ષણો વિકસિત થાય છે જેથી નર દ્વારા પસંદગી થાય છે.", "નર અને માદા બંનેમાં લક્ષણિક તફાવત જોવા મળતો નથી અને પ્રજનન યાદચ્છિક રીતે થાય છે."], "ans": 1, "exp": "સેક્સુઅલ સિલેક્શનમાં, નરમાં આકર્ષક લક્ષણો વિકસિત થાય છે જેથી માદા દ્વારા પસંદગી થાય છે. ઉદાહરણ તરીકે, મોરના પીછાના રંગીન પીછા માદા મોરને આકર્ષવા માટે વિકસિત થયા છે. A) લિંગી દ્વિરૂપતા (Sexual Dimorphism) જોવા મળે છે. C) સામાન્ય રીતે નરમાં જ આકર્ષક લક્ષણો વિકસિત થાય છે. D) પ્રજનન યાદચ્છિક નથી હોતું.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે કોઈ વસતીમાં 'ઓવરડોમિનન્ટ સિલેક્શન' (Overdominant Selection) થાય છે, ત્યારે નીચેનામાંથી કયો જનીન પ્રકાર સૌથી વધુ ફિટનેસ ધરાવે છે?", "opts": ["હોમોઝાઇગસ રિસેસિવ (aa)", "હોમોઝાઇગસ ડોમિનન્ટ (AA)", "હેટરોઝાઇગસ (Aa)", "હેમીઝાઇગસ (A)"], "ans": 2, "exp": "ઓવરડોમિનન્ટ સિલેક્શનમાં હેટરોઝાઇગસ (Aa) જનીન પ્રકાર સૌથી વધુ ફિટનેસ ધરાવે છે કારણ કે હેટરોઝાઇગસ સ્થિતિમાં જનીનની વ્યક્તિગત અસરો કરતાં વધુ ફાયદાકારક પરસ્પર ક્રિયા થાય છે. હોમોઝાઇગસ ડોમિનન્ટ (AA) અને હોમોઝાઇગસ રિસેસિવ (aa) ની ફિટનેસ હેટરોઝાઇગસ કરતાં ઓછી હોય છે. હેમીઝાઇગસ (A) એ પુરુષમાં X-લિંક્ડ જનીન માટે લાગુ પડે છે, પરંતુ ઓવરડોમિનન્ટ સિલેક્શનના સંદર્ભમાં તે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન 'ફિટનેસ કોસ્ટ' (Fitness Cost) ની સૌથી યોગ્ય વ્યાખ્યા આપે છે?", "opts": ["જ્યારે કોઈ જીવ દ્વારા એન્ટીબાયોટિક પ્રતિકારકતા વિકસાવવામાં આવે ત્યારે તેની પ્રજનન ક્ષમતામાં ઘટાડો થવો", "જ્યારે કોઈ જીવ તેના પર્યાવરણ સાથે અનુકૂલન કરે ત્યારે તેની શારીરિક ક્ષમતામાં વધારો થવો", "જ્યારે કોઈ જીવ તેના આહારમાં ફેરફાર કરે ત્યારે તેની ઉર્જા વપરાશમાં ઘટાડો થવો", "જ્યારે કોઈ જીવ તેના શિકારી પાસેથી બચવા માટે નવા રંગમાં ફેરફાર કરે ત્યારે તેની દૃશ્યતા વધવી"], "ans": 0, "exp": "ફિટનેસ કોસ્ટ એટલે જ્યારે કોઈ જીવ કોઈ ફાયદાકારક લક્ષણ (જેવા કે એન્ટીબાયોટિક પ્રતિકારકતા) વિકસાવે છે, ત્યારે તેની પ્રજનન ક્ષમતા અથવા અન્ય ફિટનેસ ઘટકોમાં ઘટાડો થાય છે. ઉદાહરણ તરીકે, એન્ટીબાયોટિક પ્રતિકારક બેક્ટેરિયા તેની પ્રજનન ક્ષમતામાં ઘટાડો અનુભવી શકે છે. બાકીના વિકલ્પો ફિટનેસ કોસ્ટની વ્યાખ્યા સાથે મેળ ખાતા નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે કોઈ વસતીમાં 'નેગેટિવ ફ્રીક્વન્સી-ડેપેન્ડન્ટ સિલેક્શન' (Negative Frequency-Dependent Selection) થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ જોવા મળે છે?", "opts": ["વસતીમાં સૌથી સામાન્ય જનીન પ્રકારની ફિટનેસ વધે છે", "વસતીમાં સૌથી દુર્લભ જનીન પ્રકારની ફિટનેસ વધે છે", "વસતીમાં તમામ જનીન પ્રકારોની ફિટનેસ સમાન રહે છે", "વસતીમાં જનીન વૈવિધ્યમાં ઘટાડો થાય છે"], "ans": 1, "exp": "નેગેટિવ ફ્રીક્વન્સી-ડેપેન્ડન્ટ સિલેક્શનમાં, જ્યારે કોઈ જનીન પ્રકાર વસતીમાં દુર્લભ હોય છે, ત્યારે તેની ફિટનેસ વધે છે. આનો અર્થ એ છે કે દુર્લભ જનીન પ્રકારોને ફાયદો થાય છે, જ્યારે સામાન્ય જનીન પ્રકારોની ફિટનેસ ઘટે છે. આ પ્રકારનું સિલેક્શન જનીન વૈવિધ્યને જાળવી રાખવામાં મદદ કરે છે. બાકીના વિકલ્પો આ પ્રકારના સિલેક્શનની વ્યાખ્યા સાથે મેળ ખાતા નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે કોઈ જાતિમાં 'સેક્સુઅલ ડિમોર્ફિઝમ' (Sexual Dimorphism) જોવા મળે છે, ત્યારે નીચેનામાંથી કયું કથન સૌથી યોગ્ય રીતે લાગુ પડે છે?", "opts": ["નર અને માદા વચ્ચે શારીરિક લક્ષણોમાં તફાવત હોવા છતાં, તેમની ફિટનેસ સમાન હોય છે", "નર અને માદા વચ્ચે શારીરિક લક્ષણોમાં તફાવત હોવા છતાં, તેમની પ્રજનન ક્ષમતામાં તફાવત હોય છે", "નર અને માદા વચ્ચે શારીરિક લક્ષણોમાં તફાવત ન હોવા છતાં, તેમની ફિટનેસમાં તફાવત હોય છે", "નર અને માદા વચ્ચે શારીરિક લક્ષણોમાં તફાવત હોવા છતાં, તેમની જનીન સંરચના સમાન હોય છે"], "ans": 1, "exp": "સેક્સુઅલ ડિમોર્ફિઝમમાં, નર અને માદા વચ્ચે શારીરિક લક્ષણોમાં તફાવત હોવા છતાં, તેમની પ્રજનન ક્ષમતામાં પણ તફાવત હોય છે. આ તફાવતો સેક્સુઅલ સિલેક્શન દ્વારા ઉત્ક્રાંતિ દરમિયાન વિકસિત થાય છે. વિકલ્પ A, C, અને D સેક્સુઅલ ડિમોર્ફિઝમની વ્યાખ્યા સાથે મેળ ખાતા નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે કોઈ વસતીમાં 'પોલિજીનિક ફિટનેસ' (Polygenic Fitness) ની ચર્ચા થાય છે, ત્યારે નીચેનામાંથી કયું કથન સૌથી યોગ્ય રીતે સમજાવે છે કે કેવી રીતે અલગ-અલગ જનીનોનો સંકલન ફિટનેસને અસર કરે છે?", "opts": ["એક જ જનીન દ્વારા નિર્ધારિત થતી ફિટનેસની તુલનામાં, બહુવિધ જનીનોના સંકલનથી ફિટનેસમાં વૃદ્ધિ થાય છે, પરંતુ તે સંપૂર્ણપણે પર્યાવરણીય પરિબળો પર આધાર રાખે છે.", "પોલિજીનિક ફિટનેસમાં, અલગ-અલગ જનીનોના સંકલનથી ફિટનેસની ડિગ્રી નક્કી થાય છે, જેમાં પ્રત્યેક જનીનનો યોગદાન સ્વતંત્ર રીતે જોડાયેલો હોય છે અને તેના પરસ્પર પ્રભાવથી ફિટનેસમાં વૃદ્ધિ અથવા ઘટાડો થઈ શકે છે.", "પોલિજીનિક ફિટનેસ એટલે કે ફિટનેસની ગણતરી માત્ર ડોમિનન્ટ એલિલ્સના આધારે થાય છે, જ્યારે રિસેસિવ એલિલ્સનો કોઈ પ્રભાવ હોતો નથી.", "પોલિજીનિક ફિટનેસમાં, ફિટનેસની ડિગ્રી માત્ર એક જ વર્ણસૂત્ર પર આધારિત હોય છે, જેમાં અલગ-અલગ જનીનોનો કોઈ પ્રભાવ હોતો નથી."], "ans": 1, "exp": "પોલિજીનિક ફિટનેસમાં, અલગ-અલગ જનીનોના સંકલનથી ફિટનેસની ડિગ્રી નક્કી થાય છે. પ્રત્યેક જનીનનો યોગદાન સ્વતંત્ર રીતે જોડાયેલો હોય છે અને તેના પરસ્પર પ્રભાવથી ફિટનેસમાં વૃદ્ધિ અથવા ઘટાડો થઈ શકે છે. આમ, વિકલ્પ B સૌથી યોગ્ય છે. વિકલ્પ A ખોટો છે કારણ કે ફિટનેસ માત્ર પર્યાવરણીય પરિબળો પર આધાર રાખતી નથી. વિકલ્પ C ખોટો છે કારણ કે ફિટનેસની ગણતરી માત્ર ડોમિનન્ટ એલિલ્સ પર આધારિત નથી. વિકલ્પ D ખોટો છે કારણ કે ફિટનેસ માત્ર એક જ વર્ણસૂત્ર પર આધારિત નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
