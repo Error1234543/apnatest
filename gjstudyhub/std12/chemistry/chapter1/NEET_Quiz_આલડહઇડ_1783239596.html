@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - આલ્ડિહાઇડ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 આલ્ડિહાઇડ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "નીચેના યૌગિકોમાંથી કયો યૌગિક IUPAC નામકરણ પ્રમાણે 3-ઓક્સોપેન્ટેનલ કહેવાય છે?", "options": ["A) CH3CH2CH2CH(O)CH2CHO", "B) CH3CH2C(O)CH2CH2CHO", "C) CH3C(O)CH2CH2CH2CHO", "D) CH3CH2CH2C(O)CH2CHO"], "correct": 1, "explanation": "3-ઓક્સોપેન્ટેનલમાં, 'ઓક્સો' સૂચવે છે કે કાર્બોનિલ સમૂહ (C=O) ત્રીજા કાર્બન પર છે, અને 'પેન્ટેનલ' સૂચવે છે કે પાંચ કાર્બન શૃંખલા છે જેમાં અંતે આલ્ડિહાઇડ સમૂહ (CHO) છે. વિકલ્પ B (CH3CH2C(O)CH2CH2CHO)માં, કાર્બોનિલ સમૂહ ત્રીજા કાર્બન પર છે, જે IUPAC નિયમો અનુસાર યોગ્ય છે. વિકલ્પ Aમાં કાર્બોનિલ સમૂહ ચોથા કાર્બન પર છે, વિકલ્પ Cમાં બીજા કાર્બન પર છે, અને વિકલ્પ Dમાં ચોથા કાર્બન પર છે, જે બધા અયોગ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 1}, {"question": "નીચેના પૈકી કયું વિધાન સત્ય નથી? આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહ હાજર હોય છે, પરંતુ તેમના ભૌતિક અને રાસાયણિક ગુણધર્મો અલગ હોય છે.", "options": ["A) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન હાઇડ્રોજન સાથે જોડાયેલ હોય છે, જ્યારે કિટોનમાં તે બે કાર્બન સાથે જોડાયેલ હોય છે.", "B) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહની પોલારિટી સરખી હોય છે.", "C) આલ્ડિહાઇડ ઓક્સિડેશનથી કાર્બોક્સિલિક ઍસિડ બનાવે છે, જ્યારે કિટોન ઓક્સિડેશનથી કિટોન બનાવે છે.", "D) આલ્ડિહાઇડ અને કિટોન બંનેમાં ન્યૂક્લિયોફિલિક એડિશન પ્રક્રિયા થાય છે."], "correct": 2, "explanation": "વિકલ્પ C ખોટો છે કારણ કે કિટોન ઓક્સિડેશનથી કાર્બોક્સિલિક ઍસિડ બનાવતું નથી, પરંતુ કિટોન જળવિભાજનથી કાર્બોક્સિલિક ઍસિડ અને કિટોન બનાવી શકે છે. વિકલ્પ A સત્ય છે કારણ કે આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન હાઇડ્રોજન સાથે જોડાયેલ હોય છે, જ્યારે કિટોનમાં તે બે કાર્બન સાથે જોડાયેલ હોય છે. વિકલ્પ B સત્ય છે કારણ કે કાર્બોનિલ સમૂહની પોલારિટી બંનેમાં સરખી હોય છે. વિકલ્પ D સત્ય છે કારણ કે બંનેમાં ન્યૂક્લિયોફિલિક એડિશન પ્રક્રિયા થાય છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 2}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3CH2CH(CH3)CH2C(O)CH3", "options": ["A) 2-મિથાઇલ-6-હેપ્ટેન-4-ઓન", "B) 4-મિથાઇલ-2-હેપ્ટેન-6-ઓન", "C) 6-મિથાઇલ-2-હેપ્ટેન-4-ઓન", "D) 2-મિથાઇલ-4-હેપ્ટેન-6-ઓન"], "correct": 2, "explanation": "યૌગિક CH3CH2CH(CH3)CH2C(O)CH3નું IUPAC નામ 6-મિથાઇલ-2-હેપ્ટેન-4-ઓન છે. અહીં, સૌથી લાંબી શૃંખલા 7 કાર્બનની છે (હેપ્ટેન), અને કિટોન સમૂહ ચોથા કાર્બન પર છે. મિથાઇલ સમૂહ છઠ્ઠા કાર્બન પર છે. વિકલ્પ A, B, અને Dમાં કાર્બન શૃંખલા અને સ્થાનો યોગ્ય રીતે દર્શાવેલ નથી.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 3}, {"question": "નીચેના પૈકી કયું વિધાન આલ્ડિહાઇડ અને કિટોનના બંધારણ વિશે સત્ય છે?", "options": ["A) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ કાર્બન sp2 સંકરિત હોય છે.", "B) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન sp3 સંકરિત હોય છે, જ્યારે કિટોનમાં તે sp2 સંકરિત હોય છે.", "C) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ કાર્બન sp સંકરિત હોય છે.", "D) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન sp સંકરિત હોય છે, જ્યારે કિટોનમાં તે sp3 સંકરિત હોય છે."], "correct": 0, "explanation": "વિકલ્પ A સત્ય છે કારણ કે આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ કાર્બન sp2 સંકરિત હોય છે. કાર્બોનિલ સમૂહ (C=O)માં, કાર્બન અને ઓક્સિજન વચ્ચે દ્વિબંધ હોય છે, જે sp2 સંકરણ દર્શાવે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ ગલત સંકરણ સૂચવે છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 4}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? (CH3)2CHCH2C(O)CH(CH3)2", "options": ["A) 2,2,5-ટ્રાઇમિથાઇલ-3-હેક્ઝેનોન", "B) 2,5,5-ટ્રાઇમિથાઇલ-3-હેક્ઝેનોન", "C) 2,2-ડાઇમિથાઇલ-5-ઇઝોપ્રોપાઇલ-3-હેક્ઝેનોન", "D) 5,5-ડાઇમિથાઇલ-2-ઇઝોપ્રોપાઇલ-3-હેક્ઝેનોન"], "correct": 1, "explanation": "યૌગિક (CH3)2CHCH2C(O)CH(CH3)2નું IUPAC નામ 2,5,5-ટ્રાઇમિથાઇલ-3-હેક્ઝેનોન છે. અહીં, સૌથી લાંબી શૃંખલા 6 કાર્બનની છે (હેક્ઝેન), અને કિટોન સમૂહ ત્રીજા કાર્બન પર છે. મિથાઇલ સમૂહો બીજા અને પાંચમા કાર્બન પર છે. વિકલ્પ A, C, અને Dમાં કાર્બન શૃંખલા અને સ્થાનો યોગ્ય રીતે દર્શાવેલ નથી.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 5}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3CH2C(O)CH2CH(CH3)CH2C(O)OH", "options": ["A) 6-ઓક્સો-4-મિથાઇલહેપ્ટેનોઇક ઍસિડ", "B) 4-મિથાઇલ-6-ઓક્સોહેપ્ટેનોઇક ઍસિડ", "C) 2-કાર્બોક્સિ-5-મિથાઇલહેક્સેન-3-ઓન", "D) 3-કીટો-5-મિથાઇલહેક્સેનોઇક ઍસિડ"], "correct": 1, "explanation": "સરળતમ કાર્બન શૃંખલા નંબરિંગ કરતી વખતે, કાર્બોક્સિલિક ઍસિડ સમૂહને પ્રાથમિકતા આપવી જોઈએ. અહીં, કાર્બોક્સિલિક ઍસિડ સમૂહને નંબર 1 આપી, કિટોન સમૂહ 6મા કાર્બન પર આવે છે અને મિથાઇલ સમૂહ 4મા કાર્બન પર આવે છે. આથી સરળ નામ '4-મિથાઇલ-6-ઓક્સોહેપ્ટેનોઇક ઍસિડ' થાય છે. વિકલ્પ Aમાં નંબરિંગ ખોટી રીતે કરવામાં આવી છે. વિકલ્પ C અને D IUPAC નિયમો પ્રમાણે યોગ્ય નથી, કારણ કે કાર્બોક્સિલિક ઍસિડ સમૂહને પ્રાથમિકતા ન આપી.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 6}, {"question": "નીચેના વિધાનો પૈકી કયું સત્ય નથી?", "options": ["A) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે.", "B) કિટોનમાં કાર્બોનિલ સમૂહ બે આલ્કાઇલ સમૂહો સાથે જોડાયેલ હોય છે.", "C) કાર્બોક્સિલિક ઍસિડમાં કાર્બોનિલ અને હાઇડ્રોક્સિલ સમૂહ વચ્ચેનો કોણ 180° હોય છે.", "D) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહ પોલર હોય છે."], "correct": 2, "explanation": "કાર્બોક્સિલિક ઍસિડમાં કાર્બોનિલ અને હાઇડ્રોક્સિલ સમૂહ વચ્ચેનો કોણ 120° હોય છે, 180° નહીં. આલ્ડિહાઇડ અને કિટોનમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે, કિટોનમાં કાર્બોનિલ સમૂહ બે આલ્કાઇલ સમૂહો સાથે જોડાયેલ હોય છે, અને કાર્બોનિલ સમૂહ પોલર હોય છે. આથી વિકલ્પ C ખોટો છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 7}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? (CH3)2C=CHCH2CH2C(O)CH3", "options": ["A) 2-મિથાઇલ-5-હેક્સેન-2-ઓન", "B) 6-મિથાઇલ-3-હેક્સેન-2-ઓન", "C) 2-મિથાઇલ-5-હેક્સેન-6-ઓન", "D) 3,3-ડાઇમિથાઇલ-5-હેક્સેન-2-ઓન"], "correct": 0, "explanation": "યૌગિકમાં ડબલ બોન્ડ અને કિટોન સમૂહ બંને હાજર છે. IUPAC નિયમો પ્રમાણે, ડબલ બોન્ડને પ્રાથમિકતા આપી, કાર્બન શૃંખલાને નંબરિંગ કરતી વખતે ડબલ બોન્ડને નીચા નંબર આપવા જોઈએ. અહીં, ડબલ બોન્ડ 2 અને 3 કાર્બન વચ્ચે છે, અને કિટોન સમૂહ 5મા કાર્બન પર છે. આથી સરળ નામ '2-મિથાઇલ-5-હેક્સેન-2-ઓન' થાય છે. વિકલ્પ B, C, અને Dમાં નંબરિંગ ખોટી રીતે કરવામાં આવી છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 8}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? HOOC-CH2-CH2-CH(CH3)-C(O)-CH3", "options": ["A) 4-મિથાઇલ-6-ઓક્સોહેક્સેનોઇક ઍસિડ", "B) 2-કાર્બોક્સિ-5-મિથાઇલહેક્સેન-3-ઓન", "C) 5-મિથાઇલ-2-ઓક્સોહેક્સેનોઇક ઍસિડ", "D) 3-કીટો-5-મિથાઇલહેક્સેનોઇક ઍસિડ"], "correct": 0, "explanation": "કાર્બોક્સિલિક ઍસિડ સમૂહને પ્રાથમિકતા આપી, કાર્બન શૃંખલાને નંબરિંગ કરતી વખતે કાર્બોક્સિલિક ઍસિડ સમૂહને નંબર 1 આપવા જોઈએ. અહીં, કિટોન સમૂહ 4મા કાર્બન પર અને મિથાઇલ સમૂહ 4મા કાર્બન પર જોડાયેલ છે. આથી સરળ નામ '4-મિથાઇલ-6-ઓક્સોહેક્સેનોઇક ઍસિડ' થાય છે. વિકલ્પ B, C, અને D IUPAC નિયમો પ્રમાણે યોગ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 9}, {"question": "નીચેના વિધાનો પૈકી કયું સત્ય છે?", "options": ["A) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહ સ્પ3 સંકરિત હોય છે.", "B) કાર્બોક્સિલિક ઍસિડમાં કાર્બોનિલ કાર્બન સ્પ સંકરિત હોય છે.", "C) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે અને કિટોનમાં કાર્બોનિલ સમૂહ બે આલ્કાઇલ સમૂહો સાથે જોડાયેલ હોય છે.", "D) કાર્બોક્સિલિક ઍસિડમાં હાઇડ્રોક્સિલ સમૂહ અને કાર્બોનિલ સમૂહ વચ્ચેનો કોણ 90° હોય છે."], "correct": 2, "explanation": "આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે, અને કિટોનમાં કાર્બોનિલ સમૂહ બે આલ્કાઇલ સમૂહો સાથે જોડાયેલ હોય છે. વિકલ્પ A ખોટો છે કારણ કે કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે. વિકલ્પ B ખોટો છે કારણ કે કાર્બોક્સિલિક ઍસિડમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે. વિકલ્પ D ખોટો છે કારણ કે કાર્બોક્સિલિક ઍસિડમાં હાઇડ્રોક્સિલ અને કાર્બોનિલ સમૂહ વચ્ચેનો કોણ 120° હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 10}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3CH2C(O)CH(CH3)C(O)CH2CH3", "options": ["A) 5-ઇથાઇલ-4-મિથાઇલહેપ્ટેન-3,6-ડાયોન", "B) 4-ઇથાઇલ-5-મિથાઇલહેપ્ટેન-3,6-ડાયોન", "C) 3-ઇથાઇલ-4-મિથાઇલહેપ્ટેન-2,5-ડાયોન", "D) 4-મિથાઇલ-5-ઇથાઇલહેપ્ટેન-3,6-ડાયોન"], "correct": 1, "explanation": "યૌગિકમાં કાર્બોનિલ સમૂહોની સ્થિતિ અને શાખાઓને ધ્યાનમાં લેતા, સૌથી લાંબી કાર્બન શૃંખલા 7 કાર્બન ધરાવે છે. કિટોન સમૂહો ક્રમશ: 3 અને 6 સ્થાને છે, જ્યારે ઇથાઇલ સમૂહ 4 સ્થાને અને મિથાઇલ સમૂહ 5 સ્થાને છે. IUPAC નિયમો પ્રમાણે, સબસ્ટિટ્યુટ્સને નીચેથી ઉચ્ચ ક્રમમાં ગોઠવી, નામ 4-ઇથાઇલ-5-મિથાઇલહેપ્ટેન-3,6-ડાયોન થાય છે. બાકીના વિકલ્પો સબસ્ટિટ્યુટ્સની સ્થિતિ અથવા ક્રમમાં ભૂલ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 11}, {"question": "નીચેના પૈકી કયું વિધાન આલ્ડિહાઇડ અને કિટોનના બંધારણ વિશે ખોટું છે?", "options": ["A) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન એક હાઇડ્રોજન અને એક આલ્કાઇલ સમૂહ સાથે જોડાયેલ હોય છે.", "B) કિટોનમાં કાર્બોનિલ કાર્બન બે આલ્કાઇલ સમૂહ સાથે જોડાયેલ હોય છે.", "C) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહ C=O હોય છે.", "D) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે, જ્યારે કિટોનમાં તે સ્પ3 સંકરિત હોય છે."], "correct": 3, "explanation": "વિકલ્પ D ખોટો છે કારણ કે આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ કાર્બન સ્પ2 સંકરિત હોય છે. વિકલ્પ A, B, અને C સત્ય છે કારણ કે તેઓ બંધારણીય લાક્ષણિકતાઓને યથાર્થ રીતે વર્ણવે છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 12}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? (CH3)2CHCH2C(O)CH2C(O)OH", "options": ["A) 4-મિથાઇલ-6-ઓક્સોહેપ્ટેનોઇક ઍસિડ", "B) 5-મિથાઇલ-4-ઓક્સોહેપ્ટેનોઇક ઍસિડ", "C) 3-મિથાઇલ-5-ઓક્સોહેપ્ટેનોઇક ઍસિડ", "D) 6-મિથાઇલ-4-ઓક્સોહેપ્ટેનોઇક ઍસિડ"], "correct": 0, "explanation": "યૌગિકમાં કાર્બોક્સિલિક ઍસિડ સમૂહને પ્રાધાન્ય આપી, સૌથી લાંબી શૃંખલા 7 કાર્બન ધરાવે છે. કિટોન સમૂહ 6 સ્થાને અને મિથાઇલ સમૂહ 4 સ્થાને છે. IUPAC નિયમો પ્રમાણે, નામ 4-મિથાઇલ-6-ઓક્સોહેપ્ટેનોઇક ઍસિડ થાય છે. બાકીના વિકલ્પો સબસ્ટિટ્યુટ્સની સ્થિતિ અથવા ક્રમમાં ભૂલ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયું વિધાન કિટોન અને આલ્ડિહાઇડના નામકરણ વિશે સત્ય છે?", "options": ["A) કિટોનના નામમાં 'ઓન' પ્રત્યય વાપરવામાં આવે છે, જ્યારે આલ્ડિહાઇડમાં 'અલ' પ્રત્યય વાપરવામાં આવે છે.", "B) કિટોનના નામમાં 'એલ' પ્રત્યય વાપરવામાં આવે છે, જ્યારે આલ્ડિહાઇડમાં 'ઓન' પ્રત્યય વાપરવામાં આવે છે.", "C) કિટોન અને આલ્ડિહાઇડ બંનેમાં 'ઓલ' પ્રત્યય વાપરવામાં આવે છે.", "D) કિટોન અને આલ્ડિહાઇડ બંનેમાં 'ઇક ઍસિડ' પ્રત્યય વાપરવામાં આવે છે."], "correct": 0, "explanation": "IUPAC નામકરણ પ્રમાણે, કિટોનના નામમાં 'ઓન' પ્રત્યય વાપરવામાં આવે છે (ઉદા. પ્રોપેનોન), જ્યારે આલ્ડિહાઇડમાં 'અલ' પ્રત્યય વાપરવામાં આવે છે (ઉદા. પ્રોપેનલ). વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ પ્રત્યયોની અદલાબદલી કરે છે અથવા અયોગ્ય પ્રત્યયો વાપરે છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 14}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3CH2CH(CH3)CH2C(O)CH2C(O)CH3", "options": ["A) 5-મિથાઇલ-3,7-ઓક્સોઓક્ટેનલ", "B) 6-મિથાઇલ-4,8-ઓક્સોઓક્ટેન-2-ઓન", "C) 5-મિથાઇલ-3,7-ડાયોક્સોઓક્ટેન", "D) 4-મિથાઇલ-2,6-ડાયોક્સોહેપ્ટેન"], "correct": 2, "explanation": "યૌગિકમાં સૌથી લાંબી શૃંખલા 8 કાર્બન ધરાવે છે, જેમાં કિટોન સમૂહો 3 અને 7 સ્થાને છે. મિથાઇલ સમૂહ 5 સ્થાને છે. IUPAC નિયમો પ્રમાણે, નામ 5-મિથાઇલ-3,7-ડાયોક્સોઓક્ટેન થાય છે. વિકલ્પ A, B, અને D સ્થિતિ અથવા પ્રત્યયમાં ભૂલ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 15}, {"question": "નીચેના યૌગિકનું IUPAC નામ આપો: CH₃-CH₂-CH(CH₃)-CH₂-CHO", "options": ["A) 3-મિથાઇલપેન્ટેનાલ", "B) 2-મિથાઇલપેન્ટેનાલ", "C) 4-મિથાઇલપેન્ટેનાલ", "D) 3-મિથાઇલબ્યુટેનાલ"], "correct": 0, "explanation": "સાચો જવાબ A) 3-મિથાઇલપેન્ટેનાલ છે. આલ્ડિહાઇડ સમૂહને પ્રાથમિકતા આપીને કાર્બન શૃંખલા ગણતરી કરતાં, મુખ્ય શૃંખલા 5 કાર્બનની છે અને આલ્ડિહાઇડ કાર્બનને પ્રથમ કાર્બન ગણવામાં આવે છે. મિથાઇલ સમૂહ ત્રીજા કાર્બન પર છે. B) ખોટું છે કારણ કે મુખ્ય શૃંખલાની ગણતરી ખોટી છે. C) ખોટું છે કારણ કે મિથાઇલ સમૂહનું સ્થાન ખોટું દર્શાવ્યું છે. D) ખોટું છે કારણ કે મુખ્ય શૃંખલા 5 કાર્બનની છે, 4 કાર્બનની નહીં.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 16}, {"question": "નીચેના પૈકી કયું વિધાન આલ્ડિહાઇડ અને કિટોનના કાર્બોનિલ સમૂહના બંધારણ વિશે ખોટું છે?", "options": ["A) કાર્બોનિલ કાર્બન sp² સંકરણ ધરાવે છે", "B) કાર્બોનિલ સમૂહમાં કાર્બન અને ઓક્સિજન વચ્ચે દ્વિબંધ હોય છે", "C) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન હંમેશા પ્રાથમિક કાર્બન હોય છે", "D) કિટોનમાં કાર્બોનિલ કાર્બન હંમેશા દ્વિતીયક કાર્બન હોય છે"], "correct": 2, "explanation": "સાચો જવાબ C) છે કારણ કે આ વિધાન ખોટું છે. આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન પ્રાથમિક કાર્બન નથી, પરંતુ તે હાઇડ્રોજન અને કાર્બન સાથે જોડાયેલો હોય છે. A), B), અને D) વિધાનો સાચાં છે કારણ કે કાર્બોનિલ કાર્બન sp² સંકરણ ધરાવે છે, દ્વિબંધ ધરાવે છે, અને કિટોનમાં કાર્બોનિલ કાર્બન દ્વિતીયક હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 17}, {"question": "નીચેના યૌગિકનું IUPAC નામ આપો: CH₃-C(O)-CH₂-CH(CH₃)-CH₂-COOH", "options": ["A) 5-મિથાઇલ-6-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "B) 4-મિથાઇલ-5-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "C) 2-મિથાઇલ-5-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "D) 5-મિથાઇલ-4-ઓક્સોહેક્ઝેનોઇક ઍસિડ"], "correct": 3, "explanation": "સાચો જવાબ D) 5-મિથાઇલ-4-ઓક્સોહેક્ઝેનોઇક ઍસિડ છે. કાર્બોક્સિલિક ઍસિડ સમૂહને પ્રાથમિકતા આપીને કાર્બન શૃંખલા ગણતરી કરતાં, મુખ્ય શૃંખલા 6 કાર્બનની છે. કિટોન સમૂહ ચોથા કાર્બન પર છે અને મિથાઇલ સમૂહ પાંચમા કાર્બન પર છે. A), B), અને C) ખોટાં છે કારણ કે તેમાં કિટોન અને મિથાઇલ સમૂહના સ્થાન ખોટાં દર્શાવ્યાં છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 18}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n\n(1) આલ્ડિહાઇડ અને કિટોન બંનેમાં કાર્બોનિલ સમૂહ હાજર હોય છે.\n(2) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન ઓછામાં ઓછા એક હાઇડ્રોજન સાથે જોડાયેલો હોય છે.\n(3) કિટોનમાં કાર્બોનિલ કાર્બન બે કાર્બન પરમાણુઓ સાથે જોડાયેલો હોય છે.\n(4) ફોર્માલ્ડિહાઇડ એકમાત્ર એવો આલ્ડિહાઇડ છે જેમાં કાર્બોનિલ કાર્બન બે હાઇડ્રોજન સાથે જોડાયેલો હોય છે.", "options": ["A) માત્ર (1), (2) અને (3) સાચાં છે", "B) માત્ર (1), (2) અને (4) સાચાં છે", "C) માત્ર (2), (3) અને (4) સાચાં છે", "D) બધાં જ (1), (2), (3) અને (4) સાચાં છે"], "correct": 3, "explanation": "સાચો જવાબ D) છે કારણ કે બધાં જ વિધાનો સાચાં છે. (1) કાર્બોનિલ સમૂહ બંનેમાં હાજર છે. (2) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન ઓછામાં ઓછા એક હાઇડ્રોજન સાથે જોડાયેલો હોય છે. (3) કિટોનમાં કાર્બોનિલ કાર્બન બે કાર્બન સાથે જોડાયેલો હોય છે. (4) ફોર્માલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન બે હાઇડ્રોજન સાથે જોડાયેલો હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 19}, {"question": "નીચેના યૌગિકનું IUPAC નામ આપો: CH₃-CH=C(CH₃)-CH₂-C(O)-CH₃", "options": ["A) 5-મિથાઇલ-4-હેક્ઝેન-2-ઓન", "B) 2-મિથાઇલ-4-હેક્ઝેન-5-ઓન", "C) 5-મિથાઇલહેક્ઝ-3-ઇન-2-ઓન", "D) 2-મિથાઇલહેક્ઝ-3-ઇન-5-ઓન"], "correct": 2, "explanation": "સાચો જવાબ C) 5-મિથાઇલહેક્ઝ-3-ઇન-2-ઓન છે. મુખ્ય શૃંખલામાં 6 કાર્બન છે જેમાં દ્વિબંધ ત્રીજા કાર્બન પર છે અને કિટોન સમૂહ બીજા કાર્બન પર છે. મિથાઇલ સમૂહ પાંચમા કાર્બન પર છે. A) અને B) ખોટાં છે કારણ કે તેમાં દ્વિબંધની ગણતરી ખોટી છે. D) ખોટું છે કારણ કે કિટોન સમૂહનું સ્થાન ખોટું દર્શાવ્યું છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 20}, {"question": "નીચેના યૌગિકો પૈકી કયા યૌગિકનું IUPAC નામ 4-ફોર્માઇલ-2-મિથાઇલહેક્ઝેન-3-ઓન છે?", "options": ["A) CH3CH2CH(CH3)CH(CHO)C(O)CH3", "B) CH3CH2C(O)CH(CH3)CH2CHO", "C) CH3CH(CH3)CH2C(O)CH(C2H5)CHO", "D) CH3C(O)CH2CH(CH3)CH(C2H5)CHO"], "correct": 2, "explanation": "સાચો વિકલ્પ C છે કારણ કે તેમાં મુખ્ય શૃંખલા હેક્ઝેન છે, જેમાં 3-ઓન અને 4-ફોર્માઇલ સમૂહ યોગ્ય સ્થાને છે. વિકલ્પ A માં મુખ્ય શૃંખલા પેન્ટેન છે અને સમૂહોનું સ્થાન ખોટું છે. વિકલ્પ B માં મુખ્ય શૃંખલા હેક્ઝેન નથી અને સમૂહોનું સ્થાન પણ ખોટું છે. વિકલ્પ D માં મુખ્ય શૃંખલા હેક્ઝેન નથી અને સમૂહોનું સ્થાન પણ ખોટું છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ્સ", "difficulty": "Hard", "num": 21}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n(1) કાર્બોનિલ સમૂહમાં કાર્બન sp² સંકરણ ધરાવે છે.\n(2) આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન ઓછામાં ઓછા એક હાઇડ્રોજન સાથે જોડાયેલો હોય છે.\n(3) કિટોનમાં કાર્બોનિલ કાર્બન બે કાર્બન પરમાણુઓ સાથે જોડાયેલો હોય છે.\n(4) કાર્બોનિલ સમૂહમાં કાર્બન-ઓક્સિજન બંધ લંબાઈ આલ્કીનના કાર્બન-કાર્બન બંધ કરતાં ટૂંકી હોય છે.", "options": ["A) માત્ર 1 અને 2 સાચાં છે", "B) માત્ર 1, 2 અને 3 સાચાં છે", "C) માત્ર 2, 3 અને 4 સાચાં છે", "D) બધાં જ સાચાં છે"], "correct": 3, "explanation": "સાચો વિકલ્પ D છે કારણ કે બધાં જ વિધાનો સાચાં છે. કાર્બોનિલ સમૂહમાં કાર્બન sp² સંકરણ ધરાવે છે (1), આલ્ડિહાઇડમાં કાર્બોનિલ કાર્બન ઓછામાં ઓછા એક હાઇડ્રોજન સાથે જોડાયેલો હોય છે (2), કિટોનમાં કાર્બોનિલ કાર્બન બે કાર્બન પરમાણુઓ સાથે જોડાયેલો હોય છે (3), અને કાર્બોનિલ સમૂહમાં કાર્બન-ઓક્સિજન બંધ લંબાઈ આલ્કીનના કાર્બન-કાર્બન બંધ કરતાં ટૂંકી હોય છે (4).", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ્સ", "difficulty": "Hard", "num": 22}, {"question": "નીચેના યૌગિકનું IUPAC નામ આપો: CH3-CH=C(CH3)-CH2-CH2-C(O)-CH2-CHO", "options": ["A) 6-મિથાઇલ-7-ઓક્સોઓક્ટ-5-ઇનાલ", "B) 3-મિથાઇલ-8-ઓક્સોઓક્ટ-3-ઇનાલ", "C) 6-ફોર્માઇલ-2-મિથાઇલહેપ્ટ-2-ઇન-4-ઓન", "D) 3-મિથાઇલ-8-ફોર્માઇલઓક્ટ-3-ઇન-2-ઓન"], "correct": 0, "explanation": "સાચો વિકલ્પ A છે કારણ કે મુખ્ય શૃંખલા ઓક્ટેન છે, જેમાં 5-ઇન, 7-ઓન અને 1-આલ (ફોર્માઇલ) સમૂહો યોગ્ય સ્થાને છે. વિકલ્પ B માં સમૂહોનું સ્થાન ખોટું છે. વિકલ્પ C માં મુખ્ય શૃંખલા હેપ્ટેન છે જે ખોટું છે. વિકલ્પ D માં સમૂહોનું સ્થાન અને મુખ્ય શૃંખલા ખોટાં છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ્સ", "difficulty": "Hard", "num": 23}, {"question": "નીચેના પૈકી કયું વિધાન આલ્ડિહાઇડ અને કિટોનના નામકરણ વિશે ખોટું છે?", "options": ["A) જો આલ્ડિહાઇડ અને કિટોન બંને એક જ અણુમાં હાજર હોય તો આલ્ડિહાઇડને પ્રાથમિકતા આપવામાં આવે છે", "B) કાર્બોનિલ સમૂહને સૌથી નીચો ક્રમાંક આપવામાં આવે છે, પછી ભલે તે આલ્ડિહાઇડ હોય કે કિટોન", "C) જો અણુમાં કાર્બોક્સિલિક ઍસિડ હાજર હોય તો તેને સૌથી વધુ પ્રાથમિકતા આપવામાં આવે છે", "D) કિટોન સમૂહને આલ્ડિહાઇડ સમૂહ કરતાં વધુ પ્રાથમિકતા આપવામાં આવે છે કારણ કે તે વધુ ઓક્સિડાઇઝ્ડ સ્વરૂપ છે"], "correct": 3, "explanation": "સાચો વિકલ્પ D છે કારણ કે આ વિધાન ખોટું છે. આલ્ડિહાઇડને કિટોન કરતાં વધુ પ્રાથમિકતા આપવામાં આવે છે કારણ કે આલ્ડિહાઇડ સમૂહ અંતમાં હોય છે અને તેને પ્રાથમિકતા આપવામાં આવે છે. વિકલ્પ A, B અને C સાચાં વિધાનો છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ્સ", "difficulty": "Hard", "num": 24}, {"question": "નીચેના યૌગિકનું IUPAC નામ આપો: OHC-CH2-CH2-CH(CH3)-CH2-C(O)-CH2-CH2-CHO", "options": ["A) 3-મિથાઇલ-1,8-ઓક્ટેનડાયાલ-5-ઓન", "B) 6-મિથાઇલ-1,9-નોનેનડાયાલ-3-ઓન", "C) 4-મિથાઇલ-1,8-ઓક્ટેનડાયાલ-2-ઓન", "D) 3-ફોર્માઇલ-5-મિથાઇલહેપ્ટેન-1,7-ડાયાલ"], "correct": 1, "explanation": "સાચો વિકલ્પ B છે કારણ કે મુખ્ય શૃંખલા નોનેન છે, જેમાં 1,9-ડાયાલ અને 3-ઓન સમૂહો યોગ્ય સ્થાને છે. વિકલ્પ A માં મુખ્ય શૃંખલા ઓક્ટેન છે જે ખોટું છે. વિકલ્પ C માં સમૂહોનું સ્થાન ખોટું છે. વિકલ્પ D માં મુખ્ય શૃંખલા અને સમૂહોનું સ્થાન ખોટાં છે.", "ncert_ref": "Class XII - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ્સ", "difficulty": "Hard", "num": 25}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3-CH(OH)-CH2-C(O)-CH(CH3)-CH2-CHO", "options": ["A) 5-હાઇડ્રોક્સી-4-મિથાઇલહેક્ઝેન-3-ઓન-1-એલ", "B) 2-હાઇડ્રોક્સી-4-મિથાઇલહેક્ઝેન-3-ઓન-6-એલ", "C) 4-હાઇડ્રોક્સી-2-મિથાઇલહેક્ઝેન-3-ઓન-1-એલ", "D) 3-હાઇડ્રોક્સી-4-મિથાઇલહેક્ઝેન-2-ઓન-6-એલ"], "correct": 2, "explanation": "સાચું નામ '4-હાઇડ્રોક્સી-2-મિથાઇલહેક્ઝેન-3-ઓન-1-એલ' છે. કારણ કે કાર્બોનિલ સમૂહ (C=O) અને હાઇડ્રોક્સી સમૂહ (OH)ની સ્થિતિને પ્રાથમિકતા આપી, કાર્બન શૃંખલાને નંબરિત કરવામાં આવે છે. આલ્ડિહાઇડ સમૂહ (CHO)ને સૌથી નીચો નંબર (1) આપવામાં આવે છે. વિકલ્પ A, B, અને Dમાં નંબરિત કરણી ખોટી છે અથવા સમૂહોની સ્થિતિ યોગ્ય રીતે દર્શાવવામાં આવી નથી.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 26}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? OHC-CH2-C(O)-CH=C(CH3)-CH2-CHO", "options": ["A) 6-ઓક્સો-4-મિથાઇલહેપ્ટા-2,4-ડાયીન-1-એલ", "B) 4-ઓક્સો-2-મિથાઇલહેપ્ટા-2,5-ડાયીન-7-એલ", "C) 2-ઓક્સો-4-મિથાઇલહેપ્ટા-2,5-ડાયીન-1-એલ", "D) 4-ફોર્માઇલ-6-ઓક્સો-2-મિથાઇલહેક્સ-2-ઇન-1-એલ"], "correct": 3, "explanation": "સાચું નામ '4-ફોર્માઇલ-6-ઓક્સો-2-મિથાઇલહેક્સ-2-ઇન-1-એલ' છે. કારણ કે આલ્ડિહાઇડ સમૂહ (CHO)ને પ્રાથમિકતા આપી, કાર્બન શૃંખલાને નંબરિત કરવામાં આવે છે. ડબલ બોન્ડ (C=C) અને કિટોન સમૂહ (C=O)ની સ્થિતિને પણ યોગ્ય રીતે દર્શાવવામાં આવી છે. વિકલ્પ A, B, અને Cમાં નામકરણ ખોટી રીતે કરવામાં આવ્યું છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 27}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો: (1) આલ્ડિહાઇડ સમૂહ (CHO)ની પ્રાથમિકતા કિટોન સમૂહ (C=O) કરતાં વધુ હોય છે. (2) કાર્બોક્સિલિક ઍસિડ સમૂહ (COOH)ની પ્રાથમિકતા આલ્ડિહાઇડ સમૂહ કરતાં વધુ હોય છે.", "options": ["A) વિધાન (1) સત્ય છે, પરંતુ વિધાન (2) ખોટું છે.", "B) વિધાન (1) ખોટું છે, પરંતુ વિધાન (2) સત્ય છે.", "C) બંને વિધાનો સત્ય છે.", "D) બંને વિધાનો ખોટાં છે."], "correct": 2, "explanation": "બંને વિધાનો સત્ય છે. IUPAC નામકરણ પ્રમાણે, કાર્બોક્સિલિક ઍસિડ સમૂહ (COOH)ની પ્રાથમિકતા સૌથી વધુ હોય છે, ત્યારબાદ આલ્ડિહાઇડ સમૂહ (CHO), અને ત્યારબાદ કિટોન સમૂહ (C=O). વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ આ પ્રાથમિકતાને યોગ્ય રીતે દર્શાવતા નથી.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 28}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? CH3-CH2-C(O)-CH(OH)-CH2-C(O)OH", "options": ["A) 5-હાઇડ્રોક્સી-4-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "B) 3-હાઇડ્રોક્સી-4-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "C) 4-હાઇડ્રોક્સી-3-ઓક્સોહેક્ઝેનોઇક ઍસિડ", "D) 2-હાઇડ્રોક્સી-5-ઓક્સોહેક્ઝેનોઇક ઍસિડ"], "correct": 1, "explanation": "સાચું નામ '3-હાઇડ્રોક્સી-4-ઓક્સોહેક્ઝેનોઇક ઍસિડ' છે. કારણ કે કાર્બોક્સિલિક ઍસિડ સમૂહ (COOH)ને સૌથી નીચો નંબર (1) આપવામાં આવે છે. હાઇડ્રોક્સી સમૂહ (OH) અને કિટોન સમૂહ (C=O)ની સ્થિતિને પણ યોગ્ય રીતે દર્શાવવામાં આવી છે. વિકલ્પ A, C, અને Dમાં નંબરિત કરણી ખોટી છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 29}, {"question": "નીચેના યૌગિકનું IUPAC નામ શું છે? OHC-CH2-CH(CH3)-C(O)-CH2-CH2-CHO", "options": ["A) 5-મિથાઇલ-3-ઓક્સોહેપ્ટેનડાયલ", "B) 2-મિથાઇલ-5-ઓક્સોહેપ્ટેનડાયલ", "C) 3-મિથાઇલ-5-ઓક્સોહેપ્ટેનડાયલ", "D) 4-મિથાઇલ-2-ઓક્સોહેપ્ટેનડાયલ"], "correct": 0, "explanation": "સાચું નામ '5-મિથાઇલ-3-ઓક્સોહેપ્ટેનડાયલ' છે. કારણ કે આલ્ડિહાઇડ સમૂહો (CHO)ને પ્રાથમિકતા આપી, કાર્બન શૃંખલાને નંબરિત કરવામાં આવે છે. કિટોન સમૂહ (C=O) અને મિથાઇલ સમૂહ (CH3)ની સ્થિતિને પણ યોગ્ય રીતે દર્શાવવામાં આવી છે. વિકલ્પ B, C, અને Dમાં નામકરણ ખોટી રીતે કરવામાં આવ્યું છે.", "ncert_ref": "Class XII - Chapter 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક ઍસિડ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
