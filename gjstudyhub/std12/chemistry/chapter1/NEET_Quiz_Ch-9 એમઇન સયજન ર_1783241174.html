@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch-9 એમાઇન સંયોજનો રાસાયણિક પ્રક્રિયાઓ (બેઝિક સ્વભાવ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch-9 એમાઇન સંયોજનો રાસાયણિક પ્રક્રિયાઓ (બેઝિક સ્વભાવ)</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક કાર્બનિક સંયોજન જેનું આણ્વીય સૂત્ર C₃H₉N છે, તેને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત થાય છે. આ સંયોજનની બેઝિકતા (pKb) અન્ય આઇસોમર કરતાં સૌથી વધુ છે. આ સંયોજન કયું હશે?", "options": ["A) પ્રોપેન-1-એમાઇન", "B) પ્રોપેન-2-એમાઇન", "C) N-મિથાઇલઇથેનેમાઇન", "D) ટ્રાઇમિથાઇલએમાઇન"], "correct": 2, "explanation": "સંયોજન C₃H₉N ના આઇસોમરમાંથી માત્ર દ્વિતીયક એમાઇન (N-મિથાઇલઇથેનેમાઇન) નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરીને નાઇટ્રોજન વાયુ મુક્ત કરે છે અને નાઇટ્રોસોએમાઇન બનાવે છે. પ્રાથમિક એમાઇન આલ્કોહોલ બનાવે છે, તૃતીયક એમાઇન પ્રક્રિયા કરતું નથી. વધુમાં, દ્વિતીયક એમાઇનની બેઝિકતા (pKb) પ્રાથમિક અને તૃતીયક કરતાં વધુ હોય છે કારણ કે તેમાં નાઇટ્રોજન પરમાણુ પર એકલ ઇલેક્ટ્રોન યુગ્મની સ્થિરતા વધુ હોય છે. (NCERT Class 12, Chapter 9: એમાઇન સંયોજનો)", "ncert_ref": "Class XII - પ્રકરણ 9: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 1}, {"question": "એક પ્રયોગમાં, બેન્ઝિન ડાયેઝોનિયમ ક્લોરાઇડને ફિનોલ સાથે આલ્કલાઇન માધ્યમમાં પ્રક્રિયા કરતાં નારંગી રંગનું સંયોજન મળે છે. આ પ્રક્રિયામાં ફિનોલનું કાર્ય શું છે?", "options": ["A) ઇલેક્ટ્રોન-અપૂરક કેન્દ્ર તરીકે", "B) ઇલેક્ટ્રોન-સમૃદ્ધ કેન્દ્ર તરીકે", "C) ઉદ્દીપક તરીકે", "D) ઓક્સિડાઇઝિંગ એજન્ટ તરીકે"], "correct": 1, "explanation": "ફિનોલમાં હાઇડ્રોક્સિલ સમૂહ (-OH) ના કારણે બેન્ઝિન વલય ઇલેક્ટ્રોન-સમૃદ્ધ બને છે, જે ડાયેઝોનિયમ આયન (ArN₂⁺) સાથે ઇલેક્ટ્રોફિલિક એરોમેટિક સબસ્ટિટ્યુશન પ્રક્રિયા કરે છે. આ પ્રક્રિયા કપ્લિંગ પ્રક્રિયા તરીકે ઓળખાય છે, જેમાં ફિનોલ ઇલેક્ટ્રોન-સમૃદ્ધ કેન્દ્ર તરીકે કાર્ય કરે છે. (NCERT Class 12, Chapter 9: એમાઇન સંયોજનો)", "ncert_ref": "Class XII - પ્રકરણ 9: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 2}, {"question": "એક એમાઇન સંયોજનને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય પદાર્થ મળે છે, જે આલ્કલીમાં દ્રાવ્ય થતો નથી. આ સંયોજન કયા પ્રકારનું એમાઇન હશે?", "options": ["A) પ્રાથમિક એમાઇન", "B) દ્વિતીયક એમાઇન", "C) તૃતીયક એમાઇન", "D) એરોમેટિક એમાઇન"], "correct": 2, "explanation": "હિન્સબર્ગ કસોટીમાં તૃતીયક એમાઇન બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતું નથી, પરંતુ દ્વિતીયક એમાઇન સાથે પ્રક્રિયા કરીને અદ્રાવ્ય સલ્ફોનામાઇડ બનાવે છે જે આલ્કલીમાં દ્રાવ્ય થતું નથી. પ્રાથમિક એમાઇન આલ્કલીમાં દ્રાવ્ય સલ્ફોનામાઇડ બનાવે છે. (NCERT Class 12, Chapter 9: એમાઇન સંયોજનો)", "ncert_ref": "Class XII - પ્રકરણ 9: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 3}, {"question": "એક પ્રયોગમાં, એનિલિનને બ્રોમિન જળ સાથે પ્રક્રિયા કરતાં સફેદ અવક્ષેપ મળે છે. આ પ્રક્રિયામાં એનિલિનનું વર્તન શું દર્શાવે છે?", "options": ["A) એનિલિન એસિડિક છે", "B) એનિલિન ઇલેક્ટ્રોન-અપૂરક છે", "C) એનિલિન ઇલેક્ટ્રોન-સમૃદ્ધ છે", "D) એનિલિન તટસ્થ છે"], "correct": 2, "explanation": "એનિલિનમાં એમિનો સમૂહ (-NH₂) બેન્ઝિન વલયને ઇલેક્ટ્રોન-સમૃદ્ધ બનાવે છે, જેના કારણે બ્રોમિન જળ સાથે ઇલેક્ટ્રોફિલિક સબસ્ટિટ્યુશન પ્રક્રિયા સરળતાથી થાય છે અને 2,4,6-ટ્રાયબ્રોમોએનિલિનનો સફેદ અવક્ષેપ મળે છે. આ પ્રક્રિયા એનિલિનની ઇલેક્ટ્રોન-સમૃદ્ધ પ્રકૃતિ દર્શાવે છે. (NCERT Class 12, Chapter 9: એમાઇન સંયોજનો)", "ncert_ref": "Class XII - પ્રકરણ 9: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 4}, {"question": "એક સંયોજનનું આણ્વીય સૂત્ર C₄H₁₁N છે. તેને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં દ્રાવ્ય પદાર્થ મળે છે, જેને આલ્કલીમાં ઓગાળતાં અદ્રાવ્ય બને છે. આ સંયોજન કયું હશે?", "options": ["A) બ્યુટેન-1-એમાઇન", "B) બ્યુટેન-2-એમાઇન", "C) N-મિથાઇલપ્રોપેન-1-એમાઇન", "D) N,N-ડાઇમિથાઇલઇથેનેમાઇન"], "correct": 0, "explanation": "હિન્સબર્ગ કસોટીમાં પ્રાથમિક એમાઇન (બ્યુટેન-1-એમાઇન) બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરીને દ્રાવ્ય સલ્ફોનામાઇડ બનાવે છે, જે આલ્કલીમાં ઓગાળતાં અદ્રાવ્ય સોડિયમ ક્ષાર બને છે. દ્વિતીયક અને તૃતીયક એમાઇન આ પ્રકારની પ્રક્રિયા દર્શાવતા નથી. (NCERT Class 12, Chapter 9: એમાઇન સંયોજનો)", "ncert_ref": "Class XII - પ્રકરણ 9: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 5}, {"question": "એક એરોમેટિક એમાઇન સંયોજન X ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બને છે. આ લવણને ફિનોલ સાથે આલ્કલાઇન માધ્યમમાં પ્રક્રિયા કરતાં નારંગી રંગનો અવક્ષેપ મળે છે. જો X ને બ્રોમિન જળ સાથે પ્રક્રિયા કરવામાં આવે તો કયો અવક્ષેપ મળશે?", "options": ["A) સફેદ અવક્ષેપ (2,4,6-ટ્રિબ્રોમોએનિલિન)", "B) પીળો અવક્ષેપ (બેન્ઝિન)", "C) લાલ અવક્ષેપ (એનિલિન હાઇડ્રોક્લોરાઇડ)", "D) વાદળી અવક્ષેપ (N-બ્રોમોએનિલિન)"], "correct": 0, "explanation": "એનિલિન (X) ને બ્રોમિન જળ સાથે પ્રક્રિયા કરતાં 2,4,6-ટ્રિબ્રોમોએનિલિન બને છે, જે સફેદ અવક્ષેપ સ્વરૂપે મળે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) બેન્ઝિન બ્રોમિન જળ સાથે પ્રક્રિયા કરતું નથી, C) એનિલિન હાઇડ્રોક્લોરાઇડ લાલ અવક્ષેપ નથી, D) N-બ્રોમોએનિલિન વાદળી અવક્ષેપ નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇનો", "difficulty": "Hard", "num": 6}, {"question": "એક એલિફેટિક એમાઇન Y ને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય સંયોજન બને છે. જો Y ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરવામાં આવે તો કયું ઉત્પન્ન થશે?", "options": ["A) ડાયેઝોનિયમ લવણ", "B) એલ્કોહોલ અને નાઇટ્રોજન વાયુ", "C) નાઇટ્રોએલ્કેન", "D) એલ્કાઇલ હાઇડ્રોક્સિલએમાઇન"], "correct": 1, "explanation": "એલિફેટિક એમાઇન (Y) ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં એલ્કોહોલ અને નાઇટ્રોજન વાયુ મળે છે. હિન્સબર્ગ કસોટી પાસે થવું એ સૂચવે છે કે Y પ્રાથમિક એમાઇન છે. A) ડાયેઝોનિયમ લવણ ફક્ત એરોમેટિક એમાઇન માટે જ બને છે, C) નાઇટ્રોએલ્કેન નાઇટ્રસ એસિડ સાથે પ્રક્રિયા નથી, D) એલ્કાઇલ હાઇડ્રોક્સિલએમાઇન અસ્થિર સંયોજન છે અને બને નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇનો", "difficulty": "Hard", "num": 7}, {"question": "એક સંયોજન Z નું આણ્વીય સૂત્ર C5H13N છે. તેને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય સંયોજન બને છે. જો Z ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરવામાં આવે તો કયું ઉત્પન્ન થશે?", "options": ["A) પેન્ટેન-1-ઓલ અને N2", "B) પેન્ટેન-2-ઓલ અને N2", "C) 1-નાઇટ્રોપેન્ટેન", "D) પેન્ટેન-1-એમાઇન હાઇડ્રોક્લોરાઇડ"], "correct": 0, "explanation": "C5H13N વાળું સંયોજન Z પ્રાથમિક એમાઇન છે (હિન્સબર્ગ કસોટી પાસે થવું). પ્રાથમિક એલિફેટિક એમાઇન ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં એલ્કોહોલ અને N2 વાયુ મળે છે. A) પેન્ટેન-1-ઓલ અને N2 સહી ઉત્પન્ન છે. B) પેન્ટેન-2-ઓલ અયોગ્ય છે કારણ કે એમાઇન સમૂહ પ્રાથમિક કાર્બન પર છે, C) 1-નાઇટ્રોપેન્ટેન નાઇટ્રસ એસિડ સાથે પ્રક્રિયા નથી, D) પેન્ટેન-1-એમાઇન હાઇડ્રોક્લોરાઇડ અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇનો", "difficulty": "Hard", "num": 8}, {"question": "એક એરોમેટિક એમાઇન સંયોજનને નાઇટ્રસ એસિડ સાથે 0-5°C તાપમાને પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બને છે. આ લવણને ક્યુપ્રસ ક્લોરાઇડ અને હાઇડ્રોક્લોરિક એસિડ સાથે પ્રક્રિયા કરતાં કયું ઉત્પન્ન થશે?", "options": ["A) ક્લોરોબેન્ઝિન", "B) બેન્ઝિન", "C) ફિનોલ", "D) એનિલિન"], "correct": 0, "explanation": "ડાયેઝોનિયમ લવણને ક્યુપ્રસ ક્લોરાઇડ અને હાઇડ્રોક્લોરિક એસિડ સાથે પ્રક્રિયા કરતાં ક્લોરોબેન્ઝિન બને છે (સેન્ડમેયર પ્રક્રિયા). B) બેન્ઝિન બને નથી, C) ફિનોલ બને નથી, D) એનિલિન બને નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇનો", "difficulty": "Hard", "num": 9}, {"question": "એક સંયોજનનું આણ્વીય સૂત્ર C6H15N છે. તેને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય સંયોજન બને છે. જો આ સંયોજનને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરવામાં આવે તો કયું ઉત્પન્ન થશે?", "options": ["A) હેક્સેન-1-ઓલ અને N2", "B) હેક્સેન-2-ઓલ અને N2", "C) 1-નાઇટ્રોહેક્સેન", "D) હેક્સેન-1-એમાઇન નાઇટ્રેટ"], "correct": 0, "explanation": "C6H15N વાળું સંયોજન પ્રાથમિક એમાઇન છે (હિન્સબર્ગ કસોટી પાસે થવું). પ્રાથમિક એલિફેટિક એમાઇન ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં એલ્કોહોલ અને N2 વાયુ મળે છે. A) હેક્સેન-1-ઓલ અને N2 સહી ઉત્પન્ન છે. B) હેક્સેન-2-ઓલ અયોગ્ય છે કારણ કે એમાઇન સમૂહ પ્રાથમિક કાર્બન પર છે, C) 1-નાઇટ્રોહેક્સેન નાઇટ્રસ એસિડ સાથે પ્રક્રિયા નથી, D) હેક્સેન-1-એમાઇન નાઇટ્રેટ અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇનો", "difficulty": "Hard", "num": 10}, {"question": "એક એમાઇન સંયોજન A ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ ઉત્પન્ન થાય છે અને ફિનોલ સાથે આલ્કલાઇન માધ્યમમાં પ્રક્રિયા કરતાં નારંગી રંગનો અવક્ષેપ મળે છે. આ સંયોજન A ની ઓળખ કઈ હશે?", "options": ["A) એનિલિન", "B) મિથાઇલએમાઇન", "C) ડાઇમિથાઇલએમાઇન", "D) ટ્રાઇમિથાઇલએમાઇન"], "correct": 3, "explanation": "સંયોજન A ટ્રાઇમિથાઇલએમાઇન છે, કારણ કે તે તૃતીય એમાઇન છે અને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત કરે છે. એનિલિન (A) એરોમેટિક એમાઇન છે અને ડાયેઝોનિયમ લવણ બનાવે છે, મિથાઇલએમાઇન (B) અને ડાઇમિથાઇલએમાઇન (C) પ્રાથમિક અને દ્વિતીય એમાઇન છે, જે નાઇટ્રોઝો એમાઇન બનાવે છે, નહીં કે નાઇટ્રોજન વાયુ.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 11}, {"question": "એક એમાઇન સંયોજન B ને બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં સફેદ અવક્ષેપ મળે છે, પરંતુ હિન્સબર્ગ કસોટીમાં કોઈ અવક્ષેપ મળતો નથી. આ સંયોજન B ની ઓળખ કઈ હશે?", "options": ["A) એનિલિન", "B) બેન્ઝાઇલએમાઇન", "C) ડાઇએથાઇલએમાઇન", "D) પિરિડિન"], "correct": 2, "explanation": "સંયોજન B ડાઇએથાઇલએમાઇન છે, કારણ કે તે તૃતીય એમાઇન છે અને હિન્સબર્ગ કસોટીમાં પ્રક્રિયા કરતું નથી (કોઈ H-અણુ નથી). એનિલિન (A) અને બેન્ઝાઇલએમાઇન (B) પ્રાથમિક એમાઇન છે, જે હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય અવક્ષેપ આપે છે. પિરિડિન (D) એ એમાઇન નથી, પરંતુ હેટરોસાયક્લિક સંયોજન છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 12}, {"question": "એક એમાઇન સંયોજન C ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં પીળો તેલ જેવો પદાર્થ મળે છે, જે આલ્કલી સાથે પ્રક્રિયા કરતાં સોડિયમ ડાયેઝોનેટ બનાવે છે. આ સંયોજન C ની ઓળખ કઈ હશે?", "options": ["A) એનિલિન", "B) મિથાઇલએમાઇન", "C) ડાઇમિથાઇલએમાઇન", "D) ટ્રાઇમિથાઇલએમાઇન"], "correct": 0, "explanation": "સંયોજન C એનિલિન છે, કારણ કે એરોમેટિક પ્રાથમિક એમાઇન નાઇટ્રસ એસિડ સાથે 0-5°C તાપમાને ડાયેઝોનિયમ લવણ બનાવે છે, જે આલ્કલી સાથે સોડિયમ ડાયેઝોનેટ બનાવે છે. મિથાઇલએમાઇન (B), ડાઇમિથાઇલએમાઇન (C), અને ટ્રાઇમિથાઇલએમાઇન (D) એલિફેટિક એમાઇન છે, જે નાઇટ્રોઝો એમાઇન અથવા નાઇટ્રોજન વાયુ મુક્ત કરે છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 13}, {"question": "એક એમાઇન સંયોજન D ને ક્લોરોફોર્મ અને આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરતાં અપ્રિય ગંધવાળો પદાર્થ મળે છે. આ સંયોજન D ની ઓળખ કઈ હશે?", "options": ["A) એનિલિન", "B) મિથાઇલએમાઇન", "C) ડાઇમિથાઇલએમાઇન", "D) ટ્રાઇમિથાઇલએમાઇન"], "correct": 1, "explanation": "સંયોજન D મિથાઇલએમાઇન છે, કારણ કે પ્રાથમિક એલિફેટિક એમાઇન ક્લોરોફોર્મ અને આલ્કોહોલિક KOH સાથે આઇસોનાઇટ્રાઇલ (કાર્બાઇલએમાઇન) પ્રક્રિયા આપે છે, જે અપ્રિય ગંધ ધરાવે છે. એનિલિન (A) એરોમેટિક એમાઇન છે અને આ પ્રક્રિયા આપતું નથી. ડાઇમિથાઇલએમાઇન (C) અને ટ્રાઇમિથાઇલએમાઇન (D) દ્વિતીય અને તૃતીય એમાઇન છે, જે આ પ્રક્રિયા આપતાં નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 14}, {"question": "એક એમાઇન સંયોજન E ને એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરતાં એસિટામાઇડ મળે છે, પરંતુ હિન્સબર્ગ કસોટીમાં કોઈ અવક્ષેપ મળતો નથી. આ સંયોજન E ની ઓળખ કઈ હશે?", "options": ["A) એનિલિન", "B) ડાઇમિથાઇલએમાઇન", "C) ટ્રાઇમિથાઇલએમાઇન", "D) પિરિડિન"], "correct": 2, "explanation": "સંયોજન E ટ્રાઇમિથાઇલએમાઇન છે, કારણ કે તે તૃતીય એમાઇન છે અને એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરતું નથી (કોઈ H-અણુ નથી), પરંતુ હિન્સબર્ગ કસોટીમાં પણ પ્રક્રિયા કરતું નથી. એનિલિન (A) પ્રાથમિક એમાઇન છે અને હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય અવક્ષેપ આપે છે. ડાઇમિથાઇલએમાઇન (B) દ્વિતીય એમાઇન છે અને હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય અવક્ષેપ આપે છે. પિરિડિન (D) એ એમાઇન નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 15}, {"question": "એક એમાઇન સંયોજનને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બનાવે છે. આ સંયોજનની સાથે ક્લોરોફોર્મ અને આલ્કોહોલિક KOH ની પ્રક્રિયાથી કયો પરિણામ મળે છે?", "options": ["A) આઇસોનાઇટ્રાઇલની વાસ મળે છે", "B) કાર્બાઇલ એમાઇન પરીક્ષણ ધન આઉટ પડે છે", "C) સફેદ અવક્ષેપ મળે છે", "D) નાઇટ્રોજન વાયુ મુક્ત થાય છે"], "correct": 1, "explanation": "ડાયેઝોનિયમ લવણ બનાવતું એમાઇન સંયોજન એરોમેટિક પ્રાથમિક એમાઇન (જેમકે એનિલિન) હોય છે. ક્લોરોફોર્મ અને આલ્કોહોલિક KOH સાથે એરોમેટિક પ્રાથમિક એમાઇનની પ્રક્રિયાથી કાર્બાઇલ એમાઇન પરીક્ષણ ધન આઉટ પડે છે (આઇસોનાઇટ્રાઇલની વાસ મળે છે). અહીં, A અને B બંને કાર્બાઇલ એમાઇન પરીક્ષણ સાથે સંબંધિત છે, પરંતુ B વધુ સ્પષ્ટ અને સીધો પરિણામ છે. C અને D અનુક્રમે એલિફેટિક એમાઇન અથવા એમાઇડ માટે લાગુ પડે છે.", "ncert_ref": "Class XII - Chapter 13: કાર્બનિક સંયોજનોમાં નાઇટ્રોજન યુક્ત ક્રિયાશીલ સમૂહ (એમાઇન)", "difficulty": "Hard", "num": 16}, {"question": "એક એલિફેટિક દ્વિતીય એમાઇનને બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં કયો ઉત્પાદ મળે છે?", "options": ["A) બેન્ઝોઇલ એમાઇડ", "B) N-બેન્ઝોઇલ એમાઇન", "C) બેન્ઝોઇક એસિડ", "D) એમાઇન હાઇડ્રોક્લોરાઇડ"], "correct": 1, "explanation": "દ્વિતીય એમાઇનમાં બે હાઇડ્રોજન પરમાણુઓ હાજર નથી, જેથી તે બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરી N-બેન્ઝોઇલ એમાઇન બનાવે છે. A (બેન્ઝોઇલ એમાઇડ) પ્રાથમિક એમાઇન માટે લાગુ પડે છે, C (બેન્ઝોઇક એસિડ) એસિડ હાઇડ્રોલિસિસનો પરિણામ છે, અને D (એમાઇન હાઇડ્રોક્લોરાઇડ) HCl સાથે પ્રક્રિયાનો પરિણામ છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇનના રાસાયણિક ગુણધર્મો", "difficulty": "Hard", "num": 17}, {"question": "એક એમાઇન સંયોજન X ને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત થાય છે. આ સંયોજન X ની સાથે ક્લોરોફોર્મ અને આલ્કોહોલિક KOH ની પ્રક્રિયાથી કયો પરિણામ મળશે?", "options": ["A) કાર્બાઇલ એમાઇન પરીક્ષણ ધન આઉટ પડશે", "B) આઇસોનાઇટ્રાઇલની વાસ મળશે", "C) કોઈ પ્રક્રિયા થશે નહીં", "D) સફેદ અવક્ષેપ મળશે"], "correct": 2, "explanation": "નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત થાય તે એલિફેટિક પ્રાથમિક એમાઇનની લાક્ષણિકતા છે. એલિફેટિક પ્રાથમિક એમાઇન ક્લોરોફોર્મ અને આલ્કોહોલિક KOH સાથે પ્રક્રિયા કરતું નથી, જેથી કોઈ પરિણામ મળતો નથી. A અને B એરોમેટિક પ્રાથમિક એમાઇન માટે લાગુ પડે છે, જ્યારે D એલિફેટિક એમાઇન માટે લાગુ પડતું નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇનના વર્ગીકરણ અને પ્રક્રિયાઓ", "difficulty": "Hard", "num": 18}, {"question": "એક એમાઇન સંયોજન Y ને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય ઉત્પાદ મળતું નથી. આ સંયોજન Y ની સાથે એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરતાં કયો ઉત્પાદ મળે છે?", "options": ["A) એસિટામાઇડ", "B) N-એસિટિલ એમાઇન", "C) એસિટિક એસિડ", "D) એમાઇન હાઇડ્રોક્લોરાઇડ"], "correct": 1, "explanation": "હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય ઉત્પાદ ન મળવું એ દ્વિતીય એમાઇનની લાક્ષણિકતા છે. દ્વિતીય એમાઇન એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરી N-એસિટિલ એમાઇન બનાવે છે. A (એસિટામાઇડ) પ્રાથમિક એમાઇન માટે લાગુ પડે છે, C (એસિટિક એસિડ) એસિડ હાઇડ્રોલિસિસનો પરિણામ છે, અને D (એમાઇન હાઇડ્રોક્લોરાઇડ) HCl સાથે પ્રક્રિયાનો પરિણામ છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇનના રાસાયણિક ગુણધર્મો અને પરીક્ષણો", "difficulty": "Hard", "num": 19}, {"question": "એક એરોમેટિક એમાઇન સંયોજન Z ને નાઇટ્રસ એસિડ સાથે 0-5°C તાપમાને પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બને છે. આ સંયોજન Z ની સાથે બ્રોમિન જળ સાથે પ્રક્રિયા કરતાં કયો ઉત્પાદ મળે છે?", "options": ["A) 2,4,6-ટ્રાઇબ્રોમોએનિલિન", "B) 3-બ્રોમોએનિલિન", "C) 4-બ્રોમોએનિલિન", "D) બેન્ઝિન"], "correct": 0, "explanation": "એરોમેટિક પ્રાથમિક એમાઇન (જેમકે એનિલિન) બ્રોમિન જળ સાથે પ્રક્રિયા કરી 2,4,6-ટ્રાઇબ્રોમોએનિલિન બનાવે છે, કારણ કે એમાઇન સમૂહ એલેક્ટ્રોન-દાતા છે અને બેન્ઝિન વલયને સક્રિય કરે છે. B અને C અંશતઃ બ્રોમીનેશનના પરિણામ છે, પરંતુ એનિલિનની લાક્ષણિક પ્રક્રિયા પૂર્ણ બ્રોમીનેશન છે. D (બેન્ઝિન) એ પ્રક્રિયાનો પરિણામ નથી.", "ncert_ref": "Class XII - Chapter 13: એરોમેટિક એમાઇનના રાસાયણિક ગુણધર્મો", "difficulty": "Hard", "num": 20}, {"question": "એક એમાઇન સંયોજનને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત થાય છે અને ફિનોલના દ્રાવણ સાથે રંગીન યોગિક બનાવે છે. આ એમાઇન કયા પ્રકારનું હશે?", "options": ["A) પ્રાથમિક એરોમેટિક એમાઇન", "B) દ્વિતીય એલિફેટિક એમાઇન", "C) તૃતીય એલિફેટિક એમાઇન", "D) પ્રાથમિક એલિફેટિક એમાઇન"], "correct": 3, "explanation": "પ્રાથમિક એલિફેટિક એમાઇન નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ મુક્ત કરે છે અને ફિનોલ સાથે રંગીન યોગિક (લીબરમેન નાઇટ્રોસો કસોટી) બનાવે છે. પ્રાથમિક એરોમેટિક એમાઇન ડાયેઝોનિયમ લવણ બનાવે છે (A ખોટું). દ્વિતીય એમાઇન નાઇટ્રોસોએમાઇન બનાવે છે (B ખોટું). તૃતીય એમાઇન નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતું નથી (C ખોટું).", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 21}, {"question": "એક એમાઇન સંયોજન X ને બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં સફેદ અવક્ષેપ મળે છે, પરંતુ હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય ઉત્પાદ મળતું નથી. X કયું હશે?", "options": ["A) એનિલિન", "B) ડાયમેથાઇલએમાઇન", "C) મેથાઇલએમાઇન", "D) ડાયએથાઇલએમાઇન"], "correct": 1, "explanation": "ડાયમેથાઇલએમાઇન (દ્વિતીય એમાઇન) બેન્ઝોઇલ ક્લોરાઇડ સાથે N,N-ડાયમેથાઇલબેન્ઝામાઇડ બનાવે છે (સફેદ અવક્ષેપ), પરંતુ હિન્સબર્ગ કસોટીમાં પ્રક્રિયા કરતું નથી (કેમ કે તે દ્વિતીય એમાઇન છે). એનિલિન (A) હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય ઉત્પાદ આપે છે. મેથાઇલએમાઇન (C) અને ડાયએથાઇલએમાઇન (D) પણ હિન્સબર્ગ કસોટીમાં પ્રક્રિયા કરે છે (C પ્રાથમિક, D તૃતીય).", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 22}, {"question": "એક એમાઇન સંયોજન Y ને ક્લોરોફોર્મ અને આલ્કોહોલિક KOH સાથે ગરમ કરતાં અપ્રિય ગંધવાળું સંયોજન મળે છે. Y કયા પ્રકારનું એમાઇન હશે?", "options": ["A) પ્રાથમિક એમાઇન (એલિફેટિક અથવા એરોમેટિક)", "B) દ્વિતીય એમાઇન", "C) તૃતીય એમાઇન", "D) ક્વોટરનરી એમોનિયમ લવણ"], "correct": 0, "explanation": "કાર્બિલએમાઇન પ્રક્રિયા (ક્લોરોફોર્મ + આલ્કોહોલિક KOH) ફક્ત પ્રાથમિક એમાઇન (એલિફેટિક અથવા એરોમેટિક) સાથે થાય છે અને ઇસોસાયનાઇડ (અપ્રિય ગંધ) મુક્ત કરે છે. દ્વિતીય (B), તૃતીય (C), અને ક્વોટરનરી એમોનિયમ લવણ (D) આ પ્રક્રિયા આપતાં નથી.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 23}, {"question": "એક એમાઇન સંયોજન Z નું આણ્વીય સૂત્ર C7H9N છે. તેને નાઇટ્રસ એસિડ સાથે 0-5°C તાપમાને પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બનાવે છે. Z નું સંરચનાત્મક સૂત્ર કયું હશે?", "options": ["A) CH3-CH2-C6H4-NH2", "B) C6H5-NH-CH3", "C) C6H5-NH2", "D) C6H5-N(CH3)2"], "correct": 2, "explanation": "C7H9N આણ્વીય સૂત્ર ધરાવતું એરોમેટિક પ્રાથમિક એમાઇન એનિલિન (C6H5-NH2) છે, જે નાઇટ્રસ એસિડ સાથે ડાયેઝોનિયમ લવણ બનાવે છે. CH3-CH2-C6H4-NH2 (A) નું સૂત્ર C8H11N છે (ખોટું). C6H5-NH-CH3 (B) દ્વિતીય એમાઇન છે અને ડાયેઝોનિયમ લવણ બનાવતું નથી (ખોટું). C6H5-N(CH3)2 (D) તૃતીય એમાઇન છે અને પ્રક્રિયા કરતું નથી (ખોટું).", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 24}, {"question": "એક એમાઇન સંયોજનને એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરતાં એસિટામાઇડ મળે છે. આ એમાઇન કયા પ્રકારનું હશે અને કયા ઉત્પાદન સાથે પ્રક્રિયા થશે?", "options": ["A) પ્રાથમિક એમાઇન, એસિટામાઇડ અને એસિટિક એસિડ", "B) દ્વિતીય એમાઇન, N-એસિટાઇલ ડેરિવેટિવ", "C) તૃતીય એમાઇન, કોઈ પ્રક્રિયા થતી નથી", "D) પ્રાથમિક એમાઇન, N-એસિટાઇલ ડેરિવેટિવ અને એસિટિક એસિડ"], "correct": 3, "explanation": "પ્રાથમિક એમાઇન એસિટિક એનહાઇડ્રાઇડ સાથે પ્રક્રિયા કરતાં N-એસિટાઇલ ડેરિવેટિવ (એસિટામાઇડ) અને એસિટિક એસિડ મુક્ત કરે છે. દ્વિતીય એમાઇન (B) પણ N-એસિટાઇલ ડેરિવેટિવ બનાવે છે, પરંતુ એસિટિક એસિડ મુક્ત થતું નથી. તૃતીય એમાઇન (C) પ્રક્રિયા કરતું નથી. વિકલ્પ A અધૂરો છે કેમ કે એસિટામાઇડ જ એસિટામાઇડ છે, પરંતુ એસિટિક એસિડ પણ મુક્ત થાય છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 25}, {"question": "એક એલિફેટિક પ્રાથમિક એમાઇનને નાઇટ્રસ એસિડ સાથે પ્રક્રિયા કરતાં નીચેનામાંથી કયો ઉત્પાદ મળે છે, જ્યારે પ્રક્રિયા ૦-૫°C તાપમાને થાય છે?", "options": ["A) ડાયેઝોનિયમ લવણ", "B) નાઇટ્રોજન વાયુ, એલ્કોહોલ અને જળ", "C) એરોમેટિક ડાયેઝોનિયમ ક્લોરાઇડ", "D) એમાઇડ"], "correct": 1, "explanation": "એલિફેટિક પ્રાથમિક એમાઇનને નાઇટ્રસ એસિડ સાથે ૦-૫°C તાપમાને પ્રક્રિયા કરતાં નાઇટ્રોજન વાયુ, એલ્કોહોલ અને જળ મળે છે. ડાયેઝોનિયમ લવણ એરોમેટિક એમાઇન માટે જ મળે છે. એરોમેટિક ડાયેઝોનિયમ ક્લોરાઇડ એ એરોમેટિક એમાઇનની પ્રક્રિયાનો ઉત્પાદ છે. એમાઇડ બનવું એ એસિટિક એનહાઇડ્રાઇડ જેવી પ્રક્રિયક સાથે થાય છે.", "ncert_ref": "Class XII - Chapter 13: કાર્બનિક સંયોજનોમાં નાઇટ્રોજન ધરાવતા સંયોજનો", "difficulty": "Hard", "num": 26}, {"question": "એક એરોમેટિક દ્વિતીય એમાઇનને બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં કયો ઉત્પાદ મળે છે?", "options": ["A) N-બેન્ઝોઇલ એમાઇડ", "B) N,N-ડાઇબેન્ઝોઇલ એમાઇન", "C) બેન્ઝોઇક એસિડ", "D) એનિલિન"], "correct": 1, "explanation": "એરોમેટિક દ્વિતીય એમાઇનમાં બે હાઇડ્રોજન પરમાણુઓ એમાઇન સમૂહ પર હોય છે, જેથી બેન્ઝોઇલ ક્લોરાઇડ સાથે પ્રક્રિયા થતાં N,N-ડાઇબેન્ઝોઇલ એમાઇન મળે છે. N-બેન્ઝોઇલ એમાઇડ પ્રાથમિક એમાઇન માટે મળે છે. બેન્ઝોઇક એસિડ અને એનિલિન એ પ્રક્રિયાના ઉત્પાદ નથી.", "ncert_ref": "Class XII - Chapter 13: કાર્બનિક સંયોજનોમાં નાઇટ્રોજન ધરાવતા સંયોજનો", "difficulty": "Hard", "num": 27}, {"question": "એક એમાઇન સંયોજન X નું આણ્વીય સૂત્ર C6H15N છે. જ્યારે તેને હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરવામાં આવે છે, ત્યારે અદ્રાવ્ય ઉત્પાદ મળતું નથી. આથી X ની ઓળખ કયા પ્રકારની એમાઇન તરીકે થાય છે?", "options": ["A) પ્રાથમિક એમાઇન", "B) દ્વિતીય એમાઇન", "C) તૃતીય એમાઇન", "D) એરોમેટિક એમાઇન"], "correct": 2, "explanation": "હિન્સબર્ગ કસોટીમાં, તૃતીય એમાઇન બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતું નથી, કારણ કે તેમાં હાઇડ્રોજન પરમાણુ નથી જે સલ્ફોનાઇલ સમૂહ સાથે પ્રતિક્રિયા આપી શકે. પ્રાથમિક અને દ્વિતીય એમાઇન અદ્રાવ્ય ઉત્પાદ આપે છે. એરોમેટિક એમાઇન પણ હિન્સબર્ગ કસોટીમાં પ્રતિક્રિયા આપે છે.", "ncert_ref": "Class XII - Chapter 13: કાર્બનિક સંયોજનોમાં નાઇટ્રોજન ધરાવતા સંયોજનો", "difficulty": "Hard", "num": 28}, {"question": "એક એમાઇન સંયોજન X ને નાઇટ્રસ એસિડ (HNO₂) સાથે પ્રક્રિયા કરતાં ડાયેઝોનિયમ લવણ બનાવતું નથી, પરંતુ તે આલ્કલાઇન માધ્યમમાં ફિનોલ સાથે પ્રક્રિયા કરીને નારંગી રંગનું સંયોજન બનાવે છે. આ એમાઇન X ની ઓળખ કયી હશે?", "options": ["A) એનિલિન", "B) મિથાઇલએમાઇન", "C) ડાઇમિથાઇલએમાઇન", "D) બેન્ઝાઇલએમાઇન"], "correct": 3, "explanation": "ડાયેઝોનિયમ લવણ બનાવવા માટે એમાઇન એરોમેટિક પ્રાથમિક હોવું જરૂરી છે. એનિલિન (A) એરોમેટિક પ્રાથમિક એમાઇન છે, જેથી તે HNO₂ સાથે ડાયેઝોનિયમ લવણ બનાવે છે. મિથાઇલએમાઇન (B) અને ડાઇમિથાઇલએમાઇન (C) એલિફેટિક એમાઇન છે, જેઓ ડાયેઝોનિયમ લવણ બનાવતા નથી, પરંતુ મિથાઇલએમાઇન પ્રાથમિક હોવાથી તે નાઇટ્રોજન વાયુ મુક્ત કરે છે, જ્યારે ડાઇમિથાઇલએમાઇન દ્વિતીય હોવાથી તે નાઇટ્રોસોએમાઇન બનાવે છે. બેન્ઝાઇલએમાઇન (D) એરોમેટિક પ્રાથમિક એમાઇન છે, પરંતુ તે એરોમેટિક રિંગ સાથે સીધું જોડાયેલું નથી (બેન્ઝાઇલ સમૂહ દ્વારા જોડાયેલું છે), જેથી તે HNO₂ સાથે ડાયેઝોનિયમ લવણ બનાવતું નથી. પરંતુ તે આલ્કલાઇન માધ્યમમાં ફિનોલ સાથે પ્રક્રિયા કરીને નારંગી રંગનું સંયોજન (એઝો ડાય) બનાવે છે, જેથી તે સાચો વિકલ્પ છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 29}, {"question": "નીચેનામાંથી કયું એમાઇન સંયોજન હિન્સબર્ગ કસોટીમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરતાં અદ્રાવ્ય સંયોજન બનાવતું નથી?", "options": ["A) પ્રોપાઇલએમાઇન", "B) ડાઇઇથાઇલએમાઇન", "C) એનિલિન", "D) બેન્ઝાઇલએમાઇન"], "correct": 1, "explanation": "હિન્સબર્ગ કસોટી પ્રાથમિક એમાઇન માટે વપરાય છે, જેમાં બેન્ઝિન સલ્ફોનાઇલ ક્લોરાઇડ સાથે પ્રક્રિયા કરીને અદ્રાવ્ય સલ્ફોનામાઇડ બનાવે છે. પ્રોપાઇલએમાઇન (A) અને બેન્ઝાઇલએમાઇન (D) પ્રાથમિક એમાઇન છે, જેથી તે અદ્રાવ્ય સંયોજન બનાવે છે. એનિલિન (C) પણ પ્રાથમિક એમાઇન છે, પરંતુ તે એરોમેટિક હોવાથી તે પણ અદ્રાવ્ય સંયોજન બનાવે છે. ડાઇઇથાઇલએમાઇન (B) દ્વિતીય એમાઇન છે, જેથી તે હિન્સબર્ગ કસોટીમાં અદ્રાવ્ય સંયોજન બનાવતું નથી, પરંતુ દ્રાવ્ય સંયોજન બનાવે છે. જેથી ડાઇઇથાઇલએમાઇન સાચો વિકલ્પ છે.", "ncert_ref": "Class XII - Chapter 13: એમાઇન સંયોજનો", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
