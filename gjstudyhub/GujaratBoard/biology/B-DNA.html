@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B-DNA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>B-DNA</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">B-DNA</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "બી-ડીએનએ (B-DNA) ની લાક્ષણિકતાઓ સંદર્ભે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["તેની પિચ (pitch) લગભગ 3.4 nm હોય છે અને તેમાં લગભગ 10 બેઇઝ જોડ પ્રતિ વળાંક હોય છે", "તેની મુખ્ય ખાંચ (major groove) અને ગૌણ ખાંચ (minor groove) ની પહોળાઈ લગભગ સમાન હોય છે", "તે જમણા હાથનો હેલિક્સ બનાવે છે અને તેની હેલિક્સ ધરીની આસપાસ બેઇઝ જોડો લગભગ લંબરૂપ હોય છે", "તેના બંને સ્ટ્રેન્ડ એકબીજાના પૂરક અને પ્રતિસમાંતર (antiparallel) હોય છે"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે બી-ડીએનએમાં મુખ્ય ખાંચ (major groove) ગૌણ ખાંચ (minor groove) કરતાં વધુ પહોળી હોય છે. વિકલ્પ A, C અને D બી-ડીએનએની સાચી લાક્ષણિકતાઓ દર્શાવે છે: પિચ 3.4 nm, 10 બેઇઝ જોડ પ્રતિ વળાંક, જમણા હાથનો હેલિક્સ અને પ્રતિસમાંતર સ્ટ્રેન્ડ્સ.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "બી-ડીએનએમાં એક પૂર્ણ વળાંક પૂર્ણ કરવા માટે જરૂરી બેઇઝ જોડોની સંખ્યા અને તેની પિચ (pitch) નું મૂલ્ય અનુક્રમે કેટલું હોય છે?", "opts": ["10 બેઇઝ જોડ, 3.4 Å", "10 બેઇઝ જોડ, 3.4 nm", "11 બેઇઝ જોડ, 2.8 nm", "12 બેઇઝ જોડ, 3.6 nm"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે બી-ડીએનએમાં એક પૂર્ણ વળાંક માટે 10 બેઇઝ જોડ હોય છે અને તેની પિચ 3.4 nm હોય છે. વિકલ્પ A ખોટો છે કારણ કે પિચનું મૂલ્ય Å નહીં પણ nm માં હોય છે. વિકલ્પ C અને D બી-ડીએનએની લાક્ષણિકતાઓ સાથે મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન બી-ડીએનએની રચના સાથે સુસંગત નથી?", "opts": ["બી-ડીએનએમાં એડેનિન થાઇમિન સાથે બે હાઇડ્રોજન બંધથી જોડાય છે", "બી-ડીએનએની હેલિક્સ ધરીની આસપાસ બેઇઝ જોડોનું અંતર લગભગ 0.34 nm હોય છે", "બી-ડીએનએમાં ગ્વાનિન સાયટોસિન સાથે ત્રણ હાઇડ્રોજન બંધથી જોડાય છે, જે તેને વધુ સ્થિર બનાવે છે", "બી-ડીએનએમાં શર્કરા-ફોસ્ફેટ બેકબોન હેલિક્સની અંદરની બાજુએ આવેલું હોય છે"], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે બી-ડીએનએમાં શર્કરા-ફોસ્ફેટ બેકબોન હેલિક્સની બહારની બાજુએ આવેલું હોય છે, નહીં કે અંદર. વિકલ્પ A, B અને C બી-ડીએનએની સાચી લાક્ષણિકતાઓ દર્શાવે છે: એડેનિન-થાઇમિન બે હાઇડ્રોજન બંધ, બેઇઝ જોડોનું અંતર 0.34 nm, અને ગ્વાનિન-સાયટોસિન ત્રણ હાઇડ્રોજન બંધ.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં નીચેના પૈકી કયું પરિબળ સૌથી વધુ સ્થિરતા પ્રદાન કરે છે?", "opts": ["શર્કરા-ફોસ્ફેટ બેકબોન વચ્ચેના ફોસ્ફોડાયએસ્ટર બંધ", "બેઇઝ જોડો વચ્ચેના હાઇડ્રોજન બંધ", "બેઇઝ જોડો વચ્ચેના હાઇડ્રોફોબિક આંતરક્રિયાઓ", "ધાતુ આયનો સાથેના સંકલન બંધ"], "ans": 2, "exp": "સાચો જવાબ C છે કારણ કે બી-ડીએનએની સ્થિરતામાં બેઇઝ જોડો વચ્ચેની હાઇડ્રોફોબિક આંતરક્રિયાઓ મુખ્ય ભૂમિકા ભજવે છે. વિકલ્પ A ફોસ્ફોડાયએસ્ટર બંધ સ્ટ્રેન્ડની અખંડિતતા માટે જરૂરી છે, પરંતુ સ્થિરતા માટે મુખ્ય નથી. વિકલ્પ B હાઇડ્રોજન બંધ સ્થિરતા આપે છે, પરંતુ હાઇડ્રોફોબિક આંતરક્રિયાઓ વધુ મહત્ત્વપૂર્ણ છે. વિકલ્પ D ધાતુ આયનો સાથેના સંકલન બંધ સામાન્ય રીતે DNA ની સ્થિરતામાં મહત્ત્વપૂર્ણ નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એક સંશોધકે બી-ડીએનએના નમૂનાનું વિશ્લેષણ કરતાં જાણ્યું કે તેમાં 20% એડેનિન છે. આ નમૂનામાં ગ્વાનિનની ટકાવારી કેટલી હશે?", "opts": ["20%", "30%", "40%", "60%"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે DNA માં એડેનિન (A) થાઇમિન (T) સાથે અને ગ્વાનિન (G) સાયટોસિન (C) સાથે જોડાય છે. જો A = 20% હોય, તો T પણ 20% હશે. બાકીના 60% G અને C વચ્ચે સમાન રીતે વહેંચાય છે, તેથી G = 30% અને C = 30% થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્યો અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "બી-ડીએનએની ડબલ હેલિક્સ રચનામાં, નાઇટ્રોજનસ યુક્ત બેઇઝ વચ્ચેના હાઇડ્રોજન બંધોની સંખ્યા સંબંધે નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["એડેનિન અને થાયમિન વચ્ચે બે હાઇડ્રોજન બંધો હોય છે", "ગ્વાનિન અને સાયટોસિન વચ્ચે ત્રણ હાઇડ્રોજન બંધો હોય છે", "એડેનિન અને થાયમિન વચ્ચે એક હાઇડ્રોજન બંધ હોય છે", "ગ્વાનિન અને સાયટોસિન વચ્ચે ચાર હાઇડ્રોજન બંધો હોય છે"], "ans": 1, "exp": "બી-ડીએનએની ડબલ હેલિક્સ રચનામાં, એડેનિન (A) અને થાયમિન (T) વચ્ચે બે હાઇડ્રોજન બંધો હોય છે, જ્યારે ગ્વાનિન (G) અને સાયટોસિન (C) વચ્ચે ત્રણ હાઇડ્રોજન બંધો હોય છે. આમ, વિકલ્પ B સત્ય છે. વિકલ્પ A ખોટો છે કારણ કે A-T વચ્ચે બે બંધો હોય છે, વિકલ્પ C ખોટો છે કારણ કે A-T વચ્ચે એક નહીં પરંતુ બે બંધો હોય છે, અને વિકલ્પ D ખોટો છે કારણ કે G-C વચ્ચે ચાર નહીં પરંતુ ત્રણ બંધો હોય છે.", "ref": "Std 12 - Chapter 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું પરિબળ ડબલ હેલિક્સની સ્થિરતામાં સૌથી ઓછો ફાળો આપે છે?", "opts": ["હાઇડ્રોજન બંધો", "હાઇડ્રોફોબિક ઇન્ટરેક્શન", "વાન ડર વાલ્સ બળ", "ફોસ્ફોડાયેસ્ટર બંધો"], "ans": 3, "exp": "બી-ડીએનએની ડબલ હેલિક્સની સ્થિરતામાં હાઇડ્રોજન બંધો (A), હાઇડ્રોફોબિક ઇન્ટરેક્શન (B), અને વાન ડર વાલ્સ બળ (C) મહત્વની ભૂમિકા ભજવે છે. ફોસ્ફોડાયેસ્ટર બંધો (D) ડીએનએની સાંકળની રચનામાં ભાગ ભજવે છે, પરંતુ ડબલ હેલિક્સની સ્થિરતામાં સીધો ફાળો આપતા નથી. આમ, વિકલ્પ D સૌથી ઓછો ફાળો આપે છે.", "ref": "Std 12 - Chapter 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું વિધાન ડી-ડીએનએ (D-DNA) સાથે સરખામણી કરતાં ખોટું છે?", "opts": ["બી-ડીએનએમાં પ્રતિ વળાંક પર 10.4 બેઇઝ જોડો હોય છે", "બી-ડીએનએમાં હેલિક્સનો વ્યાસ 20 Å હોય છે", "બી-ડીએનએમાં બેઇઝ પ્લેન હેલિક્સની ધરી સાથે 90° કોણ બનાવે છે", "બી-ડીએનએમાં હેલિક્સની પિચ 3.4 nm હોય છે"], "ans": 2, "exp": "બી-ડીએનએમાં પ્રતિ વળાંક પર 10.4 બેઇઝ જોડો (A), હેલિક્સનો વ્યાસ 20 Å (B), અને હેલિક્સની પિચ 3.4 nm (D) હોય છે. પરંતુ બી-ડીએનએમાં બેઇઝ પ્લેન હેલિક્સની ધરી સાથે 90° કોણ બનાવતું નથી, પરંતુ લગભગ 0° કોણ બનાવે છે, જ્યારે ડી-ડીએનએમાં આ કોણ 90° હોય છે. આમ, વિકલ્પ C ખોટો છે.", "ref": "Std 12 - Chapter 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું પરિબળ ડીએનએની ડબલ હેલિક્સને સ્થિર રાખવામાં મદદ કરતું નથી?", "opts": ["બેઇઝ સ્ટેકિંગ ઇન્ટરેક્શન", "હાઇડ્રોજન બંધો", "આયનિક બંધો", "હાઇડ્રોફોબિક ઇન્ટરેક્શન"], "ans": 2, "exp": "બી-ડીએનએની ડબલ હેલિક્સને સ્થિર રાખવામાં બેઇઝ સ્ટેકિંગ ઇન્ટરેક્શન (A), હાઇડ્રોજન બંધો (B), અને હાઇડ્રોફોબિક ઇન્ટરેક્શન (D) મહત્વની ભૂમિકા ભજવે છે. આયનિક બંધો (C) ડીએનએની રચનામાં સ્થિરતા પ્રદાન કરતા નથી, કારણ કે ડીએનએમાં આયનિક બંધો હાજર નથી. આમ, વિકલ્પ C ખોટો છે.", "ref": "Std 12 - Chapter 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું વિધાન ડીએનએની બી-ફોર્મ અને એ-ફોર્મ વચ્ચેના તફાવત સંબંધે સત્ય છે?", "opts": ["બી-ડીએનએમાં હેલિક્સનો વ્યાસ એ-ડીએનએ કરતાં મોટો હોય છે", "બી-ડીએનએમાં પ્રતિ વળાંક પરના બેઇઝ જોડોની સંખ્યા એ-ડીએનએ કરતાં ઓછી હોય છે", "બી-ડીએનએમાં હેલિક્સની પિચ એ-ડીએનએ કરતાં ઓછી હોય છે", "બી-ડીએનએમાં બેઇઝ જોડો હેલિક્સની ધરીથી ઓછા ઢાળવાળા હોય છે"], "ans": 0, "exp": "બી-ડીએનએ અને એ-ડીએનએ વચ્ચેના તફાવતોમાં, બી-ડીએનએમાં હેલિક્સનો વ્યાસ (20 Å) એ-ડીએનએ (23 Å) કરતાં ઓછો હોય છે, પરંતુ વિકલ્પ Aમાં ઉલ્લેખ કરેલ છે કે બી-ડીએનએમાં વ્યાસ મોટો હોય છે, જે ખોટું છે. વિકલ્પ B ખોટો છે કારણ કે બી-ડીએનએમાં પ્રતિ વળાંક પર 10.4 બેઇઝ જોડો હોય છે, જ્યારે એ-ડીએનએમાં 11 બેઇઝ જોડો હોય છે. વિકલ્પ C ખોટો છે કારણ કે બી-ડીએનએમાં પિચ (3.4 nm) એ-ડીએનએ (2.6 nm) કરતાં વધુ હોય છે. વિકલ્પ D ખોટો છે કારણ કે બી-ડીએનએમાં બેઇઝ જોડો હેલિક્સની ધરી સાથે લગભગ 0° કોણ બનાવે છે, જ્યારે એ-ડીએનએમાં આ કોણ 20° હોય છે. પરંતુ વિકલ્પ A સિવાયના તમામ વિકલ્પો ખોટા છે, પરંતુ પ્રશ્નમાં સત્ય વિધાન શોધવાનું છે, આમ વિકલ્પ A ખોટો હોવા છતાં, અન્ય વિકલ્પો પણ ખોટા છે. પરંતુ વિકલ્પ A એ સૌથી નજીકનું સત્ય વિધાન છે, કારણ કે બી-ડીએનએનો વ્યાસ એ-ડીએનએ કરતાં ઓછો હોવા છતાં, વિકલ્પ A એ વ્યાસ સંબંધી વિધાન છે.", "ref": "Std 12 - Chapter 6: અનુવંશિકતાનું આણ્વિક આધાર", "ch": ""}, {"q": "બી-ડીએનએની ડબલ હેલિક્સ રચનામાં, એડેનિન અને થાયમિન વચ્ચેના હાઇડ્રોજન બંધોની સંખ્યા અને ગ્વાનિન અને સાયટોસિન વચ્ચેના હાઇડ્રોજન બંધોની સંખ્યાનો ગુણોત્તર કયો હોય છે?", "opts": ["1:1", "1:2", "2:3", "3:2"], "ans": 1, "exp": "બી-ડીએનએમાં એડેનિન (A) અને થાયમિન (T) વચ્ચે 2 હાઇડ્રોજન બંધો હોય છે, જ્યારે ગ્વાનિન (G) અને સાયટોસિન (C) વચ્ચે 3 હાઇડ્રોજન બંધો હોય છે. આથી ગુણોત્તર 2:3 નહીં પરંતુ 1:2 (A-T:G-C) હોય છે. A) 1:1 ખોટું છે કારણ કે બંધોની સંખ્યા સમાન નથી. C) 2:3 અને D) 3:2 ખોટા છે કારણ કે તે ગુણોત્તરને ઉલટાવે છે અથવા ખોટી રીતે પ્રસ્તુત કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું વિધાન ડીએનએની હેલિકલ પિચ અને પ્રતિ વળાંકની બેઇઝ જોડોની સંખ્યા સંબંધે સાચું છે?", "opts": ["બી-ડીએનએની હેલિકલ પિચ 3.4 nm હોય છે અને પ્રતિ વળાંકમાં 10 બેઇઝ જોડો હોય છે.", "બી-ડીએનએની હેલિકલ પિચ 0.34 nm હોય છે અને પ્રતિ વળાંકમાં 10 બેઇઝ જોડો હોય છે.", "બી-ડીએનએની હેલિકલ પિચ 3.4 nm હોય છે અને પ્રતિ વળાંકમાં 34 બેઇઝ જોડો હોય છે.", "બી-ડીએનએની હેલિકલ પિચ 0.34 nm હોય છે અને પ્રતિ વળાંકમાં 3.4 બેઇઝ જોડો હોય છે."], "ans": 0, "exp": "બી-ડીએનએની હેલિકલ પિચ (એક પૂર્ણ વળાંકની લંબાઈ) 3.4 nm હોય છે અને પ્રતિ વળાંકમાં 10 બેઇઝ જોડો હોય છે. B) ખોટું છે કારણ કે 0.34 nm એ બેઇઝ જોડો વચ્ચેનું અંતર છે, પિચ નહીં. C) ખોટું છે કારણ કે 34 બેઇઝ જોડો એક વળાંકમાં નથી. D) ખોટું છે કારણ કે 0.34 nm પિચ નથી અને 3.4 બેઇઝ જોડો અસંભવ છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "બી-ડીએનએની ડબલ હેલિક્સ રચનામાં, નીચેના પૈકી કયું પરિબળ ડીએનએની સ્થિરતામાં સૌથી વધુ યોગદાન આપે છે?", "opts": ["હાઇડ્રોજન બંધો", "વાન ડર વાલ્સ બળો", "હાઇડ્રોફોબિક ઇન્ટરેક્શન્સ", "ફોસ્ફોડાયેસ્ટર બંધો"], "ans": 2, "exp": "બી-ડીએનએની સ્થિરતામાં હાઇડ્રોફોબિક ઇન્ટરેક્શન્સ (જલવિરાગી પરસ્પર ક્રિયાઓ) સૌથી વધુ યોગદાન આપે છે, કારણ કે તે બેઇઝ જોડોને એકબીજા સાથે જોડી રાખવામાં મદદ કરે છે. A) હાઇડ્રોજન બંધો મહત્વપૂર્ણ છે પરંતુ સૌથી વધુ નથી. B) વાન ડર વાલ્સ બળો ઓછા પ્રબળ હોય છે. D) ફોસ્ફોડાયેસ્ટર બંધો ડીએનએની રીંછમાં સ્થિરતા પ્રદાન કરે છે પરંતુ બેઇઝ જોડોની સ્થિરતામાં નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું વિધાન ડીએનએની મેજર ગ્રૂવ અને માઇનર ગ્રૂવ સંબંધે સાચું છે?", "opts": ["મેજર ગ્રૂવ અને માઇનર ગ્રૂવની પહોળાઈ સમાન હોય છે.", "મેજર ગ્રૂવ માઇનર ગ્રૂવ કરતાં વધુ પહોળો હોય છે અને પ્રોટીન-ડીએનએ પરસ્પર ક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "માઇનર ગ્રૂવ મેજર ગ્રૂવ કરતાં વધુ પહોળો હોય છે અને ડીએનએની સ્થિરતામાં મદદ કરે છે.", "મેજર ગ્રૂવ અને માઇનર ગ્રૂવ ડીએનએની રચનામાં કોઈ ભૂમિકા ભજવતા નથી."], "ans": 1, "exp": "બી-ડીએનએમાં મેજર ગ્રૂવ માઇનર ગ્રૂવ કરતાં વધુ પહોળો હોય છે અને પ્રોટીન-ડીએનએ પરસ્પર ક્રિયામાં (જેમ કે ટ્રાન્સક્રિપ્શન ફેક્ટરો માટે) મહત્વપૂર્ણ ભૂમિકા ભજવે છે. A) ખોટું છે કારણ કે પહોળાઈ સમાન નથી. C) ખોટું છે કારણ કે માઇનર ગ્રૂવ ઓછો પહોળો હોય છે. D) ખોટું છે કારણ કે બંને ગ્રૂવ મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ડીએનએની બી-ફોર્મ (B-DNA) સંદર્ભે નીચેના વિધાનો ધ્યાનમાં લો:\n\n(1) બી-ડીએનએમાં પ્રતિ વળાંક (turn) દીઠ સરેરાશ 10 બેઇઝ જોડો હોય છે.\n(2) બી-ડીએનએની હેલિક્સની પિચ (pitch) લગભગ 3.4 nm હોય છે.\n(3) બી-ડીએનએમાં મેજર ગ્રૂવ (major groove) અને માઇનર ગ્રૂવ (minor groove)ની પહોળાઈ લગભગ સમાન હોય છે.\n(4) બી-ડીએનએની ડબલ હેલિક્સમાં બંને શૃંખલાઓ એકબીજાની વિરુદ્ધ દિશામાં (antiparallel) ગોઠવાયેલી હોય છે.\n\nઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન ખોટું/ખોટાં છે?", "opts": ["ફક્ત (3)", "ફક્ત (1) અને (2)", "ફક્ત (2) અને (3)", "ફક્ત (1), (2) અને (4)"], "ans": 0, "exp": "સાચો જવાબ વિકલ્પ A (ફક્ત (3)) છે.\n\nકારણો:\n- વિધાન (1): બી-ડીએનએમાં પ્રતિ વળાંક દીઠ સરેરાશ 10 બેઇઝ જોડો હોય છે, જે સાચું છે (GSEB Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય).\n- વિધાન (2): બી-ડીએનએની હેલિક્સની પિચ લગભગ 3.4 nm હોય છે, જે પણ સાચું છે.\n- વિધાન (3): બી-ડીએનએમાં મેજર ગ્રૂવ અને માઇનર ગ્રૂવની પહોળાઈ સમાન હોતી નથી. મેજર ગ્રૂવ લગભગ 22 Å પહોળો હોય છે, જ્યારે માઇનર ગ્રૂવ લગભગ 12 Å પહોળો હોય છે. આથી આ વિધાન ખોટું છે.\n- વિધાન (4): બી-ડીએનએની ડબલ હેલિક્સમાં બંને શૃંખલાઓ એકબીજાની વિરુદ્ધ દિશામાં ગોઠવાયેલી હોય છે, જે સાચું છે.\n\nઆથી માત્ર વિધાન (3) ખોટું છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય", "ch": ""}, {"q": "બી-ડીએનએ (B-DNA) ની રચનામાં, નાઇટ્રોજનસ બેઇઝની ગોઠવણી સંદર્ભે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["નાઇટ્રોજનસ બેઇઝ હેલિક્સના અક્ષથી લગભગ 90° ના ખૂણે ગોઠવાયેલા હોય છે", "પ્યુરિન અને પિરિમિડિન બેઇઝ હેલિક્સના કેન્દ્ર તરફ ગોઠવાયેલા હોય છે", "બેઇઝ જોડો વચ્ચેનું અંતર લગભગ 0.34 nm હોય છે", "બેઇઝ જોડો હેલિક્સના અક્ષને સમાંતર ગોઠવાયેલા હોય છે"], "ans": 3, "exp": "બી-ડીએનએમાં નાઇટ્રોજનસ બેઇઝ હેલિક્સના અક્ષને લંબરૂપે (લગભગ 90° ના ખૂણે) ગોઠવાયેલા હોય છે, અક્ષને સમાંતર નહીં. વિકલ્પ A, B અને C સાચાં છે કારણ કે બેઇઝ હેલિક્સના કેન્દ્ર તરફ ગોઠવાય છે અને તેમની વચ્ચેનું અંતર 0.34 nm હોય છે. વિકલ્પ D ખોટો છે કારણ કે બેઇઝ અક્ષને સમાંતર નહીં, પરંતુ લંબરૂપે ગોઠવાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય (DNA અને RNA)", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, મેજર ગ્રૂવ અને માઇનર ગ્રૂવ સંદર્ભે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["મેજર ગ્રૂવ પ્રોટીન સાથેની આંતરક્રિયા માટે વધુ સુલભ હોય છે", "માઇનર ગ્રૂવ મેજર ગ્રૂવ કરતાં વધુ પહોળો હોય છે", "મેજર ગ્રૂવમાં બેઇઝ જોડોની વધુ માહિતી ઉપલબ્ધ હોય છે", "માઇનર ગ્રૂવમાં હાઇડ્રોજન બંધોની સંખ્યા મર્યાદિત હોય છે"], "ans": 1, "exp": "બી-ડીએનએમાં મેજર ગ્રૂવ માઇનર ગ્રૂવ કરતાં વધુ પહોળો હોય છે, નહીં કે માઇનર ગ્રૂવ મેજર ગ્રૂવ કરતાં વધુ પહોળો. વિકલ્પ B ખોટું છે કારણ કે માઇનર ગ્રૂવ સાંકડો હોય છે. વિકલ્પ A, C અને D સાચાં છે કારણ કે મેજર ગ્રૂવ પ્રોટીન સાથેની આંતરક્રિયા માટે વધુ સુલભ હોય છે અને તેમાં બેઇઝ જોડોની વધુ માહિતી ઉપલબ્ધ હોય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય (DNA અને RNA)", "ch": ""}, {"q": "બી-ડીએનએની રચનામાં, નીચેના પૈકી કયું પરિબળ ડીએનએની હેલિકલ પિચ (helical pitch) ને અસર કરતું નથી?", "opts": ["આયનિક સાંદ્રતા", "તાપમાન", "પ્રકાશની તીવ્રતા", "pH મૂલ્ય"], "ans": 2, "exp": "બી-ડીએનએની હેલિકલ પિચ આયનિક સાંદ્રતા, તાપમાન અને pH મૂલ્યથી પ્રભાવિત થાય છે, પરંતુ પ્રકાશની તીવ્રતાથી પ્રભાવિત થતી નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રકાશની તીવ્રતા ડીએનએની હેલિકલ પિચને અસર કરતી નથી. વિકલ્પ A, B અને D સાચાં છે કારણ કે આ પરિબળો હેલિકલ પિચને અસર કરે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય (DNA અને RNA)", "ch": ""}, {"q": "ડીએનએની બી-ફોર્મ (B-DNA) ની રચનામાં, નીચેના પૈકી કયું પરિબળ ડીએનએની સ્થિરતામાં સીધો ફાળો આપતું નથી, પરંતુ તેની હાજરી ડીએનએની કાર્યાત્મકતા માટે જરૂરી છે?", "opts": ["હાઇડ્રોજન બંધોની સંખ્યા અને સ્થાન", "સ્ટેકિંગ આંતરક્રિયાઓ (stacking interactions) વચ્ચેના વાન ડર વાલ્સ બળો", "ફોસ્ફોડાઇએસ્ટર બંધોની હાજરી", "મેજર ગ્રૂવ અને માઇનર ગ્રૂવની પહોળાઈ અને ઊંડાઈ"], "ans": 3, "exp": "સાચો જવાબ: D) મેજર ગ્રૂવ અને માઇનર ગ્રૂવની પહોળાઈ અને ઊંડાઈ. કારણ કે મેજર ગ્રૂવ અને માઇનર ગ્રૂવની પહોળાઈ અને ઊંડાઈ ડીએનએની સ્થિરતામાં સીધો ફાળો આપતી નથી, પરંતુ તે પ્રોટીન અને ઉત્સેચકો સાથેની આંતરક્રિયા માટે જરૂરી છે. હાઇડ્રોજન બંધો અને સ્ટેકિંગ આંતરક્રિયાઓ ડીએનએની સ્થિરતામાં સીધો ફાળો આપે છે, જ્યારે ફોસ્ફોડાઇએસ્ટર બંધો ડીએનએની શૃંખલાને જોડી રાખે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય (DNA અને RNA)", "ch": ""}, {"q": "બી-ડીએનએ (B-DNA) ની રચનામાં, નીચેના પૈકી કયું વિધાન **ડી-ડીએનએ (D-DNA)** સાથે સરખામણી કરતાં **સાચું નથી**?", "opts": ["બી-ડીએનએમાં પ્રતિ વળાંકમાં 10.5 બેઇઝ જોડો હોય છે, જ્યારે ડી-ડીએનએમાં પ્રતિ વળાંકમાં 8 બેઇઝ જોડો હોય છે.", "બી-ડીએનએની હેલિકલ પિચ 3.4 nm હોય છે, જ્યારે ડી-ડીએનએની હેલિકલ પિચ 2.4 nm હોય છે.", "બી-ડીએનએમાં ડી-ડીએનએ કરતાં વધુ હાઇડ્રોજન બંધો હોય છે, જે તેને વધુ સ્થિર બનાવે છે.", "બી-ડીએનએમાં મેજર ગ્રૂવ અને માઇનર ગ્રૂવની ગોઠવણી ડી-ડીએનએ કરતાં અલગ હોય છે."], "ans": 2, "exp": "વિકલ્પ C ખોટું છે કારણ કે બી-ડીએનએમાં ડી-ડીએનએ કરતાં **ઓછા** હાઇડ્રોજન બંધો હોય છે. બી-ડીએનએમાં પ્રતિ બેઇઝ જોડમાં 2-3 હાઇડ્રોજન બંધો હોય છે, જ્યારે ડી-ડીએનએમાં વધુ હાઇડ્રોજન બંધો હોઈ શકે છે, જે તેને વધુ સ્થિર બનાવે છે. વિકલ્પ A સાચો છે કારણ કે બી-ડીએનએમાં પ્રતિ વળાંકમાં 10.5 બેઇઝ જોડો હોય છે, જ્યારે ડી-ડીએનએમાં 8 બેઇઝ જોડો હોય છે. વિકલ્પ B સાચો છે કારણ કે બી-ડીએનએની હેલિકલ પિચ 3.4 nm હોય છે, જ્યારે ડી-ડીએનએની હેલિકલ પિચ 2.4 nm હોય છે. વિકલ્પ D સાચો છે કારણ કે બી-ડીએનએ અને ડી-ડીએનએની મેજર ગ્રૂવ અને માઇનર ગ્રૂવની ગોઠવણી અલગ હોય છે.", "ref": "Std 12 - Chapter 6: વંશવેલા અને આણ્વિક આનુવંશિકતા (Molecular Basis of Inheritance)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
