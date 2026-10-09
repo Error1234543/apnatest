@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દહીં બનાવવામાં સૂક્ષ્મજીવો</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>દહીં બનાવવામાં સૂક્ષ્મજીવો</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">દહીં બનાવવામાં સૂક્ષ્મજીવો</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "દહીં બનાવવામાં વપરાતા સૂક્ષ્મજીવોની જાતિઓમાં કયા બેક્ટેરિયાને 'લેક્ટિક એસિડ બેક્ટેરિયા' તરીકે ઓળખવામાં આવે છે, જે દૂધમાંથી લેક્ટોઝને લેક્ટિક એસિડમાં ફેરવી દહીં બનાવે છે?", "opts": ["એસ્કેરિકિયા કોલાઇ", "લેક્ટોબેસિલસ એસિડોફિલસ", "સ્ટેફાઇલોકોકસ ઓરિયસ", "બેસિલસ સબટિલિસ"], "ans": 1, "exp": "લેક્ટોબેસિલસ એસિડોફિલસ એ લેક્ટિક એસિડ બેક્ટેરિયા છે જે દૂધમાં રહેલ લેક્ટોઝને લેક્ટિક એસિડમાં ફેરવી દહીં બનાવે છે. એસ્કેરિકિયા કોલાઇ આંતરડાના સૂક્ષ્મજીવ તરીકે જાણીતું છે, સ્ટેફાઇલોકોકસ ઓરિયસ ત્વચા અને શ્વસનતંત્રના ઇન્ફેક્શન માટે જવાબદાર છે, જ્યારે બેસિલસ સબટિલિસ મૃતોપજીવી બેક્ટેરિયા છે જે સામાન્ય રીતે દહીં બનાવવામાં વપરાતું નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવા માટે દૂધને ગરમ કરીને ઠંડુ પાડવામાં આવે છે, પરંતુ તેને ઉકાળી નથી શકાતું. આ પગલાંનો હેતુ શો છે?", "opts": ["દૂધમાં રહેલા તમામ સૂક્ષ્મજીવોને મારી નાખવા", "દૂધમાં રહેલા પોષક તત્વોને સંરક્ષિત રાખવા અને અપેષ્ટ સૂક્ષ્મજીવોને મારી નાખવા", "દૂધને પાતળું બનાવવા", "દહીં જલદી જામે તે માટે તાપમાન વધારવા"], "ans": 1, "exp": "દૂધને ગરમ કરીને ઠંડુ પાડવાનો હેતુ અપેષ્ટ સૂક્ષ્મજીવોને મારી નાખવા અને ઉપયોગી સૂક્ષ્મજીવો (લેક્ટિક એસિડ બેક્ટેરિયા)ને જીવિત રાખવા છે. ઉકાળવાથી ઉપયોગી સૂક્ષ્મજીવો પણ મારી જાય છે, જે દહીં બનાવવા માટે જરૂરી છે. પોષક તત્વોને સંરક્ષિત રાખવા પણ આ પગલાંનો એક હેતુ છે.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધને કેવી રીતે જામવા મદદ કરે છે?", "opts": ["દૂધના પ્રોટીનને તોડીને પાણી મુક્ત કરે છે", "દૂધના pHને ઘટાડીને કેસીન પ્રોટીનને જામવા મજબૂર કરે છે", "દૂધમાં હવા ભેળવીને ફીણ પેદા કરે છે", "દૂધમાં શર્કરાને વાધારે છે"], "ans": 1, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના pHને ઘટાડે છે, જેના કારણે દૂધમાં રહેલ કેસીન પ્રોટીન જામી જાય છે અને દહીં બને છે. બાકીના વિકલ્પો દહીં બનાવવાની પ્રક્રિયા સાથે સંકળાયેલા નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા સૂક્ષ્મજીવોની ક્રિયાશીલતા માટે કયું તાપમાન સૌથી અનુકૂળ ગણવામાં આવે છે?", "opts": ["0°C", "25°C", "37°C", "100°C"], "ans": 2, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા માટે 37°C (માનવ શરીરનું તાપમાન) સૌથી અનુકૂળ તાપમાન છે, કારણ કે આ તાપમાને તેની ઉત્સેચક ક્રિયાશીલતા સૌથી વધુ હોય છે. 0°C અને 100°C પર સૂક્ષ્મજીવોની ક્રિયાશીલતા ખૂબ જ ઓછી અથવા શૂન્ય હોય છે, જ્યારે 25°C પર ક્રિયાશીલતા ધીમી પડે છે.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવા માટે દૂધમાં સૂક્ષ્મજીવોની વસ્તી વૃદ્ધિ માટે કયો પોષક તત્વ સૌથી મહત્વપૂર્ણ છે?", "opts": ["પ્રોટીન", "લેક્ટોઝ (દૂધની શર્કરા)", "ચરબી", "ખનીજ દ્રવ્યો"], "ans": 1, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા માટે લેક્ટોઝ (દૂધની શર્કરા) એ પ્રાથમિક કાર્બન સ્ત્રોત છે, જેની વપરાશથી તેઓ લેક્ટિક એસિડ ઉત્પન્ન કરે છે. પ્રોટીન, ચરબી અને ખનીજ દ્રવ્યો પણ મહત્વપૂર્ણ છે, પરંતુ લેક્ટોઝ વિના દહીં બનાવવાની પ્રક્રિયા શક્ય નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા લેક્ટોઝના કિણવન દરમિયાન કયા ઉત્પાદનો ઉત્પન્ન થાય છે, જેમાંથી એક દહીંને ખાટો સ્વાદ આપે છે?", "opts": ["લેક્ટિક એસિડ અને ગ્લુકોઝ", "લેક્ટિક એસિડ અને ગેલેક્ટોઝ", "એસિટિક એસિડ અને લેક્ટોઝ", "સાયટ્રિક એસિડ અને ગ્લુકોઝ"], "ans": 1, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા લેક્ટોઝને કિણવન દ્વારા લેક્ટિક એસિડ અને ગેલેક્ટોઝમાં તોડે છે. લેક્ટિક એસિડ દહીંને ખાટો સ્વાદ આપે છે. ગ્લુકોઝ અને લેક્ટોઝ અહીં ઉત્પાદન નથી, એસિટિક એસિડ અને સાયટ્રિક એસિડ લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતાં નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા સૂક્ષ્મજીવોની ક્રિયાશીલતા માટે કયું પરિબળ સૌથી મહત્વપૂર્ણ છે, જ્યારે દૂધને 40-45°C તાપમાને ગરમ કરવામાં આવે છે?", "opts": ["દૂધમાં રહેલા પાણીની માત્રા", "દૂધમાં રહેલા પ્રોટીનની માત્રા", "ઉત્સેચક લેક્ટેઝની ક્રિયાશીલતા", "લેક્ટિક એસિડ બેક્ટેરિયાની વૃદ્ધિ દર"], "ans": 3, "exp": "40-45°C તાપમાન લેક્ટિક એસિડ બેક્ટેરિયાની વૃદ્ધિ માટે અનુકૂળ હોય છે, જે દહીં બનાવવામાં મહત્વપૂર્ણ પરિબળ છે. પાણી અને પ્રોટીનની માત્રા તો પોષક તત્વો છે, પરંતુ તાપમાન વૃદ્ધિ દરને પ્રભાવિત કરે છે. લેક્ટેઝ ઉત્સેચક દૂધમાં સહજ રીતે હાજર હોય છે, પરંતુ તે બેક્ટેરિયાની ક્રિયાશીલતાને પ્રભાવિત કરતું નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના કયા ઘટકને જમીન પર ઉતારીને દહીંને ઘટ્ટ બનાવે છે?", "opts": ["કેસીન પ્રોટીન", "લેક્ટોઝ", "ચરબી", "ખનીજ દ્રવ્યો"], "ans": 0, "exp": "લેક્ટિક એસિડ કેસીન પ્રોટીનને જમીન પર ઉતારીને દહીંને ઘટ્ટ બનાવે છે. લેક્ટોઝ, ચરબી અને ખનીજ દ્રવ્યો દહીંની ઘટ્ટતામાં સીધો ફાળો આપતા નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝના કિણવન દરમિયાન ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના પ્રોટીન કેસીનને કેવી રીતે અસર કરે છે?", "opts": ["કેસીનને પાણીમાં દ્રાવ્ય બનાવે છે, જેથી દહીં પાતળું રહે છે", "કેસીનને અદ્રાવ્ય બનાવે છે, જેથી દહીં જાડું અને ઘટ્ટ બને છે", "કેસીનને તોડીને એમિનો એસિડમાં રૂપાંતરિત કરે છે, જેથી દહીંનો સ્વાદ કડવો થાય છે", "કેસીન સાથે પ્રક્રિયા કરીને લેક્ટોઝની માત્રા વધારે છે, જેથી દહીં વધુ મીઠું લાગે છે"], "ans": 1, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના pHને ઘટાડે છે, જેથી કેસીન પ્રોટીન અદ્રાવ્ય બને છે અને દહીં જાડું અને ઘટ્ટ બને છે. વિકલ્પ A ખોટો છે કારણ કે લેક્ટિક એસિડ કેસીનને પાણીમાં દ્રાવ્ય બનાવતો નથી. વિકલ્પ C ખોટો છે કારણ કે કેસીનને એમિનો એસિડમાં રૂપાંતરિત કરવામાં આવતું નથી. વિકલ્પ D ખોટો છે કારણ કે લેક્ટોઝની માત્રા ઘટે છે, વધતી નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા સૂક્ષ્મજીવો દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધમાં રહેલા અન્ય સૂક્ષ્મજીવોની વૃદ્ધિને કેવી રીતે અટકાવે છે?", "opts": ["લેક્ટિક એસિડ સૂક્ષ્મજીવોના કોષભિત્તિને તોડીને તેમને મારી નાખે છે", "લેક્ટિક એસિડ દૂધના pHને ઘટાડીને અન્ય સૂક્ષ્મજીવો માટે અનુકૂળ વાતાવરણ નહીં રહે તે રીતે બનાવે છે", "લેક્ટિક એસિડ અન્ય સૂક્ષ્મજીવોના ઉત્સેચકોને સક્રિય કરે છે, જેથી તેઓ વધુ પ્રમાણમાં વૃદ્ધિ પામે છે", "લેક્ટિક એસિડ દૂધમાં રહેલા પોષક તત્ત્વોને બંધનમાં લઈ લે છે, જેથી અન્ય સૂક્ષ્મજીવોને પોષણ મળતું નથી"], "ans": 1, "exp": "લેક્ટિક એસિડ દૂધના pHને ઘટાડે છે, જેથી અન્ય સૂક્ષ્મજીવો માટે અનુકૂળ વાતાવરણ નહીં રહે અને તેમની વૃદ્ધિ અટકાવવામાં આવે છે. વિકલ્પ A ખોટો છે કારણ કે લેક્ટિક એસિડ સીધા જ સૂક્ષ્મજીવોના કોષભિત્તિને તોડતો નથી. વિકલ્પ C ખોટો છે કારણ કે લેક્ટિક એસિડ અન્ય સૂક્ષ્મજીવોના ઉત્સેચકોને સક્રિય કરતો નથી. વિકલ્પ D ખોટો છે કારણ કે લેક્ટિક એસિડ પોષક તત્ત્વોને બંધનમાં લેતો નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના કયા ઘટકને સ્થિર કરવામાં મદદ કરે છે?", "opts": ["દૂધમાં રહેલા વિટામિનને", "દૂધમાં રહેલા ખનીજ દ્રવ્યોને", "દૂધમાં રહેલા કેસીન પ્રોટીનને", "દૂધમાં રહેલા ચરબીને"], "ans": 2, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા ઉત્પન્ન થતો લેક્ટિક એસિડ દૂધના pHને ઘટાડે છે, જે કેસીન પ્રોટીનને ગંઠાયેલું બનાવે છે. આના કારણે દહીંનું જાડું સ્વરૂપ સ્થિર રહે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: A) લેક્ટિક એસિડ વિટામિનને સ્થિર કરતું નથી, B) લેક્ટિક એસિડ ખનીજ દ્રવ્યોને સ્થિર કરતું નથી, D) લેક્ટિક એસિડ ચરબીને સ્થિર કરતું નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની કઈ જાતિ દૂધમાં રહેલા લેક્ટોઝને સીધા જ કિણવણ કરવાની ક્ષમતા ધરાવે છે, પરંતુ તેના માટે કોઈ અતિરિક્ત ઉત્સેચકની જરૂર રહેતી નથી?", "opts": ["Lactobacillus bulgaricus", "Streptococcus thermophilus", "Lactococcus lactis", "Leuconostoc mesenteroides"], "ans": 1, "exp": "Streptococcus thermophilus લેક્ટોઝને સીધા જ કિણવણ કરવાની ક્ષમતા ધરાવે છે અને તેના માટે કોઈ અતિરિક્ત ઉત્સેચકની જરૂર રહેતી નથી. Lactobacillus bulgaricus લેક્ટોઝને કિણવણ કરવા માટે β-ગેલેક્ટોઝિડેઝ ઉત્સેચકની જરૂર પડે છે. Lactococcus lactis અને Leuconostoc mesenteroides પણ લેક્ટોઝના કિણવણ માટે ઉત્સેચકની જરૂર પડે છે.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની કઈ ક્રિયા દૂધના સ્વાદ અને ગંધમાં ફેરફાર લાવે છે?", "opts": ["લેક્ટોઝનું લેક્ટિક એસિડમાં કિણવન", "પ્રોટીનનું એમિનો એસિડમાં વિઘટન", "ચરબીનું ગ્લિસરોલ અને ફેટી એસિડમાં વિઘટન", "ખનીજ દ્રવ્યોનું ઓક્સીડેશન"], "ans": 2, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા દૂધમાં રહેલી ચરબીનું લાઇપેઝ ઉત્સેચક દ્વારા ગ્લિસરોલ અને ફેટી એસિડમાં વિઘટન કરે છે, જે દહીંના વિશિષ્ટ સ્વાદ અને ગંધ માટે જવાબદાર છે. વિકલ્પ A લેક્ટોઝના કિણવનને લગતો છે, જે દહીંના જાડા પડ માટે જવાબદાર છે, પરંતુ સ્વાદ અને ગંધ માટે નહીં. વિકલ્પ B પ્રોટીનના વિઘટનને લગતો છે, જે દહીંના સ્વાદમાં ફેરફાર લાવતું નથી. વિકલ્પ D ખનીજ દ્રવ્યોના ઓક્સીડેશનને લગતો છે, જે દહીં બનાવવામાં મહત્વનો ભાગ ભજવતું નથી.", "ref": "Std 12 - અધ્યાય 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયા દરમિયાન લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝનું કિણવન થાય છે. આ પ્રક્રિયા દરમિયાન નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["લેક્ટોઝનું કિણવન એનારોબિક શ્વસનનું ઉદાહરણ છે, જેમાં ઓક્સિજનની જરૂર પડતી નથી.", "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા લેક્ટોઝનું કિણવન થવાથી દૂધમાં pH ઘટે છે, જે પ્રોટીનના સ્કંદનમાં મદદરૂપ થાય છે.", "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા લેક્ટોઝનું કિણવન થવાથી કાર્બન ડાયોક્સાઇડ વાયુ ઉત્પન્ન થાય છે, જે દહીંને ફૂલાવે છે.", "લેક્ટિક એસિડ બેક્ટેરિયા દ્વારા લેક્ટોઝનું કિણવન થવાથી ઉર્જા મુક્ત થાય છે, જે બેક્ટેરિયાની વૃદ્ધિ માટે ઉપયોગી છે."], "ans": 2, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝનું કિણવન એનારોબિક શ્વસન છે, જેમાં લેક્ટિક એસિડ ઉત્પન્ન થાય છે, પરંતુ કાર્બન ડાયોક્સાઇડ વાયુ ઉત્પન્ન થતો નથી. કાર્બન ડાયોક્સાઇડનું ઉત્પાદન આલ્કોહોલિક કિણવનમાં જોવા મળે છે, જેમ કે યીસ્ટ દ્વારા. તેથી વિકલ્પ C ખોટું છે. બાકીના વિકલ્પો સાચાં છે કારણ કે: A) એનારોબિક શ્વસનમાં ઓક્સિજનની જરૂર નથી, B) લેક્ટિક એસિડના ઉત્પાદનથી pH ઘટે છે અને પ્રોટીનનું સ્કંદન થાય છે, D) કિણવન દરમિયાન ઉર્જા મુક્ત થાય છે જે બેક્ટેરિયાની વૃદ્ધિ માટે જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં સૂક્ષ્મજીવો", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયામાં લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ઉપરાંત અન્ય કયા સૂક્ષ્મજીવોની હાજરી દહીંની ગુણવત્તા અને સ્વાદ પર અસર કરી શકે છે? નીચેના પૈકી કયું વિધાન યોગ્ય નથી?", "opts": ["*Streptococcus thermophilus* અને *Lactobacillus bulgaricus* ની સંયુક્ત ક્રિયા દહીંના સ્વાદ અને બનાવટ માટે જવાબદાર છે.", "યીસ્ટની હાજરી દહીંમાં આલ્કોહોલનું ઉત્પાદન કરી શકે છે, જે દહીંને ખાટું બનાવે છે.", "*Bifidobacterium* જેવા પ્રોબાયોટિક બેક્ટેરિયા દહીંની પોષક ગુણવત્તા વધારે છે અને પાચનમાં મદદરૂપ થાય છે.", "*Escherichia coli* જેવા બેક્ટેરિયાની હાજરી દહીંને સ્વાસ્થ્ય માટે હાનિકારક બનાવી શકે છે, પરંતુ તે દહીંના સ્વાદને અસર કરતી નથી."], "ans": 1, "exp": "યીસ્ટ દ્વારા દહીંમાં આલ્કોહોલનું ઉત્પાદન થતું નથી. યીસ્ટ સામાન્ય રીતે આલ્કોહોલિક કિણવન માટે જાણીતું છે, પરંતુ દહીં બનાવવાની પ્રક્રિયામાં તેની હાજરી હાનિકારક ગણાય છે અને તે દહીંને ખાટું બનાવવાને બદલે બગાડી શકે છે. તેથી વિકલ્પ B ખોટું છે. બાકીના વિકલ્પો સાચાં છે કારણ કે: A) *Streptococcus thermophilus* અને *Lactobacillus bulgaricus* ની સંયુક્ત ક્રિયા દહીંના સ્વાદ અને બનાવટ માટે જવાબદાર છે, C) *Bifidobacterium* પ્રોબાયોટિક તરીકે કામ કરે છે, D) *Escherichia coli* ની હાજરી દહીંને હાનિકારક બનાવે છે પરંતુ સ્વાદને અસર કરતી નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં સૂક્ષ્મજીવો", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયામાં લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની ક્રિયાશીલતા માટે દૂધમાં રહેલા કયા વિટામિનની હાજરી જરૂરી છે, જેની ઉણપથી બેક્ટેરિયાની વૃદ્ધિ ધીમી પડી શકે છે?", "opts": ["વિટામિન A", "વિટામિન B12", "વિટામિન C", "વિટામિન D"], "ans": 1, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની વૃદ્ધિ અને ક્રિયાશીલતા માટે વિટામિન B12 ની હાજરી જરૂરી છે. આ વિટામિન બેક્ટેરિયાના કોષ વિભાજન અને ચયાપચય માટે મહત્વપૂર્ણ છે. વિટામિન A, C અને D ની ઉણપથી બેક્ટેરિયાની વૃદ્ધિ પર ખાસ અસર થતી નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં સૂક્ષ્મજીવો", "ch": ""}, {"q": "દહીં બનાવવામાં વપરાતા લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની ક્રિયાશીલતા માટે દૂધનું pH કેટલું હોવું જોઈએ, જેથી બેક્ટેરિયાની વૃદ્ધિ અને લેક્ટિક એસિડનું ઉત્પાદન મહત્તમ થાય?", "opts": ["pH 3.0 - 4.0", "pH 4.5 - 5.5", "pH 6.0 - 6.5", "pH 7.0 - 8.0"], "ans": 2, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ની વૃદ્ધિ અને ક્રિયાશીલતા માટે દૂધનું pH 6.0 - 6.5 હોવું જોઈએ. આ pH શ્રેણી બેક્ટેરિયાની વૃદ્ધિ અને લેક્ટિક એસિડના ઉત્પાદન માટે સૌથી અનુકૂળ છે. pH 3.0 - 4.0 ખૂબ જ ઍસિડિક છે, જ્યારે pH 7.0 - 8.0 ખૂબ જ આલ્કલાઇન છે, જે બેક્ટેરિયાની વૃદ્ધિને અવરોધે છે.", "ref": "Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં સૂક્ષ્મજીવો", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયામાં લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝનું કિણવન થાય છે, પરંતુ જો દૂધમાં પ્રારંભિક તબક્કે ઓક્સિજનની હાજરી વધુ હોય તો આ પ્રક્રિયા પર શું અસર થાય છે? નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય છે?", "opts": ["LABની વૃદ્ધિ ધીમી પડે છે કારણ કે તેઓ અજારક (anaerobic) કે સૂક્ષ્મજારક (microaerophilic) હોય છે", "લેક્ટોઝનું વિઘટન ઝડપી બને છે કારણ કે ઓક્સિજન ઉત્સેચકોની ક્રિયાશીલતા વધારે છે", "દહીંની ગુણવત્તા સુધરે છે કારણ કે ઓક્સિજન બેક્ટેરિયાને વધુ ઊર્જા આપે છે", "લેક્ટિક એસિડનું ઉત્પાદન બંધ થઈ જાય છે કારણ કે ઓક્સિજન કિણવન પ્રક્રિયાને અવરોધે છે"], "ans": 0, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા મુખ્યત્વે અજારક કે સૂક્ષ્મજારક હોય છે, તેથી વધુ ઓક્સિજનની હાજરીમાં તેમની વૃદ્ધિ અને ક્રિયાશીલતા ધીમી પડે છે. ઓક્સિજન લેક્ટોઝના વિઘટનને ઝડપી બનાવતું નથી કે લેક્ટિક એસિડનું ઉત્પાદન સંપૂર્ણપણે બંધ થતું નથી, પરંતુ તેની કાર્યક્ષમતા ઘટે છે.", "ref": "Std 11 - પ્રકરણ 14: સૂક્ષ્મજીવોનું વિશ્વ", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયા દરમિયાન, જો દૂધમાં લેક્ટિક એસિડ બેક્ટેરિયા (LAB) ઉપરાંત યીસ્ટની હાજરી હોય, તો દહીંનો સ્વાદ કેવો રહેશે?", "opts": ["દહીંનો સ્વાદ વધુ ખાટો થશે કારણ કે યીસ્ટ પણ લેક્ટિક એસિડ ઉત્પન્ન કરે છે.", "દહીંનો સ્વાદ મીઠો થશે કારણ કે યીસ્ટ લેક્ટોઝને ગ્લૂકોઝ અને ગેલેક્ટોઝમાં તોડી નાખે છે.", "દહીંનો સ્વાદ કડવો થશે કારણ કે યીસ્ટ દ્વારા એલ્કોહોલ અને કાર્બન ડાયોક્સાઇડ ઉત્પન્ન થશે.", "દહીંનો સ્વાદ કોઈ ફેરફાર થશે નહીં કારણ કે યીસ્ટ LAB ની ક્રિયાશીલતાને અસર કરતું નથી."], "ans": 2, "exp": "યીસ્ટ દ્વારા એલ્કોહોલ અને કાર્બન ડાયોક્સાઇડ ઉત્પન્ન થાય છે, જેથી દહીંનો સ્વાદ કડવો થાય છે. A વિકલ્પ ખોટો છે કારણ કે યીસ્ટ લેક્ટિક એસિડ ઉત્પન્ન કરતું નથી. B વિકલ્પ ખોટો છે કારણ કે યીસ્ટ લેક્ટોઝને ગ્લૂકોઝ અને ગેલેક્ટોઝમાં તોડતું નથી, પરંતુ એલ્કોહોલ અને CO2 ઉત્પન્ન કરે છે. D વિકલ્પ ખોટો છે કારણ કે યીસ્ટની હાજરી દહીંના સ્વાદને અસર કરે છે.", "ref": "Std 12 - Chapter 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}, {"q": "દહીં બનાવવાની પ્રક્રિયા દરમિયાન, જ્યારે લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝનું કિણવન થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ દહીંના ગઠ્ઠા (કર્ડ) બનાવવામાં સૌથી નિર્ણાયક ભૂમિકા ભજવે છે?", "opts": ["લેક્ટિક એસિડ દ્વારા દૂધના pHમાં ઘટાડો થવો, જે કેસીન પ્રોટીનને અસ્થિર બનાવે છે", "ઉત્પન્ન થતો કાર્બન ડાયોક્સાઇડ, જે દહીંને ફૂલાવે છે", "ઉત્પન્ન થતો ઇથેનોલ, જે દહીંને ખાટો સ્વાદ આપે છે", "લેક્ટિક એસિડ દ્વારા દૂધમાં રહેલા ચરબીના કણોનું વિઘટન થવું"], "ans": 0, "exp": "લેક્ટિક એસિડ બેક્ટેરિયા (LAB) દ્વારા લેક્ટોઝનું કિણવન થતાં લેક્ટિક એસિડ ઉત્પન્ન થાય છે, જે દૂધના pHને ઘટાડે છે. આ ઘટાડાથી કેસીન પ્રોટીન (દૂધનું મુખ્ય પ્રોટીન) અસ્થિર બને છે અને ગઠ્ઠા (કર્ડ) બનાવે છે. આ પ્રક્રિયા દહીં બનાવવામાં નિર્ણાયક છે. ઉત્પન્ન થતો કાર્બન ડાયોક્સાઇડ (B) અથવા ઇથેનોલ (C) દહીં બનાવવામાં મુખ્ય ભૂમિકા ભજવતાં નથી, જ્યારે ચરબીના કણોનું વિઘટન (D) દહીં બનાવવામાં સીધી ભૂમિકા ભજવતું નથી.", "ref": "Std 12 - પ્રકરણ 10: સૂક્ષ્મજીવો અને માનવ કલ્યાણ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
