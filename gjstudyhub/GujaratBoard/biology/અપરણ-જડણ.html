@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અપૂર્ણ જોડાણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>અપૂર્ણ જોડાણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">અપૂર્ણ જોડાણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક સજીવમાં જો બે જનીન એક જ વર્ણસૂત્ર પર 12 સેન્ટિમોર્ગન અંતરે સ્થિત હોય, તો તેમની વચ્ચે અપૂર્ણ જોડાણને કારણે કયું પરિણામ મળે છે?", "opts": ["12% પુનઃસંયોજન આવૃત્તિ અને 88% પિતૃ પ્રકાર", "6% પુનઃસંયોજન આવૃત્તિ અને 94% પિતૃ પ્રકાર", "24% પુનઃસંયોજન આવૃત્તિ અને 76% પિતૃ પ્રકાર", "100% પિતૃ પ્રકાર અને કોઈ પુનઃસંયોજન નહીં"], "ans": 0, "exp": "1 સેન્ટિમોર્ગન = 1% પુનઃસંયોજન આવૃત્તિ. તેથી 12 સેન્ટિમોર્ગન અંતરે 12% પુનઃસંયોજન આવૃત્તિ મળે અને બાકીના 88% પિતૃ પ્રકાર હોય. વિકલ્પ B ખોટો છે કારણ કે 6% એ અડધું અંતર દર્શાવે છે. વિકલ્પ C ખોટો છે કારણ કે 24% બમણું અંતર દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે અપૂર્ણ જોડાણમાં પુનઃસંયોજન થાય જ છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "ટોમેટોના છોડમાં લાલ રંગ (R) અને ગોળ આકાર (O) માટેના જનીન એક જ વર્ણસૂત્ર પર 18 એકમ અંતરે સ્થિત છે. જો બંને જનીન માટે વિષમયુગ્મી છોડ (RrOo)નું સ્વપરાગનયન કરવામાં આવે, તો F₂ પેઢીમાં કયા પ્રમાણમાં લાલ-લંબ ફળો મળવાની સંભાવના છે?", "opts": ["9%", "18%", "4.5%", "1.5%"], "ans": 2, "exp": "અપૂર્ણ જોડાણને કારણે પુનઃસંયોજન આવૃત્તિ 18% છે. તેથી પિતૃ પ્રકાર (RO અને ro) 82% અને પુનઃસંયોજિત પ્રકાર (Ro અને rO) 18% મળે. લાલ-લંબ (Ro) પ્રકાર માટે 9% (18% નો અડધો) સંભાવના છે. વિકલ્પ A ખોટો છે કારણ કે તે કુલ પુનઃસંયોજન દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે તે એક જ પુનઃસંયોજિત પ્રકાર માટે નથી. વિકલ્પ D ખોટો છે કારણ કે તે ખૂબ જ ઓછું પ્રમાણ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અપૂર્ણ જોડાણ માટે ખોટું છે?", "opts": ["અપૂર્ણ જોડાણમાં પુનઃસંયોજન આવૃત્તિ 50% કરતાં ઓછી હોય છે", "અપૂર્ણ જોડાણમાં જનીનો વચ્ચેનું અંતર સેન્ટિમોર્ગન એકમોમાં માપવામાં આવે છે", "અપૂર્ણ જોડાણ માત્ર પ્રોકેરિયોટ્સમાં જોવા મળે છે", "અપૂર્ણ જોડાણને કારણે પિતૃ પ્રકારની સંખ્યા વધુ મળે છે"], "ans": 2, "exp": "અપૂર્ણ જોડાણ યુકેરિયોટ્સમાં જોવા મળે છે, ખાસ કરીને વર્ણસૂત્રો પર સ્થિત જનીનોમાં. પ્રોકેરિયોટ્સમાં જનીનો સામાન્ય રીતે એક વર્તુળાકાર DNA પર હોય છે અને ત્યાં અપૂર્ણ જોડાણ જોવા મળતું નથી. વિકલ્પ A, B અને D સાચાં વિધાનો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રયોગમાં, બે જનીનો વચ્ચે 25% પુનઃસંયોજન આવૃત્તિ મળી. આ પરિસ્થિતિમાં નીચેનામાંથી કયું તારણ સાચું નથી?", "opts": ["બંને જનીનો એક જ વર્ણસૂત્ર પર સ્થિત છે", "બંને જનીનો વચ્ચેનું અંતર 25 સેન્ટિમોર્ગન છે", "આ જનીનો સંપૂર્ણ જોડાણ દર્શાવે છે", "પિતૃ પ્રકારની સંખ્યા પુનઃસંયોજિત પ્રકાર કરતાં વધુ હશે"], "ans": 2, "exp": "25% પુનઃસંયોજન આવૃત્તિ અપૂર્ણ જોડાણ દર્શાવે છે, સંપૂર્ણ જોડાણ નહીં. સંપૂર્ણ જોડાણમાં પુનઃસંયોજન આવૃત્તિ 0% હોય છે. વિકલ્પ A, B અને D સાચાં તારણો છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "ડ્રોસોફિલામાં બે જનીનો વચ્ચે 10% પુનઃસંયોજન આવૃત્તિ મળી. જો આ બંને જનીનો માટે વિષમયુગ્મી માદા (AaBb)નું પરીક્ષણ સંકરણ કરવામાં આવે, તો સંતતિમાં કયા પ્રકારનું પ્રમાણ મળશે?", "opts": ["45% AB : 45% ab : 5% Ab : 5% aB", "40% AB : 40% ab : 10% Ab : 10% aB", "50% AB : 50% ab", "35% AB : 35% ab : 15% Ab : 15% aB"], "ans": 0, "exp": "10% પુનઃસંયોજન આવૃત્તિને કારણે પુનઃસંયોજિત પ્રકાર (Ab અને aB) દરેક 5% મળે, જ્યારે પિતૃ પ્રકાર (AB અને ab) દરેક 45% મળે. વિકલ્પ B ખોટો છે કારણ કે તેમાં પુનઃસંયોજન આવૃત્તિ બમણી દર્શાવી છે. વિકલ્પ C સંપૂર્ણ જોડાણ દર્શાવે છે. વિકલ્પ D ખોટો છે કારણ કે તેમાં પુનઃસંયોજન આવૃત્તિ વધુ દર્શાવી છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "ડ્રોસોફિલામાં, બે જનીન A અને B વચ્ચે અપૂર્ણ જોડાણ જોવા મળે છે. જો A અને B વચ્ચેનું નકશા અંતર 20 સેન્ટિમોર્ગન હોય, તો A અને B વચ્ચે પુનઃસંયોજન આવૃત્તિ કેટલી હશે?", "opts": ["10%", "20%", "40%", "50%"], "ans": 1, "exp": "અપૂર્ણ જોડાણમાં, પુનઃસંયોજન આવૃત્તિ નકશા અંતર જેટલી જ હોય છે. અહીં, 20 સેન્ટિમોર્ગન અંતરે પુનઃસંયોજન આવૃત્તિ 20% હશે. A) 10% ખોટું છે કારણ કે અંતર 20 સેન્ટિમોર્ગન છે, નહીં 10. C) 40% અને D) 50% ખોટાં છે કારણ કે તે અંતર કરતાં વધારે છે, જે અપૂર્ણ જોડાણના સિદ્ધાંતને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "એક જીવમાં, જનીન P અને Q એક જ વર્ણસૂત્ર પર સ્થિત છે. જો P અને Q વચ્ચેનું અંતર 50 સેન્ટિમોર્ગન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["P અને Q વચ્ચે પૂર્ણ જોડાણ હશે", "P અને Q વચ્ચે અપૂર્ણ જોડાણ હશે અને પુનઃસંયોજન આવૃત્તિ 50% હશે", "P અને Q વચ્ચે અપૂર્ણ જોડાણ હશે અને પુનઃસંયોજન આવૃત્તિ 25% હશે", "P અને Q વચ્ચે કોઈ જોડાણ નહીં હોય"], "ans": 1, "exp": "50 સેન્ટિમોર્ગન અંતરે પુનઃસંયોજન આવૃત્તિ 50% હોય છે, જે અપૂર્ણ જોડાણ દર્શાવે છે. A) ખોટું છે કારણ કે પૂર્ણ જોડાણ માટે અંતર 0 સેન્ટિમોર્ગન હોવું જોઈએ. C) ખોટું છે કારણ કે આવૃત્તિ અંતર જેટલી જ હોવી જોઈએ. D) ખોટું છે કારણ કે 50 સેન્ટિમોર્ગન અંતરે જોડાણ હાજર જ હોય છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન X અને Y વચ્ચે 15 સેન્ટિમોર્ગન અંતર છે. જો X અને Y વચ્ચે પુનઃસંયોજન આવૃત્તિ 15% હોય, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["X અને Y વચ્ચે અપૂર્ણ જોડાણ છે", "X અને Y એક જ વર્ણસૂત્ર પર સ્થિત છે", "X અને Y વચ્ચે પૂર્ણ જોડાણ છે", "X અને Y વચ્ચેનું નકશા અંતર 15 સેન્ટિમોર્ગન છે"], "ans": 2, "exp": "X અને Y વચ્ચે 15% પુનઃસંયોજન આવૃત્તિ અને 15 સેન્ટિમોર્ગન અંતર દર્શાવે છે કે તેઓ અપૂર્ણ જોડાણ ધરાવે છે. A), B), અને D) સાચાં છે. C) ખોટું છે કારણ કે પૂર્ણ જોડાણ માટે પુનઃસંયોજન આવૃત્તિ 0% હોવી જોઈએ.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "એક પ્રયોગમાં, બે જનીન A અને B વચ્ચે 30% પુનઃસંયોજન આવૃત્તિ મળી. જો A અને B એક જ વર્ણસૂત્ર પર સ્થિત હોય, તો નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["A અને B વચ્ચેનું નકશા અંતર 30 સેન્ટિમોર્ગન છે", "A અને B વચ્ચે અપૂર્ણ જોડાણ છે", "A અને B વચ્ચે પૂર્ણ જોડાણ છે", "A અને B વચ્ચેનું અંતર 30 મોર્ગન છે"], "ans": 2, "exp": "30% પુનઃસંયોજન આવૃત્તિ દર્શાવે છે કે A અને B વચ્ચે અપૂર્ણ જોડાણ છે અને નકશા અંતર 30 સેન્ટિમોર્ગન છે. A), B), અને D) સાચાં છે. C) ખોટું છે કારણ કે પૂર્ણ જોડાણ માટે પુનઃસંયોજન આવૃત્તિ 0% હોવી જોઈએ.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન M અને N વચ્ચે 25 સેન્ટિમોર્ગન અંતર છે. જો M અને N વચ્ચે પુનઃસંયોજન આવૃત્તિ 25% હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["M અને N વચ્ચે પૂર્ણ જોડાણ છે", "M અને N વચ્ચે કોઈ જોડાણ નથી", "M અને N વચ્ચે અપૂર્ણ જોડાણ છે અને તેઓ એક જ વર્ણસૂત્ર પર સ્થિત છે", "M અને N વચ્ચે અપૂર્ણ જોડાણ છે પરંતુ તેઓ વિવિધ વર્ણસૂત્રો પર સ્થિત છે"], "ans": 2, "exp": "25 સેન્ટિમોર્ગન અંતર અને 25% પુનઃસંયોજન આવૃત્તિ દર્શાવે છે કે M અને N એક જ વર્ણસૂત્ર પર સ્થિત છે અને અપૂર્ણ જોડાણ ધરાવે છે. A) અને B) ખોટાં છે કારણ કે પૂર્ણ જોડાણ અથવા કોઈ જોડાણ ન હોવું શક્ય નથી. D) ખોટું છે કારણ કે વિવિધ વર્ણસૂત્રો પર સ્થિત જનીનો વચ્ચે જોડાણ હોતું નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન A અને B વચ્ચે અપૂર્ણ જોડાણ જોવા મળે છે. જો A અને B વચ્ચેનું અંતર 20 સેન્ટિમોર્ગન હોય, તો નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["પુનઃસંયોજન આવૃત્તિ 20% હશે.", "અપૂર્ણ જોડાણના કિસ્સામાં, પુનઃસંયોજન આવૃત્તિ અંતર કરતાં ઓછી હશે.", "જો અંતર 20 સેન્ટિમોર્ગન હોય, તો પુનઃસંયોજન આવૃત્તિ 20% કરતાં વધુ હશે.", "અપૂર્ણ જોડાણના કિસ્સામાં, પુનઃસંયોજન આવૃત્તિ અંતર કરતાં સમાન હશે."], "ans": 2, "exp": "અપૂર્ણ જોડાણના કિસ્સામાં, પુનઃસંયોજન આવૃત્તિ હંમેશા અંતર (સેન્ટિમોર્ગન) કરતાં ઓછી હોય છે. અહીં, 20 સેન્ટિમોર્ગન અંતર માટે પુનઃસંયોજન આવૃત્તિ 20% કરતાં ઓછી હશે. વિકલ્પ C ખોટો છે કારણ કે તે કહે છે કે આવૃત્તિ 20% કરતાં વધુ હશે, જે અપૂર્ણ જોડાણના સિદ્ધાંતને વિરોધે છે. વિકલ્પ A અને B સાચા છે, જ્યારે વિકલ્પ D પણ ખોટો છે કારણ કે પુનઃસંયોજન આવૃત્તિ અંતર કરતાં સમાન હોતી નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાણુવિજ્ઞાન અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન P અને Q એક જ વર્ણસૂત્ર પર સ્થિત છે અને તેમનું અંતર 10 સેન્ટિમોર્ગન છે. જો P અને Q વચ્ચે અપૂર્ણ જોડાણ જોવા મળે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["પુનઃસંયોજન આવૃત્તિ 10% હશે.", "પુનઃસંયોજન આવૃત્તિ 10% કરતાં ઓછી હશે.", "પુનઃસંયોજન આવૃત્તિ 10% કરતાં વધુ હશે.", "પુનઃસંયોજન આવૃત્તિ 0% હશે."], "ans": 1, "exp": "અપૂર્ણ જોડાણના કિસ્સામાં, પુનઃસંયોજન આવૃત્તિ હંમેશા અંતર (સેન્ટિમોર્ગન) કરતાં ઓછી હોય છે. અહીં, 10 સેન્ટિમોર્ગન અંતર માટે પુનઃસંયોજન આવૃત્તિ 10% કરતાં ઓછી હશે. વિકલ્પ A ખોટો છે કારણ કે તે કહે છે કે આવૃત્તિ 10% હશે, જે અપૂર્ણ જોડાણના સિદ્ધાંતને વિરોધે છે. વિકલ્પ C અને D પણ ખોટા છે કારણ કે તેઓ અપૂર્ણ જોડાણના સિદ્ધાંતને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય 5: વંશાણુવિજ્ઞાન અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "ડ્રોસોફિલા મેલેનોગેસ્ટરમાં જનીન X અને Y વચ્ચે અપૂર્ણ જોડાણ જોવા મળે છે. જો આ બંને જનીનો વચ્ચે 8 સેન્ટિમોર્ગન અંતર હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે? (નોંધ: અહીં માત્ર ટેસ્ટક્રોસના પરિણામો ધ્યાનમાં લો)", "opts": ["ટેસ્ટક્રોસમાં 92% સંતતિમાં પિતૃ સંયોજન અને 8% સંતતિમાં પુનઃસંયોજન જોવા મળશે", "ટેસ્ટક્રોસમાં 8% સંતતિમાં પિતૃ સંયોજન અને 92% સંતતિમાં પુનઃસંયોજન જોવા મળશે", "ટેસ્ટક્રોસમાં 46% સંતતિમાં પિતૃ સંયોજન અને 54% સંતતિમાં પુનઃસંયોજન જોવા મળશે", "ટેસ્ટક્રોસમાં 96% સંતતિમાં પિતૃ સંયોજન અને 4% સંતતિમાં પુનઃસંયોજન જોવા મળશે"], "ans": 0, "exp": "સેન્ટિમોર્ગન અંતર એ પુનઃસંયોજન આવૃત્તિનું પ્રતિનિધિત્વ કરે છે. 8 સેન્ટિમોર્ગન અંતરનો અર્થ છે કે 8% સંતતિમાં પુનઃસંયોજન થશે, જ્યારે બાકીના 92% સંતતિમાં પિતૃ સંયોજન જોવા મળશે. વિકલ્પ B ખોટો છે કારણ કે તેમાં પિતૃ અને પુનઃસંયોજનની ટકાવારી ઉલટાવી દેવામાં આવી છે. વિકલ્પ C ખોટો છે કારણ કે તેમાં ટકાવારી યોગ્ય રીતે વહેંચાયેલી નથી. વિકલ્પ D ખોટો છે કારણ કે તેમાં પુનઃસંયોજન આવૃત્તિ અડધી દર્શાવવામાં આવી છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રયોગમાં, ડ્રોસોફિલામાં ત્રણ જનીનો A, B અને C એક જ વર્ણસૂત્ર પર સ્થિત છે. જનીન A અને B વચ્ચે 10% પુનઃસંયોજન આવૃત્તિ અને જનીન B અને C વચ્ચે 15% પુનઃસંયોજન આવૃત્તિ મળી. જો જનીન A અને C વચ્ચે 25% પુનઃસંયોજન આવૃત્તિ મળે, તો આ પરિસ્થિતિને શું કહેવાય?", "opts": ["અપૂર્ણ જોડાણ અને રેખીય વ્યવસ્થા", "સંપૂર્ણ જોડાણ અને રેખીય વ્યવસ્થા", "અપૂર્ણ જોડાણ અને ત્રિકોણીય વ્યવસ્થા", "સંપૂર્ણ જોડાણ અને ત્રિકોણીય વ્યવસ્થા"], "ans": 0, "exp": "અહીં જનીન A અને C વચ્ચેની પુનઃસંયોજન આવૃત્તિ (25%) એ જનીન A-B અને B-C વચ્ચેની પુનઃસંયોજન આવૃત્તિના સરવાળા (10% + 15% = 25%) જેટલી છે. આ સૂચવે છે કે ત્રણેય જનીનો રેખીય ક્રમમાં ગોઠવાયેલા છે અને અપૂર્ણ જોડાણ દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે સંપૂર્ણ જોડાણમાં પુનઃસંયોજન આવૃત્તિ 0% હોય છે. વિકલ્પ C અને D ખોટા છે કારણ કે ત્રિકોણીય વ્યવસ્થામાં પુનઃસંયોજન આવૃત્તિનો સરવાળો થતો નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન P અને Q વચ્ચે અપૂર્ણ જોડાણ જોવા મળે છે. જો ટેસ્ટક્રોસમાં 36% સંતતિમાં પુનઃસંયોજન જોવા મળે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["જનીન P અને Q વચ્ચેનું અંતર 36 સેન્ટિમોર્ગન છે", "આ જનીનો એક જ વર્ણસૂત્ર પર સ્થિત છે પરંતુ એકબીજાથી દૂર છે", "આ પરિસ્થિતિમાં સંપૂર્ણ જોડાણની સરખામણીએ પિતૃ સંયોજન ઓછું જોવા મળશે", "જો આ જનીનો વચ્ચેનું અંતર 50 સેન્ટિમોર્ગન કરતાં વધુ હોય, તો તેઓ અલગ વર્ણસૂત્રો પર હોવાનું માની શકાય"], "ans": 3, "exp": "પુનઃસંયોજન આવૃત્તિ 36% એટલે કે 36 સેન્ટિમોર્ગન અંતર દર્શાવે છે. વિકલ્પ A, B અને C સાચાં છે કારણ કે અપૂર્ણ જોડાણમાં જનીનો એક જ વર્ણસૂત્ર પર સ્થિત હોય છે અને પુનઃસંયોજન આવૃત્તિ તેમના અંતર પર આધારિત હોય છે. વિકલ્પ D ખોટો છે કારણ કે 50 સેન્ટિમોર્ગન કરતાં વધુ અંતર હોય તો પણ જનીનો એક જ વર્ણસૂત્ર પર હોઈ શકે છે, પરંતુ તેઓ સ્વતંત્ર વારસાગમન દર્શાવે છે (જાણે કે અલગ વર્ણસૂત્રો પર હોય તેમ).", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન A અને B વચ્ચે 5 સેન્ટિમોર્ગન અંતર છે. જો A અને B વચ્ચે અપૂર્ણ જોડાણ જોવા મળે તો નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["પુનઃસંયોજન આવૃત્તિ 5% હશે.", "A અને B વચ્ચે ક્રોસિંગ ઓવરની શક્યતા 5% હશે.", "A અને B વચ્ચે પૂર્ણ જોડાણ જોવા મળશે.", "A અને B વચ્ચે અપૂર્ણ જોડાણ જોવા મળશે."], "ans": 2, "exp": "પુનઃસંયોજન આવૃત્તિ અને ક્રોસિંગ ઓવરની શક્યતા બંને 5 સેન્ટિમોર્ગન અંતર સૂચવે છે, જે 5% છે, તેથી A અને B સત્ય છે. અપૂર્ણ જોડાણ 5 સેન્ટિમોર્ગન અંતરે જોવા મળે છે, તેથી D સત્ય છે. પરંતુ પૂર્ણ જોડાણ ત્યારે જ જોવા મળે છે જ્યારે જનીનો એકબીજાની નજીક હોય (0 સેન્ટિમોર્ગન અંતર), તેથી C ખોટું છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન X અને Y વચ્ચે 50 સેન્ટિમોર્ગન અંતર છે. જો X અને Y વચ્ચે અપૂર્ણ જોડાણ જોવા મળે તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પુનઃસંયોજન આવૃત્તિ 50% હશે.", "X અને Y વચ્ચે ક્રોસિંગ ઓવરની શક્યતા 100% હશે.", "X અને Y વચ્ચે પૂર્ણ જોડાણ જોવા મળશે.", "X અને Y વચ્ચે અપૂર્ણ જોડાણ જોવા મળશે નહીં."], "ans": 0, "exp": "50 સેન્ટિમોર્ગન અંતરે પુનઃસંયોજન આવૃત્તિ 50% હશે, તેથી A સત્ય છે. ક્રોસિંગ ઓવરની શક્યતા 50% હશે, નહીં કે 100%, તેથી B ખોટું છે. પૂર્ણ જોડાણ ત્યારે જ જોવા મળે છે જ્યારે અંતર 0 હોય, તેથી C ખોટું છે. અપૂર્ણ જોડાણ 50 સેન્ટિમોર્ગન અંતરે જોવા મળે છે, તેથી D ખોટું છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન P અને Q વચ્ચે 20 સેન્ટિમોર્ગન અંતર છે. જો P અને Q વચ્ચે અપૂર્ણ જોડાણ જોવા મળે તો નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["પુનઃસંયોજન આવૃત્તિ 20% હશે.", "P અને Q વચ્ચે ક્રોસિંગ ઓવરની શક્યતા 20% હશે.", "P અને Q વચ્ચે પૂર્ણ જોડાણ જોવા મળશે.", "P અને Q વચ્ચે અપૂર્ણ જોડાણ જોવા મળશે."], "ans": 2, "exp": "પુનઃસંયોજન આવૃત્તિ અને ક્રોસિંગ ઓવરની શક્યતા બંને 20 સેન્ટિમોર્ગન અંતર સૂચવે છે, જે 20% છે, તેથી A અને B સત્ય છે. અપૂર્ણ જોડાણ 20 સેન્ટિમોર્ગન અંતરે જોવા મળે છે, તેથી D સત્ય છે. પરંતુ પૂર્ણ જોડાણ ત્યારે જ જોવા મળે છે જ્યારે જનીનો એકબીજાની નજીક હોય (0 સેન્ટિમોર્ગન અંતર), તેથી C ખોટું છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન A, B, અને C એક જ વર્ણસૂત્ર પર સ્થિત છે. A અને B વચ્ચે 10 સેન્ટિમોર્ગન અંતર છે, B અને C વચ્ચે 15 સેન્ટિમોર્ગન અંતર છે. જો A અને C વચ્ચે અપૂર્ણ જોડાણ જોવા મળે તો A અને C વચ્ચેનું અંતર કેટલું હશે?", "opts": ["5 સેન્ટિમોર્ગન", "10 સેન્ટિમોર્ગન", "25 સેન્ટિમોર્ગન", "15 સેન્ટિમોર્ગન"], "ans": 2, "exp": "A અને B વચ્ચે 10 સેન્ટિમોર્ગન અંતર છે, B અને C વચ્ચે 15 સેન્ટિમોર્ગન અંતર છે. જો A, B, અને C એક જ વર્ણસૂત્ર પર સ્થિત હોય તો A અને C વચ્ચેનું અંતર 10 + 15 = 25 સેન્ટિમોર્ગન હશે. તેથી, C સત્ય છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}, {"q": "ડ્રોસોફિલામાં, જનીન X અને Y વચ્ચે 30 સેન્ટિમોર્ગન અંતર છે. જો X અને Y વચ્ચે અપૂર્ણ જોડાણ જોવા મળે તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પુનઃસંયોજન આવૃત્તિ 30% હશે.", "X અને Y વચ્ચે ક્રોસિંગ ઓવરની શક્યતા 60% હશે.", "X અને Y વચ્ચે પૂર્ણ જોડાણ જોવા મળશે.", "X અને Y વચ્ચે અપૂર્ણ જોડાણ જોવા મળશે નહીં."], "ans": 0, "exp": "30 સેન્ટિમોર્ગન અંતરે પુનઃસંયોજન આવૃત્તિ 30% હશે, તેથી A સત્ય છે. ક્રોસિંગ ઓવરની શક્યતા 30% હશે, નહીં કે 60%, તેથી B ખોટું છે. પૂર્ણ જોડાણ ત્યારે જ જોવા મળે છે જ્યારે અંતર 0 હોય, તેથી C ખોટું છે. અપૂર્ણ જોડાણ 30 સેન્ટિમોર્ગન અંતરે જોવા મળે છે, તેથી D ખોટું છે.", "ref": "Std 12 - અધ્યાય 5: વંશવિજ્ઞાન અને વિકાસ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
