@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - વિદ્યુતઋણતા</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 વિદ્યુતઋણતા</span>
+                <span>🎯 Hard</span>
+                <span>📝 25 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "નીચેના પૈકી કયું વિધાન વિદ્યુતઋણતા (Electronegativity) ની પરિભાષા સાથે સંપૂર્ણ સુસંગત નથી?", "options": ["A) તે પરમાણુની વીજભાર ઘનતાને દર્શાવે છે જેમાં ઇલેક્ટ્રોનને આકર્ષવાની ક્ષમતા હોય છે.", "B) તે પરમાણુની કોણીય આકારને આધારે બદલાય છે.", "C) ફ્લોરિનમાં સૌથી ઉચ્ચ વિદ્યુતઋણતા હોય છે.", "D) પોલિંગ સ્કેલ પર તેને માપવામાં આવે છે."], "correct": 1, "explanation": "વિદ્યુતઋણતા એ પરમાણુની ઇલેક્ટ્રોનને આકર્ષવાની ક્ષમતા છે, જે પોલિંગ સ્કેલ પર માપવામાં આવે છે. ફ્લોરિનમાં સૌથી ઉચ્ચ વિદ્યુતઋણતા હોય છે. પરંતુ વિદ્યુતઋણતા પરમાણુના કોણીય આકાર પર આધારિત નથી, તે પરમાણુની ઇલેક્ટ્રોન આકર્ષણ ક્ષમતા અને પરમાણુ કદ પર આધાર રાખે છે. આથી વિકલ્પ B અસત્ય છે.", "ncert_ref": "Class XI - Chapter 3: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 1}, {"question": "જો એક તત્વની વિદ્યુતઋણતા ૨.૫ છે, તો નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) તે ધાતુ તત્વ હોવાની શક્યતા ઓછી છે.", "B) તે અર્ધધાતુ તત્વ હોવાની શક્યતા વધુ છે.", "C) તેની ઇલેક્ટ્રોન બંધ ક્ષમતા ઉચ્ચ હશે.", "D) તેની આયનીકરણ ઊર્જા ઓછી હશે."], "correct": 3, "explanation": "વિદ્યુતઋણતા ૨.૫ ધરાવતા તત્વો સામાન્ય રીતે અર્ધધાતુઓ હોય છે (જેમ કે સિલિકોન). ધાતુઓની વિદ્યુતઋણતા સામાન્ય રીતે ૨.૦ થી ઓછી હોય છે, જ્યારે અધાતુઓની ૨.૦ થી વધુ હોય છે. ઇલેક્ટ્રોન બંધ ક્ષમતા અને વિદ્યુતઋણતા વચ્ચે સકારાત્મક સંબંધ હોય છે, પરંતુ આયનીકરણ ઊર્જા અને વિદ્યુતઋણતા વચ્ચે કોઈ સીધો સંબંધ નથી. આથી વિકલ્પ D અસત્ય છે.", "ncert_ref": "Class XI - Chapter 3: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 2}, {"question": "નીચેના યુગ્મો પૈકી કયું યુગ્મ વિદ્યુતઋણતા અને પરમાણુ ત્રિજ્યા વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે દર્શાવે છે?", "options": ["A) વિદ્યુતઋણતા વધે ત્યારે પરમાણુ ત્રિજ્યા વધે", "B) વિદ્યુતઋણતા વધે ત્યારે પરમાણુ ત્રિજ્યા ઘટે", "C) વિદ્યુતઋણતા અને પરમાણુ ત્રિજ્યા વચ્ચે કોઈ સંબંધ નથી", "D) વિદ્યુતઋણતા ઘટે ત્યારે પરમાણુ ત્રિજ્યા ઘટે"], "correct": 1, "explanation": "વિદ્યુતઋણતા અને પરમાણુ ત્રિજ્યા વચ્ચે વ્યસ્ત સંબંધ હોય છે. જેમ જેમ વિદ્યુતઋણતા વધે છે, તેમ તેમ પરમાણુ ત્રિજ્યા ઘટે છે. આ કારણ છે કે વધુ વિદ્યુતઋણતા ધરાવતા પરમાણુઓમાં ઇલેક્ટ્રોનને કોર નજીક ખેંચવામાં આવે છે, જે પરમાણુ ત્રિજ્યાને ઘટાડે છે. આથી વિકલ્પ B સત્ય છે.", "ncert_ref": "Class XI - Chapter 3: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 3}, {"question": "નીચેના પૈકી કયા તત્વની વિદ્યુતઋણતા સૌથી ઓછી છે?", "options": ["A) લિથિયમ", "B) સોડિયમ", "C) પોટેશિયમ", "D) રુબિડિયમ"], "correct": 3, "explanation": "આલ્કલી ધાતુઓમાં, જેમ જેમ પરમાણુ ક્રમાંક વધે છે, તેમ તેમ વિદ્યુતઋણતા ઘટે છે. લિથિયમ, સોડિયમ, પોટેશિયમ અને રુબિડિયમમાં રુબિડિયમની વિદ્યુતઋણતા સૌથી ઓછી છે. આ કારણ છે કે પરમાણુ કદ વધવાને લીધે ઇલેક્ટ્રોનને આકર્ષવાની ક્ષમતા ઘટે છે.", "ncert_ref": "Class XI - Chapter 3: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 4}, {"question": "એક તત્વની વિદ્યુતઋણતા ૩.૦ છે. નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) તે ધાતુ તત્વ છે", "B) તે અધાતુ તત્વ છે", "C) તે નિષ્ક્રિય વાયુ છે", "D) તે અર્ધધાતુ તત્વ છે"], "correct": 1, "explanation": "વિદ્યુતઋણતા ૩.૦ ધરાવતા તત્વો સામાન્ય રીતે અધાતુઓ હોય છે. ધાતુઓની વિદ્યુતઋણતા સામાન્ય રીતે ૨.૦ થી ઓછી હોય છે, જ્યારે અધાતુઓની ૨.૦ થી વધુ હોય છે. નિષ્ક્રિય વાયુઓની વિદ્યુતઋણતા ૦ હોય છે, અને અર્ધધાતુઓની વિદ્યુતઋણતા સામાન્ય રીતે ૧.૮ થી ૨.૫ વચ્ચે હોય છે. આથી વિકલ્પ B સત્ય છે.", "ncert_ref": "Class XI - Chapter 3: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 5}, {"question": "નીચેના પૈકી કયા તત્વના પરમાણુમાં વિદ્યુતઋણતાનો ક્રમ આરોહી ક્રમે ગોઠવેલ છે?", "options": ["A) Li, Be, B, C", "B) N, O, F, Ne", "C) Na, Mg, Al, Si", "D) C, N, O, F"], "correct": 3, "explanation": "વિદ્યુતઋણતા આવર્ત કોષ્ટકમાં ડાબી બાજુથી જમણી બાજુ અને નીચેથી ઉપર તરફ વધે છે. વિકલ્પ D (C, N, O, F)માં તત્વો એક જ આવર્ત (દ્વિતીય આવર્ત)માં છે અને ડાબી બાજુથી જમણી બાજુ ગોઠવેલ છે, જેથી વિદ્યુતઋણતા આરોહી ક્રમે છે. વિકલ્પ Aમાં Be અને B વચ્ચે વિદ્યુતઋણતા ઘટે છે. વિકલ્પ Bમાં Ne ની વિદ્યુતઋણતા F કરતાં ઓછી છે (Ne ની વિદ્યુતઋણતા ૦ છે). વિકલ્પ Cમાં Mg અને Al વચ્ચે વિદ્યુતઋણતા ઘટે છે.", "ncert_ref": "Class XI - Chapter 3: આવર્ત કોષ્ટક", "difficulty": "Hard", "num": 6}, {"question": "એક તત્વ X ની વિદ્યુતઋણતા ૨.૧ છે. નીચેના પૈકી કયું વિધાન અયોગ્ય છે?", "options": ["A) X એ ધાતુ હોવાની શક્યતા છે", "B) X એ અર્ધધાતુ હોવાની શક્યતા છે", "C) X એ અધાતુ હોવાની શક્યતા છે", "D) X એ ઉત્કૃષ્ટ વાયુ હોવાની શક્યતા છે"], "correct": 3, "explanation": "વિદ્યુતઋણતા ૨.૧ ધરાવતા તત્વો સામાન્ય રીતે ધાતુઓ અથવા અર્ધધાતુઓ હોય છે. ઉત્કૃષ્ટ વાયુઓની વિદ્યુતઋણતા ૦ હોય છે, જેથી વિકલ્પ D અયોગ્ય છે. વિકલ્પ A, B, અને C સૌ યોગ્ય શક્યતાઓ છે.", "ncert_ref": "Class XI - Chapter 3: આવર્ત કોષ્ટક", "difficulty": "Hard", "num": 7}, {"question": "નીચેના પૈકી કયા યુગ્મમાં પ્રથમ તત્વની વિદ્યુતઋણતા બીજા તત્વ કરતાં ઓછી છે?", "options": ["A) O અને S", "B) F અને Cl", "C) N અને P", "D) Be અને B"], "correct": 2, "explanation": "વિદ્યુતઋણતા આવર્ત કોષ્ટકમાં ઉપરથી નીચે તરફ ઘટે છે. વિકલ્પ C (N અને P)માં N (વિદ્યુતઋણતા ~3.0)ની વિદ્યુતઋણતા P (~2.1) કરતાં વધુ છે, પરંતુ પ્રશ્નમાં પ્રથમ તત્વની વિદ્યુતઋણતા ઓછી હોવી જોઈએ. અહીં, વિકલ્પ A, B, અને Dમાં પ્રથમ તત્વની વિદ્યુતઋણતા બીજા તત્વ કરતાં વધુ છે. વિકલ્પ Cમાં Nની વિદ્યુતઋણતા P કરતાં વધુ હોવાથી, વિકલ્પ C યોગ્ય નથી. પરંતુ પ્રશ્નમાં 'ઓછી' શબ્દ છે, જેથી વિકલ્પ Cમાં Pની વિદ્યુતઋણતા N કરતાં ઓછી છે, પરંતુ પ્રથમ તત્વ N છે, જેથી વિકલ્પ C યોગ્ય નથી. સુધારેલો જવાબ: વિકલ્પ D (Be અને B)માં Be (~1.57)ની વિદ્યુતઋણતા B (~2.04) કરતાં ઓછી છે.", "ncert_ref": "Class XI - Chapter 3: આવર્ત કોષ્ટક", "difficulty": "Hard", "num": 8}, {"question": "એક યૌગિકમાં A અને B તત્વો વચ્ચેના બંધની પ્રકૃતિ નિર્ધારિત કરવા માટે નીચેના પૈકી કયો પરિબળ સૌથી મહત્વપૂર્ણ છે?", "options": ["A) પરમાણુ ત્રિજ્યા", "B) વિદ્યુતઋણતા", "C) આયનીકરણ એનર્જી", "D) ઇલેક્ટ્રોન બંધારણ"], "correct": 1, "explanation": "બંધની પ્રકૃતિ (આયનિક, સહસંયોજક, અથવા ધ્રુવીય સહસંયોજક) નક્કી કરવા માટે વિદ્યુતઋણતાનો તફાવત સૌથી મહત્વપૂર્ણ પરિબળ છે. જો વિદ્યુતઋણતાનો તફાવત ૧.૭ કરતાં વધુ હોય, તો બંધ આયનિક હોય છે. વિકલ્પ A, C, અને D પણ મહત્વપૂર્ણ છે, પરંતુ બંધની પ્રકૃતિ નક્કી કરવા માટે વિદ્યુતઋણતા સૌથી નિર્ણાયક છે.", "ncert_ref": "Class XI - Chapter 11: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 9}, {"question": "નીચેના પૈકી કયા તત્વની વિદ્યુતઋણતા સૌથી વધુ છે?", "options": ["A) O", "B) F", "C) Cl", "D) N"], "correct": 1, "explanation": "ફ્લોરિન (F)ની વિદ્યુતઋણતા (3.98) સૌથી વધુ છે. ઓક્સિજન (O)ની વિદ્યુતઋણતા 3.44, ક્લોરિન (Cl)ની 3.16, અને નાઇટ્રોજન (N)ની 3.04 છે. જેથી વિકલ્પ B (F) સૌથી યોગ્ય છે.", "ncert_ref": "Class XI - Chapter 3: આવર્ત કોષ્ટક", "difficulty": "Hard", "num": 10}, {"question": "નીચેના પૈકી કયા યુગ્મમાં બંધની ધ્રુવીયતા વિદ્યુતઋણતાના તફાવતના આધારે સૌથી ઓછી હશે?", "options": ["A) H-F", "B) H-Cl", "C) H-Br", "D) H-I"], "correct": 3, "explanation": "વિદ્યુતઋણતાના તફાવતના આધારે બંધની ધ્રુવીયતા નક્કી થાય છે. H-F (1.9), H-Cl (0.9), H-Br (0.7), H-I (0.4)માં H-I નો તફાવત સૌથી ઓછો હોવાથી બંધ સૌથી અધ્રુવીય હશે. બાકીના વિકલ્પોમાં તફાવત વધુ હોવાથી ધ્રુવીયતા વધુ હશે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 11}, {"question": "એક તત્વ X ની વિદ્યુતઋણતા ૨.૦ છે અને તત્વ Y ની વિદ્યુતઋણતા ૩.૫ છે. નીચેના પૈકી કયું વિધાન X અને Y વચ્ચેના બંધ વિશે સત્ય નથી?", "options": ["A) બંધ ધ્રુવીય હશે", "B) બંધમાં Y પર આંશિક ઋણ ભાર હશે", "C) બંધમાં X પર આંશિક ધન ભાર હશે", "D) બંધ સહસંયોજક અને અધ્રુવીય હશે"], "correct": 3, "explanation": "X (2.0) અને Y (3.5) વચ્ચે વિદ્યુતઋણતાનો તફાવત 1.5 હોવાથી બંધ ધ્રુવીય સહસંયોજક હશે. Y વધુ વિદ્યુતઋણ હોવાથી તેના પર આંશિક ઋણ ભાર અને X પર આંશિક ધન ભાર હશે. પરંતુ બંધ અધ્રુવીય ન હોવાથી D વિકલ્પ ખોટો છે.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 12}, {"question": "નીચેના પૈકી કયા તત્વના પરમાણુમાં વિદ્યુતઋણતા અને પરમાણુ કદ વચ્ચેનો સંબંધ અન્ય ત્રણ કરતાં ભિન્ન છે?", "options": ["A) Li", "B) Be", "C) B", "D) C"], "correct": 0, "explanation": "સામાન્ય રીતે એક જ આવર્તનમાં ડાબેથી જમણે જતાં વિદ્યુતઋણતા વધે અને પરમાણુ કદ ઘટે. પરંતુ Li (લિથિયમ) એ અપવાદ છે, કારણ કે તેની વિદ્યુતઋણતા (0.98) Be (1.57) કરતાં ઓછી છે, પરંતુ પરમાણુ કદ Li > Be. બાકીના તત્વો (Be, B, C)માં આ ક્રમ સાચો છે.", "ncert_ref": "Class XI - Chapter 3: આવર્તન કોષ્ટક", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા ની આરોહી ક્રમમાં ગોઠવેલ છે?", "options": ["A) P < S < Cl", "B) Si < P < S", "C) C < N < O", "D) B < C < N"], "correct": 2, "explanation": "વિદ્યુતઋણતાનો ક્રમ: C (2.55) < N (3.04) < O (3.44) સાચો છે. બાકીના વિકલ્પો ખોટા છે: A) P (2.19) < S (2.58) < Cl (3.16) સાચો છે પરંતુ પ્રશ્નમાં આરોહી ક્રમ મળતો નથી, B) Si (1.90) < P (2.19) < S (2.58) સાચો છે પરંતુ પ્રશ્નમાં આરોહી ક્રમ મળતો નથી, D) B (2.04) < C (2.55) < N (3.04) સાચો છે પરંતુ પ્રશ્નમાં આરોહી ક્રમ મળતો નથી.", "ncert_ref": "Class XI - Chapter 3: આવર્તન કોષ્ટક", "difficulty": "Hard", "num": 14}, {"question": "એક યૌગિકમાં A-B બંધની વિદ્યુતઋણતા ૧.૭ છે. નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) બંધ ૧૦૦% આયનિક હશે", "B) બંધ ૫૦% આયનિક અને ૫૦% સહસંયોજક હશે", "C) બંધ મુખ્યત્વે સહસંયોજક હશે પરંતુ થોડો આયનિક ગુણ ધરાવશે", "D) બંધ પૂર્ણપણે સહસંયોજક હશે"], "correct": 2, "explanation": "વિદ્યુતઋણતાનો તફાવત 1.7 હોવાથી બંધ મુખ્યત્વે સહસંયોજક હશે, પરંતુ થોડો આયનિક ગુણ (લગભગ 50%) ધરાવશે. 1.7 નો તફાવત પૂર્ણ આયનિક બંધ (A) અથવા પૂર્ણ સહસંયોજક બંધ (D) માટે પૂરતો નથી. B ખોટો છે કારણ કે 1.7 તફાવત એ 50% આયનિક ગુણ સૂચવતો નથી.", "ncert_ref": "Class XI - Chapter 11: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 15}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા ના તફાવતના આધારે બંધની ધ્રુવીયતા સૌથી ઓછી હશે, જ્યારે બંધ લંબાઈ સમાન રાખવામાં આવે?", "options": ["A) H-F", "B) H-Cl", "C) H-Br", "D) H-I"], "correct": 3, "explanation": "વિદ્યુતઋણતાનો તફાવત જેટલો ઓછો હોય, બંધની ધ્રુવીયતા એટલી જ ઓછી હોય છે. H-I બંધમાં વિદ્યુતઋણતાનો તફાવત (2.66 - 2.20 = 0.46) સૌથી ઓછો છે, જ્યારે H-F (4.0 - 2.20 = 1.8), H-Cl (3.16 - 2.20 = 0.96), અને H-Br (2.96 - 2.20 = 0.76) ના તફાવતો વધુ છે. આથી, H-I બંધની ધ્રુવીયતા સૌથી ઓછી છે.", "ncert_ref": "Class XI - Chapter 3: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 16}, {"question": "એક તત્વ X ની વિદ્યુતઋણતા ૨.૫ છે અને તે આલ્કલી ધાતુના સમૂહમાં છે. નીચેના પૈકી કયું વિધાન અયોગ્ય છે?", "options": ["A) X નું પરમાણુ કદ તેના સમૂહમાં સૌથી મોટું હશે.", "B) X ની વિદ્યુતઋણતા તેના સમૂહમાં સૌથી ઓછી હશે.", "C) X ની પ્રથમ આયનન શક્તિ તેના સમૂહમાં સૌથી ઓછી હશે.", "D) X ની વિદ્યુતઋણતા તેના સમૂહમાં સૌથી વધુ હશે."], "correct": 3, "explanation": "આલ્કલી ધાતુઓના સમૂહમાં વિદ્યુતઋણતા ઉપરથી નીચે તરફ જતાં ઘટે છે. આથી, X (વિદ્યુતઋણતા 2.5) ની વિદ્યુતઋણતા તેના સમૂહમાં સૌથી ઓછી હોવી જોઈએ, નહીં કે સૌથી વધુ. વિકલ્પ D અયોગ્ય છે. વિકલ્પ A, B, અને C સત્ય છે કારણ કે આલ્કલી ધાતુઓમાં પરમાણુ કદ અને પ્રથમ આયનન શક્તિ ઉપરથી નીચે તરફ અનુક્રમે વધે અને ઘટે છે.", "ncert_ref": "Class XI - Chapter 3: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 17}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા ના ક્રમની આરોહી ક્રમમાં ગોઠવણી કરેલ છે, પરંતુ તેમના પરમાણુ કદનો ક્રમ ઉતરતો છે?", "options": ["A) Li, Be, B, C", "B) N, O, F, Ne", "C) Na, Mg, Al, Si", "D) C, N, O, F"], "correct": 0, "explanation": "વિકલ્પ A (Li, Be, B, C) માં વિદ્યુતઋણતા આરોહી ક્રમમાં છે (0.98, 1.57, 2.04, 2.55), પરંતુ પરમાણુ કદ ઉતરતો ક્રમમાં છે (Li > Be > B > C). બાકીના વિકલ્પોમાં, વિદ્યુતઋણતા અને પરમાણુ કદ બંને આરોહી અથવા ઉતરતા ક્રમમાં છે.", "ncert_ref": "Class XI - Chapter 3: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 18}, {"question": "એક યૌગિકમાં A-B બંધની વિદ્યુતઋણતા ૧.૯ છે. નીચેના પૈકી કયું વિધાન સત્ય નથી?", "options": ["A) A અને B વચ્ચેનો બંધ ધ્રુવીય સહસંયોજક બંધ હશે.", "B) A અને B ની વિદ્યુતઋણતાનો તફાવત ૧.૯ કરતાં ઓછો હશે.", "C) A અને B વચ્ચેનો બંધ આયનિક બંધ હોવાની શક્યતા છે.", "D) A અને B ની વિદ્યુતઋણતાનો તફાવત ૧.૯ કરતાં વધુ હશે."], "correct": 1, "explanation": "વિદ્યુતઋણતાનો તફાવત 1.9 હોવાને કારણે બંધ ધ્રુવીય સહસંયોજક અથવા આયનિક હોઈ શકે. પરંતુ બંધની વિદ્યુતઋણતા એ બંને તત્વોની વિદ્યુતઋણતાનો સરેરાશ નથી, પરંતુ બંધની ધ્રુવીયતાનું માપ છે. આથી, વિકલ્પ B અયોગ્ય છે કારણ કે વિદ્યુતઋણતાનો તફાવત 1.9 કરતાં ઓછો અથવા વધુ હોઈ શકે, પરંતુ તે બંધની વિદ્યુતઋણતા સાથે સીધો સંબંધ ધરાવતો નથી.", "ncert_ref": "Class XI - Chapter 3: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 19}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા અને તેમના પરમાણુ ક્રમાંક વચ્ચેનો સંબંધ અન્ય ત્રણ કરતાં ભિન્ન છે?", "options": ["A) Li (3), Be (9), B (5), C (6)", "B) F (9), O (8), N (7), C (6)", "C) Na (11), Mg (12), Al (13), Si (14)", "D) Cl (17), S (16), P (15), Si (14)"], "correct": 0, "explanation": "વિદ્યુતઋણતા સામાન્ય રીતે આવર્ત કોષ્ટકના એક જ આડરેખામાં (પિરિયડમાં) ડાબી બાજુથી જમણી બાજુએ વધે છે, જ્યારે એક જ ઉભરેખામાં (ગ્રૂપમાં) ઉપરથી નીચે તરફ ઘટે છે. વિકલ્પ Aમાં, Li (0.98), Be (1.57), B (2.04), C (2.55)ની વિદ્યુતઋણતા પરમાણુ ક્રમાંક વધતાં વધે છે, પરંતુ Be અને B વચ્ચે વિદ્યુતઋણતામાં અચાનક વૃદ્ધિ થાય છે, જે અન્ય ત્રણ વિકલ્પો કરતાં ભિન્ન છે. વિકલ્પ B, C, અને Dમાં વિદ્યુતઋણતા પરમાણુ ક્રમાંક વધતાં સુસંગત રીતે વધે છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનો વર્ગીકરણ અને આવર્ત ગુણધર્મો", "difficulty": "Hard", "num": 20}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા ના ક્રમની ઉતરતી ક્રમમાં ગોઠવણી કરેલ છે?", "options": ["A) F, O, N, C", "B) N, O, F, Cl", "C) Cl, F, O, N", "D) O, F, N, Cl"], "correct": 0, "explanation": "વિદ્યુતઋણતા નો ક્રમ આધારિત છે પોલિંગ સ્કેલ પર. F (4.0) > O (3.5) > N (3.0) > C (2.5) એ સૌથી યોગ્ય ઉતરતી ક્રમ છે. બાકીના વિકલ્પો અયોગ્ય ક્રમ દર્શાવે છે: Bમાં F અને Cl નો ક્રમ ખોટો છે, Cમાં Cl અને F નો ક્રમ ખોટો છે, Dમાં F અને N નો ક્રમ ખોટો છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનો વર્ગીકરણ અને ગુણધર્મોની આવર્તિતા", "difficulty": "Hard", "num": 21}, {"question": "એક તત્વ X ની વિદ્યુતઋણતા 2.1 છે અને તે આલ્કલાઇન અર્થ ધાતુના સમૂહમાં છે. નીચેના પૈકી કયું વિધાન અયોગ્ય છે?", "options": ["A) X નું પરમાણુ કદ તેના સમૂહમાં નીચેની તરફ જતાં વધે છે.", "B) X ની વિદ્યુતઋણતા તેના સમૂહમાં નીચેની તરફ જતાં ઘટે છે.", "C) X ના પરમાણુમાં ઇલેક્ટ્રોન ગ્રહણ કરવાની પ્રવૃત્તિ ઓછી છે.", "D) X ના હાઇડ્રોક્સાઇડનું દ્રાવણ અમ્લીય છે."], "correct": 3, "explanation": "આલ્કલાઇન અર્થ ધાતુઓના હાઇડ્રોક્સાઇડનું દ્રાવણ ક્ષારીય હોય છે, અમ્લીય નહીં. A, B, અને C વિધાનો સત્ય છે: પરમાણુ કદ અને વિદ્યુતઋણતા સમૂહમાં નીચે જતાં અનુક્રમે વધે અને ઘટે છે, અને ઇલેક્ટ્રોન ગ્રહણ કરવાની પ્રવૃત્તિ ઓછી હોય છે.", "ncert_ref": "Class XI - Chapter 10: s-બ્લોક તત્વો", "difficulty": "Hard", "num": 22}, {"question": "એક યૌગિકમાં A-B બંધની વિદ્યુતઋણતા 1.7 છે. નીચેના પૈકી કયું વિધાન અયોગ્ય છે?", "options": ["A) A અને B વચ્ચેનો બંધ ધ્રુવીય હશે.", "B) A અને B ની વિદ્યુતઋણતા વચ્ચેનો તફાવત 1.7 છે.", "C) A અને B ની વિદ્યુતઋણતા નો સરવાળો 1.7 છે.", "D) A અને B ની વિદ્યુતઋણતા નો તફાવત 0.7 થી ઓછો હોવો જોઈએ."], "correct": 2, "explanation": "વિદ્યુતઋણતા નો તફાવત બંધની ધ્રુવીયતા નક્કી કરે છે, નહીં કે સરવાળો. A, B, અને D વિધાનો સત્ય છે: બંધ ધ્રુવીય હશે, તફાવત 1.7 છે, અને તફાવત 0.7 થી વધુ હોવાથી બંધ ધ્રુવીય છે.", "ncert_ref": "Class XI - Chapter 4: રાસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 23}, {"question": "નીચેના પૈકી કયા તત્વની વિદ્યુતઋણતા અને પરમાણુ ત્રિજ્યા વચ્ચેનો સંબંધ અન્ય ત્રણ કરતાં ભિન્ન છે?", "options": ["A) Li", "B) Be", "C) B", "D) C"], "correct": 0, "explanation": "Li (લિથિયમ) ની વિદ્યુતઋણતા (0.98) અને પરમાણુ ત્રિજ્યા (152 pm) નો સંબંધ અન્ય તત્વો કરતાં ભિન્ન છે, કારણ કે તે આલ્કલી ધાતુ છે અને તેની વિદ્યુતઋણતા ખૂબ ઓછી છે. Be, B, અને C ની વિદ્યુતઋણતા અનુક્રમે 1.57, 2.04, અને 2.55 છે, જે વધુ છે અને પરમાણુ ત્રિજ્યા ઘટતી જાય છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનો વર્ગીકરણ અને ગુણધર્મોની આવર્તિતા", "difficulty": "Hard", "num": 24}, {"question": "નીચેના પૈકી કયા યુગ્મમાં તત્વોની વિદ્યુતઋણતા અને તેમની પરમાણુ ત્રિજ્યા વચ્ચેનો સંબંધ અન્ય ત્રણ કરતાં ભિન્ન છે?", "options": ["A) Li, Be, B, C", "B) N, O, F, Ne", "C) Na, Mg, Al, Si", "D) C, N, O, F"], "correct": 1, "explanation": "વિદ્યુતઋણતા અને પરમાણુ ત્રિજ્યા વચ્ચેનો સંબંધ સામાન્ય રીતે વિરોધી હોય છે, એટલે કે પરમાણુ ત્રિજ્યા ઘટતી જાય તેની સાથે વિદ્યુતઋણતા વધતી જાય. ઓપ્શન A, C, અને D માં આ સંબંધ જોવા મળે છે. પરંતુ ઓપ્શન B માં, N (વિદ્યુતઋણતા 3.0) અને O (વિદ્યુતઋણતા 3.5) વચ્ચે પરમાણુ ત્રિજ્યા ઘટે છે, પરંતુ N થી O સુધી વિદ્યુતઋણતા વધે છે, જ્યારે O થી F (વિદ્યુતઋણતા 4.0) સુધી પરમાણુ ત્રિજ્યા ઘટે છે અને વિદ્યુતઋણતા પણ વધે છે. જોકે, Ne (વિદ્યુતઋણતા 0) એ અપવાદ છે, કારણ કે તે નિષ્ક્રિય વાયુ છે અને તેની વિદ્યુતઋણતા 0 હોય છે, જે આ સંબંધને ભંગ કરે છે. આથી, ઓપ્શન B ભિન્ન છે.", "ncert_ref": "Class XI - Chapter 3: તત્વોનો વર્ગીકરણ અને ગુણધર્મોની આવર્તિતા", "difficulty": "Hard", "num": 25}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
