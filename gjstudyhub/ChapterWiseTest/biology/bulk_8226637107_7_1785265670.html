@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "માનવ શ્વસનતંત્રમાં વાયુઓના વિનિમય માટે કયું બંધારણ સૌથી વધુ જવાબદાર છે?", "opts": ["શ્વાસનળી (Trachea)", "શ્વાસવાહિકાઓ (Bronchioles)", "ફેફસાંના કોષ્ઠો (Alveoli)", "સ્વરપેટી (Larynx)"], "ans": 2, "exp": "ફેફસાંના કોષ્ઠો (Alveoli) પાતળી દીવાલ અને વિપુલ રુધિરકેશિકાઓ ધરાવે છે, જે વાયુઓના વિનિમય માટે મુખ્ય સ્થાન છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન શ્વસન અને પ્રકાશસંશ્લેષણ વચ્ચેનો સંબંધ યોગ્ય રીતે વર્ણવે છે?", "opts": ["શ્વસનમાં ઓક્સિજન ઉત્પન્ન થાય છે અને પ્રકાશસંશ્લેષણમાં કાર્બન ડાયોક્સાઇડ ઉત્પન્ન થાય છે.", "શ્વસનમાં કાર્બન ડાયોક્સાઇડ વપરાય છે અને પ્રકાશસંશ્લેષણમાં ઓક્સિજન વપરાય છે.", "શ્વસન અને પ્રકાશસંશ્લેષણ બંને ઊર્જા મુક્ત કરે છે.", "શ્વસનમાં કાર્બન ડાયોક્સાઇડ ઉત્પન્ન થાય છે અને પ્રકાશસંશ્લેષણમાં ઓક્સિજન ઉત્પન્ન થાય છે."], "ans": 3, "exp": "શ્વસનમાં ગ્લુકોઝનું ઓક્સિડેશન થઈ કાર્બન ડાયોક્સાઇડ અને પાણી ઉત્પન્ન થાય છે, જ્યારે પ્રકાશસંશ્લેષણમાં કાર્બન ડાયોક્સાઇડ અને પાણીમાંથી ગ્લુકોઝ અને ઓક્સિજન બને છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું ટાઇડલ વોલ્યુમ (Tidal Volume) 500 મિલી છે અને શ્વાસ દર પ્રતિ મિનિટે 12 છે. તેનું પ્રતિ મિનિટનું શ્વસન વાયુનું પ્રમાણ (Minute Ventilation) કેટલું હશે?", "opts": ["4.2 લિટર/મિનિટ", "5.0 લિટર/મિનિટ", "6.0 લિટર/મિનિટ", "7.2 લિટર/મિનિટ"], "ans": 2, "exp": "પ્રતિ મિનિટનું શ્વસન વાયુનું પ્રમાણ = ટાઇડલ વોલ્યુમ × શ્વાસ દર = 500 મિલી × 12 = 6000 મિલી = 6.0 લિટર/મિનિટ.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન હિમોગ્લોબિન વિશે ખોટું છે?", "opts": ["હિમોગ્લોબિન એ લોહતત્વ ધરાવતું પ્રોટીન છે.", "હિમોગ્લોબિન ઓક્સિજન સાથે ઑક્સિહિમોગ્લોબિન બનાવે છે.", "હિમોગ્લોબિન કાર્બન ડાયોક્સાઇડ સાથે કાર્બોક્સિહિમોગ્લોબિન બનાવે છે.", "હિમોગ્લોબિનનું પ્રાથમિક કાર્ય ફેફસાંમાંથી પેશીઓ સુધી ઓક્સિજન પહોંચાડવાનું છે."], "ans": 2, "exp": "હિમોગ્લોબિન કાર્બન ડાયોક્સાઇડ સાથે કાર્બામિનોહિમોગ્લોબિન બનાવે છે, કાર્બોક્સિહિમોગ્લોબિન કાર્બન મોનોક્સાઇડ સાથે બને છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) શ્વાસોચ્છવાસ દરમિયાન ઉરોદરપટલ (Diaphragm) સંકોચાય છે અને ઉપર તરફ ખસે છે. (2) ઉચ્છવાસ દરમિયાન પાંસળીઓના સ્નાયુઓ સંકોચાય છે અને પાંસળીઓ ઉપર તરફ ખસે છે. (3) ઉરોદરપટલ અને પાંસળીઓના સ્નાયુઓ શ્વાસોચ્છવાસમાં મુખ્ય ભૂમિકા ભજવે છે. ઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 3", "1, 2 અને 3"], "ans": 2, "exp": "શ્વાસોચ્છવાસ દરમિયાન ઉરોદરપટલ નીચે તરફ ખસે છે અને ઉચ્છવાસ દરમિયાન ઉપર તરફ ખસે છે. વિધાન 3 સાચું છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "સસ્તન પ્રાણીઓમાં શ્વાસોચ્છવાસ દરમિયાન ફેફસાં અને રુધિર વચ્ચે ઓક્સિજન અને કાર્બન ડાયોક્સાઇડનું વિનિમય કયા સિદ્ધાંત પર આધારિત છે?", "opts": ["સક્રિય પરિવહન", "આસૃતિ (Diffusion)", "અંતઃશોષણ (Endocytosis)", "અંતઃસ્ત્રાવી નિયંત્રણ"], "ans": 1, "exp": "શ્વાસોચ્છવાસ દરમિયાન વાયુઓનું વિનિમય આંશિક દબાણના તફાવતને કારણે આસૃતિ દ્વારા થાય છે, જેમાં કોઈ ઊર્જાનો વપરાશ થતો નથી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શ્વસનતંત્રમાં 'શ્વસનપટલ' (Respiratory Membrane) ના ઘટકોમાં નીચેનામાંથી કયો સમાવેશ થતો નથી?", "opts": ["ફેફસાંના કેશવાહિનીઓનું અંતઃસ્તર", "ફેફસાંના વાયુકોષ્ઠોનું પાતળું અધિચ્છદ", "આંતરિક કોષીય પ્રવાહી સ્તર", "ઉરોદરપટલ (Diaphragm) નું સ્નાયુ સ્તર"], "ans": 3, "exp": "શ્વસનપટલમાં વાયુકોષ્ઠોનું અધિચ્છદ, આધારક કલા અને કેશવાહિનીઓનું અંતઃસ્તર સમાવિષ્ટ છે, પરંતુ ઉરોદરપટલ તેમાં સમાવિષ્ટ નથી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો અને કેટલાં વિધાનો સાચાં છે?\n(i) હિમોગ્લોબિન એ ઓક્સિજનનું વહન કરતું પ્રોટીન છે.\n(ii) કાર્બન મોનોક્સાઇડ હિમોગ્લોબિન સાથે ઓક્સિજન કરતાં વધુ પ્રબળતાથી જોડાય છે.\n(iii) બાયકાર્બોનેટ આયન રૂપે કાર્બન ડાયોક્સાઇડનું પરિવહન રુધિરમાં થાય છે.\n(iv) માયોગ્લોબિન ફક્ત સ્નાયુ પેશીઓમાં જોવા મળે છે અને તે ઓક્સિજનનો સંગ્રહ કરે છે.", "opts": ["માત્ર એક", "માત્ર બે", "માત્ર ત્રણ", "ચારેય"], "ans": 3, "exp": "વિધાન (i), (ii), (iii) અને (iv) બધાં સાચાં છે, પરંતુ કાર્બન મોનોક્સાઇડ હિમોગ્લોબિન સાથે જોડાવાથી ઓક્સિજનનું વહન અટકી જાય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું ટાઇડલ વોલ્યુમ (Tidal Volume) 500 મિલી, શ્વાસ દર (Respiratory Rate) 12 શ્વાસ/મિનિટ અને મૃત અવકાશ (Dead Space) 150 મિલી છે. આ વ્યક્તિનું પ્રતિ મિનિટ વાયુકોષ્ઠીય વેન્ટિલેશન (Alveolar Ventilation) કેટલું હશે?", "opts": ["3600 મિલી/મિનિટ", "4200 મિલી/મિનિટ", "4800 મિલી/મિનિટ", "6000 મિલી/મિનિટ"], "ans": 1, "exp": "વાયુકોષ્ઠીય વેન્ટિલેશન = (ટાઇડલ વોલ્યુમ - મૃત અવકાશ) × શ્વાસ દર = (500 - 150) × 12 = 350 × 12 = 4200 મિલી/મિનિટ નહીં, પરંતુ 3600 મિલી/મિનિટ સાચો જવાબ છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું લક્ષણ માનવ ફેફસાંના વાયુકોષ્ઠો (Alveoli) માટે અયોગ્ય છે?", "opts": ["વાયુકોષ્ઠોની દીવાલ એકસ્તરીય શલ્કીય અધિચ્છદથી બનેલી હોય છે.", "વાયુકોષ્ઠોની આસપાસ કેશવાહિનીઓનું ગીચ જાળું હોય છે.", "વાયુકોષ્ઠોમાં સિલિયા (Cilia) જોવા મળે છે જે શ્લેષ્મને બહાર ધકેલે છે.", "વાયુકોષ્ઠોની સપાટી પર સર્ફેક્ટન્ટ (Surfactant) નામનું પ્રવાહી હોય છે."], "ans": 2, "exp": "વાયુકોષ્ઠોમાં સિલિયા હોતા નથી, સિલિયા શ્વાસનળી અને શ્વસનમાર્ગમાં જોવા મળે છે જે અશુદ્ધિઓને બહાર કાઢે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવમાં શ્વાસોચ્છવાસ દરમિયાન ફેફસાંમાં હવાનું વિનિમય કયા સ્થાને થાય છે?", "opts": ["શ્વાસનળી (Trachea)", "શ્વાસવાહિકાઓ (Bronchi)", "કંઠનળી (Larynx)", "કેશિકાગુચ્છ (Alveoli)"], "ans": 3, "exp": "ફેફસાંમાં વાયુઓનું વિનિમય કેશિકાગુચ્છ (Alveoli)માં થાય છે, જ્યાં ઓક્સિજન રુધિરમાં પ્રવેશે છે અને કાર્બન ડાયોક્સાઇડ બહાર નીકળે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શ્વસનતંત્રમાં 'હેમોગ્લોબિન'નું મુખ્ય કાર્ય શું છે?", "opts": ["ફેફસાંમાં હવાનું નિયમન કરવું.", "રુધિરમાં ઓક્સિજનનું વહન કરવું.", "કાર્બન ડાયોક્સાઇડને ફેફસાંમાંથી બહાર કાઢવું.", "શ્વાસનળીમાં હવાને ગરમ કરવી."], "ans": 1, "exp": "હેમોગ્લોબિન રુધિરમાં ઓક્સિજનનું વહન કરે છે અને તેને શરીરના વિવિધ ભાગોમાં પહોંચાડે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["શ્વાસોચ્છવાસ દરમિયાન ઉરોદરપટલ (Diaphragm) નીચેની તરફ ખસે છે.", "શ્વાસોચ્છવાસ દરમિયાન પાંસળીઓ ઉપરની તરફ ખસે છે.", "શ્વાસોચ્છવાસ દરમિયાન ફેફસાંનું કદ ઘટે છે.", "શ્વાસોચ્છવાસ દરમિયાન હવાનું દબાણ ફેફસાંમાં ઘટે છે."], "ans": 2, "exp": "શ્વાસોચ્છવાસ દરમિયાન શ્વાસ લેવાની પ્રક્રિયામાં ફેફસાંનું કદ વધે છે, નહીં કે ઘટે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના રુધિરમાં કાર્બોક્સી હેમોગ્લોબિનનું પ્રમાણ વધી જાય તો શું થાય?", "opts": ["રુધિરમાં ઓક્સિજનનું પ્રમાણ વધી જાય.", "રુધિરમાં કાર્બન ડાયોક્સાઇડનું વહન વધી જાય.", "રુધિરની ઓક્સિજન વહન ક્ષમતા ઘટી જાય.", "રુધિરનું pH વધી જાય."], "ans": 2, "exp": "કાર્બોક્સી હેમોગ્લોબિન હેમોગ્લોબિન સાથે કાર્બન મોનોક્સાઇડનું જોડાણ છે, જે ઓક્સિજન વહન ક્ષમતા ઘટાડે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસની ક્રિયા દરમિયાન ઉરસગુહાનું કદ વધે છે ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["ફેફસાંનું દબાણ વાતાવરણના દબાણ કરતાં વધી જાય છે", "ફેફસાંનું દબાણ વાતાવરણના દબાણ કરતાં ઘટી જાય છે", "ફેફસાંનું દબાણ વાતાવરણના દબાણ જેટલું જ રહે છે", "ઉરસગુહાનું કદ વધવાથી ફેફસાંનું કદ ઘટી જાય છે"], "ans": 1, "exp": "ઉરસગુહાનું કદ વધવાથી ફેફસાંનું દબાણ ઘટે છે, જેના કારણે હવા બહારથી ફેફસાંમાં પ્રવેશે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન શ્વસનપટલ (respiratory membrane) માટે ખોટું છે?", "opts": ["તે ફેફસાંના વાયુકોષ્ઠ (alveoli) અને રુધિરકેશિકાઓ વચ્ચેનું પાતળું પટલ છે", "તે ઓક્સિજન અને કાર્બન ડાયોક્સાઇડના વિનિમય માટે જવાબદાર છે", "તેનું કુલ સપાટી વિસ્તાર લગભગ 70 ચોરસ મીટર જેટલું હોય છે", "તે મુખ્યત્વે સ્નાયુપેશીઓનું બનેલું હોય છે"], "ans": 3, "exp": "શ્વસનપટલ એ પાતળું પટલ છે જે વાયુકોષ્ઠ અને રુધિરકેશિકાઓની દીવાલોથી બનેલું હોય છે, સ્નાયુપેશીઓનું નહીં.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનો શ્વાસ દર (respiratory rate) 15 પ્રતિ મિનિટ અને ટાઇડલ વોલ્યુમ (tidal volume) 450 મિલી છે. જો તેનો મૃત અવકાશ (dead space) 150 મિલી હોય, તો તેનું પ્રતિ મિનિટ વાયુવિનિમય (alveolar ventilation) કેટલું હશે?", "opts": ["3000 મિલી/મિનિટ", "4500 મિલી/મિનિટ", "6750 મિલી/મિનિટ", "2250 મિલી/મિનિટ"], "ans": 1, "exp": "વાયુવિનિમય = (ટાઇડલ વોલ્યુમ - મૃત અવકાશ) × શ્વાસ દર = (450 - 150) × 15 = 300 × 15 = 4500 મિલી/મિનિટ નહીં, ખરેખર 3000 મિલી/મિનિટ.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન હિમોગ્લોબિન માટે સાચું નથી?", "opts": ["તે ઓક્સિજન સાથે ઑક્સિહિમોગ્લોબિન બનાવે છે", "તે કાર્બન ડાયોક્સાઇડ સાથે કાર્બામિનોહિમોગ્લોબિન બનાવે છે", "તેનું ઑક્સિજન સાથેનું બંધન pH અને તાપમાનથી પ્રભાવિત થતું નથી", "તે લાલ રક્તકણોમાં જોવા મળે છે"], "ans": 2, "exp": "હિમોગ્લોબિનનું ઑક્સિજન સાથેનું બંધન pH અને તાપમાનથી પ્રભાવિત થાય છે, જેને બોહર અસર કહે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું અંગ શ્વાસોચ્છવાસની ક્રિયામાં સીધું સંકળાયેલું નથી?", "opts": ["ઉરોદરપટલ (diaphragm)", "પાંસળીઓ (ribs)", "શ્વાસનળી (trachea)", "યકૃત (liver)"], "ans": 3, "exp": "યકૃત શ્વાસોચ્છવાસની ક્રિયામાં સીધી રીતે સંકળાયેલું નથી, જ્યારે અન્ય ત્રણ અંગો સીધી રીતે સંકળાયેલા છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસ દરમિયાન વાયુઓના વિનિમય માટે જવાબદાર મુખ્ય સંરચના કઈ છે?", "opts": ["શ્વાસનળી (Trachea)", "શ્વાસનળીની શાખાઓ (Bronchi)", "ફેફસાંના વાયુકોષ્ઠો (Alveoli)", "ઉરોદરપટલ (Diaphragm)"], "ans": 2, "exp": "ફેફસાંના વાયુકોષ્ઠો (Alveoli) એ પાતળી દીવાલ ધરાવતા હોય છે અને રુધિરકેશિકાઓથી ઘેરાયેલા હોય છે, જે ઓક્સિજન અને કાર્બન ડાયોક્સાઇડના વિનિમય માટે મુખ્ય સ્થાન છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મનુષ્યના શ્વસનતંત્ર માટે ખોટું છે?", "opts": ["ઉરોદરપટલ (Diaphragm) શ્વાસોચ્છવાસમાં મદદ કરે છે.", "શ્વાસનળી (Trachea) કાસ્થિની વલયોથી બનેલી હોય છે.", "ફેફસાંમાં વાયુકોષ્ઠો (Alveoli)ની સંખ્યા લગભગ 300 મિલિયન જેટલી હોય છે.", "શ્વાસોચ્છવાસ દરમિયાન કાર્બન ડાયોક્સાઇડનું વહન માત્ર રુધિરરસ (Plasma) દ્વારા થાય છે."], "ans": 3, "exp": "કાર્બન ડાયોક્સાઇડનું વહન રુધિરરસમાં દ્રાવ્ય સ્વરૂપે, બાયકાર્બોનેટ આયન તરીકે અને હિમોગ્લોબિન સાથે જોડાઈને થાય છે, માત્ર રુધિરરસ દ્વારા નહીં.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનું મિનિટ વેન્ટિલેશન (Minute Ventilation) 6 લિટર છે અને શ્વાસ દર (Respiratory Rate) 12 શ્વાસ/મિનિટ છે. તે વ્યક્તિનો ટાઇડલ વોલ્યુમ (Tidal Volume) કેટલો હશે?", "opts": ["250 મિલી", "500 મિલી", "750 મિલી", "1000 મિલી"], "ans": 1, "exp": "મિનિટ વેન્ટિલેશન = ટાઇડલ વોલ્યુમ × શ્વાસ દર. તેથી, ટાઇડલ વોલ્યુમ = 6000 મિલી / 12 = 500 મિલી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન શ્વસનપટલ (Respiratory Membrane) માટે સાચું નથી?", "opts": ["તે વાયુકોષ્ઠો (Alveoli) અને રુધિરકેશિકાઓની દીવાલોથી બનેલું હોય છે.", "તે ઓક્સિજન અને કાર્બન ડાયોક્સાઇડના વિનિમય માટે પાતળું અને અર્ધપ્રવેશશીલ હોય છે.", "તેનું કુલ સપાટી વિસ્તાર લગભગ 70 ચોરસ મીટર જેટલું હોય છે.", "તે મુખ્યત્વે સ્નાયુ પેશીઓથી બનેલું હોય છે."], "ans": 3, "exp": "શ્વસનપટલ એ વાયુકોષ્ઠો અને રુધિરકેશિકાઓની પાતળી દીવાલોથી બનેલું હોય છે, સ્નાયુ પેશીઓથી નહીં.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું જોડકું શ્વાસોચ્છવાસની પ્રક્રિયા સાથે યોગ્ય રીતે જોડાયેલું નથી?", "opts": ["ઉરોદરપટલનું સંકોચન - શ્વાસ અંદર લેવો (Inhalation)", "ઉરોદરપટલનું શિથિલન - શ્વાસ બહાર કાઢવો (Exhalation)", "ફેફસાંનું વિસ્તરણ - ઉરસગુહાનું દબાણ ઘટવું", "ઉરોદરપટલનું સંકોચન - ઉરસગુહાનું દબાણ વધવું"], "ans": 3, "exp": "ઉરોદરપટલનું સંકોચન થતાં ઉરસગુહાનું દબાણ ઘટે છે, જે શ્વાસ અંદર લેવામાં મદદ કરે છે, દબાણ વધતું નથી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસ દરમિયાન ઓક્સિજનનું વહન મુખ્યત્વે કયા સ્વરૂપે થાય છે?", "opts": ["ઓક્સિહિમોગ્લોબિન તરીકે", "કાર્બોક્સિહિમોગ્લોબિન તરીકે", "કાર્બનિક એસિડ તરીકે", "કાર્બોનેટ આયન તરીકે"], "ans": 0, "exp": "મનુષ્યમાં ઓક્સિજનનું વહન લોહીમાં હિમોગ્લોબિન સાથે જોડાઈને ઓક્સિહિમોગ્લોબિન સ્વરૂપે થાય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનો શ્વસન ગુણોત્તર (respiratory quotient, RQ) 0.7 છે. આ વ્યક્તિ મુખ્યત્વે કયા પ્રકારનો ખોરાક લઈ રહ્યો હશે?", "opts": ["કાર્બોદિત", "પ્રોટીન", "ચરબી", "મિશ્ર આહાર"], "ans": 2, "exp": "શ્વસન ગુણોત્તર (RQ) 0.7 ચરબીના ઓક્સિડેશનને દર્શાવે છે, કારણ કે ચરબીના ઓક્સિડેશનમાં ઓક્સિજનનો ઉપયોગ વધારે થાય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન બોહર અસર (Bohr effect) માટે સાચું છે?", "opts": ["ઓક્સિજનનું આંશિક દબાણ વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે.", "કાર્બન ડાયોક્સાઇડનું આંશિક દબાણ વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા ઘટે છે.", "પીએચ (pH) વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે.", "તાપમાન ઘટતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે."], "ans": 1, "exp": "બોહર અસર અનુસાર, કાર્બન ડાયોક્સાઇડનું આંશિક દબાણ વધતા લોહીનું પીએચ ઘટે છે, જે હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા ઘટાડે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન બોહર અસર (Bohr effect)નું સાચું વર્ણન કરે છે?", "opts": ["ઓક્સિજનનું આંશિક દબાણ વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે.", "કાર્બન ડાયોક્સાઇડનું આંશિક દબાણ વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા ઘટે છે.", "રુધિરનું pH વધતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે.", "તાપમાન ઘટતા હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા વધે છે."], "ans": 1, "exp": "બોહર અસર મુજબ, કાર્બન ડાયોક્સાઇડનું આંશિક દબાણ વધતા રુધિરનું pH ઘટે છે, જેના કારણે હિમોગ્લોબિનની ઓક્સિજન સાથે જોડાવાની ક્ષમતા ઘટે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસની ક્રિયા દરમિયાન ઓક્સિજનનું વહન મુખ્યત્વે કયા સ્વરૂપમાં થાય છે?", "opts": ["કાર્બનિક એસિડ તરીકે", "કાર્બોક્સીહિમોગ્લોબિન તરીકે", "ઓક્સિહિમોગ્લોબિન તરીકે", "કાર્બન ડાયોક્સાઇડ તરીકે"], "ans": 2, "exp": "મનુષ્યમાં ઓક્સિજનનું વહન લોહીમાં હિમોગ્લોબિન સાથે જોડાઈને ઓક્સિહિમોગ્લોબિન સ્વરૂપમાં થાય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનો ટાઇડલ વોલ્યુમ (Tidal Volume) 500 મિલી અને શ્વાસ દર (Respiratory Rate) 12 પ્રતિ મિનિટ છે. જો તેનો ડેડ સ્પેસ (Dead Space) 150 મિલી હોય, તો તેનો અલ્વીઓલર વેન્ટિલેશન (Alveolar Ventilation) પ્રતિ મિનિટ કેટલો હશે?", "opts": ["3.6 લિટર", "4.2 લિટર", "5.4 લિટર", "6.0 લિટર"], "ans": 1, "exp": "અલ્વીઓલર વેન્ટિલેશન = (ટાઇડલ વોલ્યુમ - ડેડ સ્પેસ) × શ્વાસ દર = (500 - 150) × 12 = 4200 મિલી = 4.2 લિટર.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસની ક્રિયા દરમિયાન ફેફસાંમાંથી રુધિરમાં ઓક્સિજનનું વહન મુખ્યત્વે કયા સ્વરૂપે થાય છે?", "opts": ["ઓક્સિહિમોગ્લોબિન તરીકે", "કાર્બોહિમોગ્લોબિન તરીકે", "કાર્બોક્સિહિમોગ્લોબિન તરીકે", "હિમોગ્લોબિન સાથે ભૌતિક દ્રાવણ સ્વરૂપે"], "ans": 0, "exp": "ઓક્સિજન હિમોગ્લોબિન સાથે જોડાઈને ઓક્સિહિમોગ્લોબિન બનાવે છે, જે રુધિરમાં ઓક્સિજનનું વહન કરે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિનો ટાઇડલ વોલ્યુમ (Tidal Volume) 500 મિલી અને શ્વાસ દર (Respiratory Rate) 15 પ્રતિ મિનિટ છે. તેનો મિનિટ વેન્ટિલેશન (Minute Ventilation) કેટલો હશે?", "opts": ["7500 મિલી/મિનિટ", "6000 મિલી/મિનિટ", "5000 મિલી/મિનિટ", "7000 મિલી/મિનિટ"], "ans": 0, "exp": "મિનિટ વેન્ટિલેશન = ટાઇડલ વોલ્યુમ × શ્વાસ દર = 500 મિલી × 15 = 7500 મિલી/મિનિટ.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "શ્વસન ગુણોત્તર (Respiratory Quotient - RQ) 0.7 ધરાવતી વ્યક્તિ મુખ્યત્વે કયા પોષક તત્વનો ઉપયોગ કરી રહી છે?", "opts": ["ચરબી (Fats)", "કાર્બોદિત (Carbohydrates)", "પ્રોટીન (Proteins)", "ખનીજ ક્ષારો (Minerals)"], "ans": 0, "exp": "શ્વસન ગુણોત્તર (RQ) 0.7 ચરબીના ઓક્સિડેશનને દર્શાવે છે, કારણ કે ચરબીના ઓક્સિડેશનમાં ઉત્પન્ન થતા CO₂ અને વપરાતા O₂ નો ગુણોત્તર 0.7 હોય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "શ્વાસોચ્છવાસ દરમિયાન ઓક્સિજનનું વહન મુખ્યત્વે કયા સ્વરૂપમાં થાય છે?", "opts": ["હીમોગ્લોબિન સાથે સંયોજન થઈને ઓક્સિહીમોગ્લોબિન સ્વરૂપે", "પ્લાઝ્મામાં દ્રાવ્ય સ્વરૂપે", "કાર્બનિક એસિડ તરીકે", "કાર્બોક્સિહીમોગ્લોબિન સ્વરૂપે"], "ans": 0, "exp": "ઓક્સિજન મુખ્યત્વે હીમોગ્લોબિન સાથે સંયોજાઈને ઓક્સિહીમોગ્લોબિન સ્વરૂપે વહન પામે છે, જે લોહીના લાલ રક્તકણોમાં જોવા મળે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું અંગ શ્વસનતંત્રનો ભાગ નથી?", "opts": ["યકૃત (Liver)", "શ્વાસનળી (Trachea)", "ફેફસાં (Lungs)", "શ્વાસનળીની શાખાઓ (Bronchi)"], "ans": 0, "exp": "યકૃત પાચનતંત્રનો ભાગ છે અને તે શ્વસનતંત્ર સાથે સંકળાયેલું નથી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "બોહર અસર (Bohr effect) શું દર્શાવે છે?", "opts": ["રુધિરમાં pH ઘટવાથી હિમોગ્લોબિનની ઓક્સિજન પ્રત્યેની આકર્ષણશક્તિ વધે છે.", "રુધિરમાં pH ઘટવાથી હિમોગ્લોબિનની ઓક્સિજન પ્રત્યેની આકર્ષણશક્તિ ઘટે છે.", "રુધિરમાં કાર્બન ડાયોક્સાઇડનું પ્રમાણ વધવાથી હિમોગ્લોબિનનું નિર્માણ વધે છે.", "રુધિરમાં ઓક્સિજનનું પ્રમાણ વધવાથી કાર્બન ડાયોક્સાઇડનું વહન વધે છે."], "ans": 1, "exp": "બોહર અસર દર્શાવે છે કે રુધિરમાં pH ઘટવાથી (અથવા CO₂નું પ્રમાણ વધવાથી) હિમોગ્લોબિનની ઓક્સિજન પ્રત્યેની આકર્ષણશક્તિ ઘટે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન શ્વસન ગુણોત્તર (respiratory quotient, RQ) માટે સાચું નથી?", "opts": ["કાર્બોદિતના ઓક્સિડેશન માટે RQ = 1 હોય છે.", "ચરબીના ઓક્સિડેશન માટે RQ < 1 હોય છે.", "પ્રોટીનના ઓક્સિડેશન માટે RQ > 1 હોય છે.", "RQ ની ગણતરી CO₂ ઉત્પન્ન થયેલ / O₂ વપરાયેલ દ્વારા થાય છે."], "ans": 2, "exp": "પ્રોટીનના ઓક્સિડેશન માટે RQ લગભગ 0.8-0.9 હોય છે, 1 કરતાં વધુ નહીં.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસ દરમિયાન ફેફસાંમાં ઓક્સિજનનું વહન મુખ્યત્વે કઈ પ્રક્રિયા દ્વારા થાય છે?", "opts": ["સાદું પ્રસરણ (Simple diffusion)", "સક્રિય વહન (Active transport)", "સહાયક પ્રસરણ (Facilitated diffusion)", "અંતઃગ્રહણ (Endocytosis)"], "ans": 0, "exp": "ફેફસાંમાં ઓક્સિજનનું વહન આંશિક દબાણના તફાવતને કારણે સાદા પ્રસરણ દ્વારા થાય છે, જેમાં ઊર્જાનો વપરાશ થતો નથી.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન બોહર અસર (Bohr effect) માટે સાચું નથી?", "opts": ["કાર્બન ડાયોક્સાઇડના વધતા પ્રમાણથી હિમોગ્લોબિનની ઓક્સિજન પ્રત્યેની આકર્ષણશક્તિ ઘટે છે.", "તે રુધિરમાં pH ઘટવાને કારણે થાય છે.", "તેના કારણે ઓક્સિહિમોગ્લોબિનનું વિઘટન સરળ બને છે.", "તે ફેફસાંમાં ઓક્સિજનનું હિમોગ્લોબિન સાથે જોડાણ વધારે છે."], "ans": 3, "exp": "બોહર અસર ફેફસાંમાં ઓક્સિજનનું જોડાણ વધારતી નથી, પરંતુ પેશીઓમાં ઓક્સિજનનું મુક્ત થવું સરળ બનાવે છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યમાં શ્વાસોચ્છવાસ દરમિયાન હવાના વિનિમય માટે જવાબદાર શ્વસનપટલ (respiratory membrane) નું બંધારણ કયા સ્તરોનું બનેલું હોય છે?", "opts": ["એક સ્તરીય શલ્કીય ઉપકલા (simple squamous epithelium) અને એક સ્તરીય ઘનાકાર ઉપકલા (cuboidal epithelium)", "એક સ્તરીય શલ્કીય ઉપકલા, આધારક પટલ (basement membrane) અને રુધિરકેશિકાની દીવાલ", "બહુસ્તરીય શલ્કીય ઉપકલા (stratified squamous epithelium) અને સંયોજક પેશી (connective tissue)", "એક સ્તરીય સ્તંભીય ઉપકલા (columnar epithelium) અને સ્નાયુ પેશી (muscle tissue)"], "ans": 1, "exp": "શ્વસનપટલ એ ફેફસાંના વાયુકોષ્ઠ (alveoli) ની દીવાલ અને રુધિરકેશિકાની દીવાલ વચ્ચેનું પાતળું પટલ છે, જે એક સ્તરીય શલ્કીય ઉપકલા, આધારક પટલ અને રુધિરકેશિકાની દીવાલનું બનેલું હોય છે.", "chapter": "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "શ્વાસોચ્છવાસ અને વાયુઓનું વિનિમય Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
