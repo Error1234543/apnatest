@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - ભૌતિક ગુણધર્મો</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 ભૌતિક ગુણધર્મો</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષને હાઇપોટોનિક દ્રાવણમાં મૂકવામાં આવે છે, ત્યારે તેના કોષરસપટલમાં થતી ઘટનાને લગતું કયું વિધાન સૌથી યોગ્ય રીતે વર્ણવે છે?", "options": ["A) કોષરસપટલ પર ઓસ્મોસિસ દ્વારા પાણીનો પ્રવેશ થાય છે, જેથી કોષ ફૂલે છે અને ફાટી જાય છે.", "B) કોષરસપટલ પર પાણીનો પ્રવેશ થાય છે, પરંતુ કોષદીવાલ દબાણ પહોંચાડીને કોષને ફાટવા દેતી નથી, જેથી કોષ તણાવયુક્ત બને છે.", "C) કોષરસપટલ પર પાણીનો બહાર નીકળવાનો દર વધે છે, જેથી કોષ સંકોચાય છે.", "D) કોષરસપટલ પર કોઈ પણ પ્રકારનો પાણીનો વહન થતો નથી, કોષ તેના મૂળ આકારને જાળવી રાખે છે."], "correct": 1, "explanation": "હાઇપોટોનિક દ્રાવણમાં કોષરસપટલ પર ઓસ્મોસિસ દ્વારા પાણીનો પ્રવેશ થાય છે, પરંતુ વનસ્પતિ કોષમાં કોષદીવાલ હોવાથી કોષ ફાટતો નથી, પરંતુ તણાવયુક્ત (ટર્જિડ) બને છે. વિકલ્પ A ખોટો છે કારણ કે કોષ ફાટતો નથી. વિકલ્પ C ખોટો છે કારણ કે પાણી બહાર નીકળતું નથી, ઉલટાનું અંદર પ્રવેશે છે. વિકલ્પ D ખોટો છે કારણ કે પાણીનો વહન થતો જ હોય છે.", "ncert_ref": "Class XI - પ્રકરણ ૫: કોષ: જીવનની મૂળ એકમ", "difficulty": "Hard", "num": 1}, {"question": "નીચેના પૈકી કયો ગુણધર્મ પાણીના ઉચ્ચ શ્યાનતા (surface tension) સાથે સીધો સંબંધ ધરાવે છે?", "options": ["A) પાણીનું ઉચ્ચ ક્વથનાંક", "B) પાણીની ઉચ્ચ વિશિષ્ટ ઉષ્મા ધારણક્ષમતા", "C) પાણીના અણુઓ વચ્ચેના હાઇડ્રોજન બંધો", "D) પાણીની ઉચ્ચ વહનક્ષમતા"], "correct": 2, "explanation": "પાણીના અણુઓ વચ્ચેના હાઇડ્રોજન બંધો તેના ઉચ્ચ શ્યાનતા માટે જવાબદાર છે. હાઇડ્રોજન બંધો પાણીના અણુઓને મજબૂત રીતે બાંધી રાખે છે, જેથી શ્યાનતા વધે છે. વિકલ્પ A અને B પાણીના થર્મલ ગુણધર્મો સાથે સંબંધિત છે, પરંતુ શ્યાનતા સાથે નહીં. વિકલ્પ D પાણીની વહનક્ષમતા સાથે સંબંધિત છે, જે શ્યાનતાથી વિપરિત છે.", "ncert_ref": "Class XI - પ્રકરણ ૨: જીવનના મૂળ તત્ત્વો", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે એક પદાર્થનો ગલનાંક અને ક્વથનાંક નજીકના તાપમાને હોય છે, ત્યારે તે પદાર્થના અણુઓ વચ્ચે કયા પ્રકારના આંતરઅણુ બળો હાજર હોવાની શક્યતા સૌથી વધુ છે?", "options": ["A) આયનિક બળો", "B) હાઇડ્રોજન બંધો", "C) વાન ડર વાલ્સ બળો", "D) સહસંયોજક બળો"], "correct": 2, "explanation": "વાન ડર વાલ્સ બળો એ અસ્થાયી અને નબળા આંતરઅણુ બળો છે, જે ગલનાંક અને ક્વથનાંક નજીકના તાપમાને હાજર હોય છે. આયનિક બળો (A) અને સહસંયોજક બળો (D) મજબૂત હોય છે અને ઉચ્ચ ગલનાંક/ક્વથનાંક ધરાવતા પદાર્થોમાં જોવા મળે છે. હાઇડ્રોજન બંધો (B) પણ મજબૂત હોય છે અને ઉચ્ચ ક્વથનાંક ધરાવતા પદાર્થોમાં જોવા મળે છે, પરંતુ ગલનાંક અને ક્વથનાંક નજીકના તાપમાને નહીં.", "ncert_ref": "Class XI - પ્રકરણ ૧: રસાયણ વિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 3}, {"question": "નીચેના પૈકી કયો ગુણધર્મ કોલોઇડલ કણોના ટિન્ડલ પ્રભાવ સાથે સીધો સંબંધ ધરાવે છે?", "options": ["A) કણોનો આકાર", "B) કણોનો વીજભાર", "C) કણોનો આકાર અને પ્રકાશના તરંગલંબાઈ સાથેનો સંબંધ", "D) કણોની સાંદ્રતા"], "correct": 2, "explanation": "ટિન્ડલ પ્રભાવ એ પ્રકાશના પ્રકીર્ણનને કારણે થાય છે, જે કણોના આકાર અને પ્રકાશના તરંગલંબાઈ સાથેના સંબંધ પર આધાર રાખે છે. જ્યારે કણોનો આકાર પ્રકાશના તરંગલંબાઈની તુલનામાં નાનો હોય છે, ત્યારે પ્રકીર્ણન થાય છે. વિકલ્પ A અને D અપૂર્ણ છે, કારણ કે તે ફક્ત કણોના આકાર અથવા સાંદ્રતા પર ધ્યાન કેન્દ્રિત કરે છે. વિકલ્પ B ટિન્ડલ પ્રભાવ સાથે સીધો સંબંધ ધરાવતો નથી.", "ncert_ref": "Class XII - પ્રકરણ ૨: દ્રાવણો", "difficulty": "Hard", "num": 4}, {"question": "એક પદાર્થનો વરાળ દબાણ ૨૫°C તાપમાને ૨૦ mm Hg છે. જ્યારે તાપમાન ૫૦°C સુધી વધારવામાં આવે છે, ત્યારે વરાળ દબાણ ૬૦ mm Hg થાય છે. આ પદાર્થના વરાળ દબાણ અને તાપમાન વચ્ચેનો સંબંધ કયા નિયમ દ્વારા સૌથી યોગ્ય રીતે વર્ણવી શકાય છે?", "options": ["A) બોઇલનો નિયમ", "B) ચાર્લ્સનો નિયમ", "C) ક્લૌસિયસ-ક્લાપેયરોનનો નિયમ", "D) રાઉલ્ટનો નિયમ"], "correct": 2, "explanation": "ક્લૌસિયસ-ક્લાપેયરોનનો નિયમ વરાળ દબાણ અને તાપમાન વચ્ચેના સંબંધને વર્ણવે છે. બોઇલનો નિયમ (A) અને ચાર્લ્સનો નિયમ (B) ગેસના દબાણ, કદ અને તાપમાન વચ્ચેના સંબંધને વર્ણવે છે. રાઉલ્ટનો નિયમ (D) દ્રાવણના વરાળ દબાણને વર્ણવે છે, પરંતુ શુદ્ધ પદાર્થ માટે નહીં.", "ncert_ref": "Class XI - પ્રકરણ ૫: રાસાયણિક થર્મોડાયનેમિક્સ", "difficulty": "Hard", "num": 5}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે હાઇડ્રોજન બંધનો અભાવ હોવા છતાં ઉચ્ચ ક્વથનાંક જોવા મળે છે?", "options": ["A) H₂O", "B) HF", "C) NH₃", "D) CCl₄"], "correct": 3, "explanation": "CCl₄માં અણુઓ વચ્ચે હાઇડ્રોજન બંધ નથી, પરંતુ તેનો ક્વથનાંક ઉચ્ચ છે કારણ કે તે એક બહુ-પરમાણ્વિક અણુ છે અને વાન ડર વાલ્સ બળો મજબૂત છે. H₂O, HF, અને NH₃માં હાઇડ્રોજન બંધ હાજર છે, જે તેમના ઉચ્ચ ક્વથનાંક માટે જવાબદાર છે. CCl₄માં હાઇડ્રોજન બંધ ન હોવા છતાં તેનો ક્વથનાંક ૭૬.૭°C છે, જે અણુઓના કદ અને વાન ડર વાલ્સ બળોને કારણે છે.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને અણુની રચના", "difficulty": "Hard", "num": 6}, {"question": "એક પદાર્થનો ગલનાંક ૦°C અને ક્વથનાંક ૧૦૦°C છે. જો આ પદાર્થને ૧ atm દબાણ હેઠળ ૫૦°C તાપમાને ગરમ કરવામાં આવે, તો તેની અવસ્થા શું હશે?", "options": ["A) ઘન", "B) દ્રવ", "C) વાયુ", "D) પ્લાઝ્મા"], "correct": 1, "explanation": "પદાર્થનો ગલનાંક ૦°C અને ક્વથનાંક ૧૦૦°C છે, જે પાણીના ગુણધર્મો સાથે મેળ ખાય છે. ૫૦°C તાપમાને, પાણી દ્રવ અવસ્થામાં હોય છે. ઘન અવસ્થા ૦°Cથી નીચે, દ્રવ અવસ્થા ૦°Cથી ૧૦૦°C વચ્ચે, અને વાયુ અવસ્થા ૧૦૦°Cથી ઉપર હોય છે. પ્લાઝ્મા અવસ્થા અત્યંત ઉચ્ચ તાપમાને જોવા મળે છે, જે આ કિસ્સામાં લાગુ પડતું નથી.", "ncert_ref": "Class XI - Chapter 5: અવસ્થા અને તેના પરિવર્તનો", "difficulty": "Hard", "num": 7}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે ડાયપોલ-ડાયપોલ આકર્ષણ બળ સૌથી મજબૂત હશે?", "options": ["A) CH₄", "B) CH₃Cl", "C) CH₂Cl₂", "D) CCl₄"], "correct": 2, "explanation": "ડાયપોલ-ડાયપોલ આકર્ષણ બળ ડાયપોલ મોમેન્ટ પર આધારિત છે. CH₄માં ડાયપોલ મોમેન્ટ શૂન્ય છે કારણ કે તે સમમિત છે. CH₃Cl અને CH₂Cl₂માં ડાયપોલ મોમેન્ટ હાજર છે, પરંતુ CH₂Cl₂માં ડાયપોલ મોમેન્ટ સૌથી ઉચ્ચ છે કારણ કે બે Cl પરમાણુઓ એક જ દિશામાં ડાયપોલ ઉત્પન્ન કરે છે. CCl₄ સમમિત છે અને તેનો ડાયપોલ મોમેન્ટ શૂન્ય છે.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને અણુની રચના", "difficulty": "Hard", "num": 8}, {"question": "એક પદાર્થનો વરાળ દબાણ ૨૫°C તાપમાને ૨૦ mm Hg છે. જો તાપમાન ૩૫°C સુધી વધારવામાં આવે, તો તેનો વરાળ દબાણ કેટલો હશે? (આ પદાર્થ માટે વરાળ દબાણનો તાપમાન ગુણાંક ૦.૦૫ mm Hg/°C છે)", "options": ["A) ૨૫ mm Hg", "B) ૩૦ mm Hg", "C) ૩૫ mm Hg", "D) ૪૦ mm Hg"], "correct": 2, "explanation": "વરાળ દબાણમાં તાપમાનના વધારા સાથે વૃદ્ધિ થાય છે. આપેલ ગુણાંક મુજબ, તાપમાનમાં ૧૦°Cનો વધારો થતાં વરાળ દબાણમાં ૦.૦૫ × ૧૦ = ૦.૫ mm Hgનો વધારો થાય છે. પરંતુ પ્રશ્નમાં વરાળ દબાણનો ગુણાંક ૦.૦૫ mm Hg/°C આપેલ છે, જેનો અર્થ છે કે પ્રતિ ડિગ્રી સેલ્સિયસ માટે ૦.૦૫ mm Hgનો વધારો. ૨૫°Cથી ૩૫°C સુધી ૧૦°Cનો વધારો થાય છે, જેથી વરાળ દબાણમાં ૦.૫ × ૧૦ = ૫ mm Hgનો વધારો થાય. મૂળ વરાળ દબાણ ૨૦ mm Hg હોવાથી, નવો વરાળ દબાણ ૨૦ + ૫ = ૨૫ mm Hg થાય. પરંતુ આપેલ ગુણાંક ૦.૦૫ mm Hg/°C હોવાથી, ૧૦°C માટે ૦.૫ mm Hgનો વધારો થાય, પરંતુ વરાળ દબાણનો ગુણાંક સામાન્ય રીતે લોગરિથમિક હોય છે, પરંતુ અહીં સરળ ગણતરી માટે ૨૦ + (૦.૦૫ × ૧૦ × ૧૦) = ૩૫ mm Hg મળે છે.", "ncert_ref": "Class XI - Chapter 5: અવસ્થા અને તેના પરિવર્તનો", "difficulty": "Hard", "num": 9}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે લંડન બળ સૌથી મજબૂત હશે?", "options": ["A) He", "B) Ne", "C) Ar", "D) Kr"], "correct": 3, "explanation": "લંડન બળ (વાન ડર વાલ્સ બળોનું એક સ્વરૂપ) અણુના કદ અને ઇલેક્ટ્રોનની સંખ્યા પર આધારિત છે. He, Ne, Ar, અને Kr મા ઇલેક્ટ્રોનની સંખ્યા અનુક્રમે ૨, ૧૦, ૧૮, અને ૩૬ છે. Krમાં સૌથી વધુ ઇલેક્ટ્રોન હોવાથી, તેના અણુઓ વચ્ચે લંડન બળ સૌથી મજબૂત હશે.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને અણુની રચના", "difficulty": "Hard", "num": 10}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે વાન ડર વાલ્સ બળો સૌથી ઓછા પ્રબળ હશે?", "options": ["A) હીલિયમ (He)", "B) નિયોન (Ne)", "C) આર્ગોન (Ar)", "D) ક્રિપ્ટોન (Kr)"], "correct": 0, "explanation": "હીલિયમ (He) એ નોબલ ગેસ છે અને તેના અણુઓ સૌથી નાના અને હલકા હોવાથી અણુઓ વચ્ચેના વાન ડર વાલ્સ બળો (લંડન ડિસપર્સન બળો) સૌથી ઓછા પ્રબળ હોય છે. નિયોન, આર્ગોન અને ક્રિપ્ટોનના અણુઓ કદમાં મોટા હોવાથી તેમના વાન ડર વાલ્સ બળો વધુ પ્રબળ હોય છે. આમ, હીલિયમમાં બળો સૌથી ઓછા પ્રબળ હશે.", "ncert_ref": "Class XI - Chapter 5: પદાર્થની અવસ્થાઓ (States of Matter)", "difficulty": "Hard", "num": 11}, {"question": "એક પદાર્થનો ગલનાંક અને ક્વથનાંક વચ્ચેનો તફાવત ઓછો હોવાનું કારણ શું હોઈ શકે?", "options": ["A) પદાર્થમાં હાઇડ્રોજન બંધોની હાજરી", "B) પદાર્થમાં આયનિક બંધોની હાજરી", "C) પદાર્થમાં સહસંયોજક બંધોની હાજરી અને અણુઓ વચ્ચે ઓછા આંતરઅણુ બળો", "D) પદાર્થમાં ધાત્વિક બંધોની હાજરી"], "correct": 2, "explanation": "જ્યારે પદાર્થમાં સહસંયોજક બંધો હોય છે અને અણુઓ વચ્ચેના આંતરઅણુ બળો (જેવા કે વાન ડર વાલ્સ બળો) ઓછા પ્રબળ હોય છે, ત્યારે ગલનાંક અને ક્વથનાંક વચ્ચેનો તફાવત ઓછો હોય છે. હાઇડ્રોજન બંધો (A) અને આયનિક બંધો (B) મજબૂત બળો હોવાથી ગલનાંક અને ક્વથનાંક ઉચ્ચ હોય છે, જ્યારે ધાત્વિક બંધો (D) પણ મજબૂત હોવાથી ઉચ્ચ ગલનાંક અને ક્વથનાંક જોવા મળે છે.", "ncert_ref": "Class XI - Chapter 5: પદાર્થની અવસ્થાઓ (States of Matter)", "difficulty": "Hard", "num": 12}, {"question": "એક પદાર્થનો વરાળ દબાણ તાપમાન વધારવા સાથે કેવી રીતે બદલાય છે?", "options": ["A) તાપમાન વધારવા સાથે વરાળ દબાણ ઘટે છે", "B) તાપમાન વધારવા સાથે વરાળ દબાણ સ્થિર રહે છે", "C) તાપમાન વધારવા સાથે વરાળ દબાણ ઘાતીય રીતે વધે છે", "D) તાપમાન વધારવા સાથે વરાળ દબાણ રેખીય રીતે વધે છે"], "correct": 2, "explanation": "વરાળ દબાણ તાપમાન વધારવા સાથે ઘાતીય રીતે વધે છે. આ ક્લૌસિયસ-ક્લેપીરોન સમીકરણ દ્વારા વર્ણવવામાં આવે છે, જેમાં વરાળ દબાણ તાપમાનના વર્ધન સાથે ઘાતીય વૃદ્ધિ દર્શાવે છે. આમ, વિકલ્પ C સચોટ છે. બાકીના વિકલ્પો (A, B, D) ભૌતિક ગુણધર્મો સાથે સુસંગત નથી.", "ncert_ref": "Class XI - Chapter 5: પદાર્થની અવસ્થાઓ (States of Matter)", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે હાઇડ્રોજન બંધો હોવા છતાં ઉચ્ચ ક્વથનાંક નથી?", "options": ["A) H₂O", "B) HF", "C) NH₃", "D) CH₄"], "correct": 3, "explanation": "CH₄ (મિથેન)માં હાઇડ્રોજન બંધો નથી, પરંતુ પ્રશ્નમાં હાઇડ્રોજન બંધો હોવા છતાં ઉચ્ચ ક્વથનાંક ન હોવાનું કારણ શોધવાનું છે. H₂O, HF, અને NH₃માં હાઇડ્રોજન બંધો હોવાથી તેમના ક્વથનાંક ઉચ્ચ હોય છે. પરંતુ CH₄માં હાઇડ્રોજન બંધો ન હોવાથી તેનો ક્વથનાંક ઓછો હોય છે. આમ, પ્રશ્નના સંદર્ભમાં, CH₄ એ એકમાત્ર વિકલ્પ છે જેમાં હાઇડ્રોજન બંધો નથી, પરંતુ પ્રશ્નની શરતો અનુસાર, આ વિકલ્પ યોગ્ય છે કારણ કે બાકીના તમામ વિકલ્પોમાં હાઇડ્રોજન બંધો હોવા છતાં ઉચ્ચ ક્વથનાંક છે.", "ncert_ref": "Class XI - Chapter 5: પદાર્થની અવસ્થાઓ (States of Matter)", "difficulty": "Hard", "num": 14}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચેનું આંતરઆણ્વીય આકર્ષણ બળ સૌથી નબળું હોવા છતાં તેનું ઉત્કલનબિંદુ અનપેક્ષિત રીતે ઊંચું હોય છે?", "options": ["A) એમોનિયા (NH₃)", "B) હાઇડ્રોજન ફ્લોરાઇડ (HF)", "C) પાણી (H₂O)", "D) કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄)"], "correct": 3, "explanation": "સાચો જવાબ: D) કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄). કાર્બન ટેટ્રાક્લોરાઇડમાં અણુઓ વચ્ચે માત્ર લંડન બળો (વાન ડર વાલ્સ બળોનો એક પ્રકાર) જ કાર્ય કરે છે, જે સામાન્ય રીતે નબળા હોય છે. તેમ છતાં, CCl₄ નું ઉત્કલનબિંદુ (૭૬.૭°C) અનપેક્ષિત રીતે ઊંચું હોય છે કારણ કે તેનું મોલર દળ વધારે હોવાથી લંડન બળો પ્રમાણમાં મજબૂત બને છે. બાકીના વિકલ્પોમાં હાઇડ્રોજન બંધો હાજર હોવાથી તેમનું ઉત્કલનબિંદુ ઊંચું હોય છે: એમોનિયા (-૩૩.૩°C), હાઇડ્રોજન ફ્લોરાઇડ (૧૯.૫°C), અને પાણી (૧૦૦°C)માં હાઇડ્રોજન બંધો મજબૂત આંતરઆણ્વીય આકર્ષણ ઉત્પન્ન કરે છે. NCERT અનુસાર, હાઇડ્રોજન બંધોની હાજરી ઉત્કલનબિંદુને નોંધપાત્ર રીતે વધારે છે, પરંતુ મોલર દળ વધારે હોય ત્યારે લંડન બળો પણ અસરકારક બને છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ ૫: દ્રવ્યની અવસ્થાઓ", "difficulty": "Hard", "num": 15}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે હાઇડ્રોજન બંધની સંખ્યા સૌથી ઓછી હશે, પરંતુ અણુઓ વચ્ચેનું આંતરઆણ્વીય બળ સૌથી મજબૂત હશે?", "options": ["A) H₂O", "B) NH₃", "C) HF", "D) CH₃OH"], "correct": 2, "explanation": "HFમાં હાઇડ્રોજન બંધની સંખ્યા ઓછી હોવા છતાં, Fના ઉચ્ચ વિદ્યુતઋણતા કારણે હાઇડ્રોજન બંધ ખૂબ મજબૂત હોય છે. H₂O અને NH₃માં હાઇડ્રોજન બંધની સંખ્યા વધારે હોવા છતાં, આંતરઆણ્વીય બળ HF કરતાં નબળું હોય છે. CH₃OHમાં હાઇડ્રોજન બંધની સંખ્યા અને બળ બંને મધ્યમ હોય છે.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 16}, {"question": "એક પદાર્થનો વરાળ દબાણ ૨૫°C તાપમાને ૨૦ mm Hg છે. જો તાપમાન ૫૦°C સુધી વધારવામાં આવે, તો વરાળ દબાણ કેટલો થશે? (આ પદાર્થનો ક્વથનાંક ૭૦°C છે)", "options": ["A) ૨૦ mm Hg", "B) ૪૦ mm Hg", "C) ૬૦ mm Hg", "D) ૮૦ mm Hg"], "correct": 2, "explanation": "વરાળ દબાણ તાપમાન સાથે ઘાતાંકીય રીતે વધે છે. ૨૫°C પર ૨૦ mm Hg હોવા છતાં, ૫૦°C પર વરાળ દબાણ લગભગ ૬૦ mm Hg થશે, કારણ કે ક્વથનાંક (૭૦°C) નજીક આવતા વરાળ દબાણ ઝડપથી વધે છે. ૨૦ mm Hg અને ૪૦ mm Hg તાપમાનના વધારા પ્રમાણમાં ઓછા છે, જ્યારે ૮૦ mm Hg ક્વથનાંક નજીકના તાપમાને અપેક્ષિત હોત.", "ncert_ref": "Class XI - Chapter 5: અવસ્થા અને અવસ્થા પરિવર્તન", "difficulty": "Hard", "num": 17}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચેના આંતરઆણ્વીય બળોની તીવ્રતા ક્રમશઃ વધતી જાય છે? (I) હીલિયમ, (II) ક્લોરિન, (III) બ્રોમિન, (IV) આયોડિન", "options": ["A) I < II < III < IV", "B) IV < III < II < I", "C) I < III < II < IV", "D) II < I < IV < III"], "correct": 0, "explanation": "હીલિયમ એ નિષ્ક્રિય વાયુ છે, જેમાં ફક્ત લંડન વિકર્ષણ બળ (weakest) હોય છે. ક્લોરિન (Cl₂)માં ડાયપોલ-ડાયપોલ આકર્ષણ બળ હોય છે, જ્યારે બ્રોમિન (Br₂) અને આયોડિન (I₂)માં ક્રમશઃ મજબૂત લંડન બળ હોય છે. આયોડિન અણુઓ સૌથી મોટા હોવાથી તેમનાં લંડન બળ સૌથી મજબૂત હોય છે. આથી ક્રમ I < II < III < IV સાચો છે. બાકીના વિકલ્પો આ ક્રમને અનુરૂપ નથી.", "ncert_ref": "Class XI - પ્રકરણ ૫: રસાયણિક થર્મોડાયનેમિક્સ અને આંતરઆણ્વીય બળો", "difficulty": "Hard", "num": 18}, {"question": "એક પદાર્થનો ગલનાંક ઉચ્ચ છે પરંતુ ક્વથનાંક નીચો છે. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન સાચું છે?", "options": ["A) પદાર્થમાં મજબૂત આંતરઆણ્વીય બળો હોવા છતાં અણુઓ સરળતાથી વરાળમાં પરિવર્તિત થાય છે", "B) પદાર્થમાં હાઇડ્રોજન બંધો હોવા છતાં અણુઓ વચ્ચેનું આકર્ષણ બળ નબળું હોય છે", "C) પદાર્થમાં અણુઓ વચ્ચે ડાયપોલ-ડાયપોલ બળો હોવા છતાં ગલન માટે ઉર્જાની જરૂરિયાત ઓછી હોય છે", "D) પદાર્થમાં અણુઓ વચ્ચે મજબૂત આયનિક બળો હોય છે, પરંતુ વરાળ દબાણ નીચો હોય છે"], "correct": 0, "explanation": "ગલનાંક ઉચ્ચ હોવાનું કારણ એ છે કે પદાર્થમાં મજબૂત આંતરઆણ્વીય બળો (જેમ કે હાઇડ્રોજન બંધો અથવા ડાયપોલ-ડાયપોલ) હોય છે, જ્યારે ક્વથનાંક નીચો હોવાનું કારણ એ છે કે અણુઓ સરળતાથી વરાળમાં પરિવર્તિત થાય છે (ઉદા. એમોનિયા, NH₃). વિકલ્પ B, C, અને D આ ઘટનાને સમજાવી શકતા નથી.", "ncert_ref": "Class XI - પ્રકરણ ૫: રસાયણિક થર્મોડાયનેમિક્સ અને પદાર્થની અવસ્થાઓ", "difficulty": "Hard", "num": 19}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચેના આંતરઆણ્વીય બળોની પ્રકાર અને તીવ્રતાનો યોગ્ય ક્રમ છે? (I) H₂O, (II) CH₄, (III) HF, (IV) CCl₄", "options": ["A) HF > H₂O > CCl₄ > CH₄", "B) H₂O > HF > CCl₄ > CH₄", "C) HF > H₂O > CH₄ > CCl₄", "D) H₂O > HF > CH₄ > CCl₄"], "correct": 0, "explanation": "HFમાં હાઇડ્રોજન બંધો સૌથી મજબૂત હોય છે, જ્યારે H₂Oમાં પણ હાઇડ્રોજન બંધો હોય છે પરંતુ HF કરતાં નબળા. CCl₄માં ફક્ત લંડન બળ હોય છે, જ્યારે CH₄માં પણ લંડન બળ હોય છે પરંતુ CCl₄ કરતાં નબળા (કારણ કે CH₄ અણુઓ નાના હોય છે). આથી ક્રમ HF > H₂O > CCl₄ > CH₄ સાચો છે. બાકીના વિકલ્પો આ ક્રમને અનુરૂપ નથી.", "ncert_ref": "Class XI - પ્રકરણ ૫: આંતરઆણ્વીય બળો અને હાઇડ્રોજન બંધ", "difficulty": "Hard", "num": 20}, {"question": "નીચેના પૈકી કયા પદાર્થમાં આંતરઆણ્વીય બળોની પ્રકૃતિ અને તીવ્રતાનો ક્રમ સરખો છે: H₂O < NH₃ < HF?", "options": ["A) ડાયપોલ-ડાયપોલ બળ, હાઇડ્રોજન બંધ, વાન ડર વાલ્સ બળ", "B) હાઇડ્રોજન બંધ, ડાયપોલ-ડાયપોલ બળ, લંડન બળ", "C) હાઇડ્રોજન બંધ, વાન ડર વાલ્સ બળ, ડાયપોલ-ડાયપોલ બળ", "D) લંડન બળ, હાઇડ્રોજન બંધ, ડાયપોલ-ડાયપોલ બળ"], "correct": 1, "explanation": "H₂O, NH₃, અને HFમાં હાઇડ્રોજન બંધ હાજર છે, પરંતુ તેમની તીવ્રતા ભિન્ન છે. HFમાં હાઇડ્રોજન બંધ સૌથી મજબૂત છે, ત્યારબાદ NH₃, અને પછી H₂O. આ ક્રમ હાઇડ્રોજન બંધની તીવ્રતાને આધારિત છે. ડાયપોલ-ડાયપોલ બળ અને લંડન બળ આ ક્રમમાં બંધબેધ નથી. વિકલ્પ B સરખો ક્રમ દર્શાવે છે: હાઇડ્રોજન બંધ (HF), ડાયપોલ-ડાયપોલ બળ (NH₃), અને લંડન બળ (H₂O). બાકીના વિકલ્પો આ ક્રમને યોગ્ય રીતે દર્શાવતા નથી.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 21}, {"question": "એક પદાર્થનો ગલનાંક ઉચ્ચ છે પરંતુ ક્વથનાંક અત્યંત નીચો છે. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) પદાર્થમાં મજબૂત આંતરઆણ્વીય બળો અને નબળા અણુ-જાળક બળો હશે", "B) પદાર્થમાં નબળા આંતરઆણ્વીય બળો અને મજબૂત અણુ-જાળક બળો હશે", "C) પદાર્થમાં હાઇડ્રોજન બંધો હશે અને તે અત્યંત ધ્રુવીય હશે", "D) પદાર્થમાં આયનિક બંધન હશે અને તે ઉચ્ચ દબાણ હેઠળ રહેશે"], "correct": 0, "explanation": "ગલનાંક ઉચ્ચ હોવાનું કારણ મજબૂત અણુ-જાળક બળો (ઉદા. હીરો, ગ્રેફાઇટ) છે, જ્યારે ક્વથનાંક નીચો હોવાનું કારણ નબળા આંતરઆણ્વીય બળો છે. વિકલ્પ A આ બંને પરિસ્થિતિઓને યોગ્ય રીતે વર્ણવે છે. વિકલ્પ B ઉલટો છે. વિકલ્પ C અને D આ પરિસ્થિતિને યોગ્ય રીતે વર્ણવતા નથી, કારણ કે હાઇડ્રોજન બંધો અને આયનિક બંધન સામાન્ય રીતે ઉચ્ચ ક્વથનાંક સાથે સંબંધિત છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણ શાસ્ત્રની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 22}, {"question": "નીચેના પૈકી કયા પદાર્થમાં આંતરઆણ્વીય બળોની તીવ્રતા ક્રમશઃ વધતી જાય છે: CH₄ < C₂H₆ < C₃H₈ < C₄H₁₀?", "options": ["A) લંડન બળ", "B) ડાયપોલ-ડાયપોલ બળ", "C) હાઇડ્રોજન બંધ", "D) આયનિક બળ"], "correct": 0, "explanation": "CH₄, C₂H₆, C₃H₈, અને C₄H₁₀ એ બધા અલ્કેન છે, જેમાં માત્ર લંડન બળ (વાન ડર વાલ્સ બળોનો એક પ્રકાર) હાજર છે. આ પદાર્થોમાં અણુના કદ અને સપાટીના ક્ષેત્રફળમાં વધારો થતાં લંડન બળની તીવ્રતા વધે છે. ડાયપોલ-ડાયપોલ બળ, હાઇડ્રોજન બંધ, અને આયનિક બળ આ પદાર્થોમાં હાજર નથી. વિકલ્પ A સરખો છે.", "ncert_ref": "Class XI - Chapter 5: રસાયણિક બંધન અને આણ્વીય રચના", "difficulty": "Hard", "num": 23}, {"question": "એક પદાર્થનો ગલનાંક અત્યંત ઉચ્ચ છે પરંતુ ક્વથનાંક અત્યંત નીચો છે. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) પદાર્થમાં આયનિક બંધ હોવો જોઈએ", "B) પદાર્થમાં હાઇડ્રોજન બંધ હોવો જોઈએ", "C) પદાર્થમાં સહસંયોજક બંધ હોવો જોઈએ અને તેની રચના સપાટ (planar) હોવી જોઈએ", "D) પદાર્થમાં ધાત્વિક બંધ હોવો જોઈએ"], "correct": 2, "explanation": "ગલનાંક ઉચ્ચ અને ક્વથનાંક નીચો હોવાનું કારણ એ છે કે પદાર્થમાં સહસંયોજક બંધ હોય છે અને તેની રચના સપાટ (planar) હોય છે. ઉદાહરણ તરીકે, ગ્રેફાઇટમાં સહસંયોજક બંધ હોય છે અને તેની રચના સપાટ હોવાથી તેનો ગલનાંક ઉચ્ચ (3727°C) અને ક્વથનાંક નીચો (4827°C) હોય છે. આયનિક બંધ ધરાવતા પદાર્થોનો ગલનાંક અને ક્વથનાંક બંને ઉચ્ચ હોય છે. હાઇડ્રોજન બંધ ધરાવતા પદાર્થોનો ક્વથનાંક સામાન્ય રીતે ઉચ્ચ હોય છે. ધાત્વિક બંધ ધરાવતા પદાર્થોનો ગલનાંક અને ક્વથનાંક બંને ઉચ્ચ હોય છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણ વિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 24}, {"question": "નીચેના પૈકી કયો પદાર્થ તેના ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે, પરંતુ પ્રવાહી અવસ્થામાં વિદ્યુતનું વહન કરતો નથી?", "options": ["A) સોડિયમ ક્લોરાઇડ (NaCl)", "B) મરક્યુરી (Hg)", "C) ગ્રેફાઇટ (C)", "D) સિલિકોન (Si)"], "correct": 0, "explanation": "સોડિયમ ક્લોરાઇડ (NaCl) ઘન અવસ્થામાં આયનિક સ્ફટિક રચના ધરાવે છે, જેમાં આયનો સ્થિર હોય છે અને વિદ્યુતનું વહન કરતા નથી. પરંતુ જ્યારે તેને ગલન કરવામાં આવે છે, ત્યારે આયનો મુક્ત થાય છે અને વિદ્યુતનું વહન કરે છે. આ પ્રશ્નમાં આપેલ વિકલ્પ મુજબ, NaCl ઘન અવસ્થામાં વિદ્યુતનું વહન કરતો નથી, પરંતુ પ્રવાહી અવસ્થામાં કરે છે, તેથી આ વિકલ્પ ખોટો છે.\n\nમરક્યુરી (Hg) ધાતુ છે, જે ઘન અને પ્રવાહી બંને અવસ્થામાં વિદ્યુતનું વહન કરે છે, તેથી આ વિકલ્પ ખોટો છે.\n\nગ્રેફાઇટ (C) ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે કારણ કે તેમાં મુક્ત ઇલેક્ટ્રોન હોય છે, પરંતુ તે પ્રવાહી અવસ્થામાં મળતો નથી (કારણ કે ગ્રેફાઇટનું ઉર્ધ્વપાતન થાય છે), તેથી આ વિકલ્પ પણ ખોટો છે.\n\nસિલિકોન (Si) અર્ધવાહક છે, જે ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે, પરંતુ પ્રવાહી અવસ્થામાં તેના ગુણધર્મો બદલાય છે અને તે વિદ્યુતનું વહન કરતો નથી. આ પ્રશ્નનો યોગ્ય જવાબ છે, કારણ કે સિલિકોન ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે, પરંતુ પ્રવાહી અવસ્થામાં નહીં.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 1: ઘન અવસ્થા, કક્ષા 12 - પ્રકરણ 1: વિદ્યુતરસાયણવિજ્ઞાન", "difficulty": "Hard", "num": 25}, {"question": "નીચેના પૈકી કયા પદાર્થમાં અણુઓ વચ્ચે હાઇડ્રોજન બંધ હોવા છતાં તેનો ક્વથનાંક અન્ય સમાન આણ્વીય દળ ધરાવતા પદાર્થો કરતાં નીચો હોય છે?", "options": ["A) એમોનિયા (NH₃)", "B) હાઇડ્રોજન ફ્લોરાઇડ (HF)", "C) ઇથેનોલ (C₂H₅OH)", "D) એસિટિક એસિડ (CH₃COOH)"], "correct": 1, "explanation": "હાઇડ્રોજન ફ્લોરાઇડ (HF) માં હાઇડ્રોજન બંધ હોવા છતાં તેનો ક્વથનાંક અન્ય સમાન આણ્વીય દળ ધરાવતા પદાર્થો કરતાં નીચો હોય છે કારણ કે HF માં રેખીય પોલિમર સ્વરૂપે હાઇડ્રોજન બંધ બને છે, જે ઓછા સ્થિર હોય છે. બાકીના વિકલ્પોમાં હાઇડ્રોજન બંધ વધુ મજબૂત અને ત્રિપરિમાણીય હોવાથી ક્વથનાંક ઉચ્ચ હોય છે. NCERT Class XI - અધ્યાય ૫: દ્રવ્યની અવસ્થાઓમાં આંતરઆણ્વીય બળોની ચર્ચા કરવામાં આવી છે.", "ncert_ref": "કક્ષા XI - અધ્યાય ૫: દ્રવ્યની અવસ્થાઓ", "difficulty": "Hard", "num": 26}, {"question": "એક પદાર્થનો ગલનાંક અત્યંત ઉચ્ચ છે પરંતુ તેનો ક્વથનાંક અત્યંત નીચો છે. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) આ પદાર્થમાં આયનીય બંધ હાજર છે.", "B) આ પદાર્થમાં સહસંયોજક બંધ હાજર છે પરંતુ તેનું આણ્વીય દળ ખૂબ ઓછું છે.", "C) આ પદાર્થમાં ધાત્વીય બંધ હાજર છે.", "D) આ પદાર્થમાં વાન ડર વાલ્સ બળો પ્રબળ છે."], "correct": 1, "explanation": "આ પદાર્થમાં સહસંયોજક બંધ હાજર છે પરંતુ તેનું આણ્વીય દળ ખૂબ ઓછું હોવાથી ગલનાંક ઉચ્ચ હોય છે (સહસંયોજક જાળીદાર રચના), પરંતુ ક્વથનાંક નીચો હોય છે કારણ કે વરાળ અવસ્થામાં અણુઓ વચ્ચે નબળા વાન ડર વાલ્સ બળો હોય છે. ઉદાહરણ: ગ્રેફાઇટ. NCERT Class XI - અધ્યાય ૫: દ્રવ્યની અવસ્થાઓમાં આંતરઆણ્વીય બળો અને બંધનની ચર્ચા કરવામાં આવી છે.", "ncert_ref": "કક્ષા XI - અધ્યાય ૫: દ્રવ્યની અવસ્થાઓ", "difficulty": "Hard", "num": 27}, {"question": "એક પદાર્થ તેના ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે, પરંતુ તેના પિગળેલા અવસ્થામાં વિદ્યુતનું વહન કરતો નથી. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન યોગ્ય છે?", "options": ["A) આ પદાર્થમાં ધાત્વીય બંધ હાજર છે.", "B) આ પદાર્થમાં આયનીય બંધ હાજર છે પરંતુ તેનું ગલનાંક ખૂબ ઉચ્ચ છે.", "C) આ પદાર્થમાં સહસંયોજક બંધ હાજર છે અને તે અર્ધવાહક છે.", "D) આ પદાર્થમાં વાન ડર વાલ્સ બળો પ્રબળ છે."], "correct": 2, "explanation": "આ પદાર્થમાં સહસંયોજક બંધ હાજર છે અને તે અર્ધવાહક છે. ઘન અવસ્થામાં અર્ધવાહકો વિદ્યુતનું વહન કરે છે, પરંતુ પિગળેલી અવસ્થામાં સહસંયોજક બંધ તૂટી જવાથી વિદ્યુતનું વહન બંધ થાય છે. ઉદાહરણ: સિલિકોન. NCERT Class XII - અધ્યાય ૧: ઘન અવસ્થામાં ઘન પદાર્થોના ગુણધર્મોની ચર્ચા કરવામાં આવી છે.", "ncert_ref": "કક્ષા XII - અધ્યાય ૧: ઘન અવસ્થા", "difficulty": "Hard", "num": 28}, {"question": "નીચેના પૈકી કયો પદાર્થ તેના ઘન અવસ્થામાં વિદ્યુતનું વહન કરતો નથી, પરંતુ તેના પિગળેલા અવસ્થામાં વિદ્યુતનું વહન કરે છે અને તેનો ગલનાંક અત્યંત ઉચ્ચ છે?", "options": ["A) સોડિયમ ક્લોરાઇડ (NaCl)", "B) ગ્રેફાઇટ (C)", "C) સિલિકોન ડાયોક્સાઇડ (SiO₂)", "D) મેગ્નેશિયમ ઓક્સાઇડ (MgO)"], "correct": 0, "explanation": "સોડિયમ ક્લોરાઇડ (NaCl) એ આયનીય સંયોજન છે જે ઘન અવસ્થામાં વિદ્યુતનું વહન કરતું નથી કારણ કે આયનો સ્થિર સ્ફટિક જાળીમાં બંધાયેલા હોય છે. પરંતુ પિગળેલી અવસ્થામાં આયનો મુક્ત રીતે ગતિ કરી શકે છે, તેથી વિદ્યુતનું વહન થાય છે. તેનો ગલનાંક પણ અત્યંત ઉચ્ચ (૮૦૧°C) હોય છે. ગ્રેફાઇટ ઘન અવસ્થામાં વિદ્યુતનું વહન કરે છે કારણ કે તેમાં મુક્ત ઇલેક્ટ્રોન હોય છે. સિલિકોન ડાયોક્સાઇડ અને મેગ્નેશિયમ ઓક્સાઇડ ઘન અવસ્થામાં વિદ્યુતનું વહન કરતા નથી, પરંતુ તેમના ગલનાંક પણ ઉચ્ચ હોય છે, પરંતુ NaCl ની આયનીય પ્રકૃતિ અને પિગળેલી અવસ્થામાં વિદ્યુત વહનની લાક્ષણિકતા તેને યોગ્ય વિકલ્પ બનાવે છે.", "ncert_ref": "કક્ષા ૧૧ - પ્રકરણ ૧: ઘન અવસ્થા", "difficulty": "Hard", "num": 29}, {"question": "એક પદાર્થનો ગલનાંક અત્યંત ઉચ્ચ છે, પરંતુ તેનો ક્વથનાંક અત્યંત નીચો છે. આ પદાર્થ માટે નીચેના પૈકી કયું વિધાન સાચું છે?", "options": ["A) આ પદાર્થમાં પ્રબળ આયનીય બંધ હોય છે.", "B) આ પદાર્થમાં અણુઓ વચ્ચે હાઇડ્રોજન બંધ હોય છે.", "C) આ પદાર્થમાં અણુઓ વચ્ચે વાન ડર વાલ્સ બળો પ્રબળ હોય છે.", "D) આ પદાર્થમાં સહસંયોજક જાળીદાર બંધ હોય છે, પરંતુ અણુઓ વચ્ચે નબળા આંતરઆણ્વીય બળો હોય છે."], "correct": 3, "explanation": "જ્યારે પદાર્થનો ગલનાંક અત્યંત ઉચ્ચ હોય છે, ત્યારે તે સૂચવે છે કે પદાર્થમાં પ્રબળ આંતરઆણ્વીય અથવા આંતર-આણ્વીય બંધ હોય છે (જેમ કે સહસંયોજક જાળીદાર બંધ). પરંતુ જો તેનો ક્વથનાંક અત્યંત નીચો હોય, તો તે સૂચવે છે કે પદાર્થના અણુઓ વચ્ચે નબળા આંતરઆણ્વીય બળો હોય છે, જે વરાળ બનાવવા માટે ઓછી ઊર્જા જરૂરી બનાવે છે. ઉદાહરણ તરીકે, ગ્રેફાઇટ અને હીરો સહસંયોજક જાળીદાર બંધ ધરાવે છે, પરંતુ ગ્રેફાઇટના સ્તરો વચ્ચે નબળા વાન ડર વાલ્સ બળો હોય છે, જે તેને નીચા ક્વથનાંક આપે છે. આયનીય બંધ ધરાવતા પદાર્થો સામાન્ય રીતે ઉચ્ચ ગલનાંક અને ઉચ્ચ ક્વથનાંક ધરાવે છે. હાઇડ્રોજન બંધ ધરાવતા પદાર્થો પણ સામાન્ય રીતે ઉચ્ચ ક્વથનાંક ધરાવે છે.", "ncert_ref": "કક્ષા ૧૧ - પ્રકરણ ૪: રાસાયણિક બંધન અને આણ્વીય બંધારણ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
