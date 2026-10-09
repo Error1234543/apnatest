@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - સવર્ગ સંયોજનોમાં સમઘટકતા (બંધારણીય અને અવકાશીય)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 સવર્ગ સંયોજનોમાં સમઘટકતા (બંધારણીય અને અવકાશીય)</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "નીચેના પૈકી કયું સંયોજન બંધારણીય સમઘટકતા (structural isomerism) દર્શાવતું નથી?", "options": ["A) C₄H₁₀O (બ્યુટેનોલ)", "B) C₅H₁₂ (પેન્ટેન)", "C) C₆H₁₂ (હેક્સીન)", "D) C₂H₆O (ઇથેનોલ)"], "correct": 3, "explanation": "C₂H₆O (ઇથેનોલ) માત્ર એક જ બંધારણીય રચના ધરાવે છે, જ્યારે બાકીના સંયોજનોમાં બંધારણીય સમઘટકતા જોવા મળે છે. બ્યુટેનોલ (C₄H₁₀O)માં 4 બંધારણીય સમઘટકો, પેન્ટેન (C₅H₁₂)માં 3 સમઘટકો અને હેક્સીન (C₆H₁₂)માં મોટી સંખ્યામાં સમઘટકો શક્ય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મહત્વના તત્વો અને સંયોજનો", "difficulty": "Hard", "num": 1}, {"question": "નીચેના પૈકી કયું વિધાન અવકાશીય સમઘટકતા (stereoisomerism) વિશે ખોટું છે?", "options": ["A) અવકાશીય સમઘટકોની રાસાયણિક સૂત્રો સરખી હોય છે પરંતુ અણુઓની જગ્યાક્રમણ ભિન્ન હોય છે.", "B) સિસ-ટ્રાન્સ સમઘટકતા અવકાશીય સમઘટકતાનો એક પ્રકાર છે.", "C) અવકાશીય સમઘટકોની ભૌતિક ગુણધર્મો સરખી હોય છે.", "D) ઓપ્ટિકલ સમઘટકતા અવકાશીય સમઘટકતાનો એક પ્રકાર છે."], "correct": 2, "explanation": "અવકાશીય સમઘટકોની ભૌતિક ગુણધર્મો (જેમ કે ગલનબિંદુ, ઉત્કલનબિંદુ) ભિન્ન હોય છે. સિસ-ટ્રાન્સ અને ઓપ્ટિકલ સમઘટકતા બંને અવકાશીય સમઘટકતાના પ્રકારો છે. અવકાશીય સમઘટકોની રાસાયણિક સૂત્રો સરખી હોય છે પરંતુ અણુઓની જગ્યાક્રમણ ભિન્ન હોય છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મહત્વના તત્વો અને સંયોજનો", "difficulty": "Hard", "num": 2}, {"question": "નીચેના પૈકી કયું સંયોજન સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે?", "options": ["A) 1-બ્યુટીન", "B) 2-બ્યુટીન", "C) પ્રોપીન", "D) ઇથીન"], "correct": 1, "explanation": "2-બ્યુટીન (CH₃-CH=CH-CH₃) સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે કારણ કે તે ડબલ બંધ ધરાવે છે અને બંને કાર્બન પર ભિન્ન સમૂહો જોડાયેલા છે. 1-બ્યુટીન, પ્રોપીન અને ઇથીન સિસ-ટ્રાન્સ સમઘટકતા દર્શાવતા નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મહત્વના તત્વો અને સંયોજનો", "difficulty": "Hard", "num": 3}, {"question": "નીચેના પૈકી કયું વિધાન ઓપ્ટિકલ સમઘટકતા વિશે સાચું છે?", "options": ["A) ઓપ્ટિકલ સમઘટકો ધ્રુવિત પ્રકાશને એક જ દિશામાં ફેરવે છે.", "B) ઓપ્ટિકલ સમઘટકોની રાસાયણિક ગુણધર્મો ભિન્ન હોય છે.", "C) ઓપ્ટિકલ સમઘટકો એનાન્ટિયોમર્સ તરીકે ઓળખાય છે.", "D) ઓપ્ટિકલ સમઘટકતા ધરાવતા અણુઓમાં કોઈ કિરાલ કાર્બન અણુ હોતો નથી."], "correct": 2, "explanation": "ઓપ્ટિકલ સમઘટકો એનાન્ટિયોમર્સ તરીકે ઓળખાય છે અને તેઓ ધ્રુવિત પ્રકાશને વિરુદ્ધ દિશામાં ફેરવે છે. તેમની રાસાયણિક ગુણધર્મો સરખી હોય છે, પરંતુ ભૌતિક ગુણધર્મો (જેમ કે ધ્રુવિત પ્રકાશને ફેરવવાની દિશા) ભિન્ન હોય છે. ઓપ્ટિકલ સમઘટકતા ધરાવતા અણુઓમાં કિરાલ કાર્બન અણુ હોવો જરૂરી છે.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મહત્વના તત્વો અને સંયોજનો", "difficulty": "Hard", "num": 4}, {"question": "નીચેના પૈકી કયું સંયોજન બંધારણીય અને અવકાશીય બંને પ્રકારની સમઘટકતા દર્શાવે છે?", "options": ["A) C₄H₈ (બ્યુટીન)", "B) C₅H₁₂ (પેન્ટેન)", "C) C₆H₁₂O₆ (ગ્લુકોઝ)", "D) C₂H₄ (ઇથીન)"], "correct": 0, "explanation": "C₄H₈ (બ્યુટીન) બંધારણીય સમઘટકતા (1-બ્યુટીન, 2-બ્યુટીન) અને અવકાશીય સમઘટકતા (સિસ-2-બ્યુટીન, ટ્રાન્સ-2-બ્યુટીન) બંને દર્શાવે છે. પેન્ટેન (C₅H₁₂) માત્ર બંધારણીય સમઘટકતા દર્શાવે છે, ગ્લુકોઝ (C₆H₁₂O₆) માત્ર અવકાશીય સમઘટકતા દર્શાવે છે, અને ઇથીન (C₂H₄) કોઈ સમઘટકતા દર્શાવતું નથી.", "ncert_ref": "Class XI - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: કેટલાક મહત્વના તત્વો અને સંયોજનો", "difficulty": "Hard", "num": 5}, {"question": "નીચેના પૈકી કયું સંયોજન એનાન્ટિયોમર (enantiomer) દર્શાવતું નથી, પરંતુ ડાયાસ્ટીરિયોમર (diastereomer) દર્શાવે છે?", "options": ["A) 2-બ્યુટેનોલ", "B) 2,3-ડાયક્લોરોબ્યુટેન", "C) 3-હેક્સેન-2-ઓલ", "D) 2-ક્લોરોપ્રોપેન"], "correct": 2, "explanation": "3-હેક્સેન-2-ઓલમાં બે કિરાલ કેન્દ્રો (C2 અને C3) હોવાથી તે એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને દર્શાવે છે. 2-બ્યુટેનોલ અને 2-ક્લોરોપ્રોપેનમાં એક જ કિરાલ કેન્દ્ર હોવાથી તેઓ ફક્ત એનાન્ટિયોમર જ દર્શાવે છે. 2,3-ડાયક્લોરોબ્યુટેનમાં બે કિરાલ કેન્દ્રો હોવાથી તે એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને દર્શાવે છે, પરંતુ પ્રશ્નમાં એનાન્ટિયોમર ન દર્શાવતું હોય તેવું સંયોજન જોઈએ છે. 3-હેક્સેન-2-ઓલ એવું સંયોજન છે જે એનાન્ટિયોમર નહીં પરંતુ ડાયાસ્ટીરિયોમર દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 6}, {"question": "નીચેના પૈકી કયું વિધાન સમઘટકતા (isomerism) વિશે ખોટું છે?", "options": ["A) બંધારણીય સમઘટકોમાં રાસાયણિક સૂત્ર એકસરખું હોય છે પરંતુ બંધારણ અલગ હોય છે.", "B) અવકાશીય સમઘટકોમાં પરમાણુઓની જોડણી એકસરખી હોય છે પરંતુ અવકાશીય ગોઠવણ અલગ હોય છે.", "C) એનાન્ટિયોમરમાં ભૌતિક ગુણધર્મો એકસરખા હોય છે પરંતુ ઓપ્ટિકલ ગુણધર્મો વિરુદ્ધ હોય છે.", "D) સિસ-ટ્રાન્સ સમઘટકતા ફક્ત એલ્કીનમાં જ જોવા મળે છે."], "correct": 3, "explanation": "સિસ-ટ્રાન્સ સમઘટકતા એલ્કીન સિવાય એલ્કેન, હેલોજનયુક્ત સંયોજનો અને સાયક્લોએલ્કેનમાં પણ જોવા મળે છે. બાકીના તમામ વિધાનો સાચા છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 7}, {"question": "નીચેના પૈકી કયું સંયોજન મેઝો (meso) રચના ધરાવે છે?", "options": ["A) 2-બ્યુટેનોલ", "B) 2,3-ડાયબ્રોમોબ્યુટેન", "C) 1,2-ડાયક્લોરોઇથેન", "D) 3-હેક્સેન-2-ઓલ"], "correct": 1, "explanation": "2,3-ડાયબ્રોમોબ્યુટેનમાં બે કિરાલ કેન્દ્રો હોવા છતાં તે મેઝો રચના ધરાવે છે કારણ કે તે અરીય સમમિતિ ધરાવે છે. બાકીના સંયોજનો મેઝો રચના ધરાવતાં નથી.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 8}, {"question": "નીચેના પૈકી કયું સંયોજન ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2-ક્લોરોબ્યુટેન", "B) 2-હાયડ્રોક્સીપ્રોપેનોઈક એસિડ", "C) 2-બ્યુટીન", "D) 3-બ્યુટીન-2-ઓલ"], "correct": 2, "explanation": "2-બ્યુટીનમાં કોઈ કિરાલ કેન્દ્ર ન હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. બાકીના સંયોજનો કિરાલ કેન્દ્ર ધરાવે છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 9}, {"question": "નીચેના પૈકી કયું વિધાન સિસ-ટ્રાન્સ સમઘટકતા વિશે સાચું નથી?", "options": ["A) સિસ-ટ્રાન્સ સમઘટકતા અવકાશીય સમઘટકતાનો એક પ્રકાર છે.", "B) સિસ-ટ્રાન્સ સમઘટકોમાં પરમાણુઓની ગોઠવણ અલગ હોય છે.", "C) સિસ-ટ્રાન્સ સમઘટકતા ફક્ત એલ્કીનમાં જ જોવા મળે છે.", "D) સિસ-ટ્રાન્સ સમઘટકોમાં ભૌતિક ગુણધર્મો અલગ હોય છે."], "correct": 2, "explanation": "સિસ-ટ્રાન્સ સમઘટકતામાં પરમાણુઓની ગોઠવણ અલગ હોવાને બદલે, પરમાણુઓની જોડણી એકસરખી હોય છે પરંતુ અવકાશીય ગોઠવણ અલગ હોય છે. બાકીના તમામ વિધાનો સાચા છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 10}, {"question": "નીચેના પૈકી કયું સંયોજન બંધારણીય સમઘટકતા દર્શાવે છે પરંતુ અવકાશીય સમઘટકતા દર્શાવતું નથી?", "options": ["A) CH₃-CH₂-CH=CH₂", "B) CH₃-CH(OH)-COOH", "C) CH₃-CH=CH-CH₃", "D) CH₃-CH₂-CH₂-CH₃"], "correct": 0, "explanation": "A) CH₃-CH₂-CH=CH₂ (બ્યુટીન-1) બંધારણીય સમઘટકતા (પોઝિશનલ સમઘટકતા) દર્શાવે છે, પરંતુ તે અવકાશીય સમઘટકતા દર્શાવતું નથી કારણ કે તેમાં ડબલ બંધની આસપાસ મુક્ત ભ્રમણ થઈ શકે છે. B) CH₃-CH(OH)-COOH (લેક્ટિક એસિડ) ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, જે અવકાશીય સમઘટકતાનો એક પ્રકાર છે. C) CH₃-CH=CH-CH₃ (બ્યુટીન-2) સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે, જે અવકાશીય સમઘટકતાનો એક પ્રકાર છે. D) CH₃-CH₂-CH₂-CH₃ (બ્યુટેન) કોઈપણ પ્રકારની સમઘટકતા દર્શાવતું નથી.", "ncert_ref": "Class XII - Chapter 10: હાઇડ્રોકાર્બન", "difficulty": "Hard", "num": 11}, {"question": "નીચેના પૈકી કયું વિધાન મેઝો સંયોજન વિશે સાચું છે?", "options": ["A) મેઝો સંયોજન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે", "B) મેઝો સંયોજનમાં કિરાલ કર્બન પરમાણુઓ હાજર નથી", "C) મેઝો સંયોજનની રચના અસમમિત હોય છે", "D) મેઝો સંયોજન ડાયાસ્ટીરિયોમર દર્શાવે છે"], "correct": 2, "explanation": "C) મેઝો સંયોજનની રચના અસમમિત હોય છે, પરંતુ તે ઓપ્ટિકલ નિષ્ક્રિય હોય છે કારણ કે તેની આંતરિક સમમિતતા હોવાથી પ્રકાશના સમતલ ધ્રુવીકરણને ફેરવતું નથી. A) ખોટું છે કારણ કે મેઝો સંયોજન ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. B) ખોટું છે કારણ કે મેઝો સંયોજનમાં કિરાલ કર્બન પરમાણુઓ હાજર હોય છે, પરંતુ તેની રચના અસમમિત હોવાથી ઓપ્ટિકલ નિષ્ક્રિય હોય છે. D) ખોટું છે કારણ કે મેઝો સંયોજન ડાયાસ્ટીરિયોમર દર્શાવતું નથી.", "ncert_ref": "Class XII - Chapter 10: હાઇડ્રોકાર્બન", "difficulty": "Hard", "num": 12}, {"question": "નીચેના પૈકી કયું સંયોજન એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને દર્શાવે છે?", "options": ["A) 2-બ્રોમોબ્યુટેન", "B) 2,3-ડાયક્લોરોબ્યુટેન", "C) 1,2-ડાયક્લોરોસાયક્લોપ્રોપેન", "D) 3-બ્રોમોપેન્ટેન"], "correct": 1, "explanation": "B) 2,3-ડાયક્લોરોબ્યુટેન એનાન્ટિયોમર (દા.ત., (2R,3R) અને (2S,3S)) અને ડાયાસ્ટીરિયોમર (દા.ત., (2R,3S) અને (2S,3R)) બંને દર્શાવે છે. A) 2-બ્રોમોબ્યુટેન ફક્ત એનાન્ટિયોમર દર્શાવે છે. C) 1,2-ડાયક્લોરોસાયક્લોપ્રોપેન મેઝો રચના ધરાવે છે અને ઓપ્ટિકલ નિષ્ક્રિય હોય છે. D) 3-બ્રોમોપેન્ટેન ફક્ત એનાન્ટિયોમર દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હાઇડ્રોકાર્બન", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયું વિધાન સિસ-ટ્રાન્સ સમઘટકતા વિશે ખોટું છે?", "options": ["A) સિસ-ટ્રાન્સ સમઘટકતા ફક્ત અલ્કીનમાં જોવા મળે છે", "B) સિસ-ટ્રાન્સ સમઘટકતા ડબલ બંધની આસપાસ મુક્ત ભ્રમણ ન થવાને કારણે થાય છે", "C) સિસ-ટ્રાન્સ સમઘટકતા અવકાશીય સમઘટકતાનો એક પ્રકાર છે", "D) સિસ-ટ્રાન્સ સમઘટકતા ધરાવતા સંયોજનોમાં ભૌતિક ગુણધર્મો અલગ હોય છે"], "correct": 0, "explanation": "A) ખોટું છે કારણ કે સિસ-ટ્રાન્સ સમઘટકતા અલ્કીન સિવાય સાયક્લિક સંયોજનોમાં પણ જોવા મળે છે. B) સાચું છે કારણ કે ડબલ બંધની આસપાસ મુક્ત ભ્રમણ ન થવાને કારણે સિસ-ટ્રાન્સ સમઘટકતા થાય છે. C) સાચું છે કારણ કે સિસ-ટ્રાન્સ સમઘટકતા અવકાશીય સમઘટકતાનો એક પ્રકાર છે. D) સાચું છે કારણ કે સિસ-ટ્રાન્સ સમઘટકતા ધરાવતા સંયોજનોમાં ભૌતિક ગુણધર્મો અલગ હોય છે.", "ncert_ref": "Class XII - Chapter 10: હાઇડ્રોકાર્બન", "difficulty": "Hard", "num": 14}, {"question": "નીચેના પૈકી કયું સંયોજન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે પરંતુ કિરાલ કર્બન પરમાણુ ધરાવતું નથી?", "options": ["A) 2-બ્યુટેનોલ", "B) 1,3-ડાયક્લોરોસાયક્લોપ્રોપેન", "C) 2-મિથાઇલબ્યુટેન-2-ઓલ", "D) 3-બ્રોમોહેક્સેન"], "correct": 1, "explanation": "B) 1,3-ડાયક્લોરોસાયક્લોપ્રોપેન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે પરંતુ કિરાલ કર્બન પરમાણુ ધરાવતું નથી કારણ કે તેની રચના અસમમિત હોય છે. A) 2-બ્યુટેનોલ કિરાલ કર્બન પરમાણુ ધરાવે છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. C) 2-મિથાઇલબ્યુટેન-2-ઓલ કિરાલ કર્બન પરમાણુ ધરાવતું નથી અને ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. D) 3-બ્રોમોહેક્સેન કિરાલ કર્બન પરમાણુ ધરાવે છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હાઇડ્રોકાર્બન", "difficulty": "Hard", "num": 15}, {"question": "નીચેના પૈકી કયું સંયોજન કિરાલ કર્બન પરમાણુ ધરાવે છે પરંતુ ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ", "B) 2,3-ડાઇક્લોરોબ્યુટેન", "C) 3-હાઇડ્રોક્સીપેન્ટેન-2-ઓન", "D) 2,3-ડાઇબ્રોમોપેન્ટેન"], "correct": 2, "explanation": "3-હાઇડ્રોક્સીપેન્ટેન-2-ઓનમાં કિરાલ કર્બન પરમાણુ હાજર છે, પરંતુ તે મેઝો રચના ધરાવે છે, જેથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. A) 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ (લેક્ટિક એસિડ) કિરાલ છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. B) 2,3-ડાઇક્લોરોબ્યુટેનમાં બે કિરાલ કર્બન પરમાણુઓ છે અને તે ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. D) 2,3-ડાઇબ્રોમોપેન્ટેન પણ કિરાલ છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 16}, {"question": "નીચેના પૈકી કયું સંયોજન મેઝો રચના ધરાવે છે પરંતુ ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2,3-ડાઇબ્રોમોબ્યુટેન", "B) 2,3-ડાઇક્લોરોપેન્ટેન", "C) 2-બ્રોમોપ્રોપેન", "D) 3-હાઇડ્રોક્સીબ્યુટેન-2-ઓન"], "correct": 0, "explanation": "2,3-ડાઇબ્રોમોબ્યુટેનમાં મેઝો રચના હાજર છે, જેથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. B) 2,3-ડાઇક્લોરોપેન્ટેનમાં કિરાલ કર્બન પરમાણુઓ હાજર છે અને તે ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. C) 2-બ્રોમોપ્રોપેનમાં એક કિરાલ કર્બન પરમાણુ છે અને તે ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. D) 3-હાઇડ્રોક્સીબ્યુટેન-2-ઓન પણ કિરાલ છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 17}, {"question": "નીચેના પૈકી કયું વિધાન એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર વિશે સાચું છે?", "options": ["A) એનાન્ટિયોમર ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, જ્યારે ડાયાસ્ટીરિયોમર દર્શાવતું નથી.", "B) એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "C) એનાન્ટિયોમરમાં ભૌતિક ગુણધર્મો સરખી હોય છે, જ્યારે ડાયાસ્ટીરિયોમરમાં ભિન્ન હોય છે.", "D) એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને મેઝો રચના ધરાવે છે."], "correct": 2, "explanation": "એનાન્ટિયોમરમાં ભૌતિક ગુણધર્મો (જેવી કે ગલનબિંદુ, ઉત્કલનબિંદુ, દ્રાવ્યતા) સરખી હોય છે, જ્યારે ડાયાસ્ટીરિયોમરમાં ભિન્ન હોય છે. A) એનાન્ટિયોમર અને ડાયાસ્ટીરિયોમર બંને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, પરંતુ એનાન્ટિયોમરની ઓપ્ટિકલ ઘૂર્ણન ક્ષમતા સરખી હોય છે, જ્યારે ડાયાસ્ટીરિયોમરની ભિન્ન હોય છે. B) બંને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, પરંતુ આ વિધાન અધૂરું છે. D) મેઝો રચના ફક્ત ડાયાસ્ટીરિયોમરમાં જોવા મળી શકે, એનાન્ટિયોમરમાં નહીં.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 18}, {"question": "નીચેના પૈકી કયું સંયોજન **અસમમિત કાર્બન પરમાણુ (chiral carbon)** ધરાવે છે, પરંતુ તેની રચનામાં **સમમિતિ તલ (plane of symmetry)** હોવાથી ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2,3-ડાયક્લોરોબ્યુટેન", "B) 2,3-ડાયક્લોરોપેન્ટેન", "C) 2-ક્લોરોબ્યુટેન", "D) 1,2-ડાયક્લોરોસાયક્લોબ્યુટેન"], "correct": 0, "explanation": "2,3-ડાયક્લોરોબ્યુટેનમાં બે અસમમિત કાર્બન પરમાણુઓ છે, પરંતુ તેની રચનામાં સમમિતિ તલ હોવાથી તે મેઝો સંયોજન બને છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. બાકીના વિકલ્પોમાં: 2,3-ડાયક્લોરોપેન્ટેન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, 2-ક્લોરોબ્યુટેન એક જ અસમમિત કાર્બન ધરાવે છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે, જ્યારે 1,2-ડાયક્લોરોસાયક્લોબ્યુટેનમાં સમમિતિ તલ ન હોવાથી ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 19}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n\n(1) **ટાર્ટારિક એસિડ** એ મેઝો રચના ધરાવતું સંયોજન છે જે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી.\n(2) **2,3-પેન્ટેનડાયોલ**માં બે અસમમિત કાર્બન પરમાણુઓ હોવા છતાં તે મેઝો રચના ધરાવતું નથી.\n(3) **સાયક્લોહેક્ઝેન-1,4-ડાયોલ**માં સમમિતિ તલ હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી.\n(4) **1,3-ડાયક્લોરોસાયક્લોબ્યુટેન**માં અસમમિત કાર્બન પરમાણુઓ ન હોવા છતાં તે સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે.", "options": ["A) વિધાન (1) અને (2) સાચાં છે", "B) વિધાન (2) અને (3) સાચાં છે", "C) વિધાન (2), (3) અને (4) સાચાં છે", "D) વિધાન (1), (3) અને (4) સાચાં છે"], "correct": 2, "explanation": "વિધાન (2): 2,3-પેન્ટેનડાયોલમાં બે અસમમિત કાર્બન છે, પરંતુ તે મેઝો રચના ધરાવતું નથી કારણ કે તેની રચનામાં સમમિતિ તલ નથી હોતું. વિધાન (3): સાયક્લોહેક્ઝેન-1,4-ડાયોલમાં સમમિતિ તલ હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. વિધાન (4): 1,3-ડાયક્લોરોસાયક્લોબ્યુટેનમાં અસમમિત કાર્બન ન હોવા છતાં તે સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે. વિધાન (1) ખોટું છે કારણ કે ટાર્ટારિક એસિડ મેઝો રચના ધરાવે છે, પરંતુ તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી એ સાચું છે, પરંતુ તે એકલું વિધાન અપૂર્ણ છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 10: હેલોએલ્કેન અને હેલોએરિન, પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "difficulty": "Hard", "num": 20}, {"question": "2-ક્લોરોબ્યુટેનના કયા સમઘટકમાં અસમમિત કાર્બન પરમાણુ હોવા છતાં તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) (2R,3S)-2-ક્લોરો-3-મિથાઈલપેન્ટેન", "B) મેસો-2,3-ડિક્લોરોબ્યુટેન", "C) (2R)-2-ક્લોરોબ્યુટેન", "D) (2S,3R)-2,3-ડાઈબ્રોમોબ્યુટેન"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B છે. મેસો-2,3-ડિક્લોરોબ્યુટેનમાં બે અસમમિત કાર્બન પરમાણુઓ હોવા છતાં તે આંતરિક સમમિતિ ધરાવે છે, જેના કારણે તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. વિકલ્પ A અને C અસમમિત કાર્બન ધરાવે છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. વિકલ્પ D પણ ઓપ્ટિકલ સમઘટકતા દર્શાવે છે કારણ કે તે મેસો રચના નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 21}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n(1) 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેનમાં સિસ સમઘટક ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.\n(2) 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેનમાં ટ્રાન્સ સમઘટક મેસો રચના ધરાવે છે.\n(3) 1,2-ડાઈક્લોરોસાયક્લોબ્યુટેનમાં સિસ સમઘટક ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી.", "options": ["A) માત્ર વિધાન 1 સાચું છે", "B) વિધાન 1 અને 2 સાચાં છે", "C) વિધાન 1 અને 3 સાચાં છે", "D) તમામ વિધાનો ખોટાં છે"], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે. વિધાન 1 સાચું છે કારણ કે 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેનનો સિસ સમઘટક અસમમિત છે અને ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. વિધાન 2 ખોટું છે કારણ કે ટ્રાન્સ સમઘટક મેસો રચના ધરાવતો નથી. વિધાન 3 ખોટું છે કારણ કે 1,2-ડાઈક્લોરોસાયક્લોબ્યુટેનનો સિસ સમઘટક ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 22}, {"question": "નીચેના પૈકી કયું સંયોજન **અસમમિત કાર્બન પરમાણુ ધરાવે છે**, પરંતુ તેની મોલેક્યુલર રચનામાં સમતલીય સમમિતિ હોવાથી ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2,3-પેન્ટેનડાયોલ", "B) 1,3-ડાઈક્લોરોસાયક્લોબ્યુટેન", "C) 2,4-ડાઈબ્રોમોપેન્ટેન", "D) મેસો-ટાર્ટારિક એસિડ"], "correct": 3, "explanation": "સાચો જવાબ વિકલ્પ D છે. મેસો-ટાર્ટારિક એસિડમાં બે અસમમિત કાર્બન પરમાણુઓ હોવા છતાં તેની મોલેક્યુલર રચનામાં સમતલીય સમમિતિ હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. વિકલ્પ A, B અને C ઓપ્ટિકલ સમઘટકતા દર્શાવે છે કારણ કે તેમની રચનામાં સમમિતિનો અભાવ છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 23}, {"question": "નીચેના પૈકી કયું સંયોજન **સિસ-ટ્રાન્સ સમઘટકતા** અને **ઓપ્ટિકલ સમઘટકતા** બંને દર્શાવે છે?", "options": ["A) 3-મિથાઈલ-2-પેન્ટીન", "B) 4-મિથાઈલ-2-હેક્ઝીન", "C) 3,4-ડાઈમિથાઈલ-3-હેક્ઝીન", "D) 2,3-ડાઈક્લોરો-2-બ્યુટીન"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B છે. 4-મિથાઈલ-2-હેક્ઝીનમાં ડબલ બોન્ડ હોવાથી સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે અને અસમમિત કાર્બન પરમાણુ હોવાથી ઓપ્ટિકલ સમઘટકતા પણ દર્શાવે છે. વિકલ્પ A માત્ર ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. વિકલ્પ C અને D સિસ-ટ્રાન્સ સમઘટકતા દર્શાવતા નથી અથવા ઓપ્ટિકલ સમઘટકતા દર્શાવતા નથી.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 13: હાઇડ્રોકાર્બન, ક્લાસ XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 24}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n(1) **એલેન (C₃H₄)**માં કોઈ અસમમિત કાર્બન પરમાણુ ન હોવા છતાં તે ઓપ્ટિકલ સમઘટકતા દર્શાવી શકે છે.\n(2) **સ્પાયરો સંયોજનો**માં બે વલયો એક જ કાર્બન પરમાણુ વડે જોડાયેલા હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતા નથી.\n(3) **ટ્રાન્સ-1,4-ડાઈમિથાઈલસાયક્લોહેક્ઝેન**માં સમતલીય સમમિતિ હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી.", "options": ["A) માત્ર વિધાન 1 સાચું છે", "B) વિધાન 1 અને 3 સાચાં છે", "C) વિધાન 2 અને 3 સાચાં છે", "D) તમામ વિધાનો સાચાં છે"], "correct": 1, "explanation": "સાચો જવાબ વિકલ્પ B છે. વિધાન 1 સાચું છે કારણ કે એલેનમાં અસમમિત કાર્બન ન હોવા છતાં તેની અક્ષીય કિરાલિટીને કારણે ઓપ્ટિકલ સમઘટકતા દર્શાવી શકે છે. વિધાન 3 સાચું છે કારણ કે ટ્રાન્સ-1,4-ડાઈમિથાઈલસાયક્લોહેક્ઝેનમાં સમતલીય સમમિતિ હોવાથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. વિધાન 2 ખોટું છે કારણ કે કેટલાક સ્પાયરો સંયોજનો ઓપ્ટિકલ સમઘટકતા દર્શાવી શકે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 9: સવર્ગ સંયોજનો", "difficulty": "Hard", "num": 25}, {"question": "નીચેના પૈકી કયું વિધાન મેઝો સંયોજન વિશે ખોટું છે?", "options": ["A) મેઝો સંયોજનમાં અસમમિત કાર્બન પરમાણુઓ હાજર હોય છે, પરંતુ તે ઓપ્ટિકલ નિષ્ક્રિય હોય છે.", "B) મેઝો સંયોજનમાં અંતર્ગત સમમિતી (internal plane of symmetry) હાજર હોય છે.", "C) મેઝો સંયોજન એનાન્ટિયોમર દર્શાવે છે.", "D) મેઝો સંયોજન ડાયાસ્ટીરિયોમર દર્શાવી શકે છે."], "correct": 2, "explanation": "મેઝો સંયોજન ઓપ્ટિકલ નિષ્ક્રિય હોય છે કારણ કે તે અંતર્ગત સમમિતી ધરાવે છે, જેથી તે એનાન્ટિયોમર દર્શાવતું નથી. તે ડાયાસ્ટીરિયોમર દર્શાવી શકે છે (ઉદા. 2,3-ડાઈબ્રોમોબ્યુટેન). વિકલ્પ C ખોટો છે કારણ કે મેઝો સંયોજન એનાન્ટિયોમર દર્શાવતું નથી.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 26}, {"question": "નીચેના પૈકી કયું સંયોજન સિસ-ટ્રાન્સ સમઘટકતા અને ઓપ્ટિકલ સમઘટકતા બંને દર્શાવે છે?", "options": ["A) 1,2-ડાઈક્લોરોઇથીન", "B) 2-બ્યુટીન", "C) 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન", "D) 2,3-ડાઈબ્રોમોપેન્ટેન"], "correct": 3, "explanation": "2,3-ડાઈબ્રોમોપેન્ટેનમાં અસમમિત કાર્બન પરમાણુઓ હાજર છે, જેથી તે ઓપ્ટિકલ સમઘટકતા (એનાન્ટિયોમર) દર્શાવે છે. તથા, તે સિસ-ટ્રાન્સ સમઘટકતા પણ દર્શાવી શકે છે જ્યારે બ્રોમિન પરમાણુઓની સ્થિતિ અલગ અલગ હોય. 1,2-ડાઈક્લોરોઇથીન અને 2-બ્યુટીન ફક્ત સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે. 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન સિસ-ટ્રાન્સ સમઘટકતા દર્શાવે છે, પરંતુ ઓપ્ટિકલ નહીં.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 27}, {"question": "નીચેના પૈકી કયું સંયોજન અસમમિત કાર્બન પરમાણુ ધરાવે છે, પરંતુ ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2-ક્લોરોબ્યુટેન", "B) 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ", "C) 2,3-ડાઈબ્રોમોબ્યુટેન (મેઝો રચના)", "D) 3-બ્રોમોપેન્ટેન"], "correct": 2, "explanation": "2,3-ડાઈબ્રોમોબ્યુટેનની મેઝો રચનામાં અસમમિત કાર્બન પરમાણુઓ હાજર હોય છે, પરંતુ અંતર્ગત સમમિતી હોવા કારણે તે ઓપ્ટિકલ નિષ્ક્રિય હોય છે. 2-ક્લોરોબ્યુટેન, 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ, અને 3-બ્રોમોપેન્ટેન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 28}, {"question": "નીચેના વિધાનો ધ્યાનમાં લો: (1) 1,2-ડાઈક્લોરોસાયક્લોપ્રોપેનમાં સિસ અને ટ્રાન્સ સમઘટકો શક્ય છે. (2) સિસ-1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે. (3) ટ્રાન્સ-1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન મેઝો રચના ધરાવે છે. કયા વિધાનો સાચા છે?", "options": ["A) ફક્ત (1) અને (2)", "B) ફક્ત (1) અને (3)", "C) ફક્ત (2) અને (3)", "D) (1), (2), અને (3)"], "correct": 1, "explanation": "1,2-ડાઈક્લોરોસાયક્લોપ્રોપેનમાં સિસ અને ટ્રાન્સ સમઘટકો શક્ય છે (વિધાન 1 સાચું). સિસ-1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી, કારણ કે તે સમમિતી ધરાવે છે (વિધાન 2 ખોટું). ટ્રાન્સ-1,2-ડાઈક્લોરોસાયક્લોપ્રોપેન મેઝો રચના ધરાવે છે (વિધાન 3 સાચું).", "ncert_ref": "Class XII - Chapter 10: હેલોએલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 29}, {"question": "નીચેના સંયોજનોમાંથી કયું સંયોજન **અસમમિત કાર્બન પરમાણુ (chiral carbon)** ધરાવે છે, પરંતુ તેની મોલેક્યુલર રચનામાં **સમમિતિ તલ (plane of symmetry)** હોવાને કારણે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી?", "options": ["A) 2,3-ડાઈક્લોરોબ્યુટેન", "B) 2,3-ડાઈક્લોરોપેન્ટેન", "C) 1,3-ડાઈક્લોરોસાયક્લોબ્યુટેન", "D) 1,2-ડાઈક્લોરોસાયક્લોહેક્ઝેન (સિસ)"], "correct": 0, "explanation": "2,3-ડાઈક્લોરોબ્યુટેનમાં બે અસમમિત કાર્બન પરમાણુઓ છે, પરંતુ તેની મેસો (meso) રચના સમમિતિ તલ ધરાવે છે જે ઓપ્ટિકલ સમઘટકતાને નાબૂદ કરે છે. તેથી તે ઓપ્ટિકલ સમઘટકતા દર્શાવતું નથી. વિકલ્પ Bમાં 2,3-ડાઈક્લોરોપેન્ટેન ઓપ્ટિકલ સમઘટકતા દર્શાવે છે કારણ કે તેમાં સમમિતિ તલ નથી. વિકલ્પ C અને Dમાં અસમમિત કાર્બન પરમાણુ હોવા છતાં તેમની રચનામાં સમમિતિ તલ નથી, તેથી તેઓ ઓપ્ટિકલ સમઘટકતા દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
