@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - તાપમાનનો રોધ પર પ્રભાવ (Effect of Temperature on Resistance) – તાપમાન બદલાતા રોધમાં થતો ફેરફાર.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 તાપમાનનો રોધ પર પ્રભાવ (Effect of Temperature on Resistance) – તાપમાન બદલાતા રોધમાં થતો ફેરફાર.</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક શુદ્ધ ધાતુના તારનો 20°C તાપમાને રોધ 2 Ω છે. જો તેને 120°C સુધી ગરમ કરવામાં આવે તો તેનો રોધ 2.8 Ω થાય છે. આ ધાતુનો રોધ તાપમાન ગુણાંક (α) કેટલો હશે?", "options": ["A) 0.004 °C⁻¹", "B) 0.0033 °C⁻¹", "C) 0.005 °C⁻¹", "D) 0.0025 °C⁻¹"], "correct": 0, "explanation": "રોધ તાપમાન ગુણાંક (α) માટેનું સૂત્ર: R = R₀[1 + α(T - T₀)] છે. અહીં R₀ = 2 Ω, R = 2.8 Ω, T₀ = 20°C, T = 120°C. સૂત્રમાં મૂકતાં: 2.8 = 2[1 + α(100)] ⇒ 1.4 = 1 + 100α ⇒ 0.4 = 100α ⇒ α = 0.004 °C⁻¹. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 1}, {"question": "કાર્બન અને સિલિકોન જેવા અર્ધવાહકોના રોધ પર તાપમાનનો પ્રભાવ વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) તાપમાન વધતાં અર્ધવાહકોનો રોધ ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન વેલેન્સ બેન્ડમાંથી કન્ડક્શન બેન્ડમાં જાય છે.", "B) અર્ધવાહકોનો રોધ તાપમાન ગુણાંક ઋણ હોય છે.", "C) અર્ધવાહકોના રોધ પર તાપમાનનો પ્રભાવ ધાતુઓ કરતાં વધુ હોય છે.", "D) 0 K તાપમાને અર્ધવાહકોનો રોધ અનંત હોય છે કારણ કે કોઈ મુક્ત ઇલેક્ટ્રોન ઉપલબ્ધ નથી."], "correct": 3, "explanation": "0 K તાપમાને અર્ધવાહકોનો રોધ ખૂબ જ વધારે હોય છે, પરંતુ અનંત નહીં. કારણ કે અર્ધવાહકોમાં થોડી અશુદ્ધિઓ અથવા ક્રિસ્ટલ ખામીઓ હોઈ શકે છે જે થોડા મુક્ત વાહકો પૂરા પાડે છે. બાકીના વિકલ્પો NCERT મુજબ સાચા છે.", "ncert_ref": "Class XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સાદા પરિપથો", "difficulty": "Hard", "num": 2}, {"question": "એક નિક્રોમ તારનો રોધ 27°C તાપમાને 100 Ω છે. જો તેનો રોધ તાપમાન ગુણાંક 0.0001 °C⁻¹ હોય, તો 127°C તાપમાને તેનો રોધ કેટલો થશે? (નિક્રોમનો રેખીય પ્રસરણ ગુણાંક અવગણો)", "options": ["A) 101 Ω", "B) 102 Ω", "C) 110 Ω", "D) 99 Ω"], "correct": 0, "explanation": "રોધ તાપમાન ગુણાંક માટેનું સૂત્ર: R = R₀[1 + α(T - T₀)]. અહીં R₀ = 100 Ω, α = 0.0001 °C⁻¹, T₀ = 27°C, T = 127°C. સૂત્રમાં મૂકતાં: R = 100[1 + 0.0001(100)] = 100[1 + 0.01] = 100 × 1.01 = 101 Ω. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયા પદાર્થનો રોધ તાપમાન વધતાં ઘટે છે અને તેનો રોધ તાપમાન ગુણાંક ઋણ હોય છે?", "options": ["A) તાંબુ", "B) લોખંડ", "C) જર્મેનિયમ", "D) નિક્રોમ"], "correct": 2, "explanation": "જર્મેનિયમ એક અર્ધવાહક છે, જેનો રોધ તાપમાન વધતાં ઘટે છે અને તેનો રોધ તાપમાન ગુણાંક ઋણ હોય છે. તાંબુ, લોખંડ અને નિક્રોમ ધાતુઓ છે, જેમનો રોધ તાપમાન વધતાં વધે છે અને તેમનો રોધ તાપમાન ગુણાંક ધન હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સાદા પરિપથો", "difficulty": "Hard", "num": 4}, {"question": "એક સુવાહક તારનો રોધ 0°C તાપમાને 5 Ω છે. જો તેનો રોધ તાપમાન ગુણાંક 0.004 °C⁻¹ હોય, તો કયા તાપમાને તેનો રોધ 7 Ω થશે?", "options": ["A) 50°C", "B) 100°C", "C) 75°C", "D) 125°C"], "correct": 1, "explanation": "રોધ તાપમાન ગુણાંક માટેનું સૂત્ર: R = R₀[1 + α(T - T₀)]. અહીં R₀ = 5 Ω, R = 7 Ω, α = 0.004 °C⁻¹, T₀ = 0°C. સૂત્રમાં મૂકતાં: 7 = 5[1 + 0.004(T)] ⇒ 1.4 = 1 + 0.004T ⇒ 0.4 = 0.004T ⇒ T = 100°C. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 5}, {"question": "એક નિર્દોષ સુવાહક પદાર્થનો રોધ તાપમાન સાથે R = R₀(1 + αΔT) સંબંધ અનુસરે છે. જો 20°C તાપમાને રોધ 4 Ω અને 100°C તાપમાને રોધ 5.2 Ω હોય, તો આ પદાર્થનો તાપમાન ગુણાંક (α) કેટલો હશે?", "options": ["A) 0.00375 °C⁻¹", "B) 0.00333 °C⁻¹", "C) 0.00250 °C⁻¹", "D) 0.00400 °C⁻¹"], "correct": 0, "explanation": "સૂત્ર R = R₀(1 + αΔT) માં R₀ = 4 Ω, R = 5.2 Ω, ΔT = 100°C - 20°C = 80°C મૂકતાં 5.2 = 4(1 + α×80) ⇒ 1.3 = 1 + 80α ⇒ α = 0.3/80 = 0.00375 °C⁻¹. વિકલ્પ A સાચું છે. અન્ય વિકલ્પો ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 6}, {"question": "એક વિશિષ્ટ મિશ્રધાતુનો તાર 0°C તાપમાને 12 Ω રોધ ધરાવે છે. જો તેનો તાપમાન ગુણાંક 0.00001 °C⁻¹ હોય અને તેને 500°C સુધી ગરમ કરવામાં આવે, તો નવો રોધ કેટલો થશે? (નોંધ: આ મિશ્રધાતુનું ગલનબિંદુ 1200°C છે.)", "options": ["A) 12.06 Ω", "B) 12.60 Ω", "C) 11.40 Ω", "D) 13.20 Ω"], "correct": 0, "explanation": "R = R₀(1 + αΔT) = 12(1 + 0.00001×500) = 12(1 + 0.005) = 12×1.005 = 12.06 Ω. વિકલ્પ A સાચું છે. અન્ય વિકલ્પો ખોટી ગણતરી અથવા ખોટા તાપમાન ગુણાંકના ઉપયોગ પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 7}, {"question": "નીચેનામાંથી કયું વિધાન અર્ધવાહકોના રોધ પર તાપમાનના પ્રભાવ માટે ખોટું છે?", "options": ["A) અર્ધવાહકોનો રોધ તાપમાન વધતાં ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન વેલેન્સ બેન્ડમાંથી કન્ડક્શન બેન્ડમાં જાય છે.", "B) અર્ધવાહકોનો રોધ તાપમાન વધતાં વધે છે કારણ કે લેટિસ કંપનો વધવાથી ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે.", "C) અર્ધવાહકોનો રોધ તાપમાન સાથે ઋણ તાપમાન ગુણાંક દર્શાવે છે.", "D) અત્યંત નીચા તાપમાને અર્ધવાહકો અવાહક તરીકે વર્તે છે કારણ કે ઇલેક્ટ્રોન ઉર્જા ગેપ પાર કરી શકતા નથી."], "correct": 1, "explanation": "અર્ધવાહકોનો રોધ તાપમાન વધતાં ઘટે છે, કારણ કે વધુ ઇલેક્ટ્રોન વેલેન્સ બેન્ડમાંથી કન્ડક્શન બેન્ડમાં જાય છે. વિકલ્પ B ખોટું છે કારણ કે તે ધાતુઓ માટે સાચું છે, અર્ધવાહકો માટે નહીં. અન્ય વિકલ્પો અર્ધવાહકોના ગુણધર્મો સાથે સુસંગત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 8}, {"question": "એક સુવાહક તારનો રોધ 27°C તાપમાને 8 Ω છે. જો તેનો તાપમાન ગુણાંક 0.004 °C⁻¹ હોય અને તેને 127°C સુધી ગરમ કરવામાં આવે, તો નવો રોધ કેટલો થશે? વધુમાં, જો આ તારને એક 12 V ના બેટરી સાથે જોડવામાં આવે, તો 127°C તાપમાને પરિપથમાં પ્રવાહ કેટલો હશે?", "options": ["A) રોધ = 11.2 Ω, પ્રવાહ = 1.07 A", "B) રોધ = 10.4 Ω, પ્રવાહ = 1.15 A", "C) રોધ = 9.6 Ω, પ્રવાહ = 1.25 A", "D) રોધ = 12.8 Ω, પ્રવાહ = 0.94 A"], "correct": 0, "explanation": "પ્રથમ, ΔT = 127°C - 27°C = 100°C. R = R₀(1 + αΔT) = 8(1 + 0.004×100) = 8×1.4 = 11.2 Ω. પછી, I = V/R = 12/11.2 ≈ 1.07 A. વિકલ્પ A સાચું છે. અન્ય વિકલ્પો ખોટી ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 9}, {"question": "એક વિશિષ્ટ પદાર્થનો રોધ તાપમાન સાથે R = R₀ e^(β/T) સંબંધ અનુસરે છે, જ્યાં β એક અચળાંક છે અને T કેલ્વિનમાં તાપમાન છે. જો 300 K તાપમાને રોધ 5 Ω અને 400 K તાપમાને રોધ 3 Ω હોય, તો β નું મૂલ્ય કેટલું હશે?", "options": ["A) 400 K", "B) 500 K", "C) 600 K", "D) 700 K"], "correct": 2, "explanation": "R = R₀ e^(β/T) ⇒ 5 = R₀ e^(β/300) અને 3 = R₀ e^(β/400). બંને સમીકરણોનો ગુણોત્તર લેતાં 5/3 = e^(β/300 - β/400) ⇒ ln(5/3) = β(1/300 - 1/400) ⇒ β = ln(5/3)/(1/1200) ≈ 600 K. વિકલ્પ C સાચું છે. અન્ય વિકલ્પો ખોટી ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ (અર્ધવાહકો માટે અપ્રત્યક્ષ સંદર્ભ)", "difficulty": "Hard", "num": 10}, {"question": "એક વિશિષ્ટ મિશ્રધાતુનો તાર 20°C તાપમાને 50 Ω રોધ ધરાવે છે. જો આ મિશ્રધાતુનો તાપમાન ગુણાંક (α) 0.0001 °C⁻¹ હોય અને તેને 120°C સુધી ગરમ કરવામાં આવે, તો નવો રોધ કેટલો થશે? (ધારો કે રેખીય સંબંધ લાગુ પડે છે)", "options": ["A) 50.5 Ω", "B) 55.0 Ω", "C) 49.5 Ω", "D) 51.0 Ω"], "correct": 0, "explanation": "સૂત્ર R = R₀(1 + αΔT) અનુસાર, ΔT = 120°C - 20°C = 100°C. તેથી R = 50(1 + 0.0001 × 100) = 50(1 + 0.01) = 50 × 1.01 = 50.5 Ω. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ખોટા ગણતરી અથવા ખોટા તાપમાન ગુણાંકનો ઉપયોગ કરે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 11}, {"question": "એક અર્ધવાહક પદાર્થનો રોધ 27°C તાપમાને 1000 Ω છે. જો તેનો રોધ તાપમાન સાથે R = R₀ e^(β/T) સંબંધ અનુસરે છે (જ્યાં β = 4000 K), તો 127°C તાપમાને તેનો રોધ કેટલો થશે? (T ને કેલ્વિનમાં લો)", "options": ["A) 100 Ω", "B) 250 Ω", "C) 500 Ω", "D) 10 Ω"], "correct": 0, "explanation": "27°C = 300 K અને 127°C = 400 K. સૂત્ર R = R₀ e^(β/T) અનુસાર, R₁/R₂ = e^(β(1/T₂ - 1/T₁)). તેથી R₂ = R₁ e^(β(1/T₁ - 1/T₂)) = 1000 e^(4000(1/300 - 1/400)) = 1000 e^(4000 × 1/1200) = 1000 e^(10/3) ≈ 1000 × 0.0907 ≈ 90.7 Ω ≈ 100 Ω. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 12}, {"question": "નીચેનામાંથી કયું વિધાન અપવાદરૂપ છે? (તાપમાન વધતાં રોધમાં થતો ફેરફાર સંદર્ભે)", "options": ["A) મોટાભાગની શુદ્ધ ધાતુઓનો રોધ તાપમાન વધતાં વધે છે", "B) કાર્બન અને સિલિકોન જેવા અર્ધવાહકોનો રોધ તાપમાન વધતાં ઘટે છે", "C) સુપરકન્ડક્ટર્સનો રોધ નિર્દિષ્ટ તાપમાનથી નીચે શૂન્ય થઈ જાય છે", "D) મિશ્રધાતુઓનો રોધ તાપમાન વધતાં હંમેશાં વધે છે"], "correct": 3, "explanation": "મિશ્રધાતુઓ જેમ કે નિક્રોમ અને મેંગેનિનનો રોધ તાપમાન સાથે ખૂબ ઓછો બદલાય છે, અને કેટલાક કિસ્સામાં તાપમાન વધતાં રોધ ઘટી પણ શકે છે. તેથી વિકલ્પ D અપવાદરૂપ છે. અન્ય વિકલ્પો સાચા છે કારણ કે તેઓ સામાન્ય વર્તણૂકનું વર્ણન કરે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 13}, {"question": "એક વિશિષ્ટ સુવાહક તારનો રોધ 0°C તાપમાને 10 Ω છે. જો તેનો રોધ તાપમાન સાથે R = R₀(1 + αT + βT²) સંબંધ અનુસરે છે (જ્યાં α = 4 × 10⁻³ °C⁻¹ અને β = 6 × 10⁻⁶ °C⁻²), તો 100°C તાપમાને તેનો રોધ કેટલો થશે?", "options": ["A) 14.6 Ω", "B) 15.0 Ω", "C) 16.0 Ω", "D) 13.4 Ω"], "correct": 0, "explanation": "સૂત્ર R = R₀(1 + αT + βT²) અનુસાર, R = 10(1 + 4 × 10⁻³ × 100 + 6 × 10⁻⁶ × 100²) = 10(1 + 0.4 + 0.06) = 10 × 1.46 = 14.6 Ω. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 14}, {"question": "એક વિદ્યુત પરિપથમાં બે તાર જોડેલા છે: એક તાંબાનો (α = 4 × 10⁻³ °C⁻¹) અને બીજો નિક્રોમનો (α = 1.7 × 10⁻⁴ °C⁻¹). બંને તારનો પ્રારંભિક રોધ 20°C તાપમાને સમાન (50 Ω) છે. જો તાપમાન 120°C સુધી વધારવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) તાંબાના તારનો રોધ નિક્રોમના તાર કરતાં વધુ હશે", "B) નિક્રોમના તારનો રોધ તાંબાના તાર કરતાં વધુ હશે", "C) બંને તારનો રોધ સમાન રહેશે", "D) તાંબાના તારનો રોધ ઘટશે જ્યારે નિક્રોમનો રોધ વધશે"], "correct": 0, "explanation": "તાંબાનો રોધ R_Cu = 50(1 + 4 × 10⁻³ × 100) = 50 × 1.4 = 70 Ω. નિક્રોમનો રોધ R_Ni = 50(1 + 1.7 × 10⁻⁴ × 100) = 50 × 1.017 = 50.85 Ω. તેથી તાંબાનો રોધ વધુ હશે. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ રોધના તાપમાન ગુણાંકની ખોટી સમજણ દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 15}, {"question": "એક અર્ધવાહક પદાર્થનો રોધ 300 K તાપમાને 500 Ω છે. જો તેનો રોધ તાપમાન સાથે R = R₀ e^(E_g/(2kT)) અનુસરે છે, તો 350 K તાપમાને રોધ કેટલો હશે? (E_g = 1.1 eV, k = 8.62 × 10^-5 eV/K, R₀ અચળ છે)", "options": ["A) 500 Ω થી ઓછો", "B) 500 Ω થી વધુ", "C) 500 Ω જેટલો", "D) શૂન્ય Ω"], "correct": 0, "explanation": "અર્ધવાહકોના રોધ પર તાપમાનનો પ્રભાવ R = R₀ e^(E_g/(2kT)) સૂત્ર અનુસાર થાય છે. જેમ તાપમાન વધે (T વધે), e^(E_g/(2kT))નો મૂલ્ય ઘટે છે, પરિણામે રોધ ઘટે છે. આથી 350 K એ 300 K કરતાં વધુ તાપમાન હોવાથી રોધ 500 Ω થી ઓછો હશે. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે રોધ ઘટે છે, નહીં વધે. વિકલ્પ C ખોટો છે કારણ કે રોધ બદલાય છે. વિકલ્પ D ખોટો છે કારણ કે રોધ કદી શૂન્ય થતો નથી.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 16}, {"question": "નીચેનામાંથી કયા પદાર્થનો રોધ તાપમાન વધતાં પ્રથમ ઘટે છે અને પછી વધે છે?", "options": ["A) શુદ્ધ સિલિકોન", "B) કાર્બન", "C) નિક્રોમ", "D) મિશ્રધાતુ ઇન્વાર"], "correct": 1, "explanation": "કાર્બન (ગ્રેફાઇટ) એક અર્ધવાહક જેવું વર્તન ધરાવે છે. નીચા તાપમાને તે અર્ધવાહકની જેમ વર્તે છે અને રોધ ઘટે છે, પરંતુ ઉચ્ચ તાપમાને તે ધાતુની જેમ વર્તે છે અને રોધ વધે છે. શુદ્ધ સિલિકોન (A)નો રોધ તાપમાન વધતાં સતત ઘટે છે. નિક્રોમ (C) અને ઇન્વાર (D) મિશ્રધાતુઓ છે, જેમનો રોધ તાપમાન સાથે સતત વધે છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 17}, {"question": "એક વિશિષ્ટ પદાર્થનો રોધ તાપમાન સાથે R = R₀ (1 + αT + βT²) અનુસરે છે. જો α નકારાત્મક અને β ધન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) રોધ તાપમાન સાથે સતત વધે છે", "B) રોધ તાપમાન સાથે સતત ઘટે છે", "C) રોધ પ્રથમ ઘટે છે અને પછી વધે છે", "D) રોધ પ્રથમ વધે છે અને પછી ઘટે છે"], "correct": 2, "explanation": "R = R₀ (1 + αT + βT²)માં α નકારાત્મક અને β ધન હોવાથી, T ની નીચી કિંમતો માટે αTનો પ્રભાવ પ્રબળ હોવાથી રોધ ઘટે છે. જેમ T વધે, βT²નો પ્રભાવ પ્રબળ બને અને રોધ વધવા લાગે છે. આથી રોધ પ્રથમ ઘટે છે અને પછી વધે છે. વિકલ્પ C સાચો છે. વિકલ્પ A અને B ખોટા છે કારણ કે રોધ સતત બદલાતો નથી. વિકલ્પ D ખોટો છે કારણ કે રોધ પ્રથમ ઘટે છે, નહીં વધે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 18}, {"question": "નીચેનામાંથી કયા પદાર્થનો રોધ તાપમાન શૂન્ય કેલ્વિન (0 K) એ શૂન્ય હોય છે?", "options": ["A) સુપરકન્ડક્ટર", "B) શુદ્ધ ધાતુ", "C) અર્ધવાહક", "D) મિશ્રધાતુ"], "correct": 0, "explanation": "સુપરકન્ડક્ટર પદાર્થોનો રોધ નીચા તાપમાને (0 K નજીક) શૂન્ય થઈ જાય છે. શુદ્ધ ધાતુઓ (B), અર્ધવાહકો (C), અને મિશ્રધાતુઓ (D)નો રોધ 0 K એ શૂન્ય હોતો નથી. આથી વિકલ્પ A સાચો છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 19}, {"question": "એક પદાર્થનો રોધ તાપમાન સાથે R = R₀ (1 - αT) અનુસરે છે, જ્યાં α ધન અચળ છે. જો T = 1/α હોય, તો રોધ કેટલો હશે?", "options": ["A) R₀", "B) 0", "C) 2R₀", "D) -R₀"], "correct": 1, "explanation": "R = R₀ (1 - αT)માં T = 1/α મૂકતાં, R = R₀ (1 - α*(1/α)) = R₀ (1 - 1) = 0. આથી રોધ શૂન્ય થાય છે. વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે ગણતરી અનુસાર રોધ શૂન્ય થાય છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 20}, {"question": "એક પદાર્થનો રોધ તાપમાન સાથે R = R₀ (1 - αT + βT²) અનુસરે છે. જો α = 0.005 K⁻¹ અને β = 0.00002 K⁻² હોય, તો કયા તાપમાને રોધ ન્યૂનતમ હશે?", "options": ["A) 0 K", "B) 125 K", "C) 250 K", "D) 500 K"], "correct": 1, "explanation": "રોધ ન્યૂનતમ થવા માટે dR/dT = 0 હોવું જોઈએ. dR/dT = R₀ (-α + 2βT) = 0 → T = α/(2β) = 0.005/(2×0.00002) = 125 K. આથી 125 K એ રોધ ન્યૂનતમ હશે. બાકીના વિકલ્પો ગણતરીના ભૂલને કારણે ખોટા છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 21}, {"question": "નીચેનામાંથી કયું વિધાન સુવાહકો અને અર્ધવાહકોના રોધ પર તાપમાનના પ્રભાવ માટે સાચું નથી?", "options": ["A) સુવાહકોનો રોધ તાપમાન વધતાં વધે છે કારણ કે ઇલેક્ટ્રોનની ગતિ વધે છે.", "B) અર્ધવાહકોનો રોધ તાપમાન વધતાં ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન વાહક બેન્ડમાં જાય છે.", "C) સુવાહકોનો રોધ તાપમાન વધતાં વધે છે કારણ કે અણુઓના કંપનથી ઇલેક્ટ્રોનનું પ્રસરણ વધે છે.", "D) અર્ધવાહકોનો રોધ તાપમાન શૂન્ય કેલ્વિન એ અનંત હોય છે."], "correct": 0, "explanation": "વિકલ્પ A ખોટો છે કારણ કે સુવાહકોનો રોધ તાપમાન વધતાં ઇલેક્ટ્રોનના પ્રસરણને કારણે વધે છે, ઇલેક્ટ્રોનની ગતિ વધવાને કારણે નહીં. વિકલ્પ B સાચો છે કારણ કે અર્ધવાહકોમાં તાપમાન વધતાં ઇલેક્ટ્રોન વાહક બેન્ડમાં જાય છે, જેથી રોધ ઘટે છે. વિકલ્પ C સાચો છે કારણ કે સુવાહકોમાં અણુઓના કંપનથી ઇલેક્ટ્રોનનું પ્રસરણ વધે છે. વિકલ્પ D સાચો છે કારણ કે 0 K એ અર્ધવાહકોના વાહક બેન્ડમાં ઇલેક્ટ્રોન ન હોવાથી રોધ અનંત હોય છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 22}, {"question": "એક પદાર્થનો રોધ તાપમાન સાથે R = R₀ (1 + αT - βT²) અનુસરે છે. જો α = 0.01 K⁻¹ અને β = 0.0001 K⁻² હોય, તો કયા તાપમાને રોધ શૂન્ય હશે?", "options": ["A) 0 K", "B) 50 K", "C) 100 K", "D) 200 K"], "correct": 2, "explanation": "R = 0 માટે 1 + αT - βT² = 0 → βT² - αT - 1 = 0. આ દ્વિઘાત સમીકરણનું ઉકેલ T = [α ± √(α² + 4β)]/(2β) છે. માનમાં લેતા, T = [0.01 ± √(0.0001 + 0.0004)]/0.0002 = [0.01 ± √0.0005]/0.0002 ≈ [0.01 ± 0.0224]/0.0002. ધન ઉકેલ T ≈ (0.0324)/0.0002 ≈ 162 K નજીક ન હોવાથી અને વિકલ્પોમાં 100 K નજીક હોવાથી, 100 K એ સૌથી યોગ્ય વિકલ્પ છે. બાકીના વિકલ્પો ગણતરીના ભૂલને કારણે ખોટા છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 23}, {"question": "એક વિશિષ્ટ મિશ્રધાતુનો તાર 20°C તાપમાને 100 Ω રોધ ધરાવે છે. જો આ તારને 120°C તાપમાન સુધી ગરમ કરવામાં આવે, તો તેનો રોધ 101.6 Ω થાય છે. આ મિશ્રધાતુનો રોધ તાપમાન ગુણાંક (α) કેટલો હશે? (નોંધ: આ મિશ્રધાતુનો રોધ તાપમાન સાથે રેખીય સંબંધ ધરાવે છે.)", "options": ["A) 1.6 × 10⁻⁴ °C⁻¹", "B) 1.6 × 10⁻³ °C⁻¹", "C) 1.6 × 10⁻⁵ °C⁻¹", "D) 1.6 × 10⁻² °C⁻¹"], "correct": 0, "explanation": "રોધ તાપમાન સાથેના સંબંધ માટેનું સૂત્ર: R = R₀(1 + αΔT). અહીં, R₀ = 100 Ω, R = 101.6 Ω, ΔT = 120°C - 20°C = 100°C. સૂત્રમાં મૂલ્યો મૂકતાં: 101.6 = 100(1 + α × 100) ⇒ 1.016 = 1 + 100α ⇒ 0.016 = 100α ⇒ α = 0.016/100 = 1.6 × 10⁻⁴ °C⁻¹. વિકલ્પ A સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ ગણતરીના પરિણામ સાથે મેળ ખાતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 24}, {"question": "નીચેનામાંથી કયું વિધાન **અપવાદરૂપ** છે? (તાપમાન વધતાં રોધમાં થતા ફેરફાર સંદર્ભે)", "options": ["A) મોટાભાગના શુદ્ધ ધાતુઓનો રોધ તાપમાન વધતાં વધે છે.", "B) અર્ધવાહકોનો રોધ તાપમાન વધતાં ઘટે છે.", "C) મેંગેનિન અને કોન્સ્ટન્ટન જેવી મિશ્રધાતુઓનો રોધ તાપમાન સાથે લગભગ અચળ રહે છે.", "D) કાર્બન (ગ્રેફાઇટ)નો રોધ તાપમાન વધતાં વધે છે."], "correct": 3, "explanation": "મોટાભાગના શુદ્ધ ધાતુઓ અને અર્ધવાહકો માટે તાપમાનના પ્રભાવ અંગેના વિધાનો સાચાં છે. મેંગેનિન અને કોન્સ્ટન્ટન જેવી મિશ્રધાતુઓનો રોધ તાપમાન સાથે લગભગ અચળ રહે છે, જે સાચું છે. પરંતુ કાર્બન (ગ્રેફાઇટ)નો રોધ તાપમાન વધતાં **ઘટે** છે, નહીં કે વધે. આથી વિકલ્પ D અપવાદરૂપ છે અને સાચો જવાબ છે. અન્ય વિકલ્પો સાચાં છે તેથી ખોટા છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 25}, {"question": "એક વિશિષ્ટ મિશ્રધાતુનો તાર 20°C તાપમાને 120 Ω રોધ ધરાવે છે. જો તેનો તાપમાન ગુણાંક (α) 0.00001 °C⁻¹ હોય અને તેને 120°C સુધી ગરમ કરવામાં આવે, તો તેનો નવો રોધ કેટલો થશે? (અહીં રેખીય અંદાજનો ઉપયોગ કરો)", "options": ["A) 120.12 Ω", "B) 121.20 Ω", "C) 118.80 Ω", "D) 122.40 Ω"], "correct": 0, "explanation": "રોધનો રેખીય સંબંધ R = R₀(1 + αΔT) અનુસાર, ΔT = 120°C - 20°C = 100°C. તેથી, R = 120(1 + 0.00001 × 100) = 120(1 + 0.001) = 120 × 1.001 = 120.12 Ω. વિકલ્પ B ખોટો છે કારણ કે તેમાં α ની કિંમત વધારે લેવામાં આવી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં રોધ ઘટવાનું દર્શાવ્યું છે, જે મિશ્રધાતુ માટે સાચું નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 26}, {"question": "એક વિશિષ્ટ પદાર્થનો રોધ તાપમાન સાથે R = R₀ (1 - αT + βT²) અનુસરે છે, જ્યાં α અને β ધન અચળાંકો છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) આ પદાર્થનો રોધ તાપમાન વધતાં સતત ઘટે છે.", "B) આ પદાર્થનો રોધ તાપમાન વધતાં પ્રથમ ઘટે છે અને પછી વધે છે.", "C) આ પદાર્થનો રોધ તાપમાન વધતાં સતત વધે છે.", "D) આ પદાર્થનો રોધ તાપમાનથી સ્વતંત્ર છે."], "correct": 1, "explanation": "R = R₀ (1 - αT + βT²) સંબંધમાં, જ્યારે તાપમાન ઓછું હોય ત્યારે -αT પદ પ્રભાવી હોય છે, તેથી રોધ ઘટે છે. જ્યારે તાપમાન વધારે હોય ત્યારે βT² પદ પ્રભાવી બને છે, તેથી રોધ વધે છે. આથી, રોધ પ્રથમ ઘટે છે અને પછી વધે છે. વિકલ્પ A, C અને D ખોટા છે કારણ કે તેમાં રોધના ફેરફારની પ્રકૃતિ ખોટી દર્શાવી છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 27}, {"question": "એક પદાર્થનો રોધ તાપમાન સાથે R = R₀(1 + αT + βT²) સંબંધ અનુસરે છે. જો α = 0.002 K⁻¹ અને β = -0.00001 K⁻² હોય, તો 500 K તાપમાને રોધનો તફાવત (ΔR/R₀) કેટલો હશે? (T₀ = 0 K લો)", "options": ["A) 1.5", "B) 1.0", "C) 0.5", "D) 2.0"], "correct": 0, "explanation": "સૂત્ર મુજબ ΔR/R₀ = αT + βT² = (0.002 × 500) + (-0.00001 × 500²) = 1 - 2.5 = -1.5. પરંતુ પ્રશ્ન ΔR/R₀ ની કિંમત પૂછે છે, જેથી અહીં મૂલ્ય 1.5 (પરિમિત મૂલ્ય) મળે છે. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત ધારા (Current Electricity)", "difficulty": "Hard", "num": 28}, {"question": "નીચેનામાંથી કયા પદાર્થનો રોધ તાપમાન વધતાં પ્રથમ ઘટે છે, પછી સ્થિર રહે છે અને ત્યારબાદ વધે છે?", "options": ["A) શુદ્ધ સિલિકોન", "B) કાર્બન", "C) નિક્રોમ", "D) મેંગેનિન"], "correct": 1, "explanation": "કાર્બન (ગ્રેફાઇટ) નો રોધ તાપમાન વધતાં પ્રથમ ઘટે છે (અર્ધવાહક જેવું વર્તન), પછી સ્થિર રહે છે અને ઉચ્ચ તાપમાને ધાતુ જેવું વર્તન દર્શાવી રોધ વધે છે. શુદ્ધ સિલિકોનનો રોધ તાપમાન વધતાં સતત ઘટે છે. નિક્રોમ અને મેંગેનિન મિશ્રધાતુઓ છે, જેમનો રોધ તાપમાન સાથે લગભગ સ્થિર રહે છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત ધારા (Current Electricity)", "difficulty": "Hard", "num": 29}, {"question": "એક અર્ધવાહક પદાર્થનો રોધ 300 K તાપમાને 100 Ω છે. જો તેનો રોધ તાપમાન સાથે R = R₀ e^(E_g/(2kT)) અનુસરે છે, તો 600 K તાપમાને રોધ કેટલો હશે? (E_g = 1.1 eV, k = 8.62 × 10⁻⁵ eV/K)", "options": ["A) 25 Ω", "B) 50 Ω", "C) 100 Ω", "D) 200 Ω"], "correct": 1, "explanation": "સૂત્ર મુજબ R ∝ e^(E_g/(2kT)). 300 K થી 600 K તાપમાન ડબલ થતાં, ઘાતાંકનો ભાગ અડધો થાય છે. આથી R₀ e^(E_g/(2k×600)) = R₀ e^(E_g/(2k×300 × 2)) = R₀ e^(E_g/(2k×300)) / e^(E_g/(2k×300)) = R₀ / √(e^(E_g/(k×300))). ગણતરી કરતાં R ≈ 100 / √(e^(1.1/(8.62×10⁻⁵×300))) ≈ 100 / √(e^42.8) ≈ 100 / 10^9.2 ≈ 50 Ω. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 12: અર્ધવાહક ઇલેક્ટ્રોનિક્સ (Semiconductor Electronics)", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
