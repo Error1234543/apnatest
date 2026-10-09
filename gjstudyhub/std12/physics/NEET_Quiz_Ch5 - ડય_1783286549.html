@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch5 - ડાયા</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch5 - ડાયા</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે ફેરોચુંબકીય પદાર્થને ઉચ્ચ તાપમાને ગરમ કરવામાં આવે છે, ત્યારે તેના ચુંબકીય ગુણધર્મો ગુમાવી દે છે. આ ઘટનાનું નામ શું છે?", "options": ["A) ક્યૂરી તાપમાન", "B) હિસ્ટેરેસિસ", "C) ચુંબકીય અવશોષણ", "D) ચુંબકીય પ્રેરણ"], "correct": 0, "explanation": "ફેરોચુંબકીય પદાર્થો એક નિશ્ચિત તાપમાન (ક્યૂરી તાપમાન) પર પહોંચતા તેના ચુંબકીય ગુણધર્મો ગુમાવી દે છે. આ તાપમાનને ક્યૂરી તાપમાન કહેવામાં આવે છે. હિસ્ટેરેસિસ ચુંબકીય પદાર્થોના ચુંબકીયકરણ અને ચુંબકીય ક્ષેત્ર વચ્ચેના પાછળ રહી જવાના ગુણધર્મને દર્શાવે છે. ચુંબકીય અવશોષણ અને ચુંબકીય પ્રેરણ એ ચુંબકીય ક્ષેત્ર સાથે સંબંધિત અન્ય ઘટનાઓ છે, પરંતુ તે ક્યૂરી તાપમાન સાથે સંબંધિત નથી.", "ncert_ref": "Class XII - Chapter 5: ડાયા, પેરા અને ફેરો ચુંબકત્વ", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયો પદાર્થ પેરા-ચુંબકીય છે?", "options": ["A) લોખંડ", "B) એલ્યુમિનિયમ", "C) નિકેલ", "D) કોબાલ્ટ"], "correct": 1, "explanation": "એલ્યુમિનિયમ એક પેરા-ચુંબકીય પદાર્થ છે, જ્યારે લોખંડ, નિકેલ અને કોબાલ્ટ ફેરોચુંબકીય પદાર્થો છે. પેરા-ચુંબકીય પદાર્થો ચુંબકીય ક્ષેત્રમાં ખેંચાય છે, પરંતુ ચુંબકીય ક્ષેત્ર દૂર કર્યા પછી તેઓ તેમના ચુંબકીય ગુણધર્મો ગુમાવી દે છે.", "ncert_ref": "Class XII - Chapter 5: ડાયા, પેરા અને ફેરો ચુંબકત્વ", "difficulty": "Hard", "num": 2}, {"question": "ડાયા-ચુંબકીય પદાર્થો માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) તેઓ ચુંબકીય ક્ષેત્ર તરફ આકર્ષાય છે", "B) તેઓ ચુંબકીય ક્ષેત્ર વિરુદ્ધ ધકેલાય છે", "C) તેઓ ચુંબકીય ક્ષેત્રમાં કોઈ પ્રતિક્રિયા દર્શાવતા નથી", "D) તેઓ ચુંબકીય ક્ષેત્રમાં ગરમ થાય છે"], "correct": 1, "explanation": "ડાયા-ચુંબકીય પદાર્થો ચુંબકીય ક્ષેત્ર વિરુદ્ધ ધકેલાય છે. આ પદાર્થો ચુંબકીય ક્ષેત્રમાં કોઈ શાશ્વત ચુંબકીય ગુણધર્મ દર્શાવતા નથી અને ચુંબકીય ક્ષેત્ર દૂર કર્યા પછી તેઓ તેમના મૂળ સ્થિતિમાં પરત ફરે છે. તેઓ ચુંબકીય ક્ષેત્ર તરફ આકર્ષાય તે ફેરો અથવા પેરા-ચુંબકીય પદાર્થોનો ગુણધર્મ છે.", "ncert_ref": "Class XII - Chapter 5: ડાયા, પેરા અને ફેરો ચુંબકત્વ", "difficulty": "Hard", "num": 3}, {"question": "ફેરોચુંબકીય પદાર્થો માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) તેઓ ચુંબકીય ક્ષેત્રમાં મજબૂત રીતે આકર્ષાય છે", "B) તેઓ ચુંબકીય ક્ષેત્ર દૂર કર્યા પછી પણ ચુંબકીય ગુણધર્મો જાળવી રાખે છે", "C) તેઓ ક્યૂરી તાપમાન પર ચુંબકીય ગુણધર્મો ગુમાવી દે છે", "D) તેઓ ચુંબકીય ક્ષેત્રમાં ધકેલાય છે"], "correct": 3, "explanation": "ફેરોચુંબકીય પદાર્થો ચુંબકીય ક્ષેત્રમાં મજબૂત રીતે આકર્ષાય છે, ચુંબકીય ક્ષેત્ર દૂર કર્યા પછી પણ ચુંબકીય ગુણધર્મો જાળવી રાખે છે, અને ક્યૂરી તાપમાન પર ચુંબકીય ગુણધર્મો ગુમાવી દે છે. પરંતુ તેઓ ચુંબકીય ક્ષેત્રમાં ધકેલાય તે વિધાન સાચું નથી, કારણ કે તેઓ ચુંબકીય ક્ષેત્ર તરફ આકર્ષાય છે.", "ncert_ref": "Class XII - Chapter 5: ડાયા, પેરા અને ફેરો ચુંબકત્વ", "difficulty": "Hard", "num": 4}, {"question": "ચુંબકીય પ્રવૃત્તિ (Magnetic susceptibility) ની દ્રષ્ટિએ નીચેનામાંથી કયો પદાર્થ ડાયા-ચુંબકીય છે?", "options": ["A) ઓક્સિજન (O₂)", "B) કોપર (Cu)", "C) આયર્ન (Fe)", "D) નિકેલ (Ni)"], "correct": 1, "explanation": "કોપર (Cu) એક ડાયા-ચુંબકીય પદાર્થ છે, જ્યારે ઓક્સિજન (O₂) પેરા-ચુંબકીય છે અને આયર્ન (Fe) અને નિકેલ (Ni) ફેરોચુંબકીય છે. ડાયા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ નકારાત્મક હોય છે, જ્યારે પેરા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ ધન હોય છે.", "ncert_ref": "Class XII - Chapter 5: ડાયા, પેરા અને ફેરો ચુંબકત્વ", "difficulty": "Hard", "num": 5}, {"question": "જ્યારે ડાયા-ચુંબકીય પદાર્થને બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકવામાં આવે છે, ત્યારે તેના અણુઓમાં ઉદભવતી ચુંબકીય ક્ષણોની દિશા અને પરિણામી ચુંબકીય ક્ષેત્રની દિશા વચ્ચેનો કોણ કયો હોય છે?", "options": ["A) 0°", "B) 45°", "C) 90°", "D) 180°"], "correct": 3, "explanation": "ડાયા-ચુંબકીય પદાર્થોમાં, બાહ્ય ચુંબકીય ક્ષેત્ર લાગુ પડતાં અણુઓમાં પ્રેરિત ચુંબકીય ક્ષણો ઉદભવે છે, જે બાહ્ય ક્ષેત્રની દિશાની વિરુદ્ધ દિશામાં હોય છે. આથી કોણ 180° હોય છે. A) 0° અને C) 90° એ ફેરો અથવા પેરા-ચુંબકીય પદાર્થો માટે લાગુ પડે છે, જ્યારે B) 45° એ કોઈપણ ચુંબકીય પદાર્થ માટે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 6}, {"question": "નીચેનામાંથી કયો પદાર્થ અતિચાલક (superconductor) અવસ્થામાં પેરા-ચુંબકીય ગુણધર્મ દર્શાવે છે?", "options": ["A) પારો (Hg)", "B) એલ્યુમિનિયમ (Al)", "C) નાયોબિયમ-ટાઇટેનિયમ (Nb-Ti)", "D) લોખંડ (Fe)"], "correct": 2, "explanation": "નાયોબિયમ-ટાઇટેનિયમ (Nb-Ti) એ અતિચાલક પદાર્થ છે, જે નીચા તાપમાને અતિચાલકત્વ દર્શાવે છે અને પેરા-ચુંબકીય ગુણધર્મ ધરાવે છે. A) પારો અને B) એલ્યુમિનિયમ સામાન્ય તાપમાને ડાયા-ચુંબકીય હોય છે, જ્યારે D) લોખંડ ફેરો-ચુંબકીય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 7}, {"question": "ફેરો-ચુંબકીય પદાર્થોમાં, ડોમેન (domain) ની ભૂમિકા શું છે?", "options": ["A) તે પદાર્થની વિદ્યુત ચાલકતા વધારે છે", "B) તે પદાર્થની ચુંબકીય શક્તિને નબળી પાડે છે", "C) તે પદાર્થમાં સ્થાયી ચુંબકીય ક્ષણો ઉત્પન્ન કરે છે", "D) તે પદાર્થની યાંત્રિક શક્તિ વધારે છે"], "correct": 2, "explanation": "ફેરો-ચુંબકીય પદાર્થોમાં, ડોમેન એ સૂક્ષ્મ પ્રદેશો હોય છે જ્યાં અણુઓની ચુંબકીય ક્ષણો એક જ દિશામાં ગોઠવાયેલી હોય છે, જે પદાર્થમાં સ્થાયી ચુંબકીય ક્ષણો ઉત્પન્ન કરે છે. A), B) અને D) એ ફેરો-ચુંબકીય પદાર્થોની મૂળભૂત ભૌતિક ગુણધર્મો સાથે સંકળાયેલ નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 8}, {"question": "જ્યારે પેરા-ચુંબકીય પદાર્થને બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકવામાં આવે છે, ત્યારે તેની ચુંબકીય પ્રવૃત્તિ (χ) નું મૂલ્ય કેવું હોય છે?", "options": ["A) ઋણ અને તાપમાન પર આધારિત", "B) ધન અને તાપમાન પર આધારિત", "C) શૂન્ય", "D) અચળ"], "correct": 1, "explanation": "પેરા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ (χ) ધન હોય છે અને તે તાપમાન પર આધાર રાખે છે (χ ∝ 1/T). A) ડાયા-ચુંબકીય પદાર્થો માટે લાગુ પડે છે, જ્યારે C) અને D) કોઈપણ ચુંબકીય પદાર્થ માટે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 9}, {"question": "નીચેનામાંથી કયો પદાર્થ નીચા તાપમાને પેરા-ચુંબકીય અને ઉચ્ચ તાપમાને ડાયા-ચુંબકીય ગુણધર્મ દર્શાવે છે?", "options": ["A) લોખંડ (Fe)", "B) કોબાલ્ટ (Co)", "C) મેગ્નેશિયમ (Mg)", "D) ઓક્સિજન (O₂)"], "correct": 3, "explanation": "ઓક્સિજન (O₂) નીચા તાપમાને પેરા-ચુંબકીય અને ઉચ્ચ તાપમાને ડાયા-ચુંબકીય ગુણધર્મ દર્શાવે છે. A) લોખંડ અને B) કોબાલ્ટ ફેરો-ચુંબકીય છે, જ્યારે C) મેગ્નેશિયમ ડાયા-ચુંબકીય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 10}, {"question": "ફેરો-ચુંબકીય પદાર્થમાં, જ્યારે બાહ્ય ચુંબકીય ક્ષેત્ર હટાવી લેવામાં આવે છે, ત્યારે શું થાય છે?", "options": ["A) પદાર્થ તરત જ તેના ચુંબકીય ગુણધર્મ ગુમાવી દે છે", "B) પદાર્થમાં અવશેષ ચુંબકત્વ (residual magnetism) રહે છે", "C) પદાર્થ ડાયા-ચુંબકીય બની જાય છે", "D) પદાર્થ પેરા-ચુંબકીય બની જાય છે"], "correct": 1, "explanation": "ફેરો-ચુંબકીય પદાર્થોમાં, બાહ્ય ચુંબકીય ક્ષેત્ર હટાવ્યા પછી પણ અવશેષ ચુંબકત્વ (residual magnetism) રહે છે, જેને કારણે પદાર્થ ચુંબકીય બની રહે છે. વિકલ્પ A ખોટો છે કારણ કે ફેરો-ચુંબકીય પદાર્થો તેમના ચુંબકીય ગુણધર્મને તરત ગુમાવતા નથી. વિકલ્પ C અને D ખોટા છે કારણ કે ફેરો-ચુંબકીય પદાર્થો ડાયા-ચુંબકીય અથવા પેરા-ચુંબકીય બનતા નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 11}, {"question": "ડાયા-ચુંબકીય પદાર્થો માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) તેઓ બાહ્ય ચુંબકીય ક્ષેત્રની દિશામાં ચુંબકીય ક્ષણ પ્રેરિત કરે છે", "B) તેમની ચુંબકીય પ્રવૃત્તિ (susceptibility) ઋણ હોય છે", "C) તેઓ બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં ધકેલાય છે", "D) તેમના અણુઓમાં કાયમી ચુંબકીય ક્ષણ હોતી નથી"], "correct": 0, "explanation": "ડાયા-ચુંબકીય પદાર્થો બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં ચુંબકીય ક્ષણ પ્રેરિત કરે છે, ન કે દિશામાં. વિકલ્પ B, C, અને D સાચા છે કારણ કે ડાયા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ ઋણ હોય છે, તેઓ બાહ્ય ક્ષેત્રની વિરુદ્ધ દિશામાં ધકેલાય છે, અને તેમના અણુઓમાં કાયમી ચુંબકીય ક્ષણ હોતી નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 12}, {"question": "પેરા-ચુંબકીય પદાર્થો માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) તેઓ બાહ્ય ચુંબકીય ક્ષેત્રની દિશામાં આકર્ષાય છે અને તેમની ચુંબકીય પ્રવૃત્તિ ધન અને તાપમાન પર આધારિત હોય છે", "B) તેઓ બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં આકર્ષાય છે", "C) તેમની ચુંબકીય પ્રવૃત્તિ તાપમાન પર આધારિત હોતી નથી", "D) તેમના અણુઓમાં કાયમી ચુંબકીય ક્ષણ હોતી નથી"], "correct": 0, "explanation": "પેરા-ચુંબકીય પદાર્થો બાહ્ય ચુંબકીય ક્ષેત્રની દિશામાં આકર્ષાય છે અને તેમની ચુંબકીય પ્રવૃત્તિ ધન અને તાપમાન પર આધારિત હોય છે (ક્યુરીના નિયમ મુજબ). વિકલ્પ B ખોટો છે કારણ કે પેરા-ચુંબકીય પદાર્થો બાહ્ય ક્ષેત્રની વિરુદ્ધ દિશામાં ધકેલાતા નથી. વિકલ્પ C ખોટો છે કારણ કે ચુંબકીય પ્રવૃત્તિ તાપમાન પર આધારિત હોય છે. વિકલ્પ D ખોટો છે કારણ કે પેરા-ચુંબકીય પદાર્થોના અણુઓમાં કાયમી ચુંબકીય ક્ષણ હોતી છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 13}, {"question": "ફેરો-ચુંબકીય પદાર્થોમાં, ક્યુરી તાપમાન (Curie temperature) એ શું સૂચવે છે?", "options": ["A) જ્યારે પદાર્થ ડાયા-ચુંબકીય બની જાય છે", "B) જ્યારે પદાર્થ પેરા-ચુંબકીય બની જાય છે", "C) જ્યારે પદાર્થ અતિચાલક બની જાય છે", "D) જ્યારે પદાર્થ તેના ચુંબકીય ગુણધર્મ ગુમાવી દે છે"], "correct": 1, "explanation": "ક્યુરી તાપમાન એ તાપમાન છે જ્યારે ફેરો-ચુંબકીય પદાર્થ પેરા-ચુંબકીય બની જાય છે. વિકલ્પ A ખોટો છે કારણ કે ફેરો-ચુંબકીય પદાર્થ ક્યુરી તાપમાને ડાયા-ચુંબકીય બનતા નથી. વિકલ્પ C ખોટો છે કારણ કે અતિચાલકતા ક્યુરી તાપમાન સાથે સંબંધિત નથી. વિકલ્પ D અંશતઃ સાચો છે, પરંતુ ફેરો-ચુંબકીય પદાર્થ ક્યુરી તાપમાને પેરા-ચુંબકીય બની જાય છે, ન કે તેના ચુંબકીય ગુણધર્મ પૂર્ણપણે ગુમાવી દે છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 14}, {"question": "નીચેનામાંથી કયો પદાર્થ ફેરો-ચુંબકીય નથી, પરંતુ પેરા-ચુંબકીય છે?", "options": ["A) લોખંડ", "B) નિકેલ", "C) કોબાલ્ટ", "D) એલ્યુમિનિયમ"], "correct": 3, "explanation": "એલ્યુમિનિયમ પેરા-ચુંબકીય પદાર્થ છે, જ્યારે લોખંડ, નિકેલ અને કોબાલ્ટ ફેરો-ચુંબકીય પદાર્થો છે. વિકલ્પ A, B, અને C ખોટા છે કારણ કે તેઓ ફેરો-ચુંબકીય પદાર્થો છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 15}, {"question": "એક પદાર્થમાં અણુઓ પાસે શૂન્ય નેટ ચુંબકીય ક્ષણ હોય છે, પરંતુ બાહ્ય ચુંબકીય ક્ષેત્ર લાગુ પાડતાં તે ક્ષેત્રની દિશામાં અલ્પ પ્રમાણમાં ચુંબકિત થાય છે. આ પદાર્થ કયા પ્રકારનો છે?", "options": ["A) ફેરો-ચુંબકીય", "B) પેરા-ચુંબકીય", "C) ડાયા-ચુંબકીય", "D) એન્ટી-ફેરો-ચુંબકીય"], "correct": 2, "explanation": "ડાયા-ચુંબકીય પદાર્થો પાસે અણુ સ્તરે શૂન્ય નેટ ચુંબકીય ક્ષણ હોય છે, પરંતુ બાહ્ય ચુંબકીય ક્ષેત્ર લાગુ પાડતાં તે ક્ષેત્રની વિરુદ્ધ દિશામાં અલ્પ પ્રમાણમાં ચુંબકિત થાય છે. ફેરો-ચુંબકીય પદાર્થો સ્વતઃ જ ચુંબકિત હોય છે, પેરા-ચુંબકીય પદાર્થો ક્ષેત્રની દિશામાં ચુંબકિત થાય છે, અને એન્ટી-ફેરો-ચુંબકીય પદાર્થો અણુ સ્તરે વિરોધી ચુંબકીય ક્ષણ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 16}, {"question": "ફેરો-ચુંબકીય પદાર્થમાં, જ્યારે તાપમાન ક્યુરી તાપમાનથી ઉપર જાય છે, ત્યારે તે કયા ગુણધર્મ પ્રદર્શિત કરે છે?", "options": ["A) તે ડાયા-ચુંબકીય બને છે", "B) તે પેરા-ચુંબકીય બને છે", "C) તે અતિચાલક બને છે", "D) તે એન્ટી-ફેરો-ચુંબકીય બને છે"], "correct": 1, "explanation": "ક્યુરી તાપમાનથી ઉપર ફેરો-ચુંબકીય પદાર્થ પેરા-ચુંબકીય ગુણધર્મ પ્રદર્શિત કરે છે. ક્યુરી તાપમાન એ તાપમાન છે જ્યાં ફેરો-ચુંબકીય પદાર્થ તેના સ્વતઃસ્ફૂર્ત ચુંબકત્વ ગુમાવે છે અને પેરા-ચુંબકીય બને છે. ડાયા-ચુંબકીય, અતિચાલક, અને એન્ટી-ફેરો-ચુંબકીય ગુણધર્મો આ સ્થિતિમાં પ્રદર્શિત થતાં નથી.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 17}, {"question": "નીચેનામાંથી કયો પદાર્થ એન્ટી-ફેરો-ચુંબકીય ગુણધર્મ દર્શાવે છે?", "options": ["A) લોખંડ", "B) નિકેલ", "C) મેંગેનીઝ ઓક્સાઇડ (MnO)", "D) કોબાલ્ટ"], "correct": 2, "explanation": "મેંગેનીઝ ઓક્સાઇડ (MnO) એન્ટી-ફેરો-ચુંબકીય પદાર્થ છે. એન્ટી-ફેરો-ચુંબકીય પદાર્થોમાં, અણુઓ અથવા આયનોની ચુંબકીય ક્ષણો પરસ્પર વિરોધી દિશામાં ગોઠવાયેલી હોય છે, જેથી નેટ ચુંબકીય ક્ષણ શૂન્ય હોય છે. લોખંડ, નિકેલ, અને કોબાલ્ટ ફેરો-ચુંબકીય પદાર્થો છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 18}, {"question": "એક પદાર્થની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત -0.0001 છે. આ પદાર્થ કયા પ્રકારનો છે?", "options": ["A) ફેરો-ચુંબકીય", "B) પેરા-ચુંબકીય", "C) ડાયા-ચુંબકીય", "D) એન્ટી-ફેરો-ચુંબકીય"], "correct": 2, "explanation": "ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત નકારાત્મક હોવાનું સૂચન કરે છે કે પદાર્થ ડાયા-ચુંબકીય છે. ડાયા-ચુંબકીય પદાર્થોની χ ની કિંમત નકારાત્મક અને અલ્પ હોય છે. ફેરો-ચુંબકીય પદાર્થોની χ ની કિંમત ખૂબ જ મોટી અને ધન હોય છે, પેરા-ચુંબકીય પદાર્થોની χ ની કિંમત ધન અને અલ્પ હોય છે, અને એન્ટી-ફેરો-ચુંબકીય પદાર્થોની χ ની કિંમત ધન અને અલ્પ હોય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 19}, {"question": "નીચેનામાંથી કયું વિધાન એન્ટી-ફેરો-ચુંબકીય પદાર્થો માટે સાચું છે?", "options": ["A) તે સ્વતઃસ્ફૂર્ત ચુંબકિત હોય છે", "B) તે બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકતાં ખૂબ જ મજબૂત રીતે ચુંબકિત થાય છે", "C) તે અણુ સ્તરે વિરોધી ચુંબકીય ક્ષણ ધરાવે છે, પરંતુ નેટ ચુંબકીય ક્ષણ શૂન્ય હોય છે", "D) તે ઉચ્ચ તાપમાને ફેરો-ચુંબકીય બને છે"], "correct": 2, "explanation": "એન્ટી-ફેરો-ચુંબકીય પદાર્થોમાં, અણુઓ અથવા આયનોની ચુંબકીય ક્ષણો પરસ્પર વિરોધી દિશામાં ગોઠવાયેલી હોય છે, જેથી નેટ ચુંબકીય ક્ષણ શૂન્ય હોય છે. એન્ટી-ફેરો-ચુંબકીય પદાર્થો સ્વતઃસ્ફૂર્ત ચુંબકિત નથી હોતા, બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકતાં અલ્પ પ્રમાણમાં ચુંબકિત થાય છે, અને ઉચ્ચ તાપમાને પેરા-ચુંબકીય બને છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 20}, {"question": "એક પદાર્થની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત +0.001 છે. જ્યારે તાપમાન વધારવામાં આવે છે, ત્યારે χ ની કિંમત ઘટે છે. આ પદાર્થ કયા પ્રકારનો છે?", "options": ["A) ડાયા-ચુંબકીય", "B) પેરા-ચુંબકીય", "C) ફેરો-ચુંબકીય", "D) એન્ટી-ફેરો-ચુંબકીય"], "correct": 1, "explanation": "પેરા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ (χ) ધન હોય છે અને તાપમાન વધારવાથી તે ઘટે છે. ડાયા-ચુંબકીય પદાર્થોની χ ઋણ હોય છે, ફેરો-ચુંબકીય પદાર્થોની χ ખૂબ જ મોટી ધન હોય છે, અને એન્ટી-ફેરો-ચુંબકીય પદાર્થોની χ નાની ધન અથવા ઋણ હોઈ શકે છે, પરંતુ તાપમાનના વધારા સાથે તેના વર્તનમાં ફેરફાર થાય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 21}, {"question": "એક પદાર્થમાં અણુઓ પાસે અસમપ્રમાણ ચુંબકીય ક્ષણો હોય છે અને તે નીચા તાપમાને ચુંબકીય ક્રમ દર્શાવે છે, પરંતુ ઉચ્ચ તાપમાને અચુંબકીય બને છે. આ પદાર્થ કયા પ્રકારનો ચુંબકીય પદાર્થ હોઈ શકે?", "options": ["A) ફેરો-ચુંબકીય", "B) પેરા-ચુંબકીય", "C) એન્ટી-ફેરો-ચુંબકીય", "D) ડાયા-ચુંબકીય"], "correct": 2, "explanation": "એન્ટી-ફેરો-ચુંબકીય પદાર્થોમાં અણુઓ પાસે અસમપ્રમાણ ચુંબકીય ક્ષણો હોય છે અને તે નીચા તાપમાને ચુંબકીય ક્રમ (જેમ કે નિયમિત ગોઠવણી) દર્શાવે છે, પરંતુ ઉચ્ચ તાપમાને (નીલ તાપમાનથી ઉપર) અચુંબકીય બને છે. ફેરો-ચુંબકીય પદાર્થો પણ નીચા તાપમાને ચુંબકીય ક્રમ દર્શાવે છે, પરંતુ તે ક્યુરી તાપમાનથી ઉપર પેરા-ચુંબકીય બને છે, ન કે અચુંબકીય. પેરા-ચુંબકીય પદાર્થો કદી ચુંબકીય ક્રમ દર્શાવતા નથી, જ્યારે ડાયા-ચુંબકીય પદાર્થો હંમેશા અચુંબકીય જ હોય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 22}, {"question": "જ્યારે એક એન્ટી-ફેરો-ચુંબકીય પદાર્થને નીચા તાપમાને રાખવામાં આવે છે, ત્યારે તેની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત કેવી હોય છે?", "options": ["A) ધન અને તાપમાન સાથે ઘટે છે", "B) ધન અને તાપમાન સાથે વધે છે", "C) ઋણ અને તાપમાન સાથે બદલાતી નથી", "D) ધન અને તાપમાન સાથે બદલાતી નથી"], "correct": 0, "explanation": "એન્ટી-ફેરો-ચુંબકીય પદાર્થોમાં, નીચા તાપમાને (નીલ તાપમાનથી નીચે) ચુંબકીય પ્રવૃત્તિ (χ) ધન હોય છે અને તાપમાન વધતાં તે ઘટે છે. નીલ તાપમાનથી ઉપર, તે અચુંબકીય બને છે અને χ શૂન્ય થાય છે. પેરા-ચુંબકીય પદાર્થોમાં χ હંમેશા ધન હોય છે અને તાપમાન સાથે ઘટે છે, પરંતુ એન્ટી-ફેરો-ચુંબકીય પદાર્થોમાં આ વર્તણૂક નીલ તાપમાનથી નીચે જોવા મળે છે. ડાયા-ચુંબકીય પદાર્થોમાં χ હંમેશા ઋણ હોય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 23}, {"question": "એક પદાર્થમાં અણુઓ પાસે ચુંબકીય ક્ષણો હોય છે અને તે નીચા તાપમાને ચુંબકીય ક્રમ દર્શાવે છે, પરંતુ બાહ્ય ચુંબકીય ક્ષેત્ર લાગુ પડતાં તેની ચુંબકીય પ્રવૃત્તિ ઘટે છે. આ પદાર્થ કયા પ્રકારનો હોઈ શકે?", "options": ["A) ફેરો-ચુંબકીય", "B) પેરા-ચુંબકીય", "C) ડાયા-ચુંબકીય", "D) ફેરિચુંબકીય"], "correct": 3, "explanation": "ફેરિચુંબકીય પદાર્થોમાં, અણુઓ પાસે ચુંબકીય ક્ષણો હોય છે અને તે નીચા તાપમાને ચુંબકીય ક્રમ દર્શાવે છે, પરંતુ બાહ્ય ચુંબકીય ક્ષેત્ર લાગુ પડતાં તેની ચુંબકીય પ્રવૃત્તિ ઘટે છે. ફેરો-ચુંબકીય પદાર્થોમાં, બાહ્ય ક્ષેત્ર લાગુ પડતાં ચુંબકીય પ્રવૃત્તિ વધે છે. પેરા-ચુંબકીય પદાર્થોમાં, ચુંબકીય પ્રવૃત્તિ હંમેશા ધન હોય છે અને બાહ્ય ક્ષેત્ર લાગુ પડતાં તે વધે છે. ડાયા-ચુંબકીય પદાર્થોમાં, ચુંબકીય પ્રવૃત્તિ હંમેશા ઋણ હોય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 24}, {"question": "એક પદાર્થની ચુંબકીય પ્રવૃત્તિ (χ) નું મૂલ્ય +0.01 છે અને તેનું તાપમાન વધારતાં χ નું મૂલ્ય ઘટે છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) આ પદાર્થ પેરા-ચુંબકીય છે અને તેનું χ ∝ 1/T સંબંધ અનુસરે છે", "B) આ પદાર્થની ચુંબકીય પ્રવૃત્તિ ધન છે કારણ કે તેના અણુઓમાં કાયમી ચુંબકીય ક્ષણો હોય છે", "C) જો આ પદાર્થને ક્યુરી તાપમાનથી ઉપર ગરમ કરવામાં આવે તો તે ફેરો-ચુંબકીય ગુણધર્મ ગુમાવી પેરા-ચુંબકીય બને છે", "D) આ પદાર્થમાં ડોમેનની રચના થાય છે અને તેનું ચુંબકીયકરણ બાહ્ય ક્ષેત્રની ગેરહાજરીમાં પણ શૂન્યતર રહે છે"], "correct": 3, "explanation": "પસંદગી A સાચી છે કારણ કે પેરા-ચુંબકીય પદાર્થો માટે χ ∝ 1/T (ક્યુરી નિયમ) લાગુ પડે છે અને χ નું મૂલ્ય ધન હોય છે. પસંદગી B પણ સાચી છે કારણ કે પેરા-ચુંબકીય પદાર્થોમાં અણુઓ પાસે કાયમી ચુંબકીય ક્ષણો હોય છે. પસંદગી C ખોટી છે કારણ કે આ પદાર્થ પહેલેથી પેરા-ચુંબકીય છે, ફેરો-ચુંબકીય નહીં, તેથી ક્યુરી તાપમાનની વાત અહીં અસંગત છે. પસંદગી D ખોટી છે કારણ કે પેરા-ચુંબકીય પદાર્થોમાં ડોમેનની રચના થતી નથી અને બાહ્ય ક્ષેત્રની ગેરહાજરીમાં ચુંબકીયકરણ શૂન્ય થઈ જાય છે.", "ncert_ref": "Class XII - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "difficulty": "Hard", "num": 25}, {"question": "એક એન્ટી-ફેરો-ચુંબકીય પદાર્થમાં, અણુઓની ચુંબકીય ક્ષણો પરસ્પર વિરુદ્ધ દિશામાં ગોઠવાયેલી હોય છે. નીચેનામાંથી કયું વિધાન આ પદાર્થ માટે સાચું નથી?", "options": ["A) એન્ટી-ફેરો-ચુંબકીય પદાર્થોનું નેટ ચુંબકીય ક્ષણ શૂન્ય હોય છે.", "B) એન્ટી-ફેરો-ચુંબકીય પદાર્થોનું ક્યુરી તાપમાન (Tₖ) હોય છે જ્યારે તે ફેરો-ચુંબકીય બને છે.", "C) એન્ટી-ફેરો-ચુંબકીય પદાર્થોનું નીલ તાપમાન (Tₙ) હોય છે જ્યારે તે પેરા-ચુંબકીય બને છે.", "D) એન્ટી-ફેરો-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત તાપમાન સાથે બદલાય છે."], "correct": 1, "explanation": "એન્ટી-ફેરો-ચુંબકીય પદાર્થોનું ક્યુરી તાપમાન (Tₖ) નહીં પણ નીલ તાપમાન (Tₙ) હોય છે જ્યારે તે પેરા-ચુંબકીય બને છે. આથી, વિધાન B ખોટું છે. વિધાન A સાચું છે કારણ કે એન્ટી-ફેરો-ચુંબકીય પદાર્થોનું નેટ ચુંબકીય ક્ષણ શૂન્ય હોય છે. વિધાન C સાચું છે કારણ કે નીલ તાપમાન એ એન્ટી-ફેરો-ચુંબકીય પદાર્થો માટે લાક્ષણિક છે. વિધાન D સાચું છે કારણ કે ચુંબકીય પ્રવૃત્તિ તાપમાન સાથે બદલાય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 26}, {"question": "એક પદાર્થની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત +0.01 છે અને તેનું તાપમાન વધારવામાં આવે છે. નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પદાર્થ પેરા-ચુંબકીય છે અને χ ની કિંમત તાપમાન વધવાની સાથે ઘટશે.", "B) પદાર્થ ફેરો-ચુંબકીય છે અને χ ની કિંમત તાપમાન વધવાની સાથે વધશે.", "C) પદાર્થ ડાયા-ચુંબકીય છે અને χ ની કિંમત તાપમાન સાથે બદલાશે નહીં.", "D) પદાર્થ એન્ટી-ફેરો-ચુંબકીય છે અને χ ની કિંમત તાપમાન વધવાની સાથે શૂન્ય થશે."], "correct": 0, "explanation": "પદાર્થ પેરા-ચુંબકીય છે કારણ કે ચુંબકીય પ્રવૃત્તિ (χ) ધન છે. પેરા-ચુંબકીય પદાર્થો માટે, χ ની કિંમત તાપમાન વધવાની સાથે ઘટે છે (ક્યુરી કાયદા અનુસાર). આથી, વિધાન A સાચું છે. વિધાન B ખોટું છે કારણ કે ફેરો-ચુંબકીય પદાર્થો માટે χ ની કિંમત ક્યુરી તાપમાનથી ઉપર શૂન્ય થાય છે. વિધાન C ખોટું છે કારણ કે ડાયા-ચુંબકીય પદાર્થો માટે χ ની કિંમત ઋણ હોય છે. વિધાન D ખોટું છે કારણ કે એન્ટી-ફેરો-ચુંબકીય પદાર્થો માટે χ ની કિંમત નીલ તાપમાનથી ઉપર શૂન્ય થાય છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 27}, {"question": "નીચેનામાંથી કયું વિધાન ડાયા-ચુંબકીય, પેરા-ચુંબકીય અને ફેરો-ચુંબકીય પદાર્થો માટેની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમતોના ક્રમને સાચી રીતે દર્શાવે છે?", "options": ["A) χ_ડાયા < χ_પેરા < χ_ફેરો", "B) χ_ફેરો < χ_પેરા < χ_ડાયા", "C) χ_પેરા < χ_ડાયા < χ_ફેરો", "D) χ_ડાયા < χ_ફેરો < χ_પેરા"], "correct": 0, "explanation": "ડાયા-ચુંબકીય પદાર્થોની ચુંબકીય પ્રવૃત્તિ (χ) ની કિંમત ઋણ અને ખૂબ જ નાની હોય છે (ઉદા. -10⁻⁵). પેરા-ચુંબકીય પદાર્થોની χ ની કિંમત ધન અને નાની હોય છે (ઉદા. +10⁻³). ફેરો-ચુંબકીય પદાર્થોની χ ની કિંમત ધન અને ખૂબ જ મોટી હોય છે (ઉદા. +10³). આથી, ક્રમ χ_ડાયા < χ_પેરા < χ_ફેરો સાચો છે. આથી, વિધાન A સાચું છે.", "ncert_ref": "Class XII - Chapter 5: ચુંબકત્વ અને પદાર્થ", "difficulty": "Hard", "num": 28}, {"question": "એક પદાર્થની ચુંબકીય પ્રવૃત્તિ (χ) નું મૂલ્ય +0.0005 છે અને તેનું તાપમાન વધારતાં χ નું મૂલ્ય ઘટે છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) આ પદાર્થ પેરા-ચુંબકીય છે અને ક્યુરીના નિયમનું પાલન કરે છે.", "B) આ પદાર્થની ચુંબકીય પ્રવૃત્તિ તાપમાનના વ્યસ્ત પ્રમાણમાં હોય છે.", "C) આ પદાર્થને નીચા તાપમાને ફેરો-ચુંબકીય ગુણધર્મ ધરાવતો બનાવી શકાય છે.", "D) આ પદાર્થમાં અણુઓ પાસે કાયમી ચુંબકીય ક્ષણ હોય છે, જે બાહ્ય ક્ષેત્રની દિશામાં ગોઠવાય છે."], "correct": 2, "explanation": "પેરા-ચુંબકીય પદાર્થો માટે χ નું મૂલ્ય ધન હોય છે અને તે તાપમાનના વધારા સાથે ઘટે છે (ક્યુરીનો નિયમ: χ ∝ 1/T). વિકલ્પ A અને B સાચાં છે કારણ કે પેરા-ચુંબકીય પદાર્થો ક્યુરીના નિયમનું પાલન કરે છે અને χ તાપમાનના વ્યસ્ત પ્રમાણમાં હોય છે. વિકલ્પ D પણ સાચું છે કારણ કે પેરા-ચુંબકીય પદાર્થોમાં અણુઓ પાસે કાયમી ચુંબકીય ક્ષણ હોય છે, જે બાહ્ય ક્ષેત્રની દિશામાં ગોઠવાય છે. વિકલ્પ C ખોટો છે કારણ કે પેરા-ચુંબકીય પદાર્થોને નીચા તાપમાને ફેરો-ચુંબકીય બનાવી શકાતા નથી; ફેરો-ચુંબકત્વ એ અલગ ગુણધર્મ છે જે ડોમેનની હાજરી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "difficulty": "Hard", "num": 29}, {"question": "એક પદાર્થને બાહ્ય ચુંબકીય ક્ષેત્રમાં મૂકતાં તેનું ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં નબળું ચુંબકન પ્રાપ્ત થાય છે. આ પદાર્થને ગરમ કરતાં તેની ચુંબકીય પ્રવૃત્તિ (χ) નું મૂલ્ય વધે છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) આ પદાર્થ ડાયા-ચુંબકીય છે અને તેની χ નું મૂલ્ય તાપમાનથી સ્વતંત્ર છે.", "B) આ પદાર્થ પેરા-ચુંબકીય છે અને તેની χ નું મૂલ્ય તાપમાનના વધારા સાથે ઘટે છે.", "C) આ પદાર્થ ડાયા-ચુંબકીય છે અને તેની χ નું મૂલ્ય તાપમાનના વધારા સાથે વધે છે.", "D) આ પદાર્થ ફેરો-ચુંબકીય છે અને તેની χ નું મૂલ્ય ક્યુરી તાપમાનથી ઉપર ઘટે છે."], "correct": 2, "explanation": "પ્રશ્નમાં વર્ણવેલ પદાર્થ ડાયા-ચુંબકીય છે કારણ કે તે બાહ્ય ચુંબકીય ક્ષેત્રની વિરુદ્ધ દિશામાં નબળું ચુંબકન દર્શાવે છે. સામાન્ય રીતે ડાયા-ચુંબકીય પદાર્થો માટે χ નું મૂલ્ય તાપમાનથી સ્વતંત્ર હોય છે, પરંતુ અમુક ડાયા-ચુંબકીય પદાર્થોમાં તાપમાન વધારતાં χ નું મૂલ્ય વધે છે (અપવાદરૂપ પરિસ્થિતિ). વિકલ્પ A ખોટો છે કારણ કે χ તાપમાનથી સંપૂર્ણપણે સ્વતંત્ર નથી. વિકલ્પ B અને D ખોટા છે કારણ કે પદાર્થ પેરા-ચુંબકીય કે ફેરો-ચુંબકીય નથી. વિકલ્પ C સાચો છે કારણ કે ડાયા-ચુંબકીય પદાર્થની χ તાપમાનના વધારા સાથે વધી શકે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 5: ચુંબકત્વ અને દ્રવ્ય", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
