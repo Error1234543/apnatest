@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Chapter 18: Locomotion and Movement | PrepGrid Official ACADEMY</title>
+    <!-- Basic styling configuration, no external CSS dependencies -->
+    <style>
+        :root {
+            /* Light Theme Variables */
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-surface-alt: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --brand-primary: #4338ca;
+            --brand-light: #e0e7ff;
+            --brand-dark: #312e81;
+            --accent-color: #0284c7;
+            --accent-light: #e0f2fe;
+            --success-color: #16a34a;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --danger-light: #fee2e2;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Gujarati Sangam MN", "Shruti";
+        }
+
+        [data-theme="dark"] {
+            --bg-base: #0f172a;
+            --bg-surface: #1e293b;
+            --bg-surface-alt: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --brand-primary: #818cf8;
+            --brand-light: #3730a3;
+            --brand-dark: #c7d2fe;
+            --accent-color: #38bdf8;
+            --accent-light: #0c4a6e;
+            --danger-light: #7f1d1d;
+            --border-color: #334155;
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 16px;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 { font-weight: 700; line-height: 1.3; color: var(--text-primary); }
+        h1 { font-size: 2.25rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.5rem; color: var(--brand-primary); margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--brand-light); }
+        h3 { font-size: 1.25rem; color: var(--accent-color); margin: 1.5rem 0 0.75rem; }
+        p { margin-bottom: 1rem; color: var(--text-secondary); }
+        strong { color: var(--text-primary); font-weight: 600; }
+        ul, ol { margin-bottom: 1rem; padding-left: 1.5rem; color: var(--text-secondary); }
+        li { margin-bottom: 0.5rem; }
+        
+        .eng-term {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: var(--brand-primary);
+            background-color: var(--brand-light);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        
+        /* Layout */
+        .header {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: var(--shadow-sm);
+        }
+        .brand { display: flex; flex-direction: column; }
+        .brand-name { font-size: 1.25rem; font-weight: 800; color: var(--brand-primary); letter-spacing: -0.5px; }
+        .brand-sub { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; }
+        
+        .header-actions { display: flex; gap: 0.75rem; }
+        .icon-btn {
+            background: var(--bg-surface-alt); border: 1px solid var(--border-color);
+            color: var(--text-primary); width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            transition: var(--transition); font-size: 1.2rem;
+        }
+        .icon-btn:hover { background: var(--brand-light); color: var(--brand-primary); border-color: var(--brand-primary); }
+
+        .progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 4px; z-index: 101; background: transparent; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-color), var(--brand-primary)); width: 0%; transition: width 0.1s; }
+
+        .search-overlay {
+            position: fixed; top: 70px; left: 0; width: 100%; background: var(--bg-surface);
+            padding: 1rem 5%; border-bottom: 1px solid var(--border-color); box-shadow: var(--shadow-md);
+            transform: translateY(-100%); opacity: 0; visibility: hidden; transition: var(--transition); z-index: 99;
+        }
+        .search-overlay.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        .search-input { width: 100%; max-width: 800px; margin: 0 auto; display: block; padding: 0.75rem 1.5rem; border-radius: 99px; border: 2px solid var(--brand-light); background: var(--bg-base); color: var(--text-primary); outline: none; font-size: 1rem; }
+        .search-input:focus { border-color: var(--brand-primary); }
+
+        .main-layout { display: grid; grid-template-columns: 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; padding: 100px 5% 3rem; }
+        @media(min-width: 1024px) { .main-layout { grid-template-columns: 280px 1fr; } }
+        
+        /* Sidebar TOC */
+        .sidebar { display: none; }
+        @media(min-width: 1024px) { .sidebar { display: block; position: sticky; top: 90px; height: calc(100vh - 120px); overflow-y: auto; } }
+        .toc-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; }
+        .toc-title { font-weight: 700; color: var(--brand-primary); margin-bottom: 1rem; border-bottom: 2px solid var(--brand-light); padding-bottom: 0.5rem; }
+        .toc-link { display: block; padding: 0.5rem 0.75rem; color: var(--text-secondary); font-size: 0.95rem; border-radius: 6px; border-left: 3px solid transparent; transition: var(--transition); margin-bottom: 0.25rem; }
+        .toc-link:hover, .toc-link.active { background: var(--brand-light); color: var(--brand-primary); font-weight: 600; border-left-color: var(--brand-primary); }
+
+        /* Mobile Menu */
+        .mobile-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 102; opacity: 0; visibility: hidden; transition: var(--transition); backdrop-filter: blur(2px); }
+        .mobile-menu-overlay.active { opacity: 1; visibility: visible; }
+        .mobile-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background: var(--bg-surface); z-index: 103; padding: 2rem 1.5rem; overflow-y: auto; transition: var(--transition); box-shadow: var(--shadow-lg); }
+        .mobile-menu.active { left: 0; }
+        .mobile-close { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.5rem; color: var(--text-primary); cursor: pointer; }
+
+        /* Components */
+        .chapter-banner {
+            background: linear-gradient(135deg, var(--brand-primary), var(--accent-color));
+            border-radius: var(--radius-lg); padding: 3rem 2rem; color: white; text-align: center;
+            box-shadow: var(--shadow-lg); margin-bottom: 2.5rem; position: relative; overflow: hidden;
+        }
+        .banner-label { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 1rem; opacity: 0.9; }
+        .banner-title { color: white; margin-bottom: 0.5rem; }
+        .banner-sub { font-size: 1.25rem; font-weight: 500; opacity: 0.9; }
+
+        .content-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm); scroll-margin-top: 100px; }
+        
+        .alert-box { display: flex; gap: 1rem; padding: 1.25rem; border-radius: var(--radius-md); margin: 1.5rem 0; border-left: 4px solid; background: var(--bg-surface-alt); }
+        .alert-box.info { border-left-color: var(--accent-color); background: var(--accent-light); }
+        .alert-box.danger { border-left-color: var(--danger-color); background: var(--danger-light); }
+        .alert-box.neet { border-left-color: var(--brand-primary); background: var(--brand-light); }
+        .alert-icon { font-size: 1.5rem; }
+        .alert-content h4 { margin: 0 0 0.25rem 0; font-size: 1.1rem; }
+        .alert-box.neet h4 { color: var(--brand-dark); }
+        .alert-box.danger h4 { color: var(--danger-color); }
+
+        /* Tables */
+        .table-responsive { width: 100%; overflow-x: auto; margin: 1.5rem 0; border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 600px; }
+        th, td { padding: 1rem; border-bottom: 1px solid var(--border-color); }
+        th { background-color: var(--brand-light); color: var(--brand-dark); font-weight: 700; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: var(--bg-base); }
+        
+        /* Collapsible */
+        .collapsible-btn {
+            background: var(--bg-surface-alt); color: var(--text-primary); cursor: pointer; padding: 1.25rem; width: 100%;
+            border: 1px solid var(--border-color); border-radius: var(--radius-md); text-align: left; font-size: 1.1rem; font-weight: 700;
+            display: flex; justify-content: space-between; align-items: center; transition: var(--transition); margin-bottom: 0.5rem;
+        }
+        .collapsible-btn:hover { background: var(--brand-light); border-color: var(--brand-primary); }
+        .collapsible-btn::after { content: '▼'; font-size: 0.8rem; transition: transform 0.3s ease; }
+        .collapsible-btn.active { background: var(--brand-light); border-color: var(--brand-primary); border-bottom-left-radius: 0; border-bottom-right-radius: 0; margin-bottom: 0; }
+        .collapsible-btn.active::after { transform: rotate(180deg); }
+        .collapsible-content { padding: 0 1.25rem; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; background: var(--bg-surface); border: 1px solid var(--border-color); border-top: none; border-radius: 0 0 var(--radius-md) var(--radius-md); margin-bottom: 1rem; }
+
+        /* CSS Diagrams */
+        .diagram-container { background: var(--bg-base); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; margin: 2rem 0; display: flex; flex-direction: column; align-items: center; overflow-x: auto; }
+        
+        .flow-diagram { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .flow-box { background: var(--bg-surface); border: 2px solid var(--brand-primary); padding: 0.75rem 1.25rem; border-radius: 8px; font-weight: 700; text-align: center; box-shadow: var(--shadow-sm); }
+        .flow-arrow { color: var(--text-secondary); font-size: 1.5rem; font-weight: bold; }
+        
+        .hierarchy-box { border-left: 3px solid var(--brand-primary); padding-left: 1rem; margin: 0.5rem 0 0.5rem 1rem; }
+        
+        /* Sarcomere CSS Drawing */
+        .sarcomere-diagram { width: 100%; max-width: 600px; height: 180px; position: relative; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 1rem 0; overflow: hidden; }
+        .z-line { position: absolute; top: 10%; bottom: 10%; width: 6px; background: var(--danger-color); }
+        .z-line.left { left: 10%; }
+        .z-line.right { right: 10%; }
+        .actin-filament { position: absolute; height: 4px; background: var(--accent-color); border-radius: 2px; }
+        .myosin-filament { position: absolute; height: 12px; background: var(--brand-primary); border-radius: 6px; left: 30%; right: 30%; }
+        .myosin-head { position:absolute; width:6px; height:6px; background:var(--brand-dark); border-radius:50%; }
+        
+        /* Utilities */
+        .search-highlight { background-color: #fef08a; color: #000; padding: 0 2px; border-radius: 2px; font-weight: bold; }
+        [data-theme="dark"] .search-highlight { background-color: #b45309; color: #fff; }
+        .back-to-top { position: fixed; bottom: 2rem; right: 2rem; background: var(--brand-primary); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; cursor: pointer; box-shadow: var(--shadow-lg); opacity: 0; visibility: hidden; transition: var(--transition); border: none; z-index: 100; }
+        .back-to-top.visible { opacity: 1; visibility: visible; }
+        .back-to-top:hover { transform: translateY(-5px); background: var(--brand-dark); }
+        .hide { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+
+    <header class="header">
+        <div class="brand">
+            <div class="brand-name">𝗣𝗿𝗲𝗽𝗚𝗿𝗶𝗱</div>
+            <div class="brand-sub">Official Academy</div>
+        </div>
+        <div class="header-actions">
+            <button class="icon-btn" id="searchBtn" title="Search Notes">🔍</button>
+            <button class="icon-btn" id="themeToggle" title="Toggle Dark Mode">🌙</button>
+            <button class="icon-btn" id="mobileMenuBtn" style="display: flex;" title="Menu">☰</button>
+        </div>
+    </header>
+
+    <div class="search-overlay" id="searchOverlay">
+        <input type="text" class="search-input" id="searchInput" placeholder="આ ચેપ્ટરમાં શોધો... (Type to search)">
+    </div>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-close" id="closeMobileMenu">×</button>
+        <!-- TOC injected here via JS -->
+    </div>
+
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="toc-card" id="tocContainer">
+                <div class="toc-title">પ્રકરણ અનુક્રમણિકા</div>
+                <nav id="tocNav">
+                    <a href="#intro" class="toc-link">1. હલનચલન અને પ્રચલન (Movement & Locomotion)</a>
+                    <a href="#types-movement" class="toc-link">2. હલનચલનના પ્રકારો</a>
+                    <a href="#muscles" class="toc-link">3. સ્નાયુ (Muscle) અને તેના પ્રકારો</a>
+                    <a href="#skeletal-muscle" class="toc-link">4. કંકાલ સ્નાયુની રચના</a>
+                    <a href="#muscle-contraction" class="toc-link">5. સ્નાયુ સંકોચનની ક્રિયાવિધિ</a>
+                    <a href="#skeletal-system" class="toc-link">6. કંકાલ તંત્ર (Skeletal System)</a>
+                    <a href="#joints" class="toc-link">7. સાંધાઓ (Joints)</a>
+                    <a href="#disorders" class="toc-link">8. સ્નાયુ અને કંકાલતંત્રની અનિયમિતતાઓ</a>
+                    <a href="#neet-focus" class="toc-link">9. Premium NEET Revision</a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content-area" id="mainContent">
+            
+            <div class="chapter-banner">
+                <div class="banner-label">Std 11 Biology | NEET UG 2026 Focus</div>
+                <h1 class="banner-title">Locomotion and Movement</h1>
+                <div class="banner-sub">પ્રચલન અને હલનચલન</div>
+            </div>
+
+            <div class="alert-box danger">
+                <div class="alert-icon">⚠️</div>
+                <div class="alert-content">
+                    <h4>NEET 2026 Syllabus Note</h4>
+                    <p>આ નોટ્સ સંપૂર્ણપણે લેટેસ્ટ NCERT (Rationalised) અને NMC NEET UG 2026 ના અધિકૃત સિલેબસ પર આધારિત છે. કાઢી નાખેલ જૂના મુદ્દાઓ (Deleted topics) નો સમાવેશ કરેલ નથી.</p>
+                </div>
+            </div>
+
+            <!-- Section 1 -->
+            <section id="intro" class="content-card">
+                <h2>1. હલનચલન અને પ્રચલન (Movement and Locomotion)</h2>
+                <p><strong>હલનચલન (Movement)</strong> એ સજીવોનું એક મહત્વનું લક્ષણ છે. અમીબા જેવા સરળ સજીવોથી લઈને મનુષ્ય જેવા જટિલ સજીવો વિવિધ પ્રકારના હલનચલન દર્શાવે છે (દા.ત., અમીબામાં ખોટા પગનું નિર્માણ, મનુષ્યમાં જડબા, પાંપણ કે જીભનું હલનચલન).</p>
+                <p><strong>પ્રચલન (Locomotion):</strong> એવા ઐચ્છિક (Voluntary) હલનચલન જેના પરિણામે <strong>સ્થાન કે જગ્યામાં ફેરફાર</strong> થાય છે, તેને પ્રચલન કહે છે. દા.ત., ચાલવું, દોડવું, ઉડવું, તરવું વગેરે.</p>
+                
+                <div class="alert-box neet">
+                    <div class="alert-icon">📌</div>
+                    <div class="alert-content">
+                        <h4>NEET Focus Fact</h4>
+                        <p><strong>"બધા જ પ્રચલન એ હલનચલન છે, પરંતુ બધા હલનચલન એ પ્રચલન નથી."</strong> <br>
+                        <em>(All locomotions are movements but all movements are not locomotions.)</em></p>
+                    </div>
+                </div>
+                <p>પ્રચલન માટેની સંરચનાઓ (Structures) હંમેશા અન્ય પ્રકારના હલનચલનથી અલગ હોવી જરૂરી નથી. દા.ત., <em>પેરામીશિયમ</em> માં પક્ષ્મો (Cilia) ખોરાક ગ્રહણ અને પ્રચલન બંને માટે વપરાય છે; <em>હાઇડ્રા</em> માં સૂત્રાંગો (Tentacles) શિકાર પકડવા અને પ્રચલન બંને માટે વપરાય છે; મનુષ્ય ઉપાંગો (Limbs) નો ઉપયોગ શરીરની મુદ્રા બદલવા અને પ્રચલન બંને માટે કરે છે.</p>
+            </section>
+
+            <!-- Section 2 -->
+            <section id="types-movement" class="content-card">
+                <h2>2. હલનચલનના પ્રકારો (Types of Movement)</h2>
+                <p>માનવ શરીરના કોષો મુખ્યત્વે ત્રણ પ્રકારના હલનચલન દર્શાવે છે:</p>
+                
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>હલનચલનનો પ્રકાર</th>
+                                <th>મિકેનિઝમ / સમજૂતી</th>
+                                <th>મનુષ્યમાં ઉદાહરણ (NEET Examples)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. અમીબીય (Amoeboid)</strong></td>
+                                <td>જીવરસના પ્રવાહ દ્વારા <span class="eng-term">Pseudopodia</span> (ખોટા પગ) નું નિર્માણ. કોષકંકાલ (Microfilaments) પણ ભાગ લે છે.</td>
+                                <td>રુધિરમાં રહેલા <strong>મેક્રોફેજ (Macrophages)</strong> અને <strong>શ્વેતકણો (Leucocytes)</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. પક્ષ્મલ (Ciliary)</strong></td>
+                                <td>પક્ષ્મોના હલનચલન દ્વારા. આંતરિક નલિકામય અંગો કે જે પક્ષ્મલ અધિચ્છદ ધરાવે છે ત્યાં જોવા મળે છે.</td>
+                                <td>શ્વાસનળી (Trachea) માં ધૂળના રજકણોને દૂર કરવા. <strong>માદા પ્રજનનમાર્ગ (Fallopian tube)</strong> માં અંડકોષનું વહન.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3. સ્નાયુલ (Muscular)</strong></td>
+                                <td>સ્નાયુઓની સંકોચન ક્ષમતા (Contractile property) નો ઉપયોગ. તે હલનચલન અને પ્રચલન બંને માટે જરૂરી છે.</td>
+                                <td>જડબા, ઉપાંગો, જીભ વગેરેનું હલનચલન.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 3 -->
+            <section id="muscles" class="content-card">
+                <h2>3. સ્નાયુ (Muscle) અને તેના પ્રકારો</h2>
+                <p>સ્નાયુ એ <strong>મધ્યસ્તર (Mesodermal)</strong> માંથી ઉદ્ભવતી વિશિષ્ટ પેશી છે. પુખ્ત મનુષ્યના શરીરના વજનના <strong>40-50%</strong> હિસ્સો સ્નાયુઓનો બનેલો છે. તેના વિશિષ્ટ ગુણધર્મો: ઉત્તેજનાશીલતા (Excitability), સંકોચનશીલતા (Contractility), વિસ્તરણશીલતા (Extensibility) અને સ્થિતિસ્થાપકતા (Elasticity).</p>
+                
+                <h3 style="border: none; padding: 0;">સ્નાયુના પ્રકારો (Types of Muscles)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>લક્ષણ</th>
+                                <th>કંકાલ સ્નાયુ (Skeletal Muscle)</th>
+                                <th>કોષ્ઠાંતર સ્નાયુ (Smooth/Visceral Muscle)</th>
+                                <th>રદ સ્નાયુ (Cardiac Muscle)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>સ્થાન</strong></td>
+                                <td>કંકાલતંત્રના ભાગો સાથે જોડાયેલ.</td>
+                                <td>અંતઃસ્થ અંગોની દીવાલમાં (અન્નમાર્ગ, પ્રજનનમાર્ગ).</td>
+                                <td>માત્ર <strong>હૃદય (Heart)</strong> ની દીવાલમાં.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>દેખાવ / પટ્ટા</strong></td>
+                                <td>રેખિત (Striated) - આછા/ઘેરા પટ્ટા ધરાવે.</td>
+                                <td>અરેખિત (Non-striated) - પટ્ટા વિહીન. લીસા.</td>
+                                <td>રેખિત (Striated).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>નિયંત્રણ (Control)</strong></td>
+                                <td><strong>ઐચ્છિક (Voluntary)</strong> - ઈચ્છા મુજબ નિયંત્રણ.</td>
+                                <td><strong>અનૈચ્છિક (Involuntary)</strong></td>
+                                <td><strong>અનૈચ્છિક (Involuntary)</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>કાર્ય (Function)</strong></td>
+                                <td>પ્રચલન અને શારીરિક મુદ્રા બદલવી.</td>
+                                <td>અન્નમાર્ગમાં ખોરાકનું વહન વગેરે.</td>
+                                <td>હૃદયનું પમ્પિંગ (સંકોચન).</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 4 -->
+            <section id="skeletal-muscle" class="content-card">
+                <h2>4. કંકાલ સ્નાયુની રચના (Structure of Skeletal Muscle)</h2>
+                
+                <div class="diagram-container">
+                    <p style="font-weight:bold; margin-bottom: 1rem; color: var(--text-secondary);">માળખાકીય આયોજન (Organisation Hierarchy):</p>
+                    <div class="flow-diagram">
+                        <div class="flow-box">સ્નાયુ (Muscle)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">સ્નાયુજૂથ (Fascicle)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box">સ્નાયુતંતુ (Muscle Fibre / કોષ)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box" style="border-color: var(--accent-color);">સ્નાયુતંતુક (Myofibril)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-box" style="border-color: var(--danger-color);">સાર્કોમિયર (Sarcomere)</div>
+                    </div>
+                </div>
+
+                <ul>
+                    <li><strong>સ્નાયુતંતુ (Muscle Fibre):</strong> તે સ્નાયુનો કોષ છે.
+                        <ul style="margin-top:0.5rem; list-style-type:circle;">
+                            <li>રસસ્તરને <strong>Sarcolemma (સાર્કોલેમા)</strong> કહે છે.</li>
+                            <li>કોષરસને <strong>Sarcoplasm (સાર્કોપ્લાઝ્મ)</strong> કહે છે. તેમાં ઘણા કોષકેન્દ્રો (Syncytium) હોય છે.</li>
+                            <li>અંતઃકોષરસજાળને <strong>Sarcoplasmic Reticulum (SR)</strong> કહે છે, જે <strong>Ca<sup>++</sup> (કેલ્શિયમ આયન)</strong> નો સંગ્રહસ્થાન છે.</li>
+                        </ul>
+                    </li>
+                    <li><strong>સ્નાયુતંતુક (Myofibril):</strong> સ્નાયુકોષમાં સમાંતર ગોઠવાયેલા ઘણા તંતુઓ. આ તંતુઓનો રેખિત દેખાવ બે મહત્વના પ્રોટીનને આભારી છે: <strong>એક્ટિન (Actin)</strong> અને <strong>માયોસિન (Myosin)</strong>.</li>
+                </ul>
+
+                <h3>સાર્કોમિયરની રચના (Structure of Sarcomere)</h3>
+                <p>સાર્કોમિયર (સ્નાયુકોષખંડ) એ સ્નાયુ સંકોચનનો <strong>ક્રિયાત્મક એકમ (Functional Unit)</strong> છે. તે બે ક્રમિક 'Z' રેખાઓ વચ્ચેનો ભાગ છે.</p>
+
+                <!-- Sarcomere Diagram CSS -->
+                <div class="diagram-container" style="padding: 1rem;">
+                    <p style="font-weight:bold; font-size: 0.9rem; color: var(--brand-primary); margin-bottom: 0.5rem;">Diagram: Sarcomere</p>
+                    <div class="sarcomere-diagram">
+                        <!-- Z lines -->
+                        <div class="z-line left"></div>
+                        <div class="z-line right"></div>
+                        <!-- Actin (Thin) -->
+                        <div class="actin-filament" style="top: 30%; left: 10%; width: 25%;"></div>
+                        <div class="actin-filament" style="top: 30%; right: 10%; width: 25%;"></div>
+                        <div class="actin-filament" style="top: 50%; left: 10%; width: 25%;"></div>
+                        <div class="actin-filament" style="top: 50%; right: 10%; width: 25%;"></div>
+                        <div class="actin-filament" style="top: 70%; left: 10%; width: 25%;"></div>
+                        <div class="actin-filament" style="top: 70%; right: 10%; width: 25%;"></div>
+                        <!-- Myosin (Thick) -->
+                        <div class="myosin-filament" style="top: 40%;"></div>
+                        <div class="myosin-filament" style="top: 60%;"></div>
+                        <!-- Labels -->
+                        <div style="position:absolute; top:2px; left:5px; font-size:0.7rem; font-weight:bold;">Z-line</div>
+                        <div style="position:absolute; top:2px; right:5px; font-size:0.7rem; font-weight:bold;">Z-line</div>
+                        <div style="position:absolute; bottom:5px; left:40%; font-size:0.8rem; font-weight:bold; color: var(--brand-primary);">A-Band (Dark)</div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ભાગ / પટ્ટો</th>
+                                <th>રચના અને સમજૂતી</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>I - પટ્ટો (Isotropic)</strong></td>
+                                <td>આછો પટ્ટો (Light band). તેમાં માત્ર <strong>એક્ટિન (પાતળા)</strong> તંતુઓ હોય છે. તેની મધ્યમાં Z-રેખા આવેલી છે.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>A - પટ્ટો (Anisotropic)</strong></td>
+                                <td>ઘેરો પટ્ટો (Dark band). તેમાં <strong>માયોસિન (જાડા)</strong> તંતુઓ હોય છે (છેડા પર એક્ટિન ઓવરલેપ થાય છે).</td>
+                            </tr>
+                            <tr>
+                                <td><strong>H - વિસ્તાર (H-zone)</strong></td>
+                                <td>A-પટ્ટાનો મધ્ય ભાગ, જ્યાં <strong>એક્ટિન તંતુઓ પહોંચતા નથી</strong> (માત્ર માયોસિન હોય છે). તેની મધ્યમાં M-રેખા આવેલી છે.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert-box info">
+                    <div class="alert-icon">🧬</div>
+                    <div class="alert-content">
+                        <h4>પ્રોટીનની રચના (Actin vs Myosin)</h4>
+                        <p><strong>1. Actin (Thin Filament):</strong> બે 'F' એક્ટિન તંતુઓ કુંતલાકાર ગોઠવાયેલા. તેના પર ટ્રોપોમાયોસિન (Tropomyosin) અને <strong>ટ્રોપોનિન (Troponin)</strong> આવેલા છે. (આરામની અવસ્થામાં ટ્રોપોનિન માયોસિનના જોડાણસ્થાનને ઢાંકી દે છે).<br>
+                        <strong>2. Myosin (Thick Filament):</strong> મેરોમાયોસિન (Meromyosin) નામના મોનોમરનું બનેલું છે. તેમાં ગોળાકાર માથું (Head) હોય છે જે <strong>ATP બાઈન્ડીંગ સાઇટ</strong> અને એક્ટિન બાઈન્ડીંગ સાઇટ ધરાવે છે.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 5 -->
+            <section id="muscle-contraction" class="content-card">
+                <h2>5. સ્નાયુ સંકોચનની ક્રિયાવિધિ (Mechanism of Muscle Contraction)</h2>
+                <p>સ્નાયુ સંકોચન <strong>સરકતા તંતુના સિદ્ધાંત (Sliding Filament Theory)</strong> દ્વારા સમજાવી શકાય છે. આ મુજબ: "સ્નાયુ સંકોચન દરમિયાન પાતળા તંતુઓ (એક્ટિન) જાડા તંતુઓ (માયોસિન) પર સરકે છે."</p>
+
+                <h3>ચેતા-સ્નાયુ સંધાન (Neuromuscular Junction)</h3>
+                <p>કેન્દ્રિય ચેતાતંત્ર (CNS) માંથી પ્રેરક ચેતા (Motor neuron) દ્વારા સિગ્નલ આવે છે. ચેતાનો અંતિમ છેડો અને સ્નાયુકોષના સાર્કોલેમા વચ્ચેના જોડાણને <span class="eng-term">Neuromuscular junction / Motor-end plate</span> કહે છે. અહીં ચેતાપ્રેષક દ્રવ્ય <strong>એસિટાઈલ કોલાઈન (Acetylcholine - ACh)</strong> મુક્ત થાય છે.</p>
+
+                <h3>સંકોચનના તબક્કા (Steps of Contraction - NEET Flow)</h3>
+                <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--success-color); font-family:monospace; margin-bottom:1rem;">
+                    ACh મુક્ત થાય &rarr; સાર્કોલેમામાં એક્શન પોટેન્શિયલ સર્જાય &rarr; <strong>SR માંથી Ca<sup>++</sup> મુક્ત થાય</strong> &rarr; Ca<sup>++</sup> ટ્રોપોનિન સાથે જોડાય &rarr; એક્ટિન પર માયોસિન જોડાણસ્થાન ખુલ્લું પડે.
+                </div>
+
+                <h3>Cross-Bridge Cycle (ક્રોસ-બ્રિજ ચક્ર)</h3>
+                <ol>
+                    <li>માયોસિનનું માથું <strong>ATP નું જળવિભાજન (Hydrolysis)</strong> કરીને ઉર્જા મેળવે છે.</li>
+                    <li>ઊર્જાયુક્ત માયોસિન એક્ટિનના ખુલ્લા સ્થાન સાથે જોડાઈને <strong>ક્રોસ-બ્રિજ (Cross-bridge)</strong> બનાવે છે.</li>
+                    <li>માયોસિન એક્ટિન તંતુને A-પટ્ટાના કેન્દ્ર તરફ ખેંચે છે <strong>(Power stroke)</strong>. આને કારણે Z-રેખાઓ નજીક આવે છે (સંકોચન).</li>
+                    <li><strong>નવો ATP</strong> જોડાતા ક્રોસ-બ્રિજ તૂટે છે અને ચક્ર ફરી શરૂ થાય છે. (જ્યાં સુધી Ca++ પાછા SR માં ન જાય ત્યાં સુધી).</li>
+                </ol>
+
+                <div class="alert-box neet">
+                    <div class="alert-icon">🎯</div>
+                    <div class="alert-content">
+                        <h4>NEET TRAP: સંકોચન દરમિયાન થતા ફેરફારો</h4>
+                        <ul style="margin:0; padding-left:1.2rem;">
+                            <li>સાર્કોમિયરની લંબાઈ <strong>ઘટે છે</strong>.</li>
+                            <li>I-પટ્ટાની લંબાઈ <strong>ઘટે છે</strong>.</li>
+                            <li>H-વિસ્તાર <strong>ઘટે છે અથવા અદૃશ્ય થાય છે</strong>.</li>
+                            <li><strong style="color:var(--danger-color);">A-પટ્ટાની લંબાઈ અકબંધ (Constant) રહે છે.</strong> (કારણ કે જાડા તંતુઓની લંબાઈ બદલાતી નથી).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6 -->
+            <section id="skeletal-system" class="content-card">
+                <h2>6. કંકાલ તંત્ર (Skeletal System)</h2>
+                <p>કંકાલતંત્ર હાડકાં (Bones) અને કાસ્થિ (Cartilages) નું બનેલું છે. પુખ્ત મનુષ્યમાં કુલ <strong>206 હાડકાં</strong> હોય છે. તેને બે મુખ્ય વિભાગોમાં વહેંચવામાં આવે છે: 1. અક્ષીય કંકાલ (80) અને 2. ઉપાંગીય કંકાલ (126).</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>વિભાગ</th>
+                                <th>હાડકાંની સંખ્યા</th>
+                                <th>મુખ્ય ભાગો (NEET Focus Bones)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. અક્ષીય કંકાલ (Axial Skeleton)</strong><br><span style="font-size:0.85rem; color:var(--text-secondary);">શરીરની મુખ્ય ધરી.</span></td>
+                                <td><strong>80</strong></td>
+                                <td>
+                                    • <strong>ખોપરી (Skull) - 22:</strong> મસ્તક (8) + ચહેરો (14). (યુ-આકારનું હાઇઓઇડ/Hyoid અસ્થિ - 1, અને મધ્યકર્ણ અસ્થિઓ 3x2=6).<br>
+                                    • <strong>કરોડસ્તંભ (Vertebral Column) - 26:</strong> સર્વાઇકલ(7), થોરાસિક(12), લમ્બર(5), સેક્રમ(1-ફ્યુઝ્ડ), કોક્સિક્સ(1-ફ્યુઝ્ડ).<br>
+                                    • <strong>ઉરોસ્થિ (Sternum) - 1:</strong> છાતીનું મધ્ય હાડકું.<br>
+                                    • <strong>પાંસળીઓ (Ribs) - 12 જોડ (24):</strong> 1-7 (સાચી/True), 8-10 (ખોટી/False - 7મી સાથે જોડાય), 11-12 (તરતી/Floating).
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. ઉપાંગીય કંકાલ (Appendicular)</strong><br><span style="font-size:0.85rem; color:var(--text-secondary);">ઉપાંગો અને મેખલાઓ.</span></td>
+                                <td><strong>126</strong></td>
+                                <td>
+                                    • <strong>અગ્ર ઉપાંગ (Forelimbs - હાથ):</strong> 30 હાડકાં/હાથ. હ્યુમરસ, અરીય(Radius), પ્રકોષ્ઠાસ્થિ(Ulna), કાર્પલ્સ(8-કાંડું), મેટાકાર્પલ્સ(5-હથેળી), ફેલેન્જીસ(14-આંગળીઓ).<br>
+                                    • <strong>પશ્ચ ઉપાંગ (Hindlimbs - પગ):</strong> 30 હાડકાં/પગ. ફિમર(1-સૌથી લાંબુ), ટિબિયા, ફિબ્યુલા, ટાર્સલ્સ(7-ઘૂંટી), મેટાટાર્સલ્સ(5), ફેલેન્જીસ(14), પટેલા(1-ઢીંચણ/Knee cap).<br>
+                                    • <strong>સ્કંધ મેખલા (Pectoral Girdle):</strong> 2x2=4 (ક્લેવિકલ - કોલર બોન, સ્કેપ્યુલા - શોલ્ડર બ્લેડ).<br>
+                                    • <strong>નિતંબ મેખલા (Pelvic Girdle):</strong> 2 (કોક્સલ બોન - ઇલિયમ, ઇસ્ચિયમ, પ્યુબિસના જોડાણથી બનેલ).
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 7 -->
+            <section id="joints" class="content-card">
+                <h2>7. સાંધાઓ (Joints)</h2>
+                <p>હાડકાં-હાડકાં વચ્ચેના અથવા હાડકાં-કાસ્થિ વચ્ચેના જોડાણ સ્થાનને સાંધો કહે છે. હલનચલન માટે સાંધા અત્યંત જરૂરી છે. તેમને મુખ્ય 3 પ્રકારમાં વહેંચવામાં આવે છે:</p>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>સાંધાનો પ્રકાર (Type)</th>
+                                <th>હલનચલન (Movement)</th>
+                                <th>રચના અને ઉદાહરણ (NEET Examples)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>1. તંતુમય સાંધા (Fibrous Joints)</strong></td>
+                                <td style="color:var(--danger-color); font-weight:bold;">કોઈ હલનચલન નહિ.</td>
+                                <td>ગાઢ તંતુમય સંયોજક પેશીથી જોડાયેલા. દા.ત., <strong>ખોપરીના હાડકાં વચ્ચેના સાંધા (Sutures)</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>2. કાસ્થિમય સાંધા (Cartilaginous)</strong></td>
+                                <td>મર્યાદિત હલનચલન.</td>
+                                <td>હાડકાં કાસ્થિ દ્વારા જોડાયેલા હોય છે. દા.ત., <strong>કરોડસ્તંભની બે ક્રમિક કશેરુકાઓ (Vertebrae) વચ્ચેનો સાંધો</strong>.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>3. સાયનોવિયલ સાંધા (Synovial)</strong></td>
+                                <td style="color:var(--success-color); font-weight:bold;">નોંધપાત્ર હલનચલન.</td>
+                                <td>હાડકાં વચ્ચે <strong>પ્રવાહીયુક્ત સાયનોવિયલ ગુહા (Synovial cavity)</strong> હોય છે. પ્રચલન માટે જવાબદાર.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>સાયનોવિયલ સાંધાના મુખ્ય પ્રકારો (Types of Synovial Joints)</h3>
+                <ul class="list-disc pl-5">
+                    <li><strong>કંદુક-ઊખળ સાંધો (Ball and Socket joint):</strong> ખભાનો સાંધો (Humerus અને Pectoral girdle વચ્ચે).</li>
+                    <li><strong>મિજાગરા સાંધો (Hinge joint):</strong> ઘૂંટણનો સાંધો (Knee joint), કોણીનો સાંધો (Elbow).</li>
+                    <li><strong>ઊખળી સાંધો (Pivot joint):</strong> એડલાસ અને એક્સિસ (પ્રથમ અને દ્વિતીય કશેરુકા) વચ્ચેનો સાંધો. (માથું ફેરવવા).</li>
+                    <li><strong>સરકતો સાંધો (Gliding joint):</strong> કાર્પલ્સ (કાંડાના હાડકાં) વચ્ચે.</li>
+                    <li><strong>વલાકા સાંધો (Saddle joint):</strong> મનુષ્યના અંગૂઠાના કાર્પલ અને મેટાકાર્પલ વચ્ચે.</li>
+                </ul>
+            </section>
+
+            <!-- Section 8 -->
+            <section id="disorders" class="content-card">
+                <h2>8. સ્નાયુ અને કંકાલતંત્રની અનિયમિતતાઓ (Disorders)</h2>
+                
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+                    <!-- Disorder 1 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--danger-color);">
+                        <h4 style="color:var(--danger-color); margin-bottom:0.5rem;">માયસ્થેનિયા ગ્રેવીસ (Myasthenia gravis)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;"><strong>સ્વ-પ્રતિકારક રોગ (Auto-immune).</strong> ચેતા-સ્નાયુ સંધાન (Neuromuscular junction) ને અસર કરે છે. કંકાલ સ્નાયુઓ નબળા પડે છે અને પક્ષઘાત (Paralysis) થઈ શકે છે.</p>
+                    </div>
+                    <!-- Disorder 2 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--brand-primary);">
+                        <h4 style="color:var(--brand-primary); margin-bottom:0.5rem;">મસ્ક્યુલર ડિસ્ટ્રોફી (Muscular dystrophy)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;"><strong>જનીનિક ખામી (Genetic disorder).</strong> કંકાલ સ્નાયુઓનો ક્રમશઃ ઘસારો/પતન (Progressive degeneration) થાય છે.</p>
+                    </div>
+                    <!-- Disorder 3 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--accent-color);">
+                        <h4 style="color:var(--accent-color); margin-bottom:0.5rem;">ટિટેની (Tetany)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;">શરીરના પ્રવાહીમાં <strong>કેલ્શિયમ (Ca<sup>++</sup>) નું પ્રમાણ ઘટવાને કારણે</strong> સ્નાયુઓમાં જલદ સંકોચન કે ખેંચાણ (Wild contractions/spasm) આવે છે.</p>
+                    </div>
+                    <!-- Disorder 4 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--warning-color);">
+                        <h4 style="color:var(--warning-color); margin-bottom:0.5rem;">આર્થરાઇટિસ (Arthritis)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;">સાંધાનો સોજો (Inflammation of joints).</p>
+                    </div>
+                    <!-- Disorder 5 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--text-secondary);">
+                        <h4 style="color:var(--text-secondary); margin-bottom:0.5rem;">ઓસ્ટિયોપોરોસિસ (Osteoporosis)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;"><strong>ઉંમર સંબંધિત રોગ.</strong> હાડકાંનો જથ્થો ઘટે છે અને ફ્રેક્ચરની શક્યતા વધે છે. મેનોપોઝ બાદ સ્ત્રીઓમાં <strong>ઇસ્ટ્રોજન (Estrogen) નું પ્રમાણ ઘટવું</strong> એ મુખ્ય કારણ છે.</p>
+                    </div>
+                    <!-- Disorder 6 -->
+                    <div style="background:var(--bg-surface-alt); padding:1rem; border-radius:8px; border-left:4px solid var(--success-color);">
+                        <h4 style="color:var(--success-color); margin-bottom:0.5rem;">ગાઉટ (Gout)</h4>
+                        <p style="font-size:0.9rem; margin-bottom:0;">સાંધામાં <strong>યુરિક એસિડ (Uric acid) ના સ્ફટિકો</strong> જમા થવાને કારણે સાંધાનો સોજો.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 9: Premium NEET -->
+            <section id="neet-focus" class="content-card" style="border: 2px solid var(--brand-primary); background: var(--bg-base);">
+                <h2 style="margin-top:0; border-bottom: none; display: flex; align-items: center; gap: 0.5rem; color: var(--brand-dark);">
+                    <span style="font-size: 1.5rem;">🔥</span> Premium NEET Revision
+                </h2>
+
+                <button class="collapsible-btn active">Common Confusions (ગુંચવણભર્યા મુદ્દા)</button>
+                <div class="collapsible-content" style="max-height: 1000px;">
+                    <ul style="padding: 1rem 1.5rem;">
+                        <li style="margin-bottom: 0.8rem;"><strong>Actin vs Myosin:</strong> Actin પાતળો તંતુ છે, પ્રકાશિત (I-Band) બનાવે છે. Myosin જાડો તંતુ છે, અપ્રકાશિત (A-Band) બનાવે છે.</li>
+                        <li style="margin-bottom: 0.8rem;"><strong>True vs False Ribs:</strong> 1 થી 7 જોડ સાચી પાંસળી છે જે સીધી ઉરોસ્થિ સાથે કાસ્થિથી જોડાય છે. 8,9,10 મી જોડ ખોટી (Vertebrochondral) પાંસળી છે, જે 7મી પાંસળીના કાસ્થિ સાથે જોડાય છે.</li>
+                        <li><strong>Myasthenia gravis vs Muscular dystrophy:</strong> Myasthenia સ્વ-પ્રતિકારક (Autoimmune) છે અને ચેતા-સ્નાયુ સંધાનને અસર કરે છે. Dystrophy એ જનીનિક (Genetic) ખામી છે જે સીધી સ્નાયુને અસર કરે છે.</li>
+                    </ul>
+                </div>
+
+                <button class="collapsible-btn">Rapid Revision Flashcards</button>
+                <div class="collapsible-content">
+                    <div style="display: grid; gap: 1rem; padding: 1rem 0; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                        <!-- Card 1 -->
+                        <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--brand-primary); box-shadow: var(--shadow-sm);">
+                            <strong style="color:var(--brand-dark);">Q: સ્નાયુ સંકોચન માટે કયો આયન સૌથી જરૂરી છે?</strong><br>
+                            <span style="font-size:0.95rem;">A: કેલ્શિયમ આયન (Ca<sup>++</sup>), જે ટ્રોપોનિન સાથે જોડાય છે.</span>
+                        </div>
+                        <!-- Card 2 -->
+                        <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--accent-color); box-shadow: var(--shadow-sm);">
+                            <strong style="color:var(--accent-color);">Q: એડલાસ અને એક્સિસ વચ્ચે કયો સાંધો છે?</strong><br>
+                            <span style="font-size:0.95rem;">A: ઊખળી સાંધો (Pivot joint).</span>
+                        </div>
+                        <!-- Card 3 -->
+                        <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--danger-color); box-shadow: var(--shadow-sm);">
+                            <strong style="color:var(--danger-color);">Q: મનુષ્યમાં ક્રેનિયલ (ખોપરીના અસ્થિ) ની સંખ્યા?</strong><br>
+                            <span style="font-size:0.95rem;">A: 8 અસ્થિઓ.</span>
+                        </div>
+                        <!-- Card 4 -->
+                        <div style="background: var(--bg-surface); padding: 1rem; border-radius: 8px; border-left: 4px solid var(--success-color); box-shadow: var(--shadow-sm);">
+                            <strong style="color:var(--success-color);">Q: સાર્કોમિયર શેની વચ્ચે આવેલ છે?</strong><br>
+                            <span style="font-size:0.95rem;">A: બે ક્રમિક Z-રેખાઓ વચ્ચેનો ભાગ.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="collapsible-btn">NEET પહેલાં શું યાદ રાખવું? (Checklist)</button>
+                <div class="collapsible-content">
+                    <ul style="padding: 1rem 1.5rem; font-size: 0.95rem;">
+                        <li>સ્નાયુ સંકોચનનો ફ્લો ચાર્ટ (ACh &rarr; Ca++ &rarr; Troponin &rarr; Cross-bridge &rarr; Power stroke).</li>
+                        <li>A-band ની લંબાઈ સંકોચન વખતે બદલાતી નથી એ મુદ્દો મગજમાં બેસાડવો.</li>
+                        <li>ખોપરીના હાડકાં (Sutures) એ તંતુમય સાંધા છે જે હલનચલન કરતા નથી.</li>
+                        <li>મેનોપોઝ પછી ઇસ્ટ્રોજન ઘટવાથી ઓસ્ટિયોપોરોસિસ થાય છે.</li>
+                        <li>Gout (ગાઉટ) નું કારણ યુરિક એસિડના સ્ફટિકો છે.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer style="text-align: center; padding: 2rem 0; margin-top: 3rem; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.9rem;">
+                <p>&copy; 2026 PrepGrid Official ACADEMY. All Rights Reserved.</p>
+                <p style="margin-top: 0.25rem;">Developed exclusively for NEET UG 2026 Gujarati Medium Students.</p>
+            </footer>
+
+        </main>
+    </div>
+
+    <!-- Back to top button -->
+    <button class="back-to-top" id="backToTop" aria-label="Go to top">↑</button>
+
+    <!-- Vanilla JS Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Theme Toggle
+            const themeBtn = document.getElementById('themeToggle');
+            const htmlEl = document.documentElement;
+            
+            if (localStorage.getItem('theme') === 'dark') {
+                htmlEl.setAttribute('data-theme', 'dark');
+                themeBtn.textContent = '☀️';
+            }
+
+            themeBtn.addEventListener('click', () => {
+                const currentTheme = htmlEl.getAttribute('data-theme');
+                if (currentTheme === 'dark') {
+                    htmlEl.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                    themeBtn.textContent = '🌙';
+                } else {
+                    htmlEl.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeBtn.textContent = '☀️';
+                }
+            });
+
+            // 2. Mobile Menu Generation and Toggle
+            const mobileBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileOverlay = document.getElementById('mobileMenuOverlay');
+            const closeBtn = document.getElementById('closeMobileMenu');
+            const tocNav = document.getElementById('tocNav');
+            
+            // Clone TOC to mobile menu
+            const clonedNav = tocNav.cloneNode(true);
+            clonedNav.id = 'mobileTocNav';
+            // Insert after close button
+            closeBtn.insertAdjacentElement('afterend', clonedNav);
+
+            function toggleMobileMenu() {
+                mobileMenu.classList.toggle('active');
+                mobileOverlay.classList.toggle('active');
+            }
+
+            mobileBtn.addEventListener('click', toggleMobileMenu);
+            closeBtn.addEventListener('click', toggleMobileMenu);
+            mobileOverlay.addEventListener('click', toggleMobileMenu);
+            
+            // Close on mobile link click
+            mobileMenu.addEventListener('click', (e) => {
+                if(e.target.classList.contains('toc-link')) toggleMobileMenu();
+            });
+
+            // 3. Progress Bar & Back to Top
+            const progressBar = document.getElementById('progressBar');
+            const backToTopBtn = document.getElementById('backToTop');
+
+            window.addEventListener('scroll', () => {
+                const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+                const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const scrolled = (winScroll / height) * 100;
+                progressBar.style.width = scrolled + '%';
+
+                if (winScroll > 400) {
+                    backToTopBtn.classList.add('visible');
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            });
+
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // 4. TOC Active State Highlighting
+            const sections = document.querySelectorAll('.content-card');
+            const allTocLinks = document.querySelectorAll('.toc-link'); // Gets both desktop and mobile
+
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    // Adjusted offset for sticky header
+                    if (pageYOffset >= sectionTop - 120) {
+                        current = section.getAttribute('id');
+                    }
+                });
+
+                allTocLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+
+            // 5. Collapsible Sections (Event Delegation)
+            const mainContent = document.getElementById('mainContent');
+            mainContent.addEventListener('click', (e) => {
+                const btn = e.target.closest('.collapsible-btn');
+                if (!btn) return;
+                
+                btn.classList.toggle('active');
+                const content = btn.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + 50 + "px"; // added buffer
+                }
+            });
+
+            // Initialize open collapsibles
+            document.querySelectorAll('.collapsible-btn.active').forEach(btn => {
+                const content = btn.nextElementSibling;
+                content.style.maxHeight = content.scrollHeight + 50 + "px";
+            });
+
+            // 6. Search Functionality
+            const searchBtn = document.getElementById('searchBtn');
+            const searchOverlay = document.getElementById('searchOverlay');
+            const searchInput = document.getElementById('searchInput');
+            
+            // Store original HTML of all cards to restore
+            const originalContents = new Map();
+            document.querySelectorAll('.content-card').forEach(card => {
+                originalContents.set(card.id, card.innerHTML);
+            });
+
+            searchBtn.addEventListener('click', () => {
+                searchOverlay.classList.toggle('active');
+                if (searchOverlay.classList.contains('active')) {
+                    searchInput.focus();
+                } else {
+                    clearSearch();
+                }
+            });
+
+            function clearSearch() {
+                searchInput.value = '';
+                document.querySelectorAll('.content-card').forEach(card => {
+                    card.innerHTML = originalContents.get(card.id);
+                });
+            }
+
+            searchInput.addEventListener('input', (e) => {
+                const keyword = e.target.value.trim().toLowerCase();
+                if (keyword.length < 2) {
+                    clearSearch();
+                    return;
+                }
+
+                document.querySelectorAll('.content-card').forEach(card => {
+                    // Reset to original before highlighting
+                    card.innerHTML = originalContents.get(card.id);
+                    
+                    const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT, null, false);
+                    const nodesToWrap = [];
+                    let node;
+                    while (node = walker.nextNode()) {
+                        if (node.nodeValue.toLowerCase().includes(keyword)) {
+                            // Don't highlight inside script/style tags or already highlighted tags
+                            if (node.parentElement.tagName !== 'SCRIPT' && 
+                                node.parentElement.tagName !== 'STYLE' && 
+                                !node.parentElement.classList.contains('search-highlight')) {
+                                nodesToWrap.push(node);
+                            }
+                        }
+                    }
+
+                    nodesToWrap.forEach(textNode => {
+                        const escapedKey = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex = new RegExp(`(${escapedKey})`, 'gi');
+                        const span = document.createElement('span');
+                        span.innerHTML = textNode.nodeValue.replace(regex, '<span class="search-highlight">$1</span>');
+                        textNode.parentNode.replaceChild(span, textNode);
+                    });
+                });
+
+                // Expand any collapsibles that contain a highlight
+                document.querySelectorAll('.search-highlight').forEach(highlight => {
+                    const collapsibleContent = highlight.closest('.collapsible-content');
+                    if (collapsibleContent) {
+                        const btn = collapsibleContent.previousElementSibling;
+                        if (btn && !btn.classList.contains('active')) {
+                            btn.classList.add('active');
+                            collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + 50 + "px";
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+```eof
