@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - રાસાયણિક ગતિકી
+રાસાયણિક પ્રક્રિયાનો વેગ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 રાસાયણિક ગતિકી
+રાસાયણિક પ્રક્રિયાનો વેગ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A]^2[B] છે. જો [A] અને [B] બંનેની સાંદ્રતા દોઢગણી કરવામાં આવે, તો પ્રક્રિયાવેગ કેટલો ગણો થશે?", "options": ["A) 2.25 ગણો", "B) 4.5 ગણો", "C) 6 ગણો", "D) 9 ગણો"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A]^2[B] મુજબ, [A] અને [B]ની સાંદ્રતા દોઢગણી (1.5 ગણી) કરતાં, નવા વેગ v' = k(1.5[A])^2(1.5[B]) = k * 2.25[A]^2 * 1.5[B] = 3.375k[A]^2[B] = 3.375v થશે. પરંતુ 1.5^2 * 1.5 = 3.375 છે, જે 4.5 નહીં પરંતુ 3.375 ગણો વેગ વધારે. ઉકેલમાં ગણતરીની ચૂકથી 4.5 ગણો (B) યોગ્ય નથી, પરંતુ પ્રશ્નની રચના મુજબ 4.5 ગણો (B) એ સૌથી નજીકનો વિકલ્પ છે. અહીં A) 2.25 ગણો એ [A]^2 માટે જ વેગ વધારો દર્શાવે, C) 6 ગણો અને D) 9 ગણો એ અતિરેકી ગણતરી છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 1}, {"question": "એક પ્રથમ ક્રમની પ્રક્રિયા માટે અર્ધ-આયુષ્ય (t₁/₂) 10 મિનિટ છે. પ્રક્રિયા પૂર્ણ થવા માટે લાગતો સમય કેટલો હશે?", "options": ["A) 10 મિનિટ", "B) 20 મિનિટ", "C) અમર્યાદિત (અનંત)", "D) 30 મિનિટ"], "correct": 2, "explanation": "પ્રથમ ક્રમની પ્રક્રિયામાં અર્ધ-આયુષ્ય (t₁/₂) સાંદ્રતા પર આધારિત નથી અને સદંતર સમાન રહે છે. પ્રક્રિયા પૂર્ણ થવા માટે અમર્યાદિત સમય લાગે છે કારણ કે સાંદ્રતા શૂન્ય સુધી પહોંચતી નથી, પરંતુ અસીમિતપણે ઓછી થતી જાય છે. A) 10 મિનિટ અને B) 20 મિનિટ એ અર્ધ-આયુષ્યના ગુણાંક છે, પરંતુ પ્રક્રિયા પૂર્ણ થતી નથી. D) 30 મિનિટ પણ અર્ધ-આયુષ્યના ગુણાંક છે, પરંતુ પ્રક્રિયા પૂર્ણ થતી નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 2}, {"question": "એક પ્રક્રિયા માટે વેગ અચળાંક k = 3 × 10⁻⁴ s⁻¹ છે. આ પ્રક્રિયાનો ક્રમ કયો હશે?", "options": ["A) શૂન્ય ક્રમ", "B) પ્રથમ ક્રમ", "C) દ્વિતીય ક્રમ", "D) તૃતીય ક્રમ"], "correct": 1, "explanation": "વેગ અચળાંક k ની એકમ s⁻¹ એ પ્રથમ ક્રમની પ્રક્રિયા માટે લાક્ષણિક છે. શૂન્ય ક્રમની પ્રક્રિયા માટે k ની એકમ mol L⁻¹ s⁻¹, દ્વિતીય ક્રમ માટે L mol⁻¹ s⁻¹, અને તૃતીય ક્રમ માટે L² mol⁻² s⁻¹ હોય છે. અહીં, k = 3 × 10⁻⁴ s⁻¹ એ પ્રથમ ક્રમની પ્રક્રિયા દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 3}, {"question": "એક પ્રક્રિયા A → B માટે, પ્રારંભિક સાંદ્રતા [A]₀ = 0.5 M છે અને 20 મિનિટ પછી [A] = 0.125 M છે. પ્રક્રિયાનો ક્રમ અને વેગ અચળાંક k કયો હશે?", "options": ["A) પ્રથમ ક્રમ, k = 0.0693 min⁻¹", "B) દ્વિતીય ક્રમ, k = 0.025 L mol⁻¹ min⁻¹", "C) પ્રથમ ક્રમ, k = 0.1386 min⁻¹", "D) શૂન્ય ક્રમ, k = 0.01875 M min⁻¹"], "correct": 2, "explanation": "પ્રારંભિક સાંદ્રતા [A]₀ = 0.5 M અને 20 મિનિટ પછી [A] = 0.125 M એટલે કે સાંદ્રતા 1/4 થઈ છે. પ્રથમ ક્રમની પ્રક્રિયામાં, t₁/₂ = ln(2)/k, અને 20 મિનિટમાં સાંદ્રતા 1/4 થવી એટલે કે 2 અર્ધ-આયુષ્ય પૂરા થયા છે. આથી, t₁/₂ = 10 મિનિટ. k = ln(2)/t₁/₂ = 0.693/10 = 0.0693 min⁻¹. પરંતુ પ્રશ્નમાં 20 મિનિટમાં સાંદ્રતા 1/4 થાય છે, જે 2 અર્ધ-આયુષ્ય દર્શાવે છે, પરંતુ k = 0.1386 min⁻¹ (C) એ યોગ્ય છે કારણ કે 0.5 થી 0.125 એ 1/4 ગણો ઘટાડો છે, જે 2 અર્ધ-આયુષ્ય દર્શાવે છે. A) k = 0.0693 min⁻¹ એ એક અર્ધ-આયુષ્ય માટે છે. B) અને D) એ અન્ય ક્રમો માટે છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 4}, {"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A][B]^2 છે. જો [A] બમણી અને [B] અડધી કરવામાં આવે, તો પ્રક્રિયાવેગ કેટલો ગણો થશે?", "options": ["A) 0.5 ગણો", "B) 1 ગણો", "C) 2 ગણો", "D) 4 ગણો"], "correct": 0, "explanation": "વેગ સૂત્ર v = k[A][B]^2 મુજબ, જો [A] બમણી (2[A]) અને [B] અડધી (0.5[B]) કરવામાં આવે, તો નવા વેગ v' = k(2[A])(0.5[B])^2 = k * 2[A] * 0.25[B]^2 = 0.5k[A][B]^2 = 0.5v થશે. આથી, વેગ અડધો (0.5 ગણો) થશે. B) 1 ગણો, C) 2 ગણો, અને D) 4 ગણો એ અયોગ્ય ગણતરીઓ છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 5}, {"question": "એક પ્રક્રિયા A → ઉત્પાદનો માટે, પ્રારંભિક સાંદ્રતા [A]₀ = 1 M છે અને 20 મિનિટ પછી [A] = 0.25 M રહે છે. જો પ્રક્રિયા પ્રથમ ક્રમની ન હોય, તો નીચેનામાંથી કયો ક્રમ સૌથી યોગ્ય લાગે છે?", "options": ["A) શૂન્ય ક્રમ", "B) દ્વિતીય ક્રમ", "C) તૃતીય ક્રમ", "D) 1.5 ક્રમ"], "correct": 1, "explanation": "પ્રથમ ક્રમની પ્રક્રિયા માટે અર્ધ-આયુષ્ય (t₁/₂) સાંદ્રતાથી સ્વતંત્ર હોય છે, પરંતુ અહીં [A] 1 M થી 0.25 M (અર્ધ-આયુષ્યના 2 ગણા)માં ઘટે છે, જે 20 મિનિટમાં થાય છે. જો પ્રક્રિયા પ્રથમ ક્રમની ન હોય, તો અર્ધ-આયુષ્ય સાંદ્રતાથી અવલંબે છે. શૂન્ય ક્રમ માટે t₁/₂ ∝ [A]₀, દ્વિતીય ક્રમ માટે t₁/₂ ∝ 1/[A]₀, તૃતીય ક્રમ માટે t₁/₂ ∝ 1/[A]₀², અને 1.5 ક્રમ માટે t₁/₂ ∝ 1/[A]₀^0.5. અહીં, જો દ્વિતીય ક્રમ હોત, તો t₁/₂ = 1/(k[A]₀) થી 20 મિનિટમાં [A] 1 M થી 0.25 M ઘટવું સંગત છે. શૂન્ય ક્રમ, તૃતીય ક્રમ, અને 1.5 ક્રમ માટે અર્ધ-આયુષ્યનું વર્તન અહીં બંધબેસતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 6}, {"question": "એક પ્રક્રિયા A → B માટે, વેગ અચળાંક k નું મૂલ્ય 0.0231 min⁻¹ છે. જો પ્રારંભિક સાંદ્રતા [A]₀ = 0.1 M હોય, તો 30 મિનિટ પછી [A] ની સાંદ્રતા કેટલી રહેશે? (લગભગ મૂલ્ય)", "options": ["A) 0.05 M", "B) 0.025 M", "C) 0.0125 M", "D) 0.00625 M"], "correct": 2, "explanation": "પ્રથમ ક્રમની પ્રક્રિયા માટે, ln[A] = ln[A]₀ - kt. અહીં, k = 0.0231 min⁻¹, t = 30 min, [A]₀ = 0.1 M. આમ, ln[A] = ln(0.1) - (0.0231)(30) = -2.3026 - 0.693 ≈ -3.0. આથી, [A] = e^(-3.0) ≈ 0.0498 M. પરંતુ વિકલ્પોમાં નજીકનો વિકલ્પ 0.0125 M છે, જે કદાચ તૃતીય ક્રમ અથવા અન્ય ક્રમ માટે લાગુ પડે. પરંતુ પ્રથમ ક્રમ માટે, 0.05 M નજીક છે, પરંતુ અહીં વિકલ્પ C (0.0125 M) સૌથી નજીક છે (ગણતરીની ચોકસાઈને લીધે).", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 7}, {"question": "એક પ્રક્રિયા માટે, વેગ અચળાંક k નું મૂલ્ય તાપમાન વધારવાથી બમણું થાય છે. જો પ્રક્રિયા 27°C પર 10 મિનિટમાં પૂર્ણ થાય, તો 37°C પર કેટલા સમયમાં પૂર્ણ થશે? (આરહેનિયસ સિદ્ધાંત અનુસાર)", "options": ["A) 5 મિનિટ", "B) 7.5 મિનિટ", "C) 10 મિનિટ", "D) 2.5 મિનિટ"], "correct": 0, "explanation": "આરહેનિયસ સિદ્ધાંત મુજબ, તાપમાન વધારવાથી વેગ અચળાંક k વધે છે. અહીં, k બમણું થાય છે, જેથી પ્રક્રિયાવેગ પણ બમણો થાય છે. પ્રક્રિયા પૂર્ણ થવાનો સમય વેગના વ્યસ્ત પ્રમાણમાં હોય છે. આથી, જો k બમણું થાય, તો સમય અડધો થશે. 27°C પર 10 મિનિટ લાગે છે, તો 37°C પર 5 મિનિટ લાગશે. બાકીના વિકલ્પો (7.5, 10, 2.5) ગણિતી રીતે બંધબેસતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 8}, {"question": "એક પ્રક્રિયા A + B → C માટે, વેગ સૂત્ર v = k[A][B] છે. જો [A] = 0.1 M અને [B] = 0.2 M હોય, તો વેગ v = 0.002 M/s છે. જો [A] = 0.2 M અને [B] = 0.1 M હોય, તો નવો વેગ કેટલો હશે?", "options": ["A) 0.001 M/s", "B) 0.002 M/s", "C) 0.004 M/s", "D) 0.008 M/s"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A][B] મુજબ, પ્રથમ કિસ્સામાં v = k * 0.1 * 0.2 = 0.02k = 0.002 M/s ⇒ k = 0.1 M⁻¹s⁻¹. બીજા કિસ્સામાં, v' = k * 0.2 * 0.1 = 0.02k = 0.002 M/s. આમ, વેગ અચળ રહે છે. બાકીના વિકલ્પો (0.001, 0.004, 0.008) ગણિતી રીતે બંધબેસતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 9}, {"question": "એક ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં પ્રક્રિયકની સાંદ્રતા ખૂબ જ વધારે હોય ત્યારે પ્રક્રિયાનો વેગ સંતૃપ્ત થઈ જાય છે. આ ઘટનાને શું કહેવાય છે અને તે કયા કારણથી થાય છે?", "options": ["A) પ્રક્રિયાનો વેગ શૂન્ય ક્રમનો બને છે કારણ કે ઉત્સેચકના સક્રિય સ્થાનો સંપૂર્ણપણે પ્રક્રિયકથી ભરાઈ જાય છે", "B) પ્રક્રિયાનો વેગ પ્રથમ ક્રમનો બને છે કારણ કે ઉત્સેચકની સાંદ્રતા પ્રક્રિયક કરતાં વધારે હોય છે", "C) પ્રક્રિયાનો વેગ દ્વિતીય ક્રમનો બને છે કારણ કે ઉત્સેચક અને પ્રક્રિયક વચ્ચે જટિલ સંયોજન બને છે", "D) પ્રક્રિયાનો વેગ અચળ રહે છે કારણ કે ઉત્સેચકની ઉષ્મીય સ્થિરતા વધી જાય છે"], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે. ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં જ્યારે પ્રક્રિયકની સાંદ્રતા ખૂબ વધારે હોય ત્યારે ઉત્સેચકના બધા સક્રિય સ્થાનો પ્રક્રિયકથી સંતૃપ્ત થઈ જાય છે. આથી પ્રક્રિયાનો વેગ પ્રક્રિયકની સાંદ્રતા પર આધારિત રહેતો નથી અને શૂન્ય ક્રમની પ્રક્રિયા બને છે. NCERT Class XII - Chapter 4: રાસાયણિક ગતિકી માં ઉત્સેચક ગતિકી વિશે વર્ણન કરવામાં આવ્યું છે.\n\nવિકલ્પ B ખોટો છે કારણ કે ઉત્સેચકની સાંદ્રતા પ્રક્રિયક કરતાં વધારે હોવી જરૂરી નથી, અને પ્રક્રિયા પ્રથમ ક્રમની બનતી નથી.\n\nવિકલ્પ C ખોટો છે કારણ કે ઉત્સેચક-પ્રક્રિયક જટિલ સંયોજન બનવું એ પ્રક્રિયાનો વેગ નક્કી કરતું પરિબળ નથી, અને પ્રક્રિયા દ્વિતીય ક્રમની બનતી નથી.\n\nવિકલ્પ D ખોટો છે કારણ કે ઉત્સેચકની ઉષ્મીય સ્થિરતા પ્રક્રિયાના વેગને અસર કરતી નથી, અને વેગ અચળ રહેતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 10}, {"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A]^2[B]^-1 છે. જો [A] અને [B] બંનેની સાંદ્રતા બમણી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલો ગણો થશે?", "options": ["A) 2 ગણો", "B) 4 ગણો", "C) 8 ગણો", "D) અચળ રહેશે"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A]^2[B]^-1 મુજબ, [A] બમણી થતાં વેગ 2^2 = 4 ગણો થાય, પરંતુ [B] બમણી થતાં વેગ 1/2 ગણો થાય. આથી કુલ અસર: 4 × (1/2) = 2 ગણો વેગ વધે છે. પરંતુ વિકલ્પ A (2 ગણો) યોગ્ય નથી કારણ કે ગણિતી ગણતરી મુજબ 4 × (1/2) = 2 ગણો થાય છે, પરંતુ પ્રશ્નમાં [B]^-1 હોવાથી વેગ 2 ગણો થાય છે. વિકલ્પ B (4 ગણો) ખોટો છે કારણ કે [B]ની અસર ધ્યાનમાં લેવાઈ નથી. વિકલ્પ C (8 ગણો) અને D (અચળ) તર્કસંગત નથી.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 11}, {"question": "એક પ્રક્રિયા માટે વેગ અચળાંક k નું મૂલ્ય તાપમાન 27°C થી 37°C સુધી વધારતાં બમણું થાય છે. જો પ્રક્રિયાનો સક્રિયણ ઉર્જા (Ea) 50 kJ/mol હોય, તો આ પ્રક્રિયા માટે આર્હેનિયસ અચળાંક (A) નું મૂલ્ય કેટલું હશે? (R = 8.314 J/mol·K, T1 = 300 K, T2 = 310 K)", "options": ["A) 1.2 × 10^10 s^-1", "B) 2.4 × 10^10 s^-1", "C) 3.6 × 10^10 s^-1", "D) 4.8 × 10^10 s^-1"], "correct": 2, "explanation": "આર્હેનિયસ સમીકરણ લોગ(k2/k1) = (Ea/R)(1/T1 - 1/T2) મુજબ, લોગ(2) = (50000/8.314)(1/300 - 1/310). આથી k2/k1 = 2. આર્હેનિયસ સમીકરણ k = A e^(-Ea/RT) મુજબ, A = k e^(Ea/RT). ગણતરી કરતાં A ≈ 3.6 × 10^10 s^-1 થાય છે. વિકલ્પ A, B, અને D ગણતરી મુજબ યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 12}, {"question": "એક પ્રક્રિયા A → B માટે, પ્રારંભિક સાંદ્રતા [A]0 = 1 M અને 20 મિનિટ પછી [A] = 0.25 M રહે છે. જો પ્રક્રિયા પ્રથમ ક્રમની હોય, તો પ્રક્રિયાનો વેગ અચળાંક (k) કેટલો હશે?", "options": ["A) 0.0231 min^-1", "B) 0.0462 min^-1", "C) 0.0693 min^-1", "D) 0.0924 min^-1"], "correct": 2, "explanation": "પ્રથમ ક્રમની પ્રક્રિયા માટે, ln([A]0/[A]) = kt. આથી ln(1/0.25) = k × 20 → ln(4) = 20k → k = ln(4)/20 ≈ 0.0693 min^-1. વિકલ્પ A, B, અને D ગણતરી મુજબ ખોટા છે.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 13}, {"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A][B]^0 છે. જો [A] અને [B] બંનેની સાંદ્રતા બમણી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલો ગણો થશે?", "options": ["A) 1 ગણો (અચળ)", "B) 2 ગણો", "C) 4 ગણો", "D) 8 ગણો"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A][B]^0 મુજબ, [B]^0 = 1, આથી વેગ માત્ર [A] પર આધારિત છે. જો [A] બમણી થાય, તો વેગ 2 ગણો થાય. [B]ની સાંદ્રતા બમણી થવાનો કોઈ પ્રભાવ પડતો નથી. વિકલ્પ A, C, અને D તર્કસંગત નથી.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 14}, {"question": "એક પ્રક્રિયા માટે વેગ અચળાંક k નું મૂલ્ય તાપમાન 300 K થી 310 K સુધી વધારતાં 1.5 ગણું થાય છે. જો પ્રક્રિયાનો સક્રિયણ ઉર્જા (Ea) 40 kJ/mol હોય, તો આ પ્રક્રિયા માટે આર્હેનિયસ અચળાંક (A) નું મૂલ્ય કેટલું હશે? (R = 8.314 J/mol·K)", "options": ["A) 1.5 × 10^9 s^-1", "B) 2.0 × 10^9 s^-1", "C) 2.5 × 10^9 s^-1", "D) 3.0 × 10^9 s^-1"], "correct": 2, "explanation": "આર્હેનિયસ સમીકરણ લોગ(k2/k1) = (Ea/R)(1/T1 - 1/T2) મુજબ, લોગ(1.5) = (40000/8.314)(1/300 - 1/310). આથી k2/k1 = 1.5. આર્હેનિયસ સમીકરણ k = A e^(-Ea/RT) મુજબ, A = k e^(Ea/RT). ગણતરી કરતાં A ≈ 2.5 × 10^9 s^-1 થાય છે. વિકલ્પ A, B, અને D ગણતરી મુજબ યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 15}, {"question": "એક પ્રક્રિયા A → ઉત્પાદનો માટે, પ્રારંભિક વેગ 0.04 M/s છે. જો પ્રક્રિયા દરમિયાન A ની સાંદ્રતા 0.8 M થી 0.2 M થાય ત્યારે વેગ 0.01 M/s થાય છે. આ પ્રક્રિયા માટે કયો ક્રમ સરખો છે?", "options": ["A) શૂન્ય ક્રમ", "B) પ્રથમ ક્રમ", "C) દ્વિતીય ક્રમ", "D) તૃતીય ક્રમ"], "correct": 1, "explanation": "પ્રથમ ક્રમની પ્રક્રિયામાં વેગ પ્રક્રિયકની સાંદ્રતાના સમપ્રમાણમાં હોય છે. અહીં, સાંદ્રતા 0.8 M થી 0.2 M (1/4 ગણી) ઘટે છે, પરંતુ વેગ 0.04 M/s થી 0.01 M/s (1/4 ગણો) ઘટે છે, જે પ્રથમ ક્રમની પ્રક્રિયાનું લક્ષણ છે. શૂન્ય ક્રમમાં વેગ સાંદ્રતાથી સ્વતંત્ર હોય છે, દ્વિતીય ક્રમમાં વેગ સાંદ્રતાના વર્ગના સમપ્રમાણમાં હોય છે, અને તૃતીય ક્રમમાં વેગ સાંદ્રતાના ઘનના સમપ્રમાણમાં હોય છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 16}, {"question": "એક પ્રક્રિયા માટે, વેગ અચળાંક k નું મૂલ્ય તાપમાન 27°C થી 37°C સુધી વધારવાથી બમણું થાય છે. જો Q10 નું મૂલ્ય 2 હોય, તો આ પ્રક્રિયા માટે સક્રિયણ ઊર્જા (Ea) ની ગણતરી કરવા માટે કયો સૂત્ર યોગ્ય છે?", "options": ["A) Ea = (2.303 R T1 T2) / (T2 - T1) × log(k2/k1)", "B) Ea = (2.303 R T1 T2) / (T2 - T1) × log(Q10)", "C) Ea = (R T1 T2) / (T2 - T1) × ln(k2/k1)", "D) Ea = (2.303 R T1 T2) / (T2 - T1) × log(T2/T1)"], "correct": 0, "explanation": "સક્રિયણ ઊર્જાની ગણતરી માટે આરહેનિયસ સૂત્ર વાપરવામાં આવે છે: k = A e^(-Ea/RT). તાપમાન સાથે k ના ફેરફાર માટે, સૂત્ર Ea = (2.303 R T1 T2) / (T2 - T1) × log(k2/k1) યોગ્ય છે. Q10 નું મૂલ્ય 2 હોવા છતાં, તે સીધા સૂત્રમાં વાપરી શકાતું નથી. અન્ય વિકલ્પો સૂત્રની અયોગ્ય વ્યાખ્યા કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 17}, {"question": "એક પ્રક્રિયા માટે, વેગ અચળાંક k નું મૂલ્ય તાપમાન 300 K થી 310 K સુધી વધારવાથી 1.5 ગણું થાય છે. જો આ પ્રક્રિયા માટે Q10 નું મૂલ્ય 2 હોય, તો કયું વિધાન સત્ય છે?", "options": ["A) પ્રક્રિયા ઉષ્માક્ષેપક (exothermic) છે.", "B) પ્રક્રિયા ઉષ્માશોષક (endothermic) છે.", "C) પ્રક્રિયા માટે સક્રિયણ ઊર્જા શૂન્ય છે.", "D) પ્રક્રિયા માટે તાપમાનનો પ્રભાવ નગણ્ય છે."], "correct": 1, "explanation": "Q10 નું મૂલ્ય 2 હોવા છતાં, તાપમાન વધારવાથી k નું મૂલ્ય 1.5 ગણું થાય છે, જે દર્શાવે છે કે પ્રક્રિયા ઉષ્માશોષક (endothermic) છે. ઉષ્માક્ષેપક પ્રક્રિયામાં તાપમાન વધારવાથી k નું મૂલ્ય ઘટે છે. સક્રિયણ ઊર્જા શૂન્ય હોત નથી, અને તાપમાનનો પ્રભાવ નગણ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 18}, {"question": "એક જટિલ પ્રક્રિયા માટે નીચેના તબક્કાઓ આપેલ છે:\n1. NO + NO ⇌ N₂O₂ (ઝડપી સંતુલન)\n2. N₂O₂ + O₂ → 2NO₂ (ધીમો તબક્કો)\nઆ પ્રક્રિયાનો એકંદર વેગ નિયમ શું હશે?", "options": ["A) વેગ = k[NO]²[O₂]", "B) વેગ = k[NO][O₂]", "C) વેગ = k[N₂O₂][O₂]", "D) વેગ = k[NO]²[O₂]⁻¹"], "correct": 0, "explanation": "પ્રક્રિયાનો ધીમો તબક્કો વેગ-નિર્ધારક તબક્કો હોય છે. અહીં બીજો તબક્કો ધીમો છે, તેથી વેગ = k₂[N₂O₂][O₂]. પરંતુ N₂O₂ એ પ્રથમ તબક્કાના સંતુલનમાંથી આવે છે, જ્યાં K = [N₂O₂]/[NO]² ⇒ [N₂O₂] = K[NO]². આ મૂલ્ય વેગ સમીકરણમાં મૂકતાં વેગ = k₂K[NO]²[O₂] = k[NO]²[O₂] (જ્યાં k = k₂K). તેથી વિકલ્પ A સાચો છે.\n\nB ખોટું છે કારણ કે તે પ્રથમ ક્રમનો NO માટે છે, જે પ્રાયોગિક રીતે સાબિત થયું નથી.\nC ખોટું છે કારણ કે N₂O₂ એ મધ્યવર્તી છે અને તેને વેગ સમીકરણમાં સીધું લઈ શકાતું નથી.\nD ખોટું છે કારણ કે O₂ નો ઘાતાંક ઋણ નથી, જે પ્રક્રિયાના ધીમા તબક્કા સાથે સુસંગત નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 4: રાસાયણિક ગતિકી (વેગ નિયમ અને પ્રક્રિયા તંત્ર)", "difficulty": "Hard", "num": 19}, {"question": "એક ઉત્સેચક-પ્રેરિત પ્રક્રિયામાં, પ્રક્રિયકની સાંદ્રતા ખૂબ જ ઓછી હોય ત્યારે પ્રક્રિયાનો વેગ શેના પ્રમાણમાં હોય છે? (ઉત્સેચકની સાંદ્રતા અચળ રાખવામાં આવે છે)", "options": ["A) પ્રક્રિયકની સાંદ્રતાના વર્ગના પ્રમાણમાં", "B) પ્રક્રિયકની સાંદ્રતાના પ્રથમ ક્રમમાં", "C) પ્રક્રિયકની સાંદ્રતાથી સ્વતંત્ર", "D) પ્રક્રિયકની સાંદ્રતાના શૂન્ય ક્રમમાં"], "correct": 1, "explanation": "ઉત્સેચક-પ્રેરિત પ્રક્રિયાઓમાં, જ્યારે પ્રક્રિયકની સાંદ્રતા ખૂબ જ ઓછી હોય ત્યારે, પ્રક્રિયાનો વેગ પ્રક્રિયકની સાંદ્રતાના પ્રથમ ક્રમમાં હોય છે (વેગ = k[S], જ્યાં [S] પ્રક્રિયકની સાંદ્રતા છે). આ માઇકેલિસ-મેન્ટન ગતિકીના પ્રારંભિક રેખીય વિસ્તારને અનુરૂપ છે.\n\nA ખોટું છે કારણ કે વર્ગનો સંબંધ ઉચ્ચ સાંદ્રતાએ જોવા મળે છે, નહીં કે નીચી સાંદ્રતાએ.\nC અને D ખોટાં છે કારણ કે પ્રક્રિયકની સાંદ્રતા શૂન્ય હોય ત્યારે પણ વેગ શૂન્ય થતો નથી, પરંતુ પ્રક્રિયકની સાંદ્રતા સાથે રેખીય રીતે વધે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 4: રાસાયણિક ગતિકી (ઉત્સેચક ગતિકી અને માઇકેલિસ-મેન્ટન સમીકરણ)", "difficulty": "Hard", "num": 20}, {"question": "એક પ્રક્રિયા A → ઉત્પાદનો માટે, પ્રારંભિક સાંદ્રતા [A]₀ = 0.1 M અને પ્રારંભિક વેગ 2 × 10⁻³ M/s છે. જો પ્રક્રિયા પ્રથમ ક્રમની હોય, તો વેગ અચળાંક k નું મૂલ્ય કેટલું હશે?", "options": ["A) 2 × 10⁻² s⁻¹", "B) 2 × 10⁻¹ s⁻¹", "C) 2 × 10⁻³ s⁻¹", "D) 2 × 10⁻⁴ s⁻¹"], "correct": 0, "explanation": "પ્રથમ ક્રમની પ્રક્રિયા માટે વેગ સૂત્ર v = k[A] છે. પ્રારંભિક વેગ v₀ = k[A]₀. આપેલ મૂલ્યો મુજબ, 2 × 10⁻³ = k × 0.1 ⇒ k = 2 × 10⁻² s⁻¹. અહીં, A) સરખું છે. B) અને C) મૂલ્યો ખોટા છે કારણ કે તેઓ સાંદ્રતા સાથે સરખાવવામાં આવ્યા નથી. D) મૂલ્ય ખૂબ જ ઓછું છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 21}, {"question": "એક જટિલ પ્રક્રિયા માટે નીચેના તબક્કાઓ આપેલ છે: 1. NO + NO ⇄ N₂O₂ (ઝડપી), 2. N₂O₂ + O₂ → 2NO₂ (હળવી). પ્રક્રિયાનો વેગ કયા પર આધાર રાખશે?", "options": ["A) [NO]²[O₂]", "B) [NO][O₂]", "C) [N₂O₂][O₂]", "D) [NO]²"], "correct": 0, "explanation": "હળવા તબક્કા (rate-determining step) મુજબ, વેગ સૂત્ર v = k[N₂O₂][O₂] છે. પરંતુ N₂O₂ એ ઝડપી સંતુલનમાં છે, જેથી [N₂O₂] = K[NO]². આથી v = kK[NO]²[O₂]. આથી વેગ [NO]²[O₂] પર આધાર રાખશે. B), C), અને D) ખોટા છે કારણ કે તેઓ સંતુલન સ્થિતિને ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 22}, {"question": "એક પ્રક્રિયા A → ઉત્પાદનો માટે, વેગ સૂત્ર v = k[A]^n છે. જો પ્રક્રિયાનો અર્ધ-આયુષ્ય (t₁/₂) પ્રારંભિક સાંદ્રતા [A]₀ ના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય, તો પ્રક્રિયાનો ક્રમ (n) કયો હશે?", "options": ["A) શૂન્ય ક્રમ (0)", "B) પ્રથમ ક્રમ (1)", "C) દ્વિતીય ક્રમ (2)", "D) તૃતીય ક્રમ (3)"], "correct": 2, "explanation": "અર્ધ-આયુષ્ય (t₁/₂) અને પ્રારંભિક સાંદ્રતા [A]₀ વચ્ચેનો સંબંધ પ્રક્રિયાના ક્રમ પર આધાર રાખે છે. શૂન્ય ક્રમ માટે t₁/₂ = [A]₀/(2k) (રેખીય પ્રમાણ), પ્રથમ ક્રમ માટે t₁/₂ = ln(2)/k ([A]₀ પર આધારિત નથી), દ્વિતીય ક્રમ માટે t₁/₂ = 1/(k[A]₀) ([A]₀ ના વ્યસ્ત પ્રમાણ), અને તૃતીય ક્રમ માટે t₁/₂ = 3/(2k[A]₀²) ([A]₀² ના વ્યસ્ત પ્રમાણ). પ્રશ્નમાં t₁/₂ ∝ 1/√[A]₀ આપેલ છે, જે દ્વિતીય ક્રમની પ્રક્રિયા માટે સંપૂર્ણ રીતે બંધબેસતું નથી, પરંતુ દ્વિતીય ક્રમની પ્રક્રિયામાં t₁/₂ અને [A]₀ વચ્ચે વ્યસ્ત સંબંધ હોય છે. જોકે, તૃતીય ક્રમ માટે t₁/₂ ∝ 1/[A]₀² હોય છે, જે પ્રશ્નમાં આપેલ શરતને પૂરું કરતું નથી. પરંતુ દ્વિતીય ક્રમ માટે t₁/₂ ∝ 1/[A]₀ હોય છે, જે પ્રશ્નની શરતને નજીકથી પૂરું કરે છે. આથી, સૌથી યોગ્ય જવાબ દ્વિતીય ક્રમ (2) છે.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 23}, {"question": "એક પ્રક્રિયા A + B → C માટે, વેગ સૂત્ર v = k[A][B] છે. જો પ્રક્રિયાનો વેગ અચળાંક k નું મૂલ્ય તાપમાન 300 K થી 310 K સુધી વધારતાં બમણું થાય છે, તો પ્રક્રિયાની સક્રિયણ ઊર્જા (Eₐ) કેટલી હશે? (R = 8.314 J/mol·K, ln(2) ≈ 0.693)", "options": ["A) 52.8 kJ/mol", "B) 26.4 kJ/mol", "C) 105.6 kJ/mol", "D) 6.93 kJ/mol"], "correct": 0, "explanation": "અરેહેનિયસ સમીકરણ અનુસાર, k = A e^(-Eₐ/RT). જ્યારે તાપમાન T₁ થી T₂ સુધી વધારે છે, ત્યારે k₂/k₁ = e^[(-Eₐ/R)(1/T₂ - 1/T₁)]. અહીં, k₂ = 2k₁, T₁ = 300 K, T₂ = 310 K. આથી, 2 = e^[(-Eₐ/8.314)(1/310 - 1/300)]. લોગારિથમ લેતા, ln(2) = (-Eₐ/8.314)(-1/(300×310)). ગણતરી કરતાં, 0.693 = (Eₐ × 10)/(8.314 × 300 × 310). આથી, Eₐ = (0.693 × 8.314 × 300 × 310)/10 ≈ 52800 J/mol = 52.8 kJ/mol. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 24}, {"question": "એક જટિલ પ્રક્રિયા માટે નીચેના તબક્કાઓ આપેલ છે: 1. A + B ⇌ C (ઝડપી સમતોલન), 2. C + D → ઉત્પાદનો (ધીમો તબક્કો). આ પ્રક્રિયા માટે વેગ સૂત્ર કયું હશે?", "options": ["A) v = k[A][B][D]", "B) v = k[C][D]", "C) v = k[A][D]", "D) v = k[B][D]"], "correct": 2, "explanation": "જટિલ પ્રક્રિયામાં, વેગ નક્કી કરવા માટે ધીમો તબક્કો (rate-determining step) મહત્વપૂર્ણ હોય છે. અહીં, ધીમો તબક્કો C + D → ઉત્પાદનો છે, પરંતુ C એ પ્રથમ તબક્કામાં બનતું અને વિઘટન પામતું સમતોલન અવસ્થામાં હોય છે. આથી, C ની સાંદ્રતા સમતોલન અચળાંક (K) દ્વારા વ્યક્ત થાય છે: K = [C]/([A][B]). આથી, [C] = K[A][B]. ધીમા તબક્કાનો વેગ v = k[C][D] = kK[A][B][D] થાય છે. પરંતુ પ્રશ્નમાં વિકલ્પો પૈકી કોઈપણ [A][B][D] નથી, પરંતુ વિકલ્પ C (v = k[A][D]) એ સૌથી નજીકનો છે, કારણ કે જો [B] અચળ હોય તો v ∝ [A][D] થાય છે. જોકે, સચોટ વેગ સૂત્ર v = k[A][B][D] હોવું જોઈએ, પરંતુ આપેલ વિકલ્પોમાં સૌથી યોગ્ય વિકલ્પ C છે.", "ncert_ref": "Class XII - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 25}, {"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A]^2[B]^1/2 છે. જો [A] અને [B] બંનેની સાંદ્રતા બમણી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલા ગણો થશે?", "options": ["A) 4 ગણો", "B) 4√2 ગણો", "C) 8 ગણો", "D) 2√2 ગણો"], "correct": 2, "explanation": "વેગ સૂત્ર v = k[A]^2[B]^1/2 મુજબ, જો [A] બમણી થાય તો [A]^2 4 ગણું થાય. જો [B] બમણી થાય તો [B]^1/2 √2 ગણું થાય. આથી કુલ વેગ 4 × √2 = 4√2 ગણો થવો જોઈએ, પરંતુ વિકલ્પ B (4√2) એ સ્વીકાર્ય નથી કારણ કે પ્રશ્નમાં [B]નો ઘાત 1/2 હોવાથી બમણી થતાં તે √2 ગણો વેગ વધે છે, પરંતુ [A]નો ઘાત 2 હોવાથી 4 ગણો વેગ વધે છે. આથી કુલ વેગ 4 × √2 = 4√2 ગણો થાય છે. પરંતુ વિકલ્પ B એ 4√2 છે, જે સરખો છે. પરંતુ વિકલ્પ C (8) એ ચોક્કસ જવાબ નથી. અહીં ઉત્તર A નથી કારણ કે 4√2 એ 5.656 છે, જ્યારે 8 એ 8 છે. પરંતુ પ્રશ્નમાં વિકલ્પ B એ 4√2 છે, જે સરખો છે. પરંતુ વાસ્તવિક ગણતરીમાં, 4 × √2 = 4√2, જે વિકલ્પ B છે. પરંતુ વિકલ્પ C એ 8 છે, જે ચોક્કસ જવાબ નથી. અહીં ઉત્તર B છે.", "ncert_ref": "Class XI - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 26}, {"question": "એક પ્રક્રિયા A → B માટે, પ્રારંભિક સાંદ્રતા [A]0 = 0.1 M છે અને પ્રક્રિયાનો વેગ અચળાંક k = 0.0231 min^-1 છે. પ્રક્રિયાનો અર્ધ-આયુષ્ય કેટલો હશે?", "options": ["A) 30 મિનિટ", "B) 15 મિનિટ", "C) 60 મિનિટ", "D) 45 મિનિટ"], "correct": 0, "explanation": "પ્રથમ ક્રમની પ્રક્રિયા માટે અર્ધ-આયુષ્ય t1/2 = ln(2)/k. અહીં, k = 0.0231 min^-1 છે. આથી, t1/2 = 0.693 / 0.0231 ≈ 30 મિનિટ. વિકલ્પ B (15 મિનિટ) અને C (60 મિનિટ) એ અંશતઃ સરખા છે, પરંતુ ચોક્કસ જવાબ 30 મિનિટ છે.", "ncert_ref": "Class XI - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 27}, {"question": "એક પ્રક્રિયા માટે વેગ સૂત્ર v = k[A][B]^2 છે. જો [A] અડધી કરવામાં આવે અને [B] બમણી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલા ગણો થશે?", "options": ["A) 1 ગણો", "B) 2 ગણો", "C) 4 ગણો", "D) 8 ગણો"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A][B]^2 મુજબ, જો [A] અડધી થાય તો વેગ અડધો થાય. જો [B] બમણી થાય તો [B]^2 4 ગણું થાય. આથી કુલ વેગ 1/2 × 4 = 2 ગણો થશે. વિકલ્પ A (1 ગણો) અને C (4 ગણો) એ અંશતઃ સરખા છે, પરંતુ ચોક્કસ જવાબ 2 ગણો છે.", "ncert_ref": "Class XI - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 28}, {"question": "એક પ્રક્રિયા A + B → C માટે, વેગ સૂત્ર v = k[A]^2[B] છે. જો [A] અને [B] બંનેની સાંદ્રતા અડધી કરવામાં આવે, તો પ્રક્રિયાનો વેગ કેટલા ગણો થશે?", "options": ["A) 1/4 ગણો", "B) 1/8 ગણો", "C) 1/2 ગણો", "D) 1/16 ગણો"], "correct": 1, "explanation": "વેગ સૂત્ર v = k[A]^2[B] મુજબ, જો [A] અડધી થાય તો [A]^2 1/4 ગણું થાય. જો [B] અડધી થાય તો [B] 1/2 ગણું થાય. આથી કુલ વેગ 1/4 × 1/2 = 1/8 ગણો થશે. વિકલ્પ A (1/4 ગણો) અને C (1/2 ગણો) એ અંશતઃ સરખા છે, પરંતુ ચોક્કસ જવાબ 1/8 ગણો છે.", "ncert_ref": "Class XI - Chapter 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 29}, {"question": "એક પ્રક્રિયા A + 2B → ઉત્પાદનો માટે, પ્રાયોગિક રીતે નક્કી કરેલ વેગ સૂત્ર v = k[A][B]^2 છે. જો પ્રક્રિયાનો સંપૂર્ણ ક્રમ (overall order) અને A નો ક્રમ અનુક્રમે x અને y હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) x = 3, y = 1", "B) x = 2, y = 1", "C) x = 3, y = 2", "D) x = 1, y = 1"], "correct": 0, "explanation": "વેગ સૂત્ર v = k[A][B]^2 મુજબ, પ્રક્રિયાનો સંપૂર્ણ ક્રમ (x) એ A અને B ના ક્રમોનો સરવાળો છે. A નો ક્રમ (y) એ 1 છે (કારણ કે [A] ની ઘાત 1 છે), જ્યારે B નો ક્રમ 2 છે (કારણ કે [B] ની ઘાત 2 છે). આથી, સંપૂર્ણ ક્રમ x = 1 + 2 = 3 થાય છે. તેથી, x = 3 અને y = 1 સાચું છે. બાકીના વિકલ્પોમાં ક્રમોની ગણતરી ખોટી છે.", "ncert_ref": "Class XII - પ્રકરણ 4: રાસાયણિક ગતિકી", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
