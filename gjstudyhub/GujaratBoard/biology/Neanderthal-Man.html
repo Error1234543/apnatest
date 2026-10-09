@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neanderthal Man</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Neanderthal Man</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Neanderthal Man</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નિએન્ડરથલ મનુષ્ય (Neanderthal Man) ના સંદર્ભમાં નીચેનાં વિધાનો ધ્યાનમાં લો: \n(1) તેમના મગજનો કદ આધુનિક મનુષ્ય કરતાં મોટો હતો. \n(2) તેઓ યુરોપ અને પશ્ચિમ એશિયામાં લગભગ 40,000 વર્ષ પહેલાં લુપ્ત થયા હતા. \n(3) તેમના DNA નું અવશેષ આધુનિક મનુષ્યના જીનોમમાં જોવા મળતું નથી. \n(4) તેઓ અગ્નિનો ઉપયોગ કરતા હતા અને જટિલ સાધનો બનાવતા હતા. \nઉપરોક્ત વિધાનોમાંથી કયાં વિધાનો સત્ય છે?", "opts": ["ફક્ત 1, 2 અને 4", "ફક્ત 1, 3 અને 4", "ફક્ત 2, 3 અને 4", "ફક્ત 1 અને 2"], "ans": 0, "exp": "વિધાન 1 સત્ય છે કારણ કે નિએન્ડરથલ મનુષ્યના મગજનો કદ આધુનિક મનુષ્ય કરતાં મોટો હતો (લગભગ 1500 સેમી³). વિધાન 2 પણ સત્ય છે કારણ કે તેઓ લગભગ 40,000 વર્ષ પહેલાં લુપ્ત થયા હતા. વિધાન 3 ખોટું છે કારણ કે નિએન્ડરથલ DNA ના અંશ આધુનિક મનુષ્યના જીનોમમાં જોવા મળે છે (ખાસ કરીને યુરોપીયન અને એશિયન વસ્તીમાં). વિધાન 4 સત્ય છે કારણ કે તેઓ અગ્નિનો ઉપયોગ અને જટિલ સાધનો બનાવતા હતા. તેથી સાચો જવાબ A છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય (Homo sapiens) વચ્ચેના આંતરપ્રજનનના પુરાવા કયા સ્વરૂપમાં મળે છે?", "opts": ["નિએન્ડરથલ મનુષ્યના અવશેષોમાંથી મળેલા પ્રોટીનના અવશેષો", "આધુનિક મનુષ્યના જીનોમમાં નિએન્ડરથલ DNA ના અંશો", "નિએન્ડરથલ મનુષ્યના અસ્થિઓમાંથી મળેલા કાર્બન ડેટિંગના પુરાવા", "નિએન્ડરથલ મનુષ્યના પથ્થરનાં સાધનો પર મળેલા આધુનિક મનુષ્યના હાથના નિશાન"], "ans": 1, "exp": "નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય વચ્ચેના આંતરપ્રજનનના પુરાવા આધુનિક મનુષ્યના જીનોમમાં નિએન્ડરથલ DNA ના અંશોના સ્વરૂપમાં મળે છે. આ અંશો ખાસ કરીને યુરોપીયન અને એશિયન વસ્તીમાં જોવા મળે છે. અન્ય વિકલ્પો આંતરપ્રજનનના સીધા પુરાવા નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના શારીરિક લક્ષણો વિશે નીચેનાં વિધાનોમાંથી કયું ખોટું છે?", "opts": ["તેમના શરીરનું બંધારણ મજબૂત અને ટૂંકું હતું, જે ઠંડા વાતાવરણમાં અનુકૂલન માટે હતું.", "તેમના ચહેરા પર મોટા નાક અને ભરાવદાર ભમરા હતાં.", "તેમના મગજનો કદ આધુનિક મનુષ્ય કરતાં નાનો હતો.", "તેમના હાડકાં મજબૂત અને જાડાં હતાં."], "ans": 2, "exp": "નિએન્ડરથલ મનુષ્યના મગજનો કદ આધુનિક મનુષ્ય કરતાં મોટો હતો (લગભગ 1500 સેમી³), તેથી વિકલ્પ C ખોટું છે. અન્ય વિકલ્પો નિએન્ડરથલ મનુષ્યના શારીરિક લક્ષણોનું સાચું વર્ણન કરે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના સાંસ્કૃતિક અને વર્તણૂકલક્ષી પુરાવાઓમાં નીચેનામાંથી શું સામેલ નથી?", "opts": ["તેઓ મૃતકોને દફનાવતા હતા અને કબરોમાં સાધનો મૂકતા હતા.", "તેઓ ચિત્રકળા અને ગુફા ચિત્રો બનાવતા હતા.", "તેઓ અગ્નિનો ઉપયોગ રસોઈ અને ગરમી માટે કરતા હતા.", "તેઓ પથ્થરનાં જટિલ સાધનો અને હથિયારો બનાવતા હતા."], "ans": 1, "exp": "નિએન્ડરથલ મનુષ્યના પુરાવાઓમાં ચિત્રકળા અને ગુફા ચિત્રો બનાવવાના પુરાવા મળતા નથી. આ પ્રકારની કળા આધુનિક મનુષ્ય (Homo sapiens) સાથે સંકળાયેલી છે. અન્ય વિકલ્પો નિએન્ડરથલ મનુષ્યના સાંસ્કૃતિક અને વર્તણૂકલક્ષી પુરાવાઓમાં સામેલ છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણોમાં નીચેનામાંથી કયું કારણ સાચું નથી?", "opts": ["આબોહવા પરિવર્તન અને હિમયુગની અસર", "આધુનિક મનુષ્ય (Homo sapiens) સાથેની સ્પર્ધા", "નિએન્ડરથલ મનુષ્યમાં રોગપ્રતિકારક શક્તિનો અભાવ", "ઉલ્કાપાત અને વૈશ્વિક આપત્તિ"], "ans": 3, "exp": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણોમાં ઉલ્કાપાત અને વૈશ્વિક આપત્તિનો સમાવેશ થતો નથી. આ એક અસંભવિત કારણ છે. અન્ય વિકલ્પો (આબોહવા પરિવર્તન, સ્પર્ધા, રોગપ્રતિકારક શક્તિનો અભાવ) સંભવિત કારણો તરીકે માનવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના કપાળની રચના વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["તેમના કપાળ પર ઉભરા (બ્રો રિજ) હાજર હતા, જે મજબૂત જડબા અને ચહેરાની હાડકાંની રચનાને સૂચવે છે.", "તેમના કપાળ સંપૂર્ણપણે સપાટ હતા, જે આધુનિક મનુષ્ય જેવી લાક્ષણિકતા દર્શાવે છે.", "તેમના કપાળ પર કોઈ પણ પ્રકારના ઉભરા નહોતા, પરંતુ તેમની ખોપરીની પાછળની બાજુ લંબગોળ હતી.", "તેમના કપાળ પર સ્ફટિક જેવી રચના હતી, જે પ્રાચીન મનુષ્યોમાં જોવા મળતી નહોતી."], "ans": 0, "exp": "નિએન્ડરથલ મનુષ્યના કપાળ પર ઉભરા (બ્રો રિજ) હાજર હતા, જે મજબૂત જડબા અને ચહેરાની હાડકાંની રચનાને સૂચવે છે. આ લક્ષણ તેમની શારીરિક મજબૂતાઈ અને પ્રાચીન મનુષ્યોની જેમ જાડા હાડકાંની રચનાને દર્શાવે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે નિએન્ડરથલ મનુષ્યના કપાળ સંપૂર્ણપણે સપાટ નહોતા, તેમની ખોપરીની પાછળની બાજુ લંબગોળ નહોતી, અને સ્ફટિક જેવી રચના તેમનામાં જોવા મળતી નહોતી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના દાંતની રચના અને ઉપયોગ વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["તેમના દાંત મોટા અને મજબૂત હતા, જે કઠણ ખોરાક ચાવવા માટે અનુકૂળ હતા.", "તેમના કપાળના દાંત (ઇન્સિઝર) ખૂબ જ મોટા હતા, જે માંસ ખાવા માટે ઉપયોગી હતા.", "તેમના દાંતમાં એનામેલનું આચ્છાદન પાતળું હતું, જે દાંતના ઘસારાને રોકવા માટે અસરકારક નહોતું.", "તેમના દાંતની રચના આધુનિક મનુષ્યની જેમ જ હતી, પરંતુ આકારમાં થોડા મોટા હતા."], "ans": 2, "exp": "નિએન્ડરથલ મનુષ્યના દાંતમાં એનામેલનું આચ્છાદન જાડું હતું, જે દાંતના ઘસારાને રોકવા માટે અસરકારક હતું. વિકલ્પ A, B, અને D સાચા છે કારણ કે તેમના દાંત મોટા અને મજબૂત હતા, કપાળના દાંત મોટા હતા, અને તેમની દાંતની રચા આધુનિક મનુષ્યની જેમ જ હતી, પરંતુ આકારમાં થોડા મોટા હતા.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના સાંસ્કૃતિક વારસા વિશે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["તેમણે પથરાના હથિયારો અને સાધનોનો ઉપયોગ કર્યો હતો, જે મુખ્યત્વે મુશ્લી (Levallois) તકનીક દ્વારા બનાવવામાં આવતા હતા.", "તેમણે મૃતદેહોને દફનાવવાની પ્રથા અપનાવી હતી, જે મૃત્યુ પછીના જીવનમાં વિશ્વાસ સૂચવે છે.", "તેમણે ગુફાઓમાં ચિત્રો અને શિલ્પકલા બનાવી હતી, જે કલાત્મક અભિવ્યક્તિનો પુરાવો આપે છે.", "તેમણે લોખંડના સાધનોનો ઉપયોગ કર્યો હતો, જે તેમની તકનીકી પ્રગતિ દર્શાવે છે."], "ans": 3, "exp": "નિએન્ડરથલ મનુષ્ય લોખંડના સાધનોનો ઉપયોગ કરતા નહોતા. તેમણે મુખ્યત્વે પથરાના હથિયારો અને સાધનોનો ઉપયોગ કર્યો હતો, જે મુશ્લી (Levallois) તકનીક દ્વારા બનાવવામાં આવતા હતા. વિકલ્પ A, B, અને C સાચા છે કારણ કે તેમણે પથરાના સાધનોનો ઉપયોગ કર્યો હતો, મૃતદેહોને દફનાવવાની પ્રથા અપનાવી હતી, અને ગુફાઓમાં ચિત્રો અને શિલ્પકલા બનાવી હતી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય (Homo sapiens) વચ્ચેના જનીનિક સબંધ વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય વચ્ચે આંતરપ્રજનન થયું હતું, જેના પરિણામે આધુનિક મનુષ્યના DNAમાં નિએન્ડરથલ જનીનોનો અંશ મળી આવે છે.", "આધુનિક યુરોપિયન લોકોમાં નિએન્ડરથલ DNAનો અંશ સરેરાશ 1-4% જેટલો છે.", "આધુનિક આફ્રિકન લોકોમાં નિએન્ડરથલ DNAનો અંશ સૌથી વધુ છે, કારણ કે તેઓ નિએન્ડરથલ મનુષ્યની નજીક રહેતા હતા.", "નિએન્ડરથલ મનુષ્યના જનીનો આધુનિક મનુષ્યની રોગપ્રતિકારક શક્તિ અને ચયાપચય સાથે સંકળાયેલા છે."], "ans": 2, "exp": "આધુનિક આફ્રિકન લોકોમાં નિએન્ડરથલ DNAનો અંશ સૌથી ઓછો છે, કારણ કે નિએન્ડરથલ મનુષ્ય મુખ્યત્વે યુરોપ અને એશિયામાં રહેતા હતા. વિકલ્પ A, B, અને D સાચા છે કારણ કે નિએન્ડરથલ અને આધુનિક મનુષ્ય વચ્ચે આંતરપ્રજનન થયું હતું, યુરોપિયન લોકોમાં નિએન્ડરથલ DNAનો અંશ 1-4% છે, અને નિએન્ડરથલ જનીનો રોગપ્રતિકારક શક્તિ અને ચયાપચય સાથે સંકળાયેલા છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણો વિશે નીચેનામાંથી કયું સંયોજન સૌથી યોગ્ય છે?", "opts": ["હવામાન પરિવર્તન, આધુનિક મનુષ્ય સાથેની સ્પર્ધા, અને રોગચાળો", "અચાનક ભૂકંપ, જ્વાળામુખી ફાટી નીકળવો, અને મહામારી", "ખોરાકની અછત, શિકારી પ્રાણીઓનો વધારો, અને આંતરિક યુદ્ધો", "ઉલ્કાપાત, સૂર્યપ્રકાશમાં ઘટાડો, અને જંગલોનો નાશ"], "ans": 0, "exp": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના મુખ્ય કારણો હવામાન પરિવર્તન, આધુનિક મનુષ્ય સાથેની સ્પર્ધા, અને રોગચાળો હતા. વિકલ્પ B, C, અને D ખોટા છે કારણ કે અચાનક ભૂકંપ, જ્વાળામુખી ફાટી નીકળવો, ઉલ્કાપાત, સૂર્યપ્રકાશમાં ઘટાડો, અને જંગલોનો નાશ નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના મુખ્ય કારણો નહોતા.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના મગજના કદ વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["તેમનો મગજનો કદ આધુનિક મનુષ્ય કરતાં સરેરાશ ૧૦% મોટો હતો અને તેમની કપાળની હાડકાં જાડી હતી.", "તેમનો મગજનો કદ આધુનિક મનુષ્ય જેટલો જ હતો, પરંતુ તેમની મગજની રચના સરળ હતી.", "તેમનો મગજનો કદ આધુનિક મનુષ્ય કરતાં નાનો હતો, પરંતુ તેમની ચેતાતંત્રની જટિલતા વધુ હતી.", "તેમનો મગજનો કદ આધુનિક મનુષ્ય કરતાં ૨૦% નાનો હતો અને તેમની બૌદ્ધિક ક્ષમતા મર્યાદિત હતી."], "ans": 0, "exp": "નિએન્ડરથલ મનુષ્યનો મગજનો કદ આધુનિક મનુષ્ય (Homo sapiens) કરતાં સરેરાશ ૧૦% મોટો હતો. તેમની કપાળની હાડકાં જાડી હતી, જે તેમને શીત પ્રતિકારક બનાવતી હતી. વિકલ્પ B ખોટો છે કારણ કે તેમનો મગજનો કદ આધુનિક મનુષ્ય જેટલો નહોતો. વિકલ્પ C ખોટો છે કારણ કે તેમનો મગજનો કદ નાનો નહોતો. વિકલ્પ D ખોટો છે કારણ કે તેમનો મગજનો કદ ૨૦% નાનો નહોતો અને તેમની બૌદ્ધિક ક્ષમતા મર્યાદિત નહોતી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના જીવનશૈલી વિશે નીચેનામાંથી કયું સંયોજન સત્ય નથી?", "opts": ["તેઓ શિકારી અને સંગ્રહકર્તા હતા, અને તેમના આહારમાં માંસ, મૂળ, ફળ અને બીજ સામેલ હતા.", "તેઓ અગ્નિનો ઉપયોગ કરતા હતા અને ગુફાઓમાં રહેતા હતા, પરંતુ તેમને કપડાં બનાવવાની કળા નહોતી.", "તેઓ સંકેતો અને ચિહ્નો દ્વારા સંચાર કરતા હતા, પરંતુ તેમને ભાષા વિકસાવવાની ક્ષમતા નહોતી.", "તેઓ મૃતકોને દફનાવતા હતા અને તેમની સાથે શિકારના હથિયારો અને ખોરાક મૂકતા હતા."], "ans": 2, "exp": "નિએન્ડરથલ મનુષ્ય સંકેતો અને ચિહ્નો દ્વારા સંચાર કરતા હતા, પરંતુ પુરાતત્વીય પુરાવાઓ સૂચવે છે કે તેમને પ્રાથમિક ભાષા વિકસાવવાની ક્ષમતા હતી. વિકલ્પ A સત્ય છે કારણ કે તેઓ શિકારી અને સંગ્રહકર્તા હતા. વિકલ્પ B સત્ય છે કારણ કે તેઓ અગ્નિનો ઉપયોગ કરતા હતા અને ગુફાઓમાં રહેતા હતા, પરંતુ કપડાં બનાવવાની કળા વિશે પુરાવા મર્યાદિત છે. વિકલ્પ D સત્ય છે કારણ કે તેમના દફન વિધિઓમાં મૃતકો સાથે શિકારના હથિયારો અને ખોરાક મૂકવાનાં પુરાવા મળ્યા છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના શારીરિક લક્ષણો વિશે નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["તેમની નાકની રચના પહોળી અને ચપટી હતી, જે શીત હવામાનમાં હવા ગરમ કરવામાં મદદ કરતી હતી.", "તેમની નાકની રચના લાંબી અને સાંકડી હતી, જે શીત હવામાનમાં હવા ગરમ કરવામાં મદદ કરતી હતી.", "તેમની નાકની રચના ગોળ અને મોટી હતી, જે શીત હવામાનમાં હવા ગરમ કરવામાં મદદ કરતી નહોતી.", "તેમની નાકની રચના આધુનિક મનુષ્ય જેવી હતી, પરંતુ તેમની નાકની હાડકાં જાડી હતી."], "ans": 1, "exp": "નિએન્ડરથલ મનુષ્યની નાકની રચના લાંબી અને સાંકડી હતી, જે શીત હવામાનમાં હવા ગરમ કરવામાં મદદ કરતી હતી. વિકલ્પ A ખોટો છે કારણ કે તેમની નાકની રચના પહોળી અને ચપટી નહોતી. વિકલ્પ C ખોટો છે કારણ કે તેમની નાકની રચના ગોળ અને મોટી નહોતી. વિકલ્પ D ખોટો છે કારણ કે તેમની નાકની રચના આધુનિક મનુષ્ય જેવી નહોતી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્ય (Homo neanderthalensis) ના સંદર્ભમાં નીચેનાં વિધાનો ધ્યાનમાં લો: (1) તેમના મગજનું કદ આધુનિક મનુષ્ય (Homo sapiens) કરતાં મોટું હતું. (2) તેમના શરીરની રચના ઠંડા વાતાવરણમાં જીવવા માટે અનુકૂળ હતી. (3) તેમના DNA ના અભ્યાસ મુજબ, તેઓ આધુનિક મનુષ્ય સાથે આંતરપ્રજનન કરી શકતા ન હતા. (4) તેમના અવશેષો મુખ્યત્વે યુરોપ અને પશ્ચિમ એશિયામાંથી મળી આવ્યા છે.\nઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન ખોટું/ખોટાં છે?", "opts": ["ફક્ત (3)", "ફક્ત (1) અને (3)", "ફક્ત (2) અને (4)", "ફક્ત (1), (2) અને (4)"], "ans": 0, "exp": "વિધાન (3) ખોટું છે કારણ કે નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય (Homo sapiens) વચ્ચે આંતરપ્રજનનના પુરાવા મળ્યા છે, જે તેમના DNA અભ્યાસ પરથી સ્પષ્ટ થાય છે. વિધાન (1) સાચું છે કારણ કે નિએન્ડરથલ મનુષ્યનું મગજનું કદ આધુનિક મનુષ્ય કરતાં મોટું હતું. વિધાન (2) સાચું છે કારણ કે તેમની શારીરિક રચના ઠંડા વાતાવરણમાં અનુકૂળ હતી. વિધાન (4) પણ સાચું છે કારણ કે તેમના અવશેષો મુખ્યત્વે યુરોપ અને પશ્ચિમ એશિયામાંથી મળી આવ્યા છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણો વિશે નીચેનાં વિધાનો ધ્યાનમાં લો: (1) આબોહવા પરિવર્તનને કારણે તેમનું નિવાસસ્થાન નાશ પામ્યું. (2) આધુનિક મનુષ્ય (Homo sapiens) સાથેની સ્પર્ધા અને સંઘર્ષ. (3) તેમના મગજનું કદ નાનું હોવાથી બૌદ્ધિક ક્ષમતા ઓછી હતી. (4) રોગચાળા અને આનુવંશિક વિવિધતામાં ઘટાડો.\nઉપરોક્ત વિધાનોમાંથી કયું સંયોજન નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણો માટે સૌથી યોગ્ય નથી?", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (3)", "ફક્ત (2) અને (4)", "ફક્ત (1), (2) અને (4)"], "ans": 1, "exp": "વિધાન (3) ખોટું છે કારણ કે નિએન્ડરથલ મનુષ્યનું મગજનું કદ આધુનિક મનુષ્ય કરતાં મોટું હતું, તેથી તેમની બૌદ્ધિક ક્ષમતા ઓછી હતી એવું કહી શકાય નહીં. વિધાન (1), (2) અને (4) નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંભવિત કારણો તરીકે સ્વીકાર્ય છે, કારણ કે આબોહવા પરિવર્તન, આધુનિક મનુષ્ય સાથેની સ્પર્ધા અને રોગચાળા તેમજ આનુવંશિક વિવિધતામાં ઘટાડો એ લુપ્ત થવાના મુખ્ય કારણો માનવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના જનીનિક અભ્યાસમાંથી મળેલા પુરાવાઓ અનુસાર, આધુનિક યુરોપીય અને એશિયાઈ વસતિમાં નિએન્ડરથલ DNA નું પ્રમાણ કેટલું જોવા મળે છે?", "opts": ["1-2%", "3-4%", "5-6%", "7-8%"], "ans": 1, "exp": "નિએન્ડરથલ મનુષ્ય અને આધુનિક મનુષ્ય (Homo sapiens) વચ્ચે આંતરપ્રજનન થયું હોવાના પુરાવાઓ જનીનિક અભ્યાસ દ્વારા મળ્યા છે. આ અભ્યાસ અનુસાર, આધુનિક યુરોપીય અને એશિયાઈ વસતિમાં નિએન્ડરથલ DNA નું પ્રમાણ લગભગ 3-4% જોવા મળે છે. 1-2% એ ખૂબ ઓછું છે, જ્યારે 5-6% અને 7-8% એ અતિરેખિત અંદાજ છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના શારીરિક લક્ષણો પૈકી કયું લક્ષણ તેમને ઠંડા હવામાનમાં અનુકૂલિત થવા માટે સહાયક હતું?", "opts": ["લાંબા હાથ અને પગ", "મોટું અને ચપટું નાક", "પાતળી ચામડી", "ઓછી કપાળની હાડકાની જાડાઈ"], "ans": 1, "exp": "નિએન્ડરથલ મનુષ્ય ઠંડા હવામાનમાં રહેતા હતા, અને તેમના મોટું અને ચપટું નાક હવાને ગરમ કરવા અને ભેજ યુક્ત બનાવવા માટે સહાયક હતું. લાંબા હાથ અને પગ, પાતળી ચામડી, અને ઓછી કપાળની હાડકાની જાડાઈ એ ઠંડા હવામાનમાં અનુકૂલન માટે અસરકારક નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના સાંસ્કૃતિક વારસામાં નીચેનામાંથી કયું લક્ષણ સામેલ નથી?", "opts": ["મૃતદેહને દફનાવવાની પ્રથા", "શિકાર માટે અગ્નિનો ઉપયોગ", "કલાત્મક શિલ્પોનું નિર્માણ", "લેખન પદ્ધતિનો વિકાસ"], "ans": 3, "exp": "નિએન્ડરથલ મનુષ્ય મૃતદેહને દફનાવવાની પ્રથા, શિકાર માટે અગ્નિનો ઉપયોગ, અને કલાત્મક શિલ્પોનું નિર્માણ કરતા હતા. પરંતુ લેખન પદ્ધતિનો વિકાસ તેમના સમયગાળામાં થયો નહોતો, એ આધુનિક મનુષ્ય (Homo sapiens) ના વિકાસ સાથે સંકળાયેલ છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્ય (Homo neanderthalensis) ના અવશેષોના અભ્યાસ દરમિયાન મળેલા DNA પૃથક્કરણના આધારે, નીચેનામાંથી કયું વિધાન અસત્ય છે?", "opts": ["નિએન્ડરથલ મનુષ્યના DNAમાં MC1R જનીનના વિશિષ્ટ પ્રકાર મળ્યા છે, જે તેમની ત્વચા અને વાળના રંગ સાથે સંબંધિત છે.", "નિએન્ડરથલ મનુષ્યના જનીનોમમાં FOXP2 જનીનની હાજરી જોવા મળી છે, જે ભાષા અને વાણી ક્ષમતા સાથે સંકળાયેલ છે.", "નિએન્ડરથલ મનુષ્યના DNAમાં HLA (Human Leukocyte Antigen) જનીનના વિશિષ્ટ પ્રકારો મળ્યા છે, જે આધુનિક મનુષ્યના રોગપ્રતિકારક તંત્રને અસર કરે છે.", "નિએન્ડરથલ મનુષ્યના DNAમાં Y-વર્ણસૂત્રના સંપૂર્ણ અભાવને કારણે તેમનું પ્રજનન માત્ર અલિંગી પ્રજનન દ્વારા થતું હતું."], "ans": 3, "exp": "વિકલ્પ D અસત્ય છે કારણ કે નિએન્ડરથલ મનુષ્યમાં Y-વર્ણસૂત્રની હાજરીના પુરાવા મળ્યા છે અને તેઓ લિંગી પ્રજનન દ્વારા પ્રજનન કરતા હતા. વિકલ્પ A સાચો છે કારણ કે MC1R જનીનના વિશિષ્ટ પ્રકાર નિએન્ડરથલ મનુષ્યમાં મળ્યા છે, જે ત્વચા અને વાળના રંગ સાથે સંબંધિત છે. વિકલ્પ B સાચો છે કારણ કે FOXP2 જનીનની હાજરી ભાષા અને વાણી ક્ષમતા સાથે સંકળાયેલ છે. વિકલ્પ C સાચો છે કારણ કે HLA જનીનના વિશિષ્ટ પ્રકારો નિએન્ડરથલ મનુષ્યમાં મળ્યા છે, જે આધુનિક મનુષ્યના રોગપ્રતિકારક તંત્રને અસર કરે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નિએન્ડરથલ મનુષ્યના લુપ્ત થવાના સંદર્ભમાં, નીચેનાં વિધાનો ધ્યાનમાં લો: (1) આબોહવા પરિવર્તનને કારણે તેમના રહેઠાણ વિસ્તારમાં ઘટાડો થયો હતો. (2) આધુનિક મનુષ્ય (Homo sapiens) સાથેની સ્પર્ધા તેમના લુપ્ત થવાનું મુખ્ય કારણ હતું. (3) નિએન્ડરથલ મનુષ્યમાં રોગપ્રતિકારક શક્તિની અપૂરતી ક્ષમતા તેમના લુપ્ત થવામાં મહત્વપૂર્ણ ભૂમિકા ભજવી હતી. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો સત્ય છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 3, "exp": "વિકલ્પ C સાચો છે કારણ કે વિધાન 1 અને 3 સત્ય છે. આબોહવા પરિવર્તનને કારણે નિએન્ડરથલ મનુષ્યના રહેઠાણ વિસ્તારમાં ઘટાડો થયો હતો અને તેમની રોગપ્રતિકારક શક્તિની અપૂરતી ક્ષમતા પણ તેમના લુપ્ત થવામાં મહત્વપૂર્ણ ભૂમિકા ભજવી હતી. વિધાન 2 અંશતઃ સાચું છે, પરંતુ તે એકમાત્ર કે મુખ્ય કારણ ન હતું, કારણ કે આધુનિક મનુષ્ય સાથેની સ્પર્ધા ઉપરાંત અન્ય પરિબળો પણ જવાબદાર હતા.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
