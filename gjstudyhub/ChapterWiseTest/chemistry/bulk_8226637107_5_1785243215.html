@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દ્રવ્યની અવસ્થાઓ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>દ્રવ્યની અવસ્થાઓ Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "નીચેના પૈકી કયું વિધાન વાયુના ગતિ સિદ્ધાંત માટે ખોટું છે?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "વાયુના અણુઓ વચ્ચે આકર્ષણ બળ હોતું નથી.", "વાયુના અણુઓના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "વાયુના અણુઓનું કદ તેમની વચ્ચેના અંતરની સરખામણીમાં નહિવત્ હોય છે."], "ans": 1, "exp": "વાયુના ગતિ સિદ્ધાંત મુજબ, આદર્શ વાયુમાં અણુઓ વચ્ચે આકર્ષણ બળ હોતું નથી, પરંતુ વાસ્તવિક વાયુઓમાં આકર્ષણ બળ હોઈ શકે છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું તાપમાન 27°C થી 327°C કરવામાં આવે છે. જો પ્રારંભિક સરેરાશ ગતિ ઊર્જા E હોય, તો અંતિમ સરેરાશ ગતિ ઊર્જા કેટલી હશે?", "opts": ["E", "2E", "3E", "4E"], "ans": 1, "exp": "સરેરાશ ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે. તાપમાન કેલ્વિનમાં બમણું થાય છે (300 K થી 600 K), તેથી ગતિ ઊર્જા પણ બમણી થશે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન હાઇડ્રોજન બોન્ડિંગ દર્શાવતું નથી?", "opts": ["H₂O", "NH₃", "HF", "CH₄"], "ans": 3, "exp": "CH₄ (મિથેન)માં હાઇડ્રોજન બોન્ડિંગ થતું નથી કારણ કે કાર્બનની વિદ્યુતઋણતા ઓછી હોય છે અને હાઇડ્રોજન બોન્ડિંગ માટે જરૂરી પ્રબળ ધ્રુવીય બંધ નથી.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું દબાણ 2 atm છે અને તેનું કદ 4 L છે. જો દબાણને અચળ તાપમાને 1 atm કરવામાં આવે, તો નવું કદ કેટલું હશે? (બોયલનો નિયમ)", "opts": ["2 L", "4 L", "6 L", "8 L"], "ans": 3, "exp": "બોયલના નિયમ મુજબ, P₁V₁ = P₂V₂. અહીં, 2 atm × 4 L = 1 atm × V₂ ⇒ V₂ = 8 L.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન પ્રવાહી અવસ્થા માટે સાચું નથી?", "opts": ["પ્રવાહીનું કદ નિશ્ચિત હોય છે, પરંતુ આકાર નિશ્ચિત હોતો નથી.", "પ્રવાહીના અણુઓ વચ્ચે આંતરઆણ્વીય બળ પ્રબળ હોય છે.", "પ્રવાહીનું સંકોચન શક્ય નથી.", "પ્રવાહીના અણુઓ સંપૂર્ણપણે અસ્તવ્યસ્ત ગતિમાં હોય છે."], "ans": 3, "exp": "પ્રવાહી અવસ્થામાં અણુઓ સંપૂર્ણપણે અસ્તવ્યસ્ત ગતિમાં હોતા નથી, પરંતુ તેમની ગતિ મર્યાદિત હોય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વાયુ અવસ્થા માટે સાચું નથી?", "opts": ["વાયુઓને નિશ્ચિત આકાર કે કદ હોતું નથી.", "વાયુઓનું દબાણ તેમના કણોની પાત્રની દીવાલ સાથેની અથડામણને કારણે ઉત્પન્ન થાય છે.", "વાયુઓના કણો વચ્ચે આકર્ષણ બળ ખૂબ જ પ્રબળ હોય છે.", "વાયુઓનું કદ તાપમાન અને દબાણ પર આધારિત હોય છે."], "ans": 2, "exp": "વાયુઓના કણો વચ્ચે આકર્ષણ બળ ખૂબ જ નબળું હોય છે, જે વાન ડર વાલ્સ બળ તરીકે ઓળખાય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું તાપમાન 27°C થી 327°C સુધી વધારવામાં આવે છે. જો પ્રારંભિક કદ V હોય, તો અંતિમ કદ કેટલું હશે? (દબાણ અચળ રાખવામાં આવે છે)", "opts": ["V", "2V", "V/2", "4V"], "ans": 1, "exp": "ચાર્લ્સના નિયમ મુજબ, V₁/T₁ = V₂/T₂. તાપમાન કેલ્વિનમાં લેતાં, T₁ = 300 K, T₂ = 600 K. તેથી V₂ = 2V.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું ઉદાહરણ વાયુના પ્રસરણનું નથી?", "opts": ["અગરબત્તીની સુગંધ ઓરડામાં ફેલાવી.", "હાઇડ્રોજન અને ઓક્સિજન વાયુઓનું મિશ્રણ બનાવવું.", "પાણીમાં ખાંડ ઓગળવી.", "કાર્બન ડાયોક્સાઇડ વાયુનું પાણીમાં ઓગળવું."], "ans": 2, "exp": "પાણીમાં ખાંડ ઓગળવી એ પ્રસરણ નહીં, પરંતુ ઘન પદાર્થનું પ્રવાહીમાં દ્રાવણ બનાવવાની પ્રક્રિયા છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું દબાણ 2 atm અને કદ 4 L છે. જો દબાણ વધારીને 4 atm કરવામાં આવે અને તાપમાન અચળ રાખવામાં આવે, તો નવું કદ કેટલું હશે?", "opts": ["8 L", "4 L", "2 L", "1 L"], "ans": 2, "exp": "બોયલના નિયમ મુજબ, P₁V₁ = P₂V₂. તેથી, 2 atm × 4 L = 4 atm × V₂ ⇒ V₂ = 2 L.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક કદ 4 લિટર છે અને દબાણ 2 atm છે. જો દબાણ વધારીને 4 atm કરવામાં આવે તો નવું કદ કેટલું થશે? (તાપમાન અચળ રાખવામાં આવે છે)", "opts": ["1 લિટર", "2 લિટર", "4 લિટર", "8 લિટર"], "ans": 1, "exp": "બોયલના નિયમ મુજબ, P₁V₁ = P₂V₂ ⇒ 2 × 4 = 4 × V₂ ⇒ V₂ = 2 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું ઉદાહરણ વાન ડર વાલ્સ બળ સાથે સંબંધિત નથી?", "opts": ["આદર્શ વાયુ સમીકરણથી વાસ્તવિક વાયુનું વિચલન", "પાણીના અણુઓ વચ્ચે હાઇડ્રોજન બંધન", "નિષ્ક્રિય વાયુઓના પ્રવાહીકરણમાં નબળું આકર્ષણ બળ", "ઓરડાના તાપમાને આયોડિનનું ઊર્ધ્વપાતન"], "ans": 1, "exp": "પાણીના અણુઓ વચ્ચે હાઇડ્રોજન બંધન એ વાન ડર વાલ્સ બળ કરતાં વધુ પ્રબળ આંતરઆણ્વીય બળ છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું તાપમાન 27°C થી વધારીને 127°C કરવામાં આવે છે. જો પ્રારંભિક કદ 3 લિટર હોય, તો અંતિમ કદ કેટલું થશે? (દબાણ અચળ રાખવામાં આવે છે)", "opts": ["3 લિટર", "4 લિટર", "5 લિટર", "6 લિટર"], "ans": 1, "exp": "ચાર્લ્સના નિયમ મુજબ, V₁/T₁ = V₂/T₂ ⇒ 3/(273+27) = V₂/(273+127) ⇒ V₂ = 4 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન પ્રવાહી અવસ્થા માટે ખોટું છે?", "opts": ["પ્રવાહીઓનું કદ નિશ્ચિત હોય છે પરંતુ આકાર નિશ્ચિત હોતો નથી.", "પ્રવાહીઓમાં વાયુઓ કરતાં આંતરઆણ્વીય બળ વધુ પ્રબળ હોય છે.", "પ્રવાહીઓનું બાષ્પ દબાણ તાપમાન વધતા ઘટે છે.", "પ્રવાહીઓમાં સ્નિગ્ધતા તાપમાન વધતા ઘટે છે."], "ans": 2, "exp": "પ્રવાહીઓનું બાષ્પ દબાણ તાપમાન વધતા વધે છે, કારણ કે વધુ અણુઓ બાષ્પ અવસ્થામાં જાય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક કદ 5 લિટર અને તાપમાન 27°C છે. જો દબાણ અચળ રાખીને તાપમાન 127°C કરવામાં આવે, તો નવું કદ કેટલું થશે? (અચળ દબાણે)", "opts": ["6.67 લિટર", "3.75 લિટર", "7.5 લિટર", "4.17 લિટર"], "ans": 0, "exp": "ચાર્લ્સના નિયમ મુજબ, V₁/T₁ = V₂/T₂. તાપમાન કેલ્વિનમાં રૂપાંતરિત કરતાં, V₂ = (5 × 400)/300 = 6.67 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું ઉદાહરણ વાન ડર વાલ્સ બળ સાથે સંકળાયેલું નથી?", "opts": ["હાઇડ્રોજન બોન્ડિંગ", "ડાયપોલ-ડાયપોલ આંતરક્રિયા", "લંડન વિખેરણ બળ", "આયન-ડાયપોલ આંતરક્રિયા"], "ans": 3, "exp": "વાન ડર વાલ્સ બળમાં હાઇડ્રોજન બોન્ડિંગ, ડાયપોલ-ડાયપોલ અને લંડન વિખેરણ બળનો સમાવેશ થાય છે, પરંતુ આયન-ડાયપોલ આંતરક્રિયા તેમાં સમાવિષ્ટ નથી.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક દબાણ 1 atm અને કદ 2 લિટર છે. જો તાપમાન અચળ રાખીને દબાણ 0.5 atm કરવામાં આવે, તો નવું કદ કેટલું થશે? (અચળ તાપમાને)", "opts": ["1 લિટર", "4 લિટર", "3 લિટર", "2.5 લિટર"], "ans": 1, "exp": "બોયલના નિયમ મુજબ, P₁V₁ = P₂V₂. તેથી, V₂ = (1 × 2)/0.5 = 4 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) પ્રવાહીની સપાટી તણાવનું કારણ આંતરઆણ્વીય આકર્ષણ બળ છે.\n(ii) પ્રવાહીનું સ્નિગ્ધતા તાપમાન વધતા ઘટે છે.\n(iii) પ્રવાહીનું બાષ્પ દબાણ તાપમાન વધતા વધે છે.\n(iv) પ્રવાહીની ઘનતા દબાણ વધતા વધે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, પરંતુ વિધાન (iv) ખોટું છે કારણ કે પ્રવાહીની ઘનતા દબાણથી ખૂબ ઓછી પ્રભાવિત થાય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું દબાણ 3 atm અને કદ 2 લિટર છે. જો તાપમાન અચળ રાખીને દબાણ 1 atm કરવામાં આવે, તો નવું કદ કેટલું થશે? (બોયલના નિયમ મુજબ)", "opts": ["4 લિટર", "6 લિટર", "8 લિટર", "12 લિટર"], "ans": 1, "exp": "બોયલના નિયમ મુજબ, P₁V₁ = P₂V₂ ⇒ 3 × 2 = 1 × V₂ ⇒ V₂ = 6 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વાયુના ગતિવાદના મૂળભૂત ધારણાઓમાંથી એક નથી?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "વાયુના અણુઓ વચ્ચે આકર્ષણ બળ અવગણી શકાય તેટલું નબળું હોય છે.", "વાયુના અણુઓના કદ તેમના વચ્ચેના અંતરની સરખામણીમાં નહિવત્ હોય છે.", "વાયુના અણુઓની ગતિ ઊર્જા તાપમાન પર આધારિત નથી."], "ans": 3, "exp": "વાયુના ગતિવાદ મુજબ, અણુઓની ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે, તેથી તે તાપમાન પર આધારિત છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક કદ 5 લિટર છે અને દબાણ 1 atm છે. જો આ વાયુને અચળ તાપમાને સંકોચીને કદ 2 લિટર કરવામાં આવે, તો નવું દબાણ કેટલું હશે? (બૉઇલના નિયમનો ઉપયોગ કરો)", "opts": ["0.4 atm", "2.5 atm", "1.5 atm", "3.0 atm"], "ans": 1, "exp": "બૉઇલના નિયમ મુજબ, P₁V₁ = P₂V₂ ⇒ 1 atm × 5 L = P₂ × 2 L ⇒ P₂ = 2.5 atm.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન હાઇડ્રોજન બંધ બનાવી શકે નહીં?", "opts": ["H₂O", "NH₃", "HF", "CH₄"], "ans": 3, "exp": "CH₄માં હાઇડ્રોજન પરમાણુ કાર્બન સાથે જોડાયેલા હોય છે, જે વિદ્યુતઋણતા ઓછી હોવાથી હાઇડ્રોજન બંધ બનાવી શકતું નથી.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું તાપમાન 27°C થી 127°C કરવામાં આવે છે. જો પ્રારંભિક સરેરાશ ગતિ ઊર્જા E હોય, તો નવી સરેરાશ ગતિ ઊર્જા કેટલી હશે? (કેલ્વિનમાં તાપમાન રૂપાંતરણનો ઉપયોગ કરો)", "opts": ["E", "4/3 E", "3/2 E", "2 E"], "ans": 1, "exp": "ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે. 27°C = 300 K, 127°C = 400 K ⇒ E₂/E₁ = 400/300 = 4/3.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વાન ડર વાલ્સ સમીકરણ (P + a(n/V)²)(V - nb) = nRT માટે સાચું નથી?", "opts": ["'a' એ અણુઓ વચ્ચેના આકર્ષણ બળનું માપ છે.", "'b' એ અણુઓના અસરકારક કદનું માપ છે.", "વાન ડર વાલ્સ સમીકરણ આદર્શ વાયુ સમીકરણનું સુધારેલું સ્વરૂપ છે.", "'a' અને 'b' બંને વાયુના દબાણ પર આધારિત છે."], "ans": 3, "exp": "'a' અને 'b' વાયુના દબાણ કે કદ પર આધારિત નથી, પરંતુ વાયુની પ્રકૃતિ પર આધારિત છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન વાયુના ગતિવાદના મૂળભૂત ધારણાઓમાં સમાવેશિત નથી?", "opts": ["વાયુના અણુઓ સતત અનિયમિત ગતિમાં હોય છે.", "વાયુના અણુઓ વચ્ચે આકર્ષણ બળ અવગણી શકાય તેટલું નાનું હોય છે.", "વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે.", "વાયુના અણુઓ એકબીજા સાથે સ્થિતિસ્થાપક અથડામણ કરે છે, પરંતુ પાત્રની દીવાલ સાથે અસ્થિતિસ્થાપક અથડામણ કરે છે."], "ans": 3, "exp": "વાયુના ગતિવાદ મુજબ, અણુઓ પાત્રની દીવાલ સાથે પણ સ્થિતિસ્થાપક અથડામણ કરે છે, જેથી ગતિ ઊર્જાનું સંરક્ષણ થાય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન વાયુના પ્રસરણ માટે ખોટું છે?", "opts": ["વાયુનું પ્રસરણ તેના આણ્વીય વજનના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે.", "ઉચ્ચ તાપમાને વાયુનું પ્રસરણ ઝડપી થાય છે.", "વાયુનું પ્રસરણ દબાણના વધારા સાથે ઝડપી થાય છે.", "હાઇડ્રોજન વાયુનું પ્રસરણ ઑક્સિજન વાયુ કરતાં ઝડપી હોય છે."], "ans": 2, "exp": "વાયુનું પ્રસરણ દબાણના વધારા સાથે ધીમું થાય છે, કારણ કે અણુઓ વચ્ચેની અથડામણો વધે છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વાન ડર વાલ્સ બળ સૌથી નબળું છે?", "opts": ["ડાયપોલ-ડાયપોલ આકર્ષણ", "લંડન વિખેરણ બળ", "ડાયપોલ-પ્રેરિત ડાયપોલ આકર્ષણ", "હાઇડ્રોજન બંધ"], "ans": 1, "exp": "લંડન વિખેરણ બળ એ અસ્થાયી ડાયપોલને કારણે ઉદ્ભવતું સૌથી નબળું વાન ડર વાલ્સ બળ છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વાયુનું વર્તન આદર્શ વાયુ સમીકરણ (pV = nRT) સાથે સૌથી વધુ સુસંગત છે?", "opts": ["ઉચ્ચ દબાણ અને નીચું તાપમાન", "નીચું દબાણ અને ઉચ્ચ તાપમાન", "ઉચ્ચ દબાણ અને ઉચ્ચ તાપમાન", "નીચું દબાણ અને નીચું તાપમાન"], "ans": 1, "exp": "નીચા દબાણ અને ઉચ્ચ તાપમાને વાયુના અણુઓ વચ્ચેનું આંતરઆણ્વીય આકર્ષણ ઓછું થાય છે, જે આદર્શ વાયુ સમીકરણ સાથે સુસંગત છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું તાપમાન 27°C થી 327°C સુધી વધારવામાં આવે છે. જો પ્રારંભિક સરેરાશ ગતિ ઊર્જા E હોય, તો નવી સરેરાશ ગતિ ઊર્જા કેટલી હશે?", "opts": ["E", "2E", "3E", "4E"], "ans": 1, "exp": "સરેરાશ ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે. તાપમાન કેલ્વિનમાં બમણું થતાં ગતિ ઊર્જા પણ બમણી થાય છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વાન ડર વાલ્સ સમીકરણનું સાચું સ્વરૂપ છે?", "opts": ["P + a(n/V)² (V - nb) = nRT", "P - a(n/V)² (V + nb) = nRT", "P + a(n/V)² (V + nb) = nRT", "(P + a(n/V)²)(V - nb) = nRT"], "ans": 3, "exp": "વાન ડર વાલ્સ સમીકરણમાં દબાણમાં સુધારણા (a(n/V)²) ઉમેરવામાં આવે છે અને કદમાં સુધારણા (nb) બાદ કરવામાં આવે છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક દબાણ 2 atm અને કદ 3 લિટર છે. જો આ વાયુને સમતાપી પ્રક્રિયા દ્વારા કદ 6 લિટર કરવામાં આવે, તો નવું દબાણ કેટલું હશે? (બૉઇલના નિયમનો ઉપયોગ કરો)", "opts": ["1 atm", "2 atm", "0.5 atm", "4 atm"], "ans": 0, "exp": "બૉઇલના નિયમ મુજબ, P₁V₁ = P₂V₂. અહીં P₁ = 2 atm, V₁ = 3 L, V₂ = 6 L. તેથી P₂ = (2 × 3) / 6 = 1 atm.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ વાયુઓના પ્રસરણનું નથી?", "opts": ["અગરબત્તીની સુગંધ ઓરડામાં ફેલાવી.", "હાઇડ્રોજન વાયુ પોર્સેલિનના પાત્રમાંથી બહાર નીકળવો.", "કાર્બન ડાયોક્સાઇડ વાયુ પાણીમાં ઓગળવો.", "ઓરડામાં ક્લોરિન વાયુ છોડતાં તે સમગ્ર ઓરડામાં ફેલાવો."], "ans": 2, "exp": "કાર્બન ડાયોક્સાઇડ વાયુ પાણીમાં ઓગળવો એ પ્રસરણ નહીં, પરંતુ દ્રાવણની પ્રક્રિયા છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વાન ડર વાલ્સ બળનું ઉદાહરણ નથી?", "opts": ["હાઇડ્રોજન બંધન", "લંડન પ્રસરણ બળ", "દ્વિધ્રુવ-દ્વિધ્રુવ આકર્ષણ", "દ્વિધ્રુવ-પ્રેરિત દ્વિધ્રુવ આકર્ષણ"], "ans": 0, "exp": "હાઇડ્રોજન બંધન એ વાન ડર વાલ્સ બળ નથી, તે એક વિશિષ્ટ પ્રકારનું આંતરઆણ્વીય બળ છે જે N, O અથવા F સાથે જોડાયેલા હાઇડ્રોજન પરમાણુને કારણે ઉદ્ભવે છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક કદ 2 લિટર છે અને દબાણ 1 atm છે. જો તાપમાન અચળ રાખીને દબાણ 2 atm કરવામાં આવે, તો નવું કદ કેટલું હશે? (બૉઇલનો નિયમ લાગુ કરો)", "opts": ["1 લિટર", "2 લિટર", "3 લિટર", "4 લિટર"], "ans": 0, "exp": "બૉઇલના નિયમ મુજબ, અચળ તાપમાને વાયુનું કદ દબાણના વ્યસ્ત પ્રમાણમાં હોય છે. તેથી, દબાણ બમણું કરતાં કદ અડધું થશે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વાયુનું વર્તન આદર્શ વાયુ સમીકરણ PV = nRT સાથે સંપૂર્ણ રીતે સુસંગત નથી?", "opts": ["ઓછા દબાણે અને ઊંચા તાપમાને વાયુ", "ઊંચા દબાણે અને નીચા તાપમાને વાયુ", "એકપરમાણ્વીય વાયુ", "દ્વિપરમાણ્વીય વાયુ"], "ans": 1, "exp": "ઊંચા દબાણે અને નીચા તાપમાને વાયુઓનું વર્તન આદર્શ વાયુ સમીકરણથી વિચલિત થાય છે કારણ કે આંતરઆણ્વીય બળો અને વાયુના અણુઓનું કદ અસરકારક બને છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન વાયુઓના વાસ્તવિક વર્તન માટે યોગ્ય નથી?", "opts": ["વાસ્તવિક વાયુઓ નીચા તાપમાને અને ઊંચા દબાણે આદર્શ વાયુ સમીકરણનું પાલન કરતા નથી.", "વાસ્તવિક વાયુઓ માટે વાન ડર વાલ્સ સમીકરણ (P + a(n/V)²)(V - nb) = nRT લાગુ પડે છે.", "વાસ્તવિક વાયુઓના અણુઓ વચ્ચે આકર્ષણ બળ હોતું નથી અને તેમનું કદ શૂન્ય ગણી શકાય છે.", "વાસ્તવિક વાયુઓનું વર્તન આદર્શ વાયુ કરતાં અલગ હોય છે કારણ કે તેમના અણુઓ વચ્ચે આંતરઆણ્વીય બળો હોય છે."], "ans": 2, "exp": "વાસ્તવિક વાયુઓના અણુઓ વચ્ચે આકર્ષણ બળ હોય છે અને તેમનું કદ શૂન્ય ગણી શકાતું નથી, જે વાન ડર વાલ્સ સમીકરણમાં સુધારા તરીકે દર્શાવેલ છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વાયુના ગતિજ સિદ્ધાંતને લાગુ પડતું નથી?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "વાયુના અણુઓ વચ્ચે આકર્ષણ બળ અવગણી શકાય તેટલું નાનું હોય છે.", "વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા તેના નિરપેક્ષ તાપમાનના સમપ્રમાણમાં હોય છે.", "વાયુના અણુઓ એકબીજા સાથે અથડાતા નથી અને પાત્રની દીવાલ સાથે સંપૂર્ણ સ્થિતિસ્થાપક અથડામણ કરે છે."], "ans": 3, "exp": "વાયુના ગતિજ સિદ્ધાંત મુજબ, વાયુના અણુઓ એકબીજા સાથે અને પાત્રની દીવાલ સાથે અથડામણ કરે છે, પરંતુ આ અથડામણ સંપૂર્ણ સ્થિતિસ્થાપક હોતી નથી.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું કદ 5 લિટર અને તાપમાન 27°C છે. જો દબાણ અચળ રાખી તાપમાન 127°C કરવામાં આવે, તો નવું કદ કેટલું થશે? (ઑગસ્ટના નિયમનો ઉપયોગ કરો)", "opts": ["6.67 લિટર", "3.75 લિટર", "7.5 લિટર", "5.83 લિટર"], "ans": 0, "exp": "ઑગસ્ટના નિયમ મુજબ, V₁/T₁ = V₂/T₂. અહીં T₁ = 300 K, T₂ = 400 K. તેથી V₂ = (5 × 400)/300 = 6.67 લિટર.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક વાયુનું પ્રારંભિક કદ 4 લિટર અને દબાણ 2 atm છે. જો તાપમાન અચળ રાખીને દબાણ ઘટાડીને 1 atm કરવામાં આવે, તો વાયુનું નવું કદ કેટલું થશે? (બૉઇલના નિયમનો ઉપયોગ કરો)", "opts": ["2 લિટર", "4 લિટર", "6 લિટર", "8 લિટર"], "ans": 3, "exp": "બૉઇલના નિયમ મુજબ, P₁V₁ = P₂V₂. અહીં P₁ = 2 atm, V₁ = 4 L, P₂ = 1 atm, તેથી V₂ = (2 × 4) / 1 = 8 L.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન વાન ડર વાલ્સ સમીકરણ (P + a(n/V)²)(V - nb) = nRT માટે ખોટું છે?", "opts": ["'a' વાયુના અણુઓ વચ્ચેના આકર્ષણ બળનું માપ છે.", "'b' વાયુના અણુઓનું અસંકોચ્ય કદ દર્શાવે છે.", "આ સમીકરણ માત્ર આદર્શ વાયુઓ માટે જ લાગુ પડે છે.", "આ સમીકરણ વાસ્તવિક વાયુઓના વર્તનને વધુ સારી રીતે સમજાવે છે."], "ans": 2, "exp": "વાન ડર વાલ્સ સમીકરણ વાસ્તવિક વાયુઓના વર્તનને સમજાવવા માટે વિકસાવવામાં આવ્યું છે, જ્યારે આદર્શ વાયુ સમીકરણ માત્ર આદર્શ વાયુઓ માટે લાગુ પડે છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન વાન ડર વાલ્સ બળો માટે ખોટું છે?", "opts": ["વાન ડર વાલ્સ બળો એ વાયુ અણુઓ વચ્ચેના આકર્ષણ બળો છે.", "આ બળોનું મૂલ્ય અણુઓના કદ અને ધ્રુવીયતા પર આધારિત છે.", "વાન ડર વાલ્સ બળો એ રાસાયણિક બંધન કરતાં વધુ મજબૂત હોય છે.", "આ બળો વાયુઓના પ્રવાહીકરણ માટે જવાબદાર છે."], "ans": 2, "exp": "વાન ડર વાલ્સ બળો એ રાસાયણિક બંધન (જેમ કે સહસંયોજક બંધ) કરતાં ઘણાં નબળાં હોય છે, જે માત્ર આંતરઆણ્વીય આકર્ષણ માટે જવાબદાર છે.", "chapter": "દ્રવ્યની અવસ્થાઓ", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "દ્રવ્યની અવસ્થાઓ Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
