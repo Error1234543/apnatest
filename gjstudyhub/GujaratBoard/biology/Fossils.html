@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fossils</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Fossils</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Fossils</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે કોઈ જીવાશ્મ (ફોસિલ)માં હાડકાંની જગ્યાએ ખનિજ પદાર્થોનું સ્થાનાંતરણ થાય છે, ત્યારે તેને કયા પ્રકારનું જીવાશ્મ કહેવાય છે?", "opts": ["મૂળ જીવાશ્મ (Original fossil)", "છાપ જીવાશ્મ (Impression fossil)", "ખનિજીકરણ જીવાશ્મ (Petrified fossil)", "અવશેષ જીવાશ્મ (Trace fossil)"], "ans": 2, "exp": "ખનિજીકરણ જીવાશ્મમાં, જીવના મૃત અવશેષોમાં ખનિજ પદાર્થો ભરાઈ જાય છે, જેને કારણે હાડકાં અથવા અન્ય કઠણ ભાગો ખનિજમાં પરિવર્તિત થાય છે. મૂળ જીવાશ્મમાં જીવના મૂળ પદાર્થો જળવાયેલા હોય છે, છાપ જીવાશ્મમાં જીવના છાપ અથવા નિશાન હોય છે, અને અવશેષ જીવાશ્મમાં જીવના પગલાં અથવા અન્ય ક્રિયાઓના પુરાવા હોય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું જીવાશ્મ પુરાવો ઉત્ક્રાંતિના સિદ્ધાંતને સપોર્ટ કરતું નથી?", "opts": ["અર્થોસ્ટોન (Archaeopteryx)", "ટિક્ટાલિક (Tiktaalik)", "લિવિંગ ફોસિલ (Living fossil)", "ડાયનોસોરના અસ્થિ (Dinosaur bones)"], "ans": 3, "exp": "ડાયનોસોરના અસ્થિ ફક્ત મૃત જીવના અવશેષો છે, જે ઉત્ક્રાંતિના સિદ્ધાંતને સીધો સપોર્ટ કરતા નથી. અર્થોસ્ટોન અને ટિક્ટાલિક અવકાશી જીવાશ્મો છે જે સંક્રમણકાળના પુરાવા પૂરા પાડે છે, જ્યારે લિવિંગ ફોસિલ જીવંત પ્રજાતિઓ છે જે લાખો વર્ષોથી અપરિવર્તિત રહી છે અને ઉત્ક્રાંતિના પુરાવા તરીકે ગણાય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જીવાશ્મોની ઉંમર નક્કી કરવા માટે કયી પદ્ધતિ વપરાય છે જ્યારે જીવાશ્મમાં કાર્બન-14ની માત્રા અત્યંત ઓછી હોય છે?", "opts": ["કાર્બન ડેટિંગ (Carbon dating)", "પોટેશિયમ-આર્ગન ડેટિંગ (Potassium-Argon dating)", "યુરેનિયમ-લેડ ડેટિંગ (Uranium-Lead dating)", "થર્મોલ્યુમિનેસન્સ ડેટિંગ (Thermoluminescence dating)"], "ans": 2, "exp": "કાર્બન ડેટિંગ ફક્ત 50,000 વર્ષ જૂના જીવાશ્મો માટે યોગ્ય છે, જ્યારે પોટેશિયમ-આર્ગન અને થર્મોલ્યુમિનેસન્સ ડેટિંગ મધ્યમ કાળ માટે વપરાય છે. યુરેનિયમ-લેડ ડેટિંગ અત્યંત જૂના જીવાશ્મો (લાખો વર્ષ જૂના) માટે વપરાય છે, જ્યારે કાર્બન-14ની માત્રા અત્યંત ઓછી હોય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન જીવાશ્મો વિશે સાચું નથી?", "opts": ["જીવાશ્મો સામાન્ય રીતે ચૂનાના પથરામાં જોવા મળે છે.", "જીવાશ્મો ફક્ત જમીનમાં જ મળી શકે છે.", "જીવાશ્મો ઉત્ક્રાંતિના ઇતિહાસને સમજવામાં મદદ કરે છે.", "જીવાશ્મો ક્યારેક અપૂર્ણ હોઈ શકે છે."], "ans": 1, "exp": "જીવાશ્મો ફક્ત જમીનમાં જ મળી શકે છે તે વિધાન ખોટું છે. જીવાશ્મો જમીન, પાણી, અને ક્યારેક બરફમાં પણ મળી શકે છે. ચૂનાના પથરામાં જીવાશ્મો સામાન્ય રીતે જોવા મળે છે, અને તેઓ ઉત્ક્રાંતિના ઇતિહાસને સમજવામાં મહત્વની ભૂમિકા ભજવે છે. અપૂર્ણ જીવાશ્મો પણ ક્યારેક મળી શકે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જીવાશ્મોના અભ્યાસને શું કહેવાય છે?", "opts": ["પેલિઓન્ટોલોજી (Paleontology)", "આર્કિયોલોજી (Archaeology)", "જીવવિજ્ઞાન (Biology)", "ભૂગર્ભશાસ્ત્ર (Geology)"], "ans": 0, "exp": "જીવાશ્મોના અભ્યાસને પેલિઓન્ટોલોજી કહેવાય છે. આર્કિયોલોજી માનવ સંસ્કૃતિ અને ઇતિહાસના અભ્યાસ સાથે સંબંધિત છે, જીવવિજ્ઞાન જીવનના અભ્યાસ સાથે સંબંધિત છે, અને ભૂગર્ભશાસ્ત્ર પૃથ્વીના અભ્યાસ સાથે સંબંધિત છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું જીવાશ્મ પુરાવો 'સ્થાનિક વિતરણ' (endemic distribution) ને દર્શાવે છે, જે ઉત્ક્રાંતિના અભ્યાસમાં મહત્વપૂર્ણ છે?", "opts": ["એમોનાઇટ્સના જીવાશ્મો, જે વિશ્વભરમાં મળી આવે છે", "લેમરસ (Lemurs) ના જીવાશ્મો, જે માત્ર મેડેગાસ્કરમાં મળી આવે છે", "ટ્રાયલોબાઇટ્સના જીવાશ્મો, જે પેલિઓઝોઇક યુગમાં વિશ્વવ્યાપી હતા", "ડાયનોસોરના અવશેષો, જે એશિયા અને ઉત્તર અમેરિકામાં મળી આવે છે"], "ans": 1, "exp": "સ્થાનિક વિતરણ (endemic distribution) એટલે એવી જાતિઓ જે કોઈ એક વિશિષ્ટ ભૌગોલિક વિસ્તારમાં જ મર્યાદિત હોય છે. લેમરસ (Lemurs) ના જીવાશ્મો માત્ર મેડેગાસ્કરમાં મળી આવે છે, જે સ્થાનિક વિતરણનું ઉદાહરણ છે. એમોનાઇટ્સ, ટ્રાયલોબાઇટ્સ અને ડાયનોસોરના જીવાશ્મો વિશ્વભરમાં અથવા વિશાળ વિસ્તારમાં મળી આવે છે, જે સ્થાનિક વિતરણને દર્શાવતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જીવાશ્મોના અભ્યાસ દરમિયાન, 'સૂક્ષ્મ જીવાશ્મ' (microfossils) ની ઓળખ માટે કયી પદ્ધતિ સૌથી યોગ્ય છે?", "opts": ["કાર્બન-14 ડેટિંગ", "ઇલેક્ટ્રોન સૂક્ષ્મદર્શક (Electron Microscope)", "સ્ટ્રેટીગ્રાફી (Stratigraphy)", "પેલીનોલોજી (Palynology)"], "ans": 3, "exp": "સૂક્ષ્મ જીવાશ્મો (microfossils) જેમ કે પરાગકણો, બેક્ટરિયા, અને ફોરામિનિફેરા જેવા સૂક્ષ્મ જીવોના અવશેષો છે. પેલીનોલોજી (Palynology) એ પરાગકણો અને સૂક્ષ્મ જીવાશ્મોના અભ્યાસ માટે વપરાતી પદ્ધતિ છે. કાર્બન-14 ડેટિંગ ઉંમર નક્કી કરવા માટે, ઇલેક્ટ્રોન સૂક્ષ્મદર્શક સૂક્ષ્મ રચનાઓ જોવા માટે, અને સ્ટ્રેટીગ્રાફી ચટ્ટાનોના સ્તરોના અભ્યાસ માટે વપરાય છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન 'જીવંત જીવાશ્મ' (living fossil) વિશે સાચું છે?", "opts": ["જીવંત જીવાશ્મો એવા જીવો છે જેના જીવાશ્મો મળી આવ્યા નથી", "કોએલેકેન્થ (Coelacanth) એ જીવંત જીવાશ્મનું ઉદાહરણ છે, જે 400 મિલિયન વર્ષ પહેલાંના જીવો જેવું લાગે છે", "જીવંત જીવાશ્મો એવા જીવો છે જે હાલમાં વિલુપ્ત થઈ ગયા છે", "જીવંત જીવાશ્મો માત્ર વનસ્પતિઓમાં જ મળી આવે છે"], "ans": 1, "exp": "જીવંત જીવાશ્મો એવા જીવો છે જે લાખો વર્ષો પહેલાંના જીવો જેવી રચના ધરાવે છે અને આજે પણ જીવિત છે. કોએલેકેન્થ (Coelacanth) એ જીવંત જીવાશ્મનું ઉદાહરણ છે, જે 400 મિલિયન વર્ષ પહેલાંના જીવો જેવું લાગે છે. વિકલ્પ A, C, અને D સાચા નથી કારણ કે જીવંત જીવાશ્મોના જીવાશ્મો મળી આવ્યા છે, તેઓ વિલુપ્ત નથી, અને તેઓ પ્રાણીઓ અને વનસ્પતિઓ બંનેમાં મળી આવે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જીવાશ્મોના અભ્યાસ દરમિયાન, 'ટ્રેસ જીવાશ્મ' (trace fossil) ની ઓળખ માટે કયું ઉદાહરણ યોગ્ય છે?", "opts": ["ડાયનોસોરના હાડકાં", "ડાયનોસોરના પગના પગલાં", "એમોનાઇટ્સના ખોખા", "મેમથના દાંત"], "ans": 1, "exp": "ટ્રેસ જીવાશ્મ (trace fossil) એ જીવો દ્વારા છોડવામાં આવેલા ચિહ્નો અથવા નિશાનીઓ છે, જેમ કે પગલાં, બિલો, અથવા મળના નિશાન. ડાયનોસોરના પગના પગલાં એ ટ્રેસ જીવાશ્મનું ઉદાહરણ છે. ડાયનોસોરના હાડકાં, એમોનાઇટ્સના ખોખા, અને મેમથના દાંત એ બોડી જીવાશ્મ (body fossil) છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું જીવાશ્મ પુરાવો 'સમયગાળા નક્કી કરવા' (relative dating) માટે સૌથી ઉપયોગી છે?", "opts": ["ઇન્ડેક્સ જીવાશ્મ (Index fossil)", "કાર્બન-14 ડેટિંગ", "યુરેનિયમ-લેડ ડેટિંગ", "પોટેશિયમ-આર્ગન ડેટિંગ"], "ans": 0, "exp": "સમયગાળા નક્કી કરવા (relative dating) માટે ઇન્ડેક્સ જીવાશ્મ (Index fossil) સૌથી ઉપયોગી છે, કારણ કે તેઓ વિશિષ્ટ સમયગાળા સાથે સંકળાયેલા હોય છે અને વિશ્વભરમાં મળી આવે છે. કાર્બન-14, યુરેનિયમ-લેડ, અને પોટેશિયમ-આર્ગન ડેટિંગ એ અબસોલ્યુટ ડેટિંગ પદ્ધતિઓ છે, જે જીવાશ્મની અચોક્કસ ઉંમર નક્કી કરવા માટે વપરાય છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું જીવાશ્મ પુરાવો 'સંક્રાંતિક જીવાશ્મ' (transitional fossil) તરીકે ઓળખાય છે, જે બે જૂથની વચ્ચેની કડી દર્શાવે છે?", "opts": ["ટાયરેનોસોરસ રેક્સ", "આર્કિયોપ્ટેરિક્સ", "ટ્રાયલોબાઇટ", "એમોનાઇટ"], "ans": 1, "exp": "બ) આર્કિયોપ્ટેરિક્સ સાચું છે કારણ કે તે સરીસૃપ અને પક્ષીઓ વચ્ચેની કડી તરીકે ઓળખાય છે, જેને સંક્રાંતિક જીવાશ્મ કહેવાય છે. અ) ટાયરેનોસોરસ રેક્સ એક ડાયનોસોર છે, જે સંક્રાંતિક જીવાશ્મ નથી. સ) ટ્રાયલોબાઇટ અને ડ) એમોનાઇટ એ પ્રાચીન સમુદ્રી જીવો છે, જે સંક્રાંતિક જીવાશ્મ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જીવાશ્મોના અભ્યાસ દરમિયાન, 'પેટ્રિફાઇડ જીવાશ્મ' (petrified fossil) ની રચના કયા પ્રક્રિયા દ્વારા થાય છે?", "opts": ["કાર્બનિક પદાર્થોનું સંપૂર્ણ વિઘટન", "ખનિજ પદાર્થોનું સ્થાનાંતરણ (permineralization)", "હાડકાંનું સીધું જતન", "કોઈપણ રાસાયણિક પ્રક્રિયા વિના સૂકવણી"], "ans": 1, "exp": "બ) ખનિજ પદાર્થોનું સ્થાનાંતરણ (permineralization) સાચું છે કારણ કે પેટ્રિફાઇડ જીવાશ્મમાં મૂળ કાર્બનિક પદાર્થો ખનિજ પદાર્થો દ્વારા બદલાય છે. અ) કાર્બનિક પદાર્થોનું સંપૂર્ણ વિઘટન એ પેટ્રિફિકેશન નથી. સ) હાડકાંનું સીધું જતન એ પેટ્રિફાઇડ જીવાશ્મ નથી. ડ) કોઈપણ રાસાયણિક પ્રક્રિયા વિના સૂકવણી એ પેટ્રિફિકેશન નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન 'જીવાશ્મ વર્ગીકરણ' (fossil classification) વિશે સાચું છે?", "opts": ["જીવાશ્મોને ફક્ત તેમની ઉંમરના આધારે વર્ગીકૃત કરવામાં આવે છે.", "જીવાશ્મોને તેમની રચના, સ્થાન અને જીવવિજ્ઞાનીય લક્ષણોના આધારે વર્ગીકૃત કરવામાં આવે છે.", "જીવાશ્મોને ફક્ત તેમની આકારના આધારે વર્ગીકૃત કરવામાં આવે છે.", "જીવાશ્મોને ફક્ત તેમની રાસાયણિક રચનાના આધારે વર્ગીકૃત કરવામાં આવે છે."], "ans": 1, "exp": "બ) જીવાશ્મોને તેમની રચના, સ્થાન અને જીવવિજ્ઞાનીય લક્ષણોના આધારે વર્ગીકૃત કરવામાં આવે છે એ સાચું છે. અ) ફક્ત ઉંમરના આધારે વર્ગીકરણ અપૂરતું છે. સ) ફક્ત આકારના આધારે વર્ગીકરણ અપૂરતું છે. ડ) ફક્ત રાસાયણિક રચનાના આધારે વર્ગીકરણ અપૂરતું છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું જીવાશ્મ 'સૂક્ષ્મ જીવાશ્મ' (microfossil) નું ઉદાહરણ છે?", "opts": ["ડાયનોસોરના હાડકાં", "ફોરામિનિફેરા", "મેમથના દાંત", "એમોનાઇટના ખોખા"], "ans": 1, "exp": "બ) ફોરામિનિફેરા સાચું છે કારણ કે તે સૂક્ષ્મ જીવાશ્મ છે, જે સૂક્ષ્મદર્શક યંત્ર દ્વારા જોઈ શકાય છે. અ) ડાયનોસોરના હાડકાં મોટા જીવાશ્મ છે. સ) મેમથના દાંત મોટા જીવાશ્મ છે. ડ) એમોનાઇટના ખોખા મોટા જીવાશ્મ છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જીવાશ્મોના અભ્યાસ દરમિયાન, 'સંરક્ષિત જીવાશ્મ' (preserved fossil) ની રચના કયા પરિસ્થિતિમાં સૌથી વધુ સંભવિત છે?", "opts": ["ઉચ્ચ તાપમાન અને દબાણ વાળા વાતાવરણમાં", "ઓક્સિજનની અછત વાળા વાતાવરણમાં", "ખૂબ જ આર્દ્ર વાતાવરણમાં", "ખૂબ જ શુષ્ક વાતાવરણમાં"], "ans": 1, "exp": "બ) ઓક્સિજનની અછત વાળા વાતાવરણમાં સંરક્ષિત જીવાશ્મની રચના સૌથી વધુ સંભવિત છે કારણ કે ઓક્સિજનની અછતથી કાર્બનિક પદાર્થોનું વિઘટન ધીમું થાય છે. અ) ઉચ્ચ તાપમાન અને દબાણ વાળા વાતાવરણમાં જીવાશ્મ સંરક્ષણ મુશ્કેલ છે. સ) ખૂબ જ આર્દ્ર વાતાવરણમાં જીવાશ્મ સંરક્ષણ મુશ્કેલ છે. ડ) ખૂબ જ શુષ્ક વાતાવરણમાં જીવાશ્મ સંરક્ષણ મુશ્કેલ છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "એક સંશોધકને એક જીવાશ્મ મળ્યું છે જેમાં પ્રાણીના શરીરનો આકાર તો જળવાયો છે, પરંતુ તેના આંતરિક ભાગો સંપૂર્ણપણે ખનિજોથી ભરાઈ ગયા છે. આ જીવાશ્મને 'પેટ્રિફાઇડ જીવાશ્મ' તરીકે ઓળખવામાં આવે છે. આ પ્રક્રિયામાં ખનિજોનું સ્થાનાંતરણ કયા પ્રકારના ખડકોમાં સૌથી વધુ જોવા મળે છે?", "opts": ["આગ્નેય ખડકો (Igneous rocks)", "રૂપાંતરિત ખડકો (Metamorphic rocks)", "જળકૃત ખડકો (Sedimentary rocks)", "અપક્ષયિત ખડકો (Weathered rocks)"], "ans": 2, "exp": "પેટ્રિફાઇડ જીવાશ્મની રચના જળકૃત ખડકોમાં થાય છે કારણ કે આ ખડકોના સ્તરોમાં ખનિજયુક્ત પાણી પ્રવેશીને કાર્બનિક પદાર્થોનું સ્થાનાંતરણ કરે છે. આગ્નેય ખડકોમાં ગરમી અને દબાણને કારણે જીવાશ્મો નાશ પામે છે, રૂપાંતરિત ખડકોમાં ખનિજોનું પુનર્ગઠન થાય છે જે જીવાશ્મોને નષ્ટ કરે છે, અને અપક્ષયિત ખડકોમાં જીવાશ્મો સચવાતા નથી.", "ref": "Std 11 - પ્રકરણ 7: ઉત્ક્રાંતિના પુરાવા", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ 'ટ્રેસ જીવાશ્મ' (trace fossil) નું નથી, પરંતુ તેને 'શરીર જીવાશ્મ' (body fossil) તરીકે વર્ગીકૃત કરવામાં આવે છે?", "opts": ["ડાયનાસોરના પગલાંના નિશાન", "કીડાની બિલરચના", "પ્રાચીન વૃક્ષના થડનું સ્થાનાંતરિત અવશેષ", "પ્રાણીના મળના અવશેષ (coprolite)"], "ans": 2, "exp": "પ્રાચીન વૃક્ષના થડનું સ્થાનાંતરિત અવશેષ શરીર જીવાશ્મ છે કારણ કે તે વનસ્પતિના શરીરનો ભાગ છે. બાકીના વિકલ્પો ટ્રેસ જીવાશ્મ છે કારણ કે તે પ્રાણીઓની પ્રવૃત્તિના નિશાન છે, શરીરના ભાગ નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "'આર્કિયોપ્ટેરિક્સ' (Archaeopteryx) ને સંક્રાંતિક જીવાશ્મ (transitional fossil) તરીકે ઓળખવામાં આવે છે કારણ કે તે કયા બે વર્ગના પ્રાણીઓ વચ્ચેની કડી દર્શાવે છે?", "opts": ["માછલી અને ઉભયજીવી", "સરીસૃપ અને પક્ષી", "પક્ષી અને સસ્તન", "ઉભયજીવી અને સરીસૃપ"], "ans": 1, "exp": "આર્કિયોપ્ટેરિક્સ સરીસૃપ અને પક્ષીઓ વચ્ચેની સંક્રાંતિક કડી છે કારણ કે તેનામાં સરીસૃપના લક્ષણો (દાંત, પૂંછડી) અને પક્ષીઓના લક્ષણો (પીંછા, પાંખો) બંને જોવા મળે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે આર્કિયોપ્ટેરિક્સ માછલી-ઉભયજીવી, પક્ષી-સસ્તન કે ઉભયજીવી-સરીસૃપ વચ્ચેની કડી નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક જીવાશ્મમાં કાર્બન-14ની માત્રા તેના મૂળ પ્રમાણના 1/8 જેટલી જોવા મળે છે. જો કાર્બન-14નો અર્ધઆયુષ્ય સમય 5730 વર્ષ હોય, તો આ જીવાશ્મની આશરે ઉંમર કેટલી હશે?", "opts": ["5730 વર્ષ", "11460 વર્ષ", "17190 વર્ષ", "22920 વર્ષ"], "ans": 2, "exp": "કાર્બન-14ની માત્રા 1/8 થઈ ગઈ છે, જેનો અર્થ છે કે ત્રણ અર્ધઆયુષ્ય સમય વીતી ગયા છે (1 → 1/2 → 1/4 → 1/8). તેથી, કુલ સમય = 3 × 5730 = 17190 વર્ષ. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ એક કે બે અર્ધઆયુષ્ય સમય દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 14: પર્યાવરણીય રસાયણશાસ્ત્ર", "ch": ""}, {"q": "જીવાશ્મ અભ્યાસ દરમિયાન, 'કોપ્રોલાઇટ' (coprolite) ની ઓળખ કયા પ્રકારના જીવાશ્મ તરીકે થાય છે અને તે કયા હેતુ માટે મહત્વપૂર્ણ છે?", "opts": ["તે એક પ્રકારનો 'શરીર જીવાશ્મ' છે અને તે પ્રાણીની આહારની આદતો સમજવા માટે ઉપયોગી છે", "તે એક પ્રકારનો 'ટ્રેસ જીવાશ્મ' છે અને તે પ્રાણીની હલનચલનની માહિતી આપે છે", "તે એક પ્રકારનો 'સૂક્ષ્મ જીવાશ્મ' છે અને તે વનસ્પતિની ઉત્ક્રાંતિ સમજવા માટે ઉપયોગી છે", "તે એક પ્રકારનો 'પેટ્રિફાઇડ જીવાશ્મ' છે અને તે ખનિજોની રચના સમજવા માટે ઉપયોગી છે"], "ans": 0, "exp": "કોપ્રોલાઇટ એ પ્રાણીના મળના જીવાશ્મીકરણથી બનેલો 'શરીર જીવાશ્મ' છે, જે પ્રાણીની આહારની આદતો અને પાચન તંત્ર વિશે માહિતી આપે છે. વિકલ્પ B ખોટો છે કારણ કે કોપ્રોલાઇટ હલનચલન વિશે માહિતી આપતું નથી. વિકલ્પ C ખોટો છે કારણ કે કોપ્રોલાઇટ સૂક્ષ્મ જીવાશ્મ નથી અને વનસ્પતિની ઉત્ક્રાંતિ સાથે સંબંધિત નથી. વિકલ્પ D ખોટો છે કારણ કે કોપ્રોલાઇટ પેટ્રિફાઇડ જીવાશ્મ નથી અને ખનિજોની રચના સમજવા માટે ઉપયોગી નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
