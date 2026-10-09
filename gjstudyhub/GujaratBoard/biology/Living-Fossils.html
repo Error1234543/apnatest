@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Living Fossils</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Living Fossils</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Living Fossils</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયું સજીવ 'લિવિંગ ફોસિલ' તરીકે ઓળખાય છે પરંતુ તેની ઉત્ક્રાંતિની પ્રક્રિયા અન્ય કરતાં અલગ રીતે થઈ છે કારણ કે તેના વર્ગના મોટાભાગના સભ્યો લુપ્ત થઈ ગયા છે?", "opts": ["પેરામેશિયમ (Paramecium)", "લેટીમેરિયા (Latimeria)", "ગિંકગો બિલોબા (Ginkgo biloba)", "લિંગુલા (Lingula)"], "ans": 1, "exp": "લેટીમેરિયા (Latimeria) એ કોએલાકેન્થ (Coelacanth) માછલી છે જેને 'લિવિંગ ફોસિલ' માનવામાં આવે છે કારણ કે તેના વર્ગના અન્ય સભ્યો લુપ્ત થઈ ગયા છે અને તે લગભગ ૪૦ કરોડ વર્ષથી અપરિવર્તિત રહી છે. પેરામેશિયમ એકકોષી પ્રજીવ છે જે લિવિંગ ફોસિલ નથી. ગિંકગો બિલોબા વનસ્પતિ છે જે લિવિંગ ફોસિલ છે પરંતુ તેની ઉત્ક્રાંતિની પ્રક્રિયા અલગ છે. લિંગુલા એ બ્રેકિયોપોડ છે જે લિવિંગ ફોસિલ છે પરંતુ તેની ઉત્ક્રાંતિની પ્રક્રિયા લેટીમેરિયા જેવી નથી.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા સજીવોની લાક્ષણિકતા નીચેના પૈકી કઈ નથી?", "opts": ["તેમની ઉત્ક્રાંતિની પ્રક્રિયા ખૂબ જ ધીમી હોય છે", "તેમના વર્ગના મોટાભાગના સભ્યો લુપ્ત થઈ ગયા હોય છે", "તેઓ આધુનિક યુગમાં પણ અસ્તિત્વ ધરાવે છે પરંતુ તેમના પૂર્વજો જેવા જ દેખાય છે", "તેઓ માત્ર અશ્મિભૂત સ્વરૂપમાં જ મળી આવે છે"], "ans": 3, "exp": "લિવિંગ ફોસિલ એવા સજીવો છે જે આધુનિક યુગમાં પણ અસ્તિત્વ ધરાવે છે અને તેમના પૂર્વજો જેવા જ દેખાય છે, પરંતુ તેઓ અશ્મિભૂત સ્વરૂપમાં નહીં, પરંતુ જીવંત સ્વરૂપમાં મળી આવે છે. અન્ય વિકલ્પો લિવિંગ ફોસિલની લાક્ષણિકતાઓ છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: \n(1) લિવિંગ ફોસિલ સજીવોની ઉત્ક્રાંતિની પ્રક્રિયા ખૂબ જ ઝડપી હોય છે. \n(2) ગિંકગો બિલોબા એ વનસ્પતિ જગતનું લિવિંગ ફોસિલ છે. \n(3) લેટીમેરિયા એ માછલી છે જે લગભગ ૬ કરોડ વર્ષથી અપરિવર્તિત છે. \nઉપરોક્ત વિધાનોમાંથી કયું/કયા સાચું/સાચાં છે?", "opts": ["માત્ર 2", "1 અને 2", "2 અને 3", "માત્ર 3"], "ans": 0, "exp": "વિધાન (1) ખોટું છે કારણ કે લિવિંગ ફોસિલની ઉત્ક્રાંતિની પ્રક્રિયા ખૂબ જ ધીમી હોય છે. વિધાન (2) સાચું છે કારણ કે ગિંકગો બિલોબા વનસ્પતિ જગતનું લિવિંગ ફોસિલ છે. વિધાન (3) ખોટું છે કારણ કે લેટીમેરિયા લગભગ ૪૦ કરોડ વર્ષથી અપરિવર્તિત છે, ૬ કરોડ વર્ષથી નહીં.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના પૈકી કયું જોડકું ખોટું છે?", "opts": ["લિંગુલા - બ્રેકિયોપોડ", "નિયોપિલિના - મોલસ્કા", "પેરામેશિયમ - પ્રજીવ", "ગિંકગો બિલોબા - આવૃત્તબીજી વનસ્પતિ"], "ans": 3, "exp": "ગિંકગો બિલોબા એ અનાવૃત્તબીજી વનસ્પતિ છે, આવૃત્તબીજી વનસ્પતિ નહીં. અન્ય તમામ જોડકાં સાચાં છે: લિંગુલા બ્રેકિયોપોડ છે, નિયોપિલિના મોલસ્કા છે, અને પેરામેશિયમ પ્રજીવ છે.", "ref": "Std 11 - પ્રકરણ 3: વનસ્પતિ સૃષ્ટિ, Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા સજીવોના સંદર્ભમાં નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["તેઓ તેમના પૂર્વજોની સરખામણીમાં ખૂબ જ ઓછા ફેરફારો સાથે અસ્તિત્વ ધરાવે છે", "તેમની ઉત્ક્રાંતિની પ્રક્રિયા ખૂબ જ ઝડપી હોય છે જેના કારણે તેઓ ટકી રહે છે", "તેમના વર્ગના મોટાભાગના સભ્યો લુપ્ત થઈ ગયા હોય છે", "તેઓ ઉત્ક્રાંતિના અભ્યાસમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે"], "ans": 1, "exp": "લિવિંગ ફોસિલની ઉત્ક્રાંતિની પ્રક્રિયા ખૂબ જ ધીમી હોય છે, ઝડપી નહીં. તેઓ તેમના પૂર્વજોની સરખામણીમાં ખૂબ જ ઓછા ફેરફારો સાથે અસ્તિત્વ ધરાવે છે, તેમના વર્ગના મોટાભાગના સભ્યો લુપ્ત થઈ ગયા હોય છે, અને ઉત્ક્રાંતિના અભ્યાસમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવને 'લિવિંગ ફોસિલ' કહેવા પાછળ તેની શારીરિક રચના અને જીવનચક્રમાં મળતા અત્યંત પ્રાચીન લક્ષણોનો સૌથી મજબૂત પુરાવો મળે છે, જેમાં તેના રક્ત પરિવહન તંત્ર અને શ્વસન તંત્રની રચના આધુનિક મત્સ્યોથી ભિન્ન છે?", "opts": ["લેટિમેરિયા (Coelacanth)", "નૌટિલસ (Nautilus)", "ગિંકગો (Ginkgo biloba)", "હોર્સશૂ ક્રેબ (Horseshoe crab)"], "ans": 0, "exp": "લેટિમેરિયા (Coelacanth) એ લિવિંગ ફોસિલ છે કારણ કે તેની શારીરિક રચના, જેમ કે લોબ-ફિન (lobe-finned) અને રક્ત પરિવહન તંત્ર, આધુનિક મત્સ્યોથી ભિન્ન છે અને તે ૦૦ મિલિયન વર્ષ જૂના અવશેષો સાથે મળતું આવે છે. નૌટિલસનું શ્વસન તંત્ર અને રચના પ્રાચીન છે, પરંતુ તે મોલસ્કા (mollusks) વર્ગનું છે, જ્યારે ગિંકગો વનસ્પતિ છે અને હોર્સશૂ ક્રેબ એ આર્થ્રોપોડ છે, જેની રચના લેટિમેરિયા જેટલી પ્રાચીન નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા ગિંકગો (Ginkgo biloba) ની નીચેની લાક્ષણિકતાઓ પૈકી કઈ એવી છે જે તેને અન્ય આધુનિક વનસ્પતિઓથી અલગ પાડે છે અને તેની પ્રાચીનતા સૂચવે છે?", "opts": ["તેના પર્ણોનો આકાર પખી જેવો હોય છે અને તે દ્વિલિંગી (dioecious) છે.", "તેના બીજમાં બીજાંડ (ovule) ખુલ્લા પડે છે અને તે એકલિંગી (monoecious) છે.", "તેના પર્ણો સદાબહાર (evergreen) હોય છે અને તે પવન દ્વારા પરાગનયન કરે છે.", "તેના તણાવમાં વાહક પેશીઓ (vascular tissues) નહીં હોય અને તે પાણી દ્વારા પ્રજનન કરે છે."], "ans": 0, "exp": "ગિંકગો (Ginkgo biloba) ના પર્ણોનો આકાર પખી જેવો હોય છે અને તે દ્વિલિંગી (dioecious) છે, એટલે કે નર અને માદા ફૂલ અલગ વૃક્ષો પર આવે છે. આ લક્ષણ તેને અન્ય આધુનિક વનસ્પતિઓથી અલગ પાડે છે અને તેની પ્રાચીનતા સૂચવે છે. બીજા વિકલ્પો ખોટા છે કારણ કે ગિંકગોના બીજમાં બીજાંડ ખુલ્લા પડે છે પરંતુ તે દ્વિલિંગી છે, પર્ણો સદાબહાર હોય છે પરંતુ તે પવન દ્વારા પરાગનયન કરે છે, અને તેના તણાવમાં વાહક પેશીઓ હોય છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) લિવિંગ ફોસિલ સજીવોની જનીનિક રચના (genetic makeup) આધુનિક સજીવોથી ખૂબ જ ભિન્ન હોય છે. (2) લિવિંગ ફોસિલ સજીવોની ઉત્ક્રાંતિની ગતિ ખૂબ જ ધીમી હોય છે. (3) લિવિંગ ફોસિલ સજીવો તેમના પ્રાચીન વાતાવરણ સાથે અનુકૂળન પામ્યા હોય છે. ઉપરના વિધાનો પૈકી કયા વિધાનો સત્ય છે?", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (2) અને (3)", "ફક્ત (1) અને (3)", "(1), (2) અને (3)"], "ans": 3, "exp": "લિવિંગ ફોસિલ સજીવોની જનીનિક રચના આધુનિક સજીવોથી ભિન્ન હોય છે (1), તેમની ઉત્ક્રાંતિની ગતિ ધીમી હોય છે (2), અને તેઓ તેમના પ્રાચીન વાતાવરણ સાથે અનુકૂળન પામ્યા હોય છે (3). આ તમામ વિધાનો સત્ય છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવને 'લિવિંગ ફોસિલ' કહેવા પાછળ તેની પ્રજનન પદ્ધતિ અને વિકાસની પ્રક્રિયા આધુનિક સજીવોથી ભિન્ન છે, જેમાં તેના અંડકોષ (egg cells) નું વિકાસ પાથ પ્રાચીન લક્ષણો ધરાવે છે?", "opts": ["હોર્સશૂ ક્રેબ (Horseshoe crab)", "નૌટિલસ (Nautilus)", "લેટિમેરિયા (Coelacanth)", "ગિંકગો (Ginkgo biloba)"], "ans": 1, "exp": "નૌટિલસ (Nautilus) ની પ્રજનન પદ્ધતિ અને વિકાસની પ્રક્રિયા આધુનિક સજીવોથી ભિન્ન છે. તેના અંડકોષ (egg cells) નું વિકાસ પાથ પ્રાચીન લક્ષણો ધરાવે છે, જેમ કે તેના લાર્વા (larvae) નું વિકાસ પાથ, જે તેને લિવિંગ ફોસિલ બનાવે છે. હોર્સશૂ ક્રેબ, લેટિમેરિયા, અને ગિંકગો પણ લિવિંગ ફોસિલ છે, પરંતુ તેમની પ્રજનન પદ્ધતિ અને વિકાસની પ્રક્રિયા નૌટિલસ જેટલી પ્રાચીન નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા હોર્સશૂ ક્રેબ (Horseshoe crab) ની નીચેની લાક્ષણિકતાઓ પૈકી કઈ એવી છે જે તેને અન્ય આર્થ્રોપોડથી અલગ પાડે છે અને તેની પ્રાચીનતા સૂચવે છે?", "opts": ["તેના રક્તમાં હિમોસાયનિન (hemocyanin) હોય છે અને તે પાણીમાં જીવે છે.", "તેના શરીરનો આકાર અર્ધચંદ્રાકાર હોય છે અને તેના પાંચ જોડ જાંબુઓ (appendages) હોય છે.", "તેના શરીર પર કવચ (exoskeleton) હોય છે અને તે પૃથ્વી પર જીવે છે.", "તેના શરીરમાં ફેફસા (lungs) હોય છે અને તે ઉડી શકે છે."], "ans": 1, "exp": "હોર્સશૂ ક્રેબ (Horseshoe crab) ના શરીરનો આકાર અર્ધચંદ્રાકાર હોય છે અને તેના પાંચ જોડ જાંબુઓ (appendages) હોય છે, જે તેને અન્ય આર્થ્રોપોડથી અલગ પાડે છે અને તેની પ્રાચીનતા સૂચવે છે. બીજા વિકલ્પો ખોટા છે કારણ કે હોર્સશૂ ક્રેબના રક્તમાં હિમોસાયનિન હોય છે પરંતુ તે પાણીમાં જીવે છે, તેના શરીર પર કવચ હોય છે પરંતુ તે પૃથ્વી પર જીવતું નથી, અને તેના શરીરમાં ફેફસા નથી હોય અને તે ઉડી શકતું નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના પૈકી કયા સજીવને 'લિવિંગ ફોસિલ' ગણવામાં આવે છે પરંતુ તેની પ્રજનન પદ્ધતિ અલૈંગિક (asexual) નથી?", "opts": ["સ્ટ્રોમેટોલાઇટ્સ (Stromatolites)", "ગિંકગો (Ginkgo biloba)", "હોર્સશૂ ક્રેબ (Horseshoe crab)", "કોએલેકેથ (Coelacanth)"], "ans": 1, "exp": "ગિંકગો (Ginkgo biloba) એ લિવિંગ ફોસિલ છે અને તેની પ્રજનન પદ્ધતિ લૈંગિક (sexual) છે, જ્યારે સ્ટ્રોમેટોલાઇટ્સ અલૈંગિક રીતે પ્રજનન કરે છે. હોર્સશૂ ક્રેબ અને કોએલેકેથ પણ લૈંગિક પ્રજનન કરે છે, પરંતુ ગિંકગો એ એકમાત્ર વિકલ્પ છે જે અલૈંગિક પ્રજનન નથી કરતું.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા કોએલેકેથ (Coelacanth) ની નીચેની લાક્ષણિકતાઓ પૈકી કઈ એવી છે કે જે તેને અન્ય માછલીઓથી અલગ પાડે છે?", "opts": ["તે પાણીની અંદર જ રહે છે અને શ્વસન માટે ગલફડા (gills) નો ઉપયોગ કરે છે.", "તેની પાછળની પખી (lobed fins) હાડકાંયુક્ત (bony) છે અને તેને ભૂમિ પર ચાલવાની ક્ષમતા આપે છે.", "તેની ત્વચા ખૂબ જ મજબૂત અને કવચ જેવી છે.", "તે માત્ર મીઠા પાણીમાં જ જોવા મળે છે."], "ans": 1, "exp": "કોએલેકેથની પાછળની પખી (lobed fins) હાડકાંયુક્ત છે અને તેને ભૂમિ પર ચાલવાની ક્ષમતા આપે છે, જે તેને અન્ય માછલીઓથી અલગ પાડે છે. બાકીના વિકલ્પો ખોટા છે: A) કોએલેકેથ પાણીની અંદર જ રહે છે પરંતુ તેની પખી તેને ભૂમિ પર ચાલવાની ક્ષમતા આપે છે, C) તેની ત્વચા મજબૂત નથી, D) તે ખારા પાણીમાં જોવા મળે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન લિવિંગ ફોસિલ તરીકે ઓળખાતા હોર્સશૂ ક્રેબ (Horseshoe crab) વિશે ખોટું છે?", "opts": ["તેનું રક્ત નીલું હોય છે કારણ કે તેમાં હિમોસાયનિન (hemocyanin) નામનું પ્રોટીન હોય છે.", "તેની આંખો સંવેદનશીલ હોય છે અને તે રાત્રે પણ સારી રીતે જોઈ શકે છે.", "તેની શારીરિક રચના અત્યંત જૂની છે અને તે 450 મિલિયન વર્ષથી અસ્તિત્વમાં છે.", "તેની પ્રજનન પદ્ધતિ અલૈંગિક છે અને તે મુખ્યત્વે ક્લોનિંગ દ્વારા થાય છે."], "ans": 3, "exp": "હોર્સશૂ ક્રેબની પ્રજનન પદ્ધતિ લૈંગિક છે, અલૈંગિક નહીં. બાકીના વિધાનો સાચા છે: A) તેનું રક્ત નીલું હોય છે કારણ કે હિમોસાયનિન, B) તેની આંખો સંવેદનશીલ હોય છે, C) તેની શારીરિક રચના અત્યંત જૂની છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "લિવિંગ ફોસિલ તરીકે ઓળખાતા સજીવોની ઉત્ક્રાંતિની ગતિ નીચેના પૈકી કયા કારણસર ખૂબ જ ધીમી હોય છે?", "opts": ["તેઓ ખૂબ જ સ્થિર વાતાવરણમાં રહે છે જ્યાં પર્યાવરણીય દબાણ (environmental pressure) ખૂબ જ ઓછું હોય છે.", "તેઓની જનીનિક રચના (genetic makeup) ખૂબ જ જટિલ હોય છે અને તેને બદલવું મુશ્કેલ હોય છે.", "તેઓની પ્રજનન ક્ષમતા ખૂબ જ ઓછી હોય છે અને તેઓ ખૂબ જ ધીમે ધીમે પ્રજનન કરે છે.", "તેઓની શારીરિક રચના ખૂબ જ મજબૂત હોય છે અને તેને કોઈ પણ પરિવર્તનની જરૂર નથી."], "ans": 0, "exp": "લિવિંગ ફોસિલ સજીવોની ઉત્ક્રાંતિની ગતિ ધીમી હોય છે કારણ કે તેઓ ખૂબ જ સ્થિર વાતાવરણમાં રહે છે જ્યાં પર્યાવરણીય દબાણ ખૂબ જ ઓછું હોય છે. બાકીના વિકલ્પો ખોટા છે: B) જનીનિક રચના જટિલ હોવી ઉત્ક્રાંતિની ગતિ ધીમી પાડવાનું કારણ નથી, C) પ્રજનન ક્ષમતા ઓછી હોવી પણ ઉત્ક્રાંતિની ગતિ ધીમી પાડવાનું મુખ્ય કારણ નથી, D) શારીરિક રચના મજબૂત હોવી પણ ઉત્ક્રાંતિની ગતિ ધીમી પાડવાનું કારણ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના પૈકી કયું જોડકું લિવિંગ ફોસિલ અને તેની લાક્ષણિકતા સહી રીતે દર્શાવે છે?", "opts": ["ગિંકગો - તેની પર્ણની રચના પાનખર વૃક્ષો જેવી હોય છે.", "કોએલેકેથ - તેની પખી પખીરહિત (finless) હોય છે.", "હોર્સશૂ ક્રેબ - તેનું શરીર કવચ વગરનું હોય છે.", "સ્ટ્રોમેટોલાઇટ્સ - તે સિંગલ-સેલ્યુલર (single-cellular) સજીવ છે."], "ans": 0, "exp": "ગિંકગોની પર્ણની રચના પાનખર વૃક્ષો જેવી હોય છે, જે સાચું છે. બાકીના વિકલ્પો ખોટા છે: B) કોએલેકેથની પખી હાડકાંયુક્ત અને પખીરહિત નથી, C) હોર્સશૂ ક્રેબનું શરીર કવચ ધરાવે છે, D) સ્ટ્રોમેટોલાઇટ્સ મલ્ટી-સેલ્યુલર (multi-cellular) સજીવ છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) કોએલેકેથ (Coelacanth) એ મત્સ્ય વર્ગનો સજીવ છે જેની અસ્થિઓ સંપૂર્ણપણે હાડકાંની બનેલી નથી. (2) હોર્સશૂ ક્રેબ (Horseshoe crab) એ સરીસૃપ નથી પરંતુ તેની રચના સરીસૃપ જેવી છે. (3) ગિંકગો (Ginkgo biloba) એ બીજધારી વનસ્પતિ છે જેના બીજમાં ભ્રૂણપોષ હાજર નથી. ઉપરના વિધાનો પૈકી કયા ખોટા છે?", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (2) અને (3)", "ફક્ત (1) અને (3)", "(1), (2), અને (3)"], "ans": 2, "exp": "વિધાન (1) ખોટું છે કારણ કે કોએલેકેથ (Coelacanth) એ મત્સ્ય વર્ગનો સજીવ છે અને તેની અસ્થિઓ હાડકાંની બનેલી હોય છે, પરંતુ તે લોબ-ફિન મત્સ્ય છે. વિધાન (2) ખરું છે કારણ કે હોર્સશૂ ક્રેબ (Horseshoe crab) એ સરીસૃપ નથી પરંતુ તેની રચના સરીસૃપ જેવી છે. વિધાન (3) ખોટું છે કારણ કે ગિંકગો (Ginkgo biloba) એ બીજધારી વનસ્પતિ છે અને તેના બીજમાં ભ્રૂણપોષ હાજર હોય છે. આથી, ફક્ત (1) અને (3) ખોટા છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "કોએલેકેથ (Coelacanth) ને 'લિવિંગ ફોસિલ' કહેવા પાછળ નીચેના પૈકી કયું કારણ સૌથી યોગ્ય છે?", "opts": ["તેના ફેફસા અને પાણી દ્વારા શ્વસન કરવાની ક્ષમતા", "તેની અસ્થિમાન રચના અને પૂર્વજો સાથેની સમાનતા", "તેની પ્રજનન પદ્ધતિ જે અંડજ છે", "તેના રક્ત પરિભ્રમણ તંત્રની જટિલતા"], "ans": 1, "exp": "કોએલેકેથને 'લિવિંગ ફોસિલ' કહેવા પાછળ તેની અસ્થિમાન રચના અને પૂર્વજો સાથેની સમાનતા મુખ્ય કારણ છે. તેની અસ્થિમાન રચના ૦૦ મિલિયન વર્ષ પહેલાંના ફોસિલ સાથે મળતી આવે છે. ફેફસા અને પાણી દ્વારા શ્વસન કરવાની ક્ષમતા (A) ખોટું છે કારણ કે કોએલેકેથ ફક્ત ગલફડા દ્વારા શ્વસન કરે છે. પ્રજનન પદ્ધતિ (C) અંડજ હોવા છતાં તે મુખ્ય કારણ નથી. રક્ત પરિભ્રમણ તંત્ર (D) પણ મુખ્ય કારણ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "હોર્સશૂ ક્રેબ (Horseshoe crab) ની નીચેની લાક્ષણિકતાઓ પૈકી કઈ એવી છે જે તેને 'લિવિંગ ફોસિલ' તરીકે ઓળખવામાં મદદ કરે છે?", "opts": ["તેના રક્તમાં હિમોસાયનિન હાજર છે", "તેની શારીરિક રચના ૪૫૦ મિલિયન વર્ષ પહેલાંની સાથે સરખામણી કરી શકાય છે", "તે પાણી અને જમીન બંનેમાં જીવી શકે છે", "તેની પ્રજનન પદ્ધતિ અલૈંગિક છે"], "ans": 1, "exp": "હોર્સશૂ ક્રેબની શારીરિક રચના ૪૫૦ મિલિયન વર્ષ પહેલાંની સાથે સરખામણી કરી શકાય છે, જે તેને 'લિવિંગ ફોસિલ' તરીકે ઓળખવામાં મદદ કરે છે. હિમોસાયનિન (A) તેના રક્તમાં હાજર હોવા છતાં તે મુખ્ય કારણ નથી. પાણી અને જમીન બંનેમાં જીવી શકવાની ક્ષમતા (C) ખોટી છે કારણ કે તે ફક્ત પાણીમાં જ જીવી શકે છે. પ્રજનન પદ્ધતિ (D) લૈંગિક છે, અલૈંગિક નહીં.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "ગિંકગો (Ginkgo biloba) ને 'લિવિંગ ફોસિલ' કહેવા પાછળ નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["તેના પર્ણની રચના પૂર્વજો સાથે મળતી આવે છે", "તેની પ્રજનન પદ્ધતિ બીજ ધરાવતી છે", "તેની ઉત્ક્રાંતિની ગતિ ખૂબ જ ધીમી છે", "તે ફક્ત ઉષ્ણકટિબંધીય પ્રદેશોમાં જ મળી આવે છે"], "ans": 3, "exp": "ગિંકગો ફક્ત ઉષ્ણકટિબંધીય પ્રદેશોમાં જ મળી આવે છે તે વિધાન ખોટું છે, કારણ કે તે શીતોષ્ણ કટિબંધીય પ્રદેશોમાં પણ મળી આવે છે. પર્ણની રચના (A), પ્રજનન પદ્ધતિ (B), અને ઉત્ક્રાંતિની ગતિ (C) બધા સત્ય છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેના પૈકી કયું જોડકું 'લિવિંગ ફોસિલ' અને તેની લાક્ષણિકતા સહી રીતે દર્શાવતું નથી?", "opts": ["કોએલેકેથ - લોબ-ફિન મત્સ્ય", "હોર્સશૂ ક્રેબ - અર્થ્રોપોડા સંવર્ગ", "ગિંકગો - બીજધારી વનસ્પતિ", "નૌટિલસ - મૃદુકાય સજીવ"], "ans": 3, "exp": "નૌટિલસ મૃદુકાય સજીવ નથી, તે મોલસ્કા સંવર્ગનો સજીવ છે. કોએલેકેથ લોબ-ફિન મત્સ્ય (A), હોર્સશૂ ક્રેબ અર્થ્રોપોડા સંવર્ગ (B), અને ગિંકગો બીજધારી વનસ્પતિ (C) બધા સહી જોડકાં છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
