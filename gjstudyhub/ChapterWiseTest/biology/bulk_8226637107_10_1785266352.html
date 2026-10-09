@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ગતિ અને હલનચલન Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>ગતિ અને હલનચલન Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "માનવ શરીરમાં સ્નાયુ સંકોચન માટે જવાબદાર પ્રોટીન કયું છે?", "opts": ["માયોસિન અને એક્ટિન", "ટ્રોપોનિન અને ટ્રોપોમાયોસિન", "કોલાજન અને ઈલાસ્ટિન", "હિમોગ્લોબિન અને માયોગ્લોબિન"], "ans": 0, "exp": "સ્નાયુ સંકોચન માટે માયોસિન અને એક્ટિન પ્રોટીન જવાબદાર છે, જે સરકતા તંતુ મોડેલ અનુસાર કાર્ય કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી અસ્થિ-સ્નાયુ પ્રણાલી ધરાવતું નથી?", "opts": ["માછલી", "ઉંદર", "અમીબા", "સાપ"], "ans": 2, "exp": "અમીબા એકકોષીય પ્રાણી છે અને તે અસ્થિ-સ્નાયુ પ્રણાલી ધરાવતું નથી, જ્યારે અન્ય પ્રાણીઓ બહુકોષીય છે અને અસ્થિ-સ્નાયુ પ્રણાલી ધરાવે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ થાક (Muscle Fatigue) માટે મુખ્યત્વે કયું કારણ જવાબદાર છે?", "opts": ["લેક્ટિક એસિડનું સંચય", "ગ્લુકોઝનું વધુ પ્રમાણ", "ઓક્સિજનનું વધુ પ્રમાણ", "કાર્બન ડાયોક્સાઇડનું નિર્માણ"], "ans": 0, "exp": "સ્નાયુ થાક માટે મુખ્યત્વે લેક્ટિક એસિડનું સંચય જવાબદાર છે, જે અપૂરતા ઓક્સિજનના કારણે ઉત્પન્ન થાય છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સાયનોવિયલ સાંધા માટે ખોટું છે?", "opts": ["સાયનોવિયલ પ્રવાહી સાંધાને લુબ્રિકેટ કરે છે.", "સાયનોવિયલ સાંધા હલનચલન માટે મદદરૂપ છે.", "સાયનોવિયલ સાંધા અસ્થિને સખત રીતે જોડે છે.", "સાયનોવિયલ સાંધા ઘૂંટણ અને ખભામાં જોવા મળે છે."], "ans": 2, "exp": "સાયનોવિયલ સાંધા અસ્થિને સખત રીતે જોડતા નથી, પરંતુ હલનચલન માટે લવચીકતા પ્રદાન કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં સૌથી લાંબી અસ્થિ કઈ છે?", "opts": ["ફીમર (જાંઘની અસ્થિ)", "હ્યુમરસ (હાથની અસ્થિ)", "ટિબિયા (પગની અસ્થિ)", "રેડિયસ (હાથની અસ્થિ)"], "ans": 0, "exp": "ફીમર (જાંઘની અસ્થિ) માનવ શરીરમાં સૌથી લાંબી અને મજબૂત અસ્થિ છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં સ્નાયુ સંકોચન માટે જવાબદાર પ્રોટીન જોડી કઈ છે?", "opts": ["એક્ટિન અને માયોસિન", "ટ્રોપોનિન અને ટ્રોપોમાયોસિન", "કોલાજન અને ઇલાસ્ટિન", "હિમોગ્લોબિન અને માયોગ્લોબિન"], "ans": 0, "exp": "સ્નાયુ સંકોચન માટે એક્ટિન અને માયોસિન પ્રોટીનની આંતરક્રિયા જરૂરી છે, જે સ્લાઇડિંગ ફિલામેન્ટ મિકેનિઝમ દ્વારા કાર્ય કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી અસ્થિમય (કાર્ટિલેજિનસ) કંકાલ ધરાવે છે?", "opts": ["શાર્ક", "વ્હેલ", "ડોલ્ફિન", "પેંગ્વિન"], "ans": 0, "exp": "શાર્ક એ કાર્ટિલેજિનસ માછલી છે, જેનું કંકાલ સંપૂર્ણપણે કાર્ટિલેજ (અસ્થિમય પેશી)નું બનેલું હોય છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં સૌથી લાંબી હાડકું કયું છે અને તે ક્યાં આવેલું છે?", "opts": ["ફીમર, જાંઘમાં", "હ્યુમરસ, હાથમાં", "ટિબિયા, પગમાં", "રેડિયસ, હાથમાં"], "ans": 0, "exp": "ફીમર એ માનવ શરીરનું સૌથી લાંબું અને મજબૂત હાડકું છે, જે જાંઘના ભાગમાં આવેલું છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) સ્નાયુ તંતુઓમાં માયોફાઇબ્રિલ્સ હોય છે. (2) સ્નાયુ સંકોચન માટે Ca²⁺ આયનો જરૂરી છે. (3) સ્નાયુમાં માયોગ્લોબિન ઓક્સિજનનો સંગ્રહ કરે છે. (4) સ્નાયુમાં લેક્ટિક એસિડનું નિર્માણ એરોબિક શ્વસન દરમિયાન થાય છે. કેટલાં વિધાનો સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (1), (2) અને (3) સાચાં છે, જ્યારે વિધાન (4) ખોટું છે કારણ કે લેક્ટિક એસિડ એનએરોબિક શ્વસન દરમિયાન બને છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી અપૃષ્ઠવંશી છે અને તેની ગતિ માટે સ્નાયુ અને હાઇડ્રોલિક પ્રણાલીનો ઉપયોગ કરે છે?", "opts": ["તારામાછલી (સ્ટારફિશ)", "ઘોડો", "કબૂતર", "સાપ"], "ans": 0, "exp": "તારામાછલી અપૃષ્ઠવંશી પ્રાણી છે અને તેની ગતિ માટે ટ્યુબ ફીટ (હાઇડ્રોલિક પ્રણાલી) અને સ્નાયુઓનો ઉપયોગ કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ સંકોચન દરમિયાન સાર્કોમિયરમાં કયો બદલાવ થાય છે?", "opts": ["A બેન્ડની લંબાઈ ઘટે છે", "B આઇ બેન્ડની લંબાઈ વધે છે", "C એચ ઝોન અદૃશ્ય થઈ જાય છે", "D ઝેડ રેખાઓ એકબીજાથી દૂર જાય છે"], "ans": 2, "exp": "સાર્કોમિયરના સંકોચન દરમિયાન એક્ટિન તંતુઓ માયોસિન તંતુઓ તરફ ખસે છે, જેના કારણે એચ ઝોન અદૃશ્ય થઈ જાય છે અને આઇ બેન્ડની લંબાઈ ઘટે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી હાઇડ્રોસ્ટેટિક કંકાલ ધરાવે છે?", "opts": ["A વંદો", "B અળસિયું", "C દેડકો", "D માછલી"], "ans": 1, "exp": "અળસિયું હાઇડ્રોસ્ટેટિક કંકાલ ધરાવે છે, જે શરીરના પ્રવાહી દબાણ પર આધારિત હોય છે અને તેને ગતિ માટે ટેકો પૂરો પાડે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં સૌથી લાંબી અને મજબૂત હાડકું કયું છે?", "opts": ["A કરોડસ્તંભ", "B ઉર્વસ્થિ (ફીમર)", "C હ્યુમરસ", "D પિંડલીનું હાડકું (ટિબિયા)"], "ans": 1, "exp": "ઉર્વસ્થિ (ફીમર) માનવ શરીરનું સૌથી લાંબું અને મજબૂત હાડકું છે, જે જાંઘના ભાગમાં આવેલું છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સ્નાયુ તંતુઓ માટે ખોટું છે?", "opts": ["A લાલ સ્નાયુ તંતુઓ ધીમા સંકોચન માટે જાણીતા છે", "B સફેદ સ્નાયુ તંતુઓ ઓછા માયોગ્લોબિન ધરાવે છે", "C લાલ સ્નાયુ તંતુઓ એરોબિક શ્વસન માટે વધુ યોગ્ય છે", "D સફેદ સ્નાયુ તંતુઓ લાંબા સમય સુધી સતત કાર્ય કરી શકે છે"], "ans": 3, "exp": "સફેદ સ્નાયુ તંતુઓ ઝડપી સંકોચન માટે જાણીતા છે અને તેઓ લાંબા સમય સુધી સતત કાર્ય કરી શકતા નથી, કારણ કે તેઓ ઓછા માયોગ્લોબિન અને ઓછી મિટોકોન્ડ્રિયા ધરાવે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) સ્નાયુ સંકોચન માટે કેલ્શિયમ આયનો જરૂરી છે. (2) માયોસિન હેડ એક્ટિન સાથે જોડાઈને ક્રોસ-બ્રિજ બનાવે છે. (3) એટીપીના જળવિભાજનથી સ્નાયુ સંકોચન થાય છે. (4) ટ્રોપોનિન અને ટ્રોપોમાયોસિન સ્નાયુ સંકોચનમાં નિષ્ક્રિય ભૂમિકા ભજવે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["A એક", "B બે", "C ત્રણ", "D ચાર"], "ans": 2, "exp": "વિધાન (1) અને (2) સાચાં છે. વિધાન (3) અંશતઃ સાચું છે, પરંતુ એટીપીનું જળવિભાજન સ્નાયુ સંકોચન માટે જરૂરી છે, જ્યારે વિધાન (4) ખોટું છે કારણ કે ટ્રોપોનિન અને ટ્રોપોમાયોસિન સક્રિય ભૂમિકા ભજવે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ સંકોચન દરમિયાન સાર્કોમિયરમાં નીચેનામાંથી કયો ફેરફાર થતો નથી?", "opts": ["A-બેન્ડની લંબાઈ અચળ રહે છે", "B-આઈ-બેન્ડની લંબાઈ ઘટે છે", "C-એચ-ઝોનની પહોળાઈ ઘટે છે", "D-ઝેડ-લાઇન વચ્ચેનું અંતર વધે છે"], "ans": 3, "exp": "સ્નાયુ સંકોચન દરમિયાન ઝેડ-લાઇન વચ્ચેનું અંતર ઘટે છે, વધતું નથી. બાકીના ફેરફારો સાચા છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સ્નાયુ તંતુઓના સંકોચન માટે ખોટું છે?", "opts": ["ટ્રોપોનિન-સી કૅલ્શિયમ આયનો સાથે જોડાય છે", "ટ્રોપોમાયોસિન એક્ટિન ફિલામેન્ટ પરથી ખસે છે", "એટીપીનું જળવિભાજન માયોસિન હેડને એક્ટિનથી છૂટું પાડે છે", "કૅલ્શિયમ આયનો સાર્કોપ્લાઝમિક રેટિક્યુલમમાંથી સીધા સાર્કોમિયરમાં પ્રવેશે છે"], "ans": 3, "exp": "કૅલ્શિયમ આયનો સાર્કોપ્લાઝમિક રેટિક્યુલમમાંથી સાર્કોપ્લાઝમમાં મુક્ત થાય છે, સીધા સાર્કોમિયરમાં પ્રવેશતા નથી.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ શરીરમાં હિંજ સાંધાનું ઉદાહરણ કયું છે?", "opts": ["કાંડાનો સાંધો", "કોણીનો સાંધો", "ખભાનો સાંધો", "કરોડસ્તંભના કશેરુકાઓ વચ્ચેનો સાંધો"], "ans": 1, "exp": "કોણીનો સાંધો હિંજ સાંધાનું ઉદાહરણ છે, જે ફક્ત એક જ સમતલમાં ગતિ કરવા દે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1. હાઇલાઇન કાસ્થિ સાંધાના સપાટી પર જોવા મળે છે. 2. ઈલાસ્ટિક કાસ્થિ કાનના બાહ્ય ભાગમાં જોવા મળે છે. 3. ફાઇબ્રોકાસ્થિ કરોડસ્તંભના ઇન્ટરવર્ટિબ્રલ ડિસ્કમાં જોવા મળે છે. 4. કાસ્થિનું પોષણ લસિકા દ્વારા થાય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["માત્ર એક", "માત્ર બે", "માત્ર ત્રણ", "ચારેય"], "ans": 2, "exp": "વિધાન 1, 2 અને 3 સાચાં છે. કાસ્થિનું પોષણ લસિકા દ્વારા નહીં, પરંતુ પેરિકોન્ડ્રિયમ દ્વારા થાય છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ સંકોચન દરમિયાન સાર્કોમિયરમાં નીચેનામાંથી કયું પરિવર્તન થતું નથી?", "opts": ["A-બેન્ડની લંબાઈ અચળ રહે છે", "B-આઈ-બેન્ડની લંબાઈ ઘટે છે", "C-એચ-ઝોનની પહોળાઈ ઘટે છે", "D-ઝેડ-લાઇન વચ્ચેનું અંતર વધે છે"], "ans": 3, "exp": "સ્નાયુ સંકોચન દરમિયાન ઝેડ-લાઇન વચ્ચેનું અંતર ઘટે છે, કારણ કે એક્ટિન તંતુઓ મિયોસિન તંતુઓ તરફ ખસે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સ્નાયુ તંતુઓના 'ટેટાનસ' માટે સાચું નથી?", "opts": ["ટેટાનસ એ સતત ઉત્તેજનાને કારણે સ્નાયુનું સંપૂર્ણ સંકોચન છે", "ટેટાનસ દરમિયાન સ્નાયુમાં લેક્ટિક એસિડનું પ્રમાણ વધે છે", "ટેટાનસ માત્ર હૃદયના સ્નાયુઓમાં જોવા મળે છે", "ટેટાનસની સ્થિતિમાં સ્નાયુમાં ATPનો ઉપયોગ વધે છે"], "ans": 2, "exp": "ટેટાનસ એ કંકાલ સ્નાયુઓમાં જોવા મળતી ઘટના છે, હૃદયના સ્નાયુઓમાં નહીં, કારણ કે હૃદયના સ્નાયુઓમાં લાંબા અપવર્તી કાળ હોય છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં આવેલા નીચેના સાંધાઓને તેમના પ્રકાર સાથે યોગ્ય રીતે જોડો: (a) ખભાનો સાંધો (b) કોણીનો સાંધો (c) કરોડસ્તંભના કશેરુકાઓ વચ્ચેનો સાંધો (d) ખોપરીના હાડકાં વચ્ચેનો સાંધો. (1) બોલ અને સોકેટ સાંધો (2) મિજાગરા સાંધો (3) અચલ સાંધો (4) સરકતો સાંધો", "opts": ["a-1, b-2, c-4, d-3", "a-2, b-1, c-3, d-4", "a-1, b-2, c-3, d-4", "a-2, b-1, c-4, d-3"], "ans": 0, "exp": "ખભાનો સાંધો બોલ અને સોકેટ પ્રકારનો, કોણીનો મિજાગરા પ્રકારનો, કરોડસ્તંભના કશેરુકાઓ વચ્ચેનો સરકતો અને ખોપરીના હાડકાં વચ્ચેનો અચલ સાંધો છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો વાંચો અને કેટલાં સાચાં છે તે જણાવો: (1) એક્ટિન તંતુઓ પાતળા હોય છે અને ટ્રોપોનિન તેમનો ભાગ છે. (2) મિયોસિન તંતુઓ જાડા હોય છે અને તેમના માથા ATP ઉત્સેચકીય પ્રવૃત્તિ ધરાવે છે. (3) સ્નાયુ સંકોચન દરમિયાન Ca²⁺ આયનો ટ્રોપોનિન સાથે જોડાઈને ટ્રોપોમાયોસિનને ખસેડે છે. (4) સ્નાયુ શિથિલન દરમિયાન સાર્કોપ્લાઝમિક રેટિક્યુલમ Ca²⁺ આયનોને પુનઃશોષણ કરે છે.", "opts": ["માત્ર એક વિધાન સાચું છે", "માત્ર બે વિધાનો સાચાં છે", "માત્ર ત્રણ વિધાનો સાચાં છે", "ચારેય વિધાનો સાચાં છે"], "ans": 3, "exp": "ચારેય વિધાનો સ્નાયુ સંકોચન અને શિથિલનની પ્રક્રિયા માટે સાચાં છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું પ્રાણી હાઇડ્રોસ્ટેટિક કંકાલ ધરાવતું નથી?", "opts": ["અળસિયું", "જેલીફિશ", "સ્ટારફિશ", "નેમાટોડા"], "ans": 2, "exp": "સ્ટારફિશમાં કઠણ કંકાલ તંત્ર હોય છે, જ્યારે અળસિયું, જેલીફિશ અને નેમાટોડા હાઇડ્રોસ્ટેટિક કંકાલ ધરાવે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં સ્નાયુ સંકોચન માટે જવાબદાર પ્રોટીન કયું છે?", "opts": ["માયોસિન અને એક્ટિન", "ટ્રોપોનિન અને ટ્રોપોમાયોસિન", "કોલાજેન અને ઇલાસ્ટિન", "હિમોગ્લોબિન અને માયોગ્લોબિન"], "ans": 0, "exp": "સ્નાયુ સંકોચન માટે માયોસિન અને એક્ટિન પ્રોટીન જવાબદાર છે, જે સાર્કોમિયરમાં સ્લાઇડિંગ ફિલામેન્ટ મિકેનિઝમ દ્વારા કાર્ય કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સત્ય છે?\n1. હાઇડ્રોસ્ટેટિક કંકાલ પ્રાણીઓમાં પાણીના દબાણ પર આધારિત હોય છે.\n2. બાહ્ય કંકાલ કીટકોમાં કાઇટિનથી બનેલું હોય છે.\n3. અંતઃકંકાલ મનુષ્યમાં હાડકાં અને કાસ્થિથી બનેલું હોય છે.\n4. બાહ્ય કંકાલ માત્ર અપૃષ્ઠવંશી પ્રાણીઓમાં જોવા મળે છે.", "opts": ["માત્ર 1 અને 2", "માત્ર 1, 2 અને 3", "માત્ર 2, 3 અને 4", "બધાં જ"], "ans": 1, "exp": "હાઇડ્રોસ્ટેટિક કંકાલ પાણીના દબાણ પર આધારિત છે, બાહ્ય કંકાલ કીટકોમાં કાઇટિનથી બને છે અને અંતઃકંકાલ હાડકાં-કાસ્થિથી બનેલું છે. બાહ્ય કંકાલ અપૃષ્ઠવંશી ઉપરાંત કેટલાક પૃષ્ઠવંશીઓમાં પણ જોવા મળે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ સંકોચન દરમિયાન કેલ્શિયમ આયનોનું મુખ્ય કાર્ય શું છે?", "opts": ["એક્ટિન અને માયોસિન વચ્ચે ક્રોસ-બ્રિજ રચવામાં મદદ કરવી", "એટીપીનું વિઘટન કરવું", "સાર્કોપ્લાઝમિક રેટિક્યુલમમાં સંગ્રહિત થવું", "સ્નાયુ કોષોમાં ઓક્સિજનનું વહન કરવું"], "ans": 0, "exp": "કેલ્શિયમ આયનો ટ્રોપોનિન સાથે જોડાઈને એક્ટિન ફિલામેન્ટ પર માયોસિન બાઇન્ડિંગ સાઇટ્સ ખુલ્લી કરે છે, જે ક્રોસ-બ્રિજ રચનામાં મદદ કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં આવેલા સ્નાયુ પેશીઓમાંથી કયા પ્રકારના સ્નાયુમાં સાર્કોમિયરનું બંધારણ જોવા મળતું નથી?", "opts": ["અસ્થિમય સ્નાયુ (Skeletal muscle)", "હૃદય સ્નાયુ (Cardiac muscle)", "સરળ સ્નાયુ (Smooth muscle)", "આપેલ તમામમાં સાર્કોમિયર જોવા મળે છે"], "ans": 2, "exp": "સરળ સ્નાયુમાં સાર્કોમિયરનું બંધારણ હોતું નથી, જ્યારે અસ્થિમય અને હૃદય સ્નાયુમાં સાર્કોમિયર જોવા મળે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન સ્નાયુ સંકોચનના સ્લાઇડિંગ ફિલામેન્ટ મોડેલ માટે ખોટું છે?", "opts": ["એક્ટિન અને માયોસિન ફિલામેન્ટ એકબીજા પર સરકે છે.", "સાર્કોમિયરની લંબાઈ ઘટે છે.", "માયોસિન ફિલામેન્ટની લંબાઈ બદલાતી નથી.", "એક્ટિન ફિલામેન્ટની લંબાઈ સંકોચન દરમિયાન ઘટે છે."], "ans": 3, "exp": "સ્નાયુ સંકોચન દરમિયાન એક્ટિન ફિલામેન્ટની લંબાઈ બદલાતી નથી, માત્ર તે માયોસિન પર સરકે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં હાડકાં અને સ્નાયુના જોડાણને શું કહે છે, જેના દ્વારા હલનચલન શક્ય બને છે?", "opts": ["લિગામેન્ટ", "ટેન્ડન", "કાર્ટિલેજ", "સાયનોવિયલ પટલ"], "ans": 1, "exp": "ટેન્ડન એ હાડકાં અને સ્નાયુને જોડતી રચના છે, જે હલનચલનમાં મદદ કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન સાયનોવિયલ સાંધા માટે સાચું નથી?", "opts": ["સાયનોવિયલ પ્રવાહી સાંધામાં ઘર્ષણ ઘટાડે છે.", "સાયનોવિયલ સાંધા હલનચલન માટે મુક્ત હોય છે.", "સાયનોવિયલ સાંધામાં કાર્ટિલેજ હોતું નથી.", "ઘૂંટણ અને ખભાનો સાંધો સાયનોવિયલ સાંધાનું ઉદાહરણ છે."], "ans": 2, "exp": "સાયનોવિયલ સાંધામાં કાર્ટિલેજ હોય છે, જે હાડકાંના છેડાને ઢાંકે છે અને ઘર્ષણ ઘટાડે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું જોડકું સ્નાયુ અને તેની લાક્ષણિકતા માટે ખોટું છે?", "opts": ["અરેખિત સ્નાયુ - અનૈચ્છિક, ધીમી ગતિ", "હૃદય સ્નાયુ - રેખિત, અનૈચ્છિક, કંટકિત તંતુઓ", "રેખિત સ્નાયુ - ઐચ્છિક, ઝડપી ગતિ, થાક લાગે છે", "સ્મૂથ સ્નાયુ - રેખિત, ઐચ્છિક, લાંબા સમય સુધી કાર્ય કરે છે"], "ans": 3, "exp": "સ્મૂથ સ્નાયુ અરેખિત અને અનૈચ્છિક હોય છે, જે લાંબા સમય સુધી કાર્ય કરે છે પરંતુ રેખિત હોતા નથી.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં આવેલા સ્નાયુઓમાંથી કયો સ્નાયુ સૌથી લાંબો હોય છે?", "opts": ["સાર્ટોરિયસ સ્નાયુ", "બાઇસેપ્સ બ્રેકિયાઈ", "ગ્લુટિયસ મેક્સિમસ", "સ્ટર્નોક્લિડોમાસ્ટોઇડ"], "ans": 0, "exp": "સાર્ટોરિયસ સ્નાયુ જાંઘના આગળના ભાગમાં આવેલો સૌથી લાંબો સ્નાયુ છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: 1. એક્ટિન અને માયોસિન પ્રોટીન સ્નાયુ સંકોચન માટે જવાબદાર છે. 2. સ્નાયુ સંકોચન દરમિયાન કેલ્શિયમ આયનનું પ્રમાણ ઘટે છે. 3. ટ્રોપોનિન અને ટ્રોપોમાયોસિન સ્નાયુ સંકોચનમાં મહત્ત્વની ભૂમિકા ભજવે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["માત્ર 1", "માત્ર 1 અને 3", "માત્ર 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "વિધાન 1 અને 3 સાચાં છે. સ્નાયુ સંકોચન દરમિયાન કેલ્શિયમ આયનનું પ્રમાણ વધે છે, ઘટતું નથી.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું હાડકું મનુષ્યના શરીરમાં સૌથી નાનું હાડકું છે?", "opts": ["સ્ટેપ્સ (કર્ણાસ્થિ)", "નાસિકા હાડકું", "અંગૂઠાનું હાડકું", "કંઠાસ્થિ"], "ans": 0, "exp": "સ્ટેપ્સ (કર્ણાસ્થિ) મનુષ્યના શરીરમાં સૌથી નાનું હાડકું છે, જે કાનમાં આવેલું છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં આવેલા નીચેના પૈકી કયા સ્નાયુમાં સાર્કોમિયરની ગેરહાજરી હોય છે?", "opts": ["અસ્થિમય સ્નાયુ (Skeletal muscle)", "હૃદય સ્નાયુ (Cardiac muscle)", "સરળ સ્નાયુ (Smooth muscle)", "આપેલ તમામમાં સાર્કોમિયર હાજર છે"], "ans": 2, "exp": "સરળ સ્નાયુમાં સાર્કોમિયર હોતા નથી, જે તેને અસ્થિમય અને હૃદય સ્નાયુથી અલગ પાડે છે. સાર્કોમિયર એ સ્નાયુ સંકોચનની મૂળભૂત એકમ છે જે માત્ર પટ્ટીકાવાળા સ્નાયુમાં જોવા મળે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: 1. એક્ટિન ફિલામેન્ટ્સ માયોસિન ફિલામેન્ટ્સ કરતાં પાતળા હોય છે. 2. ટ્રોપોનિન અને ટ્રોપોમાયોસિન માત્ર હૃદય સ્નાયુમાં જોવા મળે છે. 3. સ્નાયુ સંકોચન દરમિયાન A-બેન્ડની લંબાઈ બદલાતી નથી. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["માત્ર એક", "માત્ર બે", "ત્રણેય", "એક પણ નહીં"], "ans": 1, "exp": "વિધાન 1 અને 3 સાચાં છે. ટ્રોપોનિન અને ટ્રોપોમાયોસિન અસ્થિમય અને હૃદય સ્નાયુ બંનેમાં જોવા મળે છે, માત્ર હૃદય સ્નાયુમાં નહીં.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિના હાથમાં ઈજા થવાથી તેના હાથને ઉપર-નીચે કરવામાં મુશ્કેલી પડે છે. આ ઈજા કયા પ્રકારના સાંધા સાથે સંબંધિત હોવાની શક્યતા સૌથી વધુ છે?", "opts": ["બોલ અને સોકેટ સાંધો (Ball and socket joint)", "હિંજ સાંધો (Hinge joint)", "પિવોટ સાંધો (Pivot joint)", "ગ્લાઇડિંગ સાંધો (Gliding joint)"], "ans": 0, "exp": "બોલ અને સોકેટ સાંધો હાથને બહુદિશીય હલનચલન (જેમ કે ઉપર-નીચે, આગળ-પાછળ, અને પરિભ્રમણ) કરવા દે છે. આ સાંધામાં ઈજા થવાથી હલનચલન મર્યાદિત થઈ શકે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્નાયુ સંકોચન દરમિયાન કયા પ્રોટીનના તંતુઓ એકબીજા પર સરકીને સંકોચન ઉત્પન્ન કરે છે?", "opts": ["માયોસિન અને એક્ટિન", "ટ્રોપોનિન અને ટ્રોપોમાયોસિન", "કોલાજેન અને ઈલાસ્ટિન", "હિમોગ્લોબિન અને માયોગ્લોબિન"], "ans": 0, "exp": "સ્નાયુ સંકોચન દરમિયાન માયોસિનના જાડા તંતુઓ અને એક્ટિનના પાતળા તંતુઓ એકબીજા પર સરકીને સ્લાઇડિંગ ફિલામેન્ટ મિકેનિઝમ દ્વારા સંકોચન ઉત્પન્ન કરે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના શરીરમાં સ્નાયુ સંકોચન દરમિયાન નીચેના પૈકી કયું સંયોજન સીધું ઊર્જા પ્રદાન કરે છે?", "opts": ["એટીપી (ATP)", "ક્રિએટાઇન ફોસ્ફેટ", "ગ્લુકોઝ", "લેક્ટિક એસિડ"], "ans": 0, "exp": "સ્નાયુ સંકોચન દરમિયાન એટીપી (ATP) સીધું જ ઊર્જા પ્રદાન કરે છે, જે માયોસિન હેડને એક્ટિન સાથે જોડાવા માટે જરૂરી ઊર્જા પૂરી પાડે છે.", "chapter": "ગતિ અને હલનચલન", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "ગતિ અને હલનચલન Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
