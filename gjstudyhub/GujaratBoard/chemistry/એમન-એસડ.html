@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>એમિનો એસિડ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>એમિનો એસિડ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">એમિનો એસિડ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયો એમિનો એસિડ માનવ શરીરમાં 'અનિવાર્ય એમિનો એસિડ' તરીકે ગણાતો નથી, પરંતુ તેનું કાર્બનિક સંશ્લેષણ યકૃતમાં થઈ શકે છે?", "opts": ["આર્જિનિન", "હિસ્ટિડિન", "લ્યુસિન", "વેલિન"], "ans": 0, "exp": "આર્જિનિન એ માનવ શરીરમાં અર્ધ-અનિવાર્ય એમિનો એસિડ ગણાય છે, કારણ કે તેનું સંશ્લેષણ યકૃતમાં થઈ શકે છે, પરંતુ વૃદ્ધિના સમયે અથવા રોગની સ્થિતિમાં તેની જરૂરિયાત વધી જાય છે. હિસ્ટિડિન, લ્યુસિન અને વેલિન એ સંપૂર્ણ અનિવાર્ય એમિનો એસિડ છે, જે શરીરમાં સંશ્લેષિત થતા નથી અને ખોરાક દ્વારા મેળવવા જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ", "ch": ""}, {"q": "એક વિદ્યાર્થીએ એમિનો એસિડના pH-આધારિત વર્તનનો અભ્યાસ કર્યો. તેણે જોયું કે એક એમિનો એસિડનું આઇસોઇલેક્ટ્રિક બિંદુ (pI) 6.0 છે. જો આ એમિનો એસિડને pH 7.4ના દ્રાવણમાં મૂકવામાં આવે, તો તેનું ચોખ્ખું વીજભાર કેવું હશે?", "opts": ["ધન વીજભારિત", "ઋણ વીજભારિત", "તટસ્થ (વીજભારરહિત)", "pHના મૂલ્ય પર આધારિત નથી"], "ans": 1, "exp": "એમિનો એસિડનું આઇસોઇલેક્ટ્રિક બિંદુ (pI) એ તે pH છે જ્યાં તેનું ચોખ્ખું વીજભાર શૂન્ય હોય છે. જો દ્રાવણનું pH એમિનો એસિડના pI કરતાં વધારે હોય (અહીં pH 7.4 > pI 6.0), તો એમિનો એસિડ ઋણ વીજભારિત બને છે કારણ કે તેના કાર્બોક્સિલ સમૂહનું વિયોજન વધે છે. જો pH < pI હોય, તો તે ધન વીજભારિત બને છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'સલ્ફર-સમાવિષ્ટ એમિનો એસિડ' છે, પરંતુ તેના રાસાયણિક બંધારણમાં થાયોલ (-SH) સમૂહ ધરાવતો નથી?", "opts": ["મિથિયોનિન", "સિસ્ટીન", "સિસ્ટેઇન", "હોમોસિસ્ટીન"], "ans": 0, "exp": "મિથિયોનિન એ સલ્ફર-સમાવિષ્ટ એમિનો એસિડ છે, પરંતુ તેમાં થાયોલ (-SH) સમૂહ નથી હોતો. તેના બદલે તેમાં થાયોઇથર (R-S-R') બંધારણ હોય છે. સિસ્ટીન અને સિસ્ટેઇન બંને થાયોલ સમૂહ ધરાવે છે, જ્યારે હોમોસિસ્ટીન એ મિથિયોનિનના ચયાપચયનું મધ્યવર્તી છે અને તેમાં થાયોલ સમૂહ હોય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ", "ch": ""}, {"q": "એક પ્રોટીનમાં 150 એમિનો એસિડ છે. જો આ પ્રોટીનનું સંશ્લેષણ કરતી mRNAમાં કોડિંગ ક્ષેત્રની લંબાઈ 450 ન્યુક્લિઓટાઇડ હોય, તો નીચેના પૈકી કયું વિધાન સાચું છે? (સ્ટોપ કોડોનને ધ્યાનમાં લીધા વિના)", "opts": ["પ્રોટીનમાં એક પણ એમિનો એસિડનું પુનરાવર્તન થતું નથી", "mRNAમાં એક પણ નોન-કોડિંગ ક્ષેત્ર નથી", "પ્રત્યેક એમિનો એસિડ માટે mRNAમાં ત્રણ ન્યુક્લિઓટાઇડ હોય છે", "પ્રોટીનનું સંશ્લેષણ રિબોઝોમના એક જ એકમમાં થાય છે"], "ans": 2, "exp": "જનીનિક કોડ અનુસાર, પ્રત્યેક એમિનો એસિડ માટે mRNAમાં ત્રણ ન્યુક્લિઓટાઇડ (કોડોન) હોય છે. અહીં 150 એમિનો એસિડ માટે 450 ન્યુક્લિઓટાઇડ (150 × 3) છે, જે આ સિદ્ધાંત સાથે સુસંગત છે. વિકલ્પ A ખોટો છે કારણ કે એમિનો એસિડનું પુનરાવર્તન સામાન્ય છે. વિકલ્પ B ખોટો છે કારણ કે mRNAમાં નોન-કોડિંગ ક્ષેત્રો (જેમ કે 5' અને 3' UTR) હોઈ શકે છે. વિકલ્પ D ખોટો છે કારણ કે પ્રોટીનનું સંશ્લેષણ રિબોઝોમના બહુવિધ એકમોમાં થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એમિનો એસિડના વર્ગીકરણમાં 'આલ્ફા-એમિનો એસિડ' શબ્દનો ઉપયોગ થાય છે. નીચેના પૈકી કયો એમિનો એસિડ આ વ્યાખ્યામાં બંધબેસતો નથી, કારણ કે તેના અણુમાં એમિનો સમૂહ કાર્બોક્સિલ સમૂહ સાથે સીધો જોડાયેલો નથી?", "opts": ["પ્રોલિન", "ગ્લાયસિન", "એસ્પાર્ટિક એસિડ", "લાઇસિન"], "ans": 0, "exp": "પ્રોલિન એ એકમાત્ર એમિનો એસિડ છે જે 'આલ્ફા-એમિનો એસિડ'ની વ્યાખ્યામાં બંધબેસતો નથી, કારણ કે તેના અણુમાં એમિનો સમૂહ કાર્બોક્સિલ સમૂહ સાથે સીધો જોડાયેલો નથી. તેના બદલે, પ્રોલિનમાં એમિનો સમૂહ એક ચક્રીય બંધારણમાં જોડાયેલો હોય છે, જે તેને 'ઇમિનો એસિડ' બનાવે છે. અન્ય તમામ વિકલ્પો આલ્ફા-એમિનો એસિડ છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ", "ch": ""}, {"q": "એક સંશોધકે જાણ્યું કે એક વિશિષ્ટ એમિનો એસિડનું આયનીય સ્વરૂપ pH 7.4 પર ઝ્વિટર આયન સ્વરૂપમાં નથી. આ એમિનો એસિડ માટે નીચેનામાંથી કયું વિધાન સાચું હોઈ શકે?", "opts": ["આ એમિનો એસિડમાં કાર્બોક્સિલ સમૂહ કરતાં એમિનો સમૂહનો pKa મૂલ્ય વધારે છે.", "આ એમિનો એસિડમાં બંને સમૂહોના pKa મૂલ્યો 7.4 કરતાં નીચા છે.", "આ એમિનો એસિડ પ્રોલિન છે, જેનું ઝ્વિટર આયન સ્વરૂપ અસ્થિર હોય છે.", "આ એમિનો એસિડમાં આલ્ફા-કાર્બન પર હાઇડ્રોજન નથી, તેથી તે ઝ્વિટર આયન બનાવી શકતો નથી."], "ans": 0, "exp": "સાચો જવાબ A છે કારણ કે જો એમિનો સમૂહનો pKa કાર્બોક્સિલ સમૂહ કરતાં વધારે હોય, તો pH 7.4 પર એમિનો સમૂહ પ્રોટોનયુક્ત રહે છે અને કાર્બોક્સિલ સમૂહ ડિપ્રોટોનયુક્ત થાય છે, જે ઝ્વિટર આયન સ્વરૂપને અટકાવે છે. વિકલ્પ B ખોટો છે કારણ કે જો બંને pKa મૂલ્યો 7.4 કરતાં નીચા હોય, તો ઝ્વિટર આયન સ્વરૂપ બને. વિકલ્પ C ખોટો છે કારણ કે પ્રોલિન પણ ઝ્વિટર આયન બનાવી શકે છે. વિકલ્પ D ખોટો છે કારણ કે આલ્ફા-કાર્બન પર હાઇડ્રોજન ન હોવું એ ઝ્વિટર આયન બનાવવામાં અવરોધ નથી.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'ઇમિનો એસિડ' તરીકે વર્ગીકૃત થાય છે અને તે પ્રોટીનની દ્વિતીયક રચનામાં મહત્ત્વપૂર્ણ ભૂમિકા ભજવે છે?", "opts": ["લાઇસિન", "પ્રોલિન", "આર્જિનાઇન", "હિસ્ટિડિન"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે પ્રોલિન એક ઇમિનો એસિડ છે, જેમાં એમિનો સમૂહ આલ્ફા-કાર્બન સાથે ચક્રીય રચના બનાવે છે. આ રચના પ્રોટીનની દ્વિતીયક રચનામાં વળાંક ઉત્પન્ન કરે છે. વિકલ્પ A, C અને D સામાન્ય એમિનો એસિડ છે, ઇમિનો એસિડ નથી.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "એક પ્રયોગમાં જાણવા મળ્યું કે એક એમિનો એસિડનું pI (આયસોઇલેક્ટ્રિક બિંદુ) મૂલ્ય 9.7 છે. આ એમિનો એસિડ માટે નીચેનામાંથી કયું વિધાન સાચું હોઈ શકે?", "opts": ["આ એમિનો એસિડમાં બે એમિનો સમૂહ અને એક કાર્બોક્સિલ સમૂહ છે.", "આ એમિનો એસિડમાં બે કાર્બોક્સિલ સમૂહ અને એક એમિનો સમૂહ છે.", "આ એમિનો એસિડમાં એક એમિનો સમૂહ અને એક કાર્બોક્સિલ સમૂહ છે, પરંતુ બાજુની શૃંખલામાં વધારાનો એસિડિક સમૂહ છે.", "આ એમિનો એસિડમાં એક એમિનો સમૂહ અને એક કાર્બોક્સિલ સમૂહ છે, પરંતુ બાજુની શૃંખલામાં વધારાનો બેઝિક સમૂહ છે."], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે pI મૂલ્ય 9.7 એ બેઝિક એમિનો એસિડની લાક્ષણિકતા છે, જેમાં બાજુની શૃંખલામાં વધારાનો બેઝિક સમૂહ હોય છે. વિકલ્પ A ખોટો છે કારણ કે બે એમિનો સમૂહવાળા એમિનો એસિડનું pI મૂલ્ય વધારે હોય છે, પરંતુ તેની પુષ્ટિ થતી નથી. વિકલ્પ B ખોટો છે કારણ કે બે કાર્બોક્સિલ સમૂહવાળા એમિનો એસિડનું pI મૂલ્ય નીચું હોય છે. વિકલ્પ C ખોટો છે કારણ કે એસિડિક બાજુની શૃંખલા pI મૂલ્ય ઘટાડે છે.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'અપ્રત્યક્ષ રીતે અનિવાર્ય' ગણાય છે, કારણ કે તે શરીરમાં અન્ય એમિનો એસિડમાંથી સંશ્લેષિત થઈ શકે છે, પરંતુ અમુક શારીરિક પરિસ્થિતિઓમાં તેની જરૂરિયાત વધી જાય છે?", "opts": ["ટ્રિપ્ટોફેન", "આર્જિનાઇન", "વેલાઇન", "લ્યુસિન"], "ans": 1, "exp": "સાચો જવાબ B છે કારણ કે આર્જિનાઇન શરીરમાં સંશ્લેષિત થઈ શકે છે, પરંતુ ઝડપી વૃદ્ધિ અથવા ઈજા જેવી પરિસ્થિતિઓમાં તેની જરૂરિયાત વધી જાય છે, તેથી તેને 'અપ્રત્યક્ષ રીતે અનિવાર્ય' ગણવામાં આવે છે. વિકલ્પ A, C અને D સંપૂર્ણપણે અનિવાર્ય એમિનો એસિડ છે.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "એક પ્રોટીનમાં એમિનો એસિડની શૃંખલા નીચે મુજબ છે: Gly-Ala-Pro-Lys-Glu. આ શૃંખલામાં કયો એમિનો એસિડ pH 7.0 પર ધન વીજભારિત હશે?", "opts": ["Gly", "Ala", "Pro", "Lys"], "ans": 3, "exp": "સાચો જવાબ D છે કારણ કે લાઇસિન (Lys) ની બાજુની શૃંખલામાં એમિનો સમૂહ હોય છે, જે pH 7.0 પર પ્રોટોનયુક્ત થઈ ધન વીજભારિત બને છે. વિકલ્પ A, B અને C ની બાજુની શૃંખલાઓ તટસ્થ હોય છે, તેથી તે ધન વીજભારિત નથી બનતી.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "એક એમિનો એસિડનું રાસાયણિક સૂત્ર C₃H₇NO₂S છે. આ એમિનો એસિડની વિશેષતા કયી હશે જો તે પ્રોટીનના દ્વિતીય સંરચનામાં ડિસલ્ફાઇડ બંધ બનાવવામાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["તે સિસ્ટીન છે, જેમાં થાયોલ સમૂહ (-SH) હાજર છે અને ડિસલ્ફાઇડ બંધ બનાવે છે.", "તે મિથાયોનિન છે, જેમાં સલ્ફર હાજર છે પરંતુ ડિસલ્ફાઇડ બંધ બનાવતું નથી.", "તે સીરિન છે, જેમાં હાઇડ્રોક્સિલ સમૂહ (-OH) હાજર છે અને ડિસલ્ફાઇડ બંધ બનાવતું નથી.", "તે પ્રોલિન છે, જેમાં ઇમિનો સમૂહ હાજર છે અને ડિસલ્ફાઇડ બંધ બનાવતું નથી."], "ans": 0, "exp": "સિસ્ટીન એ એકમાત્ર એમિનો એસિડ છે જેમાં થાયોલ સમૂહ (-SH) હાજર છે, જે ડિસલ્ફાઇડ બંધ (-S-S-) બનાવવામાં સક્ષમ છે. મિથાયોનિનમાં સલ્ફર હાજર છે પરંતુ તે ડિસલ્ફાઇડ બંધ બનાવતું નથી. સીરિન અને પ્રોલિનમાં સલ્ફર હાજર નથી, અને તેઓ ડિસલ્ફાઇડ બંધ બનાવતાં નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રક્રિયાઓ (બાયોમોલેક્યુલ્સ એન્ડ પ્રોસેસેસ)", "ch": ""}, {"q": "એક પ્રયોગમાં એમિનો એસિડને pH 2.0 પર ઇલેક્ટ્રોફોરેસિસ કરવામાં આવ્યો. જો એમિનો એસિડ એનોડ તરફ ગતિ કરે છે, તો તેની વિશેષતા કયી હશે?", "opts": ["એમિનો એસિડનો pI (આયસોઇલેક્ટ્રિક બિંદુ) 2.0 કરતાં ઓછો છે અને તે ધન વીજભાર ધરાવે છે.", "એમિનો એસિડનો pI 2.0 કરતાં વધારે છે અને તે ઋણ વીજભાર ધરાવે છે.", "એમિનો એસિડનો pI 2.0 જેટલો છે અને તે વીજભાર રહિત છે.", "એમિનો એસિડનો pI 7.0 છે અને તે ધન વીજભાર ધરાવે છે."], "ans": 1, "exp": "pH 2.0 પર, જો એમિનો એસિડ એનોડ (ધન અગ્ર) તરફ ગતિ કરે છે, તો તે ઋણ વીજભાર ધરાવે છે. આનો અર્થ એ કે pH 2.0 એ એમિનો એસિડના pI કરતાં ઓછો છે, કારણ કે pI કરતાં નીચેના pH પર એમિનો એસિડ ધન વીજભાર ધરાવે છે. જ્યારે pH > pI હોય ત્યારે એમિનો એસિડ ઋણ વીજભાર ધરાવે છે. આથી, એમિનો એસિડનો pI 2.0 કરતાં વધારે હોવો જોઈએ.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રક્રિયાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'કેટાયોનિક એમિનો એસિડ' તરીકે વર્ગીકૃત થાય છે અને તે પ્રોટીનના તૃતીય સંરચનામાં હાઇડ્રોજન બંધ બનાવવામાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["લાઇસિન, જેમાં બે એમિનો સમૂહ હાજર છે અને તે ધન વીજભાર ધરાવે છે.", "આર્જિનિન, જેમાં ગુઆનિડિન સમૂહ હાજર છે અને તે ધન વીજભાર ધરાવે છે.", "હિસ્ટિડિન, જેમાં ઇમિડેઝોલ વલય હાજર છે અને તે ધન વીજભાર ધરાવે છે.", "એસ્પાર્ટિક એસિડ, જેમાં બે કાર્બોક્સિલ સમૂહ હાજર છે અને તે ઋણ વીજભાર ધરાવે છે."], "ans": 2, "exp": "હિસ્ટિડિન એ કેટાયોનિક એમિનો એસિડ છે, જેમાં ઇમિડેઝોલ વલય હાજર છે અને તે ધન વીજભાર ધરાવે છે. લાઇસિન અને આર્જિનિન પણ કેટાયોનિક એમિનો એસિડ છે, પરંતુ હિસ્ટિડિન પ્રોટીનના તૃતીય સંરચનામાં હાઇડ્રોજન બંધ બનાવવામાં મહત્વની ભૂમિકા ભજવે છે. એસ્પાર્ટિક એસિડ એ એનાયોનિક એમિનો એસિડ છે અને તે ઋણ વીજભાર ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રક્રિયાઓ", "ch": ""}, {"q": "એક પ્રોટીનમાં એમિનો એસિડની શૃંખલા નીચે મુજબ છે: Met-Val-Arg-Cys. જો આ પ્રોટીનને ડાયલાઇસિસ કરવામાં આવે, તો કયો એમિનો એસિડ સૌથી પહેલા અલગ થશે?", "opts": ["Met, કારણ કે તેનો આણ્વીય વજન સૌથી ઓછો છે.", "Cys, કારણ કે તે ડિસલ્ફાઇડ બંધ બનાવી શકે છે અને તેનો આણ્વીય વજન ઓછો છે.", "Arg, કારણ કે તે ધન વીજભાર ધરાવે છે અને ડાયલાઇસિસ દરમિયાન સરળતાથી અલગ થાય છે.", "Val, કારણ કે તે હાઇડ્રોફોબિક છે અને ડાયલાઇસિસ દરમિયાન સરળતાથી અલગ થાય છે."], "ans": 2, "exp": "ડાયલાઇસિસ દરમિયાન, ધન વીજભાર ધરાવતા એમિનો એસિડ સરળતાથી અલગ થાય છે કારણ કે તેઓ પાણીમાં સરળતાથી દ્રાવ્ય હોય છે. આર્જિનિન (Arg) ધન વીજભાર ધરાવે છે, જ્યારે મિથાયોનિન (Met), સિસ્ટીન (Cys), અને વેલિન (Val) હાઇડ્રોફોબિક અથવા તટસ્થ વીજભાર ધરાવે છે. આથી, Arg સૌથી પહેલા અલગ થશે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રક્રિયાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'ગ્લાયકોજેનિક એમિનો એસિડ' નથી, પરંતુ તે 'કિટોનોજેનિક એમિનો એસિડ' છે?", "opts": ["લ્યુસિન", "આલ્ફા-કેટોગ્લુટારિક એસિડ", "ગ્લાયસિન", "એલાનિન"], "ans": 0, "exp": "લ્યુસિન એ એકમાત્ર એમિનો એસિડ છે જે ફક્ત કિટોનોજેનિક છે અને ગ્લાયકોજેનિક નથી. આલ્ફા-કેટોગ્લુટારિક એસિડ એ ક્રેબ્સ ચક્રનો ભાગ છે અને તે ગ્લાયકોજેનિક અને કિટોનોજેનિક બંને છે. ગ્લાયસિન અને એલાનિન ગ્લાયકોજેનિક અને કિટોનોજેનિક બંને છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રક્રિયાઓ", "ch": ""}, {"q": "એક એમિનો એસિડનું આયસોઇલેક્ટ્રિક બિંદુ (pI) 6.0 છે. જો આ એમિનો એસિડને pH 4.0 વાળા દ્રાવણમાં મૂકવામાં આવે, તો તેનું વર્તન કેવું રહેશે?", "opts": ["તે ધન વિદ્યુતભાર ધરાવશે અને એનોડ તરફ ગતિ કરશે", "તે ઋણ વિદ્યુતભાર ધરાવશે અને કેથોડ તરફ ગતિ કરશે", "તે વિદ્યુતભારરહિત રહેશે અને કોઈ ગતિ કરશે નહીં", "તે ધન વિદ્યુતભાર ધરાવશે પરંતુ કોઈ ગતિ કરશે નહીં"], "ans": 0, "exp": "એમિનો એસિડનું pI 6.0 હોવાથી pH 4.0 (pI કરતાં ઓછું) પર તે ધન વિદ્યુતભાર ધરાવશે, કારણ કે કાર્બોક્સિલ ગ્રુપ (COO-) પ્રોટોનેટ થઈ COOH બનશે, જ્યારે એમિનો ગ્રુપ (NH2) પ્રોટોનેટ થઈ NH3+ બનશે. ધન ભાર ધરાવતા કણો એનોડ તરફ ગતિ કરે છે. બાકીના વિકલ્પો ખોટા છે: B) ઋણ ભાર pH > pI પર જોવા મળે, C) વિદ્યુતભારરહિત pI પર જોવા મળે, D) ધન ભાર હોવા છતાં એનોડ તરફ ગતિ થાય છે.", "ref": "Std 12 - પ્રકરણ 14: જૈવ-અણુઓ (Biomolecules)", "ch": ""}, {"q": "નીચેના પૈકી કયા એમિનો એસિડની શૃંખલામાં 'ડિસલ્ફાઇડ બંધ' બનાવવાની ક્ષમતા નથી?", "opts": ["સિસ્ટીન", "મિથાયોનિન", "સિસ્ટીન અને મિથાયોનિન બંને", "પ્રોલિન"], "ans": 3, "exp": "ડિસલ્ફાઇડ બંધ (S-S બંધ) બનાવવા માટે એમિનો એસિડમાં સલ્ફહાઇડ્રિલ ગ્રુપ (-SH) હોવો જરૂરી છે. સિસ્ટીનમાં -SH ગ્રુપ હોવાથી તે ડિસલ્ફાઇડ બંધ બનાવી શકે છે. મિથાયોનિનમાં સલ્ફર હોવા છતાં -SH ગ્રુપ ન હોવાથી તે ડિસલ્ફાઇડ બંધ બનાવી શકતું નથી. પ્રોલિનમાં સલ્ફર જ નથી, તેથી તે ડિસલ્ફાઇડ બંધ બનાવી શકતું નથી. વિકલ્પ C ખોટો છે કારણ કે સિસ્ટીન ડિસલ્ફાઇડ બંધ બનાવી શકે છે.", "ref": "Std 12 - પ્રકરણ 14: જૈવ-અણુઓ (Biomolecules)", "ch": ""}, {"q": "એક પ્રોટીનમાં એમિનો એસિડની શૃંખલા નીચે મુજબ છે: Ala-Gly-Val-Leu-Ile. આ શૃંખલા વિશે કયું વિધાન સત્ય છે?", "opts": ["આ પ્રોટીનમાં ફક્ત હાઇડ્રોફોબિક એમિનો એસિડ છે", "આ પ્રોટીનમાં ફક્ત હાઇડ્રોફિલિક એમિનો એસિડ છે", "આ પ્રોટીનમાં હાઇડ્રોફોબિક અને હાઇડ્રોફિલિક એમિનો એસિડ બંને છે", "આ પ્રોટીનમાં ફક્ત એસિડિક એમિનો એસિડ છે"], "ans": 0, "exp": "આપેલ શૃંખલામાં આલાનિન (Ala), ગ્લાઇસિન (Gly), વેલિન (Val), લ્યુસિન (Leu), અને આઇસોલ્યુસિન (Ile) એમિનો એસિડ છે. આ બધા જ હાઇડ્રોફોબિક (જલવિરોધી) એમિનો એસિડ છે. ગ્લાઇસિન હલકા હાઇડ્રોફિલિક હોવા છતાં, તેને સામાન્ય રીતે હાઇડ્રોફોબિક ગણવામાં આવે છે. બાકીના વિકલ્પો ખોટા છે: B) હાઇડ્રોફિલિક એમિનો એસિડ (જે પાણી સાથે પ્રતિક્રિયા કરે) નથી, C) બંને પ્રકારના એમિનો એસિડ નથી, D) એસિડિક એમિનો એસિડ (જેમ કે ગ્લુટેમિક એસિડ) નથી.", "ref": "Std 12 - પ્રકરણ 14: જૈવ-અણુઓ (Biomolecules)", "ch": ""}, {"q": "નીચેના પૈકી કયો એમિનો એસિડ 'કિટોનોજેનિક' અને 'ગ્લાયકોજેનિક' બંને છે?", "opts": ["લ્યુસિન", "લાઇસિન", "ફિનાઇલઆલાનિન", "ટ્રિપ્ટોફેન"], "ans": 3, "exp": "ટ્રિપ્ટોફેન એમિનો એસિડ કિટોનોજેનિક અને ગ્લાયકોજેનિક બંને છે. લ્યુસિન અને લાઇસિન ફક્ત કિટોનોજેનિક છે, જ્યારે ફિનાઇલઆલાનિન કિટોનોજેનિક અને ગ્લાયકોજેનિક બંને છે, પરંતુ તેનો મુખ્ય માર્ગ કિટોનોજેનિક તરફ ઢળે છે. ટ્રિપ્ટોફેન મુખ્યત્વે કિટોનોજેનિક અને ગ્લાયકોજેનિક બંને તરફ વહેંચાય છે.", "ref": "Std 12 - પ્રકરણ 14: જૈવ-અણુઓ (Biomolecules)", "ch": ""}, {"q": "એક એમિનો એસિડનું રાસાયણિક સૂત્ર C5H9NO4 છે. આ એમિનો એસિડ વિશે કયું વિધાન સત્ય છે?", "opts": ["તે એસિડિક એમિનો એસિડ છે અને તેનું નામ ગ્લુટેમિક એસિડ છે", "તે બેઝિક એમિનો એસિડ છે અને તેનું નામ લાઇસિન છે", "તે તટસ્થ એમિનો એસિડ છે અને તેનું નામ વેલિન છે", "તે એરોમેટિક એમિનો એસિડ છે અને તેનું નામ ટાઇરોસિન છે"], "ans": 0, "exp": "રાસાયણિક સૂત્ર C5H9NO4 ધરાવતા એમિનો એસિડનું નામ ગ્લુટેમિક એસિડ છે, જે એસિડિક એમિનો એસિડ છે (કારણ કે તેના મોલેક્યુલમાં બે કાર્બોક્સિલ ગ્રુપ છે). લાઇસિન (B)નું સૂત્ર C6H14N2O2 છે, વેલિન (C)નું સૂત્ર C5H11NO2 છે, અને ટાઇરોસિન (D)નું સૂત્ર C9H11NO3 છે. તેથી, ફક્ત વિકલ્પ A સત્ય છે.", "ref": "Std 12 - પ્રકરણ 14: જૈવ-અણુઓ (Biomolecules)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
