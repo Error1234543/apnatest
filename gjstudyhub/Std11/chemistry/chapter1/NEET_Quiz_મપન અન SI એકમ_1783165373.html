@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - માપન અને SI એકમો</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 માપન અને SI એકમો</span>
+                <span>🎯 Hard</span>
+                <span>📝 20 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક વિદ્યાર્થી પાસે ૫૦ cm લંબાઈ ધરાવતી એક પટ્ટી છે. તે પટ્ટીને વાપરીને એક વર્તુળાકાર ક્ષેત્રની પરિમિતિ માપે છે અને ૧૦૦ cm માપે છે. જો પટ્ટીની લંબાઈમાં ૧%નો ભૂલ હાજર હોય, તો વર્તુળના વ્યાસમાં શું ભૂલ થશે?", "options": ["A) ૧%", "B) ૨%", "C) ૦.૫%", "D) ૨.૫%"], "correct": 1, "explanation": "વર્તુળની પરિમિતિ (C) અને વ્યાસ (D) વચ્ચેનો સંબંધ C = πD છે. પરિમિતિમાં ભૂલ ૧% છે, પરંતુ વ્યાસ પરિમિતિનો વ્યસ્ત પ્રમાણમાં છે (D = C/π). જ્યારે પરિમિતિમાં ૧% ભૂલ હોય, ત્યારે વ્યાસમાં પણ ૧% ભૂલ થાય છે. પરંતુ અહીં પટ્ટીની લંબાઈમાં ૧% ભૂલ હોવાથી, પરિમિતિ માપવામાં ૧% ભૂલ થાય છે, અને વ્યાસમાં પણ ૧% ભૂલ થાય છે. પરંતુ વર્તુળની પરિમિતિ અને વ્યાસ વચ્ચેનો સંબંધ લીધે, વ્યાસમાં ભૂલ ૨% થાય છે. અહીં, A અને C ગળતર છે કારણ કે તે સીધી ભૂલને ધ્યાનમાં લે છે, પરંતુ વાસ્તવિક ભૂલ વ્યાસમાં ૨% થાય છે.", "ncert_ref": "Class XI - પ્રકરણ ૨: એકમ અને માપન", "difficulty": "Hard", "num": 1}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક કિલોગ્રામ દળ ધરાવતું પદાર્થ પૃથ્વી પર ૯.૮ N બળ અનુભવે છે.' આ વિધાનમાં કયા SI એકમનો ઉપયોગ થયો નથી?", "options": ["A) કિલોગ્રામ", "B) ન્યૂટન", "C) મીટર", "D) સેકન્ડ"], "correct": 2, "explanation": "વિધાનમાં કિલોગ્રામ (દળ) અને ન્યૂટન (બળ)નો ઉપયોગ થયો છે. ન્યૂટન એ SI એકમ છે જે બળ માપવા માટે વપરાય છે (1 N = 1 kg·m/s²). પરંતુ મીટર અને સેકન્ડનો ઉપયોગ વિધાનમાં થયો નથી. મીટર એ લંબાઈનો એકમ છે અને સેકન્ડ એ સમયનો એકમ છે, પરંતુ આ વિધાનમાં તેનો ઉલ્લેખ નથી. તેથી, મીટર એ યોગ્ય જવાબ છે.", "ncert_ref": "Class XI - પ્રકરણ ૨: એકમ અને માપન", "difficulty": "Hard", "num": 2}, {"question": "એક પ્રયોગશાળામાં, એક વિદ્યાર્થી એમ માપે છે કે પાણીનો ગલનબિંદુ ૦°C છે અને ઉત્કલનબિંદુ ૧૦૦°C છે. જો તે તાપમાનને ફેરનહીટમાં રૂપાંતરિત કરે, તો કયો વિકલ્પ યોગ્ય રહેશે?", "options": ["A) ૩૨°F અને ૨૧૨°F", "B) ૩૨°F અને ૧૮૦°F", "C) ૦°F અને ૧૦૦°F", "D) ૨૧૨°F અને ૩૭૩°F"], "correct": 1, "explanation": "પાણીનો ગલનબિંદુ ૦°C એ ૩૨°F છે અને ઉત્કલનબિંદુ ૧૦૦°C એ ૨૧૨°F છે. પરંતુ ફેરનહીટ સ્કેલમાં, ૦°C = ૩૨°F અને ૧૦૦°C = ૨૧૨°F છે. પરંતુ વિકલ્પ A અને B વચ્ચે, B યોગ્ય છે કારણ કે ૨૧૨°F એ ૧૦૦°C નું યોગ્ય રૂપાંતરણ છે. વિકલ્પ C અને D અયોગ્ય છે કારણ કે તે સીધું રૂપાંતરણ નથી.", "ncert_ref": "Class XI - પ્રકરણ ૨: એકમ અને માપન", "difficulty": "Hard", "num": 3}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો ઘનત્વ ૫ g/cm³ છે.' જો આ ઘનત્વને kg/m³માં રૂપાંતરિત કરવું હોય, તો કયો વિકલ્પ યોગ્ય રહેશે?", "options": ["A) ૫૦૦ kg/m³", "B) ૫૦ kg/m³", "C) ૫૦૦૦ kg/m³", "D) ૫ kg/m³"], "correct": 2, "explanation": "ઘનત્વનું રૂપાંતરણ g/cm³ થી kg/m³માં કરવા માટે, 1 g/cm³ = 1000 kg/m³ છે. તેથી, 5 g/cm³ = 5 × 1000 kg/m³ = 5000 kg/m³. વિકલ્પ C યોગ્ય છે. વિકલ્પ A, B, અને D અયોગ્ય છે કારણ કે તે યોગ્ય રૂપાંતરણ નથી.", "ncert_ref": "Class XI - પ્રકરણ ૨: એકમ અને માપન", "difficulty": "Hard", "num": 4}, {"question": "એક પ્રયોગમાં, એક વિદ્યાર્થી એમ માપે છે કે એક પદાર્થની લંબાઈ ૫.૦ cm ± ૦.૧ cm છે. જો તે પદાર્થની લંબાઈને ૫ ગણી કરે, તો નવી લંબાઈમાં કેટલી ભૂલ રહેશે?", "options": ["A) ± ૦.૧ cm", "B) ± ૦.૫ cm", "C) ± ૦.૨ cm", "D) ± ૦.૦૨ cm"], "correct": 1, "explanation": "જ્યારે લંબાઈને ૫ ગણી કરવામાં આવે, ત્યારે મૂળ ભૂલ ± ૦.૧ cm પણ ૫ ગણી થાય છે. તેથી, નવી ભૂલ ± ૦.૧ × ૫ = ± ૦.૫ cm થાય છે. વિકલ્પ B યોગ્ય છે. વિકલ્પ A, C, અને D અયોગ્ય છે કારણ કે તે ભૂલના યોગ્ય ગુણાંકને ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XI - પ્રકરણ ૨: એકમ અને માપન", "difficulty": "Hard", "num": 5}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો દબાણ 1 Pa છે.' આ માપનમાં કયા SI મૂળ એકમોનો ઉપયોગ થયો છે?", "options": ["A) કિલોગ્રામ, મીટર, સેકન્ડ", "B) કિલોગ્રામ, મીટર, એમ્પિયર", "C) મીટર, કિલોગ્રામ, કેલ્વિન", "D) ન્યૂટન, મીટર, સેકન્ડ"], "correct": 0, "explanation": "દબાણનો SI એકમ પાસ્કલ (Pa) છે, જેને N/m² તરીકે વ્યાખ્યાયિત કરવામાં આવે છે. ન્યૂટન (N) એ kg·m/s² છે, તેથી Pa = kg/(m·s²). આમ, દબાણ માપવા માટે કિલોગ્રામ (kg), મીટર (m), અને સેકન્ડ (s) એ ત્રણ મૂળ એકમોનો ઉપયોગ થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે એમ્પિયર (A) અને કેલ્વિન (K) દબાણના માપન સાથે સંબંધિત નથી.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 6}, {"question": "એક પ્રયોગમાં, એક વિદ્યાર્થી એમ માપે છે કે એક પદાર્થનો પ્રતિકાર 5 Ω છે. પ્રતિકારનો SI એકમ કયા મૂળ એકમો પર આધારિત છે?", "options": ["A) કિલોગ્રામ, મીટર, સેકન્ડ, એમ્પિયર", "B) એમ્પિયર, વોલ્ટ, મીટર", "C) કિલોગ્રામ, મીટર, એમ્પિયર, કેલ્વિન", "D) વોલ્ટ, એમ્પિયર, સેકન્ડ"], "correct": 0, "explanation": "પ્રતિકારનો SI એકમ ઓહમ (Ω) છે, જેને V/A તરીકે વ્યાખ્યાયિત કરવામાં આવે છે. વોલ્ટ (V) એ kg·m²/(s³·A) છે, તેથી Ω = kg·m²/(s³·A²). આમ, પ્રતિકાર માપવા માટે કિલોગ્રામ (kg), મીટર (m), સેકન્ડ (s), અને એમ્પિયર (A) એ ચાર મૂળ એકમોનો ઉપયોગ થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે વોલ્ટ અને કેલ્વિન મૂળ એકમો નથી.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 7}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો વિદ્યુત પ્રવાહ 3 A છે.' વિદ્યુત પ્રવાહનો SI એકમ કયા મૂળ એકમ પર આધારિત છે?", "options": ["A) કિલોગ્રામ અને સેકન્ડ", "B) એમ્પિયર", "C) કિલોગ્રામ, મીટર, અને સેકન્ડ", "D) કુલોમ અને સેકન્ડ"], "correct": 1, "explanation": "વિદ્યુત પ્રવાહનો SI મૂળ એકમ એમ્પિયર (A) છે. તે કોઈ અન્ય મૂળ એકમ પર આધારિત નથી. કુલોમ (C) એ વિદ્યુત ભારનો એકમ છે, જે એમ્પિયર-સેકન્ડ (A·s) છે, પરંતુ તે મૂળ એકમ નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે તેઓ એમ્પિયરને અન્ય એકમો સાથે જોડે છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 8}, {"question": "એક પ્રયોગશાળામાં, એક વિદ્યાર્થી એમ માપે છે કે એક પદાર્થનો પ્રકાશની તીવ્રતા 10 cd છે. પ્રકાશની તીવ્રતાનો SI એકમ કયો છે અને તે કયા મૂળ એકમ પર આધારિત છે?", "options": ["A) કૅન્ડેલા, કિલોગ્રામ", "B) કૅન્ડેલા, મૂળ એકમ", "C) લ્યુમેન, મીટર", "D) લક્સ, સેકન્ડ"], "correct": 1, "explanation": "પ્રકાશની તીવ્રતાનો SI મૂળ એકમ કૅન્ડેલા (cd) છે. તે કોઈ અન્ય મૂળ એકમ પર આધારિત નથી. લ્યુમેન (lm) અને લક્સ (lx) એ પ્રકાશના પ્રવાહ અને પ્રકાશની તીવ્રતાના વ્યુત્પન્ન એકમો છે, પરંતુ તેઓ મૂળ એકમો નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે તેઓ કૅન્ડેલાને અન્ય એકમો સાથે જોડે છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 9}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો પદાર્થની માત્રા 2 mol છે.' પદાર્થની માત્રાનો SI એકમ કયો છે અને તે કયા મૂળ એકમ પર આધારિત છે?", "options": ["A) મોલ, કિલોગ્રામ", "B) મોલ, મૂળ એકમ", "C) ગ્રામ, કિલોગ્રામ", "D) એટમ, કિલોગ્રામ"], "correct": 1, "explanation": "પદાર્થની માત્રાનો SI મૂળ એકમ મોલ (mol) છે. તે કોઈ અન્ય મૂળ એકમ પર આધારિત નથી. ગ્રામ (g) અને કિલોગ્રામ (kg) એ દળના એકમો છે, પરંતુ તેઓ પદાર્થની માત્રાના મૂળ એકમ નથી. એટમ એ પદાર્થની માત્રાનો એકમ નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે તેઓ મોલને અન્ય એકમો સાથે જોડે છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 10}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો વિસ્તાર 2500 mm² છે.' આ માપને SI એકમમાં વ્યક્ત કરતાં કયો વિકલ્પ સાચો છે?", "options": ["A) 2.5 × 10⁻³ m²", "B) 2.5 × 10⁻⁴ m²", "C) 2.5 × 10⁻² m²", "D) 2.5 × 10⁻⁵ m²"], "correct": 0, "explanation": "1 mm = 10⁻³ m, તેથી 1 mm² = (10⁻³ m)² = 10⁻⁶ m². આથી 2500 mm² = 2500 × 10⁻⁶ m² = 2.5 × 10⁻³ m². વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને Dમાં ઘાતાંકની કિંમતો ચૂકી છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 11}, {"question": "એક પ્રયોગમાં, એક પદાર્થનો દબાણ 1 bar માપવામાં આવ્યો છે. આને SI એકમમાં રૂપાંતરિત કરતાં કયો વિકલ્પ યોગ્ય છે?", "options": ["A) 10⁵ Pa", "B) 10⁴ Pa", "C) 10³ Pa", "D) 10² Pa"], "correct": 0, "explanation": "1 bar = 10⁵ Pa (પાસ્કલ) છે. આથી વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને Dમાં દબાણની કિંમત ઓછી દર્શાવવામાં આવી છે, જે ચૂક છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 12}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો ઘનત્વ 1 g/cm³ છે.' આને kg/m³માં વ્યક્ત કરતાં કયો વિકલ્પ સાચો છે?", "options": ["A) 1000 kg/m³", "B) 100 kg/m³", "C) 10 kg/m³", "D) 1 kg/m³"], "correct": 0, "explanation": "1 g/cm³ = 1000 kg/m³ છે, કારણ કે 1 g = 10⁻³ kg અને 1 cm³ = 10⁻⁶ m³, તેથી 1 g/cm³ = (10⁻³ kg)/(10⁻⁶ m³) = 10³ kg/m³ = 1000 kg/m³. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને Dમાં રૂપાંતરણ ચૂકી છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 13}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો વિદ્યુત પ્રતિકાર 5 kΩ છે.' આને SI મૂળ એકમોમાં વ્યક્ત કરતાં કયો વિકલ્પ સાચો છે?", "options": ["A) 5 × 10³ kg·m²·s⁻³·A⁻²", "B) 5 × 10³ kg·m²·s⁻²·A⁻¹", "C) 5 × 10³ kg·m·s⁻³·A⁻²", "D) 5 × 10³ kg·m²·s⁻³·A⁻¹"], "correct": 0, "explanation": "1 Ω (ઓહમ) = 1 kg·m²·s⁻³·A⁻² છે. આથી 5 kΩ = 5 × 10³ Ω = 5 × 10³ kg·m²·s⁻³·A⁻². વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને Dમાં એકમોની ઘાતાંકો ચૂકી છે.", "ncert_ref": "Class XI - પ્રકરણ 2: એકમ અને માપન", "difficulty": "Hard", "num": 14}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો દબાણ 1 atm છે.' આને SI એકમમાં રૂપાંતરિત કરતાં કયો વિકલ્પ યોગ્ય છે?", "options": ["A) 101.325 Pa", "B) 101325 Pa", "C) 1.01325 × 10⁵ Pa", "D) 1.01325 × 10⁴ Pa"], "correct": 2, "explanation": "1 atm (વાતાવરણીય દબાણ) ને SI એકમમાં રૂપાંતરિત કરતાં તે 101325 Pa જેટલો હોય છે, જેને વૈજ્ઞાનિક સંકેતમાં 1.01325 × 10⁵ Pa લખવામાં આવે છે. વિકલ્પ A અને B અપૂર્ણ અથવા અયોગ્ય સ્વરૂપે દર્શાવે છે, જ્યારે વિકલ્પ D ખોટી ક્રમમાં છે. વિકલ્પ C સંપૂર્ણ અને યોગ્ય વૈજ્ઞાનિક સ્વરૂપ છે.", "ncert_ref": "Class XI - Chapter 2: એકમ અને માપન", "difficulty": "Hard", "num": 15}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો વિદ્યુત ભાર 3.2 × 10^-19 C છે.' આ ભાર કેટલા ઇલેક્ટ્રોનના તુલ્ય હશે? (e = 1.6 × 10^-19 C)", "options": ["A) 2 ઇલેક્ટ્રોન", "B) 3 ઇલેક્ટ્રોન", "C) 4 ઇલેક્ટ્રોન", "D) 5 ઇલેક્ટ્રોન"], "correct": 1, "explanation": "વિદ્યુત ભાર (Q) = n × e, જ્યાં n = ઇલેક્ટ્રોનની સંખ્યા અને e = એક ઇલેક્ટ્રોનનો ભાર. અહીં, Q = 3.2 × 10^-19 C અને e = 1.6 × 10^-19 C. તેથી, n = Q/e = (3.2 × 10^-19)/(1.6 × 10^-19) = 2. પરંતુ વિકલ્પ A 2 ઇલેક્ટ્રોન છે, પરંતુ પ્રશ્નમાં 3.2 × 10^-19 C આપેલ છે, જે 2 ઇલેક્ટ્રોનના ભાર જેટલો છે. પરંતુ વિકલ્પ B (3 ઇલેક્ટ્રોન) યોગ્ય નથી. અહીં, ચૂકવણી છે કે પ્રશ્નમાં 3.2 × 10^-19 C આપેલ છે, જે 2 ઇલેક્ટ્રોનના ભાર જેટલો છે. પરંતુ વિકલ્પ A સચોટ છે. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે તેઓ 3.2 × 10^-19 C ભાર સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 1: ભૌતિક જગત", "difficulty": "Hard", "num": 16}, {"question": "એક પદાર્થનો દળ 100 g છે અને તેનો કદ 20 cm³ છે. તેનો ઘનત્વ kg/m³માં શું હશે?", "options": ["A) 5000 kg/m³", "B) 500 kg/m³", "C) 50 kg/m³", "D) 5 kg/m³"], "correct": 0, "explanation": "ઘનત્વ = દળ / કદ. અહીં, દળ = 100 g = 0.1 kg અને કદ = 20 cm³ = 20 × 10^-6 m³. તેથી, ઘનત્વ = 0.1 kg / (20 × 10^-6 m³) = 5000 kg/m³. વિકલ્પ A સચોટ છે. વિકલ્પ B, C, અને D અયોગ્ય છે કારણ કે તેઓ ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 2: એકમ અને માપન", "difficulty": "Hard", "num": 17}, {"question": "એક વૈજ્ઞાનિક એમ કહે છે કે, 'એક પદાર્થનો દબાણ 1 bar છે.' આને Pascal (Pa)માં રૂપાંતરિત કરો.", "options": ["A) 10^5 Pa", "B) 10^4 Pa", "C) 10^3 Pa", "D) 10^2 Pa"], "correct": 0, "explanation": "1 bar = 10^5 Pa. તેથી, વિકલ્પ A સચોટ છે. વિકલ્પ B, C, અને D અયોગ્ય છે કારણ કે તેઓ 1 barના મૂલ્ય સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 2: એકમ અને માપન", "difficulty": "Hard", "num": 18}, {"question": "એક પદાર્થનો વિદ્યુત પ્રતિકાર 5 kΩ છે. આને Ohm (Ω)માં લખો.", "options": ["A) 50 Ω", "B) 500 Ω", "C) 5000 Ω", "D) 5 Ω"], "correct": 2, "explanation": "1 kΩ = 1000 Ω. તેથી, 5 kΩ = 5 × 1000 Ω = 5000 Ω. વિકલ્પ C સચોટ છે. વિકલ્પ A, B, અને D અયોગ્ય છે કારણ કે તેઓ 5 kΩના મૂલ્ય સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 2: એકમ અને માપન", "difficulty": "Hard", "num": 19}, {"question": "એક પદાર્થનો વિસ્તાર 2500 mm² છે. આને m²માં રૂપાંતરિત કરો.", "options": ["A) 2.5 × 10^-3 m²", "B) 2.5 × 10^-4 m²", "C) 2.5 × 10^-5 m²", "D) 2.5 × 10^-6 m²"], "correct": 1, "explanation": "1 mm² = 10^-6 m². તેથી, 2500 mm² = 2500 × 10^-6 m² = 2.5 × 10^-3 m². પરંતુ વિકલ્પ A 2.5 × 10^-3 m² છે, જે સચોટ છે. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે તેઓ 2500 mm²ના મૂલ્ય સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - Chapter 2: એકમ અને માપન", "difficulty": "Hard", "num": 20}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
