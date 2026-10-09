@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>કોષ: જીવનનો એકમ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>કોષ: જીવનનો એકમ Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "કોષમાં રાઇબોઝોમ્સનું મુખ્ય કાર્ય શું છે?", "opts": ["પ્રોટીન સંશ્લેષણ", "કાર્બોદિતનું પાચન", "ઊર્જા ઉત્પાદન", "વર્ણસૂત્રોનું નિર્માણ"], "ans": 0, "exp": "રાઇબોઝોમ્સ એ પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે, જ્યાં એમિનો એસિડ્સને જોડીને પ્રોટીન બનાવવામાં આવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું અંગક કોષમાં જોવા મળતું નથી?", "opts": ["કોષકેન્દ્ર", "કણાભસૂત્ર (મિટોકોન્ડ્રિયા)", "હરિતકણ (ક્લોરોપ્લાસ્ટ)", "હૃદય"], "ans": 3, "exp": "હૃદય એ અંગ છે, જે બહુકોષીય સજીવોમાં જોવા મળે છે, જ્યારે બાકીના ત્રણ અંગકો કોષમાં જોવા મળે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં DNAનું પ્રતિકૃતિકરણ (Replication) ક્યારે થાય છે?", "opts": ["કોષવિભાજનના પ્રોફેઝ દરમિયાન", "કોષવિભાજનના ઇન્ટરફેઝ દરમિયાન", "કોષવિભાજનના મેટાફેઝ દરમિયાન", "કોષવિભાજનના એનાફેઝ દરમિયાન"], "ans": 1, "exp": "DNAનું પ્રતિકૃતિકરણ કોષવિભાજનના ઇન્ટરફેઝના S-તબક્કા દરમિયાન થાય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન લાઇસોઝોમ્સ માટે ખોટું છે?", "opts": ["તે કોષમાં પાચન માટે જવાબદાર છે.", "તે હાઇડ્રોલાઇટિક ઉત્સેચકો ધરાવે છે.", "તે કોષમાં ઊર્જા ઉત્પાદન માટે જવાબદાર છે.", "તે કોષના કચરાને તોડવામાં મદદ કરે છે."], "ans": 2, "exp": "લાઇસોઝોમ્સ પાચન અને કચરાના નિકાલ માટે જવાબદાર છે, જ્યારે ઊર્જા ઉત્પાદન કણાભસૂત્રોનું કાર્ય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં કયું અંગક પ્રકાશસંશ્લેષણ માટે જવાબદાર છે?", "opts": ["કણાભસૂત્ર (મિટોકોન્ડ્રિયા)", "હરિતકણ (ક્લોરોપ્લાસ્ટ)", "રાઇબોઝોમ્સ", "ગોલ્ગી કાય"], "ans": 1, "exp": "હરિતકણ (ક્લોરોપ્લાસ્ટ) પ્રકાશસંશ્લેષણની પ્રક્રિયા માટે જવાબદાર છે, જેમાં સૂર્યપ્રકાશની મદદથી કાર્બોદિતનું સંશ્લેષણ થાય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયો કોષીય અંગક કોષમાં ઊર્જા ઉત્પાદન માટે જવાબદાર છે?", "opts": ["કણાભસૂત્ર (મિટોકોન્ડ્રિયા)", "ગોલ્ગી પિંડ", "લાયસોઝોમ", "અંતઃકોષરસજાળ (એન્ડોપ્લાઝમિક રેટિક્યુલમ)"], "ans": 0, "exp": "કણાભસૂત્ર (મિટોકોન્ડ્રિયા) કોષીય શ્વસન દ્વારા ATP ઉત્પન્ન કરે છે, જે કોષ માટે ઊર્જાનો મુખ્ય સ્ત્રોત છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષકેન્દ્રમાં નીચેનામાંથી કયો ઘટક હાજર નથી?", "opts": ["રાઇબોઝોમ્સ", "વર્ણસૂત્રો (ક્રોમોસોમ્સ)", "કોષકેન્દ્રિકા (ન્યુક્લિયોલસ)", "DNA"], "ans": 0, "exp": "રાઇબોઝોમ્સ કોષકેન્દ્રમાં નહીં, પરંતુ કોષરસમાં અથવા અંતઃકોષરસજાળ પર જોવા મળે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન કોષરસપટલ (પ્લાઝમા મેમ્બ્રેન) માટે ખોટું છે?", "opts": ["તે ફક્ત પ્રોટીનનું બનેલું છે.", "તે અર્ધપ્રવેશશીલ છે.", "તે કોષને આકાર આપે છે.", "તે પદાર્થોના વહનમાં મદદ કરે છે."], "ans": 0, "exp": "કોષરસપટલ લિપિડ અને પ્રોટીન બંનેથી બનેલું છે, માત્ર પ્રોટીનથી નહીં.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં લાયસોઝોમનું મુખ્ય કાર્ય શું છે?", "opts": ["કોષીય કચરાનું પાચન અને નિકાલ", "પ્રોટીન સંશ્લેષણ", "ઊર્જા ઉત્પાદન", "કાર્બોદિતનું સંચય"], "ans": 0, "exp": "લાયસોઝોમમાં હાઇડ્રોલાઇટિક ઉત્સેચકો હોય છે જે કોષીય કચરા અને બિનજરૂરી પદાર્થોનું પાચન કરે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષની કઈ અંગિકા પ્રોટીન સંશ્લેષણ માટે મુખ્યત્વે જવાબદાર છે?", "opts": ["ગોલ્ગીકાય", "રાઇબોઝોમ", "લાઇસોઝોમ", "કણાભસૂત્ર"], "ans": 1, "exp": "રાઇબોઝોમ એ પ્રોટીન સંશ્લેષણનું મુખ્ય સ્થાન છે, જ્યાં એમિનો એસિડને જોડીને પોલિપેપ્ટાઇડ શૃંખલા બનાવવામાં આવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષકેન્દ્રમાં નીચેનામાંથી શું હાજર નથી?", "opts": ["DNA", "રાઇબોઝોમ", "રાઇબોઝોમલ આરએનએ (rRNA)", "હિસ્ટોન પ્રોટીન"], "ans": 1, "exp": "રાઇબોઝોમ કોષરસમાં અથવા અંતઃકોષરસજાળ પર જોવા મળે છે, કોષકેન્દ્રમાં નહીં.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં ૨૦% થાઇમિન છે, તો તે કોષમાં ગ્વાનિનનું પ્રમાણ કેટલું હશે?", "opts": ["૨૦%", "૩૦%", "૪૦%", "૧૦%"], "ans": 1, "exp": "DNAમાં એડેનીન = થાઇમિન (૨૦%) અને ગ્વાનિન = સાઇટોસિન. કુલ ૧૦૦%માંથી ૪૦% બાકી રહે છે, તેથી ગ્વાનિન = ૩૦%.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન મિટોકોન્ડ્રિયા માટે સાચું નથી?", "opts": ["તેને પોતાનું DNA હોય છે.", "તે કોષીય શ્વસન માટે જવાબદાર છે.", "તે કણાભસૂત્ર તરીકે પણ ઓળખાય છે.", "તે પ્રકાશસંશ્લેષણ માટે જવાબદાર છે."], "ans": 3, "exp": "મિટોકોન્ડ્રિયા કોષીય શ્વસન માટે જવાબદાર છે, પ્રકાશસંશ્લેષણ માટે નહીં. પ્રકાશસંશ્લેષણ હરિતકણમાં થાય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું અંગક કોષમાં જોવા મળતું નથી?", "opts": ["મિટોકોન્ડ્રિયા", "ક્લોરોપ્લાસ્ટ", "સેન્ટ્રોસોમ", "રાઇઝોઇડ"], "ans": 3, "exp": "રાઇઝોઇડ એ છોડના મૂળ જેવી રચના છે જે કોષનું અંગક નથી, જ્યારે બાકીના ત્રણ કોષીય અંગકો છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં લાઇસોઝોમ્સનું કાર્ય શું છે?", "opts": ["અંતઃકોષીય પાચન", "પ્રોટીન સંશ્લેષણ", "ઊર્જા ઉત્પાદન", "આનુવંશિક માહિતીનું સંગ્રહણ"], "ans": 0, "exp": "લાઇસોઝોમ્સમાં હાઇડ્રોલાઇટિક ઉત્સેચકો હોય છે જે અંતઃકોષીય પાચન માટે જવાબદાર છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) કોષરસપટલ ફક્ત લિપિડનું બનેલું હોય છે. (2) કોષરસપટલ પ્રોટીન અને લિપિડ બંનેનું બનેલું હોય છે. (3) કોષરસપટલ અર્ધપ્રવેશશીલ હોય છે. (4) કોષરસપટલ સંપૂર્ણપણે અપ્રવેશશીલ હોય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 1, "exp": "વિધાન (2) અને (3) સાચાં છે. કોષરસપટલ પ્રોટીન અને લિપિડનું બનેલું હોય છે અને તે અર્ધપ્રવેશશીલ હોય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં ગોલ્ગીકાયનું મુખ્ય કાર્ય શું છે?", "opts": ["પ્રોટીનનું સંગ્રહણ અને સ્રાવ", "ઊર્જા ઉત્પાદન", "આનુવંશિક માહિતીનું નિયંત્રણ", "પ્રકાશસંશ્લેષણ"], "ans": 0, "exp": "ગોલ્ગીકાય પ્રોટીનનું સંગ્રહણ, રૂપાંતરણ અને સ્રાવ માટે જવાબદાર છે, જે કોષમાંથી બહાર મોકલવામાં આવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષની કોષદીવાલ અને કોષરસપટલ વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["કોષદીવાલ પ્રાણીકોષમાં જોવા મળે છે, જ્યારે કોષરસપટલ વનસ્પતિકોષમાં જોવા મળે છે.", "કોષદીવાલ સેલ્યુલોઝની બનેલી હોય છે, જ્યારે કોષરસપટલ લિપિડ અને પ્રોટીનની બનેલી હોય છે.", "કોષદીવાલ અર્ધપારગમ્ય હોય છે, જ્યારે કોષરસપટલ પૂર્ણપણે અપારગમ્ય હોય છે.", "કોષદીવાલ કોષના આકારને જાળવી રાખતી નથી, જ્યારે કોષરસપટલ આકાર જાળવી રાખે છે."], "ans": 1, "exp": "કોષદીવાલ વનસ્પતિકોષમાં સેલ્યુલોઝની બનેલી હોય છે અને કોષને યાંત્રિક આધાર આપે છે, જ્યારે કોષરસપટલ લિપિડ અને પ્રોટીનની બનેલી હોય છે અને પદાર્થોના વહનને નિયંત્રિત કરે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 12 વર્ણસૂત્રો છે. તે કોષના DNA પ્રતિકૃતિ પછી દ્વિભાજન દ્વારા બે નવા કોષો બને ત્યારે દરેક નવા કોષમાં કેટલા વર્ણસૂત્રો હશે?", "opts": ["6", "12", "24", "36"], "ans": 1, "exp": "DNA પ્રતિકૃતિ પછી દરેક વર્ણસૂત્ર બેવડાય છે, પરંતુ દ્વિભાજન દરમિયાન વર્ણસૂત્રોની સંખ્યા મૂળ સંખ્યા જેટલી જ રહે છે, એટલે કે 12.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું અંગક પ્રોકેરિયોટિક કોષમાં જોવા મળતું નથી?", "opts": ["રિબોઝોમ", "કોષરસપટલ", "કોષકેન્દ્રપટલ", "DNA"], "ans": 2, "exp": "પ્રોકેરિયોટિક કોષમાં કોષકેન્દ્રપટલ હોતું નથી, કારણ કે તેમાં સુયોજિત કોષકેન્દ્ર નથી હોતું.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) લાયસોઝોમ્સને કોષનું પાચનતંત્ર કહેવાય છે. (2) લાયસોઝોમ્સમાં હાઇડ્રોલાઇટિક ઉત્સેચકો હોય છે. (3) લાયસોઝોમ્સ કોષકેન્દ્રમાં જોવા મળે છે. (4) લાયસોઝોમ્સ કોષીય કચરાનું પાચન કરે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. લાયસોઝોમ્સ કોષકેન્દ્રમાં હોતા નથી, તેથી વિધાન 3 ખોટું છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું અંગક કોષમાં જોવા મળતું નથી પરંતુ વાઇરસમાં જોવા મળે છે?", "opts": ["કોષકેન્દ્ર", "કેપ્સિડ", "રાઇબોઝોમ", "કોષરસપટલ"], "ans": 1, "exp": "વાઇરસમાં કેપ્સિડ નામનું પ્રોટીન આવરણ હોય છે, જે કોષમાં જોવા મળતું નથી.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન કોષરસપટલ માટે ખોટું છે?", "opts": ["તે લિપિડ અને પ્રોટીનનું બનેલું છે.", "તે અર્ધપ્રવેશશીલ છે.", "તે કોષને આકાર આપે છે.", "તે ફક્ત પ્રાણી કોષમાં જોવા મળે છે."], "ans": 3, "exp": "કોષરસપટલ વનસ્પતિ અને પ્રાણી બંને કોષોમાં જોવા મળે છે, માત્ર પ્રાણી કોષમાં જ નહીં.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં મિટોકોન્ડ્રિયાનું મુખ્ય કાર્ય શું છે?", "opts": ["પ્રકાશસંશ્લેષણ", "આરએનએ સંશ્લેષણ", "ઊર્જા ઉત્પાદન (એટીપી)", "પ્રોટીનનું વિઘટન"], "ans": 2, "exp": "મિટોકોન્ડ્રિયા કોષમાં ઊર્જા ઉત્પાદનનું કાર્ય કરે છે, જેમાં એટીપી (ATP) ઉત્પન્ન થાય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 16 વર્ણસૂત્રો હોય, તો તેના દ્વિતીય મિયોસિસ વિભાજન પછી દરેક સંતતિ કોષમાં કેટલા વર્ણસૂત્રો હશે?", "opts": ["8", "16", "32", "4"], "ans": 0, "exp": "મિયોસિસ વિભાજનમાં વર્ણસૂત્રોની સંખ્યા અડધી થાય છે, તેથી 16 વર્ણસૂત્રો ધરાવતા કોષમાં દ્વિતીય મિયોસિસ પછી 8 વર્ણસૂત્રો હશે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું અંગક લાઇસોઝોમ સાથે સંકળાયેલું નથી?", "opts": ["પાચક ઉત્સેચકો ધરાવે છે.", "કોષીય કચરાનો નાશ કરે છે.", "પ્રોટીન સંશ્લેષણમાં ભાગ લે છે.", "અપચય ક્રિયામાં મદદ કરે છે."], "ans": 2, "exp": "લાઇસોઝોમ પાચક ઉત્સેચકો ધરાવે છે અને કોષીય કચરાનો નાશ કરે છે, પરંતુ પ્રોટીન સંશ્લેષણમાં ભાગ લેતું નથી.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં મિટોકોન્ડ્રિયા અને ક્લોરોપ્લાસ્ટ બંને માટે કયું વિધાન સાચું છે?", "opts": ["બંને પ્રકાશસંશ્લેષણમાં ભાગ લે છે.", "બંને પોતાનું DNA ધરાવે છે.", "બંને કોષરસપટલથી ઘેરાયેલા છે.", "બંને ઉત્સેચકોનું સંશ્લેષણ કરે છે."], "ans": 1, "exp": "મિટોકોન્ડ્રિયા અને ક્લોરોપ્લાસ્ટ બંને પોતાનું DNA ધરાવે છે અને અર્ધસ્વાયત્ત અંગકો છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષના કયા અંગકેન્દ્રીય ઘટકને 'કોષનું શક્તિગૃહ' કહેવામાં આવે છે?", "opts": ["લાઇસોઝોમ", "રાઇબોઝોમ", "મિટોકૉન્ડ્રિયા", "ગોલ્ગી કાય"], "ans": 2, "exp": "મિટોકૉન્ડ્રિયા શ્વસનની ક્રિયા દ્વારા ATP ઉત્પન્ન કરે છે, જે કોષની ઊર્જા માટે જરૂરી છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 16 વર્ણસૂત્રો છે. તેના દ્વિતીય અર્ધીકરણ (મિયોસિસ-II) પછી બનતા દરેક કોષમાં વર્ણસૂત્રોની સંખ્યા કેટલી હશે?", "opts": ["8", "16", "32", "4"], "ans": 0, "exp": "મિયોસિસ-II પછી વર્ણસૂત્રોની સંખ્યા અડધી થઈ જાય છે, તેથી 16 ÷ 2 = 8 વર્ણસૂત્રો બાકી રહે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન લાઇસોઝોમ માટે સાચું નથી?", "opts": ["તે કોષના પાચનમાં મદદ કરે છે.", "તે હાઇડ્રોલાઇટિક ઉત્સેચકો ધરાવે છે.", "તે કોષના 'આત્મહત્યા કરનાર કોથળી' તરીકે ઓળખાય છે.", "તે પ્રકાશસંશ્લેષણમાં મદદ કરે છે."], "ans": 3, "exp": "લાઇસોઝોમ પ્રકાશસંશ્લેષણમાં ભાગ લેતા નથી, તે કોષીય પાચન માટે જવાબદાર છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં રહેલા નીચેના પૈકી કયા અંગકમાં બેવડું પટલ હોતું નથી?", "opts": ["કણાભસૂત્ર (Mitochondria)", "હરિતકણ (Chloroplast)", "કોષકેન્દ્ર (Nucleus)", "લાઇસોઝોમ (Lysosome)"], "ans": 3, "exp": "લાઇસોઝોમ એક પટલીય અંગક છે, જ્યારે કણાભસૂત્ર, હરિતકણ અને કોષકેન્દ્ર બેવડું પટલ ધરાવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 24 ક્રોમેટિડ્સ (chromatids) દ્વિતીય અર્ધીકરણ (Meiosis II)ના મધ્યાવસ્થામાં જોવા મળે છે. તો તે કોષમાં પ્રાથમિક અર્ધીકરણ (Meiosis I) પહેલાં કેટલા વર્ણસૂત્રો હશે?", "opts": ["6", "12", "24", "48"], "ans": 1, "exp": "દ્વિતીય અર્ધીકરણના મધ્યાવસ્થામાં દરેક વર્ણસૂત્ર બે ક્રોમેટિડ્સ ધરાવે છે. આથી 24 ક્રોમેટિડ્સ = 12 વર્ણસૂત્રો. પ્રાથમિક અર્ધીકરણ પહેલાં આ સંખ્યા બમણી થઈ 24 વર્ણસૂત્રો હશે, પરંતુ પ્રશ્નમાં 12 વર્ણસૂત્રોનો વિકલ્પ સાચો છે કારણ કે પ્રાથમિક અર્ધીકરણ પહેલાં દરેક વર્ણસૂત્ર ડિપ્લોઇડ સંખ્યામાં હોય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન કોષરસપટલ (Plasma Membrane) માટે ખોટું છે?", "opts": ["તે પ્રોટીન અને ફોસ્ફોલિપિડ્સનું બનેલું હોય છે.", "તે અર્ધપ્રવેશશીલ (Semi-permeable) હોય છે.", "તે કોષને યાંત્રિક આધાર આપે છે અને આકાર જાળવી રાખે છે.", "તે ફક્ત પ્રાણી કોષોમાં જ જોવા મળે છે."], "ans": 3, "exp": "કોષરસપટલ વનસ્પતિ, પ્રાણી અને બેક્ટેરિયા સહિત તમામ કોષોમાં જોવા મળે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં પ્રોટીન સંશ્લેષણ માટે નીચેના પૈકી કયું અંગક સૌથી વધુ જવાબદાર છે?", "opts": ["લાઇસોઝોમ (Lysosome)", "રિબોઝોમ (Ribosome)", "ગોલ્ગી કાય (Golgi Apparatus)", "કણાભસૂત્ર (Mitochondria)"], "ans": 1, "exp": "રિબોઝોમ એ પ્રોટીન સંશ્લેષણનું મુખ્ય સ્થાન છે, જ્યાં એમિનો એસિડ્સને જોડીને પોલિપેપ્ટાઇડ શૃંખલા બનાવવામાં આવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે?\n1. કોષકેન્દ્રમાં રહેલું ક્રોમેટિન (Chromatin) DNA અને પ્રોટીનનું બનેલું હોય છે.\n2. કોષરસપટલ ફક્ત લિપિડ્સનું બનેલું હોય છે.\n3. કણાભસૂત્રને કોષનું શક્તિઘર કહેવામાં આવે છે.\n4. લાઇસોઝોમને કોષનું પાચનતંત્ર કહેવામાં આવે છે.", "opts": ["માત્ર 1 અને 2", "માત્ર 2", "માત્ર 2 અને 3", "માત્ર 4"], "ans": 1, "exp": "વિધાન 2 ખોટું છે કારણ કે કોષરસપટલ પ્રોટીન અને ફોસ્ફોલિપિડ્સનું બનેલું હોય છે. વિધાન 1, 3 અને 4 સાચાં છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 24 ક્રોમોસોમ છે. તેના દ્વિતીય અર્ધીકરણ (મિયોસિસ-II) પછી દરેક સંતતિ કોષમાં કેટલા ક્રોમોસોમ હશે?", "opts": ["6", "12", "24", "48"], "ans": 1, "exp": "દ્વિતીય અર્ધીકરણમાં ક્રોમોસોમની સંખ્યા અડધી થતી નથી, પરંતુ પ્રથમ અર્ધીકરણમાં અડધી થઈ ગઈ હોય છે. તેથી 24 ક્રોમોસોમ ધરાવતા કોષમાં મિયોસિસ-I પછી 12 ક્રોમોસોમ અને મિયોસિસ-II પછી પણ 12 ક્રોમોસોમ રહે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષમાં રહેલા નીચેના અંગોમાંથી કયું અંગ પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે, પરંતુ તે કોષકેન્દ્રમાં હાજર નથી?", "opts": ["રાઇબોઝોમ", "લાઇસોઝોમ", "ગોલ્ગી કાય", "અંતઃપ્રદ્રવ્યી જાળીદાર રચના (Rough ER)"], "ans": 0, "exp": "રાઇબોઝોમ પ્રોટીન સંશ્લેષણ માટે જવાબદાર છે અને તે કોષકેન્દ્રની બહાર સાયટોપ્લાઝમ તેમજ અંતઃપ્રદ્રવ્યી જાળીદાર રચના (Rough ER) પર જોવા મળે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "એક કોષમાં 12 જોડ વર્ણસૂત્રો છે. દ્વિતીય અર્ધીકરણ (Meiosis II) પૂર્ણ થયા બાદ દરેક સંતતિ કોષમાં કેટલા વર્ણસૂત્રો હશે?", "opts": ["6", "12", "24", "48"], "ans": 1, "exp": "દ્વિતીય અર્ધીકરણમાં વર્ણસૂત્રોની સંખ્યા અડધી થતી નથી, તેથી દરેક સંતતિ કોષમાં 12 વર્ણસૂત્રો હશે (હેપ્લોઇડ સંખ્યા).", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "કોષના કયા અંગકેન્દ્રીય ભાગમાં રાઈબોઝોમના મોટા અને નાના એકમોનું નિર્માણ થાય છે?", "opts": ["કોષકેન્દ્રિકા (Nucleolus)", "રુક્ષ અંતઃકોષરસજાળ (Rough ER)", "ગોલ્ગી પ્રક્રિયા (Golgi apparatus)", "લાયસોઝોમ (Lysosome)"], "ans": 0, "exp": "કોષકેન્દ્રિકા (Nucleolus)માં રાઈબોઝોમલ આરએનએ (rRNA)નું સંશ્લેષણ થાય છે અને રાઈબોઝોમના મોટા તથા નાના એકમોનું નિર્માણ થાય છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે?\n1. કોષરસપટલ ફોસ્ફોલિપિડ દ્વિસ્તરીય રચના ધરાવે છે.\n2. કોષરસપટલમાં પ્રોટીન અને કાર્બોહાઇડ્રેટ્સ પણ હાજર હોય છે.\n3. કોષરસપટલમાં કોલેસ્ટેરોલ હોતું નથી.\n4. કોષરસપટલ પસંદગીમાન અભેદ્યતા દર્શાવે છે.", "opts": ["વિધાન 1 અને 2", "વિધાન 3", "વિધાન 4", "વિધાન 2 અને 3"], "ans": 1, "exp": "કોષરસપટલમાં કોલેસ્ટેરોલ હાજર હોય છે, જે પટલની પ્રવાહિતા અને સ્થિરતામાં મહત્ત્વનો ભાગ ભજવે છે.", "chapter": "કોષ: જીવનનો એકમ", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "કોષ: જીવનનો એકમ Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
