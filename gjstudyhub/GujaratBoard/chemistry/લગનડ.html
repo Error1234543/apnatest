@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>લિગેન્ડ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>લિગેન્ડ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">લિગેન્ડ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયું સંયોજન લિગેન્ડ તરીકે કાર્ય કરી શકે છે, પરંતુ તે પ્રોટીન નથી?", "opts": ["ઇન્સ્યુલિન", "હિમોગ્લોબિન", "એડિનોસિન ટ્રાયફોસ્ફેટ (ATP)", "એડ્રિનાલિન"], "ans": 2, "exp": "ATP એ ન્યુક્લિઓટાઇડ છે જે લિગેન્ડ તરીકે કાર્ય કરી શકે છે કારણ કે તે વિશિષ્ટ રીસેપ્ટર્સ સાથે જોડાઈ શકે છે (દા.ત., પ્યુરિનર્જિક રીસેપ્ટર્સ). ઇન્સ્યુલિન અને હિમોગ્લોબિન પ્રોટીન છે, જ્યારે એડ્રિનાલિન હોર્મોન છે જે પ્રોટીન નથી પરંતુ તે એમિનો એસિડનું વ્યુત્પન્ન છે, પરંતુ ATP એ ન્યુક્લિઓટાઇડ હોવાથી તે પ્રોટીન નથી. તેથી ATP એ સાચો જવાબ છે.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ અને ઉત્સેચકો", "ch": ""}, {"q": "લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'સ્પેર રીસેપ્ટર્સ' ની હાજરી શું સૂચવે છે?", "opts": ["બધા રીસેપ્ટર્સ લિગેન્ડ સાથે જોડાયા પછી જ પ્રતિક્રિયા થાય છે", "લિગેન્ડની ઓછી સાંદ્રતાએ પણ મહત્તમ જૈવિક પ્રતિક્રિયા પ્રાપ્ત થઈ શકે છે", "રીસેપ્ટર્સનું નિષ્ક્રિયકરણ થાય છે", "લિગેન્ડ રીસેપ્ટર સાથે કાયમી રીતે જોડાય છે"], "ans": 1, "exp": "સ્પેર રીસેપ્ટર્સની હાજરીનો અર્થ એ છે કે બધા રીસેપ્ટર્સ લિગેન્ડ સાથે જોડાયા વગર પણ મહત્તમ જૈવિક પ્રતિક્રિયા પ્રાપ્ત થઈ શકે છે. આનો અર્થ એ છે કે લિગેન્ડની ઓછી સાંદ્રતાએ પણ પૂરતી પ્રતિક્રિયા મળી શકે છે. અન્ય વિકલ્પો આ સંકલ્પનાને સમજાવતા નથી.", "ref": "Std 12 - પ્રકરણ 15: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "નીચેના પૈકી કયું લિગેન્ડ-રીસેપ્ટર આંતરક્રિયાનું ઉદાહરણ નથી?", "opts": ["એપિનેફ્રિન β-એડ્રિનર્જિક રીસેપ્ટર સાથે જોડાણ", "ઇન્સ્યુલિન ઇન્સ્યુલિન રીસેપ્ટર સાથે જોડાણ", "ઓક્સિજન હિમોગ્લોબિન સાથે જોડાણ", "એસિટિલકોલાઇન નિકોટિનિક એસિટિલકોલાઇન રીસેપ્ટર સાથે જોડાણ"], "ans": 2, "exp": "ઓક્સિજન હિમોગ્લોબિન સાથે જોડાણ કરે છે, પરંતુ આ લિગેન્ડ-રીસેપ્ટર આંતરક્રિયા નથી કારણ કે હિમોગ્લોબિન રીસેપ્ટર નથી, તે પરિવહન પ્રોટીન છે. અન્ય વિકલ્પોમાં લિગેન્ડ વિશિષ્ટ રીસેપ્ટર્સ સાથે જોડાય છે, જે લિગેન્ડ-રીસેપ્ટર આંતરક્રિયા છે.", "ref": "Std 11 - પ્રકરણ 16: પાચન અને શોષણ, Std 12 - પ્રકરણ 15: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "એક સંશોધકને એક નવો લિગેન્ડ મળે છે જે કોષપટલ પરના રીસેપ્ટર સાથે જોડાય છે અને G-પ્રોટીનને સક્રિય કરે છે. આ લિગેન્ડની લાક્ષણિકતા નીચેના પૈકી કઈ હોવાની શક્યતા સૌથી વધુ છે?", "opts": ["તે સ્ટીરોઇડ હોર્મોન છે", "તે પાણીમાં દ્રાવ્ય નાનું અણુ છે", "તે કોષકેન્દ્રમાં પ્રવેશી શકે છે", "તે DNA સાથે સીધું જોડાણ કરે છે"], "ans": 1, "exp": "G-પ્રોટીન-યુગ્મિત રીસેપ્ટર્સ (GPCRs) સામાન્ય રીતે પાણીમાં દ્રાવ્ય નાના અણુઓ (દા.ત., એપિનેફ્રિન) સાથે જોડાય છે જે કોષપટલને પાર કરી શકતા નથી. સ્ટીરોઇડ હોર્મોન્સ કોષપટલને પાર કરીને કોષકેન્દ્રમાં પ્રવેશે છે અને DNA સાથે સીધું જોડાણ કરે છે, તેથી તે GPCR સાથે જોડાતા નથી.", "ref": "Std 12 - પ્રકરણ 15: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન લિગેન્ડ-રીસેપ્ટર આંતરક્રિયાની 'ઉચ્ચ આકર્ષણ' (High Affinity) લાક્ષણિકતા માટે ખોટું છે?", "opts": ["લિગેન્ડ રીસેપ્ટર સાથે નીચી સાંદ્રતાએ પણ મજબૂત રીતે જોડાય છે", "લિગેન્ડ-રીસેપ્ટર જોડાણ લાંબા સમય સુધી ટકી રહે છે", "લિગેન્ડ રીસેપ્ટર સાથે ઝડપથી જોડાય છે અને ઝડપથી છૂટો પડે છે", "આંતરક્રિયા માટે ઉચ્ચ વિશિષ્ટતા જરૂરી છે"], "ans": 2, "exp": "ઉચ્ચ આકર્ષણનો અર્થ એ છે કે લિગેન્ડ રીસેપ્ટર સાથે મજબૂત અને લાંબા સમય સુધી જોડાયેલો રહે છે, નહીં કે ઝડપથી જોડાય અને છૂટો પડે. ઉચ્ચ આકર્ષણ ધરાવતા લિગેન્ડ્સ નીચી સાંદ્રતાએ પણ મજબૂત રીતે જોડાય છે અને ઉચ્ચ વિશિષ્ટતા ધરાવે છે. તેથી વિકલ્પ C ખોટું છે.", "ref": "Std 12 - પ્રકરણ 15: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "એક પ્રયોગમાં જાણવા મળ્યું કે કોષમાં લિગેન્ડ-રીસેપ્ટર સંકુલ બન્યા પછી પણ કોષીય પ્રતિભાવ ઉત્પન્ન થતો નથી. નીચેના પૈકી કયું કારણ આ ઘટના માટે જવાબદાર હોઈ શકે?", "opts": ["લિગેન્ડની સાંદ્રતા ખૂબ જ ઓછી હતી", "રીસેપ્ટરનું ફોસ્ફોરાયલેશન થયું ન હતું", "લિગેન્ડનું બંધનક્રિયા સમયે રીસેપ્ટરનું સ્થાનાંતરણ થયું ન હતું", "લિગેન્ડનું બંધનક્રિયા પછી રીસેપ્ટરનું ડિગ્રેડેશન થયું ન હતું"], "ans": 1, "exp": "લિગેન્ડ-રીસેપ્ટર સંકુલ બન્યા પછી કોષીય પ્રતિભાવ માટે રીસેપ્ટરનું ફોસ્ફોરાયલેશન જરૂરી છે. જો આ પ્રક્રિયા ન થાય તો સંકેતનું પ્રસરણ અટકી જાય છે. લિગેન્ડની ઓછી સાંદ્રતા પ્રતિભાવને અસર કરી શકે, પરંતુ સંકુલ બન્યા પછી પ્રતિભાવ ન થવાનું મુખ્ય કારણ ફોસ્ફોરાયલેશનનો અભાવ છે. રીસેપ્ટરનું સ્થાનાંતરણ કે ડિગ્રેડેશન પ્રતિભાવ માટે જરૂરી નથી.", "ref": "Std 12 - પ્રકરણ 21: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન લિગેન્ડ-રીસેપ્ટર આંતરક્રિયાની 'ઉલટાવી શકાય તેવી' (Reversible) લાક્ષણિકતા માટે ખોટું છે?", "opts": ["લિગેન્ડનું બંધનક્રિયા નબળા હાઇડ્રોજન બંધ દ્વારા થાય છે", "લિગેન્ડનું બંધનક્રિયા કાયમી સહસંયોજક બંધ દ્વારા થાય છે", "લિગેન્ડની સાંદ્રતા ઘટતા રીસેપ્ટરથી અલગ થઈ શકે છે", "આ આંતરક્રિયા કોષીય પ્રતિભાવને નિયંત્રિત કરવામાં મદદરૂપ છે"], "ans": 1, "exp": "લિગેન્ડ-રીસેપ્ટર આંતરક્રિયા સામાન્ય રીતે ઉલટાવી શકાય તેવી હોય છે, જે નબળા બંધ (જેમ કે હાઇડ્રોજન બંધ) દ્વારા થાય છે. જો આંતરક્રિયા કાયમી સહસંયોજક બંધ દ્વારા થાય તો તે ઉલટાવી શકાય તેવી નથી. તેથી વિકલ્પ B ખોટું છે.", "ref": "Std 12 - પ્રકરણ 21: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "એક સંશોધકને એક નવો લિગેન્ડ મળે છે જે કોષમાં પ્રવેશ્યા વિના જ કોષપટલ પરના રીસેપ્ટર સાથે બંધાય છે અને કોષીય પ્રતિભાવ ઉત્પન્ન કરે છે. આ લિગેન્ડ નીચેના પૈકી કયા પ્રકારનો હોઈ શકે?", "opts": ["સ્ટીરોઇડ હોર્મોન (Steroid Hormone)", "પેપ્ટાઇડ હોર્મોન (Peptide Hormone)", "થાઇરોઇડ હોર્મોન (Thyroid Hormone)", "નાઇટ્રિક ઓક્સાઇડ (Nitric Oxide)"], "ans": 1, "exp": "પેપ્ટાઇડ હોર્મોન જલદ્રાવ્ય હોય છે અને કોષપટલ પરના રીસેપ્ટર સાથે બંધાઈને કોષીય પ્રતિભાવ ઉત્પન્ન કરે છે, પરંતુ કોષમાં પ્રવેશતા નથી. સ્ટીરોઇડ હોર્મોન અને થાઇરોઇડ હોર્મોન કોષમાં પ્રવેશીને કોષકેન્દ્રીય રીસેપ્ટર સાથે આંતરક્રિયા કરે છે. નાઇટ્રિક ઓક્સાઇડ નાનું અણુ હોવાથી કોષમાં પ્રવેશી શકે છે.", "ref": "Std 12 - પ્રકરણ 21: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'ડેસેન્સિટાઇઝેશન' (Desensitization) ની ઘટના ક્યારે જોવા મળે છે?", "opts": ["લિગેન્ડની સાંદ્રતા વધારે હોય ત્યારે", "રીસેપ્ટરનું ફોસ્ફોરાયલેશન ન થાય ત્યારે", "લિગેન્ડનું બંધનક્રિયા લાંબા સમય સુધી ચાલુ રહે ત્યારે", "રીસેપ્ટરનું સ્થાનાંતરણ કોષપટલ પર થાય ત્યારે"], "ans": 2, "exp": "ડેસેન્સિટાઇઝેશન એ લિગેન્ડનું બંધનક્રિયા લાંબા સમય સુધી ચાલુ રહેવાથી રીસેપ્ટરની સંવેદનશીલતા ઘટવાની પ્રક્રિયા છે. આથી કોષીય પ્રતિભાવ ઓછો થાય છે. લિગેન્ડની વધારે સાંદ્રતા કે રીસેપ્ટરનું ફોસ્ફોરાયલેશન આ ઘટના માટે જવાબદાર નથી.", "ref": "Std 12 - પ્રકરણ 21: રાસાયણિક સંકલન અને એકીકરણ", "ch": ""}, {"q": "જ્યારે એક લિગેન્ડ તેના રીસેપ્ટર સાથે જોડાય છે ત્યારે નીચેના પૈકી કયું પરિણામ એ 'અગોનિસ્ટ' (Agonist) લિગેન્ડ માટે સૌથી ઓછું સંભવિત છે?", "opts": ["રીસેપ્ટરની સક્રિયતા વધે છે અને કોષીય પ્રતિક્રિયા ઉત્તેજિત થાય છે", "રીસેપ્ટરની સક્રિયતા ઘટે છે અને કોષીય પ્રતિક્રિયા અવરોધાય છે", "રીસેપ્ટરની સંરચના બદલાય છે અને સિગ્નલ ટ્રાન્સડક્શન પથ સક્રિય થાય છે", "રીસેપ્ટર સાથેના બંધન પછી કોષમાં કેલ્શિયમ આયનની સાંદ્રતા વધે છે"], "ans": 1, "exp": "અગોનિસ્ટ લિગેન્ડ એવા લિગેન્ડ છે જે રીસેપ્ટર સાથે જોડાઈને તેની સક્રિયતા વધારે છે અને કોષીય પ્રતિક્રિયા ઉત્તેજિત કરે છે. આથી, વિકલ્પ A અને C સાચા છે. વિકલ્પ D પણ સાચો છે કારણ કે કેલ્શિયમ આયનની સાંદ્રતા વધવી એ અગોનિસ્ટ લિગેન્ડની પ્રતિક્રિયાનું એક સામાન્ય પરિણામ છે. જ્યારે વિકલ્પ B રીસેપ્ટરની સક્રિયતા ઘટવી અને કોષીય પ્રતિક્રિયા અવરોધાવી તે 'એન્ટાગોનિસ્ટ' લિગેન્ડની લાક્ષણિકતા છે, જે અગોનિસ્ટ માટે ઓછું સંભવિત છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "એક લિગેન્ડ તેના રીસેપ્ટર સાથે જોડાયા પછી કોષમાં સિગ્નલ ટ્રાન્સડક્શન પથમાં કયા પગલામાં G-પ્રોટીનની ભૂમિકા મહત્ત્વની હોય છે?", "opts": ["લિગેન્ડ-રીસેપ્ટર સંકુલનું આંતરિકરણ (Internalization)", "એડેનિલેટ સાયક્લેઝ ઉત્સેચકનું સક્રિયીકરણ", "કોષપટલ પરના આયન ચેનલનું ઉઘાડવું", "ટાયરોઝિન કિનેઝ ઉત્સેચકનું સક્રિયીકરણ"], "ans": 1, "exp": "G-પ્રોટીન એડેનિલેટ સાયક્લેઝ ઉત્સેચકને સક્રિય કરે છે, જે cAMPનું ઉત્પાદન કરે છે અને સિગ્નલ ટ્રાન્સડક્શન પથને આગળ ધપાવે છે. A) આંતરિકરણ G-પ્રોટીન સાથે સીધો સંબંધ ધરાવતું નથી. C) આયન ચેનલનું ઉઘાડવું લિગેન્ડ-ગેટેડ આયન ચેનલ રીસેપ્ટર્સ સાથે સંબંધિત છે, G-પ્રોટીન સાથે નહીં. D) ટાયરોઝિન કિનેઝ ઉત્સેચક G-પ્રોટીન કપલ્ડ રીસેપ્ટર્સ (GPCR) ના ભાગ રૂપે નથી, પરંતુ RTK (રીસેપ્ટર ટાયરોઝિન કિનેઝ) સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "નીચેના પૈકી કયું લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'અગોનિસ્ટ' અને 'એન્ટાગોનિસ્ટ' વચ્ચેનો મુખ્ય તફાવત છે?", "opts": ["અગોનિસ્ટ રીસેપ્ટર સાથે જોડાય છે અને સક્રિય કરે છે, જ્યારે એન્ટાગોનિસ્ટ રીસેપ્ટર સાથે જોડાય છે પરંતુ સક્રિય કરતું નથી", "અગોનિસ્ટ અને એન્ટાગોનિસ્ટ બંને રીસેપ્ટરને સક્રિય કરે છે, પરંતુ અલગ અલગ પથ દ્વારા", "અગોનિસ્ટ રીસેપ્ટર સાથે જોડાય છે અને અવરોધે છે, જ્યારે એન્ટાગોનિસ્ટ રીસેપ્ટરને સક્રિય કરે છે", "અગોનિસ્ટ અને એન્ટાગોનિસ્ટ વચ્ચે કોઈ તફાવત નથી, બંને એકસરખી રીતે કાર્ય કરે છે"], "ans": 0, "exp": "અગોનિસ્ટ લિગેન્ડ રીસેપ્ટર સાથે જોડાય છે અને તેને સક્રિય કરે છે, જ્યારે એન્ટાગોનિસ્ટ રીસેપ્ટર સાથે જોડાય છે પરંતુ તેને સક્રિય કરતું નથી, પરિણામે અગોનિસ્ટની અસરને અવરોધે છે. B) એન્ટાગોનિસ્ટ રીસેપ્ટરને સક્રિય કરતું નથી. C) અગોનિસ્ટ અવરોધતું નથી, એન્ટાગોનિસ્ટ સક્રિય કરતું નથી. D) બંને વચ્ચે મહત્ત્વનો તફાવત છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "એક લિગેન્ડ જે કોષપટલ પરના રીસેપ્ટર સાથે જોડાય છે અને પછી કોષમાં પ્રવેશીને કોષકેન્દ્રમાં જઈને જનીન અભિવ્યક્તિને પ્રભાવિત કરે છે, તે કયા પ્રકારનો લિગેન્ડ હોઈ શકે છે?", "opts": ["હાઇડ્રોફિલિક લિગેન્ડ (જળપ્રિય)", "હાઇડ્રોફોબિક લિગેન્ડ (જળવિરોધી)", "આયનિક લિગેન્ડ", "પેપ્ટાઇડ લિગેન્ડ"], "ans": 1, "exp": "હાઇડ્રોફોબિક લિગેન્ડ (જળવિરોધી) કોષપટલમાંથી પસાર થઈ શકે છે અને કોષકેન્દ્રમાં જઈને જનીન અભિવ્યક્તિને પ્રભાવિત કરે છે. A) હાઇડ્રોફિલિક લિગેન્ડ કોષપટલમાંથી પસાર થઈ શકતું નથી. C) આયનિક લિગેન્ડ પણ કોષપટલમાંથી પસાર થઈ શકતું નથી. D) પેપ્ટાઇડ લિગેન્ડ સામાન્ય રીતે હાઇડ્રોફિલિક હોય છે અને કોષપટલમાંથી પસાર થઈ શકતું નથી.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'ડાઉનરેગ્યુલેશન' (Downregulation) ની ઘટના ક્યારે જોવા મળે છે?", "opts": ["જ્યારે લિગેન્ડની સાંદ્રતા ઓછી હોય ત્યારે", "જ્યારે લિગેન્ડની સાંદ્રતા ઉચ્ચ હોય ત્યારે", "જ્યારે રીસેપ્ટરની સંખ્યા વધુ હોય ત્યારે", "જ્યારે કોષમાં એટીપીની ઉણપ હોય ત્યારે"], "ans": 1, "exp": "ડાઉનરેગ્યુલેશન એ લિગેન્ડની ઉચ્ચ સાંદ્રતામાં જોવા મળે છે, જ્યારે કોષ રીસેપ્ટરની સંખ્યા ઘટાડે છે અથવા રીસેપ્ટરની સંવેદનશીલતા ઘટાડે છે. A) લિગેન્ડની ઓછી સાંદ્રતામાં અપરેગ્યુલેશન જોવા મળે છે. C) રીસેપ્ટરની સંખ્યા વધુ હોવી એ ડાઉનરેગ્યુલેશન નહીં પરંતુ અપરેગ્યુલેશન સૂચવે છે. D) એટીપીની ઉણપ ડાઉનરેગ્યુલેશન સાથે સીધો સંબંધ ધરાવતી નથી.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'કોમ્પિટિટિવ ઇનહિબિશન' (Competitive Inhibition) ની લાક્ષણિકતા માટે સાચું છે?", "opts": ["ઇનહિબિટર રીસેપ્ટરના અલગ સ્થાને જોડાય છે અને લિગેન્ડની અસરને અવરોધે છે", "ઇનહિબિટર લિગેન્ડ સાથે રીસેપ્ટરના એક જ સ્થાને સ્પર્ધા કરે છે", "ઇનહિબિટર રીસેપ્ટરને સ્થાયી રીતે બદલી નાખે છે", "ઇનહિબિટર લિગેન્ડની અસરને વધારે છે"], "ans": 1, "exp": "કોમ્પિટિટિવ ઇનહિબિશનમાં, ઇનહિબિટર લિગેન્ડ સાથે રીસેપ્ટરના એક જ સ્થાને સ્પર્ધા કરે છે, પરિણામે લિગેન્ડની અસરને અવરોધે છે. A) એ નોન-કોમ્પિટિટિવ ઇનહિબિશન છે. C) ઇનહિબિટર રીસેપ્ટરને સ્થાયી રીતે બદલતું નથી. D) ઇનહિબિટર લિગેન્ડની અસરને વધારતું નથી, પરંતુ ઘટાડે છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Communication)", "ch": ""}, {"q": "નીચેના પૈકી કયું લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'ઓલોસ્ટેરિક મોડ્યુલેશન' (Allosteric Modulation) નું ઉદાહરણ છે?", "opts": ["ઇન્સ્યુલિન તેના રીસેપ્ટર સાથે જોડાઈને ટાયરોઝિન કિનેઝની સક્રિયતા", "બેન્ઝોડાયઝેપાઇન GABA_A રીસેપ્ટર પર બાંધીને ક્લોરાઇડ ચેનલની સક્રિયતા વધારવી", "એસિટાઇલકોલિન નિકોટિનિક રીસેપ્ટર સાથે જોડાઈને આયન ચેનલ ખોલવી", "એડ્રિનેલિન β-રીસેપ્ટર સાથે જોડાઈને cAMP ની ઉત્પત્તિ વધારવી"], "ans": 1, "exp": "બેન્ઝોડાયઝેપાઇન GABA_A રીસેપ્ટર પર બાંધીને ક્લોરાઇડ ચેનલની સક્રિયતા વધારે છે, જે ઓલોસ્ટેરિક મોડ્યુલેશનનું ઉદાહરણ છે. A) ઇન્સ્યુલિન રીસેપ્ટર ટાયરોઝિન કિનેઝની સક્રિયતા સીધી આંતરક્રિયાનું ઉદાહરણ છે. C) એસિટાઇલકોલિન નિકોટિનિક રીસેપ્ટર સાથે સીધી આંતરક્રિયા કરે છે. D) એડ્રિનેલિન β-રીસેપ્ટર સાથે જોડાઈને cAMP ની ઉત્પત્તિ વધારવી એ G-પ્રોટીન સંકુલિત રીસેપ્ટરની લાક્ષણિકતા છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Signaling)", "ch": ""}, {"q": "લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'બાયસ્ડ એગોનિઝમ' (Biased Agonism) ની ઘટનામાં નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["લિગેન્ડ રીસેપ્ટરના બધા જ સિગ્નલિંગ પથને સમાન રીતે સક્રિય કરે છે", "લિગેન્ડ રીસેપ્ટરના કેટલાક સિગ્નલિંગ પથને પ્રાધાન્ય આપે છે", "લિગેન્ડ રીસેપ્ટરની સક્રિયતા પૂર્ણપણે રોકી દે છે", "લિગેન્ડ રીસેપ્ટરની સંરચનામાં કાયમી ફેરફાર કરે છે"], "ans": 1, "exp": "બાયસ્ડ એગોનિઝમમાં લિગેન્ડ રીસેપ્ટરના કેટલાક સિગ્નલિંગ પથને પ્રાધાન્ય આપે છે, જ્યારે અન્ય પથને ઓછું સક્રિય કરે છે. A) સામાન્ય એગોનિસ્ટ બધા પથને સમાન રીતે સક્રિય કરે છે. C) એન્ટાગોનિસ્ટ સક્રિયતા રોકે છે. D) લિગેન્ડ રીસેપ્ટરની સંરચનામાં કાયમી ફેરફાર કરતું નથી.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Signaling)", "ch": ""}, {"q": "નીચેના પૈકી કયું લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'સ્કેફોલ્ડ પ્રોટીન' (Scaffold Protein) ની ભૂમિકા સાચી રીતે વર્ણવે છે?", "opts": ["તે લિગેન્ડને રીસેપ્ટર સાથે જોડવામાં મદદ કરે છે", "તે સિગ્નલ ટ્રાન્સડક્શન પથમાં વચ્ચેના પગલાઓને એકત્રિત કરે છે અને ક્રમબદ્ધ બનાવે છે", "તે રીસેપ્ટરની સંરચનામાં ફેરફાર કરે છે", "તે લિગેન્ડને કોષમાં પ્રવેશવામાં મદદ કરે છે"], "ans": 1, "exp": "સ્કેફોલ્ડ પ્રોટીન સિગ્નલ ટ્રાન્સડક્શન પથમાં વચ્ચેના પગલાઓને એકત્રિત કરે છે અને ક્રમબદ્ધ બનાવે છે, જે સિગ્નલની કાર્યક્ષમતા વધારે છે. A) લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં સ્કેફોલ્ડ પ્રોટીનની ભૂમિકા નથી. C) રીસેપ્ટરની સંરચનામાં ફેરફાર કરવો એ સ્કેફોલ્ડ પ્રોટીનની ભૂમિકા નથી. D) લિગેન્ડને કોષમાં પ્રવેશમાં મદદ કરવી એ સ્કેફોલ્ડ પ્રોટીનની ભૂમિકા નથી.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતવહન (Cell Signaling)", "ch": ""}, {"q": "નીચેના પૈકી કયું લિગેન્ડ-રીસેપ્ટર આંતરક્રિયામાં 'ઇનવર્સ એગોનિઝમ' (Inverse Agonism) નું સૌથી યોગ્ય ઉદાહરણ છે?", "opts": ["હિસ્ટામિન તેના H1 રીસેપ્ટર સાથે જોડાય છે અને એલર્જી પ્રતિક્રિયા ઉત્પન્ન કરે છે", "મોર્ફિન મ્યુ-ઓપિઓઇડ રીસેપ્ટર સાથે જોડાય છે અને પીડા નિવારણ કરે છે", "બેન્ઝોડાયઝેપાઇન GABAA રીસેપ્ટર સાથે જોડાય છે અને ક્લોરાઇડ ચેનલની સક્રિયતા ઘટાડે છે", "ઇન્સ્યુલિન તેના રીસેપ્ટર સાથે જોડાય છે અને ગ્લુકોઝ અવશોષણ વધારે છે"], "ans": 2, "exp": "સાચો જવાબ C છે. બેન્ઝોડાયઝેપાઇન GABAA રીસેપ્ટર સાથે જોડાય છે અને ક્લોરાઇડ ચેનલની સક્રિયતા ઘટાડે છે, જે ઇનવર્સ એગોનિઝમનું ઉદાહરણ છે. Aમાં હિસ્ટામિન H1 રીસેપ્ટર સાથે જોડાય છે અને એલર્જી પ્રતિક્રિયા ઉત્પન્ન કરે છે, જે એગોનિઝમ છે. Bમાં મોર્ફિન મ્યુ-ઓપિઓઇડ રીસેપ્ટર સાથે જોડાય છે અને પીડા નિવારણ કરે છે, જે એગોનિઝમ છે. Dમાં ઇન્સ્યુલિન તેના રીસેપ્ટર સાથે જોડાય છે અને ગ્લુકોઝ અવશોષણ વધારે છે, જે એગોનિઝમ છે.", "ref": "Std 12 - Chapter 10: કોષીય સંકેતાવહન (Cell Signaling)", "ch": ""}, {"q": "એક સંશોધકે નવો અણુ શોધ્યો જે કોષપટલ પરના G-પ્રોટીન સંલગ્ન રીસેપ્ટર સાથે જોડાય છે અને તેની સક્રિયતા વધારે છે, પરંતુ આ અણુ કોષમાં પ્રવેશ્યા વિના જ કોષીય પ્રતિભાવ ઉત્પન્ન કરે છે. આ અણુને લિગેન્ડ તરીકે વર્ગીકૃત કરતી વખતે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["આ અણુ પ્રાથમિક સંદેશવાહક (Primary Messenger) તરીકે કાર્ય કરે છે કારણ કે તે કોષમાં પ્રવેશ્યા વિના જ સિગ્નલ ટ્રાન્સડક્શન શરૂ કરે છે.", "આ અણુને 'પ્રથમ લિગેન્ડ' કહી શકાય કારણ કે તે રીસેપ્ટર સાથે સીધો સંપર્ક કરે છે અને સક્રિય કરે છે.", "આ અણુને 'ઇન્ટ્રાસેલ્યુલર લિગેન્ડ' તરીકે વર્ગીકૃત કરી શકાય કારણ કે તે કોષમાં પ્રવેશ્યા વિના જ કોષીય પ્રતિભાવ ઉત્પન્ન કરે છે.", "આ અણુ G-પ્રોટીન સંલગ્ન રીસેપ્ટરનો અગોનિસ્ટ છે કારણ કે તે રીસેપ્ટરની સક્રિયતા વધારે છે."], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. લિગેન્ડને 'ઇન્ટ્રાસેલ્યુલર લિગેન્ડ' તરીકે વર્ગીકૃત કરવા માટે તેનું કોષમાં પ્રવેશવું જરૂરી છે, કારણ કે ઇન્ટ્રાસેલ્યુલર લિગેન્ડ કોષમાં પ્રવેશીને કોષકેન્દ્ર અથવા સાયટોપ્લાઝમમાં રહેલા રીસેપ્ટર સાથે જોડાય છે. અહીં અણુ કોષમાં પ્રવેશ્યા વિના જ કોષીય પ્રતિભાવ ઉત્પન્ન કરે છે, તેથી તેને 'ઇન્ટ્રાસેલ્યુલર લિગેન્ડ' કહી શકાય નહીં. વિકલ્પ A સાચો છે કારણ કે પ્રાથમિક સંદેશવાહક કોષમાં પ્રવેશ્યા વિના જ સિગ્નલ ટ્રાન્સડક્શન શરૂ કરે છે. વિકલ્પ B સાચો છે કારણ કે પ્રથમ લિગેન્ડ રીસેપ્ટર સાથે સીધો સંપર્ક કરે છે. વિકલ્પ D સાચો છે કારણ કે અગોનિસ્ટ રીસેપ્ટરની સક્રિયતા વધારે છે.", "ref": "Std 12 - પ્રકરણ 16: રાસાયણિક સંકલન અને એકીકરણ (Chemical Coordination and Integration)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
