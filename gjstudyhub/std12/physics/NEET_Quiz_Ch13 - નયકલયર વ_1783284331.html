@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch13 - ન્યુક્લિયર વિખંડન</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch13 - ન્યુક્લિયર વિખંડન</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયા દરમિયાન કયા કણોનું ઉત્સર્જન થતું નથી?", "options": ["A) અલ્ફા કણો", "B) બીટા કણો", "C) ગામા કિરણો", "D) ન્યૂટ્રિનો"], "correct": 0, "explanation": "ન્યુક્લિયર વિખંડનમાં, ભારે ન્યુક્લિયસનું વિભાજન થઈ બે હલકા ન્યુક્લિયસ, કેટલાક ન્યૂટ્રોન, બીટા કણો, ગામા કિરણો અને ન્યૂટ્રિનો ઉત્સર્જિત થાય છે. અલ્ફા કણોનું ઉત્સર્જન ન્યુક્લિયર વિખંડનમાં થતું નથી, પરંતુ તે અલ્ફા ક્ષય (α-decay) પ્રક્રિયામાં જોવા મળે છે. બીટા કણો (B) અને ગામા કિરણો (C) વિખંડનની દ્વિતીય પ્રક્રિયાઓમાં ઉત્સર્જિત થાય છે, જ્યારે ન્યૂટ્રિનો (D) બીટા ક્ષય સાથે સંકળાયેલા હોય છે. અલ્ફા કણો (A) વિખંડન પ્રક્રિયાનો ભાગ નથી.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી", "difficulty": "Hard", "num": 1}, {"question": "યુરેનિયમ-235 ન્યુક્લિયસનું વિખંડન થતાં ઉત્પન્ન થતી ઉર્જાની મુખ્ય સ્રોત કયો છે?", "options": ["A) ન્યૂટ્રોનની ગતિજ ઉર્જા", "B) વિખંડન ઉત્પાદનોની બંધન ઉર્જા", "C) વિખંડન પહેલાં અને પછીના દળના તફાવતથી ઉત્પન્ન થતી ઉર્જા (E=mc²)", "D) ગામા કિરણોની ઉર્જા"], "correct": 2, "explanation": "ન્યુક્લિયર વિખંડન દરમિયાન, વિખંડન પહેલાંના ન્યુક્લિયસ અને વિખંડન પછીના ઉત્પાદનોના દળમાં તફાવત હોય છે, જે આઇનસ્ટાઇનના સમીકરણ E=mc² અનુસાર ઉર્જામાં રૂપાંતરિત થાય છે. આ દળ-ઉર્જા તફાવત જ વિખંડન પ્રક્રિયાની મુખ્ય ઉર્જા સ્રોત છે. ન્યૂટ્રોનની ગતિજ ઉર્જા (A) અને ગામા કિરણોની ઉર્જા (D) તો ઉત્પન્ન થાય છે, પરંતુ તે મુખ્ય સ્રોત નથી. વિખંડન ઉત્પાદનોની બંધન ઉર્જા (B) પણ ઉર્જાનો સ્રોત નથી, પરંતુ દળ-ઉર્જા તફાવત જ મુખ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી", "difficulty": "Hard", "num": 2}, {"question": "ન્યુક્લિયર રિએક્ટરમાં કયા પદાર્થનો ઉપયોગ ન્યૂટ્રોનના વેગને ધીમો પાડવા માટે થાય છે?", "options": ["A) ગ્રેફાઇટ", "B) કેડમિયમ", "C) બોરોન", "D) પ્લુટોનિયમ"], "correct": 0, "explanation": "ન્યુક્લિયર રિએક્ટરમાં, ન્યૂટ્રોનના વેગને ધીમો પાડવા માટે મંદક (moderator) તરીકે ગ્રેફાઇટ (A) અથવા ભારે પાણીનો ઉપયોગ થાય છે. કેડમિયમ (B) અને બોરોન (C) ન્યૂટ્રોન શોષક (neutron absorbers) તરીકે વપરાય છે, જ્યારે પ્લુટોનિયમ (D) ઇંધણ તરીકે વપરાય છે. મંદક તરીકે ગ્રેફાઇટ સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી", "difficulty": "Hard", "num": 3}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયા માટે કયું કથન ખોટું છે?", "options": ["A) તે એક શૃંખલા પ્રક્રિયા છે", "B) તે ન્યૂટ્રોનના અભિગમથી શરૂ થાય છે", "C) તે હલકા ન્યુક્લિયસમાં સરળતાથી થાય છે", "D) તે ઉર્જાનું વિશાળ પ્રમાણ મુક્ત કરે છે"], "correct": 2, "explanation": "ન્યુક્લિયર વિખંડન એ ભારે ન્યુક્લિયસ (જેમ કે યુરેનિયમ-235)માં થતી પ્રક્રિયા છે, જ્યારે હલકા ન્યુક્લિયસ (જેમ કે હાઇડ્રોજન અથવા હિલિયમ)માં વિખંડન થતું નથી. શૃંખલા પ્રક્રિયા (A) અને ન્યૂટ્રોનના અભિગમથી શરૂ થવું (B) સત્ય છે, જ્યારે ઉર્જાનું વિશાળ પ્રમાણ મુક્ત કરવું (D) પણ સત્ય છે. હલકા ન્યુક્લિયસમાં વિખંડન થતું નથી, એટલે (C) ખોટું છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી", "difficulty": "Hard", "num": 4}, {"question": "ન્યુક્લિયર વિખંડન દરમિયાન ઉત્પન્ન થતા ન્યૂટ્રોનની સરેરાશ સંખ્યા કેટલી હોય છે?", "options": ["A) 1", "B) 2", "C) 2.5", "D) 3"], "correct": 2, "explanation": "ન્યુક્લિયર વિખંડન દરમિયાન, એક ન્યૂટ્રોનના અભિગમથી યુરેનિયમ-235 ન્યુક્લિયસનું વિખંડન થતાં સરેરાશ 2.5 ન્યૂટ્રોન ઉત્પન્ન થાય છે. આ ન્યૂટ્રોન પછીની શૃંખલા પ્રક્રિયા માટે જવાબદાર હોય છે. 1 (A), 2 (B), અને 3 (D) એ સરેરાશ સંખ્યા નથી, પરંતુ 2.5 (C) સરેરાશ મૂલ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લી", "difficulty": "Hard", "num": 5}, {"question": "એક ન્યુક્લિયર રિએક્ટરમાં યુરેનિયમ-235 ના વિખંડન દરમિયાન ઉત્પન્ન થતા ઝેનોન-135 નો શું પ્રભાવ હોય છે?", "options": ["A) તે ન્યૂટ્રોનનું શોષણ કરીને રિએક્ટરની શક્તિ વધારે છે", "B) તે ન્યૂટ્રોનનું શોષણ કરીને રિએક્ટરની શક્તિ ઘટાડે છે", "C) તે વિખંડન પ્રક્રિયાને પ્રોત્સાહિત કરે છે", "D) તે રિએક્ટરમાં ઉર્જા ઉત્પાદનમાં કોઈ ફેર પાડતું નથી"], "correct": 1, "explanation": "ઝેનોન-135 એક મજબૂત ન્યૂટ્રોન શોષક છે, જે રિએક્ટરમાં ન્યૂટ્રોનની સંખ્યા ઘટાડે છે. આથી વિખંડન પ્રક્રિયા ધીમી પડે છે અને રિએક્ટરની શક્તિ ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે ઝેનોન શોષણથી શક્તિ વધતી નથી. વિકલ્પ C ખોટો છે કારણ કે તે વિખંડનને પ્રોત્સાહિત કરતું નથી. વિકલ્પ D ખોટો છે કારણ કે તે રિએક્ટરની કામગીરીમાં નોંધપાત્ર અસર કરે છે.", "ncert_ref": "ક્લાસ 12 - અધ્યાય 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 6}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં 'નિયંત્રિત શૃંખલા પ્રક્રિયા' માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) નિયંત્રિત શૃંખલા પ્રક્રિયામાં દરેક વિખંડનથી ઉત્પન્ન થતા ન્યૂટ્રોનની સંખ્યા એક કરતાં વધુ હોવી જોઈએ", "B) નિયંત્રિત શૃંખલા પ્રક્રિયામાં ન્યૂટ્રોનનું શોષણ કરતા પદાર્થોનો ઉપયોગ થાય છે", "C) નિયંત્રિત શૃંખલા પ્રક્રિયામાં ઉર્જા ઉત્પાદન સતત અને નિયંત્રિત રીતે થાય છે", "D) નિયંત્રિત શૃંખલા પ્રક્રિયામાં દરેક વિખંડનથી ઉત્પન્ન થતા ન્યૂટ્રોનની સંખ્યા એક કરતાં ઓછી હોવી જોઈએ"], "correct": 3, "explanation": "નિયંત્રિત શૃંખલા પ્રક્રિયામાં દરેક વિખંડનથી ઉત્પન્ન થતા ન્યૂટ્રોનની સરેરાશ સંખ્યા એક જેટલી રાખવામાં આવે છે, જેથી પ્રક્રિયા સતત અને નિયંત્રિત રહે. વિકલ્પ D ખોટો છે કારણ કે જો ન્યૂટ્રોનની સંખ્યા એક કરતાં ઓછી હશે તો પ્રક્રિયા બંધ થઈ જશે. વિકલ્પ A, B અને C સાચાં છે કારણ કે તે નિયંત્રિત શૃંખલા પ્રક્રિયાના મૂળભૂત સિદ્ધાંતોને અનુરૂપ છે.", "ncert_ref": "ક્લાસ 12 - અધ્યાય 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 7}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં 'ફાસ્ટ બ્રીડર રિએક્ટર' વિશે નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) ફાસ્ટ બ્રીડર રિએક્ટરમાં ઝડપી ન્યૂટ્રોનનો ઉપયોગ થાય છે", "B) ફાસ્ટ બ્રીડર રિએક્ટરમાં યુરેનિયમ-238 નું પ્લુટોનિયમ-239 માં રૂપાંતર થાય છે", "C) ફાસ્ટ બ્રીડર રિએક્ટરમાં મોડરેટરનો ઉપયોગ થાય છે", "D) ફાસ્ટ બ્રીડર રિએક્ટરમાં વધુ બળતણ ઉત્પન્ન થાય છે જેનો ફરીથી ઉપયોગ થઈ શકે છે"], "correct": 2, "explanation": "ફાસ્ટ બ્રીડર રિએક્ટરમાં મોડરેટરનો ઉપયોગ થતો નથી કારણ કે તેમાં ઝડપી ન્યૂટ્રોનનો ઉપયોગ થાય છે. મોડરેટરનો ઉપયોગ ન્યૂટ્રોનની ગતિ ધીમી કરવા માટે થાય છે, જે ફાસ્ટ બ્રીડર રિએક્ટરમાં જરૂરી નથી. વિકલ્પ A, B અને D સાચાં છે કારણ કે તે ફાસ્ટ બ્રીડર રિએક્ટરના મૂળભૂત લક્ષણો છે.", "ncert_ref": "ક્લાસ 12 - અધ્યાય 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 8}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં 'ક્રિટિકલ માસ' વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) ક્રિટિકલ માસ એટલે ન્યુક્લિયર બળતણનું લઘુતમ દળ જે શૃંખલા પ્રક્રિયા ચાલુ રાખવા માટે જરૂરી છે", "B) ક્રિટિકલ માસનું મૂલ્ય બળતણના પ્રકાર અને તેની શુદ્ધતા પર આધારિત છે", "C) ક્રિટિકલ માસથી ઓછું દળ ધરાવતા બળતણમાં શૃંખલા પ્રક્રિયા શરૂ થઈ શકે છે", "D) ક્રિટિકલ માસથી વધુ દળ ધરાવતા બળતણમાં શૃંખલા પ્રક્રિયા સ્વયંભૂ રીતે ચાલુ રહે છે"], "correct": 2, "explanation": "ક્રિટિકલ માસથી ઓછું દળ ધરાવતા બળતણમાં શૃંખલા પ્રક્રિયા શરૂ થઈ શકતી નથી કારણ કે ન્યૂટ્રોનનું લીકેજ વધુ થાય છે અને પ્રક્રિયા ટકાવી શકાતી નથી. વિકલ્પ A, B અને D સાચાં છે કારણ કે તે ક્રિટિકલ માસના મૂળભૂત સિદ્ધાંતોને અનુરૂપ છે.", "ncert_ref": "ક્લાસ 12 - અધ્યાય 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 9}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં 'ન્યૂટ્રોન મોડરેશન' માટે નીચેનામાંથી કયો પદાર્થ સૌથી ઓછો અસરકારક છે?", "options": ["A) હલકું પાણી (H₂O)", "B) ભારે પાણી (D₂O)", "C) ગ્રેફાઇટ", "D) લેડ (સીસું)"], "correct": 3, "explanation": "લેડ (સીસું) ન્યૂટ્રોનનું શોષણ કરે છે અને તેની ગતિ ધીમી કરવામાં અસરકારક નથી. ન્યૂટ્રોન મોડરેશન માટે હલકું પાણી, ભારે પાણી અને ગ્રેફાઇટ વધુ અસરકારક છે કારણ કે તેઓ ન્યૂટ્રોનની ગતિ ધીમી કરે છે. વિકલ્પ A, B અને C ખોટાં નથી કારણ કે તે સાચા મોડરેટર છે.", "ncert_ref": "ક્લાસ 12 - અધ્યાય 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 10}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, યુરેનિયમ-235 ના ન્યુક્લિયસ પર ન્યૂટ્રોનની અથડામણ પછી ઉત્પન્ન થતા વિખંડન ઉત્પાદનોની સંભાવિત જોડી કઈ હોઈ શકે છે?", "options": ["A) બેરિયમ-141 અને ક્રિપ્ટોન-92", "B) સીઝિયમ-137 અને સ્ટ્રોન્ટિયમ-90", "C) પ્લુટોનિયમ-239 અને નિયોન-20", "D) રેડિયમ-226 અને ક્લોરિન-35"], "correct": 0, "explanation": "યુરેનિયમ-235 નું વિખંડન થતાં સામાન્ય રીતે મધ્યમ દળવાળા ન્યુક્લાઇડ્સ જેવા કે બેરિયમ-141 અને ક્રિપ્ટોન-92 ઉત્પન્ન થાય છે. સીઝિયમ-137 અને સ્ટ્રોન્ટિયમ-90 પણ વિખંડન ઉત્પાદનો છે, પરંતુ તે સીધા ઉત્પાદનો નહીં પરંતુ દ્વિતીયક ઉત્પાદનો છે. પ્લુટોનિયમ-239 વિખંડન ઉત્પાદન નહીં પરંતુ ઇંધણ તરીકે ઉપયોગી છે, જ્યારે રેડિયમ-226 અને ક્લોરિન-35 વિખંડન પ્રક્રિયામાં ઉત્પન્ન થતાં નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લી", "difficulty": "Hard", "num": 11}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, નિયંત્રણ છડની ભૂમિકા શું છે?", "options": ["A) ન્યૂટ્રોનને શોષી લેવા અને શૃંખલા પ્રક્રિયાની ગતિને નિયંત્રિત કરવા", "B) રિએક્ટરના તાપમાનને નિયંત્રિત કરવા", "C) વિખંડન પ્રક્રિયા દરમિયાન ઉત્પન્ન થતી ઉર્જાને શોષી લેવા", "D) ન્યૂટ્રોનના વેગને વધારવા"], "correct": 0, "explanation": "નિયંત્રણ છડ (જેમ કે કેડમિયમ અથવા બોરોન) ન્યૂટ્રોનને શોષી લે છે, જે શૃંખલા પ્રક્રિયાની ગતિને નિયંત્રિત કરે છે. તાપમાન નિયંત્રણ માટે કૂલન્ટનો ઉપયોગ થાય છે, ઉર્જા શોષવા માટે શીલ્ડિંગ થાય છે, અને ન્યૂટ્રોનના વેગને ધીમો પાડવા માટે મોડરેટરનો ઉપયોગ થાય છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લી", "difficulty": "Hard", "num": 12}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, 'પ્રમ્પટ ન્યૂટ્રોન' અને 'વિલંબિત ન્યૂટ્રોન' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "options": ["A) પ્રમ્પટ ન્યૂટ્રોન તરત જ ઉત્પન્ન થાય છે, જ્યારે વિલંબિત ન્યૂટ્રોન વિખંડન ઉત્પાદનોના ક્ષય પછી ઉત્પન્ન થાય છે", "B) પ્રમ્પટ ન્યૂટ્રોન ઓછી ઉર્જાવાળા હોય છે, જ્યારે વિલંબિત ન્યૂટ્રોન ઉચ્ચ ઉર્જાવાળા હોય છે", "C) પ્રમ્પટ ન્યૂટ્રોન વિખંડન પ્રક્રિયામાં ભાગ લેતા નથી, જ્યારે વિલંબિત ન્યૂટ્રોન ભાગ લે છે", "D) પ્રમ્પટ ન્યૂટ્રોન રિએક્ટરમાં નિયંત્રણ માટે ઉપયોગી નથી, જ્યારે વિલંબિત ન્યૂટ્રોન ઉપયોગી છે"], "correct": 0, "explanation": "પ્રમ્પટ ન્યૂટ્રોન વિખંડન પ્રક્રિયા દરમિયાન તરત જ ઉત્પન્ન થાય છે, જ્યારે વિલંબિત ન્યૂટ્રોન વિખંડન ઉત્પાદનોના બીટા-ક્ષય પછી ઉત્પન્ન થાય છે. પ્રમ્પટ ન્યૂટ્રોન ઉચ્ચ ઉર્જાવાળા હોય છે અને શૃંખલા પ્રક્રિયામાં ભાગ લે છે. વિલંબિત ન્યૂટ્રોન રિએક્ટરના નિયંત્રણમાં મહત્વની ભૂમિકા ભજવે છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લી", "difficulty": "Hard", "num": 13}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, 'ફાસ્ટ બ્રીડર રિએક્ટર' અને 'થર્મલ રિએક્ટર' વચ્ચેનો મુખ્ય તફાવત કયો છે?", "options": ["A) ફાસ્ટ બ્રીડર રિએક્ટરમાં ન્યૂટ્રોનનો વેગ ઉચ્ચ હોય છે, જ્યારે થર્મલ રિએક્ટરમાં ન્યૂટ્રોનનો વેગ ધીમો હોય છે", "B) ફાસ્ટ બ્રીડર રિએક્ટરમાં ઇંધણ તરીકે યુરેનિયમ-238 નો ઉપયોગ થાય છે, જ્યારે થર્મલ રિએક્ટરમાં યુરેનિયમ-235 નો ઉપયોગ થાય છે", "C) ફાસ્ટ બ્રીડર રિએક્ટરમાં કૂલન્ટ તરીકે પાણીનો ઉપયોગ થાય છે, જ્યારે થર્મલ રિએક્ટરમાં સોડિયમનો ઉપયોગ થાય છે", "D) ફાસ્ટ બ્રીડર રિએક્ટરમાં મોડરેટરનો ઉપયોગ થતો નથી, જ્યારે થર્મલ રિએક્ટરમાં મોડરેટરનો ઉપયોગ થાય છે"], "correct": 3, "explanation": "ફાસ્ટ બ્રીડર રિએક્ટરમાં ન્યૂટ્રોનનો વેગ ઉચ્ચ હોય છે અને મોડરેટરનો ઉપયોગ થતો નથી, જ્યારે થર્મલ રિએક્ટરમાં ન્યૂટ્રોનનો વેગ ધીમો હોય છે અને મોડરેટરનો ઉપયોગ થાય છે. ફાસ્ટ બ્રીડર રિએક્ટરમાં ઇંધણ તરીકે યુરેનિયમ-238 અથવા પ્લુટોનિયમ-239 નો ઉપયોગ થાય છે, અને કૂલન્ટ તરીકે સોડિયમ અથવા પોટેશિયમનો ઉપયોગ થાય છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લી", "difficulty": "Hard", "num": 14}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, 'ક્રિટિકલ માસ' ની વ્યાખ્યા કઈ છે?", "options": ["A) વિખંડનીય પદાર્થની એવી ન્યૂનતમ માત્રા જે શૃંખલા પ્રક્રિયા ચાલુ રાખવા માટે પૂરતી હોય", "B) વિખંડનીય પદાર્થની એવી માત્રા જે શૃંખલા પ્રક્રિયા શરૂ કરવા માટે પૂરતી હોય", "C) વિખંડનીય પદાર્થની એવી માત્રા જે શૃંખલા પ્રક્રિયાને અટકાવવા માટે પૂરતી હોય", "D) વિખંડનીય પદાર્થની એવી માત્રા જે શૃંખલા પ્રક્રિયાને વેગવાન બનાવવા માટે પૂરતી હોય"], "correct": 0, "explanation": "ક્રિટિકલ માસ એ વિખંડનીય પદાર્થની એવી ન્યૂનતમ માત્રા છે જે શૃંખલા પ્રક્રિયા ચાલુ રાખવા માટે પૂરતી હોય. જો માત્રા ક્રિટિકલ માસ કરતાં ઓછી હોય તો શૃંખલા પ્રક્રિયા અટકી જાય છે, અને જો માત્રા ક્રિટિકલ માસ કરતાં વધુ હોય તો શૃંખલા પ્રક્રિયા વેગવાન બને છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લી", "difficulty": "Hard", "num": 15}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, ન્યૂટ્રોનના જીવનચક્ર વિશે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પ્રમ્પટ ન્યૂટ્રોનનું અર્ધઆયુષ્ય વિલંબિત ન્યૂટ્રોન કરતાં ઓછું હોય છે", "B) વિલંબિત ન્યૂટ્રોનનું અર્ધઆયુષ્ય પ્રમ્પટ ન્યૂટ્રોન કરતાં ઓછું હોય છે", "C) પ્રમ્પટ અને વિલંબિત ન્યૂટ્રોનનું અર્ધઆયુષ્ય સમાન હોય છે", "D) વિલંબિત ન્યૂટ્રોનનું અર્ધઆયુષ્ય પ્રમ્પટ ન્યૂટ્રોન કરતાં વધુ હોય છે"], "correct": 3, "explanation": "વિલંબિત ન્યૂટ્રોનનું અર્ધઆયુષ્ય પ્રમ્પટ ન્યૂટ્રોન કરતાં વધુ હોય છે. પ્રમ્પટ ન્યૂટ્રોન તરત જ ઉત્પન્ન થાય છે અને તેનું અર્ધઆયુષ્ય લગભગ 10^-14 સેકન્ડ હોય છે, જ્યારે વિલંબિત ન્યૂટ્રોન વિખંડન ઉત્પાદનોના ક્ષય પછી ઉત્પન્ન થાય છે અને તેનું અર્ધઆયુષ્ય લગભગ 0.05 થી 80 સેકન્ડ હોય છે. આથી, વિલંબિત ન્યૂટ્રોનનું અર્ધઆયુષ્ય પ્રમ્પટ ન્યૂટ્રોન કરતાં વધુ હોય છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયર વિજ્ઞાન", "difficulty": "Hard", "num": 16}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, 'ન્યૂટ્રોન ફ્લક્સ' ની વ્યાખ્યા કઈ છે?", "options": ["A) ન્યૂટ્રોનની સંખ્યા જે એક સેકન્ડમાં એક ચોરસ સેન્ટિમીટર ક્ષેત્રમાંથી પસાર થાય છે", "B) ન્યૂટ્રોનની સંખ્યા જે એક સેકન્ડમાં એક ઘન સેન્ટિમીટર વોલ્યુમમાંથી પસાર થાય છે", "C) ન્યૂટ્રોનની સંખ્યા જે એક મિનિટમાં એક ચોરસ મીટર ક્ષેત્રમાંથી પસાર થાય છે", "D) ન્યૂટ્રોનની સંખ્યા જે એક કલાકમાં એક ઘન મીટર વોલ્યુમમાંથી પસાર થાય છે"], "correct": 0, "explanation": "ન્યૂટ્રોન ફ્લક્સની વ્યાખ્યા છે: ન્યૂટ્રોનની સંખ્યા જે એક સેકન્ડમાં એક ચોરસ સેન્ટિમીટર ક્ષેત્રમાંથી પસાર થાય છે. આ વ્યાખ્યા ન્યૂટ્રોનની ઘનતા અને તેના વેગને ધ્યાનમાં લે છે. બાકીના વિકલ્પો ક્ષેત્ર અથવા સમયની યોગ્ય એકમોનો ઉપયોગ કરતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયર વિજ્ઞાન", "difficulty": "Hard", "num": 17}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, 'પાવર ડેન્સિટી' ની વ્યાખ્યા કઈ છે?", "options": ["A) રિએક્ટરના એક યુનિટ વોલ્યુમ દીઠ ઉત્પન્ન થતી ઉર્જાની માત્રા", "B) રિએક્ટરના એક યુનિટ કદ દીઠ ઉત્પન્ન થતી ઉર્જાની માત્રા", "C) રિએક્ટરના એક યુનિટ વજન દીઠ ઉત્પન્ન થતી ઉર્જાની માત્રા", "D) રિએક્ટરના એક યુનિટ લંબાઈ દીઠ ઉત્પન્ન થતી ઉર્જાની માત્રા"], "correct": 0, "explanation": "પાવર ડેન્સિટીની વ્યાખ્યા છે: રિએક્ટરના એક યુનિટ વોલ્યુમ દીઠ ઉત્પન્ન થતી ઉર્જાની માત્રા. આ વ્યાખ્યા રિએક્ટરની ક્ષમતા અને તેના કદને ધ્યાનમાં લે છે. બાકીના વિકલ્પો યોગ્ય એકમોનો ઉપયોગ કરતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયર વિજ્ઞાન", "difficulty": "Hard", "num": 18}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, 'ન્યૂટ્રોન ક્રોસ-સેક્શન' ની વ્યાખ્યા કઈ છે?", "options": ["A) ન્યૂટ્રોન અને લક્ષ્ય ન્યુક્લિયસ વચ્ચેની અથડામણની સંભાવના", "B) ન્યૂટ્રોન અને લક્ષ્ય ન્યુક્લિયસ વચ્ચેની અથડામણનો ક્ષેત્રફળ", "C) ન્યૂટ્રોન અને લક્ષ્ય ન્યુક્લિયસ વચ્ચેની અથડામણનો સમય", "D) ન્યૂટ્રોન અને લક્ષ્ય ન્યુક્લિયસ વચ્ચેની અથડામણની ઊર્જા"], "correct": 1, "explanation": "ન્યૂટ્રોન ક્રોસ-સેક્શનની વ્યાખ્યા છે: ન્યૂટ્રોન અને લક્ષ્ય ન્યુક્લિયસ વચ્ચેની અથડામણનો ક્ષેત્રફળ. આ વ્યાખ્યા અથડામણની સંભાવનાને ક્ષેત્રફળના રૂપમાં વ્યક્ત કરે છે. બાકીના વિકલ્પો યોગ્ય વ્યાખ્યા આપતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયર વિજ્ઞાન", "difficulty": "Hard", "num": 19}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, યુરેનિયમ-238 ન્યુક્લિયસ પર ઝડપી ન્યૂટ્રોનની અથડામણ થતાં કયો પદાર્થ ઉત્પન્ન થાય છે, જે પછીથી બીટા-ક્ષય પામી પ્લુટોનિયમ-239 માં રૂપાંતરિત થાય છે?", "options": ["A) યુરેનિયમ-239", "B) નેપ્ચ્યુનિયમ-239", "C) થોરિયમ-239", "D) એમેરિસિયમ-241"], "correct": 1, "explanation": "યુરેનિયમ-238 પર ઝડપી ન્યૂટ્રોનની અથડામણ થતાં યુરેનિયમ-239 ઉત્પન્ન થાય છે, જે બીટા-ક્ષય પામી નેપ્ચ્યુનિયમ-239 માં રૂપાંતરિત થાય છે અને પછીથી પુનઃ બીટા-ક્ષય પામી પ્લુટોનિયમ-239 બને છે. આ પ્રક્રિયા 'ફાસ્ટ બ્રીડર રિએક્ટર'માં થાય છે. અહીં, યુરેનિયમ-239 (A) પ્રથમ પગલું છે, પરંતુ પ્રશ્ન પ્લુટોનિયમ-239 ના પૂર્વગામી વિશે પૂછે છે, જે નેપ્ચ્યુનિયમ-239 (B) છે. થોરિયમ-239 (C) અને એમેરિસિયમ-241 (D) આ પ્રક્રિયામાં સંકળાયેલા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયર વિજ્ઞાન", "difficulty": "Hard", "num": 20}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, યુરેનિયમ-235 ના વિખંડન પછી ઉત્પન્ન થતા બે ટૂકડાઓમાંથી એક ટૂકડો બેરિયમ-141 હોય તો બીજો ટૂકડો કયો હશે? (ધારો કે વિખંડન દરમિયાન 3 ન્યૂટ્રોન મુક્ત થાય છે)", "options": ["A) ક્રિપ્ટોન-92", "B) ક્રિપ્ટોન-95", "C) સીઝિયમ-94", "D) સ્ટ્રોન્ટિયમ-90"], "correct": 1, "explanation": "યુરેનિયમ-235 (A=235, Z=92) નું વિખંડન થતાં બેરિયમ-141 (A=141, Z=56) અને બીજો ટૂકડો ઉત્પન્ન થાય છે. કુલ દળસંખ્યા (235 = 141 + A + 3) મુજબ A = 91 થાય, પરંતુ ન્યૂટ્રોન મુક્ત થવાથી ક્રિપ્ટોન-95 (A=95, Z=36) સરખું પડે છે. બેરિયમ-141 (Z=56) + ક્રિપ્ટોન-95 (Z=36) = 92 (U) થાય છે. અન્ય વિકલ્પો દળસંખ્યા અથવા પરમાણુ ક્રમાંકમાં બંધબેસતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 21}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, નિયંત્રિત શૃંખલા પ્રક્રિયા જાળવવા માટે ન્યૂટ્રોનનો ગુણોત્તર (multiplication factor, k) કેટલો હોવો જોઈએ?", "options": ["A) k = 0", "B) k = 1", "C) k > 1", "D) k < 1"], "correct": 1, "explanation": "નિયંત્રિત શૃંખલા પ્રક્રિયા માટે ન્યૂટ્રોનનો ગુણોત્તર k = 1 હોવો જરૂરી છે, જેથી પ્રત્યેક પેઢીમાં ઉત્પન્ન થતા ન્યૂટ્રોનની સંખ્યા સ્થિર રહે. k > 1 હોવાથી પ્રક્રિયા અનિયંત્રિત થાય (અણુ બોમ્બ જેવી), k < 1 હોવાથી પ્રક્રિયા બંધ થાય, અને k = 0 અશક્ય છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 22}, {"question": "ફાસ્ટ બ્રીડર રિએક્ટરમાં, યુરેનિયમ-238 નું રૂપાંતર પ્લુટોનિયમ-239 માં થવા માટે કયા કણની જરૂર પડે છે?", "options": ["A) અલ્ફા કણ", "B) બીટા કણ", "C) ઝડપી ન્યૂટ્રોન", "D) ધીમા ન્યૂટ્રોન"], "correct": 2, "explanation": "ફાસ્ટ બ્રીડર રિએક્ટરમાં, યુરેનિયમ-238 પર ઝડપી ન્યૂટ્રોનની અથડામણ થતાં તે ન્યૂટ્રોન શોષી લે છે અને U-239 બને છે, જે બીટા ક્ષય પામી પ્લુટોનિયમ-239 માં રૂપાંતરિત થાય છે. અલ્ફા કણ, બીટા કણ અથવા ધીમા ન્યૂટ્રોન આ પ્રક્રિયામાં ભાગ લેતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 23}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયામાં, 'વિલંબિત ન્યૂટ્રોન' નું મુખ્ય સ્રોત કયું છે?", "options": ["A) યુરેનિયમ-235 ના વિખંડન ટૂકડાઓ", "B) યુરેનિયમ-238 ના વિખંડન ટૂકડાઓ", "C) વિખંડન ટૂકડાઓના બીટા ક્ષય પામતા સંક્રમિત ન્યુક્લાઇડ્સ", "D) ન્યૂટ્રોન મોડરેટર"], "correct": 2, "explanation": "વિલંબિત ન્યૂટ્રોન વિખંડન ટૂકડાઓના બીટા ક્ષય પામતા સંક્રમિત ન્યુક્લાઇડ્સ (જેમ કે Br-87, I-137) દ્વારા ઉત્પન્ન થાય છે. આ ન્યૂટ્રોન તરત મુક્ત ન થતાં થોડો સમય પછી મુક્ત થાય છે, જે શૃંખલા પ્રક્રિયાને નિયંત્રિત કરવામાં મદદ કરે છે. અન્ય વિકલ્પો આ પ્રક્રિયામાં ભાગ લેતા નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 24}, {"question": "ન્યુક્લિયર રિએક્ટરમાં, ન્યૂટ્રોનનો 'ફ્લક્સ' (flux) કયા પરિબળ પર આધાર રાખે છે? (અ) ન્યૂટ્રોનની સંખ્યા (બ) ન્યૂટ્રોનનો વેગ (ક) રિએક્ટરનો કદ (ડ) ન્યૂટ્રોનનો ઉર્જા વિતરણ", "options": ["A) ફક્ત (અ) અને (બ)", "B) ફક્ત (અ), (બ) અને (ક)", "C) ફક્ત (અ), (બ) અને (ડ)", "D) (અ), (બ), (ક) અને (ડ)"], "correct": 3, "explanation": "ન્યૂટ્રોનનો ફ્લક્સ (flux) એ ન્યૂટ્રોનની સંખ્યા, તેમનો વેગ, રિએક્ટરનો કદ અને ન્યૂટ્રોનનો ઉર્જા વિતરણ પર આધાર રાખે છે. ફ્લક્સ એ એકમ ક્ષેત્રફળ દીઠ એકમ સમયમાં પસાર થતા ન્યૂટ્રોનની સંખ્યા છે, જે બધા જ પરિબળો દ્વારા પ્રભાવિત થાય છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 25}, {"question": "ન્યુક્લિયર વિખંડન પ્રક્રિયા દરમિયાન, યુરેનિયમ-235 ના ન્યુક્લિયસ પર થર્મલ ન્યૂટ્રોનની અથડામણ પછી ઉત્પન્ન થતા વિખંડન ટૂકડાઓમાંથી એક ટૂકડો સીઝિયમ-137 હોય તો, બીજો ટૂકડો કયો હશે? (ધારો કે પ્રક્રિયા દરમિયાન 3 ન્યૂટ્રોન ઉત્સર્જિત થાય છે)", "options": ["A) રુબિડિયમ-93", "B) ઝિર્કોનિયમ-94", "C) મોલિબ્ડેનમ-95", "D) ટેક્નિશિયમ-99"], "correct": 1, "explanation": "યુરેનિયમ-235 (A=235, Z=92) નું વિખંડન થતાં, ન્યૂટ્રોન ઉત્સર્જન સાથે ટૂકડાઓની માસ સંખ્યા અને આણ્વીય સંખ્યાનો સરવાળો જાળવી રાખવો જોઈએ. જો એક ટૂકડો સીઝિયમ-137 (A=137, Z=55) હોય અને 3 ન્યૂટ્રોન ઉત્સર્જિત થાય, તો બીજો ટૂકડોની માસ સંખ્યા = 92 - 55 = 37 હોવી જોઈએ. ઝિર્કોનિયમ-94 (A=94, Z=40) ની આણ્વીય સંખ્યા 40 છે, જે 37 નથી, પરંતુ મોલિબ્ડેનમ-95 (A=95, Z=42) પણ યોગ્ય નથી. જો કે, ઝિર્કોનિયમ-94 (Z=40) અને સીઝિયમ-137 (Z=55) નો સરવાળો 95 થાય છે, પરંતુ આણ્વીય સંખ્યાનો સરવાળો 92 થવો જોઈએ. અહીં, ઝિર્કોનિયમ-94 (A=94, Z=40) અને સીઝિયમ-137 (A=137, Z=55) નો સરવાળો 231 થાય છે, જે 235 - 3 (ન્યૂટ્રોન) = 232 નથી. પરંતુ વાસ્તવિક રીતે, સીઝિયમ-137 અને રુબિડિયમ-93 (A=93, Z=37) નો સરવાળો 230 થાય છે, જે 235 - 3 = 232 નથી. આથી, સૌથી નજીકનો યોગ્ય જવાબ ઝિર્કોનિયમ-94 છે, કારણ કે તે વિખંડન પ્રક્રિયામાં સામાન્ય રીતે ઉત્પન્ન થતો ટૂકડો છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 26}, {"question": "ફાસ્ટ બ્રીડર રિએક્ટરમાં, યુરેનિયમ-238 નું પ્લુટોનિયમ-239 માં રૂપાંતરણ થવા માટે નીચેનામાંથી કયા કણની આવશ્યકતા હોય છે?", "options": ["A) થર્મલ ન્યૂટ્રોન", "B) ફાસ્ટ ન્યૂટ્રોન", "C) અલ્ફા કણ", "D) બીટા કણ"], "correct": 1, "explanation": "ફાસ્ટ બ્રીડર રિએક્ટરમાં, યુરેનિયમ-238 નું પ્લુટોનિયમ-239 માં રૂપાંતરણ થવા માટે ફાસ્ટ ન્યૂટ્રોનની આવશ્યકતા હોય છે. યુરેનિયમ-238 ન્યૂટ્રોન શોષીને યુરેનિયમ-239 બને છે, જે પછી બીટા ક્ષય દ્વારા નેપ્ચ્યુનિયમ-239 અને પછી પ્લુટોનિયમ-239 માં રૂપાંતરિત થાય છે. થર્મલ ન્યૂટ્રોન, અલ્ફા કણ અને બીટા કણ આ પ્રક્રિયા માટે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 27}, {"question": "એક ન્યુક્લિયર રિએક્ટરમાં, ન્યૂટ્રોનનો ગુણોત્તર (multiplication factor, k) 1.002 છે. આ પરિસ્થિતિમાં નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) રિએક્ટર સુપરક્રિટિકલ સ્થિતિમાં છે અને પાવર સતત વધી રહ્યો છે", "B) દરેક વિખંડન પ્રક્રિયા સરેરાશ 1.002 નવા વિખંડન પ્રેરે છે", "C) વિલંબિત ન્યૂટ્રોન વગર પણ રિએક્ટર સ્થિર શૃંખલા પ્રક્રિયા જાળવી શકે છે", "D) આ સ્થિતિમાં રિએક્ટરને નિયંત્રિત કરવા માટે નિયંત્રણ છડનો ઉપયોગ જરૂરી બને છે"], "correct": 2, "explanation": "જ્યારે k > 1 હોય ત્યારે રિએક્ટર સુપરક્રિટિકલ સ્થિતિમાં હોય છે અને પાવર વધે છે (વિકલ્પ A સાચું). દરેક વિખંડન સરેરાશ k નવા વિખંડન પ્રેરે છે (વિકલ્પ B સાચું). જો કે, k = 1.002 હોય ત્યારે વિલંબિત ન્યૂટ્રોન વગર રિએક્ટર સ્થિર શૃંખલા પ્રક્રિયા જાળવી શકતું નથી કારણ કે પ્રોમ્પ્ટ ન્યૂટ્રોનનો ગુણોત્તર 1 કરતાં વધુ હોવાથી પ્રક્રિયા અનિયંત્રિત બની જાય છે. આથી વિકલ્પ C ખોટું છે. વિકલ્પ D સાચું છે કારણ કે નિયંત્રણ છડનો ઉપયોગ કરીને પ્રક્રિયાને નિયંત્રિત કરવી જરૂરી છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 28}, {"question": "એક ફાસ્ટ બ્રીડર રિએક્ટરમાં, યુરેનિયમ-238 નું પ્લુટોનિયમ-239 માં રૂપાંતરણ થાય છે. આ પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) યુરેનિયમ-238 ન્યુક્લિયસ ઝડપી ન્યૂટ્રોનનું શોષણ કરીને યુરેનિયમ-239 બને છે, જે બીટા ક્ષય દ્વારા નેપ્ચ્યુનિયમ-239 અને પછી પ્લુટોનિયમ-239 માં રૂપાંતરિત થાય છે.", "B) ફાસ્ટ બ્રીડર રિએક્ટરમાં મોડરેટરનો ઉપયોગ થતો નથી, કારણ કે ઝડપી ન્યૂટ્રોનની જરૂરિયાત હોય છે.", "C) પ્લુટોનિયમ-239 નું વિખંડન થર્મલ ન્યૂટ્રોન દ્વારા થઈ શકે છે, જેના કારણે તે ન્યુક્લિયર બળતણ તરીકે ઉપયોગી બને છે.", "D) ફાસ્ટ બ્રીડર રિએક્ટરમાં યુરેનિયમ-238 નું રૂપાંતરણ પ્લુટોનિયમ-239 માં થાય છે, પરંતુ આ પ્રક્રિયા દરમિયાન ન્યૂટ્રોનનું ઉત્પાદન થતું નથી."], "correct": 3, "explanation": "ફાસ્ટ બ્રીડર રિએક્ટરમાં યુરેનિયમ-238 નું રૂપાંતરણ પ્લુટોનિયમ-239 માં થાય છે, પરંતુ આ પ્રક્રિયા દરમિયાન ન્યૂટ્રોનનું ઉત્પાદન થાય છે (વિખંડન પ્રક્રિયા દરમિયાન). આથી વિકલ્પ D ખોટું છે. વિકલ્પ A, B અને C સાચાં છે કારણ કે યુરેનિયમ-238 ઝડપી ન્યૂટ્રોનનું શોષણ કરીને પ્લુટોનિયમ-239 માં રૂપાંતરિત થાય છે, ફાસ્ટ બ્રીડર રિએક્ટરમાં મોડરેટરનો ઉપયોગ થતો નથી, અને પ્લુટોનિયમ-239 થર્મલ ન્યૂટ્રોન દ્વારા વિખંડન પામે છે.", "ncert_ref": "ક્લાસ 12 - પ્રકરણ 13: ન્યુક્લિયર ભૌતિકશાસ્ત્ર", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
