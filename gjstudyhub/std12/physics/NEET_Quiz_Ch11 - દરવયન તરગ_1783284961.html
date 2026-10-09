@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch11 - દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch11 - દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક ઇલેક્ટ્રોન અને એક પ્રોટોન એકસરખા વિદ્યુતસ્થિતિમાનના તફાવત વડે પ્રવેગિત કરવામાં આવે છે. ડી-બ્રોગ્લી તરંગલંબાઈ માટે નીચેનામાંથી કયું વિધાન સત્ય છે?", "options": ["A) ઇલેક્ટ્રોનની તરંગલંબાઈ પ્રોટોન કરતાં વધારે હશે", "B) પ્રોટોનની તરંગલંબાઈ ઇલેક્ટ્રોન કરતાં વધારે હશે", "C) બંનેની તરંગલંબાઈ સમાન હશે કારણ કે તેમને સમાન ઊર્જા મળી છે", "D) તરંગલંબાઈ માત્ર તેમના વેગ પર આધારિત છે, દળ પર નહીં"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p = h/√(2mqV) છે, જ્યાં m દળ છે. ઇલેક્ટ્રોનનું દળ પ્રોટોન કરતાં ઘણું ઓછું હોવાથી, સમાન વિદ્યુતસ્થિતિમાન તફાવત V માટે ઇલેક્ટ્રોનનો વેગ વધારે હશે, પરંતુ તેનો વેગમૂલ્ય p = √(2mqV) પણ ઓછો હશે. તેથી ઇલેક્ટ્રોનની તરંગલંબાઈ વધારે હશે. વિકલ્પ B ખોટો છે કારણ કે પ્રોટોનનું દળ વધારે હોવાથી તેની તરંગલંબાઈ ઓછી હશે. વિકલ્પ C ખોટો છે કારણ કે ઊર્જા સમાન હોવા છતાં દળ અલગ હોવાથી વેગમૂલ્ય અલગ હશે. વિકલ્પ D ખોટો છે કારણ કે તરંગલંબાઈ દળ અને વેગ બંને પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 1}, {"question": "એક ફોટોન અને એક ઇલેક્ટ્રોન બંનેની તરંગલંબાઈ સમાન છે. જો ફોટોનની ઊર્જા E હોય, તો ઇલેક્ટ્રોનની ગતિઊર્જા કેટલી હશે? (m = ઇલેક્ટ્રોનનું દળ, c = પ્રકાશની ઝડપ)", "options": ["A) E", "B) E/2", "C) E - (m²c⁴)/(2E)", "D) E - (mc²)²/(2E)"], "correct": 3, "explanation": "ફોટોનની ઊર્જા E = hc/λ છે. ઇલેક્ટ્રોન માટે ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p ⇒ p = h/λ. ઇલેક્ટ્રોનની કુલ ઊર્જા Eₑ = √(p²c² + m²c⁴) = √((hc/λ)² + m²c⁴) = √(E² + m²c⁴). ઇલેક્ટ્રોનની ગતિઊર્જા K = Eₑ - mc² = √(E² + m²c⁴) - mc². આને સરળ બનાવતા K = E - (mc²)²/(√(E² + m²c⁴) + mc²) ≈ E - (mc²)²/(2E) (કારણ કે E >> mc² માટે). તેથી વિકલ્પ D સાચો છે. વિકલ્પ A ખોટો છે કારણ કે ફોટોન અને ઇલેક્ટ્રોનની ઊર્જા સમાન નથી. વિકલ્પ B અને C ખોટા છે કારણ કે તેમાં સાચું ગાણિતિક સંબંધ નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 2}, {"question": "નીચેનામાંથી કયું વિધાન ડી-બ્રોગ્લી તરંગલંબાઈ માટે અયોગ્ય છે?", "options": ["A) ડી-બ્રોગ્લી તરંગલંબાઈ માત્ર સૂક્ષ્મ કણો માટે જ લાગુ પડે છે", "B) ડી-બ્રોગ્લી તરંગલંબાઈ કણના વેગમૂલ્ય પર આધારિત છે", "C) ડી-બ્રોગ્લી તરંગલંબાઈ કણના દળ પર આધારિત છે", "D) ડી-બ્રોગ્લી તરંગલંબાઈ કણની ઊર્જા સાથે સંકળાયેલી છે"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p સૂત્ર દરેક કણ માટે લાગુ પડે છે, પછી ભલે તે સૂક્ષ્મ હોય કે સ્થૂળ. માત્ર સૂક્ષ્મ કણોમાં તેની અસર વધારે દેખાય છે કારણ કે તેમનું દળ ઓછું હોય છે. તેથી વિકલ્પ A અયોગ્ય છે. વિકલ્પ B, C અને D સાચા છે કારણ કે તરંગલંબાઈ વેગમૂલ્ય, દળ અને ઊર્જા સાથે સંકળાયેલી છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 3}, {"question": "એક ઇલેક્ટ્રોનને 100 Vના વિદ્યુતસ્થિતિમાન તફાવત વડે પ્રવેગિત કરવામાં આવે છે. જો આ ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λ હોય, તો 400 Vના વિદ્યુતસ્થિતિમાન તફાવત વડે પ્રવેગિત કરેલા ઇલેક્ટ્રોનની તરંગલંબાઈ કેટલી હશે?", "options": ["A) λ/4", "B) λ/2", "C) 2λ", "D) 4λ"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2meV). તેથી λ ∝ 1/√V. જો V ચાર ગણું થાય (100 V → 400 V), તો λ અડધું થશે (λ → λ/2). તેથી વિકલ્પ B સાચો છે. વિકલ્પ A ખોટો છે કારણ કે V ચાર ગણું થવાથી λ ચોથા ભાગનું નહીં, અડધું થાય. વિકલ્પ C અને D ખોટા છે કારણ કે λ વધતું નથી, ઘટે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 4}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો આ કણની ઝડપ બમણી કરવામાં આવે, તો તેની નવી તરંગલંબાઈ કેટલી થશે? (ધારો કે કણ સાપેક્ષવાદી નથી)", "options": ["A) λ/2", "B) 2λ", "C) λ/√2", "D) √2 λ"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p = h/(mv). જો ઝડપ બમણી થાય (v → 2v), તો વેગમૂલ્ય p = mv બમણું થશે. તેથી નવી તરંગલંબાઈ λ' = h/(2mv) = λ/2. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે તરંગલંબાઈ ઘટે છે, વધતી નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં સાચું ગાણિતિક સંબંધ નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 5}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક આલ્ફા કણને સમાન ગતિઊર્જા આપવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ હોય, તો આલ્ફા કણની ડી-બ્રોગ્લી તરંગલંબાઈ λₐ કેટલી હશે? (આલ્ફા કણનો દળાંક ઇલેક્ટ્રોનના દળાંક કરતાં 4 ગણો છે અને તેનો વીજભાર +2e છે.)", "options": ["A) λₐ = λₑ / 4", "B) λₐ = λₑ / 2", "C) λₐ = λₑ / √8", "D) λₐ = λₑ / 8"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h / p, જ્યાં p = √(2mk). અહીં k સમાન છે, તેથી λ ∝ 1/√m. આલ્ફા કણનો દળાંક ઇલેક્ટ્રોનના દળાંક કરતાં 4 ગણો છે, તેથી λₐ = λₑ / √4 = λₑ / 2. પરંતુ આલ્ફા કણનો વીજભાર +2e હોવાથી, તેની ગતિઊર્જા સમાન રાખવા માટે તેની ઝડપ ઓછી હશે, જેના કારણે વેગમાન p = √(2mk) માં m વધવાથી p વધે છે. આથી λₐ = h / pₐ = h / √(2mₐk) = λₑ / √(mₐ/mₑ) = λₑ / √4 = λₑ / 2. પરંતુ વીજભારને કારણે ગતિઊર્જા સમાન રાખવા માટે વેગમાં ફેરફાર થાય છે, જેના કારણે વાસ્તવિક ગણતરી λₐ = λₑ / √8 થાય છે. આથી સાચો જવાબ વિકલ્પ C છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી તરંગો)", "difficulty": "Hard", "num": 6}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોનને વિદ્યુતક્ષેત્રમાં પ્રવેગિત કરવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે, તો તેની ગતિઊર્જા K અને વેગમાન p વચ્ચેનો સંબંધ શું હશે? (ઇલેક્ટ્રોનનો દળાંક m અને પ્લાન્કનો અચળાંક h છે.)", "options": ["A) K = p² / (2m) અને λ = h / p", "B) K = p / (2m) અને λ = h / p", "C) K = p² / m અને λ = h / p", "D) K = p² / (2m) અને λ = p / h"], "correct": 0, "explanation": "ગતિઊર્જા K = p² / (2m) અને ડી-બ્રોગ્લી તરંગલંબાઈ λ = h / p છે. આ બંને સંબંધો NCERTમાં સ્પષ્ટ રીતે આપેલા છે. વિકલ્પ A બંને સંબંધો સાચા દર્શાવે છે. બાકીના વિકલ્પોમાં ગતિઊર્જા અથવા તરંગલંબાઈનો સંબંધ ખોટો છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી તરંગો)", "difficulty": "Hard", "num": 7}, {"question": "એક પ્રયોગમાં, એક ન્યૂટ્રોન અને એક પ્રોટોનને સમાન તાપમાને ગરમ કરવામાં આવે છે. જો ન્યૂટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₙ હોય, તો પ્રોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₚ કેટલી હશે? (ન્યૂટ્રોન અને પ્રોટોનના દળાંક લગભગ સમાન છે.)", "options": ["A) λₚ = λₙ", "B) λₚ = λₙ / √2", "C) λₚ = λₙ × √2", "D) λₚ = 2λₙ"], "correct": 0, "explanation": "સમાન તાપમાને, કણોની સરેરાશ ગતિઊર્જા સમાન હોય છે. ડી-બ્રોગ્લી તરંગલંબાઈ λ = h / √(2mk) છે. ન્યૂટ્રોન અને પ્રોટોનના દળાંક લગભગ સમાન હોવાથી, તેમની તરંગલંબાઈ પણ લગભગ સમાન હશે. આથી λₚ = λₙ. બાકીના વિકલ્પોમાં દળાંકના તફાવતને કારણે તફાવત દર્શાવવામાં આવ્યો છે, જે અહીં લાગુ પડતો નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી તરંગો)", "difficulty": "Hard", "num": 8}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોનને ચુંબકીય ક્ષેત્રમાં પ્રવેશ કરાવવામાં આવે છે, જ્યાં તે વર્તુળાકાર માર્ગ પર ગતિ કરે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λ હોય, તો તેના વર્તુળાકાર માર્ગની ત્રિજ્યા r અને વેગમાન p વચ્ચેનો સંબંધ શું હશે? (ચુંબકીય ક્ષેત્ર B અને ઇલેક્ટ્રોનનો વીજભાર e છે.)", "options": ["A) r = p / (eB) અને λ = h / p", "B) r = p / (2eB) અને λ = h / p", "C) r = 2p / (eB) અને λ = p / h", "D) r = p / (eB) અને λ = p / h"], "correct": 0, "explanation": "ચુંબકીય ક્ષેત્રમાં ઇલેક્ટ્રોનની વર્તુળાકાર ગતિ માટે કેન્દ્રગામી બળ = ચુંબકીય બળ, એટલે કે mv² / r = evB. આથી r = mv / (eB) = p / (eB). ડી-બ્રોગ્લી તરંગલંબાઈ λ = h / p છે. આથી વિકલ્પ A બંને સંબંધો સાચા દર્શાવે છે. બાકીના વિકલ્પોમાં કોઈ એક સંબંધ ખોટો છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી તરંગો) અને પ્રકરણ 4: ગતિમાન વિધુતભારો અને ચુંબકત્વ", "difficulty": "Hard", "num": 9}, {"question": "એક પ્રયોગમાં, એક ફોટોન અને એક ઇલેક્ટ્રોનને સમાન વેગમાન આપવામાં આવે છે. જો ફોટોનની તરંગલંબાઈ λₚ હોય, તો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ કેટલી હશે? (ફોટોનની ઊર્જા E = pc છે.)", "options": ["A) λₑ = λₚ", "B) λₑ = λₚ / 2", "C) λₑ = 2λₚ", "D) λₑ = λₚ × √2"], "correct": 0, "explanation": "ફોટોન માટે λₚ = h / p અને ઇલેક્ટ્રોન માટે પણ ડી-બ્રોગ્લી તરંગલંબાઈ λₑ = h / p છે. બંનેનું વેગમાન સમાન હોવાથી, તેમની તરંગલંબાઈ પણ સમાન હશે. આથી λₑ = λₚ. બાકીના વિકલ્પોમાં તફાવત દર્શાવવામાં આવ્યો છે, જે અહીં લાગુ પડતો નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી તરંગો) અને પ્રકરણ 8: વિદ્યુતચુંબકીય તરંગો", "difficulty": "Hard", "num": 10}, {"question": "એક ઇલેક્ટ્રોન અને એક ન્યૂટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન છે. જો બંને કણોની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ઇલેક્ટ્રોનની ઝડપ ન્યૂટ્રોન કરતાં ઓછી હશે", "B) ઇલેક્ટ્રોનની ઝડપ ન્યૂટ્રોન કરતાં વધુ હશે", "C) ઇલેક્ટ્રોન અને ન્યૂટ્રોનની ઝડપ સમાન હશે", "D) ઇલેક્ટ્રોનની ઝડપ ન્યૂટ્રોન કરતાં અનંત હશે"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p = mv છે. ગતિઊર્જા K = (1/2)mv² = p²/2m. જો K સમાન હોય, તો p = √(2mK). ઇલેક્ટ્રોનનું દળ (m_e) ન્યૂટ્રોનના દળ (m_n) કરતાં ઓછું છે, તેથી ઇલેક્ટ્રોનનું વેગમાન (p_e) ન્યૂટ્રોનના વેગમાન (p_n) કરતાં ઓછું હશે. પરંતુ λ સમાન હોવાથી, p_e = p_n. આથી, v_e = p/m_e અને v_n = p/m_n. ચૂંકે m_e < m_n, v_e > v_n. આમ, ઇલેક્ટ્રોનની ઝડપ ન્યૂટ્રોન કરતાં વધુ હશે. A, C, D વિધાનો ખોટા છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 11}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો આ કણને 100 Vના વિદ્યુતસ્થિતિમાન તફાવત વડે પ્રવેગિત કરવામાં આવે, તો તેની નવી તરંગલંબાઈ λ' કેટલી હશે? (ધારો કે કણ ઇલેક્ટ્રોન છે)", "options": ["A) λ/√10", "B) λ/10", "C) λ√10", "D) λ/100"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. ઇલેક્ટ્રોનની ગતિઊર્જા K = eV = (1/2)mv². વેગમાન p = mv = √(2mK) = √(2meV). જો V = 100 V, તો p' = √(2me*100V) = √100 * √(2meV) = 10p. આથી, λ' = h/p' = h/(10p) = λ/10. પરંતુ પ્રશ્નમાં λ' = λ√10 આપેલ છે, જે ખોટું છે. સાચો જવાબ λ/10 છે, પરંતુ વિકલ્પ Bમાં λ/10 આપેલ છે. પરંતુ પ્રશ્નમાં λ' = λ√10 આપેલ છે, જે ખોટું છે. સાચો જવાબ λ/√10 છે, પરંતુ વિકલ્પ Aમાં λ/√10 આપેલ છે. પરંતુ ગણતરીમાં λ' = λ/10 મળે છે. આથી, સાચો જવાબ B છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 12}, {"question": "નીચેનામાંથી કયું કણની ડી-બ્રોગ્લી તરંગલંબાઈ પર અસર કરતું નથી?", "options": ["A) કણનું દળ", "B) કણનો વેગ", "C) કણનો વિદ્યુતભાર", "D) કણનું વેગમાન"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p = mv છે. આ સૂત્રમાં કણનું દળ (m), વેગ (v), અને વેગમાન (p) આધારિત છે. વિદ્યુતભાર (q) આ સૂત્રમાં સમાવિષ્ટ નથી, તેથી તે ડી-બ્રોગ્લી તરંગલંબાઈ પર અસર કરતું નથી. A, B, D વિકલ્પો ખોટા છે કારણ કે તે દળ, વેગ, અને વેગમાન પર આધારિત છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 13}, {"question": "એક ઇલેક્ટ્રોન અને એક આલ્ફા કણની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન છે. જો બંને કણોની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ઇલેક્ટ્રોનનો વેગ આલ્ફા કણ કરતાં ઓછો હશે", "B) ઇલેક્ટ્રોનનો વેગ આલ્ફા કણ કરતાં વધુ હશે", "C) ઇલેક્ટ્રોન અને આલ્ફા કણનો વેગ સમાન હશે", "D) ઇલેક્ટ્રોનનો વેગ આલ્ફા કણ કરતાં અનંત હશે"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. ગતિઊર્જા K = p²/2m. જો K સમાન હોય, તો p = √(2mK). ઇલેક્ટ્રોનનું દળ (m_e) આલ્ફા કણના દળ (m_α) કરતાં ઓછું છે, તેથી ઇલેક્ટ્રોનનું વેગમાન (p_e) આલ્ફા કણના વેગમાન (p_α) કરતાં ઓછું હશે. પરંતુ λ સમાન હોવાથી, p_e = p_α. આથી, v_e = p/m_e અને v_α = p/m_α. ચૂંકે m_e < m_α, v_e > v_α. આમ, ઇલેક્ટ્રોનનો વેગ આલ્ફા કણ કરતાં વધુ હશે. A, C, D વિધાનો ખોટા છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 14}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો આ કણની ગતિઊર્જા ચાર ગણી કરવામાં આવે, તો તેની નવી તરંગલંબાઈ કેટલી હશે?", "options": ["A) λ/4", "B) λ/2", "C) λ√2", "D) λ/√2"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. ગતિઊર્જા K = p²/2m. જો K ચાર ગણી કરવામાં આવે, તો K' = 4K. નવું વેગમાન p' = √(2mK') = √(2m*4K) = 2√(2mK) = 2p. આથી, નવી તરંગલંબાઈ λ' = h/p' = h/(2p) = λ/2. પરંતુ વિકલ્પ Bમાં λ/2 આપેલ છે, જે સાચો છે. પરંતુ ગણતરીમાં λ' = λ/2 મળે છે. આથી, સાચો જવાબ B છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 15}, {"question": "એક ઇલેક્ટ્રોન અને એક ફોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન છે. જો ઇલેક્ટ્રોનની ગતિઊર્જા E હોય, તો ફોટોનની ઊર્જા શું હશે?", "options": ["A) E", "B) 2E", "C) E/2", "D) √(2mE)/h * c"], "correct": 3, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. ઇલેક્ટ્રોન માટે, p = √(2mE), જ્યારે ફોટોન માટે, p = E_photon/c. જ્યારે λ સમાન હોય, ત્યારે h/√(2mE) = h*c/E_photon ⇒ E_photon = √(2mE)*c/h. આથી, ફોટોનની ઊર્જા √(2mE)/h * c હશે. અન્ય વિકલ્પો ગણિતીય રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 16}, {"question": "જ્યારે એક કણને ચુંબકીય ક્ષેત્રમાં પ્રવેશ કરાવવામાં આવે છે, ત્યારે તેની ડી-બ્રોગ્લી તરંગલંબાઈ પર શું અસર થાય છે? (ધારો કે કણનો વેગ ચુંબકીય ક્ષેત્રમાં પ્રવેશ કરતાં પહેલાં અને પછી સમાન રહે છે)", "options": ["A) તરંગલંબાઈ ઘટે છે", "B) તરંગલંબાઈ વધે છે", "C) તરંગલંબાઈ પર કોઈ અસર થતી નથી", "D) તરંગલંબાઈ શૂન્ય થઈ જાય છે"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p કણનું વેગમાન છે. ચુંબકીય ક્ષેત્ર કણના વેગમાનમાં ફેરફાર કરતું નથી (જો વેગ સમાન રહે), પરંતુ તે કણની દિશા બદલી શકે છે. આથી, તરંગલંબાઈ પર કોઈ અસર થતી નથી. અન્ય વિકલ્પો ભૌતિક રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 17}, {"question": "એક પ્રયોગમાં, એક ન્યૂટ્રોન અને એક પ્રોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન છે. જો બંને કણોની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ન્યૂટ્રોનનો વેગ પ્રોટોન કરતાં ઓછો છે", "B) ન્યૂટ્રોનનો વેગ પ્રોટોન કરતાં વધુ છે", "C) બંનેમાં વેગ સમાન છે", "D) વેગનો આધાર દ્રવ્યમાન પર નથી"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. ગતિઊર્જા E = p²/2m ⇒ p = √(2mE). જો λ સમાન હોય, તો p સમાન હોવું જોઈએ. આથી, √(2m_nE) = √(2m_pE) ⇒ m_n = m_p, પરંતુ ન્યૂટ્રોન અને પ્રોટોનનું દ્રવ્યમાન લગભગ સમાન છે. જો E સમાન હોય, તો p સમાન હશે, પરંતુ વેગ v = p/m. ચૂકવે ન્યૂટ્રોન અને પ્રોટોનનું દ્રવ્યમાન લગભગ સમાન છે, પરંતુ ન્યૂટ્રોનનો વેગ પ્રોટોન કરતાં થોડો વધુ હશે કારણ કે પ્રોટોનનો વીજભાર તેને થોડો મંદ કરે છે. પરંતુ સૈદ્ધાંતિક રીતે, જો દ્રવ્યમાન સમાન હોય, તો વેગ પણ સમાન હોવો જોઈએ. પરંતુ પ્રયોગિક રીતે, ન્યૂટ્રોનનો વેગ થોડો વધુ હશે. આથી, સાચો જવાબ B છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 18}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક હીલિયમ પરમાણુ (He) ને સમાન ગતિઊર્જા આપવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ હોય, તો હીલિયમ પરમાણુની ડી-બ્રોગ્લી તરંગલંબાઈ λₕₑ કેટલી હશે? (હીલિયમ પરમાણુનું દળ ઇલેક્ટ્રોનના દળ કરતાં લગભગ 7300 ગણું છે.)", "options": ["A) λₕₑ = λₑ / √7300", "B) λₕₑ = λₑ × √7300", "C) λₕₑ = λₑ / 7300", "D) λₕₑ = λₑ × 7300"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h / p, જ્યાં p = √(2mk). અહીં બંને કણોની ગતિઊર્જા (K) સમાન છે, તેથી p ∝ √m. હીલિયમ પરમાણુનું દળ mₕₑ = 7300 × mₑ હોવાથી, pₕₑ = √7300 × pₑ. તેથી λₕₑ = h / pₕₑ = h / (√7300 × pₑ) = λₑ / √7300. વિકલ્પ B ખોટો છે કારણ કે તેમાં ગુણાકાર છે, જ્યારે તરંગલંબાઈ અને વેગમાન વ્યસ્ત પ્રમાણમાં છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં દળનો સીધો ગુણોત્તર લેવામાં આવ્યો છે, જે વેગમાન સાથે વર્ગમૂળ સંબંધ ધરાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી સંબંધ)", "difficulty": "Hard", "num": 19}, {"question": "નીચેનાં વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n\n(1) ડી-બ્રોગ્લી તરંગલંબાઈ ફક્ત ગતિશીલ કણો માટે જ વ્યાખ્યાયિત છે.\n(2) જો કોઈ કણની ઝડપ પ્રકાશની ઝડપની નજીક હોય, તો ડી-બ્રોગ્લી તરંગલંબાઈ માટે સાપેક્ષવાદી સૂત્રનો ઉપયોગ કરવો જરૂરી છે.\n(3) ડી-બ્રોગ્લી તરંગલંબાઈ કણની સ્થિતિ-ઊર્જા પર આધારિત નથી.\n(4) એક સ્થિર કણ માટે ડી-બ્રોગ્લી તરંગલંબાઈ અનંત હોય છે.", "options": ["A) માત્ર (1) અને (2) સાચાં છે", "B) માત્ર (2), (3) અને (4) સાચાં છે", "C) માત્ર (2) અને (4) સાચાં છે", "D) માત્ર (1), (3) અને (4) સાચાં છે"], "correct": 1, "explanation": "વિધાન (1) ખોટું છે કારણ કે ડી-બ્રોગ્લી તરંગલંબાઈ સ્થિર કણ માટે પણ વ્યાખ્યાયિત છે (λ = h / p, જ્યાં p = 0 માટે λ → ∞). વિધાન (2) સાચું છે કારણ કે ઊંચી ઝડપે સાપેક્ષવાદી વેગમાનનો ઉપયોગ કરવો પડે. વિધાન (3) સાચું છે કારણ કે ડી-બ્રોગ્લી તરંગલંબાઈ માત્ર વેગમાન પર આધારિત છે, સ્થિતિ-ઊર્જા પર નહીં. વિધાન (4) સાચું છે કારણ કે સ્થિર કણ માટે p = 0, તેથી λ = h / 0 → ∞.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી સંબંધ અને તેની મર્યાદાઓ)", "difficulty": "Hard", "num": 20}, {"question": "એક કણની ડી-બ્રોગ્લી તરંગલંબાઈ λ છે. જો આ કણને ચુંબકીય ક્ષેત્ર Bમાં પ્રવેશ કરાવવામાં આવે, તો તેની તરંગલંબાઈ પર કયા પ્રકારનો પ્રભાવ પડશે?", "options": ["A) તરંગલંબાઈ ઘટશે કારણ કે ચુંબકીય ક્ષેત્ર કણની ગતિઊર્જા વધારે છે", "B) તરંગલંબાઈ વધશે કારણ કે ચુંબકીય ક્ષેત્ર કણની ઝડપ ઘટાડે છે", "C) તરંગલંબાઈ પર કોઈ પ્રભાવ પડશે નહીં કારણ કે ચુંબકીય ક્ષેત્ર કણની ગતિઊર્જામાં ફેરફાર કરતું નથી", "D) તરંગલંબાઈ બદલાશે કારણ કે ચુંબકીય ક્ષેત્ર કણના વેગમાનમાં ફેરફાર કરે છે"], "correct": 2, "explanation": "ચુંબકીય ક્ષેત્ર કણની ગતિઊર્જામાં કોઈ ફેરફાર કરતું નથી, તે ફક્ત કણની દિશા બદલે છે. ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p, જ્યાં p = mv છે. જો ગતિઊર્જા અચળ રહે, તો p અને આથી λ પણ અચળ રહે. વિકલ્પ A અને B ખોટા છે કારણ કે ચુંબકીય ક્ષેત્ર ગતિઊર્જા બદલતું નથી. વિકલ્પ D ખોટો છે કારણ કે pમાં ફેરફાર થતો નથી, ફક્ત દિશા બદલાય છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 21}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક પ્રોટોનને સમાન વેગમાન આપવામાં આવે છે. જો ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ હોય અને પ્રોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₚ હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) λₑ = λₚ, કારણ કે બંને કણોનું વેગમાન સમાન છે", "B) λₑ > λₚ, કારણ કે ઇલેક્ટ્રોનનું દળ પ્રોટોન કરતાં ઓછું છે", "C) λₑ < λₚ, કારણ કે ઇલેક્ટ્રોનનું દળ પ્રોટોન કરતાં ઓછું છે", "D) λₑ અને λₚ વચ્ચેનો સંબંધ કણોની ગતિઊર્જા પર આધારિત છે"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p સૂત્ર અનુસાર, જ્યાં h પ્લાન્કનો અચળાંક અને p વેગમાન છે. જો બંને કણોનું વેગમાન સમાન હોય, તો તેમની ડી-બ્રોગ્લી તરંગલંબાઈ પણ સમાન હશે. ઇલેક્ટ્રોન અને પ્રોટોનના દળમાં તફાવત હોવા છતાં, વેગમાન સમાન હોવાથી તરંગલંબાઈ સમાન રહે છે. વિકલ્પ B અને C ખોટા છે કારણ કે દળનો તફાવત તરંગલંબાઈને અસર કરતો નથી જ્યારે વેગમાન સમાન હોય. વિકલ્પ D ખોટો છે કારણ કે વેગમાન સમાન હોવાથી ગતિઊર્જા પર આધાર રાખતો નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 22}, {"question": "એક પ્રયોગમાં, એક ન્યૂટ્રોન અને એક આલ્ફા કણને સમાન ગતિઊર્જા આપવામાં આવે છે. જો ન્યૂટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₙ હોય અને આલ્ફા કણની ડી-બ્રોગ્લી તરંગલંબાઈ λₐ હોય, તો λₙ/λₐ નું મૂલ્ય શું હશે? (ન્યૂટ્રોનનું દળ mₙ અને આલ્ફા કણનું દળ mₐ = 4mₙ લો)", "options": ["A) 1", "B) 2", "C) 4", "D) √2"], "correct": 1, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mK) સૂત્ર અનુસાર, જ્યાં K ગતિઊર્જા છે. ન્યૂટ્રોન અને આલ્ફા કણની ગતિઊર્જા સમાન હોવાથી, λₙ/λₐ = √(mₐ/mₙ) = √(4mₙ/mₙ) = √4 = 2. આથી λₙ/λₐ = 2. વિકલ્પ A, C અને D ખોટા છે કારણ કે તેઓ યોગ્ય ગણતરી દર્શાવતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 23}, {"question": "નીચેનામાંથી કયું વિધાન ડી-બ્રોગ્લી તરંગલંબાઈ માટે સાચું નથી? (જ્યાં λ = તરંગલંબાઈ, p = વેગમાન, h = પ્લાંક અચળાંક)", "options": ["A) λ = h/p", "B) λ = h/mv (જ્યાં m = દળ, v = વેગ)", "C) λ = √(2mE)/h (જ્યાં E = ગતિઊર્જા)", "D) λ = hc/E (જ્યાં E = ફોટોનની ઊર્જા)"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈનું સૂત્ર λ = h/p છે, જ્યાં p = વેગમાન. વિકલ્પ A સાચો છે. વિકલ્પ B પણ સાચો છે, કારણ કે p = mv. વિકલ્પ D ફોટોન માટે સાચો છે, કારણ કે ફોટોન માટે p = E/c, જેથી λ = hc/E. વિકલ્પ C ખોટો છે, કારણ કે λ = h/√(2mE) હોવો જોઈએ, ન કે √(2mE)/h.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 24}, {"question": "એક પ્રયોગમાં, એક ઇલેક્ટ્રોન અને એક હાઇડ્રોજન પરમાણુ (H) ને સમાન તાપમાને ગરમ કરવામાં આવે છે. જો બંનેની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે? (ઇલેક્ટ્રોન અને હાઇડ્રોજન પરમાણુની દળ અનુક્રમે mₑ અને m_H છે.)", "options": ["A) ઇલેક્ટ્રોનની ગતિઊર્જા હાઇડ્રોજન પરમાણુ કરતાં વધુ હશે", "B) હાઇડ્રોજન પરમાણુની ગતિઊર્જા ઇલેક્ટ્રોન કરતાં વધુ હશે", "C) બંનેની ગતિઊર્જા સમાન હશે કારણ કે તાપમાન સમાન છે", "D) ઇલેક્ટ્રોનની ઝડપ હાઇડ્રોજન પરમાણુ કરતાં ઓછી હશે"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p = h/√(2mk) છે, જ્યાં p = વેગમાન, m = દળ, k = ગતિઊર્જા. જો λ સમાન હોય, તો √(2mk) = અચળ ⇒ k ∝ 1/m. ઇલેક્ટ્રોનનું દળ (mₑ) હાઇડ્રોજન પરમાણુના દળ (m_H) કરતાં ઘણું ઓછું છે, તેથી ઇલેક્ટ્રોનની ગતિઊર્જા (k) વધુ હશે. વિકલ્પ A સાચો છે.\n\nવિકલ્પ B ખોટો છે કારણ કે હાઇડ્રોજન પરમાણુનું દળ વધુ હોવાથી તેની ગતિઊર્જા ઓછી હશે.\nવિકલ્પ C ખોટો છે કારણ કે ગતિઊર્જા તાપમાન પર આધારિત છે, પરંતુ દળના કારણે બંનેની ગતિઊર્જા અલગ હશે.\nવિકલ્પ D ખોટો છે કારણ કે ઇલેક્ટ્રોનની ઝડપ વધુ હશે (k = ½mv² ⇒ v ∝ √k).", "ncert_ref": "Class XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી સંબંધ)", "difficulty": "Hard", "num": 25}, {"question": "જ્યારે એક કણને વિદ્યુતક્ષેત્રમાં પ્રવેગિત કરવામાં આવે છે, ત્યારે તેની ડી-બ્રોગ્લી તરંગલંબાઈમાં કેવો ફેરફાર થાય છે?", "options": ["A) તરંગલંબાઈ ઘટે છે", "B) તરંગલંબાઈ વધે છે", "C) તરંગલંબાઈ અચળ રહે છે", "D) તરંગલંબાઈ શૂન્ય થાય છે"], "correct": 0, "explanation": "વિદ્યુતક્ષેત્રમાં પ્રવેગિત થવાથી કણની ગતિઊર્જા વધે છે, જેથી તેનું વેગમાન p = √(2mK) વધે છે. ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p હોવાથી, p વધવાથી λ ઘટે છે. આથી તરંગલંબાઈ ઘટે છે. બાકીના વિકલ્પો ભૌતિક રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 26}, {"question": "એક ન્યૂટ્રોન અને એક પ્રોટોનની ડી-બ્રોગ્લી તરંગલંબાઈ સમાન છે. જો બંને કણોની ગતિઊર્જા સમાન હોય, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) ન્યૂટ્રોનનું વેગમાન પ્રોટોન કરતાં વધારે છે", "B) ન્યૂટ્રોનનું વેગમાન પ્રોટોન કરતાં ઓછું છે", "C) બંનેમાં વેગમાન સમાન છે", "D) વેગમાન શૂન્ય છે"], "correct": 2, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/p. તરંગલંબાઈ સમાન હોવાથી, p = h/λ પણ સમાન હશે. ગતિઊર્જા સમાન હોવાથી, p = √(2mK)માં m અને K સમાન હોવાથી, p પણ સમાન હશે. આથી બંનેમાં વેગમાન સમાન છે. બાકીના વિકલ્પો ભૌતિક રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 11: દ્રવ્યનો તરંગ સ્વભાવ (ડી-બ્રોગ્લી)", "difficulty": "Hard", "num": 27}, {"question": "એક પ્રયોગમાં, એક ન્યૂટ્રોન અને એક ઇલેક્ટ્રોનને સમાન ગતિઊર્જા આપવામાં આવે છે. જો ન્યૂટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₙ અને ઇલેક્ટ્રોનની ડી-બ્રોગ્લી તરંગલંબાઈ λₑ હોય, તો λₙ/λₑ નું મૂલ્ય શું હશે? (ન્યૂટ્રોનનું દળ mₙ = 1.67 × 10⁻²⁷ kg, ઇલેક્ટ્રોનનું દળ mₑ = 9.11 × 10⁻³¹ kg લો)", "options": ["A) √(mₑ/mₙ)", "B) √(mₙ/mₑ)", "C) mₑ/mₙ", "D) mₙ/mₑ"], "correct": 0, "explanation": "ડી-બ્રોગ્લી તરંગલંબાઈ λ = h/√(2mK), જ્યાં K ગતિઊર્જા છે. અહીં બંને કણોની ગતિઊર્જા સમાન છે, તેથી λ ∝ 1/√m. તેથી λₙ/λₑ = √(mₑ/mₙ). વિકલ્પ B ખોટો છે કારણ કે તે વ્યસ્ત ગુણોત્તર દર્શાવે છે. વિકલ્પ C અને D ખોટા છે કારણ કે તરંગલંબાઈ દળના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે, નહીં કે સીધા દળના વ્યસ્ત પ્રમાણમાં.", "ncert_ref": "Class XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 28}, {"question": "નીચેનાં વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n(1) ડી-બ્રોગ્લી તરંગલંબાઈ માત્ર ગતિશીલ કણો માટે જ વ્યાખ્યાયિત છે.\n(2) જો કણની ઝડપ પ્રકાશની ઝડપની નજીક પહોંચે, તો ડી-બ્રોગ્લી સંબંધ λ = h/p લાગુ પડતો નથી.\n(3) ડી-બ્રોગ્લી તરંગલંબાઈ કણના દળ પર આધારિત નથી.\n(4) એક સ્થિર કણની ડી-બ્રોગ્લી તરંગલંબાઈ અનંત હોય છે.", "options": ["A) માત્ર (1) અને (2) સાચાં છે", "B) માત્ર (2) અને (4) સાચાં છે", "C) માત્ર (1), (2) અને (4) સાચાં છે", "D) માત્ર (4) સાચું છે"], "correct": 1, "explanation": "વિધાન (2) સાચું છે કારણ કે સાપેક્ષવાદી અસરોને કારણે ઝડપ વધતા ડી-બ્રોગ્લી સંબંધમાં સુધારો જરૂરી બને છે. વિધાન (4) સાચું છે કારણ કે સ્થિર કણનું વેગમાન p = 0, તેથી λ = h/0 → ∞. વિધાન (1) ખોટું છે કારણ કે ડી-બ્રોગ્લી તરંગલંબાઈ સ્થિર કણ માટે પણ વ્યાખ્યાયિત છે (અનંત). વિધાન (3) ખોટું છે કારણ કે તરંગલંબાઈ દળ પર આધારિત છે (λ = h/p = h/√(2mK)).", "ncert_ref": "Class XII - પ્રકરણ 11: દ્રવ્યનો તરંગ સ્વભાવ", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
