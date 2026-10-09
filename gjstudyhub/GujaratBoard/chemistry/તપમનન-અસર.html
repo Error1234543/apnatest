@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>તાપમાનની અસર</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>તાપમાનની અસર</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">તાપમાનની અસર</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે તાપમાનમાં અચાનક વધારો થાય છે, ત્યારે ઉત્સેચકની ક્રિયાશીલતામાં થતો ફેરફાર કયો હોય છે?", "opts": ["ઉત્સેચકની ક્રિયાશીલતા સતત વધતી જાય છે.", "ઉત્સેચકની ક્રિયાશીલતા ઘટે છે કારણ કે પ્રોટીનનો અવકૃષ્ટ થાય છે.", "ઉત્સેચકની ક્રિયાશીલતા સ્થિર રહે છે કારણ કે ઉત્સેચક તાપમાન પ્રત્યે અસંવેદનશીલ હોય છે.", "ઉત્સેચકની ક્રિયાશીલતા પહેલા વધે છે અને પછી અચાનક ઘટે છે."], "ans": 3, "exp": "તાપમાનમાં અચાનક વધારો થવાથી ઉત્સેચકની ક્રિયાશીલતા પહેલા વધે છે કારણ કે અણુઓની ગતિ વધે છે, પરંતુ જ્યારે તાપમાન ખૂબ જ વધી જાય છે ત્યારે પ્રોટીનનો અવકૃષ્ટ થાય છે અને ક્રિયાશીલતા અચાનક ઘટે છે. A) ખોટું છે કારણ કે ક્રિયાશીલતા સતત વધતી નથી. B) અંશતઃ સાચું છે પરંતુ અચાનક ઘટાડો પહેલા વધારો થાય છે. C) ખોટું છે કારણ કે ઉત્સેચક તાપમાન પ્રત્યે સંવેદનશીલ હોય છે.", "ref": "Std 12 - પ્રકરણ 6: ઉત્સેચક", "ch": ""}, {"q": "પ્રકાશસંશ્લેષણની ક્રિયામાં તાપમાનની અસર વિશે કયું વિધાન સાચું છે?", "opts": ["તાપમાન વધવાથી પ્રકાશસંશ્લેષણની દર સતત વધે છે.", "તાપમાન ઘટવાથી પ્રકાશસંશ્લેષણની દર સતત ઘટે છે.", "પ્રકાશસંશ્લેષણની દર એક નિશ્ચિત તાપમાને મહત્તમ હોય છે અને તેનાથી ઉપર અથવા નીચે ઘટે છે.", "તાપમાનની અસર પ્રકાશસંશ્લેષણ પર થતી નથી."], "ans": 2, "exp": "પ્રકાશસંશ્લેષણની દર એક નિશ્ચિત તાપમાન (આદર્શ તાપમાન) એ મહત્તમ હોય છે. તેનાથી ઉપર અથવા નીચે તાપમાને દર ઘટે છે. A) અને B) ખોટા છે કારણ કે દર સતત વધતી અથવા ઘટતી નથી. D) ખોટું છે કારણ કે તાપમાનની અસર પ્રકાશસંશ્લેષણ પર થાય છે.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "શ્વસનની ક્રિયામાં તાપમાનની અસર વિશે કયું વિધાન સાચું નથી?", "opts": ["નીચા તાપમાને શ્વસનની દર ઘટે છે.", "ઉચ્ચ તાપમાને શ્વસનની દર વધે છે.", "ખૂબ જ ઉચ્ચ તાપમાને શ્વસનની ક્રિયા થંભી જાય છે.", "શ્વસનની દર તાપમાન સાથે સીધો સબંધ ધરાવે છે."], "ans": 3, "exp": "શ્વસનની દર તાપમાન સાથે સીધો સબંધ ધરાવતી નથી. નીચા તાપમાને દર ઘટે છે, ઉચ્ચ તાપમાને દર વધે છે, પરંતુ ખૂબ જ ઉચ્ચ તાપમાને ક્રિયા થંભી જાય છે. A), B), અને C) સાચા છે, પરંતુ D) ખોટું છે.", "ref": "Std 11 - પ્રકરણ 14: શ્વસન", "ch": ""}, {"q": "કોષરસમાં ઉત્સેચકની ક્રિયાશીલતા પર તાપમાનની અસર વિશે કયું વિધાન સાચું છે?", "opts": ["0°C તાપમાને ઉત્સેચકની ક્રિયાશીલતા શૂન્ય હોય છે.", "37°C તાપમાને મનુષ્યના ઉત્સેચકની ક્રિયાશીલતા મહત્તમ હોય છે.", "100°C તાપમાને ઉત્સેચકની ક્રિયાશીલતા મહત્તમ હોય છે.", "ઉત્સેચકની ક્રિયાશીલતા તાપમાન પર આધારિત નથી."], "ans": 1, "exp": "મનુષ્યના ઉત્સેચકની ક્રિયાશીલતા 37°C (શરીરનું તાપમાન) એ મહત્તમ હોય છે. A) ખોટું છે કારણ કે 0°C એ ક્રિયાશીલતા શૂન્ય નથી, પરંતુ ખૂબ જ ઓછી હોય છે. C) ખોટું છે કારણ કે 100°C એ પ્રોટીનનો અવકૃષ્ટ થાય છે. D) ખોટું છે કારણ કે ઉત્સેચકની ક્રિયાશીલતા તાપમાન પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 6: ઉત્સેચક", "ch": ""}, {"q": "તાપમાનની અસરથી કોષના કયા અંગિક પર સૌથી પહેલા અસર થાય છે?", "opts": ["કોષકેન્દ્ર", "વર્ણસૂત્ર", "કોષરસપટલ", "માઇટોકોન્ડ્રિયા"], "ans": 2, "exp": "તાપમાનની અસરથી કોષરસપટલ પર સૌથી પહેલા અસર થાય છે કારણ કે તે કોષના બાહ્ય વાતાવરણ સાથે સીધો સંપર્કમાં હોય છે. A), B), અને D) ખોટા છે કારણ કે આ અંગિકો કોષરસપટલ કરતાં વધુ અંદર હોય છે અને તાપમાનની અસર પછી થાય છે.", "ref": "Std 11 - પ્રકરણ 8: કોષ અને તેના અંગિકો", "ch": ""}, {"q": "તાપમાનમાં અચાનક ઘટાડો થવાથી કોષના કયા અંગિકમાં પ્રથમ વિકૃતિ જોવા મળે છે, જ્યારે કોષરસની સ્થિતિ સ્થિર રહે છે?", "opts": ["માઇટોકોન્ડ્રિયા", "એન્ડોપ્લાઝમિક જાળક", "ગોલ્ગી ઉપકરણ", "રાઇબોઝોમ"], "ans": 0, "exp": "માઇટોકોન્ડ્રિયા તાપમાનના ફેરફાર પ્રત્યે ખૂબ સંવેદનશીલ હોય છે, ખાસ કરીને શ્વસન ક્રિયા સાથે સંકળાયેલા ઉત્સેચકો પર અસર થાય છે. એન્ડોપ્લાઝમિક જાળક, ગોલ્ગી ઉપકરણ અને રાઇબોઝોમ પર તાપમાનની અસર મોટેભાગે કોષરસની સ્થિતિ પર આધારિત હોય છે, પરંતુ માઇટોકોન્ડ્રિયા પર સૌપ્રથમ અસર થાય છે.", "ref": "Std 11 - પ્રકરણ 8: કોષ અને કોષીય વહન", "ch": ""}, {"q": "તાપમાનમાં વધારો થવાથી પ્રકાશસંશ્લેષણની ક્રિયામાં કયા પગલામાં સૌપ્રથમ અવરોધ ઉત્પન્ન થાય છે?", "opts": ["પ્રકાશ-અવશોષણ પગલું (ફોટોસિસ્ટમ II)", "કાર્બન સ્થિરીકરણ (કેલ્વિન ચક્ર)", "પાણીનું વિભાજન (ફોટોલિસિસ)", "ATP અને NADPHનું સર્જન"], "ans": 2, "exp": "તાપમાનમાં વધારો થવાથી પાણીના અણુઓના વિભાજન (ફોટોલિસિસ) પર સૌપ્રથમ અસર થાય છે, કારણ કે આ પગલું ઉચ્ચ તાપમાન પ્રત્યે સંવેદનશીલ ઉત્સેચકો પર આધારિત હોય છે. પ્રકાશ-અવશોષણ, કાર્બન સ્થિરીકરણ અને ATP/NADPHનું સર્જન આ પગલાં પછી અસરગ્રસ્ત થાય છે.", "ref": "Std 11 - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "તાપમાનની અસર હેઠળ, કયા હોર્મોનનું સ્રાવ વધવાને કારણે ઉત્સેચકની ક્રિયાશીલતામાં ઘટાડો થાય છે?", "opts": ["ઓક્સિન", "જિબ્બેરેલિન", "એબ્સિસિક એસિડ", "સાયટોકાઇનિન"], "ans": 2, "exp": "એબ્સિસિક એસિડ (ABA) તણાવના પ્રતિભાવ રૂપે સ્રાવ પામે છે, જેમાં તાપમાનમાં ફેરફાર પણ સમાવેશ થાય છે. તે ઉત્સેચકની ક્રિયાશીલતાને અવરોધે છે, જ્યારે ઓક્સિન, જિબ્બેરેલિન અને સાયટોકાઇનિન વૃદ્ધિને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "તાપમાનમાં અચાનક વધારો થવાથી કોષના કયા અંગિકમાં DNAનું વિભાજન અવરોધાય છે, પરંતુ RNA સંશ્લેષણ ચાલુ રહે છે?", "opts": ["કોષકેન્દ્ર", "માઇટોકોન્ડ્રિયા", "ક્લોરોપ્લાસ્ટ", "લાઇસોઝોમ"], "ans": 0, "exp": "કોષકેન્દ્રમાં DNAનું વિભાજન તાપમાનના અચાનક વધારાથી અવરોધાય છે, કારણ કે કોષકેન્દ્રીય DNA પોલિમરેઝ ઉત્સેચક તાપમાન પ્રત્યે સંવેદનશીલ હોય છે. પરંતુ RNA સંશ્લેષણ (ટ્રાન્સક્રિપ્શન) અલગ ઉત્સેચકો દ્વારા થાય છે, જે વધુ સ્થિર હોય છે. માઇટોકોન્ડ્રિયા, ક્લોરોપ્લાસ્ટ અને લાઇસોઝોમમાં DNA વિભાજન કોષકેન્દ્ર જેટલું તાપમાન-સંવેદનશીલ નથી.", "ref": "Std 12 - પ્રકરણ 3: જનીન અને વંશપરંપરાગતતા", "ch": ""}, {"q": "તાપમાનમાં ઘટાડો થવાથી કયા પ્રકારના પ્રોટીનનું સંશ્લેષણ વધે છે, જે કોષને થર્મલ શોક સામે રક્ષણ આપે છે?", "opts": ["એન્ટિબોડી", "હીટ શોક પ્રોટીન (HSP)", "એન્ઝાઇમ ઇન્હિબિટર", "સ્ટ્રક્ચરલ પ્રોટીન"], "ans": 1, "exp": "હીટ શોક પ્રોટીન (HSP) તાપમાનના ફેરફાર (ખાસ કરીને ઘટાડા અથવા વધારા) સામે કોષને રક્ષણ આપવા માટે સંશ્લેષિત થાય છે. એન્ટિબોડી પ્રતિરક્ષા સાથે, એન્ઝાઇમ ઇન્હિબિટર ઉત્સેચક ક્રિયાને અવરોધે, અને સ્ટ્રક્ચરલ પ્રોટીન કોષની રચનામાં ભાગ ભજવે છે, પરંતુ તાપમાન સામે રક્ષણ માટે નહીં.", "ref": "Std 12 - પ્રકરણ 6: કોષીય પ્રક્રિયાઓ અને ઉર્જા", "ch": ""}, {"q": "તાપમાનમાં અચાનક વધારો થવા પર, કોષમાં કયા પ્રકારના પ્રોટીનનું સંશ્લેષણ વધે છે, જે ઉચ્ચ તાપમાન સામે રક્ષણ આપે છે?", "opts": ["હીટ શૉક પ્રોટીન (HSP)", "એન્ટીબૉડી પ્રોટીન", "સ્ટ્રક્ચરલ પ્રોટીન", "ઉત્સેચક પ્રોટીન"], "ans": 0, "exp": "હીટ શૉક પ્રોટીન (HSP) ઉચ્ચ તાપમાન સામે કોષને રક્ષણ આપે છે અને તણાવના સમયગાળા દરમિયાન સંશ્લેષિત થાય છે. એન્ટીબૉડી પ્રોટીન પ્રતિરક્ષાતંત્ર સાથે સંબંધિત છે, સ્ટ્રક્ચરલ પ્રોટીન કોષની રચનામાં મદદ કરે છે, અને ઉત્સેચક પ્રોટીન જૈવ રાસાયણિક પ્રક્રિયાઓને ઉત્તેજિત કરે છે, પરંતુ ઉચ્ચ તાપમાન સામે રક્ષણ આપતું નથી.", "ref": "Std 12 - Chapter 8: કોષ અને અંગિકો", "ch": ""}, {"q": "તાપમાનમાં ઘટાડો થવા પર, પ્રકાશસંશ્લેષણની ક્રિયામાં કયા પગલા પર સૌપ્રથમ અસર થાય છે?", "opts": ["પ્રકાશ-અવશોષણ પગલું", "કેલ્વિન ચક્ર", "પાણીનું વિભાજન", "CO2નું સ્થિરીકરણ"], "ans": 2, "exp": "તાપમાનમાં ઘટાડો થવા પર, પ્રકાશસંશ્લેષણની ક્રિયામાં પાણીનું વિભાજન (ફોટોલાઇસિસ) સૌપ્રથમ અવરોધાય છે, કારણ કે ઉત્સેચકોની ક્રિયાશીલતા ઘટે છે. પ્રકાશ-અવશોષણ, કેલ્વિન ચક્ર અને CO2નું સ્થિરીકરણ પછીના પગલાઓ છે, જે પાણીના વિભાજન પર આધાર રાખે છે.", "ref": "Std 11 - Chapter 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "તાપમાનની અસર હેઠળ, કોષમાં કયા અંગિકનું કામકાજ સૌથી પહેલા બંધ થાય છે?", "opts": ["માઇટોકોન્ડ્રિયા", "રાઇબોઝોમ", "ગોલ્ગી કોમ્પ્લેક્સ", "લાઇસોઝોમ"], "ans": 0, "exp": "માઇટોકોન્ડ્રિયા શ્વસનની ક્રિયા માટે જવાબદાર છે, જે તાપમાનની અસર હેઠળ સૌથી પહેલા અવરોધાય છે, કારણ કે ઉત્સેચકોની ક્રિયાશીલતા ઘટે છે. રાઇબોઝોમ, ગોલ્ગી કોમ્પ્લેક્સ અને લાઇસોઝોમના કામકાજ પર તાપમાનની અસર પછી થાય છે.", "ref": "Std 12 - Chapter 8: કોષ અને અંગિકો", "ch": ""}, {"q": "તાપમાનમાં વધારો થવા પર, કયા હોર્મોનનું સ્રાવ ઘટે છે, જેના કારણે કોષની ચયાપચય ક્રિયાઓ ધીમી પડે છે?", "opts": ["ઇન્સ્યુલિન", "થાયરોક્સિન", "એડ્રિનેલિન", "કોર્ટિસોલ"], "ans": 1, "exp": "થાયરોક્સિન હોર્મોન ચયાપચય ક્રિયાઓને ઉત્તેજિત કરે છે. તાપમાનમાં વધારો થવા પર, થાયરોક્સિનનું સ્રાવ ઘટે છે, જેના કારણે કોષની ચયાપચય ક્રિયાઓ ધીમી પડે છે. ઇન્સ્યુલિન, એડ્રિનેલિન અને કોર્ટિસોલનું સ્રાવ તાપમાન સાથે સીધું સંબંધ ધરાવતું નથી.", "ref": "Std 12 - Chapter 22: હોર્મોન અને સ્રાવી તંત્ર", "ch": ""}, {"q": "તાપમાનમાં અચાનક ઘટાડો થવા પર, કોષમાં કયા પ્રકારના લિપિડનું પ્રમાણ વધે છે, જે કોષના ઠંડા પ્રતિકારમાં મદદ કરે છે?", "opts": ["ફોસ્ફોલિપિડ", "ટ્રાઇગ્લિસરાઇડ", "સ્ટીરોઇડ", "મોમોસેચ્યુરેટેડ ફેટી એસિડ"], "ans": 3, "exp": "તાપમાનમાં ઘટાડો થવા પર, કોષમાં મોમોસેચ્યુરેટેડ ફેટી એસિડનું પ્રમાણ વધે છે, જે કોષના ઠંડા પ્રતિકારમાં મદદ કરે છે. ફોસ્ફોલિપિડ, ટ્રાઇગ્લિસરાઇડ અને સ્ટીરોઇડનું પ્રમાણ તાપમાનના ઘટાડા સાથે સીધું સંબંધ ધરાવતું નથી.", "ref": "Std 11 - Chapter 9: જૈવ અણુઓ અને ચયાપચય", "ch": ""}, {"q": "તાપમાનમાં અચાનક વધારો થવાથી કોષમાં કયા પ્રકારના પ્રોટીનનું સંશ્લેષણ વધે છે, જે કોષને થર્મલ શોકથી બચાવે છે?", "opts": ["હીટ શોક પ્રોટીન (HSP)", "એન્ટીબોડી પ્રોટીન", "સ્ટ્રક્ચરલ પ્રોટીન", "ઉત્સેચક પ્રોટીન"], "ans": 0, "exp": "હીટ શોક પ્રોટીન (HSP) કોષને ઉચ્ચ તાપમાનથી બચાવવા માટે સંશ્લેષિત થાય છે. એન્ટીબોડી પ્રોટીન પ્રતિરક્ષાતંત્ર સાથે સંબંધિત છે, સ્ટ્રક્ચરલ પ્રોટીન કોષની રચનામાં મદદ કરે છે, અને ઉત્સેચક પ્રોટીન રાસાયણિક પ્રક્રિયાઓને ઉત્તેજિત કરે છે.", "ref": "Std 12 - Chapter 7: કોષ અને કોષીકીય ક્રિયાવિધિ", "ch": ""}, {"q": "તાપમાનમાં ઘટાડો થવાથી પ્રકાશસંશ્લેષણની ક્રિયામાં કયા પગલા પર સૌપ્રથમ અસર થાય છે?", "opts": ["પ્રકાશ-અવશોષણ પગલું", "કેલ્વિન ચક્ર", "પાણીનું વિભાજન", "ઓક્સિજનનું મુક્ત થવું"], "ans": 2, "exp": "તાપમાનમાં ઘટાડો થવાથી પાણીનું વિભાજન (ફોટોલિસિસ) પગલું સૌપ્રથમ અવરોધાય છે, કારણ કે ઉત્સેચકોની ક્રિયાશીલતા ઘટે છે. પ્રકાશ-અવશોષણ, કેલ્વિન ચક્ર અને ઓક્સિજનનું મુક્ત થવું આ પગલાં પછી અસરગ્રસ્ત થાય છે.", "ref": "Std 11 - Chapter 13: પ્રકાશસંશ્લેષણ", "ch": ""}, {"q": "તાપમાનમાં ઘટાડો થવાથી કોષમાં કયા અંગિકની ક્રિયાશીલતામાં સૌપ્રથમ ઘટાડો જોવા મળે છે?", "opts": ["માઇટોકોન્ડ્રિયા", "ક્લોરોપ્લાસ્ટ", "રાઇબોઝોમ", "એન્ડોપ્લાઝમિક રેટિક્યુલમ"], "ans": 0, "exp": "તાપમાનમાં ઘટાડો થવાથી માઇટોકોન્ડ્રિયાની ક્રિયાશીલતામાં સૌપ્રથમ ઘટાડો જોવા મળે છે, કારણ કે શ્વસન ક્રિયા તાપમાન-સંવેદનશીલ હોય છે. ક્લોરોપ્લાસ્ટ પ્રકાશસંશ્લેષણ સાથે સંબંધિત છે, રાઇબોઝોમ પ્રોટીન સંશ્લેષણમાં મદદ કરે છે, અને એન્ડોપ્લાઝમિક રેટિક્યુલમ લિપિડ અને પ્રોટીનના સંશ્લેષણમાં ભાગ લે છે.", "ref": "Std 12 - અધ્યાય 4: કોષ વિભાજન અને કોષ ચક્ર", "ch": ""}, {"q": "તાપમાનની અસર હેઠળ, કોષમાં કયા હોર્મોનનું સ્રાવ વધે છે, જે ઉત્સેચકની ક્રિયાશીલતાને નિયંત્રિત કરે છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "એબ્સિસિક એસિડ", "સાયટોકાઇનિન"], "ans": 2, "exp": "એબ્સિસિક એસિડ (ABA) તણાવના પ્રતિભાવ રૂપે સ્રાવ પામે છે અને ઉત્સેચકની ક્રિયાશીલતાને નિયંત્રિત કરે છે. ઓક્સિન અને જિબરેલિન વૃદ્ધિ હોર્મોન છે, જ્યારે સાયટોકાઇનિન કોષ વિભાજનને ઉત્તેજિત કરે છે. તાપમાનની અસર હેઠળ, ABAનું સ્રાવ વધે છે, જે ઉત્સેચકની ક્રિયાશીલતાને ઘટાડે છે.", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "સસ્તન પ્રાણીઓમાં શરીરનું તાપમાન જાળવવા માટે થર્મોરેગ્યુલેશનની ક્રિયામાં, તાપમાનમાં અચાનક વધારો થતાં કયા પ્રકારના પ્રતિભાવ દ્વારા શરીરનું તાપમાન ઘટાડવામાં આવે છે, પરંતુ આ પ્રતિભાવ દરમિયાન કયા અંગમાંથી ઉત્સર્જિત થતા હોર્મોનનું પ્રમાણ ઘટે છે જેના કારણે મૂત્રનું પ્રમાણ વધે છે?", "opts": ["પરસેવો થવો અને થાઇરોઇડ ગ્રંથિમાંથી થાઇરોક્સિનનું પ્રમાણ ઘટે છે", "રુધિરવાહિનીઓનું વિસ્તરણ અને એડ્રિનલ ગ્રંથિમાંથી એડ્રિનાલિનનું પ્રમાણ ઘટે છે", "શ્વાસોચ્છવાસનો દર વધવો અને પિટ્યુટરી ગ્રંથિમાંથી વેસોપ્રેસિનનું પ્રમાણ ઘટે છે", "સ્નાયુઓમાં ધ્રુજારી અને સ્વાદુપિંડમાંથી ઇન્સ્યુલિનનું પ્રમાણ ઘટે છે"], "ans": 2, "exp": "સસ્તન પ્રાણીઓમાં તાપમાનમાં વધારો થતાં શરીરનું તાપમાન ઘટાડવા માટે શ્વાસોચ્છવાસનો દર વધે છે, જેનાથી વધારાનું ગરમી બહાર નીકળે છે. સાથે જ, પિટ્યુટરી ગ્રંથિમાંથી વેસોપ્રેસિન (ADH) હોર્મોનનું પ્રમાણ ઘટે છે, જેના કારણે મૂત્રપિંડમાં પાણીનું પુનઃશોષણ ઘટે છે અને મૂત્રનું પ્રમાણ વધે છે. આથી વિકલ્પ C સાચો છે.\n\nવિકલ્પ A ખોટો છે કારણ કે થાઇરોક્સિન હોર્મોન ચયાપચય દરને નિયંત્રિત કરે છે, પરંતુ પરસેવો થવાથી તાપમાન ઘટે છે તે સાચું છે, પરંતુ થાઇરોક્સિનનું પ્રમાણ ઘટવાથી મૂત્રનું પ્રમાણ વધતું નથી.\n\nવિકલ્પ B ખોટો છે કારણ કે એડ્રિનાલિન હોર્મોન તણાવની સ્થિતિમાં વધે છે, પરંતુ રુધિરવાહિનીઓનું વિસ્તરણ તાપમાન ઘટાડવામાં મદદરૂપ છે, પરંતુ એડ્રિનાલિનનું પ્રમાણ ઘટવાથી મૂત્રનું પ્રમાણ વધતું નથી.\n\nવિકલ્પ D ખોટો છે કારણ કે સ્નાયુઓમાં ધ્રુજારી તાપમાન વધારવા માટે થાય છે, અને ઇન્સ્યુલિન હોર્મોન રુધિરમાં શર્કરાનું પ્રમાણ ઘટાડે છે, જેનો મૂત્રના પ્રમાણ સાથે સીધો સંબંધ નથી.", "ref": "Std 12 - પ્રકરણ 7: પ્રાણીઓમાં પ્રતિક્રિયા અને સહનશીલતા", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
