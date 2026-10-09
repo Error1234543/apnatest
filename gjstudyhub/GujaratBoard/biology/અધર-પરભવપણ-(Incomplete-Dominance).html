@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અધૂરું પ્રભાવીપણું (Incomplete Dominance)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>અધૂરું પ્રભાવીપણું (Incomplete Dominance)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">અધૂરું પ્રભાવીપણું (Incomplete Dominance)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "મીરાબિલિસ જાલાપા (4 O’Clock Plant) ના ફૂલના રંગના અનુવંશિક અભ્યાસમાં, લાલ ફૂલવાળા પિતૃ (RR) અને સફેદ ફૂલવાળા પિતૃ (rr) ના સંકરણથી પ્રથમ પેઢી (F1) માં ગુલાબી ફૂલ આવે છે. જો F1 ને આત્મપરાગનથી F2 પેઢી ઉત્પન્ન કરવામાં આવે, તો F2 માં ફિનોટાઇપિક ગુણોત્તર કયું હશે?", "opts": ["1 લાલ : 2 ગુલાબી : 1 સફેદ", "3 લાલ : 1 સફેદ", "1 લાલ : 1 ગુલાબી : 1 સફેદ", "9 લાલ : 3 ગુલાબી : 4 સફેદ"], "ans": 0, "exp": "અધૂરું પ્રભાવીપણુંમાં, F1 પેઢી હેટરોઝાયગસ (Rr) હોય છે અને તે મધ્યવર્તી લક્ષણ (ગુલાબી ફૂલ) દર્શાવે છે. F1 ના આત્મપરાગનથી F2 પેઢીમાં જનનિક ગુણોત્તર 1 RR : 2 Rr : 1 rr મળે છે, જે ફિનોટાઇપિક રીતે 1 લાલ : 2 ગુલાબી : 1 સફેદ તરીકે દેખાય છે. વિકલ્પ B, C, અને D ક્રમશઃ પૂર્ણ પ્રભાવીપણું, સહ-પ્રભાવીપણું, અને ડાયહાયબ્રિડ ક્રોસના ગુણોત્તરને દર્શાવે છે, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "અધૂરું પ્રભાવીપણું દર્શાવતી જનીન જોડી માટે, જો હેટરોઝાયગસ વ્યક્તિ (Aa) ને હોમોઝાયગસ પ્રભાવી (AA) વ્યક્તિ સાથે સંકરણ કરવામાં આવે, તો સંતતિમાં કયા ફિનોટાઇપની અપેક્ષા રાખી શકાય?", "opts": ["50% પ્રભાવી અને 50% મધ્યવર્તી લક્ષણ", "100% પ્રભાવી લક્ષણ", "100% મધ્યવર્તી લક્ષણ", "75% પ્રભાવી અને 25% મધ્યવર્તી લક્ષણ"], "ans": 0, "exp": "હેટરોઝાયગસ (Aa) અને હોમોઝાયગસ પ્રભાવી (AA) વચ્ચેના સંકરણમાં, સંતતિમાં 50% AA (પ્રભાવી) અને 50% Aa (મધ્યવર્તી) જનનિક રચના મળે છે. અધૂરું પ્રભાવીપણું હોવાથી, Aa મધ્યવર્તી લક્ષણ દર્શાવે છે. વિકલ્પ B, C, અને D ક્રમશઃ પૂર્ણ પ્રભાવીપણું, સંપૂર્ણ અધૂરું પ્રભાવીપણું, અને અન્ય ગુણોત્તરને દર્શાવે છે, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "નીચેના પૈકી કયું ઉદાહરણ અધૂરું પ્રભાવીપણું નથી દર્શાવતું?", "opts": ["મીરાબિલિસ જાલાપા (4 O’Clock Plant) ના ફૂલના રંગ", "માનવમાં રક્ત વર્ગ A અને B", "સ્નેપડ્રેગન (Antirrhinum) ના ફૂલના આકાર", "ગાયના રંગમાં રોઅન (Roan) લક્ષણ"], "ans": 1, "exp": "માનવમાં રક્ત વર્ગ A અને B સહ-પ્રભાવીપણું (Co-dominance) દર્શાવે છે, જ્યાં AB રક્ત વર્ગમાં બંને એન્ટિજન A અને B વ્યક્ત થાય છે. અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ સ્થિતિમાં મધ્યવર્તી લક્ષણ જોવા મળે છે. વિકલ્પ A, C, અને D અધૂરું પ્રભાવીપણું દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક જનીન જોડી માટે, જો પિતૃ પેઢી પૈકી એક પિતૃ હોમોઝાયગસ પ્રભાવી (RR) અને બીજો હોમોઝાયગસ અપ્રભાવી (rr) હોય, તો F1 પેઢીનું ફિનોટાઇપ કયું હશે જો તે અધૂરું પ્રભાવીપણું દર્શાવે છે?", "opts": ["પ્રભાવી લક્ષણ", "અપ્રભાવી લક્ષણ", "મધ્યવર્તી લક્ષણ", "પ્રભાવી અને અપ્રભાવી લક્ષણનું મિશ્રણ"], "ans": 2, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ (Rr) સ્થિતિમાં મધ્યવર્તી લક્ષણ વ્યક્ત થાય છે. વિકલ્પ A અને B ક્રમશઃ પૂર્ણ પ્રભાવીપણું અને પૂર્ણ અપ્રભાવીપણું દર્શાવે છે, જ્યારે વિકલ્પ D સહ-પ્રભાવીપણું દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અધૂરું પ્રભાવીપણું વિશે ખોટું છે?", "opts": ["હેટરોઝાયગસ સ્થિતિમાં મધ્યવર્તી લક્ષણ વ્યક્ત થાય છે.", "F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર 1:2:1 હોય છે.", "પ્રભાવી જનીન અપ્રભાવી જનીન પર પૂર્ણપણે પ્રભાવી હોય છે.", "ઉદાહરણ તરીકે સ્નેપડ્રેગનના ફૂલનો આકાર લઈ શકાય."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે કારણ કે અધૂરું પ્રભાવીપણુંમાં પ્રભાવી જનીન અપ્રભાવી જનીન પર પૂર્ણપણે પ્રભાવી હોતું નથી, પરંતુ મધ્યવર્તી લક્ષણ વ્યક્ત થાય છે. વિકલ્પ A, B, અને D અધૂરું પ્રભાવીપણું વિશે સાચા છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મનુષ્યમાં, જો એક જનીન જોડી માટે અધૂરું પ્રભાવીપણું જોવા મળે અને હેટરોઝાયગસ (Aa) વ્યક્તિના ફિનોટાઇપમાં મિશ્ર લક્ષણ દર્શાવે, તો F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર કયો હશે?", "opts": ["1:2:1 (પ્રભાવી : મિશ્ર : અપ્રભાવી)", "3:1 (પ્રભાવી : અપ્રભાવી)", "1:1:1:1 (ચાર વૈવિધ્યસભર લક્ષણો)", "9:3:3:1 (ડાયહાયબ્રિડ ક્રોસનું ગુણોત્તર)"], "ans": 0, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ (Aa) વ્યક્તિ મિશ્ર લક્ષણ દર્શાવે છે, જ્યારે હોમોઝાયગસ પ્રભાવી (AA) અને અપ્રભાવી (aa) વ્યક્તિઓ ક્રમશ: પૂર્ણ પ્રભાવી અને પૂર્ણ અપ્રભાવી લક્ષણ દર્શાવે છે. F2 પેઢીમાં, મેન્ડલના નિયમ અનુસાર, ગુણોત્તર 1:2:1 (પ્રભાવી : મિશ્ર : અપ્રભાવી) હશે. વિકલ્પ B (3:1) પૂર્ણ પ્રભાવીપણું દર્શાવે છે, વિકલ્પ C (1:1:1:1) ડાયહાયબ્રિડ ક્રોસના કિસ્સામાં લાગુ પડે છે, અને વિકલ્પ D (9:3:3:1) ડાયહાયબ્રિડ ક્રોસનું ગુણોત્તર છે, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "નીચેના પૈકી કયા જીવમાં અધૂરું પ્રભાવીપણું જોવા મળતું નથી?", "opts": ["મીરાબિલિસ જાલાપા (4 O’Clock Plant)", "સ્નેપડ્રેગન (Antirrhinum majus)", "ડ્રોઝોફિલા (Fruit Fly)", "મનુષ્ય (Human)"], "ans": 2, "exp": "મીરાબિલિસ જાલાપા અને સ્નેપડ્રેગનમાં અધૂરું પ્રભાવીપણું જોવા મળે છે, જ્યારે મનુષ્યમાં પણ કેટલાક કિસ્સાઓમાં (જેમ કે રક્ત જૂથ) અધૂરું પ્રભાવીપણું જોવા મળે છે. ડ્રોઝોફિલામાં સામાન્ય રીતે પૂર્ણ પ્રભાવીપણું જોવા મળે છે, અધૂરું પ્રભાવીપણું નહીં. અહીં, વિકલ્પ C (ડ્રોઝોફિલા) યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક જનીન જોડી માટે, જો પિતૃ પેઢીમાં લાલ ફૂલવાળું પ્લાન્ટ (RR) અને સફેદ ફૂલવાળું પ્લાન્ટ (rr) ક્રોસ કરવામાં આવે, તો F1 પેઢીમાં ગુલાબી ફૂલવાળું પ્લાન્ટ (Rr) મળે છે. જો F1 પેઢીને સ્વ-પરાગનયન કરાવવામાં આવે, તો F2 પેઢીમાં કેટલા ટકા પ્લાન્ટ ગુલાબી ફૂલ ધરાવશે?", "opts": ["25%", "50%", "75%", "100%"], "ans": 1, "exp": "F1 પેઢીમાં હેટરોઝાયગસ (Rr) પ્લાન્ટ ગુલાબી ફૂલ ધરાવે છે. સ્વ-પરાગનયનથી F2 પેઢીમાં જનીન ગુણોત્તર 1:2:1 (RR:Rr:rr) મળે છે. અહીં, Rr (ગુલાબી ફૂલ)નું પ્રમાણ 2/4 અથવા 50% હશે. વિકલ્પ A (25%) અને C (75%) ખોટા છે, જ્યારે વિકલ્પ D (100%) ફક્ત F1 પેઢી માટે લાગુ પડે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "નીચેના વિધાનો પૈકી કયું અધૂરું પ્રભાવીપણું વિશે સત્ય નથી?", "opts": ["હેટરોઝાયગસ વ્યક્તિ મિશ્ર લક્ષણ દર્શાવે છે.", "F1 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર 1:2:1 હશે.", "અધૂરું પ્રભાવીપણું એ પૂર્ણ પ્રભાવીપણું કરતાં અપવાદ છે.", "અધૂરું પ્રભાવીપણું એ મેન્ડલના પ્રભાવીપણાના નિયમનું ઉદાહરણ છે."], "ans": 1, "exp": "વિકલ્પ A સત્ય છે કારણ કે હેટરોઝાયગસ વ્યક્તિ મિશ્ર લક્ષણ દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે F1 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર 1:2:1 F2 પેઢીમાં જોવા મળે છે, F1 પેઢીમાં તો બધા જ હેટરોઝાયગસ (મિશ્ર લક્ષણ) હશે. વિકલ્પ C સત્ય છે કારણ કે અધૂરું પ્રભાવીપણું પૂર્ણ પ્રભાવીપણું કરતાં અપવાદરૂપ છે. વિકલ્પ D સત્ય છે કારણ કે અધૂરું પ્રભાવીપણું મેન્ડલના નિયમનું એક રૂપ છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "એક જીવમાં, જો અધૂરું પ્રભાવીપણું દર્શાવતી જનીન જોડી માટે, હેટરોઝાયગસ (Aa) વ્યક્તિના ફિનોટાઇપમાં મિશ્ર લક્ષણ દર્શાવે, તો નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["હોમોઝાયગસ પ્રભાવી (AA) અને અપ્રભાવી (aa) વ્યક્તિઓ પૂર્ણ લક્ષણ દર્શાવે છે.", "હેટરોઝાયગસ (Aa) વ્યક્તિના સંતાનોમાં ફિનોટાઇપિક ગુણોત્તર 1:1 હશે.", "અધૂરું પ્રભાવીપણું એ જનીનના અભિવ્યક્તિના સ્તર પર આધાર રાખે છે.", "અધૂરું પ્રભાવીપણું એ કોઈપણ જીવમાં જોવા મળી શકે છે."], "ans": 1, "exp": "વિકલ્પ A સત્ય છે કારણ કે હોમોઝાયગસ વ્યક્તિઓ પૂર્ણ લક્ષણ દર્શાવે છે. વિકલ્પ B ખોટો છે કારણ કે હેટરોઝાયગસ (Aa) વ્યક્તિના સંતાનોમાં ફિનોટાઇપિક ગુણોત્તર 1:2:1 (AA:Aa:aa) હશે, 1:1 નહીં. વિકલ્પ C સત્ય છે કારણ કે અધૂરું પ્રભાવીપણું જનીનના અભિવ્યક્તિના સ્તર પર આધાર રાખે છે. વિકલ્પ D સત્ય છે કારણ કે અધૂરું પ્રભાવીપણું કોઈપણ જીવમાં જોવા મળી શકે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વિવિધતા", "ch": ""}, {"q": "મીરાબિલિસ જાલાપા (4 O’Clock Plant) માં, જો લાલ ફૂલવાળા (RR) અને સફેદ ફૂલવાળા (rr) પ્લાન્ટના સંકરણથી પ્રથમ પેઢીમાં ગુલાબી ફૂલવાળા પ્લાન્ટ (Rr) મળે છે. જો આ ગુલાબી ફૂલવાળા પ્લાન્ટને સફેદ ફૂલવાળા પ્લાન્ટ (rr) સાથે સંકરણ કરવામાં આવે, તો બીજી પેઢીમાં કયો ફિનોટાઇપિક ગુણોત્તર મળશે?", "opts": ["1 લાલ : 2 ગુલાબી : 1 સફેદ", "1 લાલ : 1 ગુલાબી : 1 સફેદ", "0 લાલ : 1 ગુલાબી : 1 સફેદ", "1 લાલ : 0 ગુલાબી : 1 સફેદ"], "ans": 2, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ (Rr) વ્યક્તિ મધ્યવર્તી ફિનોટાઇપ (ગુલાબી) દર્શાવે છે. જ્યારે Rr × rr સંકરણ કરવામાં આવે, ત્યારે પુનરાવર્તન ગુણોત્તર 1:1 મળે છે, જેમાં 50% Rr (ગુલાબી) અને 50% rr (સફેદ) મળે છે. લાલ ફિનોટાઇપ (RR) મળતો નથી, કારણ કે Rr અને rr વચ્ચેના સંકરણમાં RR બનતું નથી. આમ, યોગ્ય ગુણોત્તર 0 લાલ : 1 ગુલાબી : 1 સફેદ છે. વિકલ્પ A અને B ખોટા છે કારણ કે તેઓ લાલ ફિનોટાઇપનો સમાવેશ કરે છે, જ્યારે વિકલ્પ D ખોટો છે કારણ કે તે ગુલાબી ફિનોટાઇપનો સમાવેશ કરતો નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના પૈકી કયું જીવન ચક્ર અધૂરું પ્રભાવીપણું દર્શાવતી જનીન જોડી માટે સૌથી યોગ્ય રીતે વર્ણવે છે, જ્યારે પિતૃ પેઢી પૈકી એક હોમોઝાયગસ પ્રભાવી (AA) અને બીજું હોમોઝાયગસ અપ્રભાવી (aa) હોય?", "opts": ["પિતૃ (AA × aa) → F1 (Aa) → ફિનોટાઇપ: પ્રભાવી → F2 (AA, Aa, aa) → ફિનોટાઇપ: પ્રભાવી અને અપ્રભાવી", "પિતૃ (AA × aa) → F1 (Aa) → ફિનોટાઇપ: મધ્યવર્તી → F2 (AA, Aa, aa) → ફિનોટાઇપ: પ્રભાવી, મધ્યવર્તી, અપ્રભાવી", "પિતૃ (AA × aa) → F1 (Aa) → ફિનોટાઇપ: અપ્રભાવી → F2 (AA, Aa, aa) → ફિનોટાઇપ: પ્રભાવી અને અપ્રભાવી", "પિતૃ (AA × aa) → F1 (Aa) → ફિનોટાઇપ: પ્રભાવી → F2 (Aa, aa) → ફિનોટાઇપ: પ્રભાવી અને મધ્યવર્તી"], "ans": 1, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ (Aa) વ્યક્તિ મધ્યવર્તી ફિનોટાઇપ દર્શાવે છે. પિતૃ પેઢી (AA × aa) ના સંકરણથી F1 પેઢીમાં સરળતાથી Aa મળે છે, જે મધ્યવર્તી ફિનોટાઇપ દર્શાવે છે. F2 પેઢીમાં, AA, Aa, અને aa જનીનપ્રકારો મળે છે, જે અનુક્રમે પ્રભાવી, મધ્યવર્તી, અને અપ્રભાવી ફિનોટાઇપ દર્શાવે છે. વિકલ્પ A ખોટો છે કારણ કે તે F1 પેઢીમાં પ્રભાવી ફિનોટાઇપ દર્શાવે છે, જ્યારે વિકલ્પ C અને D પણ ખોટા છે કારણ કે તેઓ અધૂરું પ્રભાવીપણુંની વિશિષ્ટતાને ધ્યાનમાં લેતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના પૈકી કયું ઉદાહરણ અધૂરું પ્રભાવીપણું દર્શાવતું નથી, પરંતુ તેના બદલે સહ-પ્રભાવીપણું (Co-dominance) દર્શાવે છે?", "opts": ["મીરાબિલિસ જાલાપા (4 O’Clock Plant) ના ફૂલના રંગ", "મનુષ્યમાં રક્ત જૂથ AB", "સ્નેપડ્રેગન (Antirrhinum) ના ફૂલના રંગ", "ગાયમાં લાલ અને સફેદ વાળનો રંગ (રોઝન)"], "ans": 1, "exp": "મનુષ્યમાં રક્ત જૂથ AB સહ-પ્રભાવીપણું (Co-dominance) દર્શાવે છે, જ્યાં IA અને IB એલિલ્સ બંને પૂર્ણપણે પ્રભાવી હોય છે અને AB રક્ત જૂથ બનાવે છે. અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ મધ્યવર્તી ફિનોટાઇપ દર્શાવે છે, જ્યારે સહ-પ્રભાવીપણુંમાં, બંને એલિલ્સનો પ્રભાવ જોવા મળે છે. વિકલ્પ A, C, અને D અધૂરું પ્રભાવીપણું દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્લાન્ટ પ્રજાતિમાં, લાલ ફૂલનો રંગ (R) સફેદ ફૂલના રંગ (r) પર અધૂરું પ્રભાવી છે. જો લાલ ફૂલવાળા પ્લાન્ટ (RR) અને સફેદ ફૂલવાળા પ્લાન્ટ (rr) ના સંકરણથી મળેલા F1 પેઢીના પ્લાન્ટને સ્વ-પરાગનયન કરવામાં આવે, તો F2 પેઢીમાં કયો જનીનપ્રકાર ગુણોત્તર મળશે?", "opts": ["1 RR : 1 Rr : 1 rr", "1 RR : 2 Rr : 1 rr", "3 RR : 1 rr", "1 Rr : 1 rr"], "ans": 1, "exp": "સ્વ-પરાગનયનથી F1 પેઢી (Rr) ના પ્લાન્ટમાંથી F2 પેઢીમાં જનીનપ્રકાર ગુણોત્તર 1 RR : 2 Rr : 1 rr મળે છે. આ મેન્ડેલના પુનરાવર્તનના નિયમ અનુસાર છે, જ્યાં હેટરોઝાયગસ વ્યક્તિના સ્વ-પરાગનયનથી હોમોઝાયગસ અને હેટરોઝાયગસ જનીનપ્રકારો મળે છે. વિકલ્પ A ખોટો છે કારણ કે તે સરળ 1:1:1 ગુણોત્તર દર્શાવે છે, જ્યારે વિકલ્પ C અને D પણ ખોટા છે કારણ કે તેઓ અધૂરું પ્રભાવીપણુંની વિશિષ્ટતાને ધ્યાનમાં લેતા નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રયોગમાં, એક પ્લાન્ટ પ્રજાતિના બે શુદ્ધ સંવર્ધિત છોડ (એક લાલ ફૂલવાળો અને બીજો સફેદ ફૂલવાળો) ને પરસ્પર પરફલન કરાવવામાં આવે છે. પરિણામી F₁ પેઢીના બધા છોડ ગુલાબી ફૂલ ધરાવે છે. હવે, જો F₁ પેઢીના બે છોડને પરસ્પર પરફલન કરાવવામાં આવે, તો F₂ પેઢીમાં નીચેના પૈકી કયું પરિણામ અધૂરું પ્રભાવીપણુંની અપેક્ષા મુજબ નથી?", "opts": ["લાલ, ગુલાબી અને સફેદ ફૂલવાળા છોડનું પ્રમાણ અનુક્રમે 1:2:1 હોય", "ફક્ત ગુલાબી ફૂલવાળા છોડ મળે", "લાલ અને સફેદ ફૂલવાળા છોડનું પ્રમાણ સરખું હોય, પરંતુ ગુલાબી ફૂલવાળા છોડનું પ્રમાણ બમણું હોય", "લાલ, ગુલાબી અને સફેદ ફૂલવાળા છોડનું પ્રમાણ અનુક્રમે 25%:50%:25% હોય"], "ans": 1, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ સ્થિતિ (Rr) એ કોઈ પણ એક એલીલના સંપૂર્ણ પ્રભાવને બદલે મધ્યવર્તી લક્ષણ દર્શાવે છે. F₁ પેઢીના બધા છોડ હેટરોઝાયગસ (Rr) હોવાથી ગુલાબી ફૂલ ધરાવે છે. F₂ પેઢીમાં, જનીન પ્રકારનું પ્રમાણ 1RR:2Rr:1rr હોય છે, જે લક્ષણ પ્રકારમાં અનુક્રમે 1 લાલ:2 ગુલાબી:1 સફેદમાં પરિણમે છે. વિકલ્પ B ખોટો છે કારણ કે તે સૂચવે છે કે F₂ પેઢીમાં ફક્ત ગુલાબી ફૂલવાળા છોડ મળે, જે અધૂરા પ્રભાવીપણાની વ્યાખ્યા અને મેન્ડેલિયન વારસાગતતાના નિયમોનું ઉલ્લંઘન કરે છે. વિકલ્પ A, C અને D અધૂરા પ્રભાવીપણાની અપેક્ષા મુજબના પરિણામો દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "મીરાબિલિસ જાલાપામાં, જો લાલ ફૂલવાળા (RR) અને સફેદ ફૂલવાળા (rr) છોડના સંકરણથી પ્રથમ પેઢી (F1) માં ગુલાબી ફૂલવાળા છોડ પ્રાપ્ત થાય, તો F1 ના આંતરસંકરણથી F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર કયું હશે?", "opts": ["1:2:1 (લાલ:ગુલાબી:સફેદ)", "3:1 (લાલ:સફેદ)", "1:1 (લાલ:ગુલાબી)", "9:3:3:1 (લાલ:ગુલાબી:સફેદ:વરસાદી)"], "ans": 0, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ (Aa) વ્યક્તિ મધ્યવર્તી લક્ષણ (ગુલાબી ફૂલ) દર્શાવે છે. F1 (Aa) ના આંતરસંકરણથી F2 પેઢીમાં જનીન ગુણોત્તર 1:2:1 (RR:Aa:rr) અને ફિનોટાઇપિક ગુણોત્તર પણ 1:2:1 (લાલ:ગુલાબી:સફેદ) પ્રાપ્ત થાય છે. બાકીના વિકલ્પો મેન્ડેલિયન પ્રભાવીપણું અથવા ડાયહાયબ્રિડ ક્રોસના ગુણોત્તર દર્શાવે છે, જે અહીં લાગુ પડતાં નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના પૈકી કયા જીવમાં અધૂરું પ્રભાવીપણું જોવા મળતું નથી, પરંતુ તેના બદલે સંપૂર્ણ પ્રભાવીપણું જોવા મળે છે?", "opts": ["મીરાબિલિસ જાલાપા (4 O’Clock Plant)", "સ્નેપડ્રેગન (Antirrhinum majus)", "મનુષ્ય (Homo sapiens)", "મટર (Pisum sativum)"], "ans": 3, "exp": "મટર (Pisum sativum) માં મેન્ડેલે તેના પ્રયોગો દરમિયાન સંપૂર્ણ પ્રભાવીપણું જોયું હતું, જ્યાં પ્રભાવી એલિલ હંમેશા અપ્રભાવી એલિલ પર પ્રભાવી થાય છે. મીરાબિલિસ જાલાપા અને સ્નેપડ્રેગનમાં અધૂરું પ્રભાવીપણું જોવા મળે છે, જ્યારે મનુષ્યમાં કેટલાક લક્ષણો (જેમ કે રક્ત જૂથ) અધૂરું પ્રભાવીપણું દર્શાવે છે. પરંતુ મટરમાં અધૂરું પ્રભાવીપણું જોવા મળતું નથી.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના વિધાનો પૈકી કયું અધૂરું પ્રભાવીપણું વિશે ખોટું છે?", "opts": ["હેટરોઝાયગસ વ્યક્તિ મધ્યવર્તી લક્ષણ દર્શાવે છે.", "F2 પેઢીમાં ફિનોટાઇપિક ગુણોત્તર 1:2:1 હોય છે.", "પ્રભાવી એલિલ અપ્રભાવી એલિલ પર સંપૂર્ણ રીતે પ્રભાવી થાય છે.", "જનીન ગુણોત્તર 1:2:1 હોય છે."], "ans": 2, "exp": "અધૂરું પ્રભાવીપણુંમાં, પ્રભાવી એલિલ અપ્રભાવી એલિલ પર સંપૂર્ણ રીતે પ્રભાવી થતું નથી, પરંતુ મધ્યવર્તી લક્ષણ દર્શાવે છે. બાકીના વિધાનો સચોટ છે: હેટરોઝાયગસ વ્યક્તિ મધ્યવર્તી લક્ષણ દર્શાવે છે, F2 પેઢીમાં ફિનોટાઇપિક અને જનીન ગુણોત્તર 1:2:1 હોય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અધૂરું પ્રભાવીપણું અને સહ-પ્રભાવીપણું વચ્ચેનો તફાવત સૌથી યોગ્ય રીતે દર્શાવે છે?", "opts": ["અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓના મિશ્રણ જેવી હોય છે, જ્યારે સહ-પ્રભાવીપણુંમાં, બંને એલિલ્સ પોતપોતાની લાક્ષણિકતા દર્શાવે છે.", "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓમાંથી એક જેવી હોય છે, જ્યારે સહ-પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓના મિશ્રણ જેવી હોય છે.", "અધૂરું પ્રભાવીપણું અને સહ-પ્રભાવીપણું બંનેમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓના મિશ્રણ જેવી હોય છે.", "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓમાંથી એક જેવી હોય છે, જ્યારે સહ-પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓમાંથી એક જેવી હોય છે."], "ans": 0, "exp": "અધૂરું પ્રભાવીપણુંમાં, હેટરોઝાયગસ વ્યક્તિ એવી લાક્ષણિકતા દર્શાવે છે જે પિતૃ લાક્ષણિકતાઓના મિશ્રણ જેવી હોય છે (ઉદા. ગુલાબી ફૂલ). સહ-પ્રભાવીપણુંમાં, બંને એલિલ્સ પોતપોતાની લાક્ષણિકતા દર્શાવે છે (ઉદા. AB રક્ત જૂથ). B) ખોટું છે કારણ કે અધૂરું પ્રભાવીપણુંમાં હેટરોઝાયગસ વ્યક્તિ મિશ્રણ જેવી લાક્ષણિકતા દર્શાવે છે. C) ખોટું છે કારણ કે સહ-પ્રભાવીપણુંમાં હેટરોઝાયગસ વ્યક્તિ બંને એલિલ્સની લાક્ષણિકતા દર્શાવે છે. D) ખોટું છે કારણ કે બંને કિસ્સામાં હેટરોઝાયગસ વ્યક્તિની લાક્ષણિકતા અલગ અલગ હોય છે.", "ref": "Std 12 - અધ્યાય 5: અનુવંશિકતા અને વૈવિધ્યતા", "ch": ""}, {"q": "એક પ્રયોગમાં, એક પ્લાન્ટ પ્રજાતિના બે હોમોઝાયગસ છોડ (એક લાલ ફૂલવાળો (RR) અને બીજો સફેદ ફૂલવાળો (rr)) ના સંકરણથી પ્રથમ પેઢી (F₁) માં ગુલાબી ફૂલવાળા છોડ મળે છે. આ ગુલાબી ફૂલવાળા છોડના સ્વફલનથી મળતી બીજી પેઢી (F₂) માં લાલ, ગુલાબી અને સફેદ ફૂલવાળા છોડનું પ્રમાણ અનુક્રમે 1:2:1 મળે છે. આ પરિસ્થિતિમાં, નીચેના પૈકી કયું વિધાન અયોગ્ય છે?", "opts": ["આ ઉદાહરણમાં અધૂરું પ્રભાવીપણું દર્શાવાય છે, કારણ કે હેટરોઝાયગસ સ્થિતિમાં બંને જનીનના અંશતઃ અભિવ્યક્તિ થાય છે.", "F₂ પેઢીમાં મળતું પ્રમાણ 1:2:1 મેન્ડેલિયન વારસાગતતાના નિયમો સાથે સુસંગત છે, કારણ કે આ પ્રમાણ જનીન પ્રકાર (genotype) નું પ્રમાણ દર્શાવે છે.", "આ ઉદાહરણમાં, લાલ ફૂલનો જનીન (R) સંપૂર્ણ પ્રભાવી છે અને સફેદ ફૂલનો જનીન (r) સંપૂર્ણ પ્રચ્છન્ન છે, કારણ કે F₂ પેઢીમાં માત્ર ત્રણ જ ફીનોટાઇપ મળે છે.", "જો આ જનીન જોડી માટે સહ-પ્રભાવીપણું હોત, તો F₂ પેઢીમાં ગુલાબી ફૂલવાળા છોડના સ્થાને લાલ અને સફેદ રંગના મિશ્રણવાળા ફૂલ મળત."], "ans": 2, "exp": "વિકલ્પ C અયોગ્ય છે કારણ કે અધૂરું પ્રભાવીપણામાં કોઈ પણ જનીન સંપૂર્ણ પ્રભાવી કે સંપૂર્ણ પ્રચ્છન્ન હોતું નથી. અહીં, હેટરોઝાયગસ સ્થિતિમાં (Rr) બંને જનીન અંશતઃ અભિવ્યક્ત થાય છે, જેના કારણે ગુલાબી ફૂલ મળે છે. વિકલ્પ A યોગ્ય છે કારણ કે તે અધૂરું પ્રભાવીપણાની વ્યાખ્યા સમજાવે છે. વિકલ્પ B યોગ્ય છે કારણ કે F₂ પેઢીમાં મળતું પ્રમાણ 1:2:1 જનીન પ્રકારનું પ્રમાણ દર્શાવે છે, જે મેન્ડેલિયન વારસાગતતા સાથે સુસંગત છે. વિકલ્પ D યોગ્ય છે કારણ કે સહ-પ્રભાવીપણામાં હેટરોઝાયગસ સ્થિતિમાં બંને જનીન સ્વતંત્ર રીતે અભિવ્યક્ત થાય છે, જેના કારણે લાલ અને સફેદ રંગનું મિશ્રણ મળે છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
