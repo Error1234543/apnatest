@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>કૃત્રિમ સંકરણ (Artificial Hybridization)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>કૃત્રિમ સંકરણ (Artificial Hybridization)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">કૃત્રિમ સંકરણ (Artificial Hybridization)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "કૃત્રિમ સંકરણ પ્રયોગમાં પુષ્પની કઈ રચનાને કાપીને પરાગનયન ટાળવામાં આવે છે ?", "opts": ["પુંકેસરના પરાગકોથળી", "સ્ત્રીકેસરના કલંક", "પુષ્પદળો", "બીજાંડકોષના આવરણ"], "ans": 1, "exp": "કૃત્રિમ સંકરણમાં સ્ત્રીકેસરના કલંકને કાપીને પરાગનયન ટાળવામાં આવે છે, જેથી અનિચ્છનીય પરાગરજ સ્ત્રીકેસર પર પહોંચી ન શકે. પુંકેસરના પરાગકોથળી કાપવાથી પરાગરજ ઉત્પન્ન થવાનું બંધ થાય છે, પરંતુ કલંક કાપવાથી પરાગનયનની પ્રક્રિયા પૂર્ણપણે અટકાવી શકાય છે. પુષ્પદળો અને બીજાંડકોષના આવરણ કાપવાનો કોઈ સીધો સંબંધ પરાગનયન ટાળવાને લગતો નથી.", "ref": "Std 12 - પ્રકરણ ૫: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન પરાગરજના સંગ્રહ અને સંગ્રહિત પરાગરજની જીવિતતા જાળવવા માટે કયો પદાર્થ વાપરવામાં આવે છે ?", "opts": ["પાણી", "ગ્લિસરોલ", "લેક્ટોઝનો દ્રાવણ", "સુકા બરફ"], "ans": 2, "exp": "પરાગરજના સંગ્રહ અને જીવિતતા જાળવવા માટે લેક્ટોઝનો દ્રાવણ વાપરવામાં આવે છે, કારણ કે તે પરાગરજને લાંબા સમય સુધી જીવંત રાખે છે. પાણી પરાગરજને નુકસાન પહોંચાડી શકે છે, ગ્લિસરોલ અને સુકા બરફનો ઉપયોગ પરાગરજના સંગ્રહ માટે થતો નથી.", "ref": "Std 12 - પ્રકરણ ૫: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણમાં પરાગનયન પછી કયા હોર્મોનનો છંટકાવ કરવાથી ફળ બંધાવવાની ટકાવારી વધે છે ?", "opts": ["ઓક્સિન", "જિબ્બરેલિન", "સાયટોકાઇનિન", "ઇથિલીન"], "ans": 0, "exp": "પરાગનયન પછી ઓક્સિન હોર્મોનનો છંટકાવ કરવાથી ફળ બંધાવવાની ટકાવારી વધે છે, કારણ કે ઓક્સિન ફળના વિકાસને ઉત્તેજિત કરે છે. જિબ્બરેલિન બીજના અંકુરણને પ્રોત્સાહન આપે છે, સાયટોકાઇનિન કોષવિભાજનને ઉત્તેજિત કરે છે, અને ઇથિલીન ફળના પાકવાને ઉત્તેજિત કરે છે.", "ref": "Std 12 - પ્રકરણ ૫: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન પરાગરજને સ્ત્રીકેસરના કલંક પર લગાડવા માટે કયા સાધનનો ઉપયોગ થાય છે ?", "opts": ["પેઇન્ટબ્રશ", "સૂક્ષ્મદર્શક યંત્ર", "સૂક્ષ્મ પિન્સેટ", "કાચની સળી"], "ans": 0, "exp": "પરાગરજને સ્ત્રીકેસરના કલંક પર લગાડવા માટે પેઇન્ટબ્રશનો ઉપયોગ થાય છે, કારણ કે તે નાજુક રીતે પરાગરજને લગાડી શકે છે. સૂક્ષ્મદર્શક યંત્ર અને સૂક્ષ્મ પિન્સેટનો ઉપયોગ પરાગરજના અભ્યાસ માટે થાય છે, જ્યારે કાચની સળીનો ઉપયોગ અન્ય પ્રયોગશાળા કામગીરીમાં થાય છે.", "ref": "Std 12 - પ્રકરણ ૫: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન કયા પગલામાં પરાગરજને સુકવીને સંગ્રહિત કરવામાં આવે છે ?", "opts": ["પરાગરજ સંગ્રહ પહેલા", "પરાગરજ સંગ્રહ પછી", "પરાગનયન પહેલા", "પરાગનયન પછી"], "ans": 1, "exp": "પરાગરજને સંગ્રહ કર્યા પછી સુકવીને સંગ્રહિત કરવામાં આવે છે, જેથી તે લાંબા સમય સુધી જીવંત રહી શકે. પરાગરજ સંગ્રહ પહેલા સુકવવી એ અયોગ્ય છે, કારણ કે તાજી પરાગરજ વધુ સક્રિય હોય છે. પરાગનયન પહેલા અથવા પછી સુકવવું એ પ્રક્રિયાનો ભાગ નથી.", "ref": "Std 12 - પ્રકરણ ૫: વનસ્પતિ પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રક્રિયામાં, જો પુમકેસરને કાપી નાખ્યા પછી પણ પરાગનયન થતું હોય, તો તેનું મુખ્ય કારણ કયું હોઈ શકે ?", "opts": ["પવન દ્વારા પરાગરજનું સ્થાનાંતરણ", "કીટકો દ્વારા પરાગરજનું વહન", "પુમકેસરના અવશેષોમાં રહેલી જીવિત પરાગરજ", "સ્ત્રીકેસર પર પહેલેથી જ અંકુરિત પરાગરજ"], "ans": 2, "exp": "પુમકેસરને કાપી નાખ્યા પછી પણ પરાગનયન થવાનું મુખ્ય કારણ પુમકેસરના અવશેષોમાં રહેલી જીવિત પરાગરજ હોઈ શકે છે. પવન અથવા કીટકો દ્વારા પરાગરજનું સ્થાનાંતરણ તો શક્ય છે, પરંતુ પુમકેસર કાપ્યા પછી તેની શક્યતા ઓછી હોય છે. સ્ત્રીકેસર પર પહેલેથી જ અંકુરિત પરાગરજ હોવાનું કારણ પણ અસંભવિત છે, કારણ કે કૃત્રિમ સંકરણ પહેલા સ્ત્રીકેસરને સંરક્ષિત રાખવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ ૨: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન, પરાગરજને સંગ્રહિત કરતી વખતે કયો પદાર્થ પરાગરજની જીવિતતા જાળવવા માટે વાપરવામાં આવતો નથી ?", "opts": ["સુકા બરફ (ડ્રાય આઈસ)", "તાજું પાણી", "લિક્વિડ નાઇટ્રોજન", "સિલિકા જેલ"], "ans": 1, "exp": "પરાગરજની જીવિતતા જાળવવા માટે સુકા બરફ, લિક્વિડ નાઇટ્રોજન અને સિલિકા જેલ જેવા પદાર્થો વાપરવામાં આવે છે, જ્યારે તાજું પાણી પરાગરજની જીવિતતા ઘટાડી શકે છે અથવા તેને નષ્ટ કરી શકે છે. તાજું પાણી પરાગરજને ભીનું કરીને તેની જીવિતતા ઘટાડે છે.", "ref": "Std 12 - પ્રકરણ ૨: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "કૃત્રિમ સંકરણમાં, સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડ્યા પછી, કયા પગલાને અવગણવાથી ફળ બંધાવવાની ટકાવારી ઘટી શકે છે ?", "opts": ["પરાગરજને સુકવવી", "પરાગનયન પછી પુષ્પને ઢાંકી દેવું", "પરાગરજને સંગ્રહિત કરવી", "સ્ત્રીકેસરને પાણીથી ધોવું"], "ans": 1, "exp": "પરાગનયન પછી પુષ્પને ઢાંકી દેવાનું પગલું મહત્વપૂર્ણ છે, કારણ કે તે અનિચ્છનીય પરાગનયનને રોકે છે અને ફળ બંધાવવાની ટકાવારી વધારે છે. પરાગરજને સુકવવી, સંગ્રહિત કરવી અથવા સ્ત્રીકેસરને ધોવું એ પગલાં પરાગનયન પહેલા કરવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ ૨: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પરાગરજને સ્ત્રીકેસરના કલંક પર લગાડ્યા પછી તરત જ વરસાદ પડે, તો તેની કઈ અસર થઈ શકે ?", "opts": ["પરાગરજની જીવિતતા વધશે", "પરાગરજ ધોવાઈ જશે અને પરાગનયન થશે નહીં", "પરાગરજ વધુ સારી રીતે અંકુરિત થશે", "સ્ત્રીકેસર નિષેચિત થશે"], "ans": 1, "exp": "વરસાદ પડવાથી પરાગરજ ધોવાઈ જવાની શક્યતા રહે છે, જેથી પરાગનયન થતું નથી. પરાગરજની જીવિતતા વધવી અથવા વધુ સારી રીતે અંકુરિત થવું એ વરસાદના કારણે શક્ય નથી. સ્ત્રીકેસર નિષેચિત થવું એ પણ અસંભવિત છે.", "ref": "Std 12 - પ્રકરણ ૨: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન, પરાગરજને સંગ્રહિત કરતી વખતે કયા તાપમાને તેની જીવિતતા સૌથી લાંબા સમય સુધી જાળવી શકાય છે ?", "opts": ["૦°C", "-૨૦°C", "-૧૯૬°C", "૨૫°C"], "ans": 2, "exp": "લિક્વિડ નાઇટ્રોજન (-૧૯૬°C) પરાગરજની જીવિતતા સૌથી લાંબા સમય સુધી જાળવી શકે છે. ૦°C અને -૨૦°C એ તાપમાન પરાગરજની જીવિતતા થોડા સમય સુધી જ જાળવી શકે છે, જ્યારે ૨૫°C તાપમાન પરાગરજની જીવિતતા ઝડપથી ઘટાડે છે.", "ref": "Std 12 - પ્રકરણ ૨: લૈંગિક પ્રજનનમાં પુષ્પી વનસ્પતિઓ", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્કેસરને કાપી નાખ્યા પછી પણ અજાણ્યાથી પરાગનયન થાય છે, તો તેનું મુખ્ય કારણ કયું હોઈ શકે ?", "opts": ["પવન દ્વારા પરાગરજનું સ્થાનાંતરણ", "કીટકો દ્વારા પરાગરજનું વહન", "પુમ્કેસરના અવશેષોમાં રહેલી પરાગરજનું મુક્ત થવું", "સ્ત્રીકેસરના કલંક પર પહેલેથી જ ઉપસ્થિત પરાગરજ"], "ans": 2, "exp": "પુમ્કેસરને કાપી નાખ્યા પછી પણ પરાગનયન થવાનું મુખ્ય કારણ પુમ્કેસરના અવશેષોમાં રહેલી પરાગરજનું મુક્ત થવું હોય છે. પવન અથવા કીટકો દ્વારા પરાગરજનું સ્થાનાંતરણ તો શક્ય છે, પરંતુ પ્રયોગશાળામાં આ શક્યતા ઓછી હોય છે. સ્ત્રીકેસરના કલંક પર પહેલેથી જ પરાગરજ હોવી એ અસાધારણ પરિસ્થિતિ છે, જ્યારે પુમ્કેસરના અવશેષોમાં રહેલી પરાગરજ મુક્ત થવાનું સૌથી સામાન્ય કારણ છે.", "ref": "Std 12 - પ્રકરણ 2: જનીનિક અને કોષવિજ્ઞાન (કૃત્રિમ સંકરણ)", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્કેસરને કાપી નાખ્યા પછી પણ અચાનક વરસાદ પડે તો કયો પગલો લેવો જરૂરી બને છે ?", "opts": ["સ્ત્રીકેસરના કલંકને પાણીથી ધોઈ નાખવા", "સ્ત્રીકેસરના કલંકને પોલિથીનના કવરથી ઢાંકી દેવા", "સ્ત્રીકેસરના કલંકને સૂકવી દેવા", "સ્ત્રીકેસરના કલંકને રસાયણિક દ્રાવણથી સારવાર કરવા"], "ans": 1, "exp": "વરસાદ પડવાથી અણચાહ્યો પરાગરજ સ્ત્રીકેસરના કલંક પર પહોંચી શકે છે, જે કૃત્રિમ સંકરણની સફળતાને અસર કરે છે. આથી, સ્ત્રીકેસરના કલંકને પોલિથીનના કવરથી ઢાંકી દેવાથી પરાગરજના અણચાહ્યા સંપર્કને ટાળી શકાય છે. બાકીના વિકલ્પો યોગ્ય નથી: A) પાણીથી ધોઈ નાખવાથી કલંકને નુકસાન થઈ શકે છે, C) સૂકવી દેવાથી કલંકની પ્રતિક્રિયાશીલતા ઘટી શકે છે, D) રસાયણિક દ્રાવણનો ઉપયોગ અહીં અનુચિત છે.", "ref": "Std 12 - પ્રકરણ 2: જનીન અને જનુકીયતા", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન, જો પરાગરજને સંગ્રહિત કરતી વખતે તેની જીવિતતા ઘટી જાય તો કયો પદાર્થ ઉમેરવાથી તેને પુનઃસજીવિત કરી શકાય ?", "opts": ["શર્કરા (સુગર)", "બોરિક એસિડ", "સલ્ફ્યુરિક એસિડ", "સોડિયમ ક્લોરાઇડ"], "ans": 0, "exp": "પરાગરજની જીવિતતા જાળવવા માટે શર્કરા (સુગર) ઉમેરવાથી તેને પોષણ મળે છે અને જીવિતતા ટકાવી શકાય છે. બોરિક એસિડ પરાગરજના અંકુરણમાં મદદ કરે છે, પરંતુ જીવિતતા પુનઃસજીવિત કરવા માટે શર્કરા વધુ અસરકારક છે. સલ્ફ્યુરિક એસિડ અને સોડિયમ ક્લોરાઇડ પરાગરજ માટે હાનિકારક છે.", "ref": "Std 12 - પ્રકરણ 2: જનીન અને જનુકીયતા", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડ્યા પછી તરત જ ફળ બંધાવવા માટે કયો હોર્મોનનો છંટકાવ કરવો જોઈએ ?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "જિબરેલિન હોર્મોનનો છંટકાવ કરવાથી ફળ બંધાવવાની પ્રક્રિયા ત્વરિત થાય છે. ઓક્સિન ફળના વિકાસમાં મદદ કરે છે, પરંતુ જિબરેલિન ફળ બંધાવવા માટે વધુ અસરકારક છે. સાયટોકાઇનિન કોષવિભાજનને પ્રોત્સાહન આપે છે, પરંતુ ફળ બંધાવવા માટે તેનો ઉપયોગ થતો નથી. એબ્સિસિક એસિડ ફળના પકવવા અને પડવાની પ્રક્રિયામાં ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 2: જનીન અને જનુકીયતા", "ch": ""}, {"q": "એક વનસ્પતિશાસ્ત્રી કપાસના બે જાતો વચ્ચે કૃત્રિમ સંકરણ કરવા માંગે છે. તેઓ પુમ્કેસરને કાપી નાખે છે અને પરાગરજને સંગ્રહિત કરીને યોગ્ય સમયે સ્ત્રીકેસરના કલંક પર લગાડે છે. જો કે, સંકરણ બાદ મળતા બીજમાંથી ઉગાડેલા છોડમાં ઇચ્છિત લક્ષણો જોવા મળતા નથી. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["પરાગરજને સંગ્રહિત કરતી વખતે તેની જીવિતતા જાળવવા માટે કેલ્શિયમ ક્લોરાઇડનો ઉપયોગ કરવામાં આવ્યો ન હતો", "સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડ્યા પછી, બીજાંડને સ્વ-પરાગનયનથી બચાવવા માટે કોઈ પદાર્થથી ઢાંકવામાં આવ્યું ન હતું", "પરાગરજને સંગ્રહિત કરતી વખતે તેને યોગ્ય તાપમાને રાખવામાં આવી ન હતી, જેના કારણે તેની જીવિતતા ઘટી ગઈ", "પુમ્કેસરને કાપી નાખ્યા પછી, સ્ત્રીકેસરને કોઈ હોર્મોનના દ્રાવણથી સ્પ્રે કરવામાં આવ્યું ન હતું, જેના કારણે પરાગનલિકાનો વિકાસ અવરોધાયો"], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. કૃત્રિમ સંકરણમાં, પરાગરજ લગાડ્યા પછી બીજાંડને અન્ય પરાગરજથી બચાવવા માટે તેને યોગ્ય પદાર્થ (જેમ કે પેપર બેગ)થી ઢાંકવું જરૂરી છે. જો આ પગલું અવગણવામાં આવે, તો અન્ય પરાગરજથી પરાગનયન થઈ શકે છે, જેના કારણે ઇચ્છિત સંકરણ ન થાય અને પરિણામે ઇચ્છિત લક્ષણો મળતા નથી.\n\nવિકલ્પ A ખોટો છે કારણ કે કેલ્શિયમ ક્લોરાઇડ પરાગરજની જીવિતતા જાળવવામાં મદદ કરે છે, પરંતુ તેના અભાવમાં પરાગરજની જીવિતતા ઘટે છે, પરંતુ સંકરણ ન થવાનું મુખ્ય કારણ નથી.\n\nવિકલ્પ C ખોટો છે કારણ કે પરાગરજની જીવિતતા ઘટવાથી પરાગનયનની સફળતા પર અસર પડે છે, પરંતુ તે સંકરણ ન થવાનું સીધું કારણ નથી.\n\nવિકલ્પ D ખોટો છે કારણ કે હોર્મોનનો છંટકાવ ફળ બંધાવવામાં મદદ કરે છે, પરંતુ પરાગનલિકાના વિકાસ માટે હોર્મોન જરૂરી નથી. પરાગનલિકાનો વિકાસ પરાગરજ અને કલંકની સુસંગતતા પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્કેસરને કાપી નાખ્યા પછી પણ પરાગરજના અવશેષો સ્ત્રીકેસરના કલંક પર પહોંચી જાય, તો કયા પગલા દ્વારા આ સમસ્યાને ટાળી શકાય ?", "opts": ["સ્ત્રીકેસરના કલંકને પાણીથી ધોઈ લેવા", "સ્ત્રીકેસરના કલંકને એલ્કોહોલથી સ્વચ્છ કરવા", "સ્ત્રીકેસરના કલંકને કોઈપણ રસાયણથી સારવાર ન કરવા", "સ્ત્રીકેસરના કલંકને ગરમ પાણીથી ધોઈ લેવા"], "ans": 1, "exp": "કૃત્રિમ સંકરણમાં, પુમ્કેસરને કાપી નાખ્યા પછી પણ જો પરાગરજના અવશેષો સ્ત્રીકેસરના કલંક પર પહોંચી જાય, તો સ્ત્રીકેસરના કલંકને એલ્કોહોલથી સ્વચ્છ કરવાથી આ અવશેષો દૂર થાય છે અને અજાણ્યા પરાગનયનને ટાળી શકાય છે. પાણી અથવા ગરમ પાણી દ્વારા ધોવા એટલું પ્રભાવી નથી, જ્યારે કોઈપણ રસાયણની સારવાર ન કરવી એ સમસ્યાને ઉકેલી શકતું નથી.", "ref": "Std 12 - અધ્યાય 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, જો પુમ્કેસરને કાપી નાખ્યા પછી સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડવા પહેલાં, કલંક પર કયો પદાર્થ લગાડવાથી પરાગનયનની શક્યતા ઘટે છે ?", "opts": ["પાણી", "એલ્કોહોલ", "શર્કરાનો દ્રાવણ", "બોરિક એસિડનો દ્રાવણ"], "ans": 1, "exp": "પુમ્કેસરને કાપી નાખ્યા પછી સ્ત્રીકેસરના કલંક પર એલ્કોહોલ લગાડવાથી કલંક પરના કોઈપણ અવશેષ પરાગરજ નિષ્ક્રિય થઈ જાય છે, જે પરાગનયનની શક્યતા ઘટાડે છે. પાણી (A) પરાગરજને ધોઈ શકે પરંતુ નિષ્ક્રિય કરતું નથી. શર્કરાનો દ્રાવણ (C) પરાગરજની જીવિતતા જાળવી શકે છે, પરંતુ પરાગનયન અટકાવતું નથી. બોરિક એસિડનો દ્રાવણ (D) પરાગરજની જીવિતતા વધારી શકે છે, પરંતુ પરાગનયન અટકાવતું નથી.", "ref": "Std 12 - Chapter 2: વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ દરમિયાન, જો સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડ્યા પછી તરત જ તાપમાન ૪૦°C થી ઉપર ચડી જાય, તો કયા હોર્મોનનો છંટકાવ કરવાથી ફળ બંધાવવાની શક્યતા વધુ રહેશે ?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 1, "exp": "ઉચ્ચ તાપમાને પરાગરજની જીવિતતા ઘટી જાય છે, પરંતુ જિબરેલિન હોર્મોન ફળના વિકાસને પ્રોત્સાહન આપે છે અને ફળ બંધાવવાની ટકાવારી વધારે છે. ઓક્સિન ફળના વિકાસમાં મદદ કરે છે, પરંતુ ઉચ્ચ તાપમાને તેની અસર ઓછી થઈ જાય છે. સાયટોકાઇનિન કોષવિભાજનને પ્રોત્સાહન આપે છે, પરંતુ ફળ બંધાવવા માટે જિબરેલિન વધુ અસરકારક છે. એબ્સિસિક એસિડ ફળના વિકાસને અવરોધે છે, તેથી તે યોગ્ય વિકલ્પ નથી.", "ref": "Std 12 - પ્રકરણ ૨: વનસ્પતિમાં જનન (હોર્મોનની ભૂમિકા)", "ch": ""}, {"q": "એક વનસ્પતિશાસ્ત્રીએ બે અલગ-અલગ જાતિની વનસ્પતિઓ વચ્ચે કૃત્રિમ સંકરણ કર્યું. પ્રયોગ દરમિયાન તેમણે પુમ્કેસરને કાપી નાખ્યા બાદ સ્ત્રીકેસરના કલંક પર ઇચ્છિત પરાગરજ લગાડી, પરંતુ ફળનું નિર્માણ થયું નહીં. આ નિષ્ફળતાનું સંભવિત કારણ શું હોઈ શકે? નીચેનામાંથી કયું કારણ આ પરિસ્થિતિ માટે સૌથી વધુ યોગ્ય છે?", "opts": ["પરાગરજ અને સ્ત્રીકેસરના કલંક વચ્ચે જનીનિક અસંગતતા હતી.", "પરાગરજને લગાડ્યા પહેલાં સ્ત્રીકેસરના કલંક પર કોઈ હોર્મોનનો છંટકાવ કરવામાં આવ્યો ન હતો.", "પરાગરજને સંગ્રહિત કરતી વખતે તેની જીવિતતા જાળવવા માટે યોગ્ય તાપમાન જાળવવામાં આવ્યું ન હતું.", "પુમ્કેસરને કાપી નાખ્યા બાદ પણ સ્ત્રીકેસરના કલંક પર અજાણ્યાથી પરાગરજ પહોંચી ગઈ હતી."], "ans": 0, "exp": "સાચો જવાબ વિકલ્પ A છે કારણ કે જો પરાગરજ અને સ્ત્રીકેસરના કલંક વચ્ચે જનીનિક અસંગતતા હોય, તો પરાગનલિકાનું વિકાસ થતું નથી અને ફળનું નિર્માણ થતું નથી. વિકલ્પ B ખોટો છે કારણ કે હોર્મોનનો છંટકાવ ફળ બંધાવવાની ટકાવારી વધારે છે, પરંતુ તે ફળ નિર્માણ માટે અનિવાર્ય નથી. વિકલ્પ C ખોટો છે કારણ કે જો પરાગરજની જીવિતતા ઘટી ગઈ હોત, તો પરાગનયન જ થયું ન હોત. વિકલ્પ D ખોટો છે કારણ કે જો અજાણ્યાથી પરાગનયન થયું હોત, તો ફળનું નિર્માણ થઈ શક્યું હોત, પરંતુ તે ઇચ્છિત સંકરણ ન હોત.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "કૃત્રિમ સંકરણ પ્રયોગમાં, એક સંશોધકે પુમ્કેસરને કાપી નાખ્યા બાદ સ્ત્રીકેસરના કલંક પર પરાગરજ લગાડી. પરંતુ, તેમણે નોંધ્યું કે પરાગરજ અંકુરિત થઈ પરાગનલિકા બનાવવા છતાં ફળનું નિર્માણ થયું નહીં. આ પરિસ્થિતિ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["પરાગરજ અને સ્ત્રીકેસરના કલંક વચ્ચે રાસાયણિક અસંગતતા હતી, જેના કારણે પરાગનલિકા અંડકોષ સુધી પહોંચી શકી નહીં.", "પરાગરજને લગાડ્યા પછી તરત જ ભારે વરસાદ પડ્યો, જેના કારણે પરાગરજ ધોવાઈ ગઈ.", "પરાગરજને સંગ્રહિત કરતી વખતે તેની જીવિતતા જાળવવા માટે યોગ્ય ઉત્સેચકનો ઉપયોગ કરવામાં આવ્યો ન હતો.", "પુમ્કેસરને કાપી નાખ્યા બાદ પણ સ્ત્રીકેસરના કલંક પર અજાણ્યાથી પરાગરજ પહોંચી ગઈ હતી."], "ans": 0, "exp": "સાચો જવાબ વિકલ્પ A છે કારણ કે જો પરાગરજ અને સ્ત્રીકેસરના કલંક વચ્ચે રાસાયણિક અસંગતતા હોય, તો પરાગનલિકા અંડકોષ સુધી પહોંચી શકતી નથી, જેના કારણે ફળનું નિર્માણ થતું નથી. વિકલ્પ B ખોટો છે કારણ કે જો પરાગરજ ધોવાઈ ગઈ હોત, તો પરાગનલિકા બની જ ન હોત. વિકલ્પ C ખોટો છે કારણ કે ઉત્સેચકનો ઉપયોગ પરાગરજની જીવિતતા જાળવવા માટે થાય છે, પરંતુ તે પરાગનલિકાના વિકાસને અસર કરતો નથી. વિકલ્પ D ખોટો છે કારણ કે જો અજાણ્યાથી પરાગનયન થયું હોત, તો ફળનું નિર્માણ થઈ શક્યું હોત, પરંતુ તે ઇચ્છિત સંકરણ ન હોત.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
