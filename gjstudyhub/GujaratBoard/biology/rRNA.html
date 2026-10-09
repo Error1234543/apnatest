@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>rRNA</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>rRNA</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">rRNA</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "રાઇબોઝોમલ RNA (rRNA) ની સૌથી મહત્વની ભૂમિકા કઈ છે, જ્યારે તે રાઇબોઝોમના બંધારણમાં સક્રિય ભાગ તરીકે કામ કરે છે?", "opts": ["તે mRNA ની નકલ બનાવવામાં મદદ કરે છે.", "તે પેપ્ટાઇડ બંધની રચના માટે ઉત્સેચક તરીકે કામ કરે છે.", "તે DNA ની ટ્રાન્સક્રિપ્શન પ્રક્રિયામાં સહાય કરે છે.", "તે કોષના ઊર્જા ઉત્પાદનમાં ભાગ લે છે."], "ans": 1, "exp": "રાઇબોઝોમલ RNA (rRNA) રાઇબોઝોમનો મુખ્ય ઘટક છે અને તે પેપ્ટાઇડ બંધની રચનામાં ઉત્સેચક તરીકે કામ કરે છે, જે પ્રોટીન સંશ્લેષણ માટે આવશ્યક છે. A) mRNA ની નકલ બનાવવી તે rRNA ની ભૂમિકા નથી, તે tRNA અથવા RNA પોલિમરેઝની ભૂમિકા છે. C) DNA ની ટ્રાન્સક્રિપ્શનમાં rRNA સહાય કરતું નથી, તે RNA પોલિમરેઝનું કામ છે. D) ઊર્જા ઉત્પાદન rRNA ની ભૂમિકા નથી, તે માઇટોકોન્ડ્રિયાની ભૂમિકા છે.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "રાઇબોઝોમમાં rRNA ના કયા પ્રકારના અણુઓ હાજર હોય છે, જે પ્રોટીન સંશ્લેષણમાં સક્રિય ભૂમિકા ભજવે છે?", "opts": ["5S, 5.8S, 18S, અને 28S rRNA", "tRNA અને mRNA", "snRNA અને snoRNA", "miRNA અને siRNA"], "ans": 0, "exp": "રાઇબોઝોમમાં 5S, 5.8S, 18S, અને 28S rRNA અણુઓ હાજર હોય છે, જે પ્રોટીન સંશ્લેષણમાં સક્રિય ભૂમિકા ભજવે છે. B) tRNA અને mRNA પ્રોટીન સંશ્લેષણમાં ભાગ લે છે, પરંતુ તે rRNA નથી. C) snRNA અને snoRNA RNA પ્રોસેસિંગમાં ભાગ લે છે, પરંતુ તે રાઇબોઝોમના ઘટકો નથી. D) miRNA અને siRNA જીન રેગ્યુલેશનમાં ભાગ લે છે, પરંતુ તે rRNA નથી.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની રચના કયા જીન દ્વારા થાય છે, જે કોષકેન્દ્રમાં સ્થિત હોય છે?", "opts": ["rDNA (રાઇબોઝોમલ DNA)", "mDNA (માઇટોકોન્ડ્રિયલ DNA)", "cDNA (કોમ્પ્લિમેન્ટરી DNA)", "tDNA (ટ્રાન્સફર DNA)"], "ans": 0, "exp": "rRNA ની રચના rDNA (રાઇબોઝોમલ DNA) દ્વારા થાય છે, જે કોષકેન્દ્રમાં સ્થિત હોય છે. B) mDNA માઇટોકોન્ડ્રિયામાં સ્થિત હોય છે અને માઇટોકોન્ડ્રિયલ પ્રોટીન માટે કોડ કરે છે. C) cDNA લેબોરેટરીમાં બનાવેલી DNA છે અને કુદરતી રીતે કોષમાં હાજર નથી. D) tDNA એ કાલ્પનિક પદ છે અને વૈજ્ઞાનિક સાહિત્યમાં ઉપયોગમાં લેવાતું નથી.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની સંરચના અને કાર્યમાં કયા આયનની મહત્વની ભૂમિકા હોય છે?", "opts": ["કેલ્શિયમ (Ca²⁺)", "મેગ્નેશિયમ (Mg²⁺)", "સોડિયમ (Na⁺)", "પોટેશિયમ (K⁺)"], "ans": 1, "exp": "રાઇબોઝોમલ RNA (rRNA) ની સંરચના અને કાર્યમાં મેગ્નેશિયમ (Mg²⁺) આયનની મહત્વની ભૂમિકા હોય છે, કારણ કે તે rRNA ની ત્રિ-આયામી સંરચનાને સ્થિર કરવામાં મદદ કરે છે. A) કેલ્શિયમ (Ca²⁺) અન્ય જૈવિક પ્રક્રિયાઓમાં ભાગ લે છે, પરંતુ rRNA ની સંરચનામાં નહીં. C) સોડિયમ (Na⁺) અને D) પોટેશિયમ (K⁺) કોષીય દ્રાવણમાં આયનિક સંતુલન જાળવવામાં મદદ કરે છે, પરંતુ rRNA ની સંરચનામાં નહીં.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની કયી વિશેષતા તેને ઉત્સેચક તરીકે કામ કરવા માટે સક્ષમ બનાવે છે?", "opts": ["તે DNA સાથે જોડાઈ શકે છે.", "તે પેપ્ટાઇડ બંધની રચના માટે ઉત્સેચક તરીકે કામ કરે છે અને તેની સંરચના રિબોઝાઇમ તરીકે ઓળખાય છે.", "તે mRNA ની નકલ બનાવી શકે છે.", "તે કોષના ઊર્જા ઉત્પાદનમાં સહાય કરે છે."], "ans": 1, "exp": "rRNA તેની સંરચના અને કાર્ય દ્વારા પેપ્ટાઇડ બંધની રચના માટે ઉત્સેચક તરીકે કામ કરે છે, અને તેને રિબોઝાઇમ (રાઇબોઝોમલ ઉત્સેચક) તરીકે ઓળખવામાં આવે છે. A) rRNA DNA સાથે જોડાઈ શકતું નથી, તે mRNA સાથે જોડાઈ શકે છે. C) mRNA ની નકલ બનાવવી તે rRNA ની ભૂમિકા નથી. D) ઊર્જા ઉત્પાદન rRNA ની ભૂમિકા નથી.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની સંરચનાત્મક સ્થિરતા માટે કયા આણ્વીય આંતરક્રિયા સૌથી મહત્વપૂર્ણ ગણવામાં આવે છે?", "opts": ["હાઇડ્રોજન બંધ (Hydrogen bonds) અને વાન ડર વાલ્સ બળ", "આયનિક બંધ (Ionic bonds) અને ડિસલ્ફાઇડ બ્રિજ", "હાઇડ્રોફોબિક આંતરક્રિયા અને પાઇ-પાઇ સ્ટેકિંગ", "ફોસ્ફોડાયેસ્ટર બંધ અને ગ્લાઇકોસિડિક બંધ"], "ans": 0, "exp": "rRNA ની સંરચના મુખ્યત્વે હાઇડ્રોજન બંધ અને વાન ડર વાલ્સ બળ દ્વારા સ્થિર રહે છે, જે તેની ત્રિ-પરિમાણીય રચનાને ટકાવી રાખે છે. આયનિક બંધ (B) અને ડિસલ્ફાઇડ બ્રિજ rRNA માં મુખ્યત્વે જોવા મળતા નથી. હાઇડ્રોફોબિક આંતરક્રિયા (C) પ્રોટીનમાં વધુ મહત્વપૂર્ણ હોય છે, જ્યારે ફોસ્ફોડાયેસ્ટર બંધ (D) RNA ની પાયાની સાંકળને જોડે છે પરંતુ સંરચનાત્મક સ્થિરતામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - Chapter 6: આણ્વીય જીવવિજ્ઞાન (Molecular Biology)", "ch": ""}, {"q": "યુકેરિયોટિક કોષમાં, 5.8S rRNA ની જીન કોપી કયા વર્ણસૂત્ર પર સ્થિત હોય છે?", "opts": ["વર્ણસૂત્ર 1", "વર્ણસૂત્ર 13, 14, 15, 21, 22", "વર્ણસૂત્ર X", "વર્ણસૂત્ર 5"], "ans": 1, "exp": "યુકેરિયોટિક કોષમાં, 5.8S rRNA ની જીન કોપી વર્ણસૂત્ર 13, 14, 15, 21, અને 22 પર સ્થિત હોય છે, જે rDNA ક્લસ્ટરનો ભાગ છે. વર્ણસૂત્ર 1 (A), X (C), અને 5 (D) પર આ જીન કોપી જોવા મળતી નથી.", "ref": "Std 12 - Chapter 6: આણ્વીય જીવવિજ્ઞાન (Molecular Biology)", "ch": ""}, {"q": "પ્રોકેરિયોટ્સમાં, 16S rRNA નો ઉપયોગ કયા હેતુ માટે થાય છે?", "opts": ["પ્રોટીન સંશ્લેષણમાં રાઇબોઝોમની સબયુનિટને જોડવા", "જીવાણુની ઓળખ અને વર્ગીકરણ માટે", "DNA ની નકલ કરવા માટે", "RNA ની પ્રક્રિયા કરવા માટે"], "ans": 1, "exp": "16S rRNA નો ઉપયોગ મુખ્યત્વે જીવાણુની ઓળખ અને વર્ગીકરણ માટે થાય છે, કારણ કે તેની આણ્વીય ક્રમમાં જાતિગત ભિન્નતા હોય છે. પ્રોટીન સંશ્લેષણમાં રાઇબોઝોમની સબયુનિટને જોડવા (A) 16S rRNA નું મુખ્ય કાર્ય છે, પરંતુ પ્રશ્નમાં પૂછવામાં આવેલ હેતુ ઓળખ અને વર્ગીકરણ છે. DNA ની નકલ (C) અને RNA ની પ્રક્રિયા (D) 16S rRNA સાથે સીધો સંબંધ ધરાવતા નથી.", "ref": "Std 12 - Chapter 6: આણ્વીય જીવવિજ્ઞાન (Molecular Biology)", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની કઈ વિશેષતા તેને રાઇબોઝોમની કેટાલિટિક સક્રિયતા પ્રદાન કરે છે?", "opts": ["તેની સક્રિય સ્થાન પર મેટલ આયનની હાજરી", "તેની ત્રિ-પરિમાણીય રચના જે સબસ્ટ્રેટને બંધન કરે છે", "તેની સાથે જોડાયેલા પ્રોટીનની હાજરી", "તેની RNA ક્રમમાં પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ઉત્સેચકની જેમ કાર્ય કરવાની ક્ષમતા"], "ans": 3, "exp": "rRNA ની RNA ક્રમમાં પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ઉત્સેચકની જેમ કાર્ય કરવાની ક્ષમતા હોય છે, જે તેને કેટાલિટિક સક્રિયતા પ્રદાન કરે છે. મેટલ આયન (A) અને ત્રિ-પરિમાણીય રચના (B) મહત્વપૂર્ણ છે, પરંતુ મુખ્ય કેટાલિટિક ક્રિયા RNA ક્રમ દ્વારા જ થાય છે. પ્રોટીનની હાજરી (C) રાઇબોઝોમની રચનામાં મદદ કરે છે, પરંતુ કેટાલિટિક ક્રિયા rRNA દ્વારા જ થાય છે.", "ref": "Std 12 - Chapter 6: આણ્વીય જીવવિજ્ઞાન (Molecular Biology)", "ch": ""}, {"q": "કયા rRNA પ્રકારને રાઇબોઝોમની લાર્જ સબયુનિટમાં સૌથી મોટી રચના ગણવામાં આવે છે?", "opts": ["5S rRNA", "5.8S rRNA", "28S rRNA", "18S rRNA"], "ans": 2, "exp": "રાઇબોઝોમની લાર્જ સબયુનિટમાં 28S rRNA સૌથી મોટી રચના ધરાવે છે. 5S rRNA (A) અને 5.8S rRNA (B) લાર્જ સબયુનિટમાં હાજર હોય છે, પરંતુ તે 28S rRNA કરતાં નાની હોય છે. 18S rRNA (D) રાઇબોઝોમની સ્મોલ સબયુનિટમાં હાજર હોય છે.", "ref": "Std 12 - Chapter 6: આણ્વીય જીવવિજ્ઞાન (Molecular Biology)", "ch": ""}, {"q": "યુકેરિયોટિક કોષમાં, 5S rRNA ની જનીન કોપી કયા વિશિષ્ટ સ્થાને સ્થિત હોય છે, જે અન્ય rRNA જનીનોથી અલગ છે?", "opts": ["કોષકેન્દ્રમાં ન્યુક્લિયોલસની બહારના વિસ્તારમાં", "મિટોકોન્ડ્રિયાના DNAમાં", "ક્લોરોપ્લાસ્ટના DNAમાં", "વર્ણસૂત્ર 1 પરના ટેલોમેરિક વિસ્તારમાં"], "ans": 0, "exp": "યુકેરિયોટિક કોષોમાં 5S rRNA ની જનીન કોપી કોષકેન્દ્રમાં ન્યુક્લિયોલસની બહારના વિસ્તારમાં સ્થિત હોય છે, જ્યારે અન્ય rRNA જનીનો (18S, 5.8S, 28S) ન્યુક્લિયોલસમાં ટ્રાન્સક્રાઇબ થાય છે. મિટોકોન્ડ્રિયા અને ક્લોરોપ્લાસ્ટમાં પોતાના rRNA જનીનો હોય છે, પરંતુ 5S rRNA માટે નહીં. વર્ણસૂત્ર 1 પર ટેલોમેરિક વિસ્તારમાં આવા જનીનો હોતા નથી.", "ref": "Std 11 - પ્રકરણ 6: કોષ: જીવનનો એકમ", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની કઈ વિશેષતા તેને પ્રોટીન સંશ્લેષણ દરમિયાન tRNA ના એન્ટીકોડોન સાથે જોડાવા માટે સક્ષમ બનાવે છે, પરંતુ તે પોતે કોડિંગ કરતું નથી?", "opts": ["rRNA ની સંરચનામાં હાઇડ્રોજન બોન્ડની વિશિષ્ટ ગોઠવણી", "rRNA ની પોલિએડિનાઇલેશન પ્રક્રિયા", "rRNA ની મેથિલેશન પ્રક્રિયા દ્વારા રાસાયણિક ફેરફાર", "rRNA ની સ્પ્લાઇસિંગ પ્રક્રિયા દ્વારા ઇન્ટ્રોન દૂર થવું"], "ans": 0, "exp": "rRNA ની સંરચનામાં હાઇડ્રોજન બોન્ડની વિશિષ્ટ ગોઠવણી તેને tRNA ના એન્ટીકોડોન સાથે જોડાવા માટે યોગ્ય બનાવે છે, જે પ્રોટીન સંશ્લેષણ માટે જરૂરી છે. rRNA પોલિએડિનાઇલેટેડ થતું નથી (જે mRNA ની લાક્ષણિકતા છે), મેથિલેશન અને સ્પ્લાઇસિંગ પણ rRNA ની મુખ્ય ભૂમિકા નથી.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન rRNA ની ઉત્પત્તિ અને કાર્ય વિશે ખોટું છે?", "opts": ["પ્રોકેરિયોટ્સમાં 23S rRNA પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ઉત્સેચકીય પ્રવૃત્તિ ધરાવે છે.", "યુકેરિયોટ્સમાં 5.8S rRNA ની જનીન કોપી RNA પોલિમરેઝ III દ્વારા ટ્રાન્સક્રાઇબ થાય છે.", "rRNA ની પ્રક્રિયા દરમિયાન સ્નોર્ના (snoRNA) ની ભૂમિકા મહત્વપૂર્ણ હોય છે.", "મિટોકોન્ડ્રિયામાં રહેલું rRNA બેક્ટેરિયાના rRNA સાથે વધુ સમાનતા ધરાવે છે."], "ans": 1, "exp": "યુકેરિયોટ્સમાં 5.8S rRNA ની જનીન કોપી RNA પોલિમરેઝ I દ્વારા ટ્રાન્સક્રાઇબ થાય છે, RNA પોલિમરેઝ III દ્વારા નહીં. બાકીના વિધાનો સાચા છે: 23S rRNA પેપ્ટિડાઇલ ટ્રાન્સફરેઝ પ્રવૃત્તિ ધરાવે છે, સ્નોર્ના rRNA પ્રક્રિયામાં મહત્વપૂર્ણ છે, અને મિટોકોન્ડ્રિયાનું rRNA બેક્ટેરિયા સાથે વધુ સમાનતા ધરાવે છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "રાઇબોઝોમની એસેમ્બલી પ્રક્રિયામાં, નીચેનામાંથી કયું પરિબળ rRNA અને રાઇબોઝોમલ પ્રોટીન વચ્ચેની આંતરક્રિયાને સીધી રીતે અસર કરતું નથી?", "opts": ["Mg²⁺ આયનની સાંદ્રતા", "pH નું મૂલ્ય", "ATP ની હાજરી", "GTP ની હાજરી"], "ans": 2, "exp": "Mg²⁺ આયન rRNA અને રાઇબોઝોમલ પ્રોટીન વચ્ચેની આંતરક્રિયાને સ્થિર કરે છે, pH નું મૂલ્ય આ આંતરક્રિયાઓને અસર કરે છે, અને GTP રાઇબોઝોમની એસેમ્બલી અને કાર્યમાં મહત્વપૂર્ણ છે. જ્યારે ATP ની હાજરી રાઇબોઝોમની એસેમ્બલી માટે સીધી રીતે જરૂરી નથી, તે અન્ય કોષીય પ્રક્રિયાઓ માટે જરૂરી છે.", "ref": "Std 11 - પ્રકરણ 6: કોષ: જીવનનો એકમ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન rRNA ની ઉત્ક્રાંતિ અને કાર્યાત્મક વિશિષ્ટતા વિશે સાચું નથી?", "opts": ["યુકેરિયોટ્સમાં 18S rRNA ની સંરચના પ્રોકેરિયોટ્સના 16S rRNA કરતાં વધુ જટિલ હોય છે.", "rRNA ની ઉત્ક્રાંતિ દરમિયાન, તેના કાર્યાત્મક વિસ્તારો (ડોમેન્સ) વધુ સંરક્ષિત રહે છે.", "પ્રોકેરિયોટ્સ અને યુકેરિયોટ્સના rRNA વચ્ચેની સમાનતા તેમની ઉત્ક્રાંતિની સામાન્ય ઉત્પત્તિ દર્શાવે છે.", "rRNA ની ઉત્ક્રાંતિ દરમિયાન, તેના ન્યુક્લિયોટાઇડ ક્રમમાં ફેરફારોને કારણે તેની ઉત્સેચકીય પ્રવૃત્તિ સંપૂર્ણપણે નાશ પામે છે."], "ans": 3, "exp": "rRNA ની ઉત્ક્રાંતિ દરમિયાન તેના કાર્યાત્મક વિસ્તારો સંરક્ષિત રહે છે, જે તેની ઉત્સેચકીય પ્રવૃત્તિને જાળવી રાખે છે. બાકીના વિધાનો સાચા છે: 18S rRNA ની સંરચના વધુ જટિલ હોય છે, કાર્યાત્મક વિસ્તારો સંરક્ષિત રહે છે, અને પ્રોકેરિયોટ્સ-યુકેરિયોટ્સના rRNA વચ્ચેની સમાનતા સામાન્ય ઉત્પત્તિ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "યુકેરિયોટિક કોષમાં, 28S rRNA ની પ્રક્રિયા દરમિયાન કયા અણુની કાપકૂપ કરવામાં આવે છે, જેના કારણે તે સક્રિય રૂપમાં પરિવર્તિત થાય છે?", "opts": ["5.8S rRNA", "18S rRNA", "45S પ્રી-rRNA", "5S rRNA"], "ans": 2, "exp": "28S rRNA ની ઉત્પત્તિ 45S પ્રી-rRNA ની કાપકૂપ પ્રક્રિયા દ્વારા થાય છે. 45S પ્રી-rRNA ને કાપીને 18S, 5.8S, અને 28S rRNA મેળવવામાં આવે છે. આમ, 45S પ્રી-rRNA એ સક્રિય રૂપમાં પરિવર્તિત થવા માટે કાપકૂપ કરવામાં આવે છે. બાકીના વિકલ્પો (A, B, D) એ તૈયાર rRNA અણુઓ છે, જેઓ કાપકૂપ પ્રક્રિયાના અંતિમ ઉત્પાદનો છે.", "ref": "Std 12 - અધ્યાય 10: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની કઈ સંરચનાત્મક વિશેષતા તેને રાઇબોઝોમની પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ક્રિયા માટે યોગ્ય બનાવે છે?", "opts": ["તેની દ્વિગુણિત સર્પિલ રચના", "તેની કેટાલિટિક સક્રિય સ્થાન પર Mg²⁺ આયનની હાજરી", "તેની સાથે જોડાયેલા પ્રોટીનની હાજરી", "તેની 3' અંતે પોલી-એડેનિલેશન"], "ans": 1, "exp": "rRNA ની પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ક્રિયા માટે Mg²⁺ આયનની હાજરી મહત્વપૂર્ણ છે, કારણ કે આ આયન rRNA ની સંરચનાત્મક સ્થિરતા અને કેટાલિટિક ક્રિયામાં મદદ કરે છે. દ્વિગુણિત સર્પિલ રચના (A) સંરચનાત્મક સ્થિરતા માટે મહત્વપૂર્ણ છે, પરંતુ કેટાલિટિક ક્રિયા માટે નહીં. પ્રોટીનની હાજરી (C) રાઇબોઝોમની રચનામાં મદદ કરે છે, પરંતુ પેપ્ટિડાઇલ ટ્રાન્સફરેઝ ક્રિયા માટે rRNA ની કેટાલિટિક ક્ષમતા મહત્વપૂર્ણ છે. 3' અંતે પોલી-એડેનિલેશન (D) mRNA ની વિશેષતા છે, rRNA ની નહીં.", "ref": "Std 12 - અધ્યાય 10: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન rRNA અને પ્રોટીન સંશ્લેષણ વિશે ખોટું છે?", "opts": ["rRNA રાઇબોઝોમની રચનામાં ભાગ લે છે અને પ્રોટીન સંશ્લેષણમાં મદદ કરે છે.", "16S rRNA પ્રોકેરિયોટિક રાઇબોઝોમની સ્મોલ સબયુનિટમાં હાજર હોય છે અને mRNA સાથે જોડાણ કરવામાં મદદ કરે છે.", "23S rRNA પ્રોકેરિયોટિક રાઇબોઝોમની લાર્જ સબયુનિટમાં હાજર હોય છે અને પેપ્ટિડ બંધ રચનામાં ભાગ લે છે.", "5S rRNA યુકેરિયોટિક રાઇબોઝોમની સ્મોલ સબયુનિટમાં હાજર હોય છે અને tRNA ને બાંધવામાં મદદ કરે છે."], "ans": 3, "exp": "5S rRNA યુકેરિયોટિક રાઇબોઝોમની લાર્જ સબયુનિટમાં હાજર હોય છે, નહીં કે સ્મોલ સબયુનિટમાં. બાકીના વિધાનો (A, B, C) સાચાં છે: rRNA રાઇબોઝોમની રચનામાં ભાગ લે છે, 16S rRNA પ્રોકેરિયોટિક રાઇબોઝોમની સ્મોલ સબયુનિટમાં mRNA સાથે જોડાણ કરવામાં મદદ કરે છે, અને 23S rRNA પ્રોકેરિયોટિક રાઇબોઝોમની લાર્જ સબયુનિટમાં પેપ્ટિડ બંધ રચનામાં ભાગ લે છે.", "ref": "Std 12 - અધ્યાય 10: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "રાઇબોઝોમલ RNA (rRNA) ની કઈ જનીન કોપી યુકેરિયોટિક કોષમાં ન્યુક્લિયોલસ બહાર સ્થિત હોય છે?", "opts": ["5S rRNA", "5.8S rRNA", "18S rRNA", "28S rRNA"], "ans": 0, "exp": "5S rRNA ની જનીન કોપી યુકેરિયોટિક કોષમાં ન્યુક્લિયોલસ બહાર, વર્ણસૂત્ર 1 પર સ્થિત હોય છે. બાકીના rRNA (5.8S, 18S, 28S) ની જનીન કોપી ન્યુક્લિયોલસમાં સ્થિત હોય છે, જ્યાં 45S પ્રી-rRNA ની પ્રક્રિયા થાય છે.", "ref": "Std 12 - અધ્યાય 10: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ rRNA ની સંરચનાત્મક સ્થિરતામાં સૌથી ઓછું યોગદાન આપે છે?", "opts": ["હાઇડ્રોજન બંધ", "Mg²⁺ આયન", "વાન ડર વાલ્સ બળ", "પ્રોટીન-RNA આંતરક્રિયા"], "ans": 2, "exp": "rRNA ની સંરચનાત્મક સ્થિરતામાં હાઇડ્રોજન બંધ (A), Mg²⁺ આયન (B), અને પ્રોટીન-RNA આંતરક્રિયા (D) મહત્વપૂર્ણ ભૂમિકા ભજવે છે. વાન ડર વાલ્સ બળ (C) એ સૌથી નબળું આંતરઆણ્વીય બળ છે અને rRNA ની સ્થિરતામાં ઓછું યોગદાન આપે છે.", "ref": "Std 12 - અધ્યાય 10: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
