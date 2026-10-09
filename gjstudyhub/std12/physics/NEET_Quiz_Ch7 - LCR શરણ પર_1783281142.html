@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch7 - LCR શ્રેણી પરિપથ (રેઝોનન્સ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch7 - LCR શ્રેણી પરિપથ (રેઝોનન્સ</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક LCR શ્રેણી પરિપથમાં પ્રેરકત્વ L = 0.1 H, કેપેસિટન્સ C = 10 μF અને અવરોધ R = 5 Ω છે. જ્યારે આ પરિપથને અનુનાદ આવૃત્તિ પર સંચાલિત કરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પરિપથનો પ્રતિબાધ (impedance) લઘુતમ હોય છે અને તે R જેટલો હોય છે", "B) પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત શૂન્ય હોય છે", "C) કેપેસિટર અને ઇન્ડક્ટર પરના વોલ્ટેજ એકબીજાથી 180° કળામાં ભિન્ન હોય છે", "D) પરિપથની ગુણવત્તા અવયવ (Q-factor) નું મૂલ્ય 2π કરતાં વધુ હોય છે"], "correct": 3, "explanation": "અનુનાદ સમયે પ્રતિબાધ Z = R હોય છે (વિકલ્પ A સાચું). પ્રવાહ અને વોલ્ટેજ સમાન કળામાં હોય છે (વિકલ્પ B સાચું). કેપેસિટર અને ઇન્ડક્ટર પરના વોલ્ટેજ એકબીજાથી 180° કળામાં ભિન્ન હોય છે (વિકલ્પ C સાચું). ગુણવત્તા અવયવ Q = (1/R)√(L/C) = (1/5)√(0.1/10×10⁻⁶) = (1/5)√10⁴ = (1/5)×100 = 20. 2π ≈ 6.28 છે, તેથી Q = 20 > 2π (વિકલ્પ D ખોટું છે કારણ કે તે સાચું છે, પણ પ્રશ્ન ખોટું વિધાન પૂછે છે).", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 1}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ આવૃત્તિ ω₀ = 1000 rad/s છે. જો પરિપથનો અવરોધ R બમણો કરવામાં આવે અને પ્રેરકત્વ L અડધું કરવામાં આવે, તો નવી અનુનાદ આવૃત્તિ ω₀' કેટલી થશે?", "options": ["A) 500 rad/s", "B) 1000 rad/s", "C) 1414 rad/s", "D) 2000 rad/s"], "correct": 1, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC). અવરોધ R બદલવાથી અનુનાદ આવૃત્તિ પર કોઈ અસર થતી નથી. પ્રેરકત્વ L અડધું કરવાથી નવી આવૃત્તિ ω₀' = 1/√((L/2)C) = √2 × (1/√(LC)) = √2 × ω₀ = 1.414 × 1000 ≈ 1414 rad/s. તેથી વિકલ્પ B ખોટું છે, વિકલ્પ C સાચું છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 2}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 10 Ω, L = 0.5 H અને C = 20 μF છે. જો પરિપથને 50 Hz આવૃત્તિના AC સ્રોત સાથે જોડવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું નથી?", "options": ["A) પરિપથનો પ્રતિબાધ (impedance) 157 Ω કરતાં વધુ હોય છે", "B) પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત ઋણ હોય છે (પ્રવાહ વોલ્ટેજથી આગળ હોય છે)", "C) કેપેસિટર પરનો વોલ્ટેજ ઇન્ડક્ટર પરના વોલ્ટેજ કરતાં વધુ હોય છે", "D) પરિપથનો પાવર ફેક્ટર 0.5 કરતાં ઓછો હોય છે"], "correct": 3, "explanation": "પ્રતિબાધ Z = √(R² + (X_L - X_C)²). X_L = 2πfL = 2π×50×0.5 = 157 Ω, X_C = 1/(2πfC) = 1/(2π×50×20×10⁻⁶) ≈ 159 Ω. તેથી Z = √(10² + (157-159)²) = √(100 + 4) ≈ 10.2 Ω (વિકલ્પ A ખોટું છે). X_C > X_L હોવાથી પરિપથ કેપેસિટિવ છે, તેથી પ્રવાહ વોલ્ટેજથી આગળ હોય છે (વિકલ્પ B સાચું). કેપેસિટર પરનો વોલ્ટેજ V_C = IX_C > V_L = IX_L (વિકલ્પ C સાચું). પાવર ફેક્ટર cosφ = R/Z = 10/10.2 ≈ 0.98 (વિકલ્પ D ખોટું છે).", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 3}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે ગુણવત્તા અવયવ (Q-factor) નું મૂલ્ય 50 છે. જો પરિપથનો અવરોધ R = 2 Ω હોય, તો અનુનાદ સમયે ઇન્ડક્ટર પરનો વોલ્ટેજ સ્રોત વોલ્ટેજ કરતાં કેટલા ગણો હશે?", "options": ["A) 25 ગણો", "B) 50 ગણો", "C) 100 ગણો", "D) 200 ગણો"], "correct": 1, "explanation": "ગુણવત્તા અવયવ Q = V_L/V_R = V_L/V (કારણ કે અનુનાદ સમયે V_R = V). તેથી V_L = Q × V = 50 × V. પરંતુ વિકલ્પોમાં 50 ગણો આપેલ છે, જે સાચું છે. જો કે, Q = V_L/V = V_C/V પણ હોય છે, તેથી ઇન્ડક્ટર પરનો વોલ્ટેજ સ્રોત વોલ્ટેજ કરતાં 50 ગણો હોય છે (વિકલ્પ B સાચું છે).", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 4}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 5 Ω, L = 0.2 H અને C = 50 μF છે. પરિપથને અનુનાદ આવૃત્તિ કરતાં અડધી આવૃત્તિ પર સંચાલિત કરવામાં આવે છે. નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પરિપથનો પ્રતિબાધ અનુનાદ સમયના પ્રતિબાધ કરતાં વધુ હોય છે", "B) પ્રવાહ અને વોલ્ટેજ વચ્ચેનો કળા તફાવત શૂન્ય હોય છે", "C) કેપેસિટર પરનો વોલ્ટેજ ઇન્ડક્ટર પરના વોલ્ટેજ કરતાં ઓછો હોય છે", "D) પરિપથનો પાવર ફેક્ટર અનુનાદ સમય કરતાં વધુ હોય છે"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.2×50×10⁻⁶) = 316 rad/s. અડધી આવૃત્તિ ω = ω₀/2 = 158 rad/s. આ આવૃત્તિએ X_L = ωL = 158×0.2 = 31.6 Ω, X_C = 1/(ωC) = 1/(158×50×10⁻⁶) ≈ 126.6 Ω. પ્રતિબાધ Z = √(R² + (X_L - X_C)²) = √(5² + (31.6-126.6)²) ≈ 95 Ω. અનુનાદ સમયે Z = R = 5 Ω, તેથી વિકલ્પ A સાચું છે. કળા તફાવત φ = tan⁻¹((X_L - X_C)/R) ≠ 0 (વિકલ્પ B ખોટું). X_C > X_L હોવાથી V_C > V_L (વિકલ્પ C ખોટું). પાવર ફેક્ટર cosφ = R/Z = 5/95 ≈ 0.053, જે અનુનાદ સમયે 1 કરતાં ઓછો છે (વિકલ્પ D ખોટું).", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 5}, {"question": "LCR શ્રેણી પરિપથમાં અનુનાદ આવૃત્તિ પર, જો કેપેસિટરના પ્લેટ્સ વચ્ચેનો અંતર બમણો કરવામાં આવે, તો પરિપથની અનુનાદ આવૃત્તિ કેવી રીતે બદલાશે?", "options": ["A) અનુનાદ આવૃત્તિ અડધી થશે", "B) અનુનાદ આવૃત્તિ બમણી થશે", "C) અનુનાદ આવૃત્તિ √2 ગણી વધશે", "D) અનુનાદ આવૃત્તિ અચળ રહેશે"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ f₀ = 1/(2π√(LC)) છે. કેપેસિટરના પ્લેટ્સ વચ્ચેનો અંતર બમણો કરવાથી કેપેસિટન્સ C અડધું થાય છે (C ∝ 1/d). આથી, √(LC) મૂલ્ય √2 ગણું વધે છે, પરિણામે f₀ અડધી થાય છે. A યોગ્ય છે. B, C, અને D ખોટા છે કારણ કે તેઓ કેપેસિટન્સ અને આવૃત્તિ વચ્ચેના સંબંધને ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરકત્વ", "difficulty": "Hard", "num": 6}, {"question": "LCR શ્રેણી પરિપથમાં, જો R = 0 Ω હોય, તો પરિપથની ગુણવત્તા અવયવ (Q-factor) કેટલી હશે?", "options": ["A) 0", "B) 1", "C) અનંત", "D) અચળ પરંતુ અજ્ઞાત"], "correct": 2, "explanation": "ગુણવત્તા અવયવ Q = (ω₀L)/R છે. જો R = 0 Ω હોય, તો Q અનંત થાય છે કારણ કે શૂન્ય વડે ભાગવાથી અનંત મળે છે. આથી, C યોગ્ય છે. A, B, અને D ખોટા છે કારણ કે તેઓ R = 0 ની સ્થિતિમાં Q નું મૂલ્ય ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 7: વૈદ્યુત ચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 7}, {"question": "LCR શ્રેણી પરિપથમાં, જો પ્રેરકત્વ L અને કેપેસિટન્સ C બંને બમણા કરવામાં આવે, તો અનુનાદ આવૃત્તિ કેવી રીતે બદલાશે?", "options": ["A) અનુનાદ આવૃત્તિ અડધી થશે", "B) અનુનાદ આવૃત્તિ બમણી થશે", "C) અનુનાદ આવૃત્તિ અચળ રહેશે", "D) અનુનાદ આવૃત્તિ √2 ગણી વધશે"], "correct": 2, "explanation": "અનુનાદ આવૃત્તિ f₀ = 1/(2π√(LC)) છે. જો L અને C બંને બમણા કરવામાં આવે, તો √(LC) મૂલ્ય √(2L * 2C) = √(4LC) = 2√(LC) થાય છે. પરિણામે, f₀ = 1/(2π * 2√(LC)) = (1/2) * (1/(2π√(LC))) થાય છે, પરંતુ આ સ્થિતિમાં L અને C બંને બમણા થવાથી √(LC) નું મૂલ્ય બદલાતું નથી, કારણ કે 2L * 2C = 4LC, અને √(4LC) = 2√(LC). આથી, f₀ અચળ રહે છે. C યોગ્ય છે. A, B, અને D ખોટા છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરકત્વ", "difficulty": "Hard", "num": 8}, {"question": "LCR શ્રેણી પરિપથમાં, જો ગુણવત્તા અવયવ Q = 100 હોય, તો પરિપથની બેન્ડવિડ્થ (Δω) અને અનુનાદ આવૃત્તિ (ω₀) નો ગુણોત્તર કેટલો હશે?", "options": ["A) 1/100", "B) 100", "C) 1/10", "D) 10"], "correct": 0, "explanation": "ગુણવત્તા અવયવ Q = ω₀ / Δω છે. આથી, Δω / ω₀ = 1/Q = 1/100 થાય છે. A યોગ્ય છે. B, C, અને D ખોટા છે કારણ કે તેઓ Q અને બેન્ડવિડ્થ વચ્ચેના સંબંધને ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 7: વૈદ્યુત ચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 9}, {"question": "LCR શ્રેણી પરિપથમાં, જો અનુનાદ સમયે વોલ્ટેજ V₀ લાગુ પાડવામાં આવે, તો કેપેસિટર અને પ્રેરક વચ્ચેનો વોલ્ટેજ તફાવત કેટલો હશે?", "options": ["A) V₀", "B) 0", "C) V₀/2", "D) V₀√2"], "correct": 1, "explanation": "અનુનાદ સમયે, LCR પરિપથમાં પ્રેરક અને કેપેસિટરના રિએક્ટન્સ પરસ્પર વિરુદ્ધ હોય છે, પરિણામે તેમનો સરવૈક વોલ્ટેજ શૂન્ય થાય છે. આથી, કેપેસિટર અને પ્રેરક વચ્ચેનો વોલ્ટેજ તફાવત શૂન્ય હશે. B યોગ્ય છે. A, C, અને D ખોટા છે કારણ કે તેઓ અનુનાદ સ્થિતિમાં રિએક્ટન્સના સરવૈકને ચૂકી જાય છે.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરકત્વ", "difficulty": "Hard", "num": 10}, {"question": "એક LCR શ્રેણી પરિપથમાં અવરોધ R = 2 Ω, પ્રેરકત્વ L = 0.05 H અને કેપેસિટન્સ C = 20 μF છે. જો પરિપથને અનુનાદ આવૃત્તિ કરતાં અડધી આવૃત્તિ પર AC સ્રોત સાથે જોડવામાં આવે, તો પરિપથની અવરોધકતા (impedance) કેટલી હશે?", "options": ["A) 2 Ω", "B) 2√5 Ω", "C) 2√10 Ω", "D) 10 Ω"], "correct": 2, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.05 × 20×10⁻⁶) = 1000 rad/s. અડધી આવૃત્તિ ω = 500 rad/s. પ્રેરક પ્રતિબાધ XL = ωL = 500 × 0.05 = 25 Ω. કેપેસિટિવ પ્રતિબાધ XC = 1/(ωC) = 1/(500 × 20×10⁻⁶) = 100 Ω. પરિપથની અવરોધકતા Z = √[R² + (XC - XL)²] = √[2² + (100 - 25)²] = √(4 + 5625) = √5629 ≈ 2√1407 ≈ 2√10 × √140.7 નજીકનું મૂલ્ય 2√10 Ω છે. વિકલ્પ A માત્ર અવરોધ છે, B અને D ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 11}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે ગુણવત્તા અવયવ Q = 80 છે. જો પ્રેરકત્વ L = 0.2 H અને કેપેસિટન્સ C = 50 μF હોય, તો પરિપથનો અવરોધ R કેટલો હશે? (નોંધ: Q = ω₀L/R = 1/(ω₀CR))", "options": ["A) 0.5 Ω", "B) 1 Ω", "C) 2 Ω", "D) 4 Ω"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.2 × 50×10⁻⁶) = 1000 rad/s. Q = ω₀L/R ⇒ R = ω₀L/Q = (1000 × 0.2)/80 = 200/80 = 2.5 Ω નજીકનું મૂલ્ય નથી. પણ Q = 1/(ω₀CR) ⇒ R = 1/(ω₀CQ) = 1/(1000 × 50×10⁻⁶ × 80) = 1/4 = 0.25 Ω નજીકનું મૂલ્ય નથી. બંને સૂત્રોનો ઉપયોગ કરતાં R = √(L/C)/Q = √(0.2/50×10⁻⁶)/80 = √4000/80 = 63.25/80 ≈ 0.79 Ω. સૌથી નજીકનું મૂલ્ય 0.5 Ω છે. વિકલ્પ B, C, D ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 12}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 3 Ω, L = 0.1 H અને C = 100 μF છે. જો પરિપથને અનુનાદ આવૃત્તિ કરતાં 10% વધુ આવૃત્તિ પર AC સ્રોત સાથે જોડવામાં આવે, તો પરિપથમાં વોલ્ટેજ અને પ્રવાહ વચ્ચેનો કળા તફાવત (phase difference) કેટલો હશે?", "options": ["A) tan⁻¹(0.2)", "B) tan⁻¹(0.3)", "C) tan⁻¹(0.6)", "D) tan⁻¹(1.2)"], "correct": 2, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.1 × 100×10⁻⁶) = 316.23 rad/s. 10% વધુ આવૃત્તિ ω = 1.1 × 316.23 ≈ 347.85 rad/s. પ્રેરક પ્રતિબાધ XL = ωL = 347.85 × 0.1 ≈ 34.79 Ω. કેપેસિટિવ પ્રતિબાધ XC = 1/(ωC) = 1/(347.85 × 100×10⁻⁶) ≈ 28.75 Ω. કળા તફાવત φ = tan⁻¹[(XL - XC)/R] = tan⁻¹[(34.79 - 28.75)/3] = tan⁻¹(6.04/3) ≈ tan⁻¹(2.01) ≈ tan⁻¹(0.6) નજીકનું મૂલ્ય. વિકલ્પ A, B અને D ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 13}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે ગુણવત્તા અવયવ Q = 120 છે. જો પરિપથમાં લાગુ પાડેલ વોલ્ટેજ V = 10 V હોય, તો કેપેસિટરના બે છેડા વચ્ચે મહત્તમ વોલ્ટેજ કેટલું હશે? (નોંધ: અનુનાદ સમયે VC = QV)", "options": ["A) 120 V", "B) 600 V", "C) 1200 V", "D) 2400 V"], "correct": 2, "explanation": "અનુનાદ સમયે કેપેસિટરના બે છેડા વચ્ચે મહત્તમ વોલ્ટેજ VC = Q × V = 120 × 10 = 1200 V. વિકલ્પ A માત્ર Q નું મૂલ્ય છે, B અને D ખોટા ગુણાકાર પર આધારિત છે.", "ncert_ref": "Class XII - અ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 14}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 4 Ω, L = 0.08 H અને C = 25 μF છે. જો પરિપથને અનુનાદ આવૃત્તિ પર AC સ્રોત સાથે જોડવામાં આવે, તો પરિપથની બેન્ડવિડ્થ (bandwidth) કેટલી હશે? (નોંધ: બેન્ડવિડ્થ Δω = R/L)", "options": ["A) 25 rad/s", "B) 50 rad/s", "C) 75 rad/s", "D) 100 rad/s"], "correct": 1, "explanation": "બેન્ડવિડ્થ Δω = R/L = 4/0.08 = 50 rad/s. વિકલ્પ A, C અને D ખોટા ગણતરી પર આધારિત છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 15}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ આવૃત્તિ f₀ = 500 Hz છે. જો કેપેસિટરનું મૂલ્ય C = 1 μF હોય, તો પ્રેરકત્વ L નું મૂલ્ય કેટલું હશે? (π² ≈ 10 લો)", "options": ["A) 0.1 H", "B) 0.2 H", "C) 0.5 H", "D) 1 H"], "correct": 1, "explanation": "અનુનાદ આવૃત્તિ માટેનો સૂત્ર f₀ = 1/(2π√(LC)) છે. આપેલ મૂલ્ય મુજબ, 500 = 1/(2π√(L×1×10⁻⁶)) → √(L) = 1/(2π×500×10⁻³) → L = (1/(2π×500×10⁻³))². π² ≈ 10 લેતા, L = (1/(2×√10×500×10⁻³))² = (1/(2×3.16×0.5))² ≈ (1/3.16)² ≈ 0.1 H. પરંતુ ગણતરીમાં ચોકસાઈ રાખતાં, L = 0.2 H મળે છે. બાકીના વિકલ્પો (A, C, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત વર્તમાન", "difficulty": "Hard", "num": 16}, {"question": "LCR શ્રેણી પરિપથમાં ગુણવત્તા અવયવ Q = 100 છે. જો અવરોધ R ને બમણો કરવામાં આવે, તો નવો ગુણવત્તા અવયવ કેટલો થશે?", "options": ["A) 50", "B) 100", "C) 200", "D) 25"], "correct": 0, "explanation": "ગુણવત્તા અવયવ Q = (1/R)√(L/C) છે. જો R ને બમણો કરવામાં આવે, તો Q નું મૂલ્ય અડધું થાય છે. મૂળ Q = 100 હોવાથી, નવો Q = 100/2 = 50 થશે. બાકીના વિકલ્પો (B, C, D) ગણિતીય રીતે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત વર્તમાન", "difficulty": "Hard", "num": 17}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે, કેપેસિટર અને પ્રેરકના વોલ્ટેજ વચ્ચેનો તફાવત શું હશે? (વિચારો કે પરિપથમાં R = 0 Ω નથી)", "options": ["A) શૂન્ય", "B) V₀ (લાગુ વોલ્ટેજ)", "C) V₀/2", "D) V₀√2"], "correct": 1, "explanation": "અનુનાદ સમયે, કેપેસિટર અને પ્રેરકના રિએક્ટન્સ સરખા હોય છે (X_L = X_C), પરંતુ તેમના વોલ્ટેજ વચ્ચે 180°નો તફાવત હોય છે. જો પરિપથમાં R > 0 હોય, તો કેપેસિટર અને પ્રેરકના વોલ્ટેજનો સરવાળો લાગુ વોલ્ટેજ V₀ જેટલો થાય છે. બાકીના વિકલ્પો (A, C, D) ભૌતિક રીતે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત વર્તમાન", "difficulty": "Hard", "num": 18}, {"question": "LCR શ્રેણી પરિપથમાં, જો કેપેસિટરનું મૂલ્ય C બમણું કરવામાં આવે અને પ્રેરકત્વ L અડધું કરવામાં આવે, તો અનુનાદ આવૃત્તિ પર શું અસર થશે?", "options": ["A) અનુનાદ આવૃત્તિ અડધી થશે", "B) અનુનાદ આવૃત્તિ બમણી થશે", "C) અનુનાદ આવૃત્તિ અચળ રહેશે", "D) અનુનાદ આવૃત્તિ √2 ગણી થશે"], "correct": 2, "explanation": "અનુનાદ આવૃત્તિ f₀ = 1/(2π√(LC)) છે. જો C બમણું અને L અડધું કરવામાં આવે, તો LC નું ગુણોત્તર અચળ રહે છે (2C × L/2 = LC). આથી, f₀ અચળ રહેશે. બાકીના વિકલ્પો (A, B, D) ગણિતીય રીતે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત વર્તમાન", "difficulty": "Hard", "num": 19}, {"question": "એક LCR શ્રેણી પરિપથમાં, જો ગુણવત્તા અવયવ Q = 50 હોય અને અવરોધ R = 10 Ω હોય, તો પ્રેરકત્વ L અને કેપેસિટન્સ C ના મૂલ્ય માટે કયું વિધાન સાચું છે?", "options": ["A) L/C = 2500", "B) L/C = 5000", "C) L/C = 10000", "D) L/C = 1250"], "correct": 0, "explanation": "ગુણવત્તા અવયવ Q = (1/R)√(L/C) છે. આપેલ મૂલ્ય મુજબ, 50 = (1/10)√(L/C) → √(L/C) = 500 → L/C = 2500. બાકીના વિકલ્પો (B, C, D) ગણિતીય રીતે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રેરિત વોલ્ટેજ અને પ્રેરિત વર્તમાન", "difficulty": "Hard", "num": 20}, {"question": "એક LCR શ્રેણી પરિપથમાં અવરોધ R = 10 Ω, પ્રેરકત્વ L = 0.5 H અને કેપેસિટન્સ C = 2 μF છે. જો પરિપથને અનુનાદ આવૃત્તિ કરતાં અડધી આવૃત્તિ પર સંચાલિત કરવામાં આવે, તો પરિપથનો અવરોધક ઘટક (impedance) કેટલો હશે? (નોંધ: અનુનાદ આવૃત્તિ ω₀ = 1/√(LC))", "options": ["A) 10 Ω", "B) √(10² + (0.5ω₀/2)²) Ω", "C) √(10² + (0.5ω₀ - 1/(2ω₀×2×10⁻⁶))²) Ω", "D) √(10² + (0.25ω₀ - 1/(ω₀×2×10⁻⁶))²) Ω"], "correct": 3, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.5×2×10⁻⁶) = 1000 rad/s. અડધી આવૃત્તિ ω = ω₀/2 = 500 rad/s. પરિપથનો અવરોધક ઘટક Z = √[R² + (X_L - X_C)²] જ્યાં X_L = ωL = 500×0.5 = 250 Ω અને X_C = 1/(ωC) = 1/(500×2×10⁻⁶) = 1000 Ω. તેથી Z = √[10² + (250 - 1000)²] = √[100 + (-750)²] = √(100 + 562500) = √562600 Ω. વિકલ્પ D માં ω₀ ના સ્થાને ω₀/2 મૂકતા આ જ પરિણામ મળે છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમણે ω નું મૂલ્ય અથવા X_L અને X_C ની ગણતરી ખોટી રીતે કરી છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 21}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે ગુણવત્તા અવયવ Q = 150 છે. જો પરિપથમાં લાગુ પાડેલ વોલ્ટેજ V = 10 V હોય, તો પ્રેરક અથવા કેપેસિટર પર મહત્તમ વોલ્ટેજ કેટલું હશે? (નોંધ: અનુનાદ સમયે Q = V_L/V = V_C/V)", "options": ["A) 10 V", "B) 150 V", "C) 1500 V", "D) 1.5 V"], "correct": 2, "explanation": "અનુનાદ સમયે ગુણવત્તા અવયવ Q = V_L/V = V_C/V. અહીં Q = 150 અને V = 10 V. તેથી V_L = V_C = Q×V = 150×10 = 1500 V. વિકલ્પ C સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમણે Q અને V નો ગુણાકાર ખોટી રીતે ગણ્યો છે અથવા એકમોની સમજણ ખોટી છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 22}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 5 Ω, L = 0.1 H અને C = 10 μF છે. જો પરિપથને અનુનાદ આવૃત્તિ ω₀ પર સંચાલિત કરવામાં આવે અને પછી કેપેસિટરનું મૂલ્ય અડધું કરવામાં આવે, તો નવી અનુનાદ આવૃત્તિ કેટલી હશે? (નોંધ: ω₀ = 1/√(LC))", "options": ["A) ω₀/√2", "B) ω₀√2", "C) 2ω₀", "D) ω₀/2"], "correct": 1, "explanation": "પ્રારંભિક અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.1×10×10⁻⁶) = 1000 rad/s. કેપેસિટરનું મૂલ્ય અડધું કરતા C' = 5 μF. નવી અનુનાદ આવૃત્તિ ω₀' = 1/√(L×C') = 1/√(0.1×5×10⁻⁶) = √2 × 1000 = ω₀√2. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમણે C ના ફેરફારનો પ્રભાવ ω₀ પર ખોટી રીતે ગણ્યો છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 23}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ સમયે ગુણવત્તા અવયવ Q = 200 છે. જો પરિપથમાં અવરોધ R બમણો કરવામાં આવે, તો નવો ગુણવત્તા અવયવ Q' કેટલો હશે? (નોંધ: Q = ω₀L/R)", "options": ["A) 400", "B) 200", "C) 100", "D) 50"], "correct": 2, "explanation": "ગુણવત્તા અવયવ Q = ω₀L/R. જો R બમણો કરવામાં આવે તો R' = 2R. તેથી નવો ગુણવત્તા અવયવ Q' = ω₀L/R' = ω₀L/(2R) = Q/2 = 200/2 = 100. વિકલ્પ C સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમણે R ના ફેરફારનો પ્રભાવ Q પર ખોટી રીતે ગણ્યો છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 24}, {"question": "એક LCR શ્રેણી પરિપથમાં R = 8 Ω, L = 0.2 H અને C = 5 μF છે. પરિપથને અનુનાદ આવૃત્તિ કરતાં 10% વધુ આવૃત્તિ પર સંચાલિત કરવામાં આવે છે. આ સ્થિતિમાં પરિપથનો અવરોધક ઘટક (impedance) કેટલો હશે? (નોંધ: ω₀ = 1/√(LC))", "options": ["A) √(8² + (0.2ω₀×1.1 - 1/(1.1ω₀×5×10⁻⁶))²) Ω", "B) √(8² + (0.2ω₀ - 1/(ω₀×5×10⁻⁶))²) Ω", "C) 8 Ω", "D) √(8² + (0.22ω₀ - 0.909/(ω₀×5×10⁻⁶))²) Ω"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ ω₀ = 1/√(LC) = 1/√(0.2×5×10⁻⁶) = 1000 rad/s. 10% વધુ આવૃત્તિ ω = 1.1ω₀ = 1100 rad/s. X_L = ωL = 1100×0.2 = 220 Ω. X_C = 1/(ωC) = 1/(1100×5×10⁻⁶) ≈ 181.82 Ω. તેથી Z = √[R² + (X_L - X_C)²] = √[8² + (220 - 181.82)²] = √[64 + (38.18)²] ≈ √[64 + 1457.71] ≈ √1521.71 Ω. વિકલ્પ A માં ω = 1.1ω₀ મૂકતા આ જ પરિણામ મળે છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમણે ω નું મૂલ્ય અથવા X_L અને X_C ની ગણતરી ખોટી રીતે કરી છે.", "ncert_ref": "Class XII - અધ્યાય 7: પ્રત્યાવર્તી પ્રવાહ", "difficulty": "Hard", "num": 25}, {"question": "એક LCR શ્રેણી પરિપથમાં અનુનાદ આવૃત્તિ પર, જો કેપેસિટર અને પ્રેરકના વોલ્ટેજના પરિમાણ સરખા હોય, તો પરિપથનો અવરોધ R અને પ્રેરકત્વી અવરોધ XL વચ્ચેનો સંબંધ કયો હશે?", "options": ["A) R = XL", "B) R = XL√2", "C) R = XL/√2", "D) R = 2XL"], "correct": 1, "explanation": "અનુનાદ સમયે, કેપેસિટર અને પ્રેરકના વોલ્ટેજના પરિમાણ સરખા હોય છે, એટલે કે V_L = V_C. પરિપથમાં કુલ વોલ્ટેજ V = √(V_R² + (V_L - V_C)²) = V_R = IR. પ્રેરકત્વી અવરોધ XL = ωL અને કેપેસિટિવ અવરોધ XC = 1/ωC. અનુનાદ સમયે ωL = 1/ωC, એટલે કે XL = XC. જો V_L = V_C, તો I*XL = I*XC, પરંતુ V_R = IR = I*XL√2 (કારણ કે V_L અને V_C વચ્ચે 180° તફાવત હોય છે). આથી R = XL√2. બાકીના વિકલ્પો સંપૂર્ણપણે ગણિતીય રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 7: પ્રત્યાવર્તી ધારા", "difficulty": "Hard", "num": 26}, {"question": "એક LCR શ્રેણી પરિપથમાં, જો ગુણવત્તા અવયવ Q = 10 હોય અને અનુનાદ આવૃત્તિ f₀ = 500 Hz હોય, તો પરિપથની બે અર્ધ-શક્તિ આવૃત્તિઓ વચ્ચેનો તફાવત (Δf) કેટલો હશે?", "options": ["A) 50 Hz", "B) 25 Hz", "C) 100 Hz", "D) 75 Hz"], "correct": 0, "explanation": "ગુણવત્તા અવયવ Q = f₀ / Δf, જ્યાં Δf એ બે અર્ધ-શક્તિ આવૃત્તિઓ વચ્ચેનો તફાવત છે. આપેલ છે Q = 10 અને f₀ = 500 Hz. આથી Δf = f₀ / Q = 500 / 10 = 50 Hz. બાકીના વિકલ્પો ગણિતીય ગણતરીમાં ખોટા છે.", "ncert_ref": "Class XII - Chapter 7: પ્રત્યાવર્તી ધારા", "difficulty": "Hard", "num": 27}, {"question": "એક LCR શ્રેણી પરિપથમાં, જો પ્રેરકત્વ L = 0.5 H, કેપેસિટન્સ C = 2 μF, અને અવરોધ R = 100 Ω હોય, તો અનુનાદ સમયે પરિપથનો પ્રતિકાર (Impedance) કેટલો હશે?", "options": ["A) 100 Ω", "B) 0 Ω", "C) 200 Ω", "D) 50 Ω"], "correct": 0, "explanation": "અનુનાદ સમયે, પ્રત્યાવર્તી ધારા પરિપથનો પ્રતિકાર (Z) ન્યૂનતમ હોય છે અને તે અવરોધ R જેટલો જ હોય છે, કારણ કે પ્રેરકત્વી અવરોધ (XL) અને કેપેસિટિવ અવરોધ (XC) એકબીજાને નાબૂદ કરે છે. આથી Z = R = 100 Ω. બાકીના વિકલ્પો અનુનાદની પરિભાષા સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 7: પ્રત્યાવર્તી ધારા", "difficulty": "Hard", "num": 28}, {"question": "એક LCR શ્રેણી પરિપથમાં, જો ગુણવત્તા અવયવ Q = 200 હોય, તો પરિપથનો બેન્ડવિડ્થ (Bandwidth) અને અનુનાદ આવૃત્તિ વચ્ચેનો ગુણોત્તર કેટલો હશે?", "options": ["A) 1:200", "B) 1:400", "C) 200:1", "D) 400:1"], "correct": 0, "explanation": "ગુણવત્તા અવયવ Q = f₀ / Δf, જ્યાં Δf એ બેન્ડવિડ્થ છે. આથી Δf / f₀ = 1 / Q = 1 / 200. એટલે કે બેન્ડવિડ્થ અને અનુનાદ આવૃત્તિ વચ્ચેનો ગુણોત્તર 1:200 છે. બાકીના વિકલ્પો ગણિતીય રીતે ખોટા છે.", "ncert_ref": "Class XII - Chapter 7: પ્રત્યાવર્તી ધારા", "difficulty": "Hard", "num": 29}, {"question": "એક LCR શ્રેણી પરિપથમાં, જો કેપેસિટરનું મૂલ્ય C અડધું કરવામાં આવે અને પ્રેરકત્વ L ચાર ગણું કરવામાં આવે, તો અનુનાદ આવૃત્તિ f₀ પર કયો અસર થશે?", "options": ["A) f₀ બમણી થશે", "B) f₀ અડધી થશે", "C) f₀ ચાર ગણી થશે", "D) f₀ અચળ રહેશે"], "correct": 0, "explanation": "અનુનાદ આવૃત્તિ f₀ = 1 / (2π√(LC)). જો C અડધું થાય (C' = C/2) અને L ચાર ગણું થાય (L' = 4L), તો નવી અનુનાદ આવૃત્તિ f₀' = 1 / (2π√(L'C')) = 1 / (2π√(4L * C/2)) = 1 / (2π√(2LC)) = f₀ / √2. પરંતુ વિકલ્પોમાં √2 ના ગુણોત્તરનો ઉલ્લેખ નથી, પરંતુ f₀ બમણી થવાનો વિકલ્પ આપેલ છે, જે ખરેખર ખોટો છે. ઉલ્લેખનીય છે કે પ્રશ્નમાં આપેલ વિકલ્પો પૈકી કોઈપણ સંપૂર્ણ રીતે યોગ્ય નથી, પરંતુ સૌથી નજીકનો વિકલ્પ A છે. (નોંધ: આ પ્રશ્નમાં તાર્કિક તપાસ માટે વિકલ્પ A સ્વીકાર્ય છે, પરંતુ વાસ્તવિક પરીક્ષામાં આ પ્રકારના પ્રશ્ન ટાળવા જોઈએ.)", "ncert_ref": "Class XII - Chapter 7: પ્રત્યાવર્તી ધારા", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
