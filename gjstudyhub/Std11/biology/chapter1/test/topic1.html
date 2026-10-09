@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;font-family:'JetBrains Mono',monospace;}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.download-bar{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.toast{position:fixed;bottom:20px;right:18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 15px;font-size:12px;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:var(--success);color:var(--success);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">Quiz</div>
+    <h1>My Quiz</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+
+    
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div class="panel-title" style="margin-bottom:3px;">My Quiz</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">
+          Q<span id="cur-num">1</span> of <span id="tot-num">?</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">⏱️ Timed Exam</div>
+        <div class="meta-badge" id="timer-badge" style="display:block">⏱️ —</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/>
+          <stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <div class="download-bar">
+      <button class="btn btn-outline" onclick="restartQuiz()">↺ Try Again</button>
+      <button class="btn" onclick="downloadResults()">⬇ Results Download</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q":"નીચેનામાંથી કયા બે લક્ષણોને વૃદ્ધિના જોડિયા લક્ષણો (Twin characteristics) કહેવામાં આવે છે?","opts":["કદમાં વધારો અને આકારમાં ફેરફાર","કદમાં વધારો અને વજનમાં ઘટાડો","કદમાં વધારો (દ્રવ્યમાનમાં વધારો) અને સંખ્યામાં વધારો","કોષોના પ્રકારમાં ફેરફાર અને વિકાસ"],"ans":2},{"q":"એકકોષીય સજીવોમાં વૃદ્ધિ કોના દ્વારા સરળતાથી જોઈ શકાય છે?","opts":["ઇન-વિટ્રો સંવર્ધનમાં કોષ વિભાજનની ગણતરી કરીને","તેના વજનમાં થતા ફેરફાર દ્વારા","તેના પ્રજનન અંગોના વિકાસ દ્વારા","માત્ર ઇલેક્ટ્રોન માઇક્રોસ્કોપની મદદથી"],"ans":0},{"q":"ઉચ્ચ કક્ષાના પ્રાણીઓ અને વનસ્પતિઓમાં વૃદ્ધિ અને પ્રજનન કેવી ઘટનાઓ છે?","opts":["પરસ્પર સમાવેશી ઘટનાઓ (Synonymous)","પરસ્પર અલગ રહેતી (પરસ્પર નિવારક) ઘટનાઓ (Mutually exclusive)","એકબીજા પર આધારિત ન હોય તેવી ઘટનાઓ","બિન-જૈવિક ઘટનાઓ"],"ans":1},{"q":"જો દ્રવ્યમાનમાં (વજનમાં) થતા વધારાને વૃદ્ધિ તરીકે ગણવામાં આવે, તો નીચેનામાંથી કોણ વૃદ્ધિ દર્શાવે છે?","opts":["માત્ર સજીવો","માત્ર વનસ્પતિઓ","નિર્જીવ વસ્તુઓ (જેમ કે પર્વતો, સ્ફટિકો અને રેતીના ઢગલા)","વાયરસ"],"ans":2},{"q":"સજીવોમાં થતી વૃદ્ધિ અને નિર્જીવોમાં થતી વૃદ્ધિ વચ્ચે મુખ્ય તફાવત શો છે?","opts":["સજીવોમાં વૃદ્ધિ બહારથી થાય છે, નિર્જીવોમાં અંદરથી","સજીવોમાં વૃદ્ધિ અંદરની તરફથી થાય છે, નિર્જીવોમાં બહારની સપાટી પર દ્રવ્યો એકઠા થવાથી","નિર્જીવોમાં કોષ વિભાજન થાય છે, સજીવોમાં નહીં","બંનેમાં વૃદ્ધિ એક જ પ્રકારે થાય છે"],"ans":1},{"q":"વૃદ્ધિને સજીવોનું સંપૂર્ણ બિન-અપવાદરૂપ (Defining) લક્ષણ કેમ માનવામાં આવતું નથી?","opts":["કારણ કે વનસ્પતિઓમાં વૃદ્ધિ મર્યાદિત હોય છે","કારણ કે નિર્જીવ વસ્તુઓ પણ વજન અને કદમાં વધી શકે છે","કારણ કે બધા સજીવો વૃદ્ધિ પામતા નથી","કારણ કે વૃદ્ધિ માત્ર પ્રયોગશાળામાં જ થાય છે"],"ans":1},{"q":"મૃત સજીવોના સંદર્ભમાં વૃદ્ધિ માટે કયું વિધાન સાચું છે?","opts":["મૃત સજીવો ખૂબ ઝડપથી વૃદ્ધિ પામે છે","મૃત સજીવો અંદરથી વૃદ્ધિ પામે છે","મૃત સજીવો વૃદ્ધિ પામતા નથી","મૃત સજીવો માત્ર રાત્રે જ વૃદ્ધિ પામે છે"],"ans":2},{"q":"વનસ્પતિઓમાં કોષ વિભાજન દ્વારા થતી વૃદ્ધિ કયા વિસ્તારો પૂરતી મર્યાદિત હોય છે?","opts":["વર્ધનશીલ પેશીના વિસ્તારો (Meristematic regions)","માત્ર પર્ણના કોષોમાં","માત્ર મૂળના અગ્રભાગમાં","વનસ્પતિના મૃત કોષોમાં"],"ans":0},{"q":"પ્રાણીઓમાં કોષ વિભાજન ચોક્કસ ઉંમર પછી પણ શા માટે થાય છે?","opts":["કદમાં સતત વધારો કરવા માટે","નષ્ટ પામેલા કે ક્ષતિગ્રસ્ત કોષોની બદલી (સમારકામ) કરવા માટે","પ્રજનન ક્ષમતા વધારવા માટે","વજન ઘટાડવા માટે"],"ans":1},{"q":"પ્લેનેરિયા (ચપટા કૃમિ) માં કયા પ્રકારનું અદ્ભુત પ્રજનન જોવા મળે છે?","opts":["કલિકાસર્જન","સાચું પુનર્જનન (True Regeneration)","દ્વિભાજન","બીજાણુસર્જન"],"ans":1},{"q":"ફૂગ, તંતુમય લીલ અને મોસના પ્રતંતુ (Protonema) ખૂબ જ સરળતાથી કઈ પદ્ધતિ દ્વારા સંખ્યા વધારે છે?","opts":["લિંગી પ્રજનન","અપખંડન (Fragmentation)","કલિકાસર્જન","અંડપ્રસવતા"],"ans":1},{"q":"કયા સજીવો માટે 'વૃદ્ધિ' અને 'પ્રજનન' બંને શબ્દો એક જ અર્થ (સમાનાર્થી) માં વપરાય છે?","opts":["બહુકોષીય પ્રાણીઓ","ઉચ્ચ કક્ષાની વનસ્પતિઓ","એકકોષીય સજીવો (જેમ કે અમીબા, બેક્ટેરિયા અને એકકોષીય લીલ)","માત્ર સરીસૃપો"],"ans":2},{"q":"નીચેનામાંથી કયા સજીવો જીવંત હોવા છતાં પ્રજનન કરવાની ક્ષમતા ધરાવતા નથી?","opts":["ખચ્ચર (Mule)","વંધ્ય કામદાર મધમાખી (Worker bees)","વંધ્ય માનવ યુગલો (Infertile human couples)","આપેલા તમામ"],"ans":3},{"q":"પ્રજનનને સજીવોનું સંપૂર્ણ બિન-અપવાદરૂપ (Defining) લક્ષણ કેમ ગણવામાં આવતું નથી?","opts":["કારણ કે નિર્જીવો પણ પ્રજનન કરે છે","કારણ કે કેટલાક જીવંત સજીવો પ્રજનન કરી શકતા નથી","કારણ કે પ્રજનન માત્ર વનસ્પતિમાં જ થાય છે","કારણ કે પ્રજનનથી કદ વધતું નથી"],"ans":1},{"q":"યીસ્ટ (Yeast) અને હાઇડ્રા (Hydra) માં કયા પ્રકારનું અલિંગી પ્રજનન જોવા મળે છે?","opts":["અપખંડન","કલિકાસર્જન (Budding)","દ્વિભાજન","બહુભાજન"],"ans":1},{"q":"ફૂગ પોતાના લાખો અલિંગી બીજાણુઓ દ્વારા ખૂબ જ ઝડપથી પ્રસરણ પામે છે, આ બીજાણુઓને શું કહેવાય છે?","opts":["ચલબીજાણુઓ (Zoospores)","કણબીજાણુઓ અથવા અલિંગી બીજાણુઓ (Asexual spores)","જન્યુઓ","યુગ્મનજ"],"ans":1},{"q":"આપણા શરીરમાં થતી તમામ રાસાયણિક પ્રક્રિયાઓનો સરવાળો એટલે શું?","opts":["પાચન","ચયાપચય (Metabolism)","શ્વસન","ઉત્સર્જન"],"ans":1},{"q":"નીચેનામાંથી કયું વિધાન ચયાપચય માટે સંપૂર્ણ સાચું છે?","opts":["માત્ર વનસ્પતિઓ જ ચયાપચય દર્શાવે છે","કોઈ પણ નિર્જીવ વસ્તુ ચયાપચય દર્શાવતી નથી","વાયરસ મુક્ત અવસ્થામાં ચયાપચય દર્શાવે છે","ચયાપચય માત્ર રાત્રે જ થાય છે"],"ans":1},{"q":"પ્રયોગશાળામાં કોષમુક્ત તંત્રમાં (In-vitro) જૈવ-રાસાયણિક પ્રક્રિયા કરવામાં આવે, તો તેને શું કહેવાય?","opts":["તે એક જીવંત સજીવ છે","તે એક નિર્જીવ પ્રક્રિયા છે","તે જીવંત વસ્તુ નથી, પરંતુ ચોક્કસપણે એક 'જીવંત પ્રક્રિયા' (Living reaction) છે","તે ભૌતિક પ્રક્રિયા છે"],"ans":2},{"q":"ચયાપચયના કયા બે મુખ્ય પ્રકારો છે?","opts":["શ્વસન અને ઉત્સર્જન","ચય (Anabolism) અને અપચય (Catabolism)","પાચન અને શોષણ","વૃદ્ધિ અને પ્રજનન"],"ans":1},{"q":"કોષોનું આયોજન અથવા 'કોષીય આયોજન' (Cellular organization) એ સજીવોનું કેવું લક્ષણ છે?","opts":["અપવાદરૂપ લક્ષણ","સંપૂર્ણ બિન-અપવાદરૂપ (Defining) લક્ષણ","નિર્જીવ જેવું લક્ષણ","અસ્થાયી લક્ષણ"],"ans":1},{"q":"સજીવનું સૌથી સ્પષ્ટ અને તકનીકી રીતે જટિલ લક્ષણ કયું છે?","opts":["વજનમાં વધારો","પ્રજનન કરવાની ક્ષમતા","પોતાની આસપાસના પર્યાવરણ પ્રત્યેની સભાનતા (Consciousness)","અલિંગી પ્રજનન"],"ans":2},{"q":"વનસ્પતિઓ કયા બાહ્ય પરિબળો (પર્યાવરણીય ઉત્તેજનાઓ) સામે પ્રતિક્રિયા આપે છે?","opts":["પ્રકાશ અને પાણી","તાપમાન અને અન્ય સજીવો","પ્રદૂષકો","આપેલા તમામ"],"ans":3},{"q":"પ્રકાશઅવધિ (Photoperiod) સજીવોમાં કઈ ક્રિયા પર સીધી અસર કરે છે?","opts":["માત્ર પ્રાણીઓના ખોરાક પર","ઋતુગત સંવર્ધકો (Seasonal breeders) ના પ્રજનન પર","વનસ્પતિના મૂળની લંબાઈ પર","સજીવોના મૃત્યુ દર પર"],"ans":1},{"q":"પૃથ્વી પરનો કયો સજીવ માત્ર પોતાની જાત પ્રત્યે સભાનતા (Self-consciousness) ધરાવે છે?","opts":["ચિમ્પાન્ઝી","સિંહ","મનુષ્ય (Human)","હાથી"],"ans":2},{"q":"હૉસ્પિટલમાં કોમા (Coma) માં પડેલા દર્દી, જેનું હૃદય અને ફેફસાં મશીન દ્વારા ચાલતા હોય, તેના માટે કયું વિધાન સભાનતાના સંદર્ભમાં સાચું છે?","opts":["તે સંપૂર્ણ સભાન છે","તે સ્વયં-સભાનતા (Self-consciousness) ધરાવતો નથી","તે નિર્જીવ પથ્થર જેવો છે","તે પ્રજનન કરી શકે છે"],"ans":1},{"q":"સજીવોના કયા લક્ષણને કારણે તેઓ ઉત્ક્રાંતિ અને અનુકૂલન સાધી શકે છે?","opts":["માત્ર વૃદ્ધિ","પર્યાવરણીય ઉત્તેજનાઓ સામે પ્રતિક્રિયા અને સભાનતા","માત્ર વજન વધારવું","અસ્થાયી ચયાપચય"],"ans":1},{"q":"આપણી આસપાસ જોવા મળતા કેમિકલ્સ કે દવાઓ પ્રત્યે શરીર જે પ્રતિક્રિયા આપે છે, તે સજીવના કયા ગુણધર્મને આભારી છે?","opts":["ચયાપચય અને સભાનતા","પ્રજનન","બાહ્ય વૃદ્ધિ","અપખંડન"],"ans":0},{"q":"કોષીય અંગિકાઓના ગુણધર્મો કોના કારણે જોવા મળે છે?","opts":["અંગિકામાં હાજર રહેલા આણ્વિક ઘટકોના કારણે જ","ઘટકો વચ્ચેની આંતરક્રિયાઓ (Interactions) ના પરિણામે","કોષરસના તાપમાનના કારણે","માત્ર બહારના વાતાવરણના કારણે"],"ans":1},{"q":"સજીવો સ્વયં-જનનિત, સ્વયં-વિકસિત અને બાહ્ય ઉત્તેજનાઓ સામે પ્રતિક્રિયા આપવાની ક્ષમતા ધરાવતા પરસ્પર આંતરક્રિયા કરતા તંત્રો છે. આ વ્યાખ્યા કોની છે?","opts":["નિર્જીવની","વાયરસની","જીવંત સજીવની (Living organism)","સ્ફટિકોની"],"ans":2},{"q":"જો કોઈ પ્રક્રિયામાં જટિલ અણુઓ તૂટીને સરળ અણુઓ બને (જેમ કે શ્વસન), તો તે કઈ ક્રિયા છે?","opts":["ચય ક્રિયા","અપચય ક્રિયા (Catabolism)","પ્રજનન ક્રિયા","ભૌતિક ક્રિયા"],"ans":1},{"q":"જો કોઈ પ્રક્રિયામાં સરળ અણુઓ જોડાઈને જટિલ અણુઓ બને (જેમ કે પ્રકાશસંશ્લેષણ), તો તે કઈ ક્રિયા છે?","opts":["અપચય ક્રિયા","ચય ક્રિયા (Anabolism)","ઉત્સર્જન ક્રિયા","વિખંડન ક્રિયા"],"ans":1},{"q":"બધા જ પ્રોકેરિયોટ્સ (આદિકોષકેન્દ્રી) થી લઈને જટિલ યુકેરિયોટ્સ (સુકોષકેન્દ્રી) કયો ગુણધર્મ સમાન રીતે દર્શાવે છે?","opts":["સ્વયં-સભાનતા","પર્યાવરણીય ઉત્તેજનાઓ પ્રત્યે સભાનતા અને પ્રતિક્રિયા","બહુકોષીય આયોજન","લિંગી પ્રજનન"],"ans":1},{"q":"નીચેનામાંથી કઈ ઘટના સજીવના મૃત્યુ પછી સંપૂર્ણપણે અટકી જાય છે?","opts":["ચયાપચય","કોષીય આયોજનની જીવંત સ્થિતિ","ઉત્તેજના સામે પ્રતિક્રિયા","આપેલા તમામ"],"ans":3},{"q":"અમીબામાં થતું દ્વિભાજન (Binary fission) એ નીચેનામાંથી શેનું ઉદાહરણ છે?","opts":["માત્ર વૃદ્ધિ","માત્ર પ્રજનન","વૃદ્ધિ અને પ્રજનન બંને (પરસ્પર સમાવેશી)","ચય ક્રિયાનો અભાવ"],"ans":2},{"q":"નિર્જીવ સપાટી પર થતો દ્રવ્યોનો જમાવડો (Accretion) એ કયા પ્રકારની વૃદ્ધિ દર્શાવે છે?","opts":["આંતરિક વૃદ્ધિ","બાહ્ય વૃદ્ધિ (Extrinsic growth)","કોષ વિભાજન આધારિત વૃદ્ધિ","જૈવિક વૃદ્ધિ"],"ans":1},{"q":"કોઈ સજીવ નવું જીવંત તત્વ પેદા કર્યા વગર પોતાનું જીવન ટકાવી રાખે છે, આ વિધાન કયા લક્ષણ તરફ ઈશારો કરે છે?","opts":["પ્રજનન જીવન ટકાવવા માટે અનિવાર્ય (જરૂરી) નથી","ચયાપચય જરૂરી નથી","વૃદ્ધિ જરૂરી નથી","સભાનતા વગર જીવન શક્ય છે"],"ans":0},{"q":"પેશીઓના ગુણધર્મો કોના કારણે ઉદ્ભવે છે?","opts":["તેમાં રહેલા સ્વતંત્ર કોષોના કારણે","બંધારણીય કોષો વચ્ચેની આંતરક્રિયાઓ (Interactions) ના પરિણામે","પેશીના કદના કારણે","લોહીના દબાણના કારણે"],"ans":1},{"q":"જીવવિજ્ઞાન (Biology) એ પૃથ્વી પર કોની વાર્તા છે?","opts":["માત્ર રાસાયણિક તત્વોની","સજીવોના જીવનની અને તેમની ઉત્ક્રાંતિની (Evolution)","માત્ર પર્વતો અને નદીઓની","યંત્રોની ગોઠવણીની"],"ans":1},{"q":"ભૂતકાળ, વર્તમાન અને ભવિષ્યના તમામ સજીવો એકબીજા સાથે સામાન્ય આનુવંશિક દ્રવ્યની વહેંચણી દ્વારા જોડાયેલા છે, આ દ્રવ્ય કયું છે?","opts":["માત્ર પ્રોટીન","DNA અને આનુવંશિક દ્રવ્ય (વિવિધ અંશે સમાન)","માત્ર કાર્બોદિત","કોષદીવાલ"],"ans":1},{"q":"નીચેનામાંથી સજીવનું કયું લક્ષણ માત્ર આંતરિક હોઈ શકે છે?","opts":["બાહ્ય અવાજ સાંભળવો","આંતરિક વૃદ્ધિ અને ચયાપચય","સપાટી પર રેતી જમા થવી","કપડાં મોટા થવા"],"ans":1},{"q":"કલિકા (Bud) દ્વારા નવો સજીવ બનાવવાની ક્ષમતા નીચેનામાંથી કોણ ધરાવે છે?","opts":["અમીબા","હાઇડ્રા (Hydra)","પ્લેનેરિયા","બેક્ટેરિયા"],"ans":1},{"q":"વંધ્ય કામદાર મધમાખીઓ જીવંત હોવા છતાં કયું મુખ્ય જૈવિક લક્ષણ દર્શાવતી નથી?","opts":["ચયાપચય","પ્રજનન (Reproduction)","ચેતના","કોષીય આયોજન"],"ans":1},{"q":"છોડ જ્યારે સૂર્યપ્રકાશ તરફ નમે છે (પ્રકાશાવર્તન), ત્યારે તે સજીવનું કયું લક્ષણ દર્શાવે છે?","opts":["પ્રજનન","બાહ્ય ઉત્તેજના સામે પ્રતિક્રિયા (ચેતના)","અપચય ક્રિયા","વજનમાં ઘટાડો"],"ans":1},{"q":"નીચેનામાંથી કયું વિધાન અમીબા માટે ખોટું છે?","opts":["તે એકકોષીય સજીવ છે","તેમાં વૃદ્ધિ અને પ્રજનન અલગ-અલગ જોઈ શકાય છે","તે કોષ વિભાજન દ્વારા પ્રજનન કરે છે","તે ચયાપચય દર્શાવે છે"],"ans":1},{"q":"જીવંત સજીવોના શરીરમાંથી પાણી અને નકામા પદાર્થો બહાર કાઢવાની ક્રિયા કોના નિયંત્રણ હેઠળ થાય છે?","opts":["ભૌતિક બળ","ચયાપચય અને હોમિયોસ્ટેસિસ (સમસ્થિતિ)","માત્ર ગુરુત્વાકર્ષણ","બાહ્ય વૃદ્ધિ"],"ans":1},{"q":"સજીવોના લક્ષણોના સંદર્ભમાં 'ચેતના' (Consciousness) માટે કયું વિધાન સાર્વત્રિક રીતે સાચું છે?","opts":["તે માત્ર મનુષ્યોમાં જ હોય છે","તે સજીવોનું સંપૂર્ણ બિન-અપવાદરૂપ (Defining) લક્ષણ છે","તે નિર્જીવ વસ્તુઓમાં પણ જોવા મળે છે","વનસ્પતિમાં ચેતના હોતી નથી"],"ans":1},{"q":"શરીરમાં ચય (Anabolism) નો દર જો અપચય (Catabolism) ના દર કરતાં વધુ હોય, તો સજીવમાં શું જોવા મળશે?","opts":["હકારાત્મક વૃદ્ધિ (Growth)","વજનમાં ઘટાડો","સજીવનું મૃત્યુ","કોઈ ફેરફાર નહીં થાય"],"ans":0},{"q":"શરીરમાં અપચય (Catabolism) નો દર જો ચય (Anabolism) ના દર કરતાં વધી જાય, તો સજીવમાં શું જોવા મળશે?","opts":["ખૂબ વધુ વૃદ્ધિ","નકારાત્મક વૃદ્ધિ / ઘસારો (Negative growth / Atrophy)","પ્રજનનમાં વધારો","કોષોની સંખ્યા બમણી થવી"],"ans":1},{"q":"સજીવોના વર્ગીકરણ અને અભ્યાસ માટે નીચેનામાંથી કયું લક્ષણ પાયાનું અને પ્રથમ અનિવાર્ય લક્ષણ બને છે?","opts":["સજીવના જીવંત લક્ષણોની ઓળખ (Identification)","માત્ર તેનું વજન કરવું","તેનું મૃત્યુ થવા દેવું","તેનું કદ માપવું"],"ans":0},{"q":"શરીરની બહાર ટેસ્ટ-ટ્યુબમાં થતી જૈવિક પ્રક્રિયાઓ માટે કયું વિધાન સાચું છે?","opts":["તે નિર્જીવ વસ્તુ છે","તે જીવંત સજીવ છે","તે જીવંત પ્રક્રિયા છે પણ જીવંત સજીવ નથી","તે ભૌતિક ઘટના છે"],"ans":2},{"q":"લિંગી પ્રજનન દર્શાવતા સજીવોમાં સંતતિઓ કેવા લક્ષણો ધરાવે છે?","opts":["પિતૃઓ જેવા જ આબેહૂબ","પિતૃઓ સાથે ઓછા-વત્તા અંશે સમાનતા ધરાવતા","પિતૃઓથી તદ્દન જુદા જ","લક્ષણો હોતા જ નથી"],"ans":1},{"q":"કયા પ્રકારની વૃદ્ધિ માત્ર સજીવોનું જ વિશિષ્ટ લક્ષણ છે?","opts":["બાહ્ય વૃદ્ધિ","આંતરિક વૃદ્ધિ (Intrinsic growth)","અસ્થાયી વૃદ્ધિ","દ્રવ્યમાનનો જમાવડો"],"ans":1},{"q":"મગજ મૃત્યુ (Brain dead) પામેલા વ્યક્તિને હોસ્પિટલમાં લાઈફ સપોર્ટ પર રાખવામાં આવે ત્યારે કયું લક્ષણ અદ્રશ્ય હોય છે?","opts":["ચયાપચય","હૃદયના ધબકારા","સ્વયં-સભાનતા (Self-consciousness)","કોષીય શ્વસન"],"ans":2},{"q":"અમીબામાં કોષ વિભાજન એ વૃદ્ધિ છે કે પ્રજનન?","opts":["માત્ર વૃદ્ધિ","માત્ર પ્રજનન","વૃદ્ધિ અને પ્રજનન બંને એક જ છે (પરસ્પર સમાવેશી)","બેમાંથી એક પણ નહીં"],"ans":2},{"q":"કોઈ સજીવનું વજન 10 ગ્રામથી વધીને 15 ગ્રામ થાય, તો તેને વૃદ્ધિનું કયું લક્ષણ કહેવાય?","opts":["સંખ્યામાં વધારો","દ્રવ્યમાનમાં વધારો (Increase in mass)","કદમાં ઘટાડો","વિભેદન"],"ans":1},{"q":"સજીવો પોતાની આસપાસના વાતાવરણમાં થતા ફેરફારોને કઈ અંગિકા કે રચના દ્વારા અનુભવે છે?","opts":["માત્ર હૃદય","સંવેદનાગ્રાહી અંગો કે કોષો (Sense organs)","માત્ર ઉત્સર્ગ અંગો","કોષદીવાલ"],"ans":1},{"q":"વનસ્પતિમાં પુષ્પસર્જન (Flowering) પર કયા બાહ્ય પરિબળની સીધી અસર થાય છે?","opts":["જમીનનો રંગ","પ્રકાશઅવધિ (Photoperiod)","પવનની દિશા","અવાજનું પ્રદૂષણ"],"ans":1},{"q":"ચયાપચયની ક્રિયાઓમાં 'અપચય' (Catabolism) નું ઉદાહરણ કયું છે?","opts":["પ્રકાશસંશ્લેષણ","ગ્લુકોઝનું શ્વસન દરમિયાન વિઘટન","પ્રોટીનનું સંશ્લેષણ","સ્ટાર્ચનું નિર્માણ"],"ans":1},{"q":"ચયાપચયની ક્રિયાઓમાં 'ચય' (Anabolism) નું ઉદાહરણ કયું છે?","opts":["પાચન","ગ્લાયકોલિસિસ","પ્રકાશસંશ્લેષણ દ્વારા ગ્લુકોઝ બનવો","ઉત્સર્જન"],"ans":2},{"q":"મોસ (Moss) ના પ્રતંતુ (Protonema) માં પ્રજનન કઈ અલિંગી પદ્ધતિ દ્વારા થાય છે?","opts":["કલિકાસર્જન","અપખંડન (Fragmentation)","દ્વિભાજન","બીજાણુધાની નિર્માણ"],"ans":1},{"q":"જો પૃથ્વી પરથી પ્રજનનની ક્રિયા સંપૂર્ણપણે બંધ થઈ જાય, તો સજીવો પર શું અસર થશે?","opts":["સજીવો અમર થઈ જશે","સજીવોની જાતિઓ ધીમે-ધીમે લુપ્ત થઈ જશે","સજીવોનું કદ વધી જશે","ચયાપચય બંધ થઈ જશે"],"ans":1},{"q":"રાસાયણિક, ભૌતિક કે જૈવિક ઉત્તેજનાઓ સામે પ્રતિક્રિયા આપવી એ સજીવનું કેવું લક્ષણ છે?","opts":["વૈકલ્પિક લક્ષણ","સંપૂર્ણ અને બિન-અપવાદરૂપ (Defining) લક્ષણ","નિર્જીવ જેવું લક્ષણ","અસ્થાયી લક્ષણ"],"ans":1},{"q":"કોષમુક્ત તંત્ર (Cell-free system) માં થતી જૈવિક પ્રક્રિયાઓ જીવંત સજીવ નથી, તો તેને શું કહેવાય?","opts":["નિર્જીવ રસાયણ","જીવંત પ્રક્રિયા (Living reaction)","કાલ્પનિક ઘટના","ભૌતિક બદલાવ"],"ans":1},{"q":"લાઈફ સપોર્ટ (મશીનો) પર રહેલા દર્દીના અંગો કાર્યરત હોય પણ મગજ સચેત ન હોય, તો તેને શું કહેવાય?","opts":["પૂર્ણ જીવિત","બ્રેઈન ડેડ (Brain dead)","મૃત સજીવ","સામાન્ય માણસ"],"ans":1},{"q":"સજીવોમાં જૈવિક અણુઓનું સતત નિર્માણ અને અન્ય અણુઓમાં રૂપાંતર થવાની ક્રિયાને શું કહે છે?","opts":["ઉત્સર્જન","ચયાપચય (Metabolism)","વહન","માત્ર પાચન"],"ans":1},{"q":"જીવંત સજીવોમાં કદ અને દ્રવ્યમાનમાં થતો કેવો વધારો અપ્રતિવર્તી (Irreversible) હોય છે?","opts":["અસ્થાયી વધારો","કાયમી અને આંતરિક વધારો (વૃદ્ધિ)","બાહ્ય ધૂળ જામવી","પાણી શોષાવાથી સોજો આવવો"],"ans":1},{"q":"નીચેનામાંથી કોણ પ્રજનન કરતું નથી પરંતુ જીવંત સજીવ તરીકે સ્વીકાર્ય છે?","opts":["વંધ્ય માનવ યુગલ","કાચનો ટુકડો","પથ્થર","વાયરસ"],"ans":0},{"q":"વનસ્પતિમાં સમગ્ર જીવનકાળ દરમિયાન કોષ વિભાજન ચાલુ રહે છે કારણ કે તેમની પાસે કઈ પેશી હોય છે?","opts":["મૃદુતક પેશી","દ્રઢોતક પેશી","વર્ધનશીલ પેશી (Meristematic tissue)","અન્નવાહક પેશી"],"ans":2},{"q":"સજીવોનું કયું આયોજન તેના જીવંત હોવાનો પાયાનો પુરાવો છે?","opts":["માત્ર પરમાણુ આયોજન","કોષીય આયોજન (Cellular organization)","માત્ર ભૌતિક આયોજન","અણુઓનું મિશ્રણ"],"ans":1},{"q":"એકકોષીય સજીવોમાં કોષ વિભાજન થવાથી કઈ બે ઘટનાઓ એકસાથે થાય છે?","opts":["પાચન અને શ્વસન","વૃદ્ધિ અને પ્રજનન","ઉત્સર્જન અને ચેતના","વૃદ્ધિ અને મૃત્યુ"],"ans":1},{"q":"પર્યાવરણના ઈશારા કે ઉત્તેજનાઓને સમજવાની ક્ષમતા કયા પ્રકારના સજીવો ધરાવે છે?","opts":["માત્ર ઉચ્ચ પ્રાણીઓ","માત્ર વનસ્પતિઓ","આદિકોષકેન્દ્રીથી લઈને બધા જ સુકોષકેન્દ્રી સજીવો","માત્ર વાયરસ"],"ans":2},{"q":"પ્લેનેરિયામાં ગુમાવેલા ભાગમાંથી આખો નવો સજીવ બનવાની ક્રિયાને શું કહે છે?","opts":["કલિકાસર્જન","સાચું પુનર્જનન (True regeneration)","બીજાણુસર્જન","દ્વિભાજન"],"ans":1},{"q":"સજીવોના શરીરમાં દ્રવ્યોનું સંશ્લેષણ થવું (નવા અણુ બનવા) એ કયા પ્રકારની ચયાપચયની ક્રિયા છે?","opts":["અપચય","ચય (Anabolism)","વિઘટન","ઉત્સર્જન"],"ans":1},{"q":"શ્વસન દરમિયાન ગ્લુકોઝ તૂટીને શક્તિ મુક્ત થવી એ કઈ ક્રિયા છે?","opts":["ચય","અપચય (Catabolism)","પ્રકાશસંશ્લેષણ","શોષણ"],"ans":1},{"q":"જો કોઈ નિર્જીવ વસ્તુ જેમ કે સ્ફટિક (Crystal) કદમાં વધે, તો તે કયા પ્રકારની ઘટના છે?","opts":["જૈવિક વૃદ્ધિ","બાહ્ય સપાટી પર દ્રવ્યોનો જમાવડો","આંતરિક કોષ વિભાજન","લિંગી પ્રજનન"],"ans":1},{"q":"સજીવોના કયા ગુણધર્મને કારણે દરેક પેઢી પોતાની પરંપરા જાળવી રાખે છે?","opts":["ચયાપચય","પ્રજનન (Reproduction)","ઘસારો","બાહ્ય વૃદ્ધિ"],"ans":1},{"q":"મોસ અને ફૂગના તંતુઓ તૂટીને નવા સજીવ બનાવે છે, આ પદ્ધતિ કઈ છે?","opts":["કલિકાસર્જન","અપખંડન (Fragmentation)","દ્વિભાજન","લિંગી જન્યુજનન"],"ans":1},{"q":"ઋતુગત સંવર્ધકો (Seasonal breeders) પ્રાણીઓ અને વનસ્પતિઓમાં પ્રજનનનો સમય કોના દ્વારા નક્કી થાય છે?","opts":["માત્ર તાપમાન","પ્રકાશઅવધિ (Photoperiod)","ભેજનું પ્રમાણ","જમીનની ફળદ્રુપતા"],"ans":1},{"q":"સજીવના શરીરમાં એકપણ કોષ ન હોય પણ ચયાપચયની પ્રક્રિયા કાચની નળીમાં થતી હોય તો તે પ્રક્રિયા કેવી ગણાય?","opts":["નિર્જીવ પ્રક્રિયા","જીવંત પ્રક્રિયા (Living reaction)","કૃત્રિમ પ્રક્રિયા","જૈવિક સજીવ"],"ans":1},{"q":"કયા ગુણધર્મના કારણે મનુષ્ય પોતાની જાત વિશે વિચારી શકે છે અને નિર્ણયો લઈ શકે છે?","opts":["માત્ર વૃદ્ધિ","સ્વયં-સભાનતા (Self-consciousness)","અપચય ક્રિયા","કલિકાસર્જન"],"ans":1},{"q":"વનસ્પતિમાં રાત્રિ દરમિયાન પ્રકાશસંશ્લેષણ બંધ થાય છે પણ કઈ ચયાપચયની ક્રિયા ચાલુ રહે છે?","opts":["શ્વસન (Respiration)","બાહ્ય વૃદ્ધિ","લિંગી પ્રજનન","અપખંડન"],"ans":0},{"q":"બહુકોષીય પ્રાણીઓમાં વૃદ્ધિ કયા પ્રકારની હોય છે?","opts":["અનિશ્ચિત અને અટક્યા વગરની","નિશ્ચિત ઉંમર સુધીની અને આંતરિક","માત્ર બાહ્ય સપાટી પરની","ક્યારેય ન થતી"],"ans":1},{"q":"નીચેનામાંથી સજીવનું કયું લક્ષણ અપવાદ વગર તમામ સજીવોમાં જોવા મળે છે જ?","opts":["પ્રજનન","ચયાપચય અને કોષીય આયોજન","માત્ર લિંગી પ્રજનન","લોકોમોશન (ચલન)"],"ans":1},{"q":"હાઇડ્રા (Hydra) માં શરીરની બહાર નાનો ઉપસેલો ભાગ બને છે અને નવો સજીવ બને છે, તેને શું કહે છે?","opts":["અપખંડન","કલિકાસર્જન (Budding)","પુનર્જનન","દ્વિભાજન"],"ans":1},{"q":"સજીવોમાં થતી જૈવ-રાસાયણિક પ્રક્રિયાઓ કયા પ્રકારના અણુઓ (જૈવ અણુઓ) દ્વારા નિયંત્રિત થાય છે?","opts":["માત્ર પાણીના અણુઓ","ઉત્સેચકો (Enzymes) અને પ્રોટીન","રેતીના કણો","પ્લાસ્ટિક"],"ans":1},{"q":"વનસ્પતિઓ અને પ્રાણીઓ બંને પર્યાવરણના કયા પરિબળો પ્રત્યે સંવેદનશીલ હોય છે?","opts":["પ્રકાશ અને તાપમાન","પાણી અને પ્રદૂષકો","અન્ય સજીવો","આપેલા તમામ"],"ans":3},{"q":"સજીવ તંત્રની કટોકટીની સ્થિતિ (જેમ કે કોમા) માં કયું લક્ષણ નહિવત જેવું થઈ જાય છે?","opts":["બાહ્ય સભાનતા અને પ્રતિક્રિયા","આંતરિક ચયાપચય","કોષીય શ્વસન","લોહીનું વહન"],"ans":0},{"q":"અમીબા જેવા એકકોષીય સજીવમાં નવો સજીવ બનવા માટે કઈ કોષીય પ્રક્રિયા જરૂરી છે?","opts":["કોષરસનું સુકાઈ જવું","કોષ વિભાજન (Cell division)","માત્ર કદ વધવું","મૃત્યુ થવું"],"ans":1},{"q":"ચયાપચય એ સજીવનું કેવું લક્ષણ છે?","opts":["અપવાદરૂપ","સંપૂર્ણ બિન-અપવાદરૂપ (Defining characteristic)","નિર્જીવ વસ્તુઓ પણ દર્શાવે તેવું","અસ્થાયી"],"ans":1},{"q":"નીચેનામાંથી કઈ જોડી પ્રજનન દર્શાવતી નથી પણ જીવંત છે?","opts":["અમીબા અને પેરામીશિયમ","ખચ્ચર અને વંધ્ય કામદાર મધમાખી","યીસ્ટ અને હાઇડ્રા","ફૂગ અને લીલ"],"ans":1},{"q":"સજીવોમાં થતી 'ચય' (Anabolic) પ્રક્રિયાઓનું મુખ્ય પરિણામ શું હોઈ શકે?","opts":["શક્તિનો નાશ થવો","નવા કોષીય ઘટકોનું નિર્માણ અને વૃદ્ધિ","વજનમાં તાત્કાલિક ઘટાડો","સજીવનું મૃત્યુ"],"ans":1},{"q":"નિર્જીવ વસ્તુઓમાં દ્રવ્યમાનનો વધારો એ સજીવની વૃદ્ધિથી અલગ છે કારણ કે:","opts":["તે અંદરથી થાય છે","તે સપાટી પર બહારથી દ્રવ્યો જમા થવાને કારણે થાય છે","તે ક્યારેય થતો નથી","તે કોષ વિભાજનથી થાય છે"],"ans":1},{"q":"જીવંત સજીવોના કોષોમાં કયું તત્વ આનુવંશિક માહિતીનો સંગ્રહ અને વહન કરે છે?","opts":["કાર્બોદિત","ન્યુક્લિક એસિડ (DNA/RNA)","ચરબી","khaniij ksharo"],"ans":1},{"q":"મનુષ્યમાં ઉંમર વધવાની સાથે ચયાપચયના દરમાં શું ફેરફાર થાય છે?","opts":["ખૂબ વધી જાય છે","ધીમે-ધીમે ઘટે છે","બંધ થઈ જાય છે","સમાન જ રહે છે"],"ans":1},{"q":"ચેતના અથવા સભાનતા (Consciousness) માટે કયું વિધાન ખોટું છે?","opts":["તે બધા સજીવોનું લક્ષણ છે","પ્રોકેરિયોટ્સ પર્યાવરણ પ્રત્યે પ્રતિક્રિયા આપતા નથી","વનસ્પતિઓ પ્રકાશ અને તાપમાન પ્રત્યે પ્રતિક્રિયા આપે છે","મનુષ્ય સ્વયં-સભાનતા ધરાવે છે"],"ans":1},{"q":"ફૂગ કયા પ્રકારના બીજાણુઓ દ્વારા અલિંગી પ્રજનન કરે છે?","opts":["જન્યુઓ","અલિંગી બીજાણુઓ (Asexual spores)","યુગ્મનજ","ભ્રૂણ"],"ans":1},{"q":"સજીવોના અસ્તિત્વ માટે ચયાપચય શા માટે અનિવાર્ય છે?","opts":["શરીરનું કદ ઘટાડવા માટે","જૈવિક ક્રિયાઓ માટે સતત શક્તિ અને અણુઓ પૂરા પાડવા માટે","માત્ર ઊંઘવા માટે","નિર્જીવ બનવા માટે"],"ans":1},{"q":"જીવંત સજીવો કઈ લાક્ષણિકતાને કારણે ઉત્તેજનાઓ સામે પ્રતિક્રિયા આપીને પોતાનો બચાવ કરે છે?","opts":["માત્ર બાહ્ય વૃદ્ધિ","ચેતના અથવા સભાનતા (Consciousness)","અપખંડન","દ્વિભાજન"],"ans":1},{"q":"સજીવોમાં થતો ઘસારો અને કોષોનું મૃત્યુ એ કઈ પ્રક્રિયાનો એક ભાગ છે?","opts":["કાયમી બાહ્ય વૃદ્ધિ","સામાન્ય જૈવિક જીવનચક્ર અને અપચય ક્રિયાઓ","પ્રજનનનો પ્રકાર","જૈવવિવિધતા"],"ans":1}];
+const quizMode='exam';
+const TPQ=60;
+let userAns={}, curIdx=0, timerIv=null, timeLeft=TPQ;
+
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+
+function renderQ(){
+  clearInterval(timerIv);
+  const q=questions[curIdx];
+  const done=userAns[curIdx]!==undefined;
+  const isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  document.getElementById('q-area').innerHTML=
+    '<div class="question-card"><div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div>'+
+    '<div class="options-grid">'+optHtml+'</div>'+
+    (done?'<div style="background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:99px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);">✓ Correct: <strong style=color:#fff>'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong></div>':'')+
+    '</div>';
+  if(quizMode==='exam'&&!done){
+    timeLeft=TPQ;
+    const b=document.getElementById('timer-badge');
+    b.style.display='block';b.textContent='⏱️ '+timeLeft+'s';b.style.color='';
+    timerIv=setInterval(()=>{
+      timeLeft--;b.textContent='⏱️ '+timeLeft+'s';
+      if(timeLeft<=5)b.style.color='var(--danger)';
+      if(timeLeft<=0){clearInterval(timerIv);skipQ();}
+    },1000);
+  }
+}
+
+function pick(i){
+  clearInterval(timerIv);userAns[curIdx]=i;renderQ();
+  if(quizMode==='exam'&&curIdx<questions.length-1)setTimeout(()=>nav(1),900);
+}
+function nav(d){const n=curIdx+d;if(n<0||n>=questions.length)return;curIdx=n;renderQ();}
+function skipQ(){clearInterval(timerIv);if(userAns[curIdx]===undefined)userAns[curIdx]=-1;if(curIdx<questions.length-1){curIdx++;renderQ();}else finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+
+function finishQuiz(){
+  clearInterval(timerIv);
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  const grades=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']];
+  const [,gt,gm]=grades.find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c;
+  const ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+
+function downloadResults(){
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  let html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Results - My Quiz</title><style>body{font-family:Arial,sans-serif;max-width:720px;margin:40px auto;padding:20px;background:#f5f5f5;color:#222;}h1{text-align:center}.summary{display:flex;gap:14px;justify-content:center;margin:18px 0;flex-wrap:wrap}.stat{background:#fff;border-radius:10px;padding:13px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}.val{font-size:24px;font-weight:bold;margin-bottom:3px}.c{color:#2a9a60}.w{color:#c44}.s{color:#999}.q{background:#fff;border-radius:10px;padding:15px;margin-bottom:11px;box-shadow:0 2px 8px rgba(0,0,0,.06)}.qt{font-weight:bold;margin-bottom:9px;font-size:14px}.opt{padding:5px 10px;margin:3px 0;border-radius:6px;font-size:13px}.oc{background:#e8f9f0;color:#2a9a60;border:1px solid #2a9a60}.ow{background:#fde8e8;color:#c44;border:1px solid #c44}.op{background:#f5f5f5;border:1px solid #ddd}</style></head><body>';
+  html+='<h1>📊 My Quiz — Results</h1>';
+  html+='<div class="summary"><div class="stat"><div class="val c">'+cor+'</div><div>Correct</div></div><div class="stat"><div class="val w">'+wrg+'</div><div>Wrong</div></div><div class="stat"><div class="val s">'+skp+'</div><div>Skipped</div></div><div class="stat"><div class="val">'+pct+'%</div><div>Score</div></div></div>';
+  for(let i=0;i<questions.length;i++){
+    const q=questions[i],ua=userAns[i];
+    html+='<div class="q"><div class="qt">Q'+(i+1)+'. '+q.q+'</div>';
+    q.opts.forEach((opt,j)=>{let cls='op',pre='';if(j===q.ans){cls='oc';pre='✓ ';}else if(j===ua){cls='ow';pre='✗ ';}html+='<div class="opt '+cls+'">'+pre+'('+LETTERS[j]+') '+opt+'</div>';});
+    html+='</div>';
+  }
+  html+='</body></html>';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='results-my-quiz.html';a.click();
+}
+
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+</script>
+</body>
+</html>
