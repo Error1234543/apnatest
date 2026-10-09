@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VNTR</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>VNTR</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">VNTR</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "VNTR (Variable Number of Tandem Repeats) ની સૌથી યોગ્ય વ્યાખ્યા કઈ છે?", "opts": ["DNA ના અમુક ભાગોમાં પુનરાવર્તિત ક્રમોની સંખ્યામાં વૈવિધ્ય જોવા મળે છે, જે વ્યક્તિઓ વચ્ચે ભિન્ન હોય છે.", "DNA ના કોડિંગ ક્ષેત્રમાં એક જ પ્રકારના ન્યુક્લિયોટાઇડની પુનરાવૃત્તિ થવી.", "RNA ના અણુમાં થતી રાસાયણિક ફેરફારો જે જનીન અભિવ્યક્તિને અસર કરે છે.", "પ્રોટીન સંશ્લેષણ દરમિયાન થતી ત્રુટિઓ જે VNTR તરીકે ઓળખાય છે."], "ans": 0, "exp": "VNTR એ DNA ના અકોડિંગ ક્ષેત્રમાં પુનરાવર્તિત ક્રમોની સંખ્યામાં વૈવિધ્ય દર્શાવે છે, જે વ્યક્તિઓ વચ્ચે ભિન્ન હોય છે. વિકલ્પ B મિનિસેટેલાઇટ અથવા સેટેલાઇટ DNA ની વ્યાખ્યા સમાન છે, પરંતુ VNTR એ પુનરાવર્તિત ક્રમોની સંખ્યામાં વૈવિધ્ય પર ભાર મૂકે છે. વિકલ્પ C RNA એડિટિંગ અથવા મ્યુટેશન વિશે છે, જ્યારે વિકલ્પ D પ્રોટીન સંશ્લેષણની ત્રુટિઓ વિશે છે, જે VNTR સાથે સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 6: DNA ફિંગરપ્રિન્ટિંગ અને જનીનિક ઇજનેરિંગ", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં VNTR નો ઉપયોગ શા માટે થાય છે?", "opts": ["વ્યક્તિની ઉંમર નક્કી કરવા માટે", "વ્યક્તિઓ વચ્ચે જનીનિક તફાવતો શોધવા અને ઓળખ પત્રક તૈયાર કરવા માટે", "રોગોના નિદાન માટે રક્ત પરીક્ષણ કરવા માટે", "પ્રોટીન સંરચના નક્કી કરવા માટે"], "ans": 1, "exp": "DNA ફિંગરપ્રિન્ટિંગમાં VNTR નો ઉપયોગ વ્યક્તિઓ વચ્ચે જનીનિક તફાવતો શોધવા અને ઓળખ પત્રક તૈયાર કરવા માટે થાય છે. વિકલ્પ A ઉંમર નક્કી કરવા સાથે સંબંધિત નથી. વિકલ્પ C રક્ત પરીક્ષણ સાથે સંબંધિત છે, પરંતુ VNTR નો ઉપયોગ રક્ત પરીક્ષણમાં થતો નથી. વિકલ્પ D પ્રોટીન સંરચના સાથે સંબંધિત છે, જે VNTR ના ઉપયોગથી સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 6: DNA ફિંગરપ્રિન્ટિંગ અને જનીનિક ઇજનેરિંગ", "ch": ""}, {"q": "VNTR અને STR (Short Tandem Repeats) વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["VNTR મોટા પુનરાવર્તિત ક્રમો ધરાવે છે જ્યારે STR નાના પુનરાવર્તિત ક્રમો ધરાવે છે.", "VNTR RNA ના ક્રમો છે જ્યારે STR DNA ના ક્રમો છે.", "VNTR પ્રોટીન સંરચના સાથે સંબંધિત છે જ્યારે STR DNA સાથે સંબંધિત છે.", "VNTR અને STR વચ્ચે કોઈ તફાવત નથી, બંને એકસરખા છે."], "ans": 0, "exp": "VNTR મોટા પુનરાવર્તિત ક્રમો (10-100 bp) ધરાવે છે જ્યારે STR નાના પુનરાવર્તિત ક્રમો (2-6 bp) ધરાવે છે. વિકલ્પ B ખોટો છે કારણ કે VNTR અને STR બંને DNA ના ક્રમો છે. વિકલ્પ C ખોટો છે કારણ કે VNTR પ્રોટીન સંરચના સાથે સંબંધિત નથી. વિકલ્પ D ખોટો છે કારણ કે VNTR અને STR વચ્ચે તફાવત છે.", "ref": "Std 12 - અધ્યાય 6: DNA ફિંગરપ્રિન્ટિંગ અને જનીનિક ઇજનેરિંગ", "ch": ""}, {"q": "જો એક વ્યક્તિના DNA ના VNTR ક્ષેત્રમાં 15 પુનરાવર્તનો હોય અને બીજી વ્યક્તિના તે જ ક્ષેત્રમાં 20 પુનરાવર્તનો હોય, તો આ કઈ રીતે ઉપયોગી થઈ શકે?", "opts": ["વ્યક્તિઓની લિંગ નક્કી કરવા માટે", "વ્યક્તિઓની જનીનિક ઓળખ પત્રક તૈયાર કરવા માટે", "વ્યક્તિઓની રક્ત જૂથ નક્કી કરવા માટે", "વ્યક્તિઓની ઉંચાઈ નક્કી કરવા માટે"], "ans": 1, "exp": "VNTR ક્ષેત્રમાં પુનરાવર્તનોની સંખ્યામાં તફાવત વ્યક્તિઓની જનીનિક ઓળખ પત્રક તૈયાર કરવા માટે ઉપયોગી થાય છે. વિકલ્પ A લિંગ નક્કી કરવા સાથે સંબંધિત નથી. વિકલ્પ C રક્ત જૂથ નક્કી કરવા સાથે સંબંધિત છે, પરંતુ VNTR નો ઉપયોગ રક્ત જૂથ નક્કી કરવા માટે થતો નથી. વિકલ્પ D ઉંચાઈ નક્કી કરવા સાથે સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 6: DNA ફિંગરપ્રિન્ટિંગ અને જનીનિક ઇજનેરિંગ", "ch": ""}, {"q": "VNTR નો ઉપયોગ કયા ક્ષેત્રમાં થતો નથી?", "opts": ["ફોરેન્સિક વિજ્ઞાનમાં ગુનેગારોની ઓળખ કરવા માટે", "પિતૃત્વ પરીક્ષણમાં", "જનીનિક રોગોના નિદાનમાં", "કોષીય શ્વસનની ક્રિયામાં"], "ans": 3, "exp": "VNTR નો ઉપયોગ ફોરેન્સિક વિજ્ઞાનમાં ગુનેગારોની ઓળખ કરવા, પિતૃત્વ પરીક્ષણ અને જનીનિક રોગોના નિદાનમાં થાય છે. પરંતુ કોષીય શ્વસનની ક્રિયામાં VNTR નો કોઈ સંબંધ નથી. વિકલ્પ D યોગ્ય ઉત્તર છે.", "ref": "Std 12 - અધ્યાય 6: DNA ફિંગરપ્રિન્ટિંગ અને જનીનિક ઇજનેરિંગ", "ch": ""}, {"q": "VNTR ની લંબાઈ નક્કી કરવા માટે કયો તકનીકી પગલો સૌથી અગત્યનો છે?", "opts": ["DNA ને રેસ્ટ્રિક્શન એન્ઝાઇમ વડે કાપીને એગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસ કરવું", "PCR વડે DNA ની પ્રતિકૃતિ બનાવીને સિક્વન્સિંગ કરવું", "DNA ને ડીનેચરિંગ કરીને હાઇબ્રિડાઇઝેશન વડે પ્રોબ લગાડવું", "DNA ને રેડિયોએક્ટિવ લેબલિંગ કરીને ઓટોરેડિયોગ્રાફી વડે જોવું"], "ans": 0, "exp": "VNTR ની લંબાઈ નક્કી કરવા માટે DNA ને રેસ્ટ્રિક્શન એન્ઝાઇમ વડે કાપીને એગરોઝ જેલ ઇલેક્ટ્રોફોરેસિસ કરવું એ સૌથી અગત્યનો પગલો છે, કારણ કે VNTR ક્ષેત્રોની લંબાઈના તફાવતો જેલ ઇલેક્ટ્રોફોરેસિસ દ્વારા જોઈ શકાય છે. બાકીના વિકલ્પો (PCR, હાઇબ્રિડાઇઝેશન, ઓટોરેડિયોગ્રાફી) પણ ઉપયોગી છે, પરંતુ પ્રાથમિક પગલો રેસ્ટ્રિક્શન એન્ઝાઇમ અને જેલ ઇલેક્ટ્રોફોરેસિસ છે.", "ref": "Std 12 - Chapter 6: DNA ફિંગરપ્રિન્ટિંગ અને જીનેટિક મેપિંગ", "ch": ""}, {"q": "VNTR ના આધારે DNA ફિંગરપ્રિન્ટિંગમાં કયો પેટર્ન સૌથી વધુ વારંવાર જોવા મળે છે?", "opts": ["સરખી લંબાઈના બે બેન્ડ્સ", "અલગ-અલગ લંબાઈના મલ્ટિપલ બેન્ડ્સ", "એક જ બેન્ડ", "કોઈ બેન્ડ નહીં"], "ans": 1, "exp": "VNTR ના આધારે DNA ફિંગરપ્રિન્ટિંગમાં અલગ-અલગ લંબાઈના મલ્ટિપલ બેન્ડ્સ જોવા મળે છે, કારણ કે VNTR ક્ષેત્રોની પુનરાવર્તન સંખ્યા વ્યક્તિઓમાં ભિન્ન હોય છે, જેના કારણે જેલ ઇલેક્ટ્રોફોરેસિસમાં અલગ-અલગ લંબાઈના બેન્ડ્સ દેખાય છે. સરખી લંબાઈના બે બેન્ડ્સ (A) અથવા એક જ બેન્ડ (C) એ અસાધારણ કિસ્સાઓ છે, જ્યારે કોઈ બેન્ડ નહીં (D) એ અશક્ય છે.", "ref": "Std 12 - Chapter 6: DNA ફિંગરપ્રિન્ટિંગ અને જીનેટિક મેપિંગ", "ch": ""}, {"q": "VNTR નો ઉપયોગ કરતી વખતે, કયા કિસ્સામાં રેસ્ટ્રિક્શન એન્ઝાઇમની પસંદગી મહત્વપૂર્ણ બને છે?", "opts": ["જ્યારે VNTR ક્ષેત્રો વચ્ચેના અંતર ખૂબ જ ઓછા હોય", "જ્યારે VNTR ક્ષેત્રોની લંબાઈ ખૂબ જ મોટી હોય", "જ્યારે DNA નમૂના ખૂબ જ ઓછા પ્રમાણમાં હોય", "જ્યારે DNA નમૂના ખૂબ જ શુદ્ધ હોય"], "ans": 0, "exp": "VNTR ક્ષેત્રો વચ્ચેના અંતર ખૂબ જ ઓછા હોય ત્યારે રેસ્ટ્રિક્શન એન્ઝાઇમની પસંદગી મહત્વપૂર્ણ બને છે, કારણ કે એવા કિસ્સામાં એન્ઝાઇમ એવા સ્થાને કાપવું જોઈએ જેથી VNTR ક્ષેત્રોને અલગ પાડી શકાય. બાકીના વિકલ્પો (B, C, D) એવી સ્થિતિઓ નથી જ્યાં રેસ્ટ્રિક્શન એન્ઝાઇમની પસંદગી નિર્ણાયક હોય.", "ref": "Std 12 - Chapter 6: DNA ફિંગરપ્રિન્ટિંગ અને જીનેટિક મેપિંગ", "ch": ""}, {"q": "VNTR ના આધારે બનાવેલા DNA પ્રોફાઇલમાં, કયો પરિબળ સૌથી વધુ ભિન્નતા દર્શાવે છે?", "opts": ["VNTR ક્ષેત્રની લંબાઈ", "VNTR ક્ષેત્રની પુનરાવર્તન સંખ્યા", "VNTR ક્ષેત્રની ન્યુક્લિયોટાઇડ ક્રમ", "VNTR ક્ષેત્રની સ્થિતિ વર્ણસૂત્ર પર"], "ans": 1, "exp": "VNTR ના આધારે બનાવેલા DNA પ્રોફાઇલમાં, VNTR ક્ષેત્રની પુનરાવર્તન સંખ્યા સૌથી વધુ ભિન્નતા દર્શાવે છે, કારણ કે આ સંખ્યા વ્યક્તિઓ વચ્ચે ભિન્ન હોય છે અને તે જેલ ઇલેક્ટ્રોફોરેસિસમાં બેન્ડ્સની લંબાઈને અસર કરે છે. લંબાઈ (A), ન્યુક્લિયોટાઇડ ક્રમ (C), અને સ્થિતિ (D) પણ ભિન્ન હોઈ શકે, પરંતુ પુનરાવર્તન સંખ્યા એ સૌથી મહત્વપૂર્ણ પરિબળ છે.", "ref": "Std 12 - Chapter 6: DNA ફિંગરપ્રિન્ટિંગ અને જીનેટિક મેપિંગ", "ch": ""}, {"q": "VNTR નો ઉપયોગ કરતી વખતે, કયા કિસ્સામાં PCR તકનીકનો ઉપયોગ કરવો પડે છે?", "opts": ["જ્યારે DNA નમૂના ખૂબ જ ઓછા પ્રમાણમાં હોય", "જ્યારે VNTR ક્ષેત્રોની લંબાઈ ખૂબ જ મોટી હોય", "જ્યારે DNA નમૂના ખૂબ જ અશુદ્ધ હોય", "જ્યારે VNTR ક્ષેત્રો વચ્ચેના અંતર ખૂબ જ ઓછા હોય"], "ans": 0, "exp": "PCR તકનીકનો ઉપયોગ ત્યારે કરવો પડે છે જ્યારે DNA નમૂના ખૂબ જ ઓછા પ્રમાણમાં હોય, કારણ કે PCR વડે DNA ની પ્રતિકૃતિ બનાવીને તેને વધુ પ્રમાણમાં મેળવી શકાય છે. બાકીના વિકલ્પો (B, C, D) એવી સ્થિતિઓ નથી જ્યાં PCR નો ઉપયોગ અનિવાર્ય હોય.", "ref": "Std 12 - Chapter 6: DNA ફિંગરપ્રિન્ટિંગ અને જીનેટિક મેપિંગ", "ch": ""}, {"q": "VNTR ની લંબાઈમાં ભિન્નતા ઉત્પન્ન કરવા માટે નીચેનામાંથી કયો પરિબળ સૌથી મહત્વપૂર્ણ ગણાય છે?", "opts": ["રેસ્ટ્રિક્શન એન્ઝાઇમની ક્રિયાશીલતા", "ટેન્ડેમ રિપીટ્સની સંખ્યામાં ભિન્નતા", "DNA પોલિમરેઝની ત્રુટિઓ", "પ્રોટીન સિંથેસિસ દરમ્યાન થતી મ્યુટેશન"], "ans": 1, "exp": "VNTR (Variable Number of Tandem Repeats) ની લંબાઈમાં ભિન્નતા મુખ્યત્વે ટેન્ડેમ રિપીટ્સની સંખ્યામાં થતી વૈવિધ્યતાને કારણે થાય છે. રેસ્ટ્રિક્શન એન્ઝાઇમ (A) ફક્ત DNA ને કાપવા માટે વપરાય છે, પરંતુ તે VNTR ની લંબાઈ નક્કી કરતું નથી. DNA પોલિમરેઝની ત્રુટિઓ (C) અને પ્રોટીન સિંથેસિસ દરમ્યાન થતી મ્યુટેશન (D) VNTR ની લંબાઈમાં સીધી અસર કરતી નથી, પરંતુ તે અન્ય પ્રકારની જેનેટિક વેરિએશન માટે જવાબદાર હોઈ શકે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "DNA ફિંગરપ્રિન્ટિંગમાં VNTR નો ઉપયોગ કરતી વખતે, કયા કિસ્સામાં બે વ્યક્તિઓના DNA પ્રોફાઇલ સરખા જોવા મળી શકે છે?", "opts": ["બે વ્યક્તિઓ એક જ પરિવારની હોય અને તેમના VNTR રિપીટ્સની સંખ્યા સરખી હોય", "બે વ્યક્તિઓ અલગ-અલગ જાતિઓની હોય પરંતુ તેમના VNTR રિપીટ્સની લંબાઈ સરખી હોય", "બે વ્યક્તિઓ એક જ જાતિમાંથી હોય પરંતુ તેમના VNTR રિપીટ્સની સંખ્યા અલગ હોય", "બે વ્યક્તિઓ અલગ-અલગ પ્રજાતિઓની હોય પરંતુ તેમના VNTR રિપીટ્સની સંખ્યા સરખી હોય"], "ans": 0, "exp": "DNA ફિંગરપ્રિન્ટિંગમાં VNTR નો ઉપયોગ કરતી વખતે, બે વ્યક્તિઓના DNA પ્રોફાઇલ સરખા જોવા મળી શકે છે જો તે એક જ પરિવારની હોય અને તેમના VNTR રિપીટ્સની સંખ્યા સરખી હોય (A). બાકીના વિકલ્પો (B, C, D) એવા કિસ્સાઓ દર્શાવે છે જ્યાં VNTR રિપીટ્સની સંખ્યા અથવા લંબાઈ અલગ હોય અથવા જાતિઓ/પ્રજાતિઓ અલગ હોય, જેના કારણે DNA પ્રોફાઇલ ભિન્ન જોવા મળે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "VNTR ના આધારે DNA ફિંગરપ્રિન્ટિંગ કરતી વખતે, કયો પગલો સૌથી વધુ સમય લેતો હોય છે?", "opts": ["DNA નું નમૂના એકત્રીકરણ", "રેસ્ટ્રિક્શન એન્ઝાઇમ દ્વારા DNA ને કાપવું", "જેલ ઇલેક્ટ્રોફોરેસિસ દ્વારા DNA ફ્રેગમેન્ટ્સનું વિભાજન", "હાઇબ્રિડાઇઝેશન દ્વારા VNTR ની ઓળખ"], "ans": 2, "exp": "DNA ફિંગરપ્રિન્ટિંગ પ્રક્રિયામાં, જેલ ઇલેક્ટ્રોફોરેસિસ (C) સૌથી વધુ સમય લેતો પગલો છે, કારણ કે તે DNA ફ્રેગમેન્ટ્સને તેમની લંબાઈ અનુસાર વિભાજિત કરવા માટે લાંબો સમય લે છે. DNA નું નમૂના એકત્રીકરણ (A), રેસ્ટ્રિક્શન એન્ઝાઇમ દ્વારા કાપવું (B), અને હાઇબ્રિડાઇઝેશન (D) એ સરળ અને ઝડપી પગલાઓ છે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "VNTR ની ઓળખ માટે કયા પ્રોબનો ઉપયોગ થાય છે?", "opts": ["રેડિયોએક્ટિવ લેબલ થયેલા VNTR-વિશિષ્ટ પ્રોબ", "ફ્લોરેસન્ટ લેબલ થયેલા ઓલિગોન્યુક્લિયોટાઇડ પ્રોબ", "એન્ટીબોડી-આધારિત પ્રોબ", "RNA પ્રોબ"], "ans": 0, "exp": "VNTR ની ઓળખ માટે રેડિયોએક્ટિવ લેબલ થયેલા VNTR-વિશિષ્ટ પ્રોબ (A) નો ઉપયોગ થાય છે, કારણ કે તે VNTR ક્ષેત્રો સાથે સ્પષ્ટપણે બંધન કરે છે. ફ્લોરેસન્ટ લેબલ થયેલા ઓલિગોન્યુક્લિયોટાઇડ પ્રોબ (B) એ અન્ય તકનીકો માટે વપરાય છે, જ્યારે એન્ટીબોડી-આધારિત પ્રોબ (C) અને RNA પ્રોબ (D) VNTR ઓળખ માટે યોગ્ય નથી.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "VNTR ના આધારે DNA ફિંગરપ્રિન્ટિંગમાં, કયા કિસ્સામાં ફોલ્સ પોઝિટિવ પરિણામ મળી શકે છે?", "opts": ["જ્યારે બે વ્યક્તિઓના VNTR રિપીટ્સની સંખ્યા સરખી હોય પરંતુ તે અલગ જીનોમિક લોકસ પર હોય", "જ્યારે DNA નમૂના દૂષિત હોય", "જ્યારે રેસ્ટ્રિક્શન એન્ઝાઇમ અપૂરતું હોય", "જ્યારે જેલ ઇલેક્ટ્રોફોરેસિસ દરમ્યાન વોલ્ટેજ ખૂબ ઓછું હોય"], "ans": 0, "exp": "ફોલ્સ પોઝિટિવ પરિણામ ત્યારે મળી શકે છે જ્યારે બે વ્યક્તિઓના VNTR રિપીટ્સની સંખ્યા સરખી હોય પરંતુ તે અલગ જીનોમિક લોકસ પર હોય (A), કારણ કે આ કિસ્સામાં DNA પ્રોફાઇલ સરખા જોવા મળી શકે છે. દૂષિત DNA નમૂના (B), અપૂરતું રેસ્ટ્રિક્શન એન્ઝાઇમ (C), અને ઓછું વોલ્ટેજ (D) એ તકનીકી ત્રુટિઓ છે જે પરિણામને અસર કરે છે, પરંતુ તે ફોલ્સ પોઝિટિવ નહીં પરંતુ ફોલ્સ નેગેટિવ અથવા અસ્પષ્ટ પરિણામ તરફ દોરી શકે છે.", "ref": "Std 12 - Chapter 6: જૈવતકનીકી અને તેના ઉપયોગો", "ch": ""}, {"q": "VNTR ની લંબાઈમાં ભિન્નતા નક્કી કરવા માટે નીચેનામાંથી કયો પરિબળ સૌથી ઓછો પ્રભાવ પાડે છે?", "opts": ["રેસ્ટ્રિક્શન એન્ઝાઇમની પસંદગી", "પુનરાવર્તિત અનુક્રમની લંબાઈ", "PCR ચક્રની સંખ્યા", "જનીનની સ્થિતિ"], "ans": 3, "exp": "VNTR ની લંબાઈમાં ભિન્નતા મુખ્યત્વે પુનરાવર્તિત અનુક્રમની સંખ્યા અને લંબાઈ, રેસ્ટ્રિક્શન એન્ઝાઇમની પસંદગી, અને PCR ચક્રની સંખ્યા પર આધારિત હોય છે. જનીનની સ્થિતિ VNTR ની લંબાઈ સાથે સીધો સંબંધ ધરાવતી નથી, એટલે તે સૌથી ઓછો પ્રભાવ પાડે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "VNTR ની ઓળખ માટે કયા પ્રકારના પ્રોબનો ઉપયોગ થાય છે?", "opts": ["રેડિયોએક્ટિવ લેબલ વાળા ઓલિગોન્યુક્લિઓટાઇડ પ્રોબ", "ફ્લોરેસન્ટ લેબલ વાળા RNA પ્રોબ", "બાયોટિન-લેબલ વાળા DNA પ્રોબ", "એન્ટિબોડી-લેબલ વાળા પ્રોટીન પ્રોબ"], "ans": 0, "exp": "VNTR ની ઓળખ માટે સૌથી સામાન્ય રીતે રેડિયોએક્ટિવ લેબલ વાળા ઓલિગોન્યુક્લિઓટાઇડ પ્રોબનો ઉપયોગ થાય છે, કારણ કે તે VNTR ક્ષેત્ર સાથે સચોટ રીતે હાઇબ્રિડાઇઝ થઈ શકે છે. ફ્લોરેસન્ટ લેબલ વાળા RNA પ્રોબ, બાયોટિન-લેબલ વાળા DNA પ્રોબ, અને એન્ટિબોડી-લેબલ વાળા પ્રોટીન પ્રોબ એ VNTR ઓળખ માટે યોગ્ય નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "VNTR ના આધારે DNA ફિંગરપ્રિન્ટિંગમાં, કયા કિસ્સામાં ફોલ્સ નેગેટિવ પરિણામ મળી શકે?", "opts": ["જો DNA નમૂના ખૂબ જ ઓછો હોય", "જો VNTR ક્ષેત્રમાં હોમોઝાઇગસ મ્યુટેશન હોય", "જો રેસ્ટ્રિક્શન એન્ઝાઇમની ક્રિયા અપૂર્ણ હોય", "જો જેલ ઇલેક્ટ્રોફોરેસિસ દરમિયાન DNA ની ગતિ ખૂબ જ ધીમી હોય"], "ans": 2, "exp": "જો રેસ્ટ્રિક્શન એન્ઝાઇમની ક્રિયા અપૂર્ણ હોય તો DNA ની કાપણી સંપૂર્ણ થતી નથી, જેથી VNTR ક્ષેત્રની ઓળખ ન થઈ શકે અને ફોલ્સ નેગેટિવ પરિણામ મળી શકે. DNA નમૂના ખૂબ જ ઓછો હોય તો પણ પરિણામ અસ્પષ્ટ થઈ શકે, પરંતુ તે ફોલ્સ નેગેટિવ નહીં પરંતુ અપૂર્ણ પરિણામ તરફ દોરી શકે. VNTR ક્ષેત્રમાં હોમોઝાઇગસ મ્યુટેશન હોય તો પણ તે ફોલ્સ નેગેટિવ નહીં પરંતુ અલગ પ્રકારનું પરિણામ આપે. જેલ ઇલેક્ટ્રોફોરેસિસ દરમિયાન DNA ની ગતિ ખૂબ જ ધીમી હોય તો પણ તે પરિણામને અસર કરે, પરંતુ ફોલ્સ નેગેટિવ નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "એક સંશોધકને એક અજ્ઞાત વ્યક્તિના DNA નમૂનામાં VNTR ક્ષેત્રની લંબાઈ માપવા માટે બે અલગ-અલગ રેસ્ટ્રિક્શન ઉત્સેચકો (EcoRI અને HindIII) નો ઉપયોગ કર્યો. EcoRI નો ઉપયોગ કરતાં 3.2 kb અને 4.8 kb ના બે બેન્ડ મળ્યા, જ્યારે HindIII નો ઉપયોગ કરતાં 2.1 kb અને 5.9 kb ના બે બેન્ડ મળ્યા. આ પરિણામોના આધારે નીચેનામાંથી કયું વિધાન સૌથી વધુ સંગત છે?", "opts": ["VNTR ક્ષેત્રની કુલ લંબાઈ 8 kb છે અને બંને ઉત્સેચકો એક જ સ્થાને કાપે છે.", "VNTR ક્ષેત્રની કુલ લંબાઈ 8 kb છે, પરંતુ બંને ઉત્સેચકો અલગ-અલગ સ્થાને કાપે છે.", "VNTR ક્ષેત્રની કુલ લંબાઈ 8 kb છે, પરંતુ EcoRI એ VNTR ક્ષેત્રની અંદર કાપે છે જ્યારે HindIII બહાર કાપે છે.", "આ પરિણામો અસંગત છે કારણ કે VNTR ક્ષેત્રની લંબાઈ બદલાવી ન શકે."], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. EcoRI અને HindIII ના પરિણામોનો સરવાળો સમાન (3.2 + 4.8 = 8 kb અને 2.1 + 5.9 = 8 kb) છે, જે દર્શાવે છે કે VNTR ક્ષેત્રની કુલ લંબાઈ 8 kb છે. EcoRI ના બેન્ડ્સ નાના અને મોટા કદના છે, જે સૂચવે છે કે EcoRI એ VNTR ક્ષેત્રની અંદર કાપે છે, જ્યારે HindIII ના બેન્ડ્સ વધુ અસમાન છે, જે દર્શાવે છે કે HindIII એ VNTR ક્ષેત્રની બહાર કાપે છે. વિકલ્પ A ખોટો છે કારણ કે બંને ઉત્સેચકો એક જ સ્થાને કાપતા નથી. વિકલ્પ B ખોટો છે કારણ કે તે સ્પષ્ટ કરતું નથી કે કયો ઉત્સેચક ક્યાં કાપે છે. વિકલ્પ D ખોટો છે કારણ કે VNTR ક્ષેત્રની લંબાઈ ઉત્સેચકના કાપવાના સ્થાન પર આધારિત બદલાતી નથી, પરંતુ બેન્ડ્સના કદ પર આધારિત છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}, {"q": "એક ફોરેન્સિક કેસમાં, બે અલગ-અલગ વ્યક્તિઓના DNA નમૂનાઓમાં એક જ VNTR પ્રોબનો ઉપયોગ કરીને DNA ફિંગરપ્રિન્ટિંગ કરવામાં આવ્યું. બંને નમૂનાઓમાં સમાન સંખ્યામાં બેન્ડ્સ મળ્યા, પરંતુ તેમની તીવ્રતા (intensity) અલગ-અલગ હતી. આ પરિણામ માટે નીચેનામાંથી કયું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["બંને વ્યક્તિઓ સમાન જોડિયા (identical twins) છે, પરંતુ DNA નિષ્કર્ષણ દરમિયાન ભૂલ થઈ છે.", "VNTR ક્ષેત્રમાં હેટેરોઝાયગસ સ્થિતિ હોવાને કારણે બેન્ડ્સની તીવ્રતા અલગ છે.", "PCR પ્રક્રિયા દરમિયાન DNA ના પ્રમાણમાં તફાવત હોવાને કારણે તીવ્રતા અલગ છે.", "રેસ્ટ્રિક્શન ઉત્સેચકની પ્રવૃત્તિમાં તફાવત હોવાને કારણે બેન્ડ્સની તીવ્રતા અલગ છે."], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. VNTR ક્ષેત્રમાં હેટેરોઝાયગસ સ્થિતિ હોય ત્યારે બે અલગ-અલગ એલીલ્સ હાજર હોય છે, જેના કારણે બેન્ડ્સની સંખ્યા સમાન હોય પરંતુ તેમની તીવ્રતા અલગ હોઈ શકે છે. વિકલ્પ A ખોટો છે કારણ કે સમાન જોડિયાઓના DNA ફિંગરપ્રિન્ટ સમાન હોય છે, અને તીવ્રતામાં તફાવત ન હોવો જોઈએ. વિકલ્પ C ખોટો છે કારણ કે PCR પ્રક્રિયા દરમિયાન DNA ના પ્રમાણમાં તફાવત હોવા છતાં બેન્ડ્સની સંખ્યા બદલાતી નથી. વિકલ્પ D ખોટો છે કારણ કે રેસ્ટ્રિક્શન ઉત્સેચકની પ્રવૃત્તિમાં તફાવત હોવા છતાં બેન્ડ્સની સંખ્યા અને સ્થાન બદલાતું નથી, માત્ર તીવ્રતા પર અસર થઈ શકે છે, પરંતુ તે પ્રાથમિક કારણ નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
