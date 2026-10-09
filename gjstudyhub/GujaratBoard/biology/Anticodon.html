@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anticodon</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Anticodon</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Anticodon</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "અનુવંશિક કોડના અનુવાદ દરમિયાન, એન્ટિકોડન ક્યાં જોવા મળે છે અને તેનો મુખ્ય કાર્ય શું છે?", "opts": ["એન્ટિકોડન tRNA પર હોય છે અને તે mRNA પરના કોડન સાથે જોડાઈને એમિનો એસિડને રાઇબોઝોમ પર લાવે છે.", "એન્ટિકોડન mRNA પર હોય છે અને તે rRNA સાથે જોડાઈને પ્રોટીન સંશ્લેષણને પ્રારંભ કરે છે.", "એન્ટિકોડન rRNA પર હોય છે અને તે tRNA ને સક્રિય કરે છે.", "એન્ટિકોડન DNA પર હોય છે અને તે RNA પોલિમરેઝને બંધન કરે છે."], "ans": 0, "exp": "એન્ટિકોડન tRNA પર સ્થિત હોય છે અને તે mRNA પરના કોડન સાથે પૂરક યુગ્મન બનાવે છે, જેથી એમિનો એસિડને રાઇબોઝોમ પર લાવી શકાય. બાકીના વિકલ્પો ખોટા છે કારણ કે: B) એન્ટિકોડન mRNA પર હોતું નથી, rRNA સાથે જોડાણ પ્રોટીન સંશ્લેષણનો ભાગ નથી. C) એન્ટિકોડન rRNA પર હોતું નથી, tRNA ને સક્રિય કરવાનું કામ ઉત્સેચકો દ્વારા થાય છે. D) એન્ટિકોડન DNA પર હોતું નથી, RNA પોલિમરેઝ DNA સાથે જોડાય છે, એન્ટિકોડન સાથે નહીં.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એક tRNA અણુ પર ત્રણ એન્ટિકોડન હોઈ શકે છે. આ વિધાન વિશે શું ખરું છે?", "opts": ["ખરું, કારણ કે tRNA અણુ પર એકથી વધારે એન્ટિકોડન હોઈ શકે છે.", "ખોટું, કારણ કે પ્રત્યેક tRNA અણુ પર ફક્ત એક જ એન્ટિકોડન હોય છે.", "ખરું, કારણ કે tRNA અણુ પર એન્ટિકોડનની સંખ્યા એમિનો એસિડની સંખ્યા પર આધાર રાખે છે.", "ખોટું, કારણ કે એન્ટિકોડન ફક્ત mRNA પર જોવા મળે છે."], "ans": 1, "exp": "પ્રત્યેક tRNA અણુ પર ફક્ત એક જ એન્ટિકોડન હોય છે, જે એમિનો એસિડને ઓળખવા અને mRNA પરના કોડન સાથે જોડાવા માટે જવાબદાર હોય છે. A) ખોટું છે કારણ કે tRNA પર એકથી વધારે એન્ટિકોડન હોતાં નથી. C) ખોટું છે કારણ કે એન્ટિકોડનની સંખ્યા એમિનો એસિડની સંખ્યા પર આધાર રાખતી નથી. D) ખોટું છે કારણ કે એન્ટિકોડન tRNA પર જોવા મળે છે, mRNA પર નહીં.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એન્ટિકોડન અને કોડન વચ્ચેનું સંબંધ કયો છે?", "opts": ["એન્ટિકોડન અને કોડન વચ્ચે પૂરક આધારિત સંબંધ હોય છે, પરંતુ તે અર્ધ-સંયોજક (semi-conservative) હોય છે.", "એન્ટિકોડન અને કોડન વચ્ચે પૂરક આધારિત સંબંધ હોય છે અને તે સંપૂર્ણ પૂરક હોય છે.", "એન્ટિકોડન અને કોડન વચ્ચે કોઈ સંબંધ હોતો નથી, તે ફક્ત રાસાયણિક સંબંધ દ્વારા જોડાય છે.", "એન્ટિકોડન અને કોડન વચ્ચેનો સંબંધ ફક્ત હાઇડ્રોજન બંધ દ્વારા જ થાય છે."], "ans": 1, "exp": "એન્ટિકોડન અને કોડન વચ્ચે પૂરક આધારિત સંબંધ હોય છે અને તે સંપૂર્ણ પૂરક હોય છે (A-U, G-C). A) ખોટું છે કારણ કે તે અર્ધ-સંયોજક નથી. C) ખોટું છે કારણ કે એન્ટિકોડન અને કોડન વચ્ચે પૂરક સંબંધ હોય છે. D) ખોટું છે કારણ કે હાઇડ્રોજન બંધ તો પૂરક સંબંધનું એક પાસું છે, પરંતુ મુખ્ય સંબંધ પૂરકતાનો છે.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "જો એક tRNA નું એન્ટિકોડન 5'-UAC-3' હોય, તો તે કયા કોડન સાથે જોડાશે?", "opts": ["5'-AUG-3'", "5'-TAC-3'", "5'-CAU-3'", "5'-ATG-3'"], "ans": 0, "exp": "એન્ટિકોડન 5'-UAC-3' એ mRNA પરના કોડન 5'-AUG-3' સાથે પૂરક યુગ્મન બનાવશે (U-A, A-U, C-G). B) ખોટું છે કારણ કે TAC DNA પર હોય છે, mRNA પર નહીં. C) ખોટું છે કારણ કે CAU એ UAC નું પૂરક નથી. D) ખોટું છે કારણ કે ATG DNA પર હોય છે, mRNA પર AUG હોય છે.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એન્ટિકોડનની ભૂમિકા પ્રોટીન સંશ્લેષણમાં શું છે?", "opts": ["એન્ટિકોડન mRNA ની નકલ કરે છે.", "એન્ટિકોડન એમિનો એસિડને tRNA સાથે જોડે છે.", "એન્ટિકોડન mRNA પરના કોડન સાથે જોડાઈને એમિનો એસિડની ઓળખ કરે છે.", "એન્ટિકોડન DNA ની નકલ કરે છે."], "ans": 2, "exp": "એન્ટિકોડન mRNA પરના કોડન સાથે જોડાઈને એમિનો એસિડની ઓળખ કરે છે, જેથી રાઇબોઝોમ પર પ્રોટીન સંશ્લેષણ થઈ શકે. A) ખોટું છે કારણ કે mRNA ની નકલ RNA પોલિમરેઝ દ્વારા થાય છે. B) ખોટું છે કારણ કે એમિનો એસિડને tRNA સાથે જોડવાનું કામ એમિનોએસિલ-tRNA સિનથેટેઝ ઉત્સેચક દ્વારા થાય છે. D) ખોટું છે કારણ કે DNA ની નકલ DNA પોલિમરેઝ દ્વારા થાય છે.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "tRNA અણુ પર એન્ટિકોડન લૂપની સ્થિતિ અને તેની રચના વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["એન્ટિકોડન લૂપ tRNA ના 3' સિરે આવેલ છે અને તે ૫ ન્યુક્લિયોટાઇડનો બનેલ છે.", "એન્ટિકોડન લૂપ tRNA ના 5' સિરે આવેલ છે અને તે ૭ ન્યુક્લિયોટાઇડનો બનેલ છે.", "એન્ટિકોડન લૂપ tRNA ના મધ્ય ભાગમાં આવેલ છે અને તે ૩ ન્યુક્લિયોટાઇડનો બનેલ છે.", "એન્ટિકોડન લૂપ tRNA ના D-લૂપ નજીક આવેલ છે અને તે ૯ ન્યુક્લિયોટાઇડનો બનેલ છે."], "ans": 1, "exp": "tRNA અણુ પર એન્ટિકોડન લૂપ 5' સિરે આવેલ છે અને તે ૭ ન્યુક્લિયોટાઇડનો બનેલ છે. એન્ટિકોડન લૂપની રચના મુખ્યત્વે ૭ ન્યુક્લિયોટાઇડની હોય છે, જેમાં એન્ટિકોડન ત્રણ ન્યુક્લિયોટાઇડનો બનેલ હોય છે. વિકલ્પ A ખોટો છે કારણ કે એન્ટિકોડન લૂપ 3' સિરે નથી હોતો. વિકલ્પ C ખોટો છે કારણ કે એન્ટિકોડન લૂપ મધ્ય ભાગમાં નથી હોતો અને તે ૩ ન્યુક્લિયોટાઇડનો નથી હોતો. વિકલ્પ D ખોટો છે કારણ કે એન્ટિકોડન લૂપ D-લૂપ નજીક નથી હોતો અને તે ૯ ન્યુક્લિયોટાઇડનો નથી હોતો.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણ વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["એન્ટિકોડન અને કોડન વચ્ચે હાઇડ્રોજન બંધો બને છે.", "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં એડિનિન હંમેશા યુરેસિલ સાથે જોડાય છે.", "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં ગુઆનિન હંમેશા સાયટોસિન સાથે જોડાય છે.", "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં થાયમિન હંમેશા એડિનિન સાથે જોડાય છે."], "ans": 2, "exp": "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં ગુઆનિન હંમેશા સાયટોસિન સાથે જોડાય છે તે વિધાન ખોટું છે કારણ કે RNA માં થાયમિન નથી હોતું, તેની જગ્યાએ યુરેસિલ હોય છે. એન્ટિકોડન અને કોડન વચ્ચે હાઇડ્રોજન બંધો બને છે (A સત્ય), એડિનિન હંમેશા યુરેસિલ સાથે જોડાય છે (B સત્ય), અને થાયમિન (DNA માં) એડિનિન સાથે જોડાય છે (D સત્ય).", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "જો એક tRNA નું એન્ટિકોડન 5'-GGC-3' હોય, તો તે કયા કોડન સાથે જોડાશે?", "opts": ["5'-CCG-3'", "5'-GCC-3'", "5'-CGG-3'", "5'-GGU-3'"], "ans": 1, "exp": "tRNA નું એન્ટિકોડન 5'-GGC-3' હોય, તો તે mRNA પરના કોડન 5'-GCC-3' સાથે જોડાશે. એન્ટિકોડન અને કોડન વચ્ચે પૂરક જોડાણ થાય છે, જેમાં G-C અને C-G જોડાણ થાય છે. વિકલ્પ A (5'-CCG-3') ખોટો છે કારણ કે તે એન્ટિકોડન સાથે પૂરક નથી. વિકલ્પ C (5'-CGG-3') ખોટો છે કારણ કે તે એન્ટિકોડન સાથે પૂરક નથી. વિકલ્પ D (5'-GGU-3') ખોટો છે કારણ કે તે એન્ટિકોડન સાથે પૂરક નથી.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "એન્ટિકોડનની રચના અને કાર્ય વિશે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["એન્ટિકોડન tRNA ના અણુ પર આવેલ છે.", "એન્ટિકોડન mRNA પરના કોડન સાથે જોડાય છે.", "એન્ટિકોડન DNA પરના કોડન સાથે જોડાય છે.", "એન્ટિકોડન પ્રોટીન સંશ્લેષણ દરમિયાન અમીનો એસિડને ઓળખવામાં મદદ કરે છે."], "ans": 2, "exp": "એન્ટિકોડન DNA પરના કોડન સાથે જોડાય છે તે વિધાન ખોટું છે કારણ કે એન્ટિકોડન mRNA પરના કોડન સાથે જોડાય છે, DNA સાથે નહીં. એન્ટિકોડન tRNA ના અણુ પર આવેલ છે (A સત્ય), એન્ટિકોડન mRNA પરના કોડન સાથે જોડાય છે (B સત્ય), અને એન્ટિકોડન પ્રોટીન સંશ્લેષણ દરમિયાન અમીનો એસિડને ઓળખવામાં મદદ કરે છે (D સત્ય).", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં નીચેનામાંથી કયું જોડાણ સૌથી મજબૂત છે?", "opts": ["A-U", "G-C", "U-A", "C-G"], "ans": 1, "exp": "G-C જોડાણ સૌથી મજબૂત છે કારણ કે તે ત્રણ હાઇડ્રોજન બંધો દ્વારા જોડાયેલ છે, જ્યારે A-U જોડાણ બે હાઇડ્રોજન બંધો દ્વારા જોડાયેલ છે. વિકલ્પ A (A-U) અને C (U-A) ખોટા છે કારણ કે તે બે હાઇડ્રોજન બંધો દ્વારા જોડાયેલ છે. વિકલ્પ D (C-G) ખોટો છે કારણ કે તે G-C જેવું જ મજબૂત છે, પરંતુ પ્રશ્નમાં G-C જોડાણ સૌથી મજબૂત ગણવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 6: જૈવ અણુઓ અને પ્રોટીન સંશ્લેષણ", "ch": ""}, {"q": "tRNA અણુ પર એન્ટિકોડન લૂપમાં કયા ન્યુક્લિયોટાઇડની હાજરી અથવા ગેરહાજરી તેની કાર્યક્ષમતાને અસર કરે છે?", "opts": ["ઇનોસિન (Inosine)", "એડેનિન (Adenine)", "ગ્વાનિન (Guanine)", "સાયટોસિન (Cytosine)"], "ans": 0, "exp": "ઇનોસિન (Inosine) એ tRNA ના એન્ટિકોડન લૂપમાં જોવા મળતો એક વિશિષ્ટ ન્યુક્લિયોટાઇડ છે, જે કોડન સાથે જોડાણમાં લવચીકતા ધરાવે છે. તે એડેનિન, સાયટોસિન અને યુરેસિલ સાથે જોડાઈ શકે છે, જે એન્ટિકોડનની કાર્યક્ષમતાને વધારે છે. બાકીના ન્યુક્લિયોટાઇડ (A, G, C) એ સ્થિર જોડાણ ધરાવે છે અને ઇનોસિન જેવી લવચીકતા ધરાવતા નથી.", "ref": "Std 12 - Chapter 6: જનીન અભિવ્યક્તિ અને નિયમન (Gene Expression and Regulation)", "ch": ""}, {"q": "એક tRNA નું એન્ટિકોડન 5'-CAU-3' હોય, તો તે કયા એમિનો એસિડને વહન કરશે?", "opts": ["હિસ્ટિડિન (Histidine)", "વેલિન (Valine)", "ટાયરોસિન (Tyrosine)", "મેથિયોનિન (Methionine)"], "ans": 0, "exp": "એન્ટિકોડન 5'-CAU-3' એ કોડન 5'-AUG-3' સાથે જોડાણ કરે છે, જે હિસ્ટિડિન (Histidine) નું કોડન છે. વેલિન (GUU, GUC, GUA, GUG), ટાયરોસિન (UAU, UAC) અને મેથિયોનિન (AUG) ના કોડન આ એન્ટિકોડન સાથે મેળ ખાતા નથી.", "ref": "Std 12 - Chapter 6: જનીન અભિવ્યક્તિ અને નિયમન (Gene Expression and Regulation)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્ટિકોડન અને કોડન વચ્ચેના જોડાણ વિશે ખોટું છે?", "opts": ["એન્ટિકોડન અને કોડન વચ્ચે હાઇડ્રોજન બંધો બને છે.", "એન્ટિકોડન અને કોડન વચ્ચેનું જોડાણ 5' થી 3' દિશામાં થાય છે.", "એન્ટિકોડન અને કોડન વચ્ચેનું જોડાણ એન્ટિપેરલલ હોય છે.", "એન્ટિકોડન અને કોડન વચ્ચેનું જોડાણ સદા સ્થિર હોય છે."], "ans": 3, "exp": "એન્ટિકોડન અને કોડન વચ્ચેનું જોડાણ હાઇડ્રોજન બંધો દ્વારા થાય છે (A), 5' થી 3' દિશામાં થાય છે (B), અને એન્ટિપેરલલ હોય છે (C). પરંતુ આ જોડાણ સદા સ્થિર નથી, કારણ કે tRNA રિબોઝોમ પરથી અલગ થઈ શકે છે (D).", "ref": "Std 12 - Chapter 6: જનીન અભિવ્યક્તિ અને નિયમન (Gene Expression and Regulation)", "ch": ""}, {"q": "જો એક tRNA નું એન્ટિકોડન 5'-UUU-3' હોય, તો તે કયા કોડન સાથે જોડાણ કરશે અને કયા એમિનો એસિડને વહન કરશે?", "opts": ["5'-AAA-3', લાઇસિન (Lysine)", "5'-UUU-3', ફિનાઇલએલેનિન (Phenylalanine)", "5'-CCC-3', પ્રોલિન (Proline)", "5'-GGG-3', ગ્લાઇસિન (Glycine)"], "ans": 0, "exp": "એન્ટિકોડન 5'-UUU-3' એ કોડન 5'-AAA-3' સાથે જોડાણ કરે છે, જે લાઇસિન (Lysine) નું કોડન છે. બાકીના વિકલ્પો કોડન સાથે મેળ ખાતા નથી અથવા એમિનો એસિડની યોગ્ય જોડણી ધરાવતા નથી.", "ref": "Std 12 - Chapter 6: જનીન અ્ચિવ્યક્તિ અને નિયમન (Gene Expression and Regulation)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્ટિકોડનની રચના અને કાર્ય વિશે સત્ય છે?", "opts": ["એન્ટિકોડન tRNA ના 3' ટર્મિનલ પર સ્થિત હોય છે.", "એન્ટિકોડન tRNA ના 5' ટર્મિનલ પર સ્થિત હોય છે.", "એન્ટિકોડન mRNA ના કોડન સાથે 3' થી 5' દિશામાં જોડાય છે.", "એન્ટિકોડન એ tRNA ના એમિનો એસિડ બાઇન્ડીંગ સાઇટ પર સ્થિત હોય છે."], "ans": 0, "exp": "એન્ટિકોડન tRNA ના 3' ટર્મિનલ પર સ્થિત હોય છે (A). તે 5' ટર્મિનલ પર સ્થિત નથી (B), કોડન સાથે 5' થી 3' દિશામાં જોડાય છે (C), અને એમિનો એસિડ બાઇન્ડીંગ સાઇટ પર સ્થિત નથી (D).", "ref": "Std 12 - Chapter 6: જનીન અભિવ્યક્તિ અને નિયમન (Gene Expression and Regulation)", "ch": ""}, {"q": "tRNA અણુ પર એન્ટિકોડન લૂપમાં 'ઇનોસિન' (Inosine) ની ભૂમિકા વિશે નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય છે?", "opts": ["ઇનોસિન એડિનિન (A), સાયટોસિન (C), અને યુરેસિલ (U) સાથે જોડાઈ શકે છે, જે એન્ટિકોડનને વધુ લવચીક બનાવે છે.", "ઇનોસિન ફક્ત એડિનિન (A) સાથે જ જોડાઈ શકે છે, જે એન્ટિકોડનની વિશિષ્ટતાને વધારે છે.", "ઇનોસિન એન્ટિકોડન લૂપમાં હાજર નથી હોતું, તે ફક્ત mRNA પર જોવા મળે છે.", "ઇનોસિન એન્ટિકોડન લૂપમાં હાજર હોવા છતાં તે કોડન સાથે કોઈ જોડાણ બનાવતું નથી."], "ans": 0, "exp": "ઇનોસિન (I) એ એક અસાધારણ ન્યુક્લિયોસાઇડ છે જે tRNA ના એન્ટિકોડન લૂપમાં હાજર હોય છે. તે એડિનિન (A), સાયટોસિન (C), અને યુરેસિલ (U) સાથે જોડાઈ શકે છે, જે એન્ટિકોડનને વધુ લવચીક (wobble) બનાવે છે. આ લવચીકતા એન્ટિકોડનને એકથી વધુ કોડન સાથે જોડાવા દે છે, જે પ્રોટીન સંશ્લેષણની કાર્યક્ષમતાને વધારે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે ઇનોસિન ફક્ત A સાથે જ જોડાતું નથી (B), તે tRNA પર હાજર હોય છે (C), અને તે કોડન સાથે જોડાણ બનાવે છે (D).", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એક tRNA નું એન્ટિકોડન 5'-GUA-3' હોય, તો તે કયા કોડન સાથે જોડાઈ શકે છે? (નિયમિત કોડન-એન્ટિકોડન જોડાણ અને વોબલ હાઇપોથેસિસ ધ્યાનમાં લો)", "opts": ["5'-CAU-3' અને 5'-CAC-3'", "5'-UAC-3' અને 5'-UAU-3'", "5'-AUG-3' અને 5'-AUC-3'", "5'-GUA-3' અને 5'-GUU-3'"], "ans": 1, "exp": "એન્ટિકોડન 5'-GUA-3' એ mRNA પરના કોડન 5'-UAC-3' (પૂરક જોડાણ) અને 5'-UAU-3' (વોબલ હાઇપોથેસિસ અનુસાર, G-U જોડાણ) સાથે જોડાઈ શકે છે. વોબલ હાઇપોથેસિસ મુજબ, એન્ટિકોડનનું ત્રીજું ન્યુક્લિયોટાઇડ (A) કોડનના ત્રીજા ન્યુક્લિયોટાઇડ (U અથવા C) સાથે જોડાઈ શકે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ પૂરક જોડાણ અથવા વોબલ હાઇપોથેસિસને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "એન્ટિકોડન અને કોડન વચ્ચેના જોડાણમાં 'વોબલ હાઇપોથેસિસ' (Wobble Hypothesis) ની મર્યાદા વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["વોબલ હાઇપોથેસિસ મુજબ, એન્ટિકોડનનું પ્રથમ ન્યુક્લિયોટાઇડ કોડનના પ્રથમ ન્યુક્લિયોટાઇડ સાથે લવચીક જોડાણ બનાવી શકે છે.", "વોબલ હાઇપોથેસિસ ફક્ત પ્રોકેરિયોટ્સમાં લાગુ પડે છે, યુકેરિયોટ્સમાં નહીં.", "વોબલ હાઇપોથેસિસ મુજબ, એન્ટિકોડનનું ત્રીજું ન્યુક્લિયોટાઇડ કોડનના ત્રીજા ન્યુક્લિયોટાઇડ સાથે લવચીક જોડાણ બનાવી શકે છે.", "વોબલ હાઇપોથેસિસ મુજબ, એન્ટિકોડન અને કોડન વચ્ચે કોઈપણ સ્થાને લવચીક જોડાણ બનાવી શકે છે."], "ans": 2, "exp": "વોબલ હાઇપોથેસિસ મુજબ, એન્ટિકોડનનું ત્રીજું ન્યુક્લિયોટાઇડ (5' ટર્મિનલ) કોડનના ત્રીજા ન્યુક્લિયોટાઇડ (3' ટર્મિનલ) સાથે લવચીક જોડાણ બનાવી શકે છે. આ લવચીકતા એન્ટિકોડનને એકથી વધુ કોડન સાથે જોડાવા દે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે વોબલ હાઇપોથેસિસ એન્ટિકોડનના પ્રથમ ન્યુક્લિયોટાઇડ (A), ફક્ત પ્રોકેરિયોટ્સમાં લાગુ પડે છે (B), અથવા કોઈપણ સ્થાને લવચીક જોડાણ (D) વિશે નથી.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન એન્ટિકોડન અને tRNA ની રચના વિશે ખોટું છે?", "opts": ["tRNA અણુ પર એન્ટિકોડન લૂપ એ ત્રણ ન્યુક્લિયોટાઇડનો બનેલો હોય છે અને તે એમિનો એસિડ બાંધવાના સ્થાનથી દૂર હોય છે.", "tRNA ના એન્ટિકોડન લૂપમાં ઇનોસિન (I) ની હાજરી તેને કોડન સાથે લવચીક જોડાણ બનાવવા દે છે.", "tRNA નું એન્ટિકોડન 5' થી 3' દિશામાં લખાય છે, જ્યારે કોડન 3' થી 5' દિશામાં લખાય છે.", "tRNA અણુ પર એન્ટિકોડન લૂપ એ એમિનો એસિડ બાંધવાના સ્થાનની નજીક હોય છે."], "ans": 3, "exp": "tRNA અણુ પર એન્ટિકોડન લૂપ એ એમિનો એસિડ બાંધવાના સ્થાનથી દૂર હોય છે, નહીં કે નજીક (D ખોટું). એન્ટિકોડન લૂપ એ tRNA ના એક છેડા પર હોય છે, જ્યારે એમિનો એસિડ બાંધવાનું સ્થાન (3' OH) બીજા છેડા પર હોય છે. બાકીના વિકલ્પો સત્ય છે: એન્ટિકોડન લૂપ ત્રણ ન્યુક્લિયોટાઇડનો બનેલો હોય છે (A), ઇનોસિન લવચીક જોડાણ બનાવે છે (B), અને એન્ટિકોડન 5' થી 3' દિશામાં લખાય છે (C).", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "જો એક tRNA નું એન્ટિકોડન 5'-CCA-3' હોય, તો તે કયા કોડન સાથે જોડાઈ શકે છે? (વોબલ હાઇપોથેસિસ ધ્યાનમાં લો)", "opts": ["5'-UGG-3' અને 5'-UGU-3'", "5'-GGU-3' અને 5'-GGC-3'", "5'-AGG-3' અને 5'-AGU-3'", "5'-CGG-3' અને 5'-CGU-3'"], "ans": 1, "exp": "એન્ટિકોડન 5'-CCA-3' એ કોડન 5'-UGG-3' (પૂરક જોડાણ: C-G, C-G, A-U) અને 5'-UGU-3' (વોબલ હાઇપોથેસિસ અનુસાર, A-U અથવા A-C) સાથે જોડાઈ શકે છે. પરંતુ વિકલ્પ A માં 5'-UGG-3' અને 5'-UGU-3' આપેલ છે, જે સીધા પૂરક જોડાણ નથી. વિકલ્પ B મુજબ, 5'-GGU-3' અને 5'-GGC-3' એ એન્ટિકોડન 5'-CCA-3' સાથે પૂરક જોડાણ બનાવે છે (G-C, G-C, U-A અથવા G-C, G-C, C-G). બાકીના વિકલ્પો પૂરક જોડાણ અથવા વોબલ હાઇપોથેસિસને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય 6: જનીન અને જનીન અભિવ્યક્તિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
