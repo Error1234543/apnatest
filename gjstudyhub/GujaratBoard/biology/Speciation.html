@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speciation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Speciation</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Speciation</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે બે જાતિઓ વચ્ચે પ્રજનન થાય છે અને સંતતિ ઉત્પન્ન થાય છે, પરંતુ તે સંતતિ નિષેચન (sterile) હોય છે, તો આ કયા પ્રકારની સ્પીશીએશન (speciation)નું ઉદાહરણ છે?", "opts": ["સહ-ઉત્ક્રાંતિ (Co-evolution)", "ભૌગોલિક અલગીકરણ (Allopatric speciation)", "સંકર અસફળતા (Hybrid breakdown)", "સંકર નિષેચન (Hybrid sterility)"], "ans": 3, "exp": "સંકર નિષેચન (Hybrid sterility) એ સ્પીશીએશનનો એક પ્રકાર છે જ્યાં બે જાતિઓ વચ્ચે પ્રજનન થાય છે અને સંતતિ ઉત્પન્ન થાય છે, પરંતુ તે સંતતિ નિષેચન હોય છે. આ સ્થિતિમાં, સંતતિ પ્રજનનક્ષમ નથી, જે બે જાતિઓ વચ્ચે પ્રજનનિક અલગીકરણ (reproductive isolation) સૂચવે છે. સહ-ઉત્ક્રાંતિ (A) એ બે જાતિઓ વચ્ચેની પરસ્પર અસરને લગતું છે, ભૌગોલિક અલગીકરણ (B) એ ભૌગોલિક અલગીકરણ દ્વારા થતી સ્પીશીએશન છે, અને સંકર અસફળતા (C) એ સંતતિની અસફળતા અથવા મૃત્યુને લગતું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો ભૌગોલિક રીતે અલગ થાય છે અને લાંબા સમય સુધી અલગ અલગ પર્યાવરણમાં રહે છે, ત્યારે તેમની વચ્ચે કયા પ્રકારની સ્પીશીએશન થાય છે?", "opts": ["સંકરીકરણ (Hybridization)", "સહ-ઉત્ક્રાંતિ (Co-evolution)", "ભૌગોલિક અલગીકરણ (Allopatric speciation)", "સંકર નિષેચન (Hybrid sterility)"], "ans": 2, "exp": "ભૌગોલિક અલગીકરણ (Allopatric speciation) એ સ્પીશીએશનનો એક પ્રકાર છે જ્યારે એક જ જાતિના બે જૂથો ભૌગોલિક રીતે અલગ થાય છે અને લાંબા સમય સુધી અલગ અલગ પર્યાવરણમાં રહે છે, જેના કારણે તેઓ અલગ જાતિઓમાં વિકસે છે. સંકરીકરણ (A) એ બે જાતિઓ વચ્ચેના પ્રજનનને લગતું છે, સહ-ઉત્ક્રાંતિ (B) એ બે જાતિઓ વચ્ચેની પરસ્પર અસરને લગતું છે, અને સંકર નિષેચન (D) એ સંતતિની નિષેચનને લગતું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો એક જ ભૌગોલિક વિસ્તારમાં રહે છે પરંતુ અલગ અલગ પર્યાવરણીય નિશો (ecological niches)માં વિકસે છે, ત્યારે કયા પ્રકારની સ્પીશીએશન થાય છે?", "opts": ["ભૌગોલિક અલગીકરણ (Allopatric speciation)", "પર્યાવરણીય સ્પીશીએશન (Ecological speciation)", "સંકર નિષેચન (Hybrid sterility)", "સહ-ઉત્ક્રાંતિ (Co-evolution)"], "ans": 1, "exp": "પર્યાવરણીય સ્પીશીએશન (Ecological speciation) એ સ્પીશીએશનનો એક પ્રકાર છે જ્યારે એક જ જાતિના બે જૂથો એક જ ભૌગોલિક વિસ્તારમાં રહે છે પરંતુ અલગ અલગ પર્યાવરણીય નિશોમાં વિકસે છે, જેના કારણે તેઓ અલગ જાતિઓમાં વિકસે છે. ભૌગોલિક અલગીકરણ (A) એ ભૌગોલિક અલગીકરણ દ્વારા થતી સ્પીશીએશન છે, સંકર નિષેચન (C) એ સંતતિની નિષેચનને લગતું છે, અને સહ-ઉત્ક્રાંતિ (D) એ બે જાતિઓ વચ્ચેની પરસ્પર અસરને લગતું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે બે જાતિઓના સભ્યો વચ્ચે પ્રજનન થાય છે અને સંતતિ ઉત્પન્ન થાય છે, પરંતુ તે સંતતિ નિર્જીવ અથવા નપુસંક હોય છે, તો આ કયા પ્રકારની સ્પીશીએશન (વિશિષ્ટીકરણ)નું ઉદાહરણ ગણાય છે?", "opts": ["સહ-ઉત્ક્રાંતિ (Co-evolution)", "સંકર નિષ્ફળતા (Hybrid Inviability)", "ભૌગોલિક અલગત્વ (Allopatric Speciation)", "સહ-વસવાટી અલગત્વ (Sympatric Speciation)"], "ans": 1, "exp": "સંકર નિષ્ફળતા (Hybrid Inviability) એ સ્પીશીએશનનો એક પ્રકાર છે જ્યાં બે જાતિઓના સભ્યો વચ્ચે પ્રજનન થાય છે અને સંતતિ ઉત્પન્ન થાય છે, પરંતુ તે સંતતિ નિર્જીવ અથવા નપુસંક હોય છે. આમ, સંતતિ આગળ પ્રજનન કરવા સક્ષમ નથી, જે નવી જાતિના નિર્માણમાં અડચણ રૂપ છે. સહ-ઉત્ક્રાંતિ (A) એ બે જાતિઓ વચ્ચેના પરસ્પર અનુકૂલનને દર્શાવે છે, ભૌગોલિક અલગત્વ (C) એ ભૌગોલિક અલગત્વ દ્વારા થતી સ્પીશીએશન છે, અને સહ-વસવાટી અલગત્વ (D) એ એક જ ભૌગોલિક વિસ્તારમાં થતી સ્પીશીએશન છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયા પરિબળ દ્વારા સહ-વસવાટી અલગત્વ (Sympatric Speciation) થાય છે જ્યારે જાતિના સભ્યો એક જ ભૌગોલિક વિસ્તારમાં રહે છે?", "opts": ["ભૌગોલિક અવરોધો જેવા કે પર્વત અથવા નદી", "ખોરાક અથવા આવાસમાં ફેરફારો દ્વારા થતું પસંદગીયુક્ત ચયન", "ક્રોમોસોમલ બદલાવ જેવા કે પોલિપ્લોઇડી", "જાતિય ચયન દ્વારા થતી જનેટિક ડ્રિફ્ટ"], "ans": 2, "exp": "સહ-વસવાટી અલગત્વ (Sympatric Speciation) એ સ્પીશીએશનનો એક પ્રકાર છે જ્યાં જાતિના સભ્યો એક જ ભૌગોલિક વિસ્તારમાં રહે છે. આ પ્રકારની સ્પીશીએશન મુખ્યત્વે ક્રોમોસોમલ બદલાવ જેવા કે પોલિપ્લોઇડી (C) દ્વારા થાય છે, જ્યાં કોષમાં વર્ણસૂત્રોની સંખ્યામાં વૃદ્ધિ થાય છે. ભૌગોલિક અવરોધો (A) ભૌગોલિક અલગત્વ (Allopatric Speciation) સાથે સંબંધિત છે, ખોરાક અથવા આવાસમાં ફેરફારો (B) પસંદગીયુક્ત ચયન દ્વારા થતી સ્પીશીએશનને દર્શાવે છે, અને જાતિય ચયન દ્વારા થતી જનેટિક ડ્રિફ્ટ (D) એ સ્પીશીએશનનું કારણ નથી.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ સહ-વસવાટી અલગત્વ (Sympatric Speciation) નું મુખ્ય કારણ નથી?", "opts": ["પોલિપ્લોઇડી (બહુગુણિતી)", "ભૌગોલિક અવરોધો", "જાતિય પસંદગી", "ક્રોમોસોમલ પુનર્ગઠન"], "ans": 1, "exp": "સહ-વસવાટી અલગત્વમાં જાતિ એક જ ભૌગોલિક વિસ્તારમાં રહે છે, તેથી ભૌગોલિક અવરોધો (B) તેનું કારણ નથી. પોલિપ્લોઇડી (A), જાતિય પસંદગી (C), અને ક્રોમોસોમલ પુનર્ગઠન (D) સહ-વસવાટી અલગત્વના મુખ્ય કારણો છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો વચ્ચે પ્રજનન અવરોધ ઉદ્ભવે છે, ત્યારે કયું અલગત્વનું તબક્કું શરૂ થાય છે?", "opts": ["જનનિક વહન", "પ્રજનન અલગત્વ", "સંકરણ", "જનનિક વૈવિધ્ય"], "ans": 1, "exp": "પ્રજનન અવરોધ ઉદ્ભવવાથી પ્રજનન અલગત્વ (B) શરૂ થાય છે, જે અલગ જાતિના નિર્માણ તરફ દોરી જાય છે. જનનિક વહન (A) અને સંકરણ (C) અલગત્વને રોકે છે, જ્યારે જનનિક વૈવિધ્ય (D) અલગત્વનું પૂર્વ તબક્કું છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું ક્રમિક અલગત્વ (Gradual Speciation) નું ઉદાહરણ નથી?", "opts": ["ડાર્વિનના ફિંચ પક્ષીઓ", "પોલિપ્લોઇડી દ્વારા નવી જાતિનું નિર્માણ", "કાળા અને સફેદ કીટકોનું ભૌગોલિક અલગત્વ", "હિમાલયની ઓક પક્ષીઓ"], "ans": 1, "exp": "પોલિપ્લોઇડી દ્વારા નવી જાતિનું નિર્માણ (B) અચાનક અલગત્વ (Instantaneous Speciation) છે, જ્યારે ડાર્વિનના ફિંચ પક્ષીઓ (A), કાળા અને સફેદ કીટકો (C), અને હિમાલયની ઓક પક્ષીઓ (D) ક્રમિક અલગત્વના ઉદાહરણો છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે બે જાતિઓ વચ્ચે સંકરણ થાય છે અને સંતતિ બંજર (સ્ટેરાઇલ) હોય છે, ત્યારે કયું અલગત્વનું સ્વરૂપ દર્શાવે છે?", "opts": ["પૂર્ણ અલગત્વ", "અપૂર્ણ અલગત્વ", "સહ-વસવાટી અલગત્વ", "ભૌગોલિક અલગત્વ"], "ans": 0, "exp": "બંજર સંતતિ પૂર્ણ અલગત્વ (A) દર્શાવે છે, કારણ કે બે જાતિઓ વચ્ચે પ્રજનન થાય છે પરંતુ સંતતિ પ્રજનનક્ષમ નથી. અપૂર્ણ અલગત્વ (B)માં સંતતિ પ્રજનનક્ષમ હોય છે, જ્યારે સહ-વસવાટી (C) અને ભૌગોલિક (D) અલગત્વ ભૌગોલિક પરિસ્થિતિઓ સાથે સંબંધિત છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ અલગત્વને પ્રોત્સાહન આપતું નથી?", "opts": ["પ્રાકૃતિક પસંદગી", "જનનિક વહન", "મ્યુટેશન", "જનનિક વૈવિધ્ય"], "ans": 1, "exp": "જનનિક વહન (B) અલગત્વને રોકે છે, કારણ કે તે જનનિક વૈવિધ્યને એક જૂથમાંથી બીજા જૂથમાં લાવે છે. પ્રાકૃતિક પસંદગી (A), મ્યુટેશન (C), અને જનનિક વૈવિધ્ય (D) અલગત્વને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો વચ્ચે પ્રજનન અવરોધ ઉત્પન્ન થાય છે, ત્યારે નીચેનામાંથી કયું પરિબળ સહ-વસવાટી અલગત્વ (Sympatric Speciation) ની શક્યતા વધારે છે?", "opts": ["પોલિપ્લોઇડી (બહુગણી ક્રોમોઝોમ)", "ભૌગોલિક અવરોધોની હાજરી", "પ્રાકૃતિક પસંદગી દ્વારા જનીની ભિન્નતા", "જાતિય પસંદગી દ્વારા પ્રજનન અલગત્વ"], "ans": 0, "exp": "પોલિપ્લોઇડી (બહુગણી ક્રોમોઝોમ) સહ-વસવાટી અલગત્વનું મુખ્ય કારણ છે, કારણ કે તે એક જ જાતિના કોષોમાં ક્રોમોઝોમની સંખ્યામાં અચાનક વધારો કરે છે, જેના કારણે નવા જૂથની રચના થાય છે. ભૌગોલિક અવરોધો (B) સહ-વસવાટી અલગત્વ સાથે સંબંધિત નથી, કારણ કે તે અલગત્વ (Allopatric Speciation) નું કારણ છે. પ્રાકૃતિક પસંદગી (C) અને જાતિય પસંદગી (D) પણ સહ-વસવાટી અલગત્વમાં ભૂમિકા ભજવી શકે છે, પરંતુ પોલિપ્લોઇડી એ સૌથી સીધું અને મહત્વપૂર્ણ કારણ છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ અલગત્વના પ્રક્રિયામાં સૌથી ઓછું યોગદાન આપે છે?", "opts": ["જનીની વહન (Gene Flow)", "પ્રાકૃતિક પસંદગી (Natural Selection)", "જનીની વિક્ષેપ (Genetic Drift)", "મ્યુટેશન (Mutation)"], "ans": 0, "exp": "જનીની વહન (A) અલગત્વને રોકે છે, કારણ કે તે જૂથો વચ્ચે જનીની વિનિમયને પ્રોત્સાહન આપે છે, જેના કારણે જૂથો વચ્ચે જનીની એકરૂપતા રહે છે. પ્રાકૃતિક પસંદગી (B), જનીની વિક્ષેપ (C), અને મ્યુટેશન (D) અલગત્વને પ્રોત્સાહન આપે છે, કારણ કે તે જૂથો વચ્ચે જનીની ભિન્નતાને વધારે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન અલગત્વના સિદ્ધાંત સાથે સુસંગત નથી?", "opts": ["અલગત્વ માટે જનીની ભિન્નતા આવશ્યક છે", "અલગત્વ હંમેશા ભૌગોલિક અલગત્વ દ્વારા જ થાય છે", "પ્રજનન અવરોધો અલગત્વના મુખ્ય લક્ષણ છે", "પોલિપ્લોઇડી સહ-વસવાટી અલગત્વનું કારણ બની શકે છે"], "ans": 1, "exp": "અલગત્વ હંમેશા ભૌગોલિક અલગત્વ દ્વારા થતું નથી (B), કારણ કે સહ-વસવાટી અલગત્વ (Sympatric Speciation) પણ શક્ય છે. અલગત્વ માટે જનીની ભિન્નતા (A) આવશ્યક છે, પ્રજનન અવરોધો (C) અલગત્વના મુખ્ય લક્ષણ છે, અને પોલિપ્લોઇડી (D) સહ-વસવાટી અલગત્વનું કારણ બની શકે છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ ક્રમિક અલગત્વ (Gradual Speciation) નું નહીં હોય?", "opts": ["ડાર્વિનના ફિંચ પક્ષીઓના ચાંચના આકારમાં ફેરફાર", "પોલિપ્લોઇડી દ્વારા નવી જાતિની રચના", "ભૌગોલિક અલગત્વ પછી જનીની ભિન્નતાનો વિકાસ", "પ્રાકૃતિક પસંદગી દ્વારા ધીમે ધીમે જનીની ફેરફાર"], "ans": 1, "exp": "પોલિપ્લોઇડી દ્વારા નવી જાતિની રચના (B) એ અચાનક અલગત્વ (Instantaneous Speciation) નું ઉદાહરણ છે, કારણ કે તે એક જ પેઢીમાં થાય છે. ડાર્વિનના ફિંચ પક્ષીઓ (A), ભૌગોલિક અલગત્વ પછી જનીની ભિન્નતા (C), અને પ્રાકૃતિક પસંદગી દ્વારા ધીમે ધીમે ફેરફાર (D) એ ક્રમિક અલગત્વના ઉદાહરણો છે.", "ref": "Std 12 - Chapter 7: ઉત્ક્રાંતિ (Evolution)", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો વચ્ચે વર્ણસૂત્રીય ફેરફારોના કારણે પ્રજનન અવરોધ ઉદ્ભવે છે, ત્યારે નીચેનામાંથી કયો પ્રકારનો અલગત્વ (Speciation) થાય છે, જેમાં નવી જાતિની રચના થાય છે પરંતુ તેના મૂળ જાતિ સાથે હજુ પણ સંકરણ શક્ય હોય છે?", "opts": ["સહ-વસવાટી અલગત્વ (Sympatric Speciation)", "ભૌગોલિક અલગત્વ (Allopatric Speciation)", "ક્રમિક અલગત્વ (Gradual Speciation)", "તાત્કાલિક અલગત્વ (Instantaneous Speciation)"], "ans": 0, "exp": "સહ-વસવાટી અલગત્વ (Sympatric Speciation) એ એક પ્રકારનો અલગત્વ છે જેમાં એક જ ભૌગોલિક વિસ્તારમાં રહેતી જાતિના જૂથો વચ્ચે વર્ણસૂત્રીય ફેરફારો અથવા અન્ય અનુવંશિક પરિબળોના કારણે પ્રજનન અવરોધ ઉદ્ભવે છે, પરંતુ નવી જાતિની રચના થાય છે અને તે મૂળ જાતિ સાથે હજુ પણ સંકરણ શક્ય હોય છે. ભૌગોલિક અલગત્વ (Allopatric Speciation) ભૌગોલિક અલગતાને કારણે થાય છે, ક્રમિક અલગત્વ (Gradual Speciation) ધીમે ધીમે થતો અલગત્વ છે, અને તાત્કાલિક અલગત્વ (Instantaneous Speciation) એ અચાનક થતો અલગત્વ છે જેમાં સંકરણ શક્ય નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો વચ્ચે વર્ણસૂત્રીય પુનર્સંયોજન (Chromosomal Rearrangement) થાય છે, ત્યારે કયા પ્રકારનું અલગત્વ (Speciation) સૌથી વધુ શક્ય છે?", "opts": ["ભૌગોલિક અલગત્વ (Allopatric Speciation)", "સહ-વસવાટી અલગત્વ (Sympatric Speciation)", "ક્રમિક અલગત્વ (Gradual Speciation)", "સંકરણજન્ય અલગત્વ (Hybrid Speciation)"], "ans": 1, "exp": "સહ-વસવાટી અલગત્વ (Sympatric Speciation) એ વર્ણસૂત્રીય પુનર્સંયોજન જેવા જનીનિક ફેરફારો દ્વારા થાય છે, જ્યારે જૂથો એક જ ભૌગોલિક વિસ્તારમાં રહે છે. ભૌગોલિક અલગત્વ (A) માટે ભૌગોલિક અલગાવ જરૂરી છે, ક્રમિક અલગત્વ (C) ધીમે ધીમે થતો પ્રક્રિયા છે, અને સંકરણજન્ય અલગત્વ (D) સંકરણ દ્વારા થાય છે, વર્ણસૂત્રીય પુનર્સંયોજન નહીં.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું કથન સહ-વસવાટી અલગત્વ (Sympatric Speciation) ની સૌથી મજબૂત પુરાવો પૂરો પાડે છે?", "opts": ["ડાર્વિનના ફિંચ પક્ષીઓમાં ચાંચના આકારમાં ફેરફાર", "રાફલેસિયા (Rafflesia) ના ફૂલોમાં પરાગનયન માટે કીટકોની આકર્ષણ પદ્ધતિમાં ફેરફાર", "એપલ મેગોટ ફળમાખી (Rhagoletis pomonella) ની નવી પ્રજાતિ ઉત્પન્ન થવી હોવાનું ઉદાહરણ", "ગલાપાગોસ ટાપુઓ પર કાચબાઓના કવચના આકારમાં ભિન્નતા"], "ans": 2, "exp": "એપલ મેગોટ ફળમાખી (Rhagoletis pomonella) એ સહ-વસવાટી અલગત્વનું ક્લાસિક ઉદાહરણ છે, જ્યાં એક જ જાતિના જૂથો એક જ ભૌગોલિક વિસ્તારમાં રહીને વિવિધ હોસ્ટ (યજમાન) વનસ્પતિઓ પર આધારિત થઈને અલગ પ્રજાતિઓમાં વિકસિત થાય છે. ડાર્વિનના ફિંચ (A) અને ગલાપાગોસ કાચબા (D) ભૌગોલિક અલગત્વના ઉદાહરણો છે, જ્યારે રાફલેસિયા (B) પરાગનયન અલગત્વ સાથે સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે બે જાતિઓ વચ્ચે પ્રજનન થાય છે અને સંતતિ બંજર (સ્ટેરાઇલ) હોય છે, ત્યારે કયા પ્રકારનો પ્રજનન અવરોધ (Reproductive Barrier) કામ કરે છે?", "opts": ["પૂર્વ-સંયુગ્મન અવરોધ (Pre-zygotic Barrier)", "પશ્ચ-સંયુગ્મન અવરોધ (Post-zygotic Barrier)", "ભૌગોલિક અવરોધ (Geographical Barrier)", "વર્તણુકીય અવરોધ (Behavioral Barrier)"], "ans": 1, "exp": "પશ્ચ-સંયુગ્મન અવરોધ (Post-zygotic Barrier) એ સંતતિના વિકાસ અથવા પ્રજનન ક્ષમતામાં અવરોધ ઉત્પન્ન કરે છે, જ્યારે સંતતિ બંજર હોય છે. પૂર્વ-સંયુગ્મન અવરોધ (A) સંયુગ્મન પહેલા જ અવરોધ ઉત્પન્ન કરે છે, ભૌગોલિક અવરોધ (C) ભૌગોલિક અલગાવ સાથે સંબંધિત છે, અને વર્તણુકીય અવરોધ (D) પ્રજનન વર્તણૂકમાં અવરોધ ઉત્પન્ન કરે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "નીચેનામાંથી કયું પરિબળ અલગત્વ પ્રક્રિયામાં 'જનીનિક વહન' (Gene Flow) ને સૌથી વધુ અવરોધે છે?", "opts": ["પ્રાકૃતિક પસંદગી (Natural Selection)", "જનીનિક વિક્ષેપ (Genetic Drift)", "ભૌગોલિક અલગાવ (Geographical Isolation)", "સંકરણ (Hybridization)"], "ans": 2, "exp": "ભૌગોલિક અલગાવ (Geographical Isolation) જનીનિક વહનને સંપૂર્ણપણે અવરોધે છે, કારણ કે બે જૂથો વચ્ચે કોઈ પ્રજનન સંબંધ નથી. પ્રાકૃતિક પસંદગી (A) અને જનીનિક વિક્ષેપ (B) જનીનિક વહનને અસર કરે છે પરંતુ સંપૂર્ણ રીતે અવરોધતું નથી, જ્યારે સંકરણ (D) જનીનિક વહનને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}, {"q": "જ્યારે એક જ જાતિના બે જૂથો વચ્ચે 'પોલિપ્લોઈડી' (Polyploidy) થાય છે, ત્યારે કયા પ્રકારનું અલગત્વ સૌથી વધુ શક્ય છે?", "opts": ["ભૌગોલિક અલગત્વ (Allopatric Speciation)", "સહ-વસવાટી અલગત્વ (Sympatric Speciation)", "ક્રમિક અલગત્વ (Gradual Speciation)", "સંકરણજન્ય અલગત્વ (Hybrid Speciation)"], "ans": 1, "exp": "પોલિપ્લોઈડી (Polyploidy) એ સહ-વસવાટી અલગત્વ (Sympatric Speciation) નું એક મહત્વપૂર્ણ કારણ છે, જ્યાં વર્ણસૂત્રોની સંખ્યામાં અચાનક વૃદ્ધિ થવાથી નવી પ્રજાતિ ઉત્પન્ન થાય છે. ભૌગોલિક અલગત્વ (A) માટે ભૌગોલિક અલગાવ જરૂરી છે, ક્રમિક અલગત્વ (C) ધીમે ધીમે થતો પ્રક્રિયા છે, અને સંકરણજન્ય અલગત્વ (D) સંકરણ દ્વારા થાય છે.", "ref": "Std 12 - અધ્યાય 7: ઉત્ક્રાંતિ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
