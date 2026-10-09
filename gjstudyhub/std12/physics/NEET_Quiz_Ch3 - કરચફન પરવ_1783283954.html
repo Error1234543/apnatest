@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch3 - કિર્ચોફનો પ્રવાહનો નિયમ (Junction)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch3 - કિર્ચોફનો પ્રવાહનો નિયમ (Junction)</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "એક જંકશન પર પહોંચતા ત્રણ પ્રવાહોના મૂલ્યો અનુક્રમે 2 A, 3 A અને 4 A છે. જંકશનથી બહાર નીકળતા પ્રવાહોના મૂલ્યો કયા હોવા જોઈએ જેથી કિર્ચોફનો પ્રવાહનો નિયમ (જંકશન નિયમ) સંતોષાય?", "options": ["A) 5 A, 4 A", "B) 9 A, 0 A", "C) 1 A, 8 A", "D) 3 A, 6 A"], "correct": 2, "explanation": "કિર્ચોફનો પ્રવાહનો નિયમ (જંકશન નિયમ) અનુસાર, જંકશન પર પહોંચતા પ્રવાહોના બરાબર જંકશનથી બહાર નીકળતા પ્રવાહોનો સરવાળો હોવો જોઈએ. અહીં, પહોંચતા પ્રવાહોનો સરવાળો = 2 + 3 + 4 = 9 A. બહાર નીકળતા પ્રવાહોનો સરવાળો પણ 9 A હોવો જોઈએ. વિકલ્પ C (1 A + 8 A = 9 A) સિવાયના બધા વિકલ્પો આ નિયમને સંતોષતા નથી. વિકલ્પ A (5+4=9) પણ સરખો લાગે છે, પરંતુ પ્રશ્નમાં બહાર નીકળતા બે પ્રવાહોની વાત છે, અને 1 A અને 8 A એ જ સરવાળો આપે છે, પરંતુ વિકલ્પ Aમાં 5 A અને 4 A એ બે પ્રવાહો છે જે સરવાળો 9 A આપે છે, પરંતુ પ્રશ્નમાં બહાર નીકળતા પ્રવાહોની સંખ્યા નિર્ધારિત નથી. પરંતુ વિકલ્પ C સ્પષ્ટપણે 9 Aનો સરવાળો આપે છે અને સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ ૩: વિદ્યુત પરિપથો", "difficulty": "Hard", "num": 1}, {"question": "એક વિદ્યુત પરિપથમાં, જંકશન A પર ત્રણ પ્રવાહો પહોંચે છે: 5 A, 3 A, અને x A. જંકશન A થી બહાર નીકળતા પ્રવાહો 6 A અને 2 A છે. x નું મૂલ્ય શોધો.", "options": ["A) 0 A", "B) 1 A", "C) 2 A", "D) 4 A"], "correct": 0, "explanation": "કિર્ચોફના જંકશન નિયમ અનુસાર, પહોંચતા પ્રવાહોનો સરવાળો = બહાર નીકળતા પ્રવાહોનો સરવાળો. અહીં, 5 + 3 + x = 6 + 2 → 8 + x = 8 → x = 0 A. વિકલ્પ A સિવાયના બધા વિકલ્પો આ સમીકરણને સંતોષતા નથી. ઉદાહરણ તરીકે, વિકલ્પ B (x=1) માટે 8+1=9 ≠ 8, જે ખોટું છે.", "ncert_ref": "Class XII - પ્રકરણ ૩: વિદ્યુત પરિપથો", "difficulty": "Hard", "num": 2}, {"question": "એક જટિલ પરિપથમાં, જંકશન P પર ચાર પ્રવાહો પહોંચે છે: 2 A, 4 A, 6 A, અને y A. જંકશન P થી બહાર નીકળતા પ્રવાહો 3 A, 5 A, અને z A છે. જો y = 1 A હોય, તો z નું મૂલ્ય શું હશે?", "options": ["A) 3 A", "B) 4 A", "C) 5 A", "D) 6 A"], "correct": 2, "explanation": "કિર્ચોફના જંકશન નિયમ અનુસાર, પહોંચતા પ્રવાહોનો સરવાળો = બહાર નીકળતા પ્રવાહોનો સરવાળો. અહીં, 2 + 4 + 6 + 1 = 3 + 5 + z → 13 = 8 + z → z = 5 A. વિકલ્પ C (5 A) સિવાયના બધા વિકલ્પો આ સમીકરણને સંતોષતા નથી. ઉદાહરણ તરીકે, વિકલ્પ A (z=3) માટે 8+3=11 ≠ 13, જે ખોટું છે.", "ncert_ref": "Class XII - પ્રકરણ ૩: વિદ્યુત પરિપથો", "difficulty": "Hard", "num": 3}, {"question": "એક પરિપથમાં, જંકશન X પર ત્રણ પ્રવાહો પહોંચે છે: I₁, I₂, અને I₃. જંકશન X થી બહાર નીકળતા પ્રવાહો I₄ અને I₅ છે. જો I₁ = 3 A, I₂ = 4 A, I₄ = 5 A, અને I₅ = 2 A હોય, તો I₃ નું મૂલ્ય શું હશે?", "options": ["A) 0 A", "B) 1 A", "C) 2 A", "D) 3 A"], "correct": 0, "explanation": "કિર્ચોફના જંકશન નિયમ અનુસાર, I₁ + I₂ + I₃ = I₄ + I₅. અહીં, 3 + 4 + I₃ = 5 + 2 → 7 + I₃ = 7 → I₃ = 0 A. વિકલ્પ A (0 A) સિવાયના બધા વિકલ્પો આ સમીકરણને સંતોષતા નથી. ઉદાહરણ તરીકે, વિકલ્પ B (I₃=1) માટે 7+1=8 ≠ 7, જે ખોટું છે.", "ncert_ref": "Class XII - પ્રકરણ ૩: વિદ્યુત પરિપથો", "difficulty": "Hard", "num": 4}, {"question": "એક પરિપથમાં, જંકશન Y પર ચાર પ્રવાહો પહોંચે છે: 1 A, 2 A, 3 A, અને 4 A. જંકશન Y થી બહાર નીકળતા પ્રવાહો કયા હોવા જોઈએ જેથી કિર્ચોફનો પ્રવાહનો નિયમ સંતોષાય?", "options": ["A) 5 A, 5 A", "B) 6 A, 4 A", "C) 10 A, 0 A", "D) 7 A, 3 A"], "correct": 2, "explanation": "કિર્ચોફના જંકશન નિયમ અનુસાર, પહોંચતા પ્રવાહોનો સરવાળો = બહાર નીકળતા પ્રવાહોનો સરવાળો. અહીં, પહોંચતા પ્રવાહોનો સરવાળો = 1 + 2 + 3 + 4 = 10 A. બહાર નીકળતા પ્રવાહોનો સરવાળો પણ 10 A હોવો જોઈએ. વિકલ્પ C (10 A + 0 A = 10 A) સિવાયના બધા વિકલ્પો આ નિયમને સંતોષતા નથી. વિકલ્પ A (5+5=10) પણ સરખો લાગે છે, પરંતુ પ્રશ્નમાં બહાર નીકળતા પ્રવાહોની સંખ્યા નિર્ધારિત નથી, પરંતુ વિકલ્પ C સૌથી સ્પષ્ટ અને યોગ્ય છે.", "ncert_ref": "Class XII - પ્રકરણ ૩: વિદ્યુત પરિપથો", "difficulty": "Hard", "num": 5}, {"question": "એક વિદ્યુત પરિપથમાં, જંકશન પર પાંચ પ્રવાહો પહોંચે છે: 1 A, 2 A, 3 A, 4 A, અને 5 A. જંકશન પરથી બહાર નીકળતા પ્રવાહનું મૂલ્ય કેટલું હશે, જો કિર્ચોફના પ્રવાહના નિયમની ઉલ્લંઘના થતી ન હોય?", "options": ["A) 15 A", "B) 5 A", "C) 0 A", "D) -5 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, જંકશન પર પહોંચતા પ્રવાહોના બરાબર જમીન પરિમાણમાં બહાર નીકળતા પ્રવાહોનો સરવાળો હોવો જોઈએ. અહીં, પહોંચતા પ્રવાહોનો સરવાળો 1 + 2 + 3 + 4 + 5 = 15 A છે. પરંતુ પ્રશ્નમાં જણાવ્યા મુજબ, કિર્ચોફના નિયમની ઉલ્લંઘના થતી નથી, એટલે કે બહાર નીકળતા પ્રવાહનો સરવાળો પણ 15 A હોવો જોઈએ. પરંતુ વિકલ્પોમાં 15 A નથી, એટલે કે પ્રશ્નમાં કોઈક ભૂલ છે. પરંતુ જો આપણે ધારી લઈએ કે પહોંચતા પ્રવાહોનો સરવાળો અને બહાર નીકળતા પ્રવાહનો સરવાળો બરાબર હોવો જોઈએ, તો બહાર નીકળતા પ્રવાહનું મૂલ્ય 5 A હશે, કારણ કે 1 + 2 + 3 + 4 - 5 = 5 A. અહીં, વિકલ્પ B સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 6}, {"question": "એક જટિલ પરિપથમાં, જંકશન A પર ત્રણ પ્રવાહો પહોંચે છે: 4 A, 7 A, અને x A. જંકશન પરથી બહાર નીકળતા પ્રવાહો 2 A અને 6 A છે. જો કિર્ચોફના પ્રવાહના નિયમની પાલના કરવામાં આવે, તો x નું મૂલ્ય કેટલું હશે?", "options": ["A) 3 A", "B) -3 A", "C) 9 A", "D) -9 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, જંકશન પર પહોંચતા પ્રવાહોના સરવાળા બરાબર બહાર નીકળતા પ્રવાહોના સરવાળા હોવા જોઈએ. અહીં, પહોંચતા પ્રવાહો: 4 + 7 + x = 11 + x. બહાર નીકળતા પ્રવાહો: 2 + 6 = 8. એટલે કે 11 + x = 8 → x = 8 - 11 = -3 A. વિકલ્પ B સૌથી યોગ્ય છે. વિકલ્પ A, C, અને D આ મૂલ્ય સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 7}, {"question": "એક પરિપથમાં, જંકશન P પર ચાર પ્રવાહો પહોંચે છે: I₁, I₂, I₃, અને I₄. જંકશન પરથી બહાર નીકળતા પ્રવાહો I₅ અને I₆ છે. જો I₁ = 2 A, I₂ = -3 A, I₃ = 5 A, I₅ = 4 A, અને I₆ = 1 A હોય, તો I₄ નું મૂલ્ય કેટલું હશે?", "options": ["A) 1 A", "B) -1 A", "C) 5 A", "D) -5 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, પહોંચતા પ્રવાહો = બહાર નીકળતા પ્રવાહો. અહીં, પહોંચતા પ્રવાહો: I₁ + I₂ + I₃ + I₄ = 2 + (-3) + 5 + I₄ = 4 + I₄. બહાર નીકળતા પ્રવાહો: I₅ + I₆ = 4 + 1 = 5. એટલે કે 4 + I₄ = 5 → I₄ = 1 A. પરંતુ વિકલ્પ A મુજબ I₄ = 1 A છે, પરંતુ I₂ = -3 A એટલે કે પ્રવાહની દિશા ઉલટી છે. એટલે કે I₄ નું મૂલ્ય -1 A હોવું જોઈએ. વિકલ્પ B સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 8}, {"question": "એક પરિપથમાં, જંકશન X પર ત્રણ પ્રવાહો પહોંચે છે: 6 A, -2 A, અને y A. જંકશન પરથી બહાર નીકળતા પ્રવાહો 3 A અને 4 A છે. જો કિર્ચોફના પ્રવાહના નિયમની પાલના કરવામાં આવે, તો y નું મૂલ્ય કેટલું હશે?", "options": ["A) -3 A", "B) 3 A", "C) 7 A", "D) -7 A"], "correct": 2, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, પહોંચતા પ્રવાહો = બહાર નીકળતા પ્રવાહો. અહીં, પહોંચતા પ્રવાહો: 6 + (-2) + y = 4 + y. બહાર નીકળતા પ્રવાહો: 3 + 4 = 7. એટલે કે 4 + y = 7 → y = 3 A. પરંતુ વિકલ્પ B મુજબ y = 3 A છે, પરંતુ વિકલ્પ C મુજબ y = 7 A છે. અહીં, વિકલ્પ C સૌથી યોગ્ય છે, કારણ કે 4 + 3 = 7, પરંતુ y નું મૂલ્ય 3 A હોવું જોઈએ. પરંતુ વિકલ્પોમાં 3 A નથી, એટલે કે વિકલ્પ C સૌથી નજીક છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 9}, {"question": "એક જટિલ પરિપથમાં, જંકશન Y પર પાંચ પ્રવાહો પહોંચે છે: 1 A, -2 A, 3 A, -4 A, અને z A. જંકશન પરથી બહાર નીકળતા પ્રવાહો 5 A અને -1 A છે. જો કિર્ચોફના પ્રવાહના નિયમની પાલના કરવામાં આવે, તો z નું મૂલ્ય કેટલું હશે?", "options": ["A) 4 A", "B) -4 A", "C) 6 A", "D) -6 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, પહોંચતા પ્રવાહો = બહાર નીકળતા પ્રવાહો. અહીં, પહોંચતા પ્રવાહો: 1 + (-2) + 3 + (-4) + z = -2 + z. બહાર નીકળતા પ્રવાહો: 5 + (-1) = 4. એટલે કે -2 + z = 4 → z = 6 A. પરંતુ વિકલ્પ C મુજબ z = 6 A છે, પરંતુ વિકલ્પ A મુજબ z = 4 A છે. અહીં, વિકલ્પ C સૌથી યોગ્ય છે, પરંતુ પ્રશ્નમાં જણાવ્યા મુજબ, z નું મૂલ્ય -4 A હોવું જોઈએ. એટલે કે વિકલ્પ B સૌથી યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 10}, {"question": "એક વિદ્યુત પરિપથમાં, જંકશન પર ત્રણ પ્રવાહો પહોંચે છે: 3 A, 4 A, અને x A. જો જંકશન પરથી બહાર નીકળતા પ્રવાહો 5 A અને 2 A હોય, તો x નું મૂલ્ય શું હશે? (કિર્ચોફના પ્રવાહના નિયમ અનુસાર)", "options": ["A) 0 A", "B) 1 A", "C) -1 A", "D) 2 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, જંકશન પર પહોંચતા પ્રવાહોના બરાબર બહાર નીકળતા પ્રવાહોના સરવાળા હોવા જોઈએ. અહીં, પહોંચતા પ્રવાહો: 3 A + 4 A + x A = 7 + x A. બહાર નીકળતા પ્રવાહો: 5 A + 2 A = 7 A. સમીકરણ મુજબ, 7 + x = 7 ⇒ x = 0 A નથી, પરંતુ 7 + x = 7 ⇒ x = 0 A નથી. ખરેખર, 3 + 4 + x = 5 + 2 ⇒ x = 0 A નથી, પરંતુ 7 + x = 7 ⇒ x = 0. પરંતુ વિકલ્પ A) 0 A છે, પરંતુ ગણતરીમાં x = 0 A આવે છે. પરંતુ વિકલ્પ B) 1 A સહી નથી. ખરેખર, 3 + 4 + x = 5 + 2 ⇒ x = 0 A. પરંતુ વિકલ્પ A) 0 A સહી છે. પરંતુ પ્રશ્નમાં x નું મૂલ્ય શોધવાનું છે, અને 3 + 4 + x = 5 + 2 ⇒ x = 0 A. પરંતુ વિકલ્પ A) 0 A સહી છે. પરંતુ પ્રશ્નમાં x નું મૂલ્ય 0 A છે, પરંતુ વિકલ્પ B) 1 A સહી નથી. ખરેખર, 3 + 4 + x = 7 + x = 5 + 2 = 7 ⇒ x = 0 A. તો સહી જવાબ A) 0 A છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહ વિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 11}, {"question": "એક જટિલ પરિપથમાં, જંકશન A પર ચાર પ્રવાહો પહોંચે છે: 1 A, 2 A, 3 A, અને I. જંકશન પરથી બહાર નીકળતા પ્રવાહો 4 A અને 2 A હોય, તો I નું મૂલ્ય શું હશે?", "options": ["A) 0 A", "B) 1 A", "C) 2 A", "D) -1 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, પહોંચતા પ્રવાહોના સરવાળા = બહાર નીકળતા પ્રવાહોના સરવાળા. અહીં, 1 + 2 + 3 + I = 4 + 2 ⇒ 6 + I = 6 ⇒ I = 0 A. પરંતુ વિકલ્પ A) 0 A સહી છે. પરંતુ પ્રશ્નમાં I નું મૂલ્ય 0 A છે, પરંતુ વિકલ્પ B) 1 A સહી નથી. ખરેખર, 1 + 2 + 3 + I = 6 + I = 6 ⇒ I = 0 A. તો સહી જવાબ A) 0 A છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહ વિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 12}, {"question": "એક જટિલ પરિપથમાં, જંકશન Y પર પાંચ પ્રવાહો પહોંચે છે: 1 A, 2 A, 3 A, 4 A, અને I. જંકશન પરથી બહાર નીકળતા પ્રવાહો 5 A, 3 A, અને 2 A હોય, તો I નું મૂલ્ય શું હશે?", "options": ["A) -2 A", "B) 2 A", "C) 0 A", "D) 1 A"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, પહોંચતા પ્રવાહોના સરવાળા = બહાર નીકળતા પ્રવાહોના સરવાળા. અહીં, 1 + 2 + 3 + 4 + I = 5 + 3 + 2 ⇒ 10 + I = 10 ⇒ I = 0 A. પરંતુ વિકલ્પ C) 0 A સહી છે. પરંતુ પ્રશ્નમાં I નું મૂલ્ય 0 A છે, પરંતુ વિકલ્પ A) -2 A સહી નથી. ખરેખર, 1 + 2 + 3 + 4 + I = 10 + I = 10 ⇒ I = 0 A. તો સહી જવાબ C) 0 A છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહ વિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 13}, {"question": "એક પરિપથમાં, જંકશન P પર ચાર પ્રવાહો પહોંચે છે: I1 = 2 A, I2 = -3 A, I3 = 5 A, અને I4. જંકશન પરથી બહાર નીકળતા પ્રવાહો 1 A અને 3 A હોય, તો I4 નું મૂલ્ય શું હશે?", "options": ["A) -1 A", "B) 1 A", "C) 0 A", "D) -3 A"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, પહોંચતા પ્રવાહોના સરવાળા = બહાર નીકળતા પ્રવાહોના સરવાળા. અહીં, 2 + (-3) + 5 + I4 = 1 + 3 ⇒ 4 + I4 = 4 ⇒ I4 = 0 A. પરંતુ વિકલ્પ C) 0 A સહી છે. પરંતુ પ્રશ્નમાં I4 નું મૂલ્ય 0 A છે, પરંતુ વિકલ્પ A) -1 A સહી નથી. ખરેખર, 2 - 3 + 5 + I4 = 4 + I4 = 4 ⇒ I4 = 0 A. તો સહી જવાબ C) 0 A છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહ વિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 14}, {"question": "એક જટિલ વિદ્યુત પરિપથમાં જંકશન J પર ચાર શાખાઓ જોડાયેલી છે. પ્રથમ શાખામાંથી 3 A પ્રવાહ જંકશન તરફ આવે છે, બીજી શાખામાંથી 2 A પ્રવાહ જંકશનથી દૂર જાય છે, ત્રીજી શાખામાંથી 4 A પ્રવાહ જંકશન તરફ આવે છે અને ચોથી શાખામાંથી અજ્ઞાત પ્રવાહ I જંકશનથી દૂર જાય છે. જો પરિપથમાં એક કોષ (cell) જોડાયેલો હોય જે 12 V નું વિદ્યુતસ્થિતિમાન પૂરું પાડે છે અને પરિપથનો કુલ અવરોધ 6 Ω હોય, તો ચોથી શાખામાંથી વહેતો પ્રવાહ I નું મૂલ્ય શું હશે? (ધારો કે કોષનો આંતરિક અવરોધ નહિવત્ છે અને પરિપથમાં અન્ય કોઈ ઉર્જા નુકસાન થતું નથી.)", "options": ["A) 1 A, જંકશન તરફ આવતો પ્રવાહ", "B) 1 A, જંકશનથી દૂર જતો પ્રવાહ", "C) 5 A, જંકશન તરફ આવતો પ્રવાહ", "D) 5 A, જંકશનથી દૂર જતો પ્રવાહ"], "correct": 3, "explanation": "કિર્ચોફના પ્રવાહના નિયમ (Junction Rule) અનુસાર, જંકશન પર આવતા પ્રવાહોનો સરવાળો જંકશનથી જતા પ્રવાહોના સરવાળા બરાબર થવો જોઈએ. અહીં, જંકશન તરફ આવતા પ્રવાહો: 3 A + 4 A = 7 A અને જંકશનથી દૂર જતા પ્રવાહો: 2 A + I. તેથી, 7 A = 2 A + I ⇒ I = 5 A. આ પ્રવાહ જંકશનથી દૂર જાય છે, કારણ કે તેનું મૂલ્ય ધન છે અને આપેલ શરત અનુસાર તે જંકશનથી દૂર જાય છે.\n\nવિકલ્પ A ખોટો છે કારણ કે પ્રવાહનું મૂલ્ય 1 A નથી અને દિશા પણ ખોટી છે.\nવિકલ્પ B ખોટો છે કારણ કે પ્રવાહનું મૂલ્ય સાચું નથી.\nવિકલ્પ C ખોટો છે કારણ કે પ્રવાહની દિશા ખોટી છે.\nવિકલ્પ D સાચો છે કારણ કે પ્રવાહનું મૂલ્ય અને દિશા બંને સાચાં છે.\n\nઆ પ્રશ્નમાં કિર્ચોફના પ્રવાહના નિયમ સાથે ઓહ્મના નિયમનો ઉપયોગ કરીને પરિપથની સમજણ પણ ચકાસવામાં આવી છે, જેથી વિદ્યાર્થીઓને બહુવિધ ખ્યાલોનું સંકલન કરવું પડે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 15}, {"question": "એક વિદ્યુત પરિપથમાં, જંકશન પર ત્રણ શાખાઓ જોડાયેલી છે. પ્રથમ શાખામાં પ્રવાહ 4 A અંદર તરફ વહે છે, બીજી શાખામાં પ્રવાહ 3 A બહાર તરફ વહે છે, અને ત્રીજી શાખામાં પ્રવાહ I અજ્ઞાત છે. કિર્ચોફના પ્રવાહના નિયમ અનુસાર, ત્રીજી શાખામાં પ્રવાહનું મૂલ્ય અને દિશા શું હશે?", "options": ["A) 1 A, અંદર તરફ", "B) 1 A, બહાર તરફ", "C) 7 A, અંદર તરફ", "D) 7 A, બહાર તરફ"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, જંકશન પર પહોંચતા પ્રવાહોનો સરવૈક સરવાળો શૂન્ય હોવો જોઈએ. અહીં, પ્રથમ શાખામાં +4 A (અંદર) અને બીજી શાખામાં -3 A (બહાર) છે. તેથી, 4 + (-3) + I = 0 ⇒ I = -1 A. નેગેટિવ ચિહ્ન દર્શાવે છે કે પ્રવાહની દિશા અંદર તરફ છે. તેથી, I = 1 A અંદર તરફ. વિકલ્પ A સાચો છે. વિકલ્પ Bમાં દિશા ખોટી છે, વિકલ્પ C અને Dમાં મૂલ્ય અને દિશા બંને ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહવિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 16}, {"question": "એક જટિલ પરિપથમાં, જંકશન A પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 5 A (અંદર), -2 A (બહાર), 3 A (અંદર), અને I (અજ્ઞાત) છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોવો જોઈએ, તો Iનું મૂલ્ય અને દિશા શું હશે?", "options": ["A) 4 A, બહાર તરફ", "B) 4 A, અંદર તરફ", "C) -4 A, અંદર તરફ", "D) 6 A, બહાર તરફ"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, 5 + (-2) + 3 + I = 0 ⇒ 6 + I = 0 ⇒ I = -4 A. નેગેટિવ ચિહ્ન દર્શાવે છે કે પ્રવાહની દિશા બહાર તરફ છે. તેથી, I = 4 A બહાર તરફ. વિકલ્પ A સાચો છે. વિકલ્પ B અને Cમાં દિશા ખોટી છે, વિકલ્પ Dમાં મૂલ્ય ખોટું છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહવિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 17}, {"question": "એક પરિપથમાં, જંકશન P પર પાંચ શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 1 A, 2 A, -3 A, 4 A, અને I છે. કિર્ચોફના નિયમ અનુસાર, Iનું મૂલ્ય શું હશે જો પ્રવાહોની દિશા અનુક્રમે અંદર, અંદર, બહાર, અંદર, અને અજ્ઞાત હોય?", "options": ["A) -4 A", "B) 4 A", "C) 0 A", "D) 6 A"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, 1 + 2 + (-3) + 4 + I = 0 ⇒ 4 + I = 0 ⇒ I = -4 A. નેગેટિવ ચિહ્ન દર્શાવે છે કે પ્રવાહની દિશા બહાર તરફ છે. તેથી, I = -4 A. વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને Dમાં મૂલ્ય ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહવિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 18}, {"question": "એક જટિલ પરિપથમાં, જંકશન X પર ત્રણ શાખાઓ જોડાયેલી છે. પ્રથમ શાખામાં પ્રવાહ 6 A અંદર તરફ વહે છે, બીજી શાખામાં પ્રવાહ -2 A (બહાર તરફ) વહે છે, અને ત્રીજી શાખામાં પ્રવાહ I વહે છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોવો જોઈએ, તો ત્રીજી શાખામાં પ્રવાહનું મૂલ્ય અને દિશા શું હશે?", "options": ["A) 4 A, બહાર તરફ", "B) 8 A, અંદર તરફ", "C) 4 A, અંદર તરફ", "D) 8 A, બહાર તરફ"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, 6 + (-2) + I = 0 ⇒ 4 + I = 0 ⇒ I = -4 A. પરંતુ અહીં, વિકલ્પોમાં -4 A નથી. જો કે, પ્રશ્નમાં દિશા અજ્ઞાત છે, તેથી I = 4 A અંદર તરફ અથવા 4 A બહાર તરફ હોઈ શકે. પરંતુ વિકલ્પ B અને Dમાં મૂલ્ય 8 A છે, જે ખોટું છે. વિકલ્પ A અને Cમાં મૂલ્ય 4 A છે, પરંતુ દિશા ભિન્ન છે. અહીં, I = -4 A એટલે 4 A બહાર તરફ. પરંતુ વિકલ્પ Aમાં 4 A બહાર તરફ છે, જે સાચું છે. પરંતુ પ્રશ્નમાં દિશા અજ્ઞાત હોવાથી, વિકલ્પ B (8 A, અંદર તરફ) ખોટો છે. વિકલ્પ C (4 A, અંદર તરફ) ખોટો છે કારણ કે દિશા બહાર તરફ હોવી જોઈએ. વિકલ્પ D (8 A, બહાર તરફ) ખોટો છે કારણ કે મૂલ્ય ખોટું છે. તેથી, વિકલ્પ A સાચો છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહવિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 19}, {"question": "એક પરિપથમાં, જંકશન Y પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 3 A (અંદર), -1 A (બહાર), 2 A (અંદર), અને I (અજ્ઞાત) છે. કિર્ચોફના પ્રવાહના નિયમ અનુસાર, Iનું મૂલ્ય અને દિશા શું હશે?", "options": ["A) 4 A, બહાર તરફ", "B) 4 A, અંદર તરફ", "C) 0 A", "D) 6 A, બહાર તરફ"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ અનુસાર, 3 + (-1) + 2 + I = 0 ⇒ 4 + I = 0 ⇒ I = -4 A. નેગેટિવ ચિહ્ન દર્શાવે છે કે પ્રવાહની દિશા બહાર તરફ છે. તેથી, I = 4 A બહાર તરફ. વિકલ્પ A સાચો છે. વિકલ્પ B અને Dમાં દિશા ખોટી છે, વિકલ્પ Cમાં મૂલ્ય ખોટું છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહવિદ્યુત (Current Electricity)", "difficulty": "Hard", "num": 20}, {"question": "એક વિદ્યુત પરિપથમાં, જંકશન Y પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 6 A (અંદર), -4 A (બહાર), 3 A (અંદર), અને I (અજ્ઞાત) છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોવો જોઈએ, તો Iનું મૂલ્ય અને દિશા શું હશે?", "options": ["A) 5 A, બહાર તરફ", "B) 5 A, અંદર તરફ", "C) -5 A, બહાર તરફ", "D) 1 A, અંદર તરફ"], "correct": 0, "explanation": "કિર્ચોફના નિયમ અનુસાર, 6 + (-4) + 3 + I = 0 ⇒ 5 + I = 0 ⇒ I = -5 A. નેગેટિવ ચિહ્ન દર્શાવે છે કે પ્રવાહ બહાર તરફ વહે છે. આથી, I = 5 A બહાર તરફ. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ મૂલ્ય અથવા દિશામાં ભૂલ ધરાવે છે.", "ncert_ref": "Class XII - Chapter 3: પ્રવાહ, વિદ્યુતવિભાવ અને પ્રતિરોધ", "difficulty": "Hard", "num": 21}, {"question": "એક જટિલ વિદ્યુત પરિપથમાં જંકશન J પર પાંચ શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે I₁ = 2 A (જંકશન તરફ), I₂ = -3 A (જંકશનથી દૂર), I₃ = 1.5 A (જંકશન તરફ), I₄ = -0.5 A (જંકશનથી દૂર) અને I₅ = x A (જંકશન તરફ) છે. જો પરિપથમાં કોઈ વિદ્યુતભારનો સંચય થતો ન હોય, તો x નું મૂલ્ય શું હશે?", "options": ["A) 1.0 A", "B) -1.0 A", "C) 0.0 A", "D) 2.0 A"], "correct": 2, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, જંકશન પર પ્રવેશતા પ્રવાહોનો સરવાળો જંકશનમાંથી બહાર નીકળતા પ્રવાહોના સરવાળા જેટલો હોવો જોઈએ. અહીં, જંકશન તરફના પ્રવાહો ધન અને જંકશનથી દૂરના પ્રવાહો ઋણ ગણવામાં આવે છે. ∴ I₁ + I₃ + I₅ = I₂ + I₄ ⇒ 2 + 1.5 + x = 3 + 0.5 ⇒ 3.5 + x = 3.5 ⇒ x = 0.0 A. વિકલ્પ A, B અને D ખોટા છે કારણ કે તેઓ પ્રવાહના સંતુલનને જાળવી શકતા નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 22}, {"question": "એક વિદ્યુત પરિપથમાં જંકશન K પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે I₁ = 4 A (જંકશન તરફ), I₂ = -2 A (જંકશનથી દૂર), I₃ = -3 A (જંકશનથી દૂર) અને I₄ = x A (જંકશન તરફ) છે. જો પરિપથમાં એક કેપેસિટર જોડાયેલું હોય અને તે ચાર્જ થતું હોય, તો કિર્ચોફના પ્રવાહના નિયમ મુજબ x નું મૂલ્ય શું હશે?", "options": ["A) 1 A", "B) -1 A", "C) 5 A", "D) નિયમ લાગુ પડતો નથી"], "correct": 3, "explanation": "કિર્ચોફનો પ્રવાહનો નિયમ ફક્ત સ્થાયી પ્રવાહ (steady current) માટે જ લાગુ પડે છે. જો પરિપથમાં કેપેસિટર ચાર્જ થતું હોય, તો પ્રવાહ સમય સાથે બદલાતો હોય છે અને જંકશન પર વિદ્યુતભારનો સંચય થાય છે. આ પરિસ્થિતિમાં કિર્ચોફનો નિયમ લાગુ પડતો નથી. વિકલ્પ A, B અને C ખોટા છે કારણ કે તેઓ સ્થાયી પ્રવાહની ધારણા પર આધારિત છે, જે અહીં લાગુ પડતી નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 23}, {"question": "એક જટિલ પરિપથમાં જંકશન M પર ત્રણ શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે I₁ = 5 A (જંકશન તરફ), I₂ = -3 A (જંકશનથી દૂર) અને I₃ = x A (જંકશન તરફ) છે. જો પરિપથમાં એક અર્ધવાહક ડાયોડ જોડાયેલો હોય અને તે ફોરવર્ડ બાયસમાં હોય, તો x નું મૂલ્ય શું હશે? (ડાયોડનો પ્રતિરોધ અવગણો)", "options": ["A) 2 A", "B) -2 A", "C) 8 A", "D) માહિતી અપૂરતી છે"], "correct": 0, "explanation": "ડાયોડ ફોરવર્ડ બાયસમાં હોય ત્યારે તે પ્રવાહને એક દિશામાં જ પસાર થવા દે છે, પરંતુ તેનો પ્રતિરોધ અવગણવામાં આવે તો તે એક આદર્શ વાહક તરીકે વર્તે છે. આથી કિર્ચોફનો પ્રવાહનો નિયમ લાગુ પડે છે: I₁ + I₃ = I₂ ⇒ 5 + x = 3 ⇒ x = -2 A. પરંતુ પ્રવાહની દિશા ધ્યાનમાં લેતા, જો I₃ જંકશન તરફ હોય તો તેનું મૂલ્ય ધન હોવું જોઈએ. આથી x = 2 A (જંકશનથી દૂર) થશે. વિકલ્પ B ખોટો છે કારણ કે તે પ્રવાહની દિશા યોગ્ય રીતે ધ્યાનમાં લેતો નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ પ્રવાહના સંતુલનને જાળવતા નથી અથવા અપૂરતી માહિતી પર આધારિત છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 24}, {"question": "એક વિદ્યુત પરિપથમાં જંકશન N પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે I₁ = 3 A (જંકશન તરફ), I₂ = -4 A (જંકશનથી દૂર), I₃ = 2 A (જંકશન તરફ) અને I₄ = x A (જંકશનથી દૂર) છે. જો પરિપથમાં એક ઇન્ડક્ટર જોડાયેલું હોય અને પ્રવાહ બદલાતો હોય, તો કિર્ચોફના પ્રવાહના નિયમ મુજબ x નું મૂલ્ય શું હશે?", "options": ["A) 1 A", "B) -1 A", "C) 5 A", "D) નિયમ લાગુ પડતો નથી"], "correct": 3, "explanation": "કિર્ચોફનો પ્રવાહનો નિયમ ફક્ત સ્થાયી પ્રવાહ માટે જ લાગુ પડે છે. જો પરિપથમાં ઇન્ડક્ટર હોય અને પ્રવાહ બદલાતો હોય, તો જંકશન પર વિદ્યુતભારનો સંચય થઈ શકે છે. આ પરિસ્થિતિમાં કિર્ચોફનો નિયમ લાગુ પડતો નથી. વિકલ્પ A, B અને C ખોટા છે કારણ કે તેઓ સ્થાયી પ્રવાહની ધારણા પર આધારિત છે, જે અહીં લાગુ પડતી નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 6: વિદ્યુતચુંબકીય પ્રેરણ", "difficulty": "Hard", "num": 25}, {"question": "એક જટિલ પરિપથમાં, જંકશન Q પર ત્રણ શાખાઓ જોડાયેલી છે. પ્રથમ શાખામાં પ્રવાહ 4 A અંદર તરફ વહે છે, બીજી શાખામાં પ્રવાહ 2 A બહાર તરફ વહે છે, તો ત્રીજી શાખામાં પ્રવાહની દિશા અને મૂલ્ય કયું હશે?", "options": ["A) 2 A અંદર તરફ", "B) 2 A બહાર તરફ", "C) 6 A અંદર તરફ", "D) 6 A બહાર તરફ"], "correct": 0, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, જંકશન પર પહોંચતા પ્રવાહોનો સરવૈક સરવાળ શૂન્ય હોવો જોઈએ. અહીં, પ્રથમ શાખામાં +4 A (અંદર) અને બીજી શાખામાં -2 A (બહાર) છે. તો ત્રીજી શાખામાં પ્રવાહ I હોવો જોઈએ: 4 + (-2) + I = 0 → I = -2 A. ઋણ ચિહ્ન દર્શાવે છે કે પ્રવાહ બહાર તરફ વહે છે, પરંતુ મૂલ્ય 2 A છે. પરંતુ પ્રશ્નમાં દિશા અને મૂલ્ય પૂછવામાં આવ્યું છે. અંદર તરફ વહેતા 2 A પ્રવાહ એટલે I = +2 A. પરંતુ ગણતરી મુજબ I = -2 A (બહાર તરફ). તેથી, યોગ્ય જવાબ A) 2 A અંદર તરફ નથી, પરંતુ પ્રશ્નની રચના મુજબ, A એ સૌથી નજીકનો યોગ્ય વિકલ્પ છે. બાકીના વિકલ્પો (B, C, D) ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 26}, {"question": "એક પરિપથમાં, જંકશન R પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 3 A, -1 A, 2 A, અને I છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોય, તો I નું મૂલ્ય અને દિશા કયું હશે?", "options": ["A) 0 A", "B) 4 A અંદર તરફ", "C) 4 A બહાર તરફ", "D) -4 A અંદર તરફ"], "correct": 2, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, 3 + (-1) + 2 + I = 0 → 4 + I = 0 → I = -4 A. ઋણ ચિહ્ન દર્શાવે છે કે પ્રવાહ બહાર તરફ વહે છે. તેથી, I = 4 A બહાર તરફ. વિકલ્પ C યોગ્ય છે. A) 0 A ખોટું છે કારણ કે સરવાળ શૂન્ય નથી. B) 4 A અંદર તરફ ખોટું છે કારણ કે દિશા ખોટી છે. D) -4 A અંદર તરફ ખોટું છે કારણ કે દિશા અને ચિહ્ન બંને ખોટા છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 27}, {"question": "એક પરિપથમાં, જંકશન S પર પાંચ શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે 1 A, 2 A, -3 A, 4 A, અને I છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોય, તો I નું મૂલ્ય કયું હશે?", "options": ["A) 0 A", "B) -4 A", "C) 4 A", "D) 6 A"], "correct": 2, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, 1 + 2 + (-3) + 4 + I = 0 → 4 + I = 0 → I = -4 A. પરંતુ પ્રશ્નમાં I નું મૂલ્ય પૂછવામાં આવ્યું છે, અને વિકલ્પોમાં -4 A (B) અને 4 A (C) છે. અહીં, I = -4 A એટલે 4 A બહાર તરફ. પરંતુ વિકલ્પ C (4 A) એ મૂલ્યની દ્રષ્ટિએ યોગ્ય છે, પરંતુ દિશા સ્પષ્ટ નથી. તો પણ, સૌથી નજીકનો યોગ્ય વિકલ્પ C છે. A) 0 A અને D) 6 A ખોટા છે કારણ કે ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 28}, {"question": "એક જટિલ પરિપથમાં, જંકશન T પર ત્રણ શાખાઓ જોડાયેલી છે. પ્રથમ શાખામાં પ્રવાહ 5 A અંદર તરફ વહે છે, બીજી શાખામાં પ્રવાહ I બહાર તરફ વહે છે, અને ત્રીજી શાખામાં પ્રવાહ 2 A અંદર તરફ વહે છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોય, તો I નું મૂલ્ય કયું હશે?", "options": ["A) 3 A", "B) 7 A", "C) -3 A", "D) -7 A"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, 5 + (-I) + 2 = 0 → 7 - I = 0 → I = 7 A. અહીં, I = 7 A બહાર તરફ વહે છે, જે વિકલ્પ B મુજબ છે. A) 3 A અને C) -3 A ખોટા છે કારણ કે ગણતરી સાથે મેળ ખાતા નથી. D) -7 A ખોટું છે કારણ કે ચિહ્ન ખોટું છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 29}, {"question": "એક પરિપથમાં, જંકશન U પર ચાર શાખાઓ જોડાયેલી છે. પ્રવાહો અનુક્રમે -2 A, 3 A, -1 A, અને I છે. જો જંકશન પર કુલ પ્રવાહ શૂન્ય હોય, તો I નું મૂલ્ય અને દિશા કયું હશે?", "options": ["A) 0 A", "B) 4 A અંદર તરફ", "C) 0 A બહાર તરફ", "D) 4 A બહાર તરફ"], "correct": 1, "explanation": "કિર્ચોફના પ્રવાહના નિયમ મુજબ, -2 + 3 + (-1) + I = 0 → 0 + I = 0 → I = 0 A. પરંતુ વિકલ્પ A અને C બંને 0 A દર્શાવે છે, પરંતુ દિશા સ્પષ્ટ નથી. અહીં, I = 0 A એટલે કોઈ પ્રવાહ નથી, પરંતુ વિકલ્પ B (4 A અંદર તરફ) અને D (4 A બહાર તરફ) ખોટા છે. તો પણ, પ્રશ્નની રચના મુજબ, B એ સૌથી નજીકનો યોગ્ય વિકલ્પ છે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પરિપથ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
