@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અભિસ્રાવ દબાણ)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>અભિસ્રાવ દબાણ)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">અભિસ્રાવ દબાણ)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "પાદપ કોષમાં અભિસ્રાવ દબાણનું મૂલ્ય શા માટે વાતાવરણીય દબાણ કરતાં વધારે હોય છે?", "opts": ["કોષરસના ઉચ્ચ સાંદ્રતાને લીધે અંતર્સ્રાવી દબાણ વધારે હોય છે", "કોષભિત્તિની સ્થિતિસ્થાપકતાને લીધે કોષરસ પર દબાણ પડે છે", "પાદપ કોષમાં રહેલા મોટા કોષરસધારકના કારણે", "પાણીના અણુઓની કોષમાં પ્રવેશવાની પ્રવૃત્તિને લીધે"], "ans": 2, "exp": "પાદપ કોષમાં અભિસ્રાવ દબાણ (Turgor Pressure) કોષરસધારક (Central Vacuole)માં પાણીના અણુઓના પ્રવેશને લીધે ઉત્પન્ન થાય છે. કોષરસધારક મોટો હોવાથી તે કોષભિત્તિ પર દબાણ લાદે છે, જે અભિસ્રાવ દબાણ તરીકે ઓળખાય છે. A વિકલ્પ ખોટો છે કારણ કે અંતર્સ્રાવી દબાણ (Osmotic Pressure) કોષરસના સાંદ્રતાથી સંબંધિત છે, પરંતુ અભિસ્રાવ દબાણ કોષભિત્તિ પરનું ભૌતિક દબાણ છે. B વિકલ્પ અપૂર્ણ છે કારણ કે કોષભિત્તિની સ્થિતિસ્થાપકતા અભિસ્રાવ દબાણને ટકાવી રાખવામાં મદદ કરે છે, પરંતુ તે મુખ્ય કારણ નથી. D વિકલ્પ અભિસ્રાવ દબાણના ઉદ્ભવને સમજાવતો નથી, પરંતુ તેની પ્રક્રિયાને સમજાવે છે.", "ref": "Std 11 - પાઠ 11: પાદપમાં પરિવહન", "ch": ""}, {"q": "જો એક પાદપ કોષને હાઇપોટોનિક દ્રાવણમાં મૂકવામાં આવે, તો અભિસ્રાવ દબાણ પર શું અસર થશે?", "opts": ["અભિસ્રાવ દબાણ ઘટશે કારણ કે કોષ પાણી ગુમાવશે", "અભિસ્રાવ દબાણ વધશે કારણ કે કોષ પાણી શોષી લેશે", "અભિસ્રાવ દબાણ સ્થિર રહેશે કારણ કે કોષભિત્તિ પાણીના પ્રવેશને અટકાવશે", "અભિસ્રાવ દબાણ શૂન્ય થશે કારણ કે કોષ ફાટી જશે"], "ans": 1, "exp": "હાઇપોટોનિક દ્રાવણમાં કોષ પાણી શોષી લે છે, જેના કારણે કોષરસધારકનું કદ વધે છે અને કોષભિત્તિ પરનું દબાણ (અભિસ્રાવ દબાણ) વધે છે. A વિકલ્પ ખોટો છે કારણ કે હાઇપોટોનિક દ્રાવણમાં કોષ પાણી ગુમાવતો નથી. C વિકલ્પ ખોટો છે કારણ કે કોષભિત્તિ પાણીના પ્રવેશને અટકાવતી નથી, પરંતુ તેને નિયંત્રિત કરે છે. D વિકલ્પ ખોટો છે કારણ કે કોષ ફાટી જવાને બદલે, કોષભિત્તિનું દબાણ વધવાને લીધે અભિસ્રાવ દબાણ વધે છે.", "ref": "Std 11 - પાઠ 11: પાદપમાં પરિવહન", "ch": ""}, {"q": "અભિસ્રાવ દબાણ અને અંતર્સ્રાવી દબાણ વચ્ચેનો સંબંધ કયો છે?", "opts": ["અભિસ્રાવ દબાણ = અંતર્સ્રાવી દબાણ", "અભિસ્રાવ દબાણ = અંતર્સ્રાવી દબાણ - વાતાવરણીય દબાણ", "અભિસ્રાવ દબાણ = વાતાવરણીય દબાણ - અંતર્સ્રાવી દબાણ", "અભિસ્રાવ દબાણ અને અંતર્સ્રાવી દબાણ વચ્ચે કોઈ સંબંધ નથી"], "ans": 1, "exp": "અભિસ્રાવ દબાણ (TP) અને અંતર્સ્રાવી દબાણ (OP) વચ્ચેનો સંબંધ નીચે મુજબ છે: TP = OP - વાતાવરણીય દબાણ (WP). આ સૂત્ર મુજબ, અભિસ્રાવ દબાણ અંતર્સ્રાવી દબાણ અને વાતાવરણીય દબાણના તફાવતથી નક્કી થાય છે. A વિકલ્પ ખોટો છે કારણ કે તે બંને દબાણોને સરખા ગણાવે છે, જે સચોટ નથી. C વિકલ્પ ખોટો છે કારણ કે તે વાતાવરણીય દબાણને અંતર્સ્રાવી દબાણ કરતાં વધારે ગણાવે છે, જે અભિસ્રાવ દબાણને નકારાત્મક બનાવે છે. D વિકલ્પ ખોટો છે કારણ કે બંને દબાણો વચ્ચે સ્પષ્ટ સંબંધ છે.", "ref": "Std 11 - પાઠ 11: પાદપમાં પરિવહન", "ch": ""}, {"q": "પાદપ કોષમાં અભિસ્રાવ દબાણ શૂન્ય થાય ત્યારે કોષની કઈ અવસ્થા હોય છે?", "opts": ["કોષ પ્લાસ્મોલાઇસિસમાં હોય છે", "કોષ સંપૂર્ણપણે પાણીથી ભરેલો હોય છે", "કોષ મૃત અવસ્થામાં હોય છે", "કોષમાં કોષરસધારક નહીં હોય"], "ans": 0, "exp": "જ્યારે પાદપ કોષમાં અભિસ્રાવ દબાણ શૂન્ય થાય છે, ત્યારે કોષ પ્લાસ્મોલાઇસિસની અવસ્થામાં હોય છે, જેમાં કોષરસ કોષભિત્તિથી અલગ થઈ જાય છે. આ અવસ્થા હાઇપરટોનિક દ્રાવણમાં કોષ પાણી ગુમાવવાને લીધે ઉત્પન્ન થાય છે. B વિકલ્પ ખોટો છે કારણ કે સંપૂર્ણપણે પાણીથી ભરેલા કોષમાં અભિસ્રાવ દબાણ મહત્તમ હોય છે. C વિકલ્પ ખોટો છે કારણ કે મૃત કોષમાં અભિસ્રાવ દબાણ શૂન્ય હોઈ શકે, પરંતુ પ્લાસ્મોલાઇસિસ મૃત્યુનું કારણ નથી. D વિકલ્પ ખોટો છે કારણ કે કોષરસધારકના અભાવે કોષ જીવિત રહી શકતો નથી.", "ref": "Std 11 - પાઠ 11: પાદપમાં પરિવહન", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અભિસ્રાવ દબાણ વિશે સચોટ નથી?", "opts": ["અભિસ્રાવ દબાણ કોષભિત્તિ પર કોષરસધારક દ્વારા લાદવામાં આવે છે", "અભિસ્રાવ દબાણ પાદપ કોષને કડક બનાવે છે", "અભિસ્રાવ દબાણ કોષમાં પાણીના પ્રવેશને રોકે છે", "અભિસ્રાવ દબાણ કોષના વિકાસમાં મદદ કરે છે"], "ans": 2, "exp": "અભિસ્રાવ દબાણ કોષમાં પાણીના પ્રવેશને રોકતું નથી, પરંતુ તે કોષભિત્તિ પર દબાણ લાદીને કોષને કડક બનાવે છે અને વિકાસમાં મદદ કરે છે. A વિકલ્પ સચોટ છે કારણ કે કોષરસધારક કોષભિત્તિ પર દબાણ લાદે છે. B વિકલ્પ સચોટ છે કારણ કે અભિસ્રાવ દબાણ કોષને કડક બનાવે છે. D વિકલ્પ સચોટ છે કારણ કે અભિસ્રાવ દબાણ કોષના વિકાસમાં મહત્વની ભૂમિકા ભજવે છે.", "ref": "Std 11 - પાઠ 11: પાદપમાં પરિવહન", "ch": ""}, {"q": "પાદપ કોષની કોષરસસ્તર પર કોઈ પદાર્થનું સાંદ્રતા સંતુલન પ્રાપ્ત થયા પછી, જો બાહ્ય દ્રાવણમાં પાણીની સાંદ્રતા અચાનક ઘટે, તો અભિસ્રાવ દબાણ પર શું અસર થશે?", "opts": ["અભિસ્રાવ દબાણ તાત્કાલિક ઘટશે કારણ કે પાણી કોષમાં પ્રવેશશે", "અભિસ્રાવ દબાણ વધશે કારણ કે કોષરસસ્તર પર દબાણ વધશે", "અભિસ્રાવ દબાણ અચળ રહેશે કારણ કે સાંદ્રતા સંતુલન પહેલેથી પ્રાપ્ત થયું છે", "અભિસ્રાવ દબાણ શૂન્ય થશે કારણ કે કોષ ફાટી જશે"], "ans": 0, "exp": "જ્યારે બાહ્ય દ્રાવણમાં પાણીની સાંદ્રતા ઘટે, ત્યારે પાણી કોષમાં પ્રવેશ કરશે, જેના કારણે કોષરસસ્તર પર દબાણ વધશે અને અભિસ્રાવ દબાણ ઘટશે. વિકલ્પ B ખોટો છે કારણ કે અભિસ્રાવ દબાણ ઘટે છે, વધતું નથી. વિકલ્પ C ખોટો છે કારણ કે સાંદ્રતા સંતુલન તૂટી જાય છે. વિકલ્પ D ખોટો છે કારણ કે કોષ ફાટતો નથી, પરંતુ અભિસ્રાવ દબાણ ઘટે છે.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શરીરક્રિયા (પાદપ કોષ અને દબાણ સંબંધી ઘટનાઓ)", "ch": ""}, {"q": "જો એક પાદપ કોષને હાઇપરટોનિક દ્રાવણમાં મૂકવામાં આવે, તો અભિસ્રાવ દબાણ અને કોષરસસ્તર પરનું દબાણ વચ્ચેનો સંબંધ કયો હશે?", "opts": ["અભિસ્રાવ દબાણ = કોષરસસ્તર પરનું દબાણ", "અભિસ્રાવ દબાણ < કોષરસસ્તર પરનું દબાણ", "અભિસ્રાવ દબાણ > કોષરસસ્તર પરનું દબાણ", "અભિસ્રાવ દબાણ અને કોષરસસ્તર પરનું દબાણ બંને શૂન્ય થશે"], "ans": 1, "exp": "હાઇપરટોનિક દ્રાવણમાં પાણી કોષમાંથી બહાર નીકળે છે, જેના કારણે કોષરસસ્તર કોષરસ પર દબાણ કરે છે. અહીં, અભિસ્રાવ દબાણ કોષરસસ્તર પરના દબાણ કરતાં ઓછું હોય છે. વિકલ્પ A અને C ખોટા છે કારણ કે અભિસ્રાવ દબાણ કોષરસસ્તર પરના દબાણ જેટલું અથવા વધારે નથી. વિકલ્પ D ખોટો છે કારણ કે દબાણ શૂન્ય થતું નથી.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શરીરક્રિયા (અભિસ્રાવ દબાણ અને કોષરસસ્તર)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અભિસ્રાવ દબાણ અને કોષરસસ્તર પરના દબાણ વચ્ચેના સંબંધ વિશે સચોટ છે?", "opts": ["અભિસ્રાવ દબાણ = કોષરસસ્તર પરનું દબાણ - વાતાવરણીય દબાણ", "અભિસ્રાવ દબાણ = વાતાવરણીય દબાણ - કોષરસસ્તર પરનું દબાણ", "અભિસ્રાવ દબાણ = કોષરસસ્તર પરનું દબાણ + વાતાવરણીય દબાણ", "અભિસ્રાવ દબાણ અને કોષરસસ્તર પરનું દબાણ એકબીજા સાથે સંબંધિત નથી"], "ans": 0, "exp": "અભિસ્રાવ દબાણ (OP) અને કોષરસસ્તર પરનું દબાણ (TP) વચ્ચેનો સંબંધ છે: OP = TP - વાતાવરણીય દબાણ. વિકલ્પ B ખોટો છે કારણ કે તે વાતાવરણીય દબાણ અને કોષરસસ્તર પરના દબાણને ઉલટ સ્વરૂપે ગણે છે. વિકલ્પ C ખોટો છે કારણ કે તે બંને દબાણને ઉમેરે છે. વિકલ્પ D ખોટો છે કારણ કે બંને દબાણ એકબીજા સાથે સંબંધિત છે.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શરીરક્રિયા (દબાણ સંબંધી ઘટનાઓ)", "ch": ""}, {"q": "જો એક પાદપ કોષને પાણીમાં મૂકવામાં આવે, તો અભિસ્રાવ દબાણ પર શું અસર થશે અને કોષની કઈ અવસ્થા બનશે?", "opts": ["અભિસ્રાવ દબાણ ઘટશે અને કોષ ટર્ગિડ બનશે", "અભિસ્રાવ દબાણ વધશે અને કોષ પ્લાઝમોલાઇઝડ બનશે", "અભિસ્રાવ દબાણ અચળ રહેશે અને કોષ ફ્લેકીડ રહેશે", "અભિસ્રાવ દબાણ શૂન્ય થશે અને કોષ ફાટી જશે"], "ans": 0, "exp": "પાણીમાં મૂકવામાં આવેલા પાદપ કોષમાં પાણી પ્રવેશ કરશે, જેના કારણે અભિસ્રાવ દબાણ ઘટશે અને કોષ ટર્ગિડ બનશે. વિકલ્પ B ખોટો છે કારણ કે અભિસ્રાવ દબાણ ઘટે છે, વધતું નથી, અને કોષ પ્લાઝમોલાઇઝડ નથી બનતો. વિકલ્પ C ખોટો છે કારણ કે અભિસ્રાવ દબાણ ઘટે છે. વિકલ્પ D ખોટો છે કારણ કે કોષ ફાટતો નથી.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શરીરક્રિયા (પાદપ કોષ અને પાણી)", "ch": ""}, {"q": "એક પાદપ કોષને શુદ્ધ પાણીમાં મૂકતા તેના અભિસ્રાવ દબાણમાં થતો ફેરફાર અને કોષરસસ્તર પર થતી ઘટના વિશે નીચેના પૈકી કયું વિધાન સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["અભિસ્રાવ દબાણ ઘટે છે કારણ કે કોષરસસ્તર પર ઓસ્મોસિસ દ્વારા પાણીનો પ્રવેશ થાય છે અને કોષ ફૂલી જાય છે, પરંતુ કોષભિત્તિના દબાણને લીધે અંતે સંતુલન પ્રાપ્ત થાય છે.", "અભિસ્રાવ દબાણ વધે છે કારણ કે કોષરસસ્તર પર પાણીનો પ્રવેશ થતાં કોષરસનું સાંદ્રતા ઘટે છે અને કોષ ફાટી જાય છે.", "અભિસ્રાવ દબાણ શૂન્ય થાય છે કારણ કે કોષરસસ્તર પર પાણીનો પ્રવેશ બંધ થઈ જાય છે અને કોષ સંકોચાય છે.", "અભિસ્રાવ દબાણ સતત વધતો રહે છે કારણ કે કોષરસસ્તર પર પાણીનો પ્રવેશ ચાલુ રહે છે અને કોષભિત્તિનું દબાણ ઓછું હોય છે."], "ans": 0, "exp": "સરળ શબ્દોમાં, અભિસ્રાવ દબાણ (TP) = કોષરસ સાંદ્રતા (OP) - કોષભિત્તિ દબાણ (WP). જ્યારે પાદપ કોષને શુદ્ધ પાણીમાં મૂકવામાં આવે, ત્યારે ઓસ્મોસિસ દ્વારા પાણી કોષમાં પ્રવેશે છે, જેથી કોષરસનું સાંદ્રતા ઘટે છે (OP ઘટે) અને કોષભિત્તિ પર દબાણ વધે છે (WP વધે). પરિણામે, TP = OP - WP ઘટે છે. કોષ ફૂલી જાય છે, પરંતુ કોષભિત્તિના દબાણને લીધે અંતે સંતુલન પ્રાપ્ત થાય છે. વિકલ્પ B ખોટો છે કારણ કે કોષ ફાટતો નથી (પાદપ કોષમાં કોષભિત્તિ હોય છે), વિકલ્પ C ખોટો છે કારણ કે TP શૂન્ય થતું નથી, અને વિકલ્પ D ખોટો છે કારણ કે TP સતત વધતું નથી.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શારીરિક પ્રક્રિયાઓ (પાઠ્યપુસ્તક પાન નં. 198-200)", "ch": ""}, {"q": "પાદપ કોષમાં અભિસ્રાવ દબાણ (Ψp) અને સાંદ્રતા દબાણ (Ψs) વચ્ચેનો સંબંધ Ψ = Ψp + Ψs છે. જો કોષનું પાણીનું સ્થિતિસ્થાપકત્વ (Ψ) -0.5 MPa હોય અને સાંદ્રતા દબાણ (Ψs) -1.2 MPa હોય, તો અભિસ્રાવ દબાણ (Ψp)નું મૂલ્ય કેટલું હશે?", "opts": ["+0.7 MPa", "-0.7 MPa", "+1.7 MPa", "-1.7 MPa"], "ans": 0, "exp": "અભિસ્રાવ દબાણ (Ψp)ની ગણતરી સૂત્ર Ψ = Ψp + Ψs વડે થાય છે. અહીં, Ψ = -0.5 MPa અને Ψs = -1.2 MPa આપેલ છે. સૂત્રમાં મૂલ્યો મૂકતાં: -0.5 = Ψp + (-1.2) → Ψp = -0.5 + 1.2 = +0.7 MPa. આમ, અભિસ્રાવ દબાણ સક્રિય અને ધન હોય છે. બાકીના વિકલ્પો (B, C, D) ગણતરીની ચૂકથી અયોગ્ય છે.", "ref": "Std 12 - પાઠ 11: પાદપ જીવનમાં પરિવહન", "ch": ""}, {"q": "એક પાદપ કોષને હાઇપોટોનિક દ્રાવણમાં મૂકતા તેનું અભિસ્રાવ દબાણ વધે છે. આ દરમિયાન કોષરસસ્તર પર કયો દબાણ સક્રિય થાય છે જે અભિસ્રાવ દબાણને સંતુલિત કરવા પ્રયત્ન કરે છે?", "opts": ["વાતાવરણીય દબાણ", "કોષરસસ્તરનું તણાવ દબાણ", "સાંદ્રતા દબાણ", "ગુરુત્વાકર્ષણ દબાણ"], "ans": 1, "exp": "હાઇપોટોનિક દ્રાવણમાં પાણી કોષમાં પ્રવેશે છે, જેના કારણે અભિસ્રાવ દબાણ વધે છે. આ દબાણને સંતુલિત કરવા કોષરસસ્તર પર **તણાવ દબાણ** (Turgor Pressure) સક્રિય થાય છે, જે કોષરસસ્તરને બહાર તરફ ધક્કો આપે છે. વાતાવરણીય દબાણ (A), સાંદ્રતા દબાણ (C), અને ગુરુત્વાકર્ષણ દબાણ (D) આ પ્રક્રિયામાં સક્રિય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પાઠ 11: પાદપ જીવનમાં પરિવહન", "ch": ""}, {"q": "જો એક પાદપ કોષનું અભિસ્રાવ દબાણ શૂન્ય હોય, તો નીચેના પૈકી કયું વિધાન સચોટ છે?", "opts": ["કોષ પ્લાસ્મોલાઇસિસ અવસ્થામાં છે", "કોષ સંપૂર્ણપણે તણાવયુક્ત છે", "કોષરસસ્તર અને કોષભિત્તિ વચ્ચેનો સંપર્ક તૂટી ગયો છે", "કોષનું સ્થિતિસ્થાપકત્વ (Ψ) શૂન્ય છે"], "ans": 3, "exp": "જ્યારે અભિસ્રાવ દબાણ (Ψp) શૂન્ય હોય, ત્યારે સૂત્ર Ψ = Ψp + Ψs મુજબ, સ્થિતિસ્થાપકત્વ (Ψ) = 0 + Ψs = Ψs થાય છે. પરંતુ પ્રશ્નમાં કોઈ સાંદ્રતા દબાણ (Ψs) આપેલ નથી, પરંતુ અભિસ્રાવ દબાણ શૂન્ય હોવાનું કારણ કોષનું સંપૂર્ણ પ્લાસ્મોલાઇસિસ નથી (A), ના કોષ તણાવયુક્ત છે (B), ના કોષભિત્તિ અને કોષરસસ્તર વચ્ચેનો સંપર્ક તૂટ્યો છે (C). સૌથી યોગ્ય વિધાન એ છે કે કોષનું સ્થિતિસ્થાપકત્વ (Ψ) શૂન્ય છે (D), કારણ કે Ψp = 0 હોવાને કારણે Ψ = Ψs થાય, પરંતુ પ્રશ્નમાં Ψs શૂન્ય હોવાનું સૂચવવામાં આવે છે.", "ref": "Std 12 - પાઠ 11: પાદપ જીવનમાં પરિવહન", "ch": ""}, {"q": "નીચેના પૈકી કયા પરિબળથી અભિસ્રાવ દબાણ પર સીધો પ્રભાવ પડતો નથી?", "opts": ["કોષરસમાં પાણીની માત્રા", "કોષભિત્તિની લવચીકતા", "કોષરસમાં દ્રાવ્ય પદાર્થોની સાંદ્રતા", "કોષરસસ્તરની પારગમ્યતા"], "ans": 2, "exp": "અભિસ્રાવ દબાણ (Ψp) કોષરસમાં પાણીની માત્રા (A) અને કોષભિત્તિની લવચીકતા (B) પર આધાર રાખે છે, કારણ કે પાણીના પ્રવેશથી કોષભિત્તિ પર દબાણ પડે છે. કોષરસસ્તરની પારગમ્યતા (D) પણ પાણીના પ્રવેશને અસર કરે છે, પરંતુ કોષરસમાં દ્રાવ્ય પદાર્થોની સાંદ્રતા (C) **સાંદ્રતા દબાણ (Ψs)** ને અસર કરે છે, અભિસ્રાવ દબાણને નહીં. આમ, સીધો પ્રભાવ પડતો નથી તે કોષરસમાં દ્રાવ્ય પદાર્થોની સાંદ્રતા છે.", "ref": "Std 12 - પાઠ 11: પાદપ જીવનમાં પરિવહન", "ch": ""}, {"q": "એક પાદપ કોષને હાઇપરટોનિક દ્રાવણમાં મૂકતા, તેના અભિસ્રાવ દબાણમાં થતો ફેરફાર અને કોષની અવસ્થા વિશે નીચેના પૈકી કયું વિધાન સચોટ છે?", "opts": ["અભિસ્રાવ દબાણ વધે છે અને કોષ તણાવયુક્ત બને છે", "અભિસ્રાવ દબાણ ઘટે છે અને કોષ પ્લાસ્મોલાઇસિસ તરફ વળે છે", "અભિસ્રાવ દબાણ અચળ રહે છે અને કોષમાં કોઈ ફેરફાર થતો નથી", "અભિસ્રાવ દબાણ શૂન્ય થાય છે અને કોષ મરી જાય છે"], "ans": 1, "exp": "હાઇપરટોનિક દ્રાવણમાં પાણી કોષમાંથી બહાર નીકળે છે, જેના કારણે કોષરસમાં પાણીની માત્રા ઘટે છે અને અભિસ્રાવ દબાણ ઘટે છે. આ સાથે કોષ **પ્લાસ્મોલાઇસિસ** તરફ વળે છે. વિકલ્પ (A) ખોટો છે કારણ કે અભિસ્રાવ દબાણ ઘટે છે, નહીં કે વધે. વિકલ્પ (C) ખોટો છે કારણ કે કોષમાં ફેરફાર થાય છે. વિકલ્પ (D) ખોટો છે કારણ કે અભિસ્રાવ દબાણ શૂન્ય થતું નથી અને કોષ મરતું નથી, પરંતુ પ્લાસ્મોલાઇસિસ થાય છે.", "ref": "Std 12 - પાઠ 11: પાદપ જીવનમાં પરિવહન", "ch": ""}, {"q": "એક પાદપ કોષને હાઇપોટોનિક દ્રાવણમાં મૂકતા, તેના અભિસ્રાવ દબાણ (Ψp) અને કોષરસસ્તર દબાણ (Ψ) વચ્ચેનો સંબંધ કયો હશે, જ્યારે કોષ પૂર્ણપણે તણાવગ્રસ્ત (turgid) અવસ્થામાં હોય?", "opts": ["Ψp = -Ψ", "Ψp = Ψ", "Ψp > Ψ", "Ψp < Ψ"], "ans": 1, "exp": "પૂર્ણપણે તણાવગ્રસ્ત કોષમાં, અભિસ્રાવ દબાણ (Ψp) અને કોષરસસ્તર દબાણ (Ψ) પરિમાણમાં સમાન હોય છે, પરંતુ દિશામાં વિરુદ્ધ હોય છે. આથી Ψp = Ψ (પરિમાણમાં). વિકલ્પ A ગળતર છે કારણ કે તે ચિહ્નોને ગળતર રીતે દર્શાવે છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ પરિમાણમાં અસમાનતા દર્શાવે છે, જે તણાવગ્રસ્ત અવસ્થામાં ખરું નથી.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શારીરિક પ્રક્રિયાઓ (પાદપ જીવવિજ્ઞાન)", "ch": ""}, {"q": "જો એક પાદપ કોષનું અભિસ્રાવ દબાણ (Ψp) 0.5 MPa હોય અને કોષરસસ્તર દબાણ (Ψ) -0.5 MPa હોય, તો કોષની જળ સ્થિતિ (water potential) કેટલી હશે?", "opts": ["0 MPa", "-0.5 MPa", "0.5 MPa", "1.0 MPa"], "ans": 0, "exp": "જળ સ્થિતિ (Ψw) = સાંદ્રતા સ્થિતિ (Ψs) + દબાણ સ્થિતિ (Ψp). તણાવગ્રસ્ત કોષમાં, Ψs = -Ψp, આથી Ψw = -Ψp + Ψp = 0 MPa. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ જળ સ્થિતિના ખોટા મૂલ્યો દર્શાવે છે.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શારીરિક પ્રક્રિયાઓ (પાદપ જીવવિજ્ઞાન)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન અભિસ્રાવ દબાણ અને કોષની જળ શોષણ ક્ષમતા વિશે સચોટ છે?", "opts": ["અભિસ્રાવ દબાણ વધુ હોય, તો કોષની જળ શોષણ ક્ષમતા ઓછી હોય છે", "અભિસ્રાવ દબાણ ઓછું હોય, તો કોષની જળ શોષણ ક્ષમતા વધુ હોય છે", "અભિસ્રાવ દબાણ અને જળ શોષણ ક્ષમતા વચ્ચે કોઈ સંબંધ નથી", "અભિસ્રાવ દબાણ શૂન્ય હોય, તો કોષની જળ શોષણ ક્ષમતા અનંત હોય છે"], "ans": 0, "exp": "અભિસ્રાવ દબાણ વધુ હોય, ત્યારે કોષ પૂર્ણપણે તણાવગ્રસ્ત હોય છે અને તે વધુ પાણી શોષી શકતો નથી, આથી જળ શોષણ ક્ષમતા ઓછી હોય છે. વિકલ્પ B ખોટો છે કારણ કે ઓછું અભિસ્રાવ દબાણ એટલે કોષ વધુ પાણી શોષી શકે છે. વિકલ્પ C ખોટો છે કારણ કે સંબંધ છે. વિકલ્પ D ખોટો છે કારણ કે શૂન્ય અભિસ્રાવ દબાણ એટલે કોષ મૃત અથવા પ્લાસ્મોલાઇઝડ હોઈ શકે, જળ શોષણ ક્ષમતા શૂન્ય હોય છે.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શારીરિક પ્રક્રિયાઓ (પાદપ જીવવિજ્ઞાન)", "ch": ""}, {"q": "નીચેના પૈકી કયા પરિબળથી અભિસ્રાવ દબાણ પર અસર પડતી નથી?", "opts": ["કોષરસની સાંદ્રતા", "કોષભિત્તિની લવચીકતા", "વાતાવરણીય તાપમાન", "કોષના આકાર અને કદ"], "ans": 2, "exp": "અભિસ્રાવ દબાણ કોષરસની સાંદ્રતા, કોષભિત્તિની લવચીકતા, અને કોષના આકાર અને કદ પર આધાર રાખે છે. વાતાવરણીય તાપમાનની અસર અભિસ્રાવ દબાણ પર સીધી રીતે પડતી નથી, પરંતુ તે કોષરસની સાંદ્રતા પર અસર કરી શકે છે. આથી વિકલ્પ C સચોટ છે.", "ref": "Std 11 - પ્રકરણ 11: વનસ્પતિ શારીરિક પ્રક્રિયાઓ (પાદપ જીવવિજ્ઞાન)", "ch": ""}, {"q": "એક પાદપ કોષને હાઇપોટોનિક દ્રાવણમાં મૂકતા, કોષરસસ્તર પર દબાણ (Ψ) = -0.8 MPa અને કોષરસસ્તરનું દબાણ (Ψs) = -1.2 MPa હોય, તો અભિસ્રાવ દબાણ (Ψp)નું મૂલ્ય કેટલું હશે?", "opts": ["+0.4 MPa", "-0.4 MPa", "+0.8 MPa", "-0.8 MPa"], "ans": 0, "exp": "અભિસ્રાવ દબાણ (Ψp)નું મૂલ્ય કોષરસસ્તર પરનું કુલ દબાણ (Ψ) અને કોષરસસ્તરનું દબાણ (Ψs) વચ્ચેના સંબંધ દ્વારા નક્કી થાય છે: Ψ = Ψp + Ψs. અહીં, Ψ = -0.8 MPa અને Ψs = -1.2 MPa આપેલ છે. સૂત્ર મુજબ, Ψp = Ψ - Ψs = (-0.8) - (-1.2) = +0.4 MPa. આથી, અભિસ્રાવ દબાણ +0.4 MPa હશે. બાકીના વિકલ્પો (B, C, D) ગણતરી સાથે મેળ ખાતા નથી.", "ref": "Std 12 - અધ્યાય 11: વનસ્પતિ જીવવિજ્ઞાન - પાણીનું પરિવહન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
