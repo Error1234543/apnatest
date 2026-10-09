@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>દરનો સ્થિરાંક</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>દરનો સ્થિરાંક</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">દરનો સ્થિરાંક</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક ઉત્સેચકનો દરનો સ્થિરાંક (Kₘ) ૦.૫ mM છે. નીચેનામાંથી કયું વિધાન આ મૂલ્ય માટે ખોટું છે?", "opts": ["આ ઉત્સેચક તેના પ્રક્રિયક માટે ઉચ્ચ આકર્ષણ ધરાવે છે", "Kₘ મૂલ્ય એ પ્રક્રિયકની તે સાંદ્રતા દર્શાવે છે જ્યાં પ્રક્રિયાનો વેગ મહત્તમ વેગના અડધો હોય છે", "જો પ્રક્રિયકની સાંદ્રતા ૦.૫ mM કરતાં વધુ હોય, તો ઉત્સેચક સંતૃપ્ત થવાની શરૂઆત કરે છે", "Kₘ મૂલ્ય ઉત્સેચકની સાંદ્રતા પર આધારિત છે"], "ans": 3, "exp": "Kₘ (દરનો સ્થિરાંક) એ ઉત્સેચક અને પ્રક્રિયક વચ્ચેના આકર્ષણનું માપ છે. તે ઉત્સેચકની સાંદ્રતા પર આધારિત નથી, પરંતુ પ્રક્રિયકની સાંદ્રતા પર આધારિત છે જ્યાં પ્રક્રિયાનો વેગ મહત્તમ વેગના અડધો હોય છે. વિકલ્પ A સાચો છે કારણ કે નીચું Kₘ ઉચ્ચ આકર્ષણ દર્શાવે છે. વિકલ્પ B અને C પણ સાચા છે કારણ કે Kₘની વ્યાખ્યા અને સંતૃપ્તિની પ્રક્રિયા સાથે સુસંગત છે. વિકલ્પ D ખોટો છે કારણ કે Kₘ ઉત્સેચકની સાંદ્રતા પર આધારિત નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Kₘ) માટે અપવાદરૂપ છે?", "opts": ["Kₘ મૂલ્ય ઉત્સેચકની ઉત્પ્રેરક કાર્યક્ષમતા દર્શાવે છે", "અવરોધકોની હાજરીમાં Kₘ મૂલ્ય બદલાઈ શકે છે", "Kₘ મૂલ્ય હંમેશા પ્રક્રિયકની સાંદ્રતા કરતાં ઓછું હોય છે", "બિન-સ્પર્ધાત્મક અવરોધકો Kₘ મૂલ્યને અસર કરતા નથી"], "ans": 2, "exp": "Kₘ મૂલ્ય એ પ્રક્રિયકની તે સાંદ્રતા છે જ્યાં પ્રક્રિયાનો વેગ મહત્તમ વેગના અડધો હોય છે, પરંતુ તે હંમેશા પ્રક્રિયકની સાંદ્રતા કરતાં ઓછું હોવું જરૂરી નથી. વિકલ્પ A ખોટો નથી કારણ કે Kₘ ઉત્સેચકની કાર્યક્ષમતા સાથે સંબંધિત છે. વિકલ્પ B સાચો છે કારણ કે અવરોધકો Kₘને અસર કરી શકે છે. વિકલ્પ D સાચો છે કારણ કે બિન-સ્પર્ધાત્મક અવરોધકો Kₘને અસર કરતા નથી, પરંતુ Vₘને અસર કરે છે. વિકલ્પ C અપવાદરૂપ છે કારણ કે Kₘ પ્રક્રિયકની સાંદ્રતા કરતાં વધુ પણ હોઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક માટે Kₘ = ૨ mM અને Vₘ = ૫૦ µmol/min છે. જો પ્રક્રિયકની સાંદ્રતા ૪ mM હોય, તો પ્રક્રિયાનો વેગ કેટલો હશે? (માઈકેલિસ-મેન્ટન સમીકરણનો ઉપયોગ કરો)", "opts": ["૨૫ µmol/min", "૩૩.૩ µmol/min", "૪૦ µmol/min", "૫૦ µmol/min"], "ans": 1, "exp": "માઈકેલિસ-મેન્ટન સમીકરણ અનુસાર: v = (Vₘ × [S]) / (Kₘ + [S]). અહીં [S] = ૪ mM, Kₘ = ૨ mM, Vₘ = ૫૦ µmol/min. તેથી, v = (૫૦ × ૪) / (૨ + ૪) = ૨૦૦ / ૬ = ૩૩.૩ µmol/min. આથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Kₘ) અને ઉત્સેચકની કાર્યક્ષમતા વચ્ચેના સંબંધ માટે ખોટું છે?", "opts": ["નીચું Kₘ મૂલ્ય ઉચ્ચ આકર્ષણ દર્શાવે છે", "ઉચ્ચ Kₘ મૂલ્ય ઉત્સેચકની નબળી કાર્યક્ષમતા દર્શાવે છે", "Kₘ મૂલ્ય ઉત્સેચકની સાંદ્રતા પર આધારિત છે", "Kₘ અને Vₘનો ગુણોત્તર ઉત્સેચકની કાર્યક્ષમતા દર્શાવે છે"], "ans": 2, "exp": "Kₘ મૂલ્ય ઉત્સેચકની સાંદ્રતા પર આધારિત નથી, પરંતુ પ્રક્રિયક સાથેના આકર્ષણનું માપ છે. વિકલ્પ A સાચો છે કારણ કે નીચું Kₘ ઉચ્ચ આકર્ષણ દર્શાવે છે. વિકલ્પ B ખોટો નથી કારણ કે ઉચ્ચ Kₘ સામાન્ય રીતે નબળી કાર્યક્ષમતા દર્શાવે છે. વિકલ્પ D સાચો છે કારણ કે Kₘ/Vₘ ગુણોત્તર ઉત્સેચકની કાર્યક્ષમતા દર્શાવે છે. વિકલ્પ C ખોટો છે કારણ કે Kₘ ઉત્સેચકની સાંદ્રતા પર આધારિત નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક માટે Kₘ = ૧ mM છે. જો પ્રક્રિયકની સાંદ્રતા ૦.૫ mM હોય, તો પ્રક્રિયાનો વેગ મહત્તમ વેગના કેટલા ટકા હશે?", "opts": ["૨૫%", "૩૩%", "૫૦%", "૬૭%"], "ans": 1, "exp": "માઈકેલિસ-મેન્ટન સમીકરણ અનુસાર: v = (Vₘ × [S]) / (Kₘ + [S]). અહીં [S] = ૦.૫ mM, Kₘ = ૧ mM. તેથી, v = (Vₘ × ૦.૫) / (૧ + ૦.૫) = ૦.૫ Vₘ / ૧.૫ = ૦.૩૩ Vₘ. આથી પ્રક્રિયાનો વેગ મહત્તમ વેગના ૩૩% હશે. વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચકની પ્રક્રિયા માટે Km = ૨ mM અને Vmax = ૮૦ μmol/min છે. જો પ્રક્રિયકની સાંદ્રતા [S] = ૨ mM હોય, તો પ્રક્રિયાનો દર (V) કેટલો હશે?", "opts": ["૨૦ μmol/min", "૪૦ μmol/min", "૬૦ μmol/min", "૮૦ μmol/min"], "ans": 1, "exp": "મિશેલિસ-મેન્ટન સમીકરણ અનુસાર, V = (Vmax * [S]) / (Km + [S]). અહીં [S] = Km = ૨ mM હોવાથી, V = (૮૦ * ૨) / (૨ + ૨) = ૧૬૦ / ૪ = ૪૦ μmol/min. આથી, બરાબર Km સાંદ્રતાએ પ્રક્રિયાનો દર Vmaxના અડધો (Vmax/2) થાય છે. A, C, D ગળત છે કારણ કે તેઓ આ ગણતરીથી મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Km) અને તેની સબસ્ટ્રેટ પ્રત્યેની બંધન શક્તિ વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["જેમ Km ઓછો હોય તેમ ઉત્સેચકની સબસ્ટ્રેટ પ્રત્યેની બંધન શક્તિ ઓછી હોય છે.", "જેમ Km ઓછો હોય તેમ ઉત્સેચકની સબસ્ટ્રેટ પ્રત્યેની બંધન શક્તિ વધુ હોય છે.", "Km અને બંધન શક્તિ વચ્ચે કોઈ સંબંધ નથી.", "Km મૂલ્ય સબસ્ટ્રેટની સાંદ્રતા પર આધાર રાખે છે, બંધન શક્તિ પર નહીં."], "ans": 1, "exp": "Km એ ઉત્સેચકની સબસ્ટ્રેટ પ્રત્યેની બંધન શક્તિનું પ્રતિબિંબ છે. ઓછો Km એ દર્શાવે છે કે ઉત્સેચકને સબસ્ટ્રેટ સાથે મજબૂત બંધન છે (ઉચ્ચ બંધન શક્તિ). A ગળત છે કારણ કે તે ઉલટું વિધાન કરે છે. C ગળત છે કારણ કે Km અને બંધન શક્તિ વચ્ચે વ્યસ્ત સંબંધ છે. D ગળત છે કારણ કે Km એ ઉત્સેચકનું ગુણધર્મ છે, સબસ્ટ્રેટની સાંદ્રતા પર નહીં.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક ઉત્સેચક માટે Km = ૦.૨ mM અને Vmax = ૫૦ μmol/min છે. જો પ્રક્રિયકની સાંદ્રતા ૦.૦૨ mM હોય, તો પ્રક્રિયાનો દર (V) Vmaxના કેટલા ટકા હશે?", "opts": ["૯.૦૯%", "૧૮.૧૮%", "૨૫%", "૫૦%"], "ans": 0, "exp": "મિશેલિસ-મેન્ટન સમીકરણ અનુસાર, V = (Vmax * [S]) / (Km + [S]). અહીં [S] = ૦.૦૨ mM અને Km = ૦.૨ mM હોવાથી, V = (૫૦ * ૦.૦૨) / (૦.૨ + ૦.૦૨) = ૧ / ૦.૨૨ ≈ ૪.૫૪૫ μmol/min. Vmaxના ટકા = (૪.૫૪૫ / ૫૦) * ૧૦૦ ≈ ૯.૦૯%. B, C, D ગળત છે કારણ કે તેઓ આ ગણતરીથી મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Km) અને પ્રક્રિયાના દર (V) વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે જ્યારે [S] << Km હોય?", "opts": ["પ્રક્રિયાનો દર (V) [S]ના સમપ્રમાણમાં હોય છે.", "પ્રક્રિયાનો દર (V) [S]ના વર્ગમૂળના સમપ્રમાણમાં હોય છે.", "પ્રક્રિયાનો દર (V) સ્થિર રહે છે.", "પ્રક્રિયાનો દર (V) [S]ના વ્યસ્ત પ્રમાણમાં હોય છે."], "ans": 0, "exp": "જ્યારે [S] << Km હોય, ત્યારે મિશેલિસ-મેન્ટન સમીકરણને સરળીકરણ કરતા V ≈ (Vmax / Km) * [S] મળે છે. આથી, V એ [S]ના સમપ્રમાણમાં હોય છે. B, C, D ગળત છે કારણ કે તેઓ આ પરિસ્થિતિમાં લાગુ પડતા નથી.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક ઉત્સેચક માટે Km = ૧ mM છે. જો પ્રક્રિયકની સાંદ્રતા ૯ mM હોય, તો પ્રક્રિયાનો દર (V) Vmaxના કેટલા ટકા હશે?", "opts": ["૯૦%", "૮૦%", "૭૫%", "૬૬.૬૭%"], "ans": 0, "exp": "મિશેલિસ-મેન્ટન સમીકરણ અનુસાર, V = (Vmax * [S]) / (Km + [S]). અહીં [S] = ૯ mM અને Km = ૧ mM હોવાથી, V = (Vmax * ૯) / (૧ + ૯) = (૯/૧૦) * Vmax = ૦.૯ Vmax. આથી, V એ Vmaxના ૯૦% હશે. B, C, D ગળત છે કારણ કે તેઓ આ ગણતરીથી મેળ ખાતા નથી.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક ઉત્સેચકની પ્રક્રિયામાં, જ્યારે સબસ્ટ્રેટની સાંદ્રતા [S] = Km હોય ત્યારે પ્રક્રિયાનો દર Vmaxના કેટલા ટકા હોય છે?", "opts": ["25%", "50%", "75%", "100%"], "ans": 1, "exp": "મિશેલિસ-મેન્ટન કિનેટિક્સ અનુસાર, જ્યારે [S] = Km હોય ત્યારે પ્રક્રિયાનો દર Vmax/2 હોય છે, એટલે કે 50%. A) 25% ખોટું છે કારણ કે તે Vmaxના ચતુર્થાંશ જેટલો દર સૂચવે છે. C) 75% ખોટું છે કારણ કે તે Vmaxના ત્રણ-ચતુર્થાંશ જેટલો દર સૂચવે છે. D) 100% ખોટું છે કારણ કે Vmax મહત્તમ દર છે, જે માત્ર અતિ ઉચ્ચ [S] પર પ્રાપ્ત થાય છે.", "ref": "Std 12 - અધ્યાય 9: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક ઉત્સેચક માટે Km = 0.1 mM અને Vmax = 100 μmol/min છે. જો સબસ્ટ્રેટની સાંદ્રતા 0.01 mM હોય, તો પ્રક્રિયાનો દર (V) કેટલો હશે? (મિશેલિસ-મેન્ટન સમીકરણ વાપરો: V = (Vmax * [S]) / (Km + [S]))", "opts": ["9.09 μmol/min", "10 μmol/min", "11.11 μmol/min", "12.5 μmol/min"], "ans": 0, "exp": "મિશેલિસ-મેન્ટન સમીકરણ મુજબ: V = (Vmax * [S]) / (Km + [S]) = (100 * 0.01) / (0.1 + 0.01) = 1 / 0.11 ≈ 9.09 μmol/min. B) 10 μmol/min ખોટું છે કારણ કે તે સરળ ગણતરીનો ભૂલભર્યો અંદાજ છે. C) 11.11 μmol/min ખોટું છે કારણ કે તે વ્યસ્ત ગણતરી દર્શાવે છે. D) 12.5 μmol/min ખોટું છે કારણ કે તે કોઈપણ ગણતરી સાથે મેળ ખાતું નથી.", "ref": "Std 12 - અધ્યાય 9: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Km) અને તાપમાન વચ્ચેના સંબંધને યોગ્ય રીતે વર્ણવે છે?", "opts": ["તાપમાન વધારવાથી Km હંમેશા ઘટે છે", "તાપમાન વધારવાથી Km હંમેશા વધે છે", "તાપમાનના ફેરફારથી Km પર કોઈ અસર થતી નથી", "તાપમાનના ફેરફારથી Km પર અસર થઈ શકે છે, પરંતુ તે ઉત્સેચક પર આધાર રાખે છે"], "ans": 3, "exp": "Km તાપમાન પર આધાર રાખી શકે છે, પરંતુ તે ઉત્સેચકની પ્રકૃતિ પર નિર્ભર કરે છે. કેટલાક ઉત્સેચકો માટે તાપમાન વધારવાથી Km બદલાઈ શકે છે, જ્યારે કેટલાક માટે તે સ્થિર રહે છે. A) અને B) ખોટા છે કારણ કે તે હંમેશા ઘટે અથવા વધે એવું કહેવું સરખું નથી. C) ખોટું છે કારણ કે તાપમાનના ફેરફારથી Km પર અસર થઈ શકે છે.", "ref": "Std 12 - અધ્યાય 9: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Km) અને ઉત્સેચકની પ્રતિક્રિયા પર અવરોધકના પ્રભાવ વચ્ચેના સંબંધને યોગ્ય રીતે વર્ણવે છે?", "opts": ["સ્પર્ધાત્મક અવરોધક હાજર હોવાથી Km વધે છે, પરંતુ Vmax અચળ રહે છે.", "અસ્પર્ધાત્મક અવરોધક હાજર હોવાથી Km ઘટે છે, પરંતુ Vmax વધે છે.", "સ્પર્ધાત્મક અવરોધક હાજર હોવાથી Km અને Vmax બંને ઘટે છે.", "અસ્પર્ધાત્મક અવરોધક હાજર હોવાથી Km અને Vmax બંને અચળ રહે છે."], "ans": 0, "exp": "સ્પર્ધાત્મક અવરોધક સબસ્ટ્રેટ સાથે ઉત્સેચકની સક્રિય સ્થાને બંધાય છે, જેથી Km (સબસ્ટ્રેટ માટેની બંધન શક્તિનો માપદંડ) વધે છે, પરંતુ Vmax અચળ રહે છે કારણ કે અવરોધકને વધુ સબસ્ટ્રેટ દ્વારા દૂર કરી શકાય છે. B) ખોટું છે કારણ કે અસ્પર્ધાત્મક અવરોધક Km ને અસર કરતું નથી પરંતુ Vmax ઘટાડે છે. C) ખોટું છે કારણ કે સ્પર્ધાત્મક અવરોધક Vmax ને અસર કરતું નથી. D) ખોટું છે કારણ કે અસ્પર્ધાત્મક અવરોધક Vmax ઘટાડે છે.", "ref": "Std 12 - પ્રકરણ ૯: ઉત્સેચકો (Enzymes)", "ch": ""}, {"q": "એક ઉત્સેચક-પ્રક્રિયામાં, જો સબસ્ટ્રેટની સાંદ્રતા ખૂબ જ વધારે લેવામાં આવે તો નીચેનામાંથી કયું વિધાન દરના સ્થિરાંક (Km) માટે સાચું નથી?", "opts": ["પ્રક્રિયાનો દર (V) મહત્તમ દર (Vmax) ની નજીક પહોંચે છે", "ઉત્સેચકના સક્રિય સ્થાનો લગભગ સંપૂર્ણપણે સબસ્ટ્રેટ વડે સંતૃપ્ત થઈ જાય છે", "Km નું મૂલ્ય પ્રક્રિયાના દરને સીધી અસર કરતું નથી કારણ કે તે માત્ર સબસ્ટ્રેટની સાંદ્રતા પર આધારિત છે", "પ્રક્રિયાનો દર (V) અને સબસ્ટ્રેટની સાંદ્રતા ([S]) વચ્ચેનો સંબંધ લગભગ રેખીય બની જાય છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. જ્યારે સબસ્ટ્રેટની સાંદ્રતા ખૂબ જ વધારે હોય ત્યારે પ્રક્રિયાનો દર (V) મહત્તમ દર (Vmax) ની નજીક પહોંચે છે અને ઉત્સેચકના સક્રિય સ્થાનો સંતૃપ્ત થઈ જાય છે (વિકલ્પ A અને B સાચાં છે). Km એ ઉત્સેચકની સબસ્ટ્રેટ પ્રત્યેની આકર્ષણક્ષમતા દર્શાવે છે અને તે પ્રક્રિયાના દરને અસર કરે છે (વિકલ્પ C ખોટું છે). જ્યારે [S] >> Km હોય ત્યારે પ્રક્રિયાનો દર લગભગ Vmax જેટલો થાય છે અને તે સબસ્ટ્રેટની સાંદ્રતા સાથે રેખીય સંબંધ ધરાવતો નથી (વિકલ્પ D ખોટું છે).", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચકની પ્રક્રિયામાં, જો સબસ્ટ્રેટની સાંદ્રતા Km કરતાં ખૂબ જ ઓછી હોય ત્યારે પ્રક્રિયાનો પ્રારંભિક દર (V₀) માટે નીચેનામાંથી કયું સમીકરણ યોગ્ય છે?", "opts": ["V₀ = Vmax [S] / Km", "V₀ = Vmax / (1 + Km/[S])", "V₀ = Vmax [S] / (Km + [S])", "V₀ = Vmax Km / [S]"], "ans": 0, "exp": "જ્યારે સબસ્ટ્રેટની સાંદ્રતા Km કરતાં ખૂબ જ ઓછી હોય ત્યારે, માઇકેલિસ-મેન્ટન સમીકરણ V₀ = Vmax [S] / (Km + [S]) નું સરળીકરણ થઈને V₀ = Vmax [S] / Km થાય છે, કારણ કે [S] ની સરખામણીમાં Km નું મૂલ્ય ખૂબ મોટું હોય છે. આથી વિકલ્પ A સાચો છે. વિકલ્પ B અને C સામાન્ય માઇકેલિસ-મેન્ટન સમીકરણ દર્શાવે છે, જે બધી પરિસ્થિતિઓમાં લાગુ પડતું નથી. વિકલ્પ D ખોટું છે કારણ કે તે દરને સાંદ્રતા સાથે વ્યસ્ત પ્રમાણમાં દર્શાવે છે, જે વાસ્તવિક નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઉત્સેચકના દરના સ્થિરાંક (Km) ની વ્યાખ્યા અને તેના મહત્વને યોગ્ય રીતે વર્ણવતું નથી?", "opts": ["Km એ સબસ્ટ્રેટની તે સાંદ્રતા છે જેના પર પ્રક્રિયાનો દર Vmax ના અડધા જેટલો હોય છે.", "Km નું નીચું મૂલ્ય ઉત્સેચકની સબસ્ટ્રેટ પ્રત્યેની ઊંચી આકર્ષણશક્તિ દર્શાવે છે.", "Km નું મૂલ્ય ઉત્સેચકની સાંદ્રતા પર આધારિત છે અને ઉત્સેચકની સાંદ્રતા વધતા Km ઘટે છે.", "Km નું મૂલ્ય ઉત્સેચક-સબસ્ટ્રેટ સંકુલના વિઘટન અને રચનાના દરના ગુણોત્તર દ્વારા નક્કી થાય છે."], "ans": 2, "exp": "Km એ ઉત્સેચકનો આંતરિક ગુણધર્મ છે અને તે ઉત્સેચકની સાંદ્રતા પર આધારિત નથી. તે માત્ર ઉત્સેચક અને સબસ્ટ્રેટ વચ્ચેની આંતરક્રિયાનું માપ છે. આથી વિકલ્પ C ખોટું છે. બાકીના વિકલ્પો Km ની વ્યાખ્યા અને મહત્વને યોગ્ય રીતે વર્ણવે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક-પ્રક્રિયામાં, જો સ્પર્ધાત્મક અવરોધક ઉમેરવામાં આવે તો નીચેનામાંથી કયું પરિણામ જોવા મળશે?", "opts": ["Km નું મૂલ્ય વધશે, Vmax અચળ રહેશે.", "Km નું મૂલ્ય ઘટશે, Vmax અચળ રહેશે.", "Km નું મૂલ્ય અચળ રહેશે, Vmax ઘટશે.", "Km અને Vmax બંને ઘટશે."], "ans": 0, "exp": "સ્પર્ધાત્મક અવરોધક સબસ્ટ્રેટ સાથે સક્રિય સ્થાન માટે સ્પર્ધા કરે છે, જેના કારણે ઉત્સેચકને સબસ્ટ્રેટ સાથે જોડાવા માટે વધુ સાંદ્રતા જોઈએ છે. આથી Km નું મૂલ્ય વધે છે, પરંતુ Vmax અચળ રહે છે કારણ કે વધુ સબસ્ટ્રેટ ઉમેરવાથી અવરોધકની અસર દૂર થઈ શકે છે. આથી વિકલ્પ A સાચો છે. બાકીના વિકલ્પો સ્પર્ધાત્મક અવરોધકની અસરને યોગ્ય રીતે દર્શાવતા નથી.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "નીચેનામાંથી કયું ઉદાહરણ ઉત્સેચકના દરના સ્થિરાંક (Km) ના મૂલ્યમાં ફેરફારનું કારણ બની શકે નહીં?", "opts": ["ઉત્સેચકનું pH મૂલ્ય બદલવું.", "પ્રક્રિયામાં બિન-સ્પર્ધાત્મક અવરોધક ઉમેરવો.", "ઉત્સેચકની સાંદ્રતા બમણી કરવી.", "પ્રક્રિયાનું તાપમાન વધારવું."], "ans": 2, "exp": "Km એ ઉત્સેચકનો આંતરિક ગુણધર્મ છે અને તે ઉત્સેચકની સાંદ્રતા પર આધારિત નથી. ઉત્સેચકની સાંદ્રતા બદલવાથી Km નું મૂલ્ય બદલાતું નથી. બાકીના વિકલ્પો pH, અવરોધક અને તાપમાનમાં ફેરફાર દ્વારા Km ના મૂલ્યને અસર કરી શકે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}, {"q": "એક ઉત્સેચક માટે Km = ૦.૫ mM અને Vmax = ૬૦ μmol/min છે. જો પ્રક્રિયકની સાંદ્રતા ૦.૧ mM હોય, તો પ્રક્રિયાનો પ્રારંભિક દર (V₀) કેટલો હશે? (માઇકેલિસ-મેન્ટન સમીકરણનો ઉપયોગ કરો)", "opts": ["૧૦ μmol/min", "૧૨ μmol/min", "૮ μmol/min", "૬ μmol/min"], "ans": 0, "exp": "માઇકેલિસ-મેન્ટન સમીકરણ V₀ = Vmax [S] / (Km + [S]) નો ઉપયોગ કરતા, V₀ = ૬૦ × ૦.૧ / (૦.૫ + ૦.૧) = ૬ / ૦.૬ = ૧૦ μmol/min મળે છે. આથી વિકલ્પ A સાચો છે. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 9: ઉત્સેચકો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
