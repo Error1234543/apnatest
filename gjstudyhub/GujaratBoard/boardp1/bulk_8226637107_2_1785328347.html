@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "એક બિંદુવત્ વિધુતભાર q ને અનંત અંતરેથી વિધુતક્ષેત્રમાં કોઈ બિંદુ સુધી લાવવા માટે કરવું પડતું કાર્ય એટલે તે બિંદુનું...", "opts": ["વિદ્યુત સ્થિતિમાન", "વિદ્યુત સ્થિતિમાનનો તફાવત", "વિદ્યુત ક્ષેત્રની તીવ્રતા", "વિદ્યુત ક્ષમતા"], "ans": 0, "exp": "વિદ્યુત સ્થિતિમાનની વ્યાખ્યા મુજબ, એકમ ધન વિધુતભારને અનંત અંતરેથી કોઈ બિંદુ સુધી લાવવા માટે કરવું પડતું કાર્ય તે બિંદુનું વિદ્યુત સ્થિતિમાન કહેવાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમાંતર પ્લેટ કેપેસિટરની બે પ્લેટો વચ્ચેનું અંતર અડધું કરવામાં આવે તો તેની કેપેસિટન્સ...", "opts": ["બમણી થશે", "અડધી થશે", "ચોથા ભાગની થશે", "ચાર ગણી થશે"], "ans": 0, "exp": "કેપેસિટન્સ C = ε₀A/d સૂત્ર મુજબ, અંતર d અડધું કરતાં C બમણું થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે? (1) વિદ્યુત સ્થિતિમાન અદિશ રાશિ છે. (2) વિદ્યુત સ્થિતિમાનનો SI એકમ વોલ્ટ છે. (3) વિદ્યુત સ્થિતિમાનનો તફાવત સદિશ રાશિ છે. (4) વિદ્યુત સ્થિતિમાનનું મૂલ્ય વિધુતભારના મૂલ્ય પર આધારિત નથી.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિદ્યુત સ્થિતિમાનનો તફાવત પણ અદિશ રાશિ છે, કારણ કે તે બે બિંદુઓ વચ્ચેના કાર્યનું માપ છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 10 μF છે. જો તેને 100 V ના વિધુતસ્થિતિમાનના તફાવત પર ચાર્જ કરવામાં આવે, તો તેમાં સંગ્રહિત થતી ઊર્જા કેટલી હશે?", "opts": ["0.05 J", "0.1 J", "0.5 J", "1 J"], "ans": 0, "exp": "ઊર્જા U = ½ CV² = ½ × 10 × 10⁻⁶ × (100)² = 0.05 J.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું સંયોજન કેપેસિટરની કેપેસિટન્સ વધારવા માટે ઉપયોગી નથી?", "opts": ["સમાંતરમાં જોડાણ", "શ્રેણીમાં જોડાણ", "પ્લેટો વચ્ચેનું અંતર ઘટાડવું", "પ્લેટોનું ક્ષેત્રફળ વધારવું"], "ans": 1, "exp": "શ્રેણીમાં જોડાણ કરતાં કુલ કેપેસિટન્સ ઘટે છે, જ્યારે સમાંતરમાં જોડાણ કરતાં વધે છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુત સ્થિતિમાનની વ્યાખ્યા શું છે?", "opts": ["એકમ ધન વિદ્યુતભારને અનંત અંતરેથી વિદ્યુતક્ષેત્રમાં લાવવા માટે કરવું પડતું કાર્ય", "એકમ ધન વિદ્યુતભારને વિદ્યુતક્ષેત્રમાં એક બિંદુથી બીજા બિંદુ સુધી લઈ જવા માટે કરવું પડતું કાર્ય", "વિદ્યુતભારને વિદ્યુતક્ષેત્રમાં ગતિ કરાવવા માટે જરૂરી બળ", "વિદ્યુતક્ષેત્રમાં વિદ્યુતભારની સ્થિતિ ઊર્જા"], "ans": 0, "exp": "વિદ્યુત સ્થિતિમાનની વ્યાખ્યા એકમ ધન વિદ્યુતભારને અનંત અંતરેથી વિદ્યુતક્ષેત્રમાં લાવવા માટે કરવું પડતું કાર્ય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમાંતર પ્લેટ કેપેસિટરની કેપેસિટન્સ C છે. જો બંને પ્લેટ વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવી કેપેસિટન્સ કેટલી થશે?", "opts": ["C/2", "2C", "C", "4C"], "ans": 1, "exp": "કેપેસિટન્સ C = ε₀A/d છે. જો અંતર d અડધું થાય તો C બમણું થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["કેપેસિટરની કેપેસિટન્સ તેની પ્લેટોના ક્ષેત્રફળ પર આધાર રાખે છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટો વચ્ચેના માધ્યમ પર આધાર રાખે છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટો વચ્ચેના અંતર પર આધાર રાખતી નથી.", "કેપેસિટરમાં સંગ્રહિત ઊર્જા તેના વિદ્યુતભાર અને વોલ્ટેજ પર આધાર રાખે છે."], "ans": 2, "exp": "કેપેસિટન્સ પ્લેટો વચ્ચેના અંતર પર આધાર રાખે છે, તેથી ત્રીજું વિધાન ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 10 V ના બેટરી સાથે જોડવામાં આવે છે અને તેના પર 20 μC વિદ્યુતભાર સંગ્રહિત થાય છે. આ કેપેસિટરની કેપેસિટન્સ કેટલી હશે?", "opts": ["2 μF", "0.5 μF", "5 μF", "10 μF"], "ans": 0, "exp": "કેપેસિટન્સ C = Q/V = 20 μC / 10 V = 2 μF.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["વિદ્યુત સ્થિતિમાન સ્કેલર રાશિ છે.", "વિદ્યુત સ્થિતિમાનનો એકમ વોલ્ટ છે.", "વિદ્યુત સ્થિતિમાનનું મૂલ્ય હંમેશા ધન હોય છે.", "વિદ્યુત સ્થિતિમાનનું મૂલ્ય વિદ્યુતભારની સ્થિતિ પર આધાર રાખે છે."], "ans": 2, "exp": "વિદ્યુત સ્થિતિમાન ધન કે ઋણ હોઈ શકે છે, તેથી ત્રીજું વિધાન ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["કેપેસિટરમાં સંગ્રહિત ઊર્જા તેના વિદ્યુતભારના વર્ગના સમપ્રમાણમાં હોય છે.", "કેપેસિટરની કેપેસિટન્સ તેની પ્લેટના ક્ષેત્રફળ પર આધારિત નથી.", "સમાંતર પ્લેટ કેપેસિટરની કેપેસિટન્સ પ્લેટ વચ્ચેના માધ્યમની પરાવૈધૃતાંક પર આધાર રાખે છે.", "કેપેસિટરમાં સંગ્રહિત ઊર્જા તેની કેપેસિટન્સના સમપ્રમાણમાં હોય છે."], "ans": 1, "exp": "કેપેસિટરની કેપેસિટન્સ તેની પ્લેટના ક્ષેત્રફળ પર આધારિત છે, તેથી આ વિધાન ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું જોડકું સાચું નથી?", "opts": ["વિદ્યુત સ્થિતિમાન - વોલ્ટ", "કેપેસિટન્સ - ફેરાડ", "વિદ્યુતભાર - કુલંબ", "વિદ્યુતક્ષેત્રની પ્રબળતા - જૂલ"], "ans": 3, "exp": "વિદ્યુતક્ષેત્રની પ્રબળતા ન્યૂટન પ્રતિ કુલંબ અથવા વોલ્ટ પ્રતિ મીટરમાં માપવામાં આવે છે, જૂલ નહીં.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "વિદ્યુત સ્થિતિમાનનો SI એકમ શું છે?", "opts": ["જૂલ (J)", "વોલ્ટ (V)", "કૂલંબ (C)", "ફેરાડ (F)"], "ans": 1, "exp": "વિદ્યુત સ્થિતિમાનનો SI એકમ વોલ્ટ (V) છે, જે એક કૂલંબ વીજભારને એક જૂલ કાર્ય કરવા માટે જરૂરી ઊર્જા દર્શાવે છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 5 μF છે. જો તેને 20 V ના વિદ્યુતસ્થિતિમાનના તફાવત પર ચાર્જ કરવામાં આવે, તો તેના પરનો વીજભાર કેટલો હશે?", "opts": ["25 μC", "100 μC", "50 μC", "200 μC"], "ans": 1, "exp": "કેપેસિટન્સ (C) = 5 μF, વિદ્યુતસ્થિતિમાન (V) = 20 V. વીજભાર (Q) = C × V = 5 × 20 = 100 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "બે કેપેસિટરોને શ્રેણીમાં જોડવામાં આવે ત્યારે તેમની સમતુલ્ય કેપેસિટન્સ કેવી રીતે ગણવામાં આવે છે?", "opts": ["C₁ + C₂", "(C₁ × C₂) / (C₁ + C₂)", "C₁ × C₂", "1/C₁ + 1/C₂"], "ans": 1, "exp": "શ્રેણીમાં જોડાયેલા કેપેસિટરોની સમતુલ્ય કેપેસિટન્સનો સૂત્ર (C₁ × C₂) / (C₁ + C₂) છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિધાન અને કારણ આપેલ છે: વિધાન: વિદ્યુત સ્થિતિમાન એ અદિશ રાશિ છે. કારણ: વિદ્યુત સ્થિતિમાન માત્ર મૂલ્ય ધરાવે છે, દિશા નહીં.", "opts": ["વિધાન અને કારણ બંને સાચાં છે અને કારણ વિધાનની સાચી સમજૂતી છે.", "વિધાન અને કારણ બંને સાચાં છે, પરંતુ કારણ વિધાનની સાચી સમજૂતી નથી.", "વિધાન સાચું છે, પરંતુ કારણ ખોટું છે.", "વિધાન ખોટું છે, પરંતુ કારણ સાચું છે."], "ans": 0, "exp": "વિદ્યુત સ્થિતિમાન એ અદિશ રાશિ છે કારણ કે તે માત્ર મૂલ્ય ધરાવે છે, દિશા નહીં. તેથી વિધાન અને કારણ બંને સાચાં છે અને કારણ યોગ્ય સમજૂતી છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 12 V ના બેટરી સાથે જોડવામાં આવે છે અને તેના પર 36 μC વિદ્યુતભાર સંગ્રહિત થાય છે. જો બેટરીનો વોલ્ટેજ 24 V કરવામાં આવે, તો કેપેસિટર પર કેટલો વિદ્યુતભાર સંગ્રહિત થશે?", "opts": ["72 μC", "36 μC", "18 μC", "144 μC"], "ans": 0, "exp": "કેપેસિટન્સ (C) = Q/V = 36 μC / 12 V = 3 μF. નવો વિદ્યુતભાર (Q) = C × V = 3 μF × 24 V = 72 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન સાચું નથી?", "opts": ["સમાંતર જોડાણમાં કેપેસિટરની કુલ કેપેસિટન્સ વધે છે.", "શ્રેણી જોડાણમાં કેપેસિટરની કુલ કેપેસિટન્સ ઘટે છે.", "કેપેસિટરની કેપેસિટન્સ તેની પ્લેટોના આકાર પર આધારિત નથી.", "કેપેસિટરની કેપેસિટન્સ તેની પ્લેટો વચ્ચેના માધ્યમ પર આધારિત છે."], "ans": 2, "exp": "કેપેસિટરની કેપેસિટન્સ તેની પ્લેટોના આકાર (ક્ષેત્રફળ) પર આધારિત છે, તેથી ત્રીજું વિધાન ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 5 μF છે. જો તેને 20 V ના વિદ્યુતસ્થિતિમાનના તફાવત સાથે જોડવામાં આવે, તો તેમાં સંગ્રહિત વિદ્યુતભાર કેટલો હશે?", "opts": ["100 μC", "25 μC", "50 μC", "200 μC"], "ans": 0, "exp": "કેપેસિટન્સ (C) = 5 μF, વિદ્યુતસ્થિતિમાન (V) = 20 V. વિદ્યુતભાર (Q) = C × V = 5 × 20 = 100 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 10 μF છે અને તેને 100 V ના વિદ્યુતસ્થિતિમાનના તફાવત સાથે ચાર્જ કરવામાં આવે છે. જો તેને અન્ય અચાર્જ્ડ કેપેસિટર સાથે સમાંતરમાં જોડવામાં આવે, તો નવું સામાન્ય વિદ્યુતસ્થિતિમાન કેટલું હશે? (બીજા કેપેસિટરની કેપેસિટન્સ પણ 10 μF છે)", "opts": ["50 V", "100 V", "25 V", "75 V"], "ans": 0, "exp": "કુલ વિદ્યુતભાર Q = C × V = 10 μF × 100 V = 1000 μC. સમાંતરમાં જોડ્યા બાદ કુલ કેપેસિટન્સ 20 μF થાય. નવું વિદ્યુતસ્થિતિમાન V = Q/C = 1000 μC / 20 μF = 50 V.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "ત્રણ કેપેસિટરોને શ્રેણીમાં જોડવામાં આવે છે, જેમની કેપેસિટન્સ અનુક્રમે 2 μF, 3 μF અને 6 μF છે. આ સંયોજનની સમતુલ્ય કેપેસિટન્સ કેટલી હશે?", "opts": ["11 μF", "1 μF", "6 μF", "3 μF"], "ans": 1, "exp": "શ્રેણીમાં જોડેલા કેપેસિટરોની સમતુલ્ય કેપેસિટન્સ 1/C = 1/2 + 1/3 + 1/6 = 1 μF.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન કેપેસિટર માટે સાચું નથી?", "opts": ["કેપેસિટર વિદ્યુતભારનો સંગ્રહ કરે છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટો વચ્ચેના અંતર પર આધારિત છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટોના ક્ષેત્રફળ પર આધારિત નથી.", "કેપેસિટરની કેપેસિટન્સ પ્લેટો વચ્ચેના માધ્યમની પરાવૈદ્યુતાંક પર આધારિત છે."], "ans": 2, "exp": "કેપેસિટરની કેપેસિટન્સ પ્લેટોના ક્ષેત્રફળ પર સીધી રીતે આધારિત છે (C ∝ A).", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 4 μF છે. જો તેને 50 Vના વોલ્ટેજ સાથે જોડવામાં આવે, તો તેમાં સંગ્રહિત થતી ઊર્જા કેટલી હશે?", "opts": ["5 × 10⁻³ J", "5 × 10⁻⁴ J", "1 × 10⁻³ J", "2 × 10⁻³ J"], "ans": 0, "exp": "ઊર્જા U = ½ CV² = ½ × 4 × 10⁻⁶ × (50)² = 5 × 10⁻³ J.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 12 Vના બેટરી સાથે જોડતાં તેના પર 24 μC વીજભાર સંગ્રહિત થાય છે. આ કેપેસિટરની કેપેસિટન્સ કેટલી હશે?", "opts": ["2 μF", "4 μF", "6 μF", "8 μF"], "ans": 0, "exp": "કેપેસિટન્સ C = Q/V = 24 × 10⁻⁶ / 12 = 2 × 10⁻⁶ F = 2 μF.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું જોડાણ કેપેસિટરની કુલ કેપેસિટન્સ વધારવા માટે ઉપયોગી નથી?", "opts": ["સમાંતર જોડાણ", "શ્રેણી જોડાણ", "સમાંતર અને શ્રેણીનું મિશ્રણ", "પરાવૈદ્યુત પદાર્થનો ઉપયોગ"], "ans": 1, "exp": "શ્રેણી જોડાણમાં કેપેસિટરની કુલ કેપેસિટન્સ ઘટે છે, તેથી તે કેપેસિટન્સ વધારવા માટે ઉપયોગી નથી.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમતલ પ્લેટ કેપેસિટરની બે પ્લેટો વચ્ચેના અંતરને અડધું કરવામાં આવે ત્યારે તેની કેપેસિટન્સમાં શું ફેરફાર થાય છે?", "opts": ["કેપેસિટન્સ અડધી થાય છે", "કેપેસિટન્સ બમણી થાય છે", "કેપેસિટન્સ ચાર ગણી થાય છે", "કેપેસિટન્સમાં કોઈ ફેરફાર થતો નથી"], "ans": 1, "exp": "કેપેસિટન્સનું સૂત્ર C = ε₀A/d છે, જ્યાં d એ પ્લેટો વચ્ચેનું અંતર છે. અંતર અડધું કરતાં કેપેસિટન્સ બમણી થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન વિદ્યુત સ્થિતિમાન માટે ખોટું છે?", "opts": ["વિદ્યુત સ્થિતિમાન અદિશ રાશિ છે", "વિદ્યુત સ્થિતિમાનનો SI એકમ વોલ્ટ છે", "વિદ્યુત સ્થિતિમાનનું મૂલ્ય વિદ્યુતભારના માર્ગ પર આધારિત છે", "વિદ્યુત સ્થિતિમાનનું મૂલ્ય વિદ્યુતક્ષેત્રમાં બિંદુની સ્થિતિ પર આધારિત છે"], "ans": 2, "exp": "વિદ્યુત સ્થિતિમાનનું મૂલ્ય માત્ર વિદ્યુતક્ષેત્રમાં બિંદુની સ્થિતિ પર આધારિત છે, વિદ્યુતભારના માર્ગ પર નહીં.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ કેપેસિટરના ઉપયોગનું નથી?", "opts": ["રેડિયો ટ્યુનિંગ સર્કિટમાં", "કમ્પ્યુટર મેમરીમાં", "વિદ્યુત મોટરમાં", "ફ્લેશ કેમેરામાં"], "ans": 2, "exp": "કેપેસિટરનો ઉપયોગ રેડિયો ટ્યુનિંગ, કમ્પ્યુટર મેમરી અને ફ્લેશ કેમેરામાં થાય છે, પરંતુ વિદ્યુત મોટરમાં તેનો ઉપયોગ પ્રાથમિક રીતે થતો નથી.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 5 μF છે. જો તેને 20 V ની બેટરી સાથે જોડવામાં આવે, તો તેના પર સંગ્રહિત થતો વીજભાર કેટલો હશે?", "opts": ["25 μC", "50 μC", "100 μC", "200 μC"], "ans": 2, "exp": "વીજભાર Q = C × V = 5 μF × 20 V = 100 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન કેપેસિટર માટે ખોટું છે?", "opts": ["કેપેસિટર વીજભાર સંગ્રહિત કરે છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટો વચ્ચેના અંતર પર આધારિત છે.", "કેપેસિટર વીજપ્રવાહને સતત પસાર થવા દે છે.", "કેપેસિટરની કેપેસિટન્સ પ્લેટોના ક્ષેત્રફળ પર આધારિત છે."], "ans": 2, "exp": "કેપેસિટર વીજપ્રવાહને સતત પસાર થવા દેતું નથી, તે માત્ર વીજભારને સંગ્રહિત કરે છે અને વિદ્યુતક્ષેત્ર ઉત્પન્ન કરે છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમતલ પ્લેટ કેપેસિટરની બે પ્લેટો વચ્ચેનું અંતર અડધું કરવામાં આવે તો તેની કેપેસિટન્સ પર શું અસર થશે?", "opts": ["કેપેસિટન્સ અડધી થશે.", "કેપેસિટન્સ બમણી થશે.", "કેપેસિટન્સ ચાર ગણી થશે.", "કેપેસિટન્સમાં કોઈ ફેર પડશે નહીં."], "ans": 1, "exp": "કેપેસિટન્સ C = ε₀A/d મુજબ, અંતર d અડધું કરતાં કેપેસિટન્સ બમણી થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 8 μF છે. જો તેને 20 Vના વોલ્ટેજ પર ચાર્જ કરવામાં આવે, તો તેના પર સંગ્રહિત થતો વીજભાર કેટલો હશે?", "opts": ["40 μC", "80 μC", "160 μC", "200 μC"], "ans": 2, "exp": "કેપેસિટન્સ (C) = 8 μF, વોલ્ટેજ (V) = 20 V. વીજભાર (Q) = C × V = 8 × 20 = 160 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 50 Vના વોલ્ટેજ પર ચાર્જ કરવામાં આવે છે અને પછી બેટરીથી અલગ કરવામાં આવે છે. જો પ્લેટો વચ્ચેનું અંતર બમણું કરવામાં આવે, તો નવું વોલ્ટેજ કેટલું હશે?", "opts": ["25 V", "50 V", "100 V", "200 V"], "ans": 2, "exp": "કેપેસિટરને બેટરીથી અલગ કર્યા પછી વીજભાર અચળ રહે છે. અંતર બમણું કરતાં કેપેસિટન્સ અડધી થાય છે, તેથી વોલ્ટેજ બમણું (V = Q/C) થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 4 μF છે. જો તેને 20 Vના વોલ્ટેજ સાથે જોડવામાં આવે, તો તેના પર સંગ્રહિત થતો વીજભાર કેટલો હશે?", "opts": ["20 μC", "80 μC", "5 μC", "16 μC"], "ans": 1, "exp": "વીજભાર Q = C × V = 4 μF × 20 V = 80 μC થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરમાં સંગ્રહિત ઊર્જા કયા પરિબળો પર આધારિત છે?", "opts": ["માત્ર વીજભાર પર", "માત્ર વોલ્ટેજ પર", "વીજભાર અને વોલ્ટેજ બંને પર", "માત્ર કેપેસિટન્સ પર"], "ans": 2, "exp": "કેપેસિટરમાં સંગ્રહિત ઊર્જા U = ½ CV² અથવા U = ½ QV સૂત્રથી દર્શાવાય છે, જે વીજભાર અને વોલ્ટેજ બંને પર આધારિત છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 6 μF છે અને તેને 12 Vના બેટરી સાથે જોડવામાં આવે છે. કેપેસિટરમાં સંગ્રહિત વિદ્યુતભાર કેટલો હશે?", "opts": ["6 μC", "72 μC", "18 μC", "144 μC"], "ans": 1, "exp": "વિદ્યુતભાર Q = C × V = 6 μF × 12 V = 72 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ C છે. જો તેની પ્લેટો વચ્ચેનું અંતર બમણું કરવામાં આવે, તો નવી કેપેસિટન્સ કેટલી થશે? (ધારો કે અન્ય પરિબળો અચળ છે)", "opts": ["C/2", "2C", "C", "4C"], "ans": 0, "exp": "કેપેસિટન્સ C = ε₀A/d સૂત્ર મુજબ, અંતર d બમણું કરતાં કેપેસિટન્સ અડધી થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરની કેપેસિટન્સ 6 μF છે. જો તેને 12 Vના બેટરી સાથે જોડવામાં આવે, તો તેના પર સંગ્રહિત વીજભાર કેટલો હશે?", "opts": ["72 μC", "2 μC", "0.5 μC", "18 μC"], "ans": 0, "exp": "કેપેસિટર પરનો વીજભાર Q = C × V = 6 μF × 12 V = 72 μC થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "બે કેપેસિટરોને શ્રેણીમાં જોડવામાં આવે છે. જો તેમની કેપેસિટન્સ અનુક્રમે 2 μF અને 3 μF હોય, તો સમતુલ્ય કેપેસિટન્સ કેટલું હશે?", "opts": ["1.2 μF", "5 μF", "6 μF", "0.83 μF"], "ans": 0, "exp": "શ્રેણીમાં જોડેલા કેપેસિટરોની સમતુલ્ય કેપેસિટન્સ 1/C = 1/C₁ + 1/C₂ = 1/2 + 1/3 = 5/6 ⇒ C = 6/5 = 1.2 μF.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 100 V ની બેટરી સાથે જોડીને ચાર્જ કરવામાં આવે છે. જો કેપેસિટરનું કેપેસિટન્સ 5 μF હોય, તો તેના પર સંગ્રહિત વીજભાર કેટલો હશે?", "opts": ["50 μC", "500 μC", "200 μC", "1000 μC"], "ans": 1, "exp": "વીજભાર (Q) = કેપેસિટન્સ (C) × વોલ્ટેજ (V) = 5 μF × 100 V = 500 μC.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમતલ પ્લેટ કેપેસિટરની પ્લેટો વચ્ચેનું અંતર બમણું કરવામાં આવે તો તેની કેપેસિટન્સ પર શું અસર થાય? જો તેની પ્લેટો વચ્ચેનો પદાર્થ ડાઇઇલેક્ટ્રિક અચળાંક K ધરાવતો હોય તો તેની કેપેસિટન્સમાં થતા ફેરફારનું સૂત્ર જણાવો.", "opts": ["કેપેસિટન્સ અડધી થાય, C' = C/(2K)", "કેપેસિટન્સ બમણી થાય, C' = 2KC", "કેપેસિટન્સ અડધી થાય, C' = C/2", "કેપેસિટન્સ બમણી થાય, C' = KC/2"], "ans": 2, "exp": "સમતલ પ્લેટ કેપેસિટરની કેપેસિટન્સ C = ε₀A/d સૂત્ર મુજબ, અંતર d બમણું કરતાં કેપેસિટન્સ અડધી થાય છે. ડાઇઇલેક્ટ્રિક અચળાંક K ની અસર અલગ છે, જે અહીં પૂછવામાં આવી નથી.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) કેપેસિટરમાં સંગ્રહિત ઊર્જા તેના વોલ્ટેજના વર્ગના સમપ્રમાણમાં હોય છે. (2) કેપેસિટરની બે પ્લેટો વચ્ચે વિદ્યુતક્ષેત્ર સમાન હોય છે. (3) કેપેસિટરની ક્ષમતા માત્ર તેની ભૌમિતિક રચના પર આધારિત નથી. (4) કેપેસિટરમાં વિદ્યુતભાર સંગ્રહિત થાય છે.", "opts": ["વિધાન (1)", "વિધાન (2)", "વિધાન (3)", "વિધાન (4)"], "ans": 2, "exp": "કેપેસિટરની ક્ષમતા માત્ર તેની ભૌમિતિક રચના (પ્લેટનું ક્ષેત્રફળ અને અંતર) તેમજ મધ્યવર્તી માધ્યમ પર આધારિત હોય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 50 V ના બેટરીથી ચાર્જ કરવામાં આવે છે અને પછી બેટરીથી અલગ કરવામાં આવે છે. જો હવે તેની પ્લેટો વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવું વોલ્ટેજ શું હશે?", "opts": ["25 V", "50 V", "100 V", "12.5 V"], "ans": 0, "exp": "કેપેસિટર અલગ કર્યા બાદ વિદ્યુતભાર q અચળ રહે છે. અંતર અડધું કરતાં કેપેસિટન્સ બમણું થાય છે (C ∝ 1/d). તેથી V = q/C મુજબ વોલ્ટેજ અડધું થશે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક વિદ્યુતક્ષેત્રમાં 5 C નો ધન વિદ્યુતભાર 10 J કાર્ય કરીને એક બિંદુથી બીજા બિંદુ સુધી ગતિ કરે છે. આ બંને બિંદુઓ વચ્ચેનો વિદ્યુત સ્થિતિમાનનો તફાવત કેટલો હશે?", "opts": ["2 V", "50 V", "0.5 V", "10 V"], "ans": 0, "exp": "વિદ્યુત સ્થિતિમાનનો તફાવત (V) = કાર્ય (W) / વિદ્યુતભાર (q) = 10 J / 5 C = 2 V.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 12 V ની બેટરી સાથે જોડવામાં આવે છે અને તેના પર 36 μC વીજભાર સંગ્રહિત થાય છે. આ કેપેસિટરની કેપેસિટન્સ કેટલી હશે?", "opts": ["3 μF", "6 μF", "9 μF", "12 μF"], "ans": 0, "exp": "કેપેસિટન્સ (C) = વીજભાર (Q) / વોલ્ટેજ (V) = 36 μC / 12 V = 3 μF.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) કેપેસિટરની કેપેસિટન્સ તેની પ્લેટોના ક્ષેત્રફળ પર આધારિત છે. (2) કેપેસિટરની કેપેસિટન્સ તેની પ્લેટો વચ્ચેના અંતર પર આધારિત નથી. (3) કેપેસિટરની કેપેસિટન્સ તેની પ્લેટો વચ્ચેના માધ્યમની પરાવૈધૃતાંક પર આધારિત છે.", "opts": ["ફક્ત વિધાન (1)", "ફક્ત વિધાન (2)", "વિધાન (1) અને (3)", "વિધાન (2) અને (3)"], "ans": 1, "exp": "કેપેસિટન્સ પ્લેટો વચ્ચેના અંતર પર આધારિત છે, તેથી વિધાન (2) ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન ખોટું છે? (1) કેપેસિટરમાં સંગ્રહિત ઊર્જા તેની કેપેસિટન્સ પર આધારિત છે. (2) કેપેસિટરમાં સંગ્રહિત ઊર્જા તેના વોલ્ટેજના વર્ગના સમપ્રમાણમાં હોય છે. (3) કેપેસિટરની પ્લેટો વચ્ચેનું વિદ્યુતક્ષેત્ર અચળ હોય છે. (4) કેપેસિટરની કેપેસિટન્સ તેની પ્લેટોના ક્ષેત્રફળ પર આધારિત નથી.", "opts": ["વિધાન (1)", "વિધાન (2)", "વિધાન (3)", "વિધાન (4)"], "ans": 3, "exp": "સમતલ પ્લેટ કેપેસિટરમાં પ્લેટો વચ્ચેનું વિદ્યુતક્ષેત્ર અચળ હોય છે, પરંતુ કેપેસિટન્સ પ્લેટોના ક્ષેત્રફળ પર સીધું આધારિત છે, તેથી વિધાન (4) ખોટું છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક કેપેસિટરને 100 Vના વોલ્ટેજ સ્રોત સાથે જોડીને ચાર્જ કરવામાં આવે છે. જો કેપેસિટરની કેપેસિટન્સ 10 μF હોય, તો તેમાં સંગ્રહિત થતી ઊર્જા કેટલી હશે?", "opts": ["0.05 J", "0.1 J", "0.01 J", "0.5 J"], "ans": 0, "exp": "ઊર્જા (U) = ½ × C × V² = ½ × 10 × 10⁻⁶ × (100)² = 0.05 J.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમતલ પ્લેટ કેપેસિટરની પ્લેટો વચ્ચેનું અંતર અડધું કરવામાં આવે તો તેના કેપેસિટન્સ પર શું અસર થશે? (અચળ વિદ્યુતભાર ધારો)", "opts": ["કેપેસિટન્સ અડધું થશે", "કેપેસિટન્સ બમણું થશે", "કેપેસિટન્સ ચાર ગણું થશે", "કેપેસિટન્સમાં કોઈ ફેર પડશે નહીં"], "ans": 1, "exp": "સમતલ પ્લેટ કેપેસિટરનું કેપેસિટન્સ પ્લેટો વચ્ચેના અંતરના વ્યસ્ત પ્રમાણમાં હોય છે. અંતર અડધું કરતાં કેપેસિટન્સ બમણું થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}, {"q": "એક સમતલ પ્લેટ કેપેસિટરની પ્લેટો વચ્ચેના અંતરને અચળ રાખીને પ્લેટોનું ક્ષેત્રફળ બમણું કરવામાં આવે તો કેપેસિટરની કેપેસિટન્સ પર શું અસર થશે?", "opts": ["કેપેસિટન્સ બમણી થશે", "કેપેસિટન્સ અડધી થશે", "કેપેસિટન્સ ચોથા ભાગની થશે", "કેપેસિટન્સ પર કોઈ અસર થશે નહીં"], "ans": 0, "exp": "સમતલ પ્લેટ કેપેસિટરની કેપેસિટન્સ C = ε₀A/d સૂત્ર મુજબ, ક્ષેત્રફળ A બમણું કરતાં કેપેસિટન્સ પણ બમણી થાય છે.", "chapter": "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "વિદ્યુત સ્થિતિમાન અને કેપેસિટન્સ Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
