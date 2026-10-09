@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch6 - ઊર્જાનો વિચાર</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch6 - ઊર્જાનો વિચાર</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "પ્રકાશસંશ્લેષણ દરમ્યાન ઉત્પન્ન થતી ગ્લૂકોઝમાં સંગ્રહિત થતી રાસાયણિક ઊર્જાનો સ્રોત કયો છે?", "options": ["A) સૂર્યપ્રકાશમાં રહેલી પ્રકાશીય ઊર્જા", "B) પાણીના અણુઓના વિભાજન દરમ્યાન મુક્ત થતી ઊર્જા", "C) કાર્બન ડાયોક્સાઇડના કાર્બન અણુઓની સ્થિતિજ ઊર્જા", "D) ક્લોરોફિલ દ્વારા શોષાયેલી ઉષ્મીય ઊર્જા"], "correct": 0, "explanation": "પ્રકાશસંશ્લેષણમાં સૂર્યપ્રકાશની પ્રકાશીય ઊર્જા ક્લોરોફિલ દ્વારા શોષાઈને રાસાયણિક ઊર્જામાં રૂપાંતરિત થાય છે, જે ગ્લૂકોઝના સ્વરૂપે સંગ્રહિત થાય છે. પાણીના વિભાજન (B) ઊર્જા મુક્ત કરે છે પરંતુ તે પ્રકાશીય ઊર્જાનું રૂપાંતર નથી. કાર્બન ડાયોક્સાઇડ (C) સ્થિતિજ ઊર્જા ધરાવે છે પરંતુ તે પ્રકાશસંશ્લેષણનો પ્રાથમિક ઊર્જા સ્રોત નથી. ક્લોરોફિલ ઉષ્મીય ઊર્જા શોષતું નથી (D).", "ncert_ref": "Class XI - પ્રકરણ ૧૩: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 1}, {"question": "શ્વસન દરમ્યાન ATPની ઉત્પત્તિ કયા પગલામાં સૌથી વધુ થાય છે?", "options": ["A) ગ્લાયકોલિસિસ", "B) ક્રેબ્સ ચક્ર", "C) ઇલેક્ટ્રોન પરિવહન શૃંખલા", "D) પાયરૂવેટનું ઓક્સેલોએસિટિલ CoAમાં રૂપાંતર"], "correct": 2, "explanation": "શ્વસન દરમ્યાન ઇલેક્ટ્રોન પરિવહન શૃંખલા (C) દરમ્યાન સૌથી વધુ ATP (લગભગ 28-34 ATP) ઉત્પન્ન થાય છે. ગ્લાયકોલિસિસ (A)માં 2 ATP, ક્રેબ્સ ચક્ર (B)માં 2 ATP, અને પાયરૂવેટનું રૂપાંતર (D)માં કોઈ ATP ઉત્પન્ન થતી નથી, પરંતુ NADH ઉત્પન્ન થાય છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૪: શ્વસન", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે એક જીવમાં ATPનો પૂરતો પુરવઠો ન હોય ત્યારે કયો પદાર્થ સીધો ઊર્જા સ્રોત તરીકે વપરાય છે?", "options": ["A) ગ્લૂકોઝ", "B) ક્રિયેટિન ફોસ્ફેટ", "C) ગ્લાયકોજન", "D) લેક્ટિક એસિડ"], "correct": 1, "explanation": "ક્રિયેટિન ફોસ્ફેટ (B) સ્નાયુઓમાં ATPના તાત્કાલિક પુનઃસંશ્લેષણ માટે વપરાતો પ્રાથમિક ઊર્જા સ્રોત છે જ્યારે ATPનો પુરવઠો ઓછો હોય. ગ્લૂકોઝ (A) અને ગ્લાયકોજન (C) લાંબા ગાળાના ઊર્જા સ્રોત છે, જ્યારે લેક્ટિક એસિડ (D) શ્વસનના અભાવે ઉત્પન્ન થતો ઉપપદાર્થ છે.", "ncert_ref": "Class XI - પ્રકરણ ૨૦: સ્નાયુ અને કંકાલ તંત્ર", "difficulty": "Hard", "num": 3}, {"question": "પ્રકાશસંશ્લેષણ અને શ્વસન વચ્ચેનો સૌથી મહત્વપૂર્ણ સાંધો કયો છે?", "options": ["A) NADP+", "B) ADP", "C) ATP", "D) NADPH"], "correct": 2, "explanation": "ATP (C) પ્રકાશસંશ્લેષણ અને શ્વસન વચ્ચેનો મહત્વપૂર્ણ સાંધો છે કારણ કે તે બંને પ્રક્રિયાઓમાં ઊર્જા વહન માટે વપરાય છે. NADP+ (A) અને NADPH (D) મુખ્યત્વે પ્રકાશસંશ્લેષણ સાથે સંબંધિત છે, જ્યારે ADP (B) ATPના વિભાજનનો ઉપપદાર્થ છે.", "ncert_ref": "Class XI - પ્રકરણ ૧૩ અને ૧૪: પ્રકાશસંશ્લેષણ અને શ્વસન", "difficulty": "Hard", "num": 4}, {"question": "કયા પેશીમાં મિટોકોન્ડ્રિયાની સંખ્યા સૌથી ઓછી હોય છે?", "options": ["A) સ્નાયુ પેશી", "B) તંત્રિકા પેશી", "C) ચરબી પેશી", "D) એપિથેલિયલ પેશી"], "correct": 3, "explanation": "એપિથેલિયલ પેશી (D)માં મિટોકોન્ડ્રિયાની સંખ્યા સૌથી ઓછી હોય છે કારણ કે તે મુખ્યત્વે સંરક્ષણ અને અવશોષણ જેવા કાર્યો કરે છે, જે માટે ઓછી ઊર્જાની જરૂર પડે છે. સ્નાયુ પેશી (A), તંત્રિકા પેશી (B), અને ચરબી પેશી (C)માં ઊર્જાની જરૂરિયાત વધુ હોવાથી મિટોકોન્ડ્રિયા વધુ હોય છે.", "ncert_ref": "Class XI - પ્રકરણ ૭: પેશી અને તેના કાર્યો", "difficulty": "Hard", "num": 5}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન ક્લોરોફિલ દ્વારા શોષાયેલા પ્રકાશની ઊર્જાનો કેટલો ટકાવાર ભાગ રાસાયણિક ઊર્જા તરીકે ગ્લૂકોઝમાં સંગ્રહિત થાય છે?", "options": ["A) લગભગ 2%", "B) લગભગ 10%", "C) લગભગ 30%", "D) લગભગ 50%"], "correct": 0, "explanation": "પ્રકાશસંશ્લેષણની કાર્યક્ષમતા ખૂબ ઓછી હોય છે. ક્લોરોફિલ દ્વારા શોષાયેલા પ્રકાશની ઊર્જાનો લગભગ 2% ભાગ જ રાસાયણિક ઊર્જા તરીકે ગ્લૂકોઝમાં સંગ્રહિત થાય છે. બાકીની ઊર્જા ઉષ્મા તરીકે વ્યય પામે છે. 10%, 30%, અને 50% જેવા ટકાવાર અતિશયોક્તિ છે અને વૈજ્ઞાનિક તથ્યો સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 6}, {"question": "શ્વસન દરમ્યાન ગ્લૂકોઝના ઓક્સિડેશનથી ઉત્પન્ન થતી કુલ ATPની સંખ્યા કેટલી હોય છે જ્યારે તે ગ્લાયકોલાઇસિસ, ક્રેબ્સ ચક્ર અને ઇલેક્ટ્રોન પરિવહન સાંકળમાં થાય છે?", "options": ["A) 2 ATP", "B) 8 ATP", "C) 30 ATP", "D) 38 ATP"], "correct": 3, "explanation": "ગ્લૂકોઝના પૂર્ણ ઓક્સિડેશનથી કુલ 38 ATP ઉત્પન્ન થાય છે (ગ્લાયકોલાઇસિસ: 2 ATP, ક્રેબ્સ ચક્ર: 2 ATP, અને ઇલેક્ટ્રોન પરિવહન સાંકળ: 34 ATP). 2, 8, અને 30 ATP અપૂર્ણ અથવા અંશતઃ ઓક્સિડેશનના પરિણામો છે.", "ncert_ref": "Class XI - પ્રકરણ 14: શ્વસન", "difficulty": "Hard", "num": 7}, {"question": "જ્યારે કોષમાં ઓક્સિજનની ઉણપ હોય ત્યારે ગ્લૂકોઝનું વિભાજન કયા પથ દ્વારા થાય છે અને તે દરમ્યાન કેટલી ATP ઉત્પન્ન થાય છે?", "options": ["A) ક્રેબ્સ ચક્ર, 2 ATP", "B) ગ્લાયકોલાઇસિસ, 2 ATP", "C) ઇલેક્ટ્રોન પરિવહન સાંકળ, 34 ATP", "D) ફેરમેન્ટેશન, 8 ATP"], "correct": 1, "explanation": "ઓક્સિજનની ઉણપમાં, કોષ ગ્લાયકોલાઇસિસ દ્વારા ગ્લૂકોઝનું વિભાજન કરે છે, જે દરમ્યાન 2 ATP ઉત્પન્ન થાય છે. ક્રેબ્સ ચક્ર અને ઇલેક્ટ્રોન પરિવહન સાંકળ ઓક્સિજનની હાજરીમાં જ થાય છે. ફેરમેન્ટેશન દરમ્યાન પણ ફક્ત 2 ATP જ ઉત્પન્ન થાય છે, પરંતુ તે ગ્લાયકોલાઇસિસનો જ ભાગ છે.", "ncert_ref": "Class XI - પ્રકરણ 14: શ્વસન", "difficulty": "Hard", "num": 8}, {"question": "પ્રકાશસંશ્લેષણ અને શ્વસન બંને પ્રક્રિયાઓમાં સામેલ એનઝાઇમ કયું છે?", "options": ["A) રુબિસ્કો (RuBisCO)", "B) એટીપેઝ (ATPase)", "C) હેક્સોકિનેઝ (Hexokinase)", "D) સાયટોક્રોમ સી (Cytochrome c)"], "correct": 1, "explanation": "એટીપેઝ (ATPase) એ એનઝાઇમ છે જે ATPના જળવિભાજન અને સંશ્લેષણમાં સામેલ હોય છે, જે પ્રકાશસંશ્લેષણ (ફોટોફોસ્ફોરાઇલેશન) અને શ્વસન (ઓક્સિડેટિવ ફોસ્ફોરાઇલેશન) બંનેમાં વપરાય છે. રુબિસ્કો ફક્ત પ્રકાશસંશ્લેષણમાં, હેક્સોકિનેઝ ફક્ત શ્વસનમાં, અને સાયટોક્રોમ સી ફક્ત શ્વસનમાં વપરાય છે.", "ncert_ref": "Class XI - પ્રકરણ 13: પ્રકાશસંશ્લેષણ અને પ્રકરણ 14: શ્વસન", "difficulty": "Hard", "num": 9}, {"question": "કયા અંગમાં મિટોકોન્ડ્રિયાની સંખ્યા સૌથી વધુ હોય છે, કારણ કે તેને સતત ઉચ્ચ ઊર્જાની જરૂર હોય છે?", "options": ["A) યકૃત (Liver)", "B) મગજ (Brain)", "C) હૃદય (Heart)", "D) માંસપેશી (Muscle)"], "correct": 2, "explanation": "હૃદયમાં મિટોકોન્ડ્રિયાની સંખ્યા સૌથી વધુ હોય છે, કારણ કે હૃદયને સતત અને ઉચ્ચ ઊર્જાની જરૂર હોય છે જેથી તે નિરંતર રક્ત પંપ કરી શકે. યકૃત, મગજ, અને માંસપેશીમાં પણ મિટોકોન્ડ્રિયા હોય છે, પરંતુ હૃદયની તુલનામાં ઓછા પ્રમાણમાં.", "ncert_ref": "Class XI - પ્રકરણ 7: કોષ: જીવનની મૂળ એકમ અને પ્રકરણ 14: શ્વસન", "difficulty": "Hard", "num": 10}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન ક્લોરોપ્લાસ્ટમાં ઉત્પન્ન થતી NADP+ ની ક્રિયાશીલ રૂપ કયું છે, જે પછી કેલ્વિન ચક્રમાં વપરાય છે?", "options": ["A) NADPH", "B) FADH₂", "C) ATP", "D) NAD⁺"], "correct": 0, "explanation": "પ્રકાશસંશ્લેષણના પ્રકાશ-આશ્રિત પગલામાં, NADP+ ને ઇલેક્ટ્રોન અને પ્રોટોન મળીને NADPH બને છે, જે કેલ્વિન ચક્રમાં કાર્બન ફિક્સેશન માટે ઊર્જા અને રિડક્ટિંગ પાવર પૂરો પાડે છે. FADH₂ શ્વસનમાં વપરાતું રિડક્ટિંગ એજન્ટ છે, ATP ઊર્જાનું વાહક છે પરંતુ NADP+ નું રૂપ નથી, અને NAD⁺ શ્વસનમાં વપરાતું ઓક્સિડાઇઝ્ડ રૂપ છે.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 11}, {"question": "શ્વસન દરમ્યાન ગ્લૂકોઝના પાયરૂવેટમાં રૂપાંતરણ પછી, પાયરૂવેટનું કયું ઉત્પાદન ક્રેબ્સ ચક્રમાં પ્રવેશે છે?", "options": ["A) એસિટાઇલ-CoA", "B) લેક્ટિક એસિડ", "C) ઇથેનોલ", "D) ઓક્ઝેલોએસિટિક એસિડ"], "correct": 0, "explanation": "પાયરૂવેટનું ડિકાર્બોક્સિલેશન થઈને એસિટાઇલ-CoA બને છે, જે ક્રેબ્સ ચક્રમાં પ્રવેશે છે. લેક્ટિક એસિડ અને ઇથેનોલ અનોક્સિક શ્વસનના ઉત્પાદનો છે, જ્યારે ઓક્ઝેલોએસિટિક એસિડ ક્રેબ્સ ચક્રનું એક મધ્યવર્તી ઉત્પાદન છે પરંતુ પાયરૂવેટનું સીધું રૂપાંતરણ નથી.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 12}, {"question": "જ્યારે કોષમાં ઓક્સિજનની અછત હોય ત્યારે, ગ્લૂકોઝનું વિભાજન કયા પથ દ્વારા થાય છે અને તેના પરિણામે કયું ઉત્પાદન ઉત્પન્ન થાય છે?", "options": ["A) ક્રેબ્સ ચક્ર - CO₂ અને H₂O", "B) ગ્લાયકોલાઇસિસ - પાયરૂવેટ", "C) લેક્ટિક એસિડ કિણ્વન - લેક્ટિક એસિડ", "D) ઇથેનોલ કિણ્વન - ઇથેનોલ અને CO₂"], "correct": 3, "explanation": "ઓક્સિજનની અછતમાં, ગ્લૂકોઝનું વિભાજન ઇથેનોલ કિણ્વન દ્વારા થાય છે, જેમાં પાયરૂવેટ ઇથેનોલ અને CO₂ માં રૂપાંતરિત થાય છે. ક્રેબ્સ ચક્ર ઓક્સિજનની હાજરીમાં જ થાય છે, ગ્લાયકોલાઇસિસ તો ઓક્સિજનની હાજરી અથવા અભાવમાં થાય છે પરંતુ તે પાયરૂવેટ સુધી જ લે છે, અને લેક્ટિક એસિડ કિણ્વન પ્રાણીઓમાં થાય છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 13}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન, ક્લોરોફિલ દ્વારા શોષાયેલા પ્રકાશની ઊર્જાનો કયો ભાગ રાસાયણિક ઊર્જામાં રૂપાંતરિત થાય છે?", "options": ["A) લગભગ 2%", "B) લગભગ 10%", "C) લગભગ 50%", "D) લગભગ 80%"], "correct": 1, "explanation": "પ્રકાશસંશ્લેષણ દરમ્યાન, ક્લોરોફિલ દ્વારા શોષાયેલા પ્રકાશની ઊર્જાનો લગભગ 10% ભાગ જ રાસાયણિક ઊર્જામાં રૂપાંતરિત થાય છે. બાકીની ઊર્જા ઉષ્મામાં વ્યય થાય છે. 2% ખૂબ ઓછું છે, જ્યારે 50% અને 80% અતિશયોક્તિ છે.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 14}, {"question": "શ્વસન દરમ્યાન, કયા પગલામાં સૌથી વધુ ATP ઉત્પન્ન થાય છે?", "options": ["A) ગ્લાયકોલાઇસિસ", "B) પાયરૂવેટનું ઓક્સિડેશન", "C) ક્રેબ્સ ચક્ર", "D) ઇલેક્ટ્રોન પરિવહન શૃંખલા"], "correct": 3, "explanation": "શ્વસન દરમ્યાન, ઇલેક્ટ્રોન પરિવહન શૃંખલા દરમ્યાન સૌથી વધુ ATP ઉત્પન્ન થાય છે (લગભગ 28-34 ATP). ગ્લાયકોલાઇસિસમાં 2 ATP, પાયરૂવેટના ઓક્સિડેશનમાં 2 ATP, અને ક્રેબ્સ ચક્રમાં 2 ATP ઉત્પન્ન થાય છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 15}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન, ક્લોરોપ્લાસ્ટમાં ઉત્પન્ન થતી NADPH ની ભૂમિકા શું છે?", "options": ["A) તે CO2 ને ફિક્સ કરવા માટે કેલ્વિન ચક્રમાં વપરાય છે", "B) તે પ્રકાશ-નિર્ભર પ્રક્રિયામાં પાણીના વિભાજન માટે વપરાય છે", "C) તે ક્લોરોફિલના સંશ્લેષણ માટે વપરાય છે", "D) તે કોષીય શ્વસનમાં ઇલેક્ટ્રૉન વાહક તરીકે વપરાય છે"], "correct": 0, "explanation": "NADPH કેલ્વિન ચક્રમાં CO2 ને ફિક્સ કરવા અને કાર્બોદિતના સંશ્લેષણ માટે રિડક્શન પાવર તરીકે વપરાય છે. પ્રકાશ-નિર્ભર પ્રક્રિયામાં પાણીના વિભાજન માટે પ્રકાશ ઊર્જા વપરાય છે, ક્લોરોફિલના સંશ્લેષણ માટે NADPH વપરાતું નથી, અને કોષીય શ્વસનમાં ઇલેક્ટ્રૉન વાહક તરીકે NADH વપરાય છે, નહીં NADPH.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 16}, {"question": "શ્વસન દરમ્યાન, ક્રેબ્સ ચક્રમાં ઉત્પન્ન થતી GTP ની ભૂમિકા શું છે?", "options": ["A) તે સીધી રીતે ATP માં રૂપાંતરિત થાય છે", "B) તે ઇલેક્ટ્રૉન પરિવહન શૃંખલામાં વપરાય છે", "C) તે પાયરૂવેટના ઓક્સિડેશન માટે વપરાય છે", "D) તે ગ્લાયકોલાઇસિસમાં વપરાય છે"], "correct": 0, "explanation": "ક્રેબ્સ ચક્રમાં ઉત્પન્ન થતી GTP સીધી રીતે ATP માં રૂપાંતરિત થાય છે. ઇલેક્ટ્રૉન પરિવહન શૃંખલામાં NADH અને FADH2 વપરાય છે, પાયરૂવેટના ઓક્સિડેશન માટે CoA વપરાય છે, અને ગ્લાયકોલાઇસિસમાં GTP વપરાતું નથી.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 17}, {"question": "જ્યારે કોષમાં ઓક્સિજનની અછત હોય ત્યારે, ગ્લૂકોઝના વિભાજન દરમ્યાન ઉત્પન્ન થતી કુલ ATP ની સંખ્યા કેટલી હોય છે?", "options": ["A) 2 ATP", "B) 4 ATP", "C) 8 ATP", "D) 36 ATP"], "correct": 1, "explanation": "ઓક્સિજનની અછતમાં, ગ્લૂકોઝનું વિભાજન ગ્લાયકોલાઇસિસ અને લેક્ટિક એસિડ ફર્મેન્ટેશન દ્વારા થાય છે, જેમાં કુલ 4 ATP ઉત્પન્ન થાય છે (2 ATP ગ્લાયકોલાઇસિસમાં અને 2 ATP ફર્મેન્ટેશનમાં). 2 ATP, 8 ATP, અને 36 ATP એ અચોક્કસ સંખ્યાઓ છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 18}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન, ક્લોરોફિલ a અને ક્લોરોફિલ b વચ્ચેનો મુખ્ય તફાવત કયો છે?", "options": ["A) ક્લોરોફિલ a પ્રકાશ-નિર્ભર પ્રક્રિયામાં સક્રિય ભૂમિકા ભજવે છે, જ્યારે ક્લોરોફિલ b સહાયક ભૂમિકા ભજવે છે", "B) ક્લોરોફિલ a લાલ પ્રકાશ શોષે છે, જ્યારે ક્લોરોફિલ b નીલો પ્રકાશ શોષે છે", "C) ક્લોરોફિલ a પાણીના વિભાજન માટે જવાબદાર છે, જ્યારે ક્લોરોફિલ b CO2 ને ફિક્સ કરે છે", "D) ક્લોરોફિલ a મિટોકોન્ડ્રિયામાં હાજર હોય છે, જ્યારે ક્લોરોફિલ b ક્લોરોપ્લાસ્ટમાં હાજર હોય છે"], "correct": 0, "explanation": "ક્લોરોફિલ a પ્રકાશ-નિર્ભર પ્રક્રિયામાં સક્રિય ભૂમિકા ભજવે છે, જ્યારે ક્લોરોફિલ b સહાયક ભૂમિકા ભજવે છે. ક્લોરોફિલ a અને b બંને લાલ અને નીલો પ્રકાશ શોષે છે, પાણીના વિભાજન અને CO2 ને ફિક્સ કરવા માટે ક્લોરોફિલ a જવાબદાર છે, અને બંને ક્લોરોપ્લાસ્ટમાં હાજર હોય છે.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 19}, {"question": "શ્વસન દરમ્યાન, કયા પદાર્થનું ઓક્સિડેશન ક્રેબ્સ ચક્રમાં સીધું જ થાય છે?", "options": ["A) ગ્લૂકોઝ", "B) પાયરૂવેટ", "C) એસિટાઇલ CoA", "D) સાયટ્રેટ"], "correct": 2, "explanation": "ક્રેબ્સ ચક્રમાં એસિટાઇલ CoA નું ઓક્સિડેશન સીધું જ થાય છે. ગ્લૂકોઝ અને પાયરૂવેટ ગ્લાયકોલાઇસિસ દ્વારા ઓક્સિડાઇઝ થાય છે, જ્યારે સાયટ્રેટ ક્રેબ્સ ચક્રનું પ્રથમ ઉત્પાદન છે, પરંતુ તે સીધું ઓક્સિડાઇઝ થતું નથી.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 20}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન ક્લોરોપ્લાસ્ટમાં ઉત્પન્ન થતી NADPH હાયડ્રોજન આયન (H⁺) ને ક્યાં સંગ્રહિત કરે છે, જે પછી ATP સિંથેઝ માટે વપરાય છે?", "options": ["A) ક્લોરોપ્લાસ્ટના સ્ટ્રોમામાં", "B) થાયલેકોઇડ લ્યુમેનમાં", "C) ક્લોરોપ્લાસ્ટની બાહ્ય પટલમાં", "D) સાયટોપ્લાઝમમાં"], "correct": 1, "explanation": "NADPH દ્વારા H⁺ આયન થાયલેકોઇડ લ્યુમેનમાં સંગ્રહિત થાય છે, જે પ્રકાશસંશ્લેષણના પ્રકાશ-આધારિત તબક્કા દરમ્યાન પ્રોટોન ગ્રેડિયન્ટ બનાવે છે. આ ગ્રેડિયન્ટ ATP સિંથેઝ એનઝાઇમ દ્વારા ATPની ઉત્પત્તિ માટે જરૂરી છે. સ્ટ્રોમા (A)માં H⁺ સંગ્રહિત થતો નથી, બાહ્ય પટલ (C) અને સાયટોપ્લાઝમ (D) પ્રકાશસંશ્લેષણ સાથે સીધો સંબંધ ધરાવતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 21}, {"question": "શ્વસન દરમ્યાન ક્રેબ્સ ચક્રમાં સક્સિનિક એસિડનું ઓક્સિડેશન થતાં ઉત્પન્ન થતું ઉત્પાદન કયું છે, જે સીધું જ ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશે છે?", "options": ["A) α-કીટોગ્લૂટારિક એસિડ", "B) ફ્યુમરિક એસિડ", "C) માલિક એસિડ", "D) NADH + H⁺"], "correct": 3, "explanation": "સક્સિનિક એસિડનું ઓક્સિડેશન થતાં સક્સિનેટ ડિહાયડ્રોજિનેઝ એનઝાઇમ દ્વારા કેટલીક પ્રક્રિયા પછી NADH + H⁺ ઉત્પન્ન થાય છે, જે ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશે છે. α-કીટોગ્લૂટારિક એસિડ (A), ફ્યુમરિક એસિડ (B), અને માલિક એસિડ (C) ક્રેબ્સ ચક્રના અન્ય પગલાંમાં સામેલ છે, પરંતુ સીધું ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશતું નથી.", "ncert_ref": "Class XI - પ્રકરણ 14: શ્વસન", "difficulty": "Hard", "num": 22}, {"question": "એક પ્રયોગમાં, વનસ્પતિના પર્ણને અંધારામાં રાખીને તેમાંથી ક્લોરોફિલ દૂર કરવામાં આવ્યું. ત્યારબાદ આ પર્ણને આયોડિનના દ્રાવણમાં ડુબાડતાં તે ભૂરું-કાળું ન થયું. આ અવલોકન પરથી નીચેનામાંથી કયું તારણ યોગ્ય નથી?", "options": ["A) પ્રકાશસંશ્લેષણ માટે ક્લોરોફિલ જરૂરી છે", "B) સ્ટાર્ચની હાજરી માટે આયોડિન પરીક્ષણ હકારાત્મક આવે છે", "C) અંધારામાં પ્રકાશસંશ્લેષણ થતું નથી, તેથી સ્ટાર્ચ ઉત્પન્ન થતું નથી", "D) ક્લોરોફિલ વગર પણ પ્રકાશસંશ્લેષણ થઈ શકે છે અને સ્ટાર્ચ ઉત્પન્ન થાય છે"], "correct": 3, "explanation": "સાચો વિકલ્પ D છે કારણ કે પ્રકાશસંશ્લેષણ માટે ક્લોરોફિલ આવશ્યક છે. ક્લોરોફિલની ગેરહાજરીમાં પ્રકાશની ઊર્જાનું શોષણ થઈ શકતું નથી, તેથી સ્ટાર્ચનું ઉત્પાદન થતું નથી. વિકલ્પ A, B અને C યોગ્ય તારણો છે કારણ કે ક્લોરોફિલ પ્રકાશસંશ્લેષણ માટે જરૂરી છે, આયોડિન પરીક્ષણ સ્ટાર્ચની હાજરી દર્શાવે છે, અને અંધારામાં પ્રકાશસંશ્લેષણ થતું નથી.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 6: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 23}, {"question": "એક કોષમાં, ગ્લાયકોલિસિસ દરમ્યાન ગ્લૂકોઝનું પાયરૂવેટમાં રૂપાંતરણ થાય છે. જો આ કોષમાં ઓક્સિજનની ઉણપ હોય, તો પાયરૂવેટનું આગળનું રૂપાંતરણ કયા ઉત્પાદનમાં થશે અને તેની સાથે કેટલી ATP ઉત્પન્ન થશે? (ફક્ત ગ્લાયકોલિસિસ અને આગળના પથને ધ્યાનમાં લો)", "options": ["A) લેક્ટિક એસિડ અને કુલ 2 ATP", "B) ઇથેનોલ અને કુલ 2 ATP", "C) લેક્ટિક એસિડ અથવા ઇથેનોલ અને કુલ 4 ATP", "D) લેક્ટિક એસિડ અથવા ઇથેનોલ અને કુલ 2 ATP"], "correct": 3, "explanation": "સાચો વિકલ્પ D છે કારણ કે ઓક્સિજનની ઉણપમાં, પાયરૂવેટનું રૂપાંતરણ લેક્ટિક એસિડ (પ્રાણીઓમાં) અથવા ઇથેનોલ (યીસ્ટમાં) માં થાય છે. ગ્લાયકોલિસિસ દરમ્યાન ચોખ્ખી 2 ATP ઉત્પન્ન થાય છે, અને આગળના અજારક શ્વસનમાં વધારાની ATP ઉત્પન્ન થતી નથી. વિકલ્પ A અને B અધૂરા છે કારણ કે તેઓ માત્ર એક જ ઉત્પાદન દર્શાવે છે, જ્યારે વિકલ્પ C ખોટો છે કારણ કે કુલ ATP 2 જ રહે છે.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 6: શ્વસન", "difficulty": "Hard", "num": 24}, {"question": "નીચેનામાંથી કયું વિધાન C₄ વનસ્પતિઓમાં પ્રકાશસંશ્લેષણની પ્રક્રિયા માટે ખોટું છે?", "options": ["A) C₄ વનસ્પતિઓમાં, CO₂ નું સ્થિરીકરણ પ્રથમ મેસોફિલ કોષોમાં ઓક્ઝેલો એસિટિક એસિડ (OAA) તરીકે થાય છે", "B) C₄ વનસ્પતિઓમાં, કેલ્વિન ચક્ર બંડલ-શીથ કોષોમાં થાય છે", "C) C₄ વનસ્પતિઓમાં, પ્રકાશશ્વસન (Photorespiration) નો દર ખૂબ જ ઊંચો હોય છે", "D) C₄ વનસ્પતિઓ ઉષ્ણકટિબંધીય પરિસ્થિતિઓમાં વધુ કાર્યક્ષમ હોય છે"], "correct": 2, "explanation": "સાચો વિકલ્પ C છે કારણ કે C₄ વનસ્પતિઓમાં પ્રકાશશ્વસનનો દર ખૂબ જ ઓછો હોય છે, કારણ કે તેઓ CO₂ નું સ્થિરીકરણ કાર્યક્ષમ રીતે કરે છે અને ઓક્સિજન સાથેની સ્પર્ધા ઘટાડે છે. વિકલ્પ A, B અને D સાચાં છે કારણ કે C₄ વનસ્પતિઓમાં CO₂ નું સ્થિરીકરણ મેસોફિલ કોષોમાં OAA તરીકે થાય છે, કેલ્વિન ચક્ર બંડલ-શીથ કોષોમાં થાય છે, અને તેઓ ઉષ્ણકટિબંધીય પરિસ્થિતિઓમાં વધુ કાર્યક્ષમ હોય છે.", "ncert_ref": "કક્ષા 11 - પ્રકરણ 6: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 25}, {"question": "C4 વનસ્પતિઓમાં, પ્રકાશસંશ્લેષણ દરમ્યાન CO2નું સ્થિરીકરણ ક્યાં થાય છે અને તેની પ્રથમ સ્થિર ઉત્પાદન કયું હોય છે?", "options": ["A) મેસોફિલ કોષોમાં, ઓક્સાલોએસિટિક એસિડ", "B) બંધી કોષોમાં, 3-ફોસ્ફોગ્લિસેરિક એસિડ", "C) મેસોફિલ કોષોમાં, ફોસ્ફોઇનોલપાયરૂવેટ", "D) બંધી કોષોમાં, માલિક એસિડ"], "correct": 0, "explanation": "C4 વનસ્પતિઓમાં, CO2નું સ્થિરીકરણ પ્રથમ મેસોફિલ કોષોમાં થાય છે, જ્યાં તે ફોસ્ફોઇનોલપાયરૂવેટ (PEP) સાથે પ્રક્રિયા કરીને ઓક્સાલોએસિટિક એસિડ બનાવે છે. આ પ્રક્રિયા PEP કાર્બોક્સિલેઝ ઉત્સેચક દ્વારા સંકલિત થાય છે. બંધી કોષોમાં, ઓક્સાલોએસિટિક એસિડનું વિભાજન થઈને CO2 મુક્ત થાય છે, જે પછી કેલ્વિન ચક્રમાં 3-ફોસ્ફોગ્લિસેરિક એસિડમાં રૂપાંતરિત થાય છે. આમ, વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે 3-ફોસ્ફોગ્લિસેરિક એસિડ C3 વનસ્પતિઓમાં બનાવાય છે. વિકલ્પ C ખોટો છે કારણ કે ફોસ્ફોઇનોલપાયરૂવેટ CO2 સાથે પ્રક્રિયા કરે છે, પરંતુ તે સ્થિર ઉત્પાદન નથી. વિકલ્પ D ખોટો છે કારણ કે માલિક એસિડ C4 ચક્રનું મધ્યવર્તી ઉત્પાદન છે, પરંતુ પ્રથમ સ્થિર ઉત્પાદન નથી.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 26}, {"question": "શ્વસન દરમ્યાન, ક્રેબ્સ ચક્રમાં સક્સિનિલ-CoA થી સક્સિનિક એસિડમાં રૂપાંતરણ દરમ્યાન ઉત્પન્ન થતી ઊર્જાનો સ્વરૂપ કયો હોય છે?", "options": ["A) GTP", "B) NADH", "C) FADH2", "D) ATP"], "correct": 0, "explanation": "ક્રેબ્સ ચક્રમાં, સક્સિનિલ-CoA થી સક્સિનિક એસિડમાં રૂપાંતરણ દરમ્યાન, સબ્સ્ટ્રેટ-લેવલ ફોસ્ફોરાઇલેશન દ્વારા GTP ઉત્પન્ન થાય છે. આ GTP પછી ATPમાં રૂપાંતરિત થાય છે. NADH અને FADH2 ક્રેબ્સ ચક્રના અન્ય પગલાંઓમાં ઉત્પન્ન થાય છે, પરંતુ સક્સિનિલ-CoA થી સક્સિનિક એસિડના રૂપાંતરણ દરમ્યાન નહીં. ATP સીધું ઉત્પન્ન થતું નથી, પરંતુ GTP દ્વારા ઉત્પન્ન થાય છે. આમ, વિકલ્પ A સાચો છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન અને ઊર્જા", "difficulty": "Hard", "num": 27}, {"question": "નીચેનામાંથી કયું વિધાન કેમોસ્મોસિસ (Chemiosmosis) વિશે ખોટું છે?", "options": ["A) તે મિટોકોન્ડ્રિયા અને ક્લોરોપ્લાસ્ટ બંનેમાં થાય છે", "B) તે પ્રોટોન ગ્રેડિયન્ટ દ્વારા ATP સિંથેઝ ઉત્સેચકને ચાલુ કરે છે", "C) તે સીધી રીતે ઓક્સિજનની હાજરીપર આધાર રાખે છે", "D) તે એડિનોસિન ડાઇફોસ્ફેટ (ADP) અને અકાર્બનિક ફોસ્ફેટથી ATP બનાવે છે"], "correct": 2, "explanation": "કેમોસ્મોસિસ એ એક પ્રક્રિયા છે જ્યાં પ્રોટોન ગ્રેડિયન્ટ દ્વારા ATP સિંથેઝ ઉત્સેચકને ચાલુ કરવામાં આવે છે, જે ADP અને અકાર્બનિક ફોસ્ફેટથી ATP બનાવે છે. આ પ્રક્રિયા મિટોકોન્ડ્રિયા (શ્વસન દરમ્યાન) અને ક્લોરોપ્લાસ્ટ (પ્રકાશસંશ્લેષણ દરમ્યાન) બંનેમાં થાય છે. પરંતુ, તે સીધી રીતે ઓક્સિજનની હાજરીપર આધાર રાખતું નથી, કારણ કે પ્રોટોન ગ્રેડિયન્ટ ઓક્સિજન વગર પણ બનાવી શકાય છે (જેમ કે પ્રકાશસંશ્લેષણ દરમ્યાન). આમ, વિકલ્પ C ખોટો છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન અને ઊર્જા", "difficulty": "Hard", "num": 28}, {"question": "એક કોષમાં, જો સાયનાઇડ (Cyanide) નામક વિષારી પદાર્થ ઉમેરવામાં આવે, તો શ્વસન પ્રક્રિયાનો કયો પગલો અવરોધાય છે?", "options": ["A) ગ્લાયકોલિસિસ", "B) પાયરૂવેટનું એસિટાઇલ-CoAમાં રૂપાંતરણ", "C) ક્રેબ્સ ચક્ર", "D) ઇલેક્ટ્રોન પરિવહન શૃંખલા"], "correct": 3, "explanation": "સાયનાઇડ ઇલેક્ટ્રોન પરિવહન શૃંખલાના સાયટોક્રોમ c ઓક્સિડેઝ ઉત્સેચકને અવરોધે છે, જે ઇલેક્ટ્રોન પરિવહન શૃંખલાનો ભાગ છે. આથી, ઇલેક્ટ્રોન પરિવહન શૃંખલા અવરોધાય છે, અને ATPની ઉત્પત્તિ બંધ થાય છે. ગ્લાયકોલિસિસ, પાયરૂવેટનું એસિટાઇલ-CoAમાં રૂપાંતરણ, અને ક્રેબ્સ ચક્ર સાયનાઇડથી અસરગ્રસ્ત થતાં નથી. આમ, વિકલ્પ D સાચો છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન અને ઊર્જા", "difficulty": "Hard", "num": 29}, {"question": "પ્રકાશસંશ્લેષણ દરમ્યાન, ક્લોરોપ્લાસ્ટમાં થતી પ્રકાશ-અવલંબી પ્રક્રિયાઓમાં, નીચેનામાંથી કયું વિધાન ખોટું છે?", "options": ["A) પ્રકાશ-અવલંબી પ્રક્રિયાઓ થાયલેકોઇડ ઝરિયામાં થાય છે", "B) પ્રકાશ-અવલંબી પ્રક્રિયાઓ દરમ્યાન, પાણીનું વિભાજન થાય છે અને O2 મુક્ત થાય છે", "C) પ્રકાશ-અવલંબી પ્રક્રિયાઓ દરમ્યાન, NADPH અને ATP ઉત્પન્ન થાય છે", "D) પ્રકાશ-અવલંબી પ્રક્રિયાઓ દરમ્યાન, CO2નું સ્થિરીકરણ થાય છે"], "correct": 3, "explanation": "પ્રકાશ-અવલંબી પ્રક્રિયાઓ (પ્રકાશી પ્રક્રિયાઓ) થાયલેકોઇડ ઝરિયામાં થાય છે, જ્યાં પાણીનું વિભાજન થાય છે અને O2 મુક્ત થાય છે. આ પ્રક્રિયાઓ દરમ્યાન, NADPH અને ATP ઉત્પન્ન થાય છે, જે પછી કેલ્વિન ચક્ર (પ્રકાશ-સ્વતંત્ર પ્રક્રિયાઓ) માટે વપરાય છે. CO2નું સ્થિરીકરણ પ્રકાશ-સ્વતંત્ર પ્રક્રિયાઓ (કેલ્વિન ચક્ર) દરમ્યાન થાય છે, પ્રકાશ-અવલંબી પ્રક્રિયાઓ દરમ્યાન નહીં. આમ, વિકલ્પ D ખોટો છે.", "ncert_ref": "Class XI - Chapter 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
