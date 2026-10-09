@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>રસીકરણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>રસીકરણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">રસીકરણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "રસીકરણ દરમિયાન, કયા પ્રકારના રોગપ્રતિકારક તંત્રના પ્રતિભાવને ઉત્તેજિત કરવા માટે મૃત અથવા નિષ્ક્રિય રોગજનકોનો ઉપયોગ થાય છે?", "opts": ["સક્રિય પ્રતિરક્ષા (Active Immunity) - રોગપ્રતિકારક તંત્રને રોગજનકો વિરુદ્ધ એન્ટીબોડી ઉત્પન્ન કરવા પ્રેરે છે.", "નિષ્ક્રિય પ્રતિરક્ષા (Passive Immunity) - એન્ટીબોડી સીધી રીતે શરીરમાં આપવામાં આવે છે.", "પ્રાકૃતિક સક્રિય પ્રતિરક્ષા (Natural Active Immunity) - રોગ થયા પછી શરીરમાં એન્ટીબોડી વિકસે છે.", "પ્રાકૃતિક નિષ્ક્રિય પ્રતિરક્ષા (Natural Passive Immunity) - મા પાસેથી બાળકને એન્ટીબોડી મળે છે."], "ans": 0, "exp": "રસીકરણમાં મૃત અથવા નિષ્ક્રિય રોગજનકો આપીને શરીરને એન્ટીબોડી ઉત્પન્ન કરવા પ્રેરવામાં આવે છે, જે સક્રિય પ્રતિરક્ષા છે. નિષ્ક્રિય પ્રતિરક્ષામાં એન્ટીબોડી સીધી આપવામાં આવે છે (B ગળતર), પ્રાકૃતિક સક્રિય પ્રતિરક્ષા રોગ થયા પછી વિકસે છે (C ગળતર), અને પ્રાકૃતિક નિષ્ક્રિય પ્રતિરક્ષા મા પાસેથી મળે છે (D ગળતર).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં જીવંત, નબળા પડેલા રોગજનકોનો ઉપયોગ થાય છે, જે શરીરમાં રોગ ઉત્પન્ન કરવાની ક્ષમતા ગુમાવી દે છે પરંતુ પ્રતિરક્ષા તંત્રને ઉત્તેજિત કરે છે?", "opts": ["નિષ્ક્રિય રસી (Inactivated Vaccine)", "જીવંત નબળી રસી (Attenuated Live Vaccine)", "ટોક્સોઇડ રસી (Toxoid Vaccine)", "રિકોમ્બિનન્ટ રસી (Recombinant Vaccine)"], "ans": 1, "exp": "જીવંત નબળી રસીમાં રોગજનકોને નબળા પાડીને આપવામાં આવે છે, જે પ્રતિરક્ષા તંત્રને ઉત્તેજિત કરે છે પરંતુ રોગ ઉત્પન્ન કરતી નથી. નિષ્ક્રિય રસીમાં મૃત રોગજનકો હોય છે (A ગળતર), ટોક્સોઇડ રસીમાં ટોક્સિનને નિષ્ક્રિય કરવામાં આવે છે (C ગળતર), અને રિકોમ્બિનન્ટ રસીમાં જનીન ઇજનેરી દ્વારા બનાવેલ પ્રોટીન હોય છે (D ગળતર).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "રસીકરણ દરમિયાન, કયા કોષો રોગજનકોને ઓળખીને એન્ટીજન પ્રસ્તુત કરે છે અને T-કોષોને ઉત્તેજિત કરે છે?", "opts": ["B-કોષો (B-cells)", "પ્લાઝ્મા કોષો (Plasma cells)", "એન્ટીજન-પ્રસ્તુત કરનારા કોષો (Antigen-Presenting Cells, APCs)", "કિલર T-કોષો (Cytotoxic T-cells)"], "ans": 2, "exp": "એન્ટીજન-પ્રસ્તુત કરનારા કોષો (APCs) જેવા કે ડેન્ડ્રિટિક કોષો અને મેક્રોફેજ રોગજનકોને ઓળખીને એન્ટીજન પ્રસ્તુત કરે છે અને T-કોષોને ઉત્તેજિત કરે છે. B-કોષો એન્ટીબોડી ઉત્પન્ન કરે છે (A ગળતર), પ્લાઝ્મા કોષો એન્ટીબોડી બનાવે છે (B ગળતર), અને કિલર T-કોષો સંક્રમિત કોષોને નષ્ટ કરે છે (D ગળતર).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં રોગજનકના ટોક્સિનને રાસાયણિક અથવા ઉષ્મા દ્વારા નિષ્ક્રિય કરવામાં આવે છે અને રસી તરીકે ઉપયોગમાં લેવાય છે?", "opts": ["જીવંત નબળી રસી (Attenuated Live Vaccine)", "નિષ્ક્રિય રસી (Inactivated Vaccine)", "ટોક્સોઇડ રસી (Toxoid Vaccine)", "કોન્જ્યુગેટ રસી (Conjugate Vaccine)"], "ans": 2, "exp": "ટોક્સોઇડ રસીમાં રોગજનકના ટોક્સિનને નિષ્ક્રિય કરવામાં આવે છે અને તેને રસી તરીકે ઉપયોગમાં લેવાય છે. જીવંત નબળી રસીમાં જીવંત રોગજનકો હોય છે (A ગળતર), નિષ્ક્રિય રસીમાં મૃત રોગજનકો હોય છે (B ગળતર), અને કોન્જ્યુગેટ રસીમાં પોલિસેકેરાઇડ એન્ટીજનને પ્રોટીન સાથે જોડવામાં આવે છે (D ગળતર).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "રસીકરણ પછી, કયા પ્રકારની પ્રતિક્રિયા દરમિયાન શરીરમાં એન્ટીબોડીનું સ્તર ઝડપથી વધે છે જ્યારે રોગજનકનો સંપર્ક થાય છે?", "opts": ["પ્રાથમિક પ્રતિરક્ષા પ્રતિક્રિયા (Primary Immune Response)", "દ્વિતીય પ્રતિરક્ષા પ્રતિક્રિયા (Secondary Immune Response)", "સ્વ-પ્રતિકારક પ્રતિક્રિયા (Autoimmune Response)", "અતિસંવેદનશીલતા પ્રતિક્રિયા (Hypersensitivity Response)"], "ans": 1, "exp": "રસીકરણ પછી, દ્વિતીય પ્રતિરક્ષા પ્રતિક્રિયા દરમિયાન શરીરમાં એન્ટીબોડીનું સ્તર ઝડપથી વધે છે જ્યારે રોગજનકનો સંપર્ક થાય છે. પ્રાથમિક પ્રતિક્રિયા પહેલી વખત રોગજનકનો સંપર્ક થાય ત્યારે થાય છે (A ગળતર), સ્વ-પ્રતિકારક પ્રતિક્રિયામાં શરીરના પોતાના કોષો વિરુદ્ધ પ્રતિક્રિયા થાય છે (C ગળતર), અને અતિસંવેદનશીલતા પ્રતિક્રિયામાં અતિશય પ્રતિક્રિયા થાય છે (D ગળતર).", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "જ્યારે એક વ્યક્તિને ટેટનસ ટોક્સોઇડ રસી આપવામાં આવે છે, ત્યારે તેના શરીરમાં કયા પ્રકારના એન્ટીબોડીનું ઉત્પાદન થાય છે, જે ટેટનસ ટોક્સિનને બંધન કરે છે?", "opts": ["IgA", "IgG", "IgM", "IgE"], "ans": 1, "exp": "ટેટનસ ટોક્સોઇડ રસી એક નિષ્ક્રિય ટોક્સિન છે, જે શરીરમાં પ્રતિદેહ (IgG) એન્ટીબોડીનું ઉત્પાદન ઉત્તેજિત કરે છે. IgG એન્ટીબોડી લોહીમાં રહે છે અને ટેટનસ ટોક્સિનને બંધન કરે છે, જેથી તે કોષોને નુકસાન પહોંચાડી ન શકે. IgA મ્યુકસલ સપાટી પર કામ કરે છે, IgM પ્રાથમિક પ્રતિભાવમાં ઉત્પન્ન થાય છે, અને IgE એલર્જી પ્રતિક્રિયાઓ સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને શરીરની રક્ષા", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં, રોગજનકના જીવંત, નબળા પડેલા સ્વરૂપનો ઉપયોગ કરવામાં આવે છે, પરંતુ તે રોગજનકની વિરુલન્સ (રોગ ઉત્પન્ન કરવાની ક્ષમતા) પુનઃસ્થાપિત કરવાની શક્યતા રહેલી છે?", "opts": ["મૃત રસી", "નિષ્ક્રિય રસી", "જીવંત નબળી રસી", "ટોક્સોઇડ રસી"], "ans": 2, "exp": "જીવંત નબળી રસીમાં, રોગજનકને નબળો પાડીને તેની વિરુલન્સ ઘટાડવામાં આવે છે, પરંતુ કેટલીક વખત તે પુનઃસ્થાપિત થઈ શકે છે, જેથી રોગ ઉત્પન્ન થવાની શક્યતા રહે છે. મૃત રસી અને નિષ્ક્રિય રસીમાં રોગજનક મૃત અથવા નિષ્ક્રિય હોવાથી આ શક્યતા રહેતી નથી. ટોક્સોઇડ રસી ટોક્સિન પર આધારિત હોય છે, રોગજનક પર નહીં.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને શરીરની રક્ષા", "ch": ""}, {"q": "રસીકરણ પછી, કયા કોષો દ્વારા એન્ટીજન પ્રસ્તુત કરવામાં આવે છે, જે T-કોષોને સક્રિય કરે છે અને પ્રતિદેહ ઉત્પાદનમાં મદદ કરે છે?", "opts": ["B-કોષો", "પ્લાઝ્મા કોષો", "ડેન્ડ્રિટિક કોષો", "મેસ્ટ કોષો"], "ans": 2, "exp": "ડેન્ડ્રિટિક કોષો એ પ્રમુખ એન્ટીજન-પ્રસ્તુત કરનારા કોષો (APCs) છે, જે એન્ટીજનને પ્રોસેસ કરે છે અને તેને T-કોષોને પ્રસ્તુત કરે છે, જેથી પ્રતિદેહ પ્રતિભાવ શરૂ થાય. B-કોષો એન્ટીબોડી ઉત્પન્ન કરે છે, પ્લાઝ્મા કોષો એન્ટીબોડીનું ઉત્પાદન કરે છે, અને મેસ્ટ કોષો એલર્જી પ્રતિક્રિયાઓમાં ભાગ લે છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને શરીરની રક્ષા", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં, રોગજનકના વંશાણુગત પદાર્થ (જેમ કે DNA અથવા RNA)નો ઉપયોગ કરવામાં આવે છે, જે શરીરના કોષોને રોગજનકના પ્રોટીનનું ઉત્પાદન કરવા માટે પ્રેરે છે?", "opts": ["મૃત રસી", "જીવંત નબળી રસી", "વંશાણુગત રસી (DNA/RNA રસી)", "ટોક્સોઇડ રસી"], "ans": 2, "exp": "વંશાણુગત રસી (DNA/RNA રસી)માં, રોગજનકના વંશાણુગત પદાર્થને શરીરના કોષોમાં ઇન્જેક્ટ કરવામાં આવે છે, જેથી તે કોષો રોગજનકના પ્રોટીનનું ઉત્પાદન કરે છે. આ પ્રોટીન પ્રતિદેહ પ્રતિભાવને ઉત્તેજિત કરે છે. મૃત રસી, જીવંત નબળી રસી, અને ટોક્સોઇડ રસી આ પ્રક્રિયાનો ઉપયોગ કરતી નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને શરીરની રક્ષા", "ch": ""}, {"q": "રસીકરણ દરમિયાન, કયા હોર્મોન અથવા સાયટોકાઇનની ભૂમિકા રોગપ્રતિકારક પ્રતિભાવને વેગ આપવામાં મહત્વની હોય છે, જેથી એન્ટીબોડીનું ઉત્પાદન ઝડપથી થાય?", "opts": ["ઇન્સ્યુલિન", "ઇન્ટરફેરોન", "ઇન્ટરલ્યુકિન-2", "એડ્રિનેલિન"], "ans": 2, "exp": "ઇન્ટરલ્યુકિન-2 (IL-2) એક સાયટોકાઇન છે, જે T-કોષો અને B-કોષોના વિકાસ અને પ્રસરણને ઉત્તેજિત કરે છે, જેથી પ્રતિદેહ પ્રતિભાવ વેગ પકડે. ઇન્સ્યુલિન ગ્લુકોઝના ચયાપચયને નિયંત્રિત કરે છે, ઇન્ટરફેરોન વાયરલ ઇન્ફેક્શન સામે કામ કરે છે, અને એડ્રિનેલિન તણાવ પ્રતિભાવ સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને શરીરની રક્ષા", "ch": ""}, {"q": "રસીકરણ પછી, જ્યારે શરીરમાં એન્ટીજનની પુનરાવર્તિત સંપર્ક થાય છે, ત્યારે કયા પ્રકારના T-કોષો સક્રિય થાય છે અને મેમરી B-કોષોને ઉત્તેજિત કરે છે, જે ઝડપી અને મજબૂત પ્રતિક્રિયા માટે જવાબદાર હોય છે?", "opts": ["સહાયક T-કોષો (Helper T-cells)", "સાયટોટોક્સિક T-કોષો (Cytotoxic T-cells)", "નિયંત્રક T-કોષો (Regulatory T-cells)", "મેમરી T-કોષો (Memory T-cells)"], "ans": 0, "exp": "સહાયક T-કોષો (Helper T-cells) એન્ટીજન પ્રસ્તુત કરનારા કોષો દ્વારા પ્રસ્તુત એન્ટીજનને ઓળખીને સક્રિય થાય છે અને મેમરી B-કોષોને ઉત્તેજિત કરે છે, જે પુનરાવર્તિત સંપર્ક દરમિયાન ઝડપી અને મજબૂત પ્રતિક્રિયા માટે જવાબદાર હોય છે. સાયટોટોક્સિક T-કોષો સંક્રમિત કોષોને નષ્ટ કરે છે, નિયંત્રક T-કોષો પ્રતિક્રિયાને નિયંત્રિત કરે છે, અને મેમરી T-કોષો લાંબા ગાળાની ઇમ્યુનિટી માટે જવાબદાર હોય છે, પરંતુ પુનરાવર્તિત સંપર્ક દરમિયાન મેમરી B-કોષોને ઉત્તેજિત કરવા માટે સહાયક T-કોષો જવાબદાર હોય છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીનું પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં, રોગજનકના વંશાણુગત પદાર્થ (જેમ કે mRNA)નો ઉપયોગ કરવામાં આવે છે, જે શરીરના કોષોને એન્ટીજન ઉત્પન્ન કરવા માટે પ્રેરે છે?", "opts": ["જીવંત નબળા પડેલા રસીકરણ", "મૃત રસીકરણ", "ટોક્સોઇડ રસીકરણ", "જીન-આધારિત રસીકરણ"], "ans": 3, "exp": "જીન-આધારિત રસીકરણમાં, રોગજનકના વંશાણુગત પદાર્થ (જેમ કે mRNA)નો ઉપયોગ કરવામાં આવે છે, જે શરીરના કોષોને એન્ટીજન ઉત્પન્ન કરવા માટે પ્રેરે છે. જીવંત નબળા પડેલા રસીકરણમાં જીવંત, નબળા પડેલા રોગજનકોનો ઉપયોગ થાય છે, મૃત રસીકરણમાં મૃત રોગજનકોનો ઉપયોગ થાય છે, અને ટોક્સોઇડ રસીકરણમાં રોગજનકના ટોક્સિનને નિષ્ક્રિય કરવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીનું પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "રસીકરણ પછી, કયા પ્રકારના એન્ટીબોડી પ્રથમ ઉત્પન્ન થાય છે અને તેની સાંદ્રતા ઝડપથી ઘટે છે?", "opts": ["IgG", "IgM", "IgA", "IgE"], "ans": 1, "exp": "રસીકરણ પછી, IgM એન્ટીબોડી પ્રથમ ઉત્પન્ન થાય છે અને તેની સાંદ્રતા ઝડપથી ઘટે છે. IgG લાંબા ગાળાની ઇમ્યુનિટી માટે જવાબદાર હોય છે, IgA શ્લેષ્મલ પડદાઓ પર કામ કરે છે, અને IgE એલર્જી પ્રતિક્રિયાઓ સાથે સંબંધિત હોય છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીનું પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં, રોગજનકના એન્ટીજનને કૃત્રિમ રીતે તૈયાર કરવામાં આવે છે અને શરીરમાં પ્રવેશ કરાવવામાં આવે છે, જે શરીરને એન્ટીબોડી ઉત્પન્ન કરવા માટે પ્રેરે છે?", "opts": ["જીવંત નબળા પડેલા રસીકરણ", "સબયુનિટ રસીકરણ", "ટોક્સોઇડ રસીકરણ", "ડીએનએ રસીકરણ"], "ans": 1, "exp": "સબયુનિટ રસીકરણમાં, રોગજનકના એન્ટીજનને કૃત્રિમ રીતે તૈયાર કરવામાં આવે છે અને શરીરમાં પ્રવેશ કરાવવામાં આવે છે, જે શરીરને એન્ટીબોડી ઉત્પન્ન કરવા માટે પ્રેરે છે. જીવંત નબળા પડેલા રસીકરણમાં જીવંત, નબળા પડેલા રોગજનકોનો ઉપયોગ થાય છે, ટોક્સોઇડ રસીકરણમાં રોગજનકના ટોક્સિનને નિષ્ક્રિય કરવામાં આવે છે, અને ડીએનએ રસીકરણમાં રોગજનકના વંશાણુગત પદાર્થનો ઉપયોગ થાય છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીનું પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "રસીકરણ દરમિયાન, કયા કોષો દ્વારા એન્ટીજન પ્રસ્તુત કરવામાં આવે છે, જે સાયટોટોક્સિક T-કોષોને સક્રિય કરે છે?", "opts": ["B-કોષો", "મેક્રોફેજ", "ડેન્ડ્રિટિક કોષો", "ન્યુટ્રોફિલ્સ"], "ans": 2, "exp": "ડેન્ડ્રિટિક કોષો દ્વારા એન્ટીજન પ્રસ્તુત કરવામાં આવે છે, જે સાયટોટોક્સિક T-કોષોને સક્રિય કરે છે. B-કોષો એન્ટીબોડી ઉત્પન્ન કરે છે, મેક્રોફેજ એન્ટીજનને ફેગોસાઇટોસિસ દ્વારા નષ્ટ કરે છે, અને ન્યુટ્રોફિલ્સ બેક્ટેરિયા અને ફંગી વિરુદ્ધ લડે છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીનું પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "રસીકરણ દરમિયાન, જો કોઈ વ્યક્તિને પહેલાથી જ એલર્જીની સમસ્યા હોય, તો કયા પ્રકારની રસી આપવી જોખમી સાબિત થઈ શકે છે?", "opts": ["મૃત રસી (Inactivated vaccine)", "જીવંત નબળી રસી (Live attenuated vaccine)", "ટોક્સોઇડ રસી (Toxoid vaccine)", "સબયુનિટ રસી (Subunit vaccine)"], "ans": 1, "exp": "જીવંત નબળી રસી (Live attenuated vaccine) એલર્જી ધરાવતી વ્યક્તિઓમાં જોખમી સાબિત થઈ શકે છે, કારણ કે જીવંત સૂક્ષ્મજીવો શરીરમાં પ્રતિકૂળ પ્રતિક્રિયા ઉત્પન્ન કરી શકે છે. મૃત રસી, ટોક્સોઇડ રસી અને સબયુનિટ રસીમાં જીવંત સૂક્ષ્મજીવો હોતા નથી, જેથી તેઓ એલર્જી ધરાવતી વ્યક્તિઓ માટે સુરક્ષિત માનવામાં આવે છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "રસીકરણ પછી, જ્યારે શરીરમાં પહેલીવાર એન્ટીજન પ્રવેશે છે, ત્યારે કયા પ્રકારના T-કોષો સક્રિય થાય છે અને તેની ભૂમિકા શું છે?", "opts": ["સહાયક T-કોષો (Helper T-cells) - B-કોષોને ઉત્તેજિત કરવા અને એન્ટીબોડી ઉત્પાદનમાં મદદ કરવા", "સાયટોટોક્સિક T-કોષો (Cytotoxic T-cells) - સીધા રોગજનક કોષોને નષ્ટ કરવા", "રેગ્યુલેટરી T-કોષો (Regulatory T-cells) - પ્રતિક્રિયાને નિયંત્રિત કરવા અને અતિ-પ્રતિક્રિયા અટકાવવા", "મેમરી T-કોષો (Memory T-cells) - ભવિષ્યમાં એન્ટીજનને ઝડપથી ઓળખવા"], "ans": 0, "exp": "સહાયક T-કોષો (Helper T-cells) પહેલીવાર એન્ટીજન પ્રવેશે ત્યારે સક્રિય થાય છે અને B-કોષોને ઉત્તેજિત કરે છે, જે એન્ટીબોડી ઉત્પાદનમાં મદદ કરે છે. સાયટોટોક્સિક T-કોષો સીધા રોગજનક કોષોને નષ્ટ કરે છે, પરંતુ તે પહેલી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતી નથી. રેગ્યુલેટરી T-કોષો પ્રતિક્રિયાને નિયંત્રિત કરે છે, પરંતુ તે પહેલી પ્રતિક્રિયામાં સક્રિય થતી નથી. મેમરી T-કોષો ભવિષ્યમાં એન્ટીજનને ઓળખવા માટે તૈયાર રહે છે, પરંતુ તે પહેલી પ્રતિક્રિયામાં સક્રિય થતી નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "કયા રસીકરણના પ્રકારમાં, રોગજનકના એન્ટીજનને લિપોસોમ અથવા નેનોપાર્ટિકલ્સ સાથે જોડીને આપવામાં આવે છે, જે શરીરમાં પ્રતિક્રિયાને વધુ પ્રભાવી બનાવે છે?", "opts": ["જીવંત, નબળા પડેલા રસીકરણ", "મૃત રસીકરણ", "સબયુનિટ રસીકરણ", "કોન્જ્યુગેટ રસીકરણ"], "ans": 3, "exp": "કોન્જ્યુગેટ રસીકરણમાં, રોગજનકના એન્ટીજનને લિપોસોમ અથવા નેનોપાર્ટિકલ્સ સાથે જોડીને આપવામાં આવે છે, જે શરીરમાં પ્રતિક્રિયાને વધુ પ્રભાવી બનાવે છે. જીવંત, નબળા પડેલા રસીકરણમાં જીવંત રોગજનકનો ઉપયોગ થાય છે. મૃત રસીકરણમાં મૃત રોગજનકનો ઉપયોગ થાય છે. સબયુનિટ રસીકરણમાં રોગજનકના માત્ર એન્ટીજનનો ઉપયોગ થાય છે, પરંતુ તેને લિપોસોમ અથવા નેનોપાર્ટિકલ્સ સાથે જોડીને આપવામાં આવતું નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "રસીકરણ દરમિયાન, જો કોઈ વ્યક્તિને પહેલાથી જ ઓટોઇમ્યુન રોગ હોય, તો કયા પ્રકારની રસીનો ઉપયોગ કરવો જોખમી સાબિત થઈ શકે છે અને શા માટે?", "opts": ["જીવંત, નબળા પડેલા રોગજનકોવાળી રસી, કારણ કે તે શરીરના સ્વ-પ્રતિકારક તંત્રને વધુ ઉત્તેજિત કરી શકે છે અને ઓટોઇમ્યુન પ્રતિક્રિયાને વેગ આપી શકે છે.", "મૃત રોગજનકોવાળી રસી, કારણ કે તે શરીરમાં એન્ટીબોડીનું ઉત્પાદન કરવામાં અસમર્થ હોય છે.", "ટોક્સોઇડ રસી, કારણ કે તે શરીરમાં ટોક્સિન વિરુદ્ધ પ્રતિક્રિયા ઉત્પન્ન કરવામાં નિષ્ફળ જાય છે.", "રિકોમ્બિનન્ટ રસી, કારણ કે તે શરીરમાં જનીનીય પદાર્થોને સીધા જ રૂપાંતરિત કરે છે અને ઓટોઇમ્યુન રોગને વધુ ગંભીર બનાવી શકે છે."], "ans": 0, "exp": "જીવંત, નબળા પડેલા રોગજનકોવાળી રસી ઓટોઇમ્યુન રોગ ધરાવતા વ્યક્તિઓમાં જોખમી સાબિત થઈ શકે છે, કારણ કે તે શરીરના સ્વ-પ્રતિકારક તંત્રને વધુ ઉત્તેજિત કરી શકે છે અને ઓટોઇમ્યુન પ્રતિક્રિયાને વેગ આપી શકે છે. મૃત રોગજનકોવાળી રસી અને ટોક્સોઇડ રસી સામાન્ય રીતે સુરક્ષિત હોય છે, કારણ કે તેઓ શરીરમાં જીવંત રોગજનકોને ઉત્પન્ન કરતા નથી. રિકોમ્બિનન્ટ રસી પણ સામાન્ય રીતે સુરક્ષિત હોય છે, કારણ કે તે શરીરમાં જનીનીય પદાર્થોને સીધા જ રૂપાંતરિત કરતા નથી, પરંતુ એન્ટીજનનું ઉત્પાદન કરવા માટે ઉપયોગમાં લેવાય છે.", "ref": "Std 12 - Chapter 10: રોગપ્રતિકારકતા અને શરીરની રક્ષા", "ch": ""}, {"q": "રસીકરણ દરમિયાન, જો કોઈ વ્યક્તિને પહેલાથી જ એડ્સ (HIV) ચેપ લાગેલો હોય, તો કયા પ્રકારની રસી તેના માટે સૌથી ઓછી અસરકારક સાબિત થઈ શકે છે અને શા માટે?", "opts": ["જીવંત, નબળા પડેલા રોગજનકવાળી રસી (જેમ કે MMR રસી), કારણ કે તેના શરીરમાં CD4+ T-કોષોની સંખ્યા ઓછી હોવાથી પ્રતિક્રિયા મંદ પડે છે", "મૃત રોગજનકવાળી રસી (જેમ કે પોલિયો રસી), કારણ કે તેના શરીરમાં B-કોષો સક્રિય થઈ શકતા નથી", "ટોક્સોઇડ રસી (જેમ કે ટેટનસ રસી), કારણ કે તેના શરીરમાં એન્ટીટોક્સિન ઉત્પન્ન થઈ શકતા નથી", "mRNA રસી (જેમ કે કોવિડ-19 રસી), કારણ કે તેના શરીરમાં mRNA નો અનુવાદ થઈ શકતા નથી"], "ans": 0, "exp": "જીવંત, નબળા પડેલા રોગજનકવાળી રસી (A) એડ્સ રોગીઓ માટે ઓછી અસરકારક સાબિત થાય છે, કારણ કે HIV ચેપ લાગેલા વ્યક્તિઓમાં CD4+ T-કોષોની સંખ્યા ઓછી હોવાથી પ્રતિક્રિયા મંદ પડે છે. મૃત રોગજનકવાળી રસી (B) અને ટોક્સોઇડ રસી (C) એડ્સ રોગીઓમાં પણ અસરકારક હોઈ શકે છે, કારણ કે તે B-કોષો અને એન્ટીબોડી ઉત્પાદન પર આધારિત હોય છે, જે HIV ચેપ દરમિયાન પણ કામ કરી શકે છે. mRNA રસી (D) પણ અસરકારક હોઈ શકે છે, કારણ કે તે સીધા જ કોષમાં પ્રોટીન ઉત્પન્ન કરે છે અને T-કોષોની જરૂરિયાત ઓછી હોય છે.", "ref": "Std 12 - પ્રકરણ 10: માનવીના પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
