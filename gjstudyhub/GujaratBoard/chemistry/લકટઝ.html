@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>લેક્ટોઝ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>લેક્ટોઝ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">લેક્ટોઝ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "લેક્ટોઝના જળવિભાજન માટે જવાબદાર ઉત્સેચક લેક્ટેઝનું ઉત્પાદન માનવ શરીરમાં કયા અંગના કોષો દ્વારા મુખ્યત્વે થાય છે?", "opts": ["જઠરના શ્લેષ્મસ્તરના કોષો", "નાના આંતરડાના શ્લેષ્મસ્તરના કોષો", "યકૃતના હિપેટોસાઇટ કોષો", "સ્વાદુપિંડના એસિનર કોષો"], "ans": 1, "exp": "લેક્ટેઝ ઉત્સેચક નાના આંતરડાના શ્લેષ્મસ્તરના કોષો (એન્ટેરોસાઇટ્સ) દ્વારા ઉત્પન્ન થાય છે, જે લેક્ટોઝને ગ્લુકોઝ અને ગેલેક્ટોઝમાં તોડે છે. જઠરના કોષો મુખ્યત્વે પેપ્સિન ઉત્પન્ન કરે છે, યકૃત ગ્લાયકોજેન સંગ્રહ અને ચયાપચયમાં ભાગ લે છે, જ્યારે સ્વાદુપિંડ પાચક ઉત્સેચકો ઉત્પન્ન કરે છે પરંતુ લેક્ટેઝ નહીં.", "ref": "Std 11 - પ્રકરણ 16: પાચન અને શોષણ", "ch": ""}, {"q": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં નીચેનામાંથી કયું લક્ષણ જોવા મળતું નથી?", "opts": ["પેટમાં દુખાવો અને અપચો", "ઝાડા અને ગેસની સમસ્યા", "લોહીમાં ગ્લુકોઝનું પ્રમાણ વધી જવું", "પોષક તત્ત્વોનું અપૂરતું શોષણ"], "ans": 2, "exp": "લેક્ટોઝ અસહિષ્ણુતામાં લેક્ટોઝનું પાચન ન થતાં તે આંતરડામાં આથવણ પામે છે, જેનાથી પેટમાં દુખાવો, અપચો, ઝાડા અને ગેસ થાય છે. પરંતુ લોહીમાં ગ્લુકોઝનું પ્રમાણ વધતું નથી કારણ કે લેક્ટોઝનું યોગ્ય પાચન થતું નથી. પોષક તત્ત્વોનું શોષણ પણ અસરગ્રસ્ત થાય છે.", "ref": "Std 11 - પ્રકરણ 16: પાચન અને શોષણ", "ch": ""}, {"q": "લેક્ટોઝનું રાસાયણિક બંધારણ શું છે અને તે કયા બે મોનોસેકેરાઇડ્સથી બનેલું છે?", "opts": ["ડાયસેકેરાઇડ; ગ્લુકોઝ + ફ્રુક્ટોઝ", "ડાયસેકેરાઇડ; ગ્લુકોઝ + ગેલેક્ટોઝ", "પોલિસેકેરાઇડ; ગ્લુકોઝના બહુલક", "ટ્રાયસેકેરાઇડ; ગ્લુકોઝ + ગેલેક્ટોઝ + ફ્રુક્ટોઝ"], "ans": 1, "exp": "લેક્ટોઝ એક ડાયસેકેરાઇડ છે જે ગ્લુકોઝ અને ગેલેક્ટોઝના અણુઓથી બનેલું છે. ફ્રુક્ટોઝ સુક્રોઝમાં જોવા મળે છે, પોલિસેકેરાઇડ ગ્લુકોઝના બહુલક છે (જેમ કે સ્ટાર્ચ), અને ટ્રાયસેકેરાઇડ કાર્બોહાઇડ્રેટ નથી પરંતુ ચરબી છે.", "ref": "Std 11 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન લેક્ટોઝ ઓપેરોન માટે ખોટું છે?", "opts": ["લેક્ટોઝ ઓપેરોનનું નિયમન માત્ર લેક્ટોઝની હાજરીમાં થાય છે", "લેક્ટોઝ ઓપેરોનમાં ત્રણ રચનાત્મક જનીનો (lacZ, lacY, lacA) હોય છે", "લેક્ટોઝ ઓપેરોનનું નિયમન ગ્લુકોઝની હાજરી દ્વારા પણ થાય છે (કેટાબોલાઇટ રિપ્રેશન)", "લેક્ટોઝ ઓપેરોન પ્રોકેરિયોટિક જનીન નિયમનનું ઉદાહરણ છે"], "ans": 0, "exp": "લેક્ટોઝ ઓપેરોનનું નિયમન માત્ર લેક્ટોઝની હાજરીમાં જ નહીં, પરંતુ ગ્લુકોઝની ગેરહાજરીમાં પણ થાય છે (કેટાબોલાઇટ રિપ્રેશન). લેક્ટોઝ ઓપેરોનમાં ત્રણ રચનાત્મક જનીનો હોય છે અને તે પ્રોકેરિયોટિક જનીન નિયમનનું ઉદાહરણ છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "લેક્ટોઝનું પાચન ન થતું હોય તેવી વ્યક્તિમાં નીચેનામાંથી કયું દૂધ ઉત્પાદન સૌથી વધુ યોગ્ય ગણી શકાય?", "opts": ["ગાયનું દૂધ (સંપૂર્ણ ક્રીમ)", "લેક્ટોઝ-મુક્ત દૂધ", "સોયા દૂધ (સોયાબીન આધારિત)", "ભેંસનું દૂધ (સંપૂર્ણ ક્રીમ)"], "ans": 1, "exp": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિઓ માટે લેક્ટોઝ-મુક્ત દૂધ સૌથી યોગ્ય છે કારણ કે તેમાં લેક્ટોઝ પહેલેથી જ તૂટેલું હોય છે. ગાયનું અને ભેંસનું દૂધ લેક્ટોઝ ધરાવે છે, જ્યારે સોયા દૂધ લેક્ટોઝ-મુક્ત છે પરંતુ તે દૂધ નથી, તે વનસ્પતિ આધારિત છે.", "ref": "Std 11 - પ્રકરણ 16: પાચન અને શોષણ", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, ક્યારે લેક્ટોઝનું પાચન થતું નથી ત્યારે પણ ઓપેરોન સક્રિય રહે છે?", "opts": ["લેક્ટોઝ ઓપેરોનમાં રિપ્રેસર પ્રોટીન મ્યુટેશન થયું હોય", "ગ્લુકોઝની હાજરીમાં લેક્ટોઝ ઓપેરોન સક્રિય રહે છે", "cAMPની માત્રા ઓછી હોય ત્યારે", "લેક્ટોઝની હાજરીમાં રિપ્રેસર પ્રોટીન લેક્ટોઝ ઓપેરોન સાથે બંધાય છે"], "ans": 0, "exp": "લેક્ટોઝ ઓપેરોનમાં રિપ્રેસર પ્રોટીન મ્યુટેશન થયું હોય ત્યારે તે ઓપેરોનને દબાવી શકતું નથી, પરિણામે લેક્ટોઝ ઓપેરોન સક્રિય રહે છે. ગ્લુકોઝની હાજરીમાં લેક્ટોઝ ઓપેરોન નિષ્ક્રિય રહે છે (કેટાબોલાઇટ રિપ્રેશન), cAMPની માત્રા ઓછી હોય ત્યારે પણ ઓપેરોન નિષ્ક્રિય રહે છે, અને લેક્ટોઝની હાજરીમાં રિપ્રેસર પ્રોટીન ઓપેરોન સાથે બંધાય નહીં, પરંતુ લેક્ટોઝ સાથે બંધાય છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં, નીચેનામાંથી કયું પદાર્થ લેક્ટોઝના પાચન વિના સીધું રુધિરમાં શોષાય છે?", "opts": ["ગ્લુકોઝ", "ગેલેક્ટોઝ", "ફ્રક્ટોઝ", "સુક્રોઝ"], "ans": 2, "exp": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં લેક્ટેઝ ઉત્સેચકની ઉણપ હોવાથી લેક્ટોઝનું પાચન થતું નથી, પરંતુ ફ્રક્ટોઝ સીધું રુધિરમાં શોષાય છે. ગ્લુકોઝ અને ગેલેક્ટોઝ લેક્ટોઝના પાચન પછી જ મુક્ત થાય છે, જ્યારે સુક્રોઝ લેક્ટોઝ નથી.", "ref": "Std 12 - અધ્યાય 15: માનવ પોષણ અને શોષણ", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન લેક્ટોઝની હાજરીમાં થતી પ્રક્રિયા વિશે ખોટું છે?", "opts": ["લેક્ટોઝ રિપ્રેસર પ્રોટીન સાથે બંધાય છે અને તેને નિષ્ક્રિય કરે છે", "લેક્ટોઝ ઓપેરોનમાં ટ્રાન્સક્રિપ્શન શરૂ થાય છે", "cAMP-CAP કોમ્પ્લેક્સ RNA પોલિમરેઝ સાથે બંધાય છે", "લેક્ટોઝ ઓપેરોનમાં ટ્રાન્સલેશન સીધું જ થાય છે"], "ans": 3, "exp": "લેક્ટોઝ ઓપેરોનમાં ટ્રાન્સક્રિપ્શન પછી mRNA બન્યા પછી જ ટ્રાન્સલેશન થાય છે, સીધું ટ્રાન્સલેશન થતું નથી. લેક્ટોઝ રિપ્રેસર પ્રોટીન સાથે બંધાય છે અને તેને નિષ્ક્રિય કરે છે, જેથી ઓપેરોન સક્રિય થાય છે. cAMP-CAP કોમ્પ્લેક્સ RNA પોલિમરેઝ સાથે બંધાય છે અને ટ્રાન્સક્રિપ્શન શરૂ કરે છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "લેક્ટોઝના પાચન માટે જવાબદાર ઉત્સેચક લેક્ટેઝનું ઉત્પાદન કયા જીન દ્વારા નિયંત્રિત થાય છે?", "opts": ["lacZ", "lacY", "lacA", "lacI"], "ans": 0, "exp": "લેક્ટોઝના પાચન માટે જવાબદાર ઉત્સેચક લેક્ટેઝનું ઉત્પાદન lacZ જીન દ્વારા થાય છે. lacY જીન લેક્ટોઝના પરિવહન માટે જવાબદાર છે, lacA જીન થાયોગેલેક્ટોઝ ટ્રાન્સએસિલેઝ ઉત્સેચક માટે જવાબદાર છે, અને lacI જીન રિપ્રેસર પ્રોટીન માટે જવાબદાર છે.", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, નીચેનામાંથી કયું પદાર્થ લેક્ટોઝ ઓપેરોનને સક્રિય કરવા માટે જરૂરી નથી?", "opts": ["લેક્ટોઝ", "ગ્લુકોઝ", "cAMP", "CAP પ્રોટીન"], "ans": 1, "exp": "લેક્ટોઝ ઓપેરોનને સક્રિય કરવા માટે લેક્ટોઝ, cAMP, અને CAP પ્રોટીન જરૂરી છે. ગ્લુકોઝની હાજરીમાં લેક્ટોઝ ઓપેરોન નિષ્ક્રિય રહે છે (કેટાબોલાઇટ રિપ્રેશન).", "ref": "Std 12 - અધ્યાય 6: અનુવંશિકતા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, ક્યારે લેક્ટોઝની હાજરીમાં પણ લેક્ટેઝ ઉત્સેચકનું સંશ્લેષણ થતું નથી?", "opts": ["ગ્લુકોઝની ઉચ્ચ સાંદ્રતા હાજર હોય ત્યારે", "લેક્ટોઝની સાંદ્રતા ખૂબ ઓછી હોય ત્યારે", "cAMPની સાંદ્રતા ખૂબ ઓછી હોય ત્યારે", "રિપ્રેસર પ્રોટીન લેક્ટોઝ સાથે જોડાય ત્યારે"], "ans": 0, "exp": "ગ્લુકોઝની ઉચ્ચ સાંદ્રતા હાજર હોય ત્યારે, કેટાબોલાઇટ રિપ્રેશન દ્વારા લેક્ટોઝ ઓપેરોન દબાય છે, જેથી લેક્ટેઝ ઉત્સેચકનું સંશ્લેષણ થતું નથી. બાકીના વિકલ્પો ખોટા છે: B) લેક્ટોઝની ઓછી સાંદ્રતામાં પણ ઓપેરોન સક્રિય થઈ શકે, C) cAMPની ઓછી સાંદ્રતા લેક્ટોઝ ઓપેરોનને અસર કરે છે પરંતુ ગ્લુકોઝની હાજરીમાં cAMP ઓછું હોય છે, D) રિપ્રેસર પ્રોટીન લેક્ટોઝ સાથે જોડાતું નથી, તે ઓપરેટર સાથે જોડાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન લેક્ટોઝ ઓપેરોનની નિયંત્રણ પ્રણાલી વિશે ખોટું છે?", "opts": ["લેક્ટોઝ ઓપેરોનમાં રિપ્રેસર જીન (I) હાજર છે", "લેક્ટોઝ ઓપેરોનમાં પ્રમોટર (P) અને ઓપરેટર (O) હાજર છે", "લેક્ટોઝ ઓપેરોનમાં સ્ટ્રક્ચરલ જીન (Z, Y, A) હાજર છે", "લેક્ટોઝ ઓપેરોનમાં ટર્મિનેટર જીન (T) હાજર છે"], "ans": 3, "exp": "લેક્ટોઝ ઓપેરોનમાં ટર્મિનેટર જીન (T) હાજર નથી. A) રિપ્રેસર જીન (I) હાજર છે - સાચું. B) પ્રમોટર (P) અને ઓપરેટર (O) હાજર છે - સાચું. C) સ્ટ્રક્ચરલ જીન (Z, Y, A) હાજર છે - સાચું.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, જ્યારે ગ્લુકોઝની ઉચ્ચ સાંદ્રતા અને લેક્ટોઝની હાજરી હોય ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["cAMPની સાંદ્રતા ઉચ્ચ રહે છે અને CAP-cAMP કોમ્પ્લેક્સ રચાય છે, જેથી લેક્ટોઝ ઓપેરોન સક્રિય થાય છે.", "ગ્લુકોઝની હાજરીમાં cAMPની સાંદ્રતા ઓછી થાય છે, જેથી CAP-cAMP કોમ્પ્લેક્સ રચાતો નથી અને લેક્ટોઝ ઓપેરોન નિષ્ક્રિય રહે છે.", "લેક્ટોઝ રિપ્રેસર પ્રોટીન સાથે બંધાય છે અને રિપ્રેસરને ઓપેરેટરથી દૂર કરે છે, જેથી ઓપેરોન સક્રિય થાય છે.", "લેક્ટોઝ ઓપેરોનમાં ટ્રાન્સક્રિપ્શન શરૂ થાય છે, પરંતુ ગ્લુકોઝની હાજરીમાં mRNAનું અનુવાદ થતું નથી."], "ans": 1, "exp": "ગ્લુકોઝની ઉચ્ચ સાંદ્રતામાં, cAMPની સાંદ્રતા ઓછી થાય છે, જેથી CAP-cAMP કોમ્પ્લેક્સ રચાતો નથી. આ કારણે લેક્ટોઝ ઓપેરોન નિષ્ક્રિય રહે છે, કારણ કે CAP-cAMP કોમ્પ્લેક્સ ઓપેરોનની સક્રિયતા માટે જરૂરી છે. વિકલ્પ A ખોટો છે કારણ કે cAMPની સાંદ્રતા ઓછી થાય છે. વિકલ્પ C ખોટો છે કારણ કે લેક્ટોઝ રિપ્રેસર પ્રોટીન સાથે બંધાય છે, પરંતુ ગ્લુકોઝની હાજરીમાં ઓપેરોન નિષ્ક્રિય રહે છે. વિકલ્પ D ખોટો છે કારણ કે ટ્રાન્સક્રિપ્શન જ શરૂ થતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં, જો તે લેક્ટોઝ-મુક્ત આહાર લે તો પણ લેક્ટેઝ ઉત્સેચકનું ઉત્પાદન થતું નથી. આનું કારણ નીચેનામાંથી કયું છે?", "opts": ["લેક્ટોઝ ઓપેરોનમાં મ્યુટેશન થયું છે, જેથી લેક્ટેઝ જીન નિષ્ક્રિય થયું છે.", "લેક્ટોઝની અભાવમાં, રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાયેલું રહે છે અને ટ્રાન્સક્રિપ્શન અવરોધાય છે.", "લેક્ટોઝ ઓપેરોનમાં પ્રમોટર પ્રદેશ નષ્ટ થયો છે, જેથી RNA પોલિમરેઝ બંધાઈ શકતું નથી.", "કોષમાં cAMPની સાંદ્રતા ઓછી હોવાથી CAP-cAMP કોમ્પ્લેક્સ રચાતો નથી."], "ans": 1, "exp": "લેક્ટોઝની અભાવમાં, રિપ્રેસર પ્રોટીન ઓપેરેટર સાથે બંધાયેલું રહે છે અને લેક્ટેઝ જીનનું ટ્રાન્સક્રિપ્શન અવરોધાય છે. વિકલ્પ A ખોટો છે કારણ કે મ્યુટેશનના કારણે લેક્ટોઝ અસહિષ્ણુતા થતી નથી, પરંતુ લેક્ટેઝ જીન નિષ્ક્રિય થતું નથી. વિકલ્પ C ખોટો છે કારણ કે પ્રમોટર પ્રદેશ નષ્ટ થયો હોત તો લેક્ટોઝની હાજરીમાં પણ ટ્રાન્સક્રિપ્શન થતું નહીં. વિકલ્પ D ખોટો છે કારણ કે cAMPની સાંદ્રતા લેક્ટોઝની હાજરીમાં જ નિયંત્રિત થાય છે, લેક્ટોઝની અભાવમાં નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, નીચેનામાંથી કયું કોમ્બિનેશન લેક્ટેઝ, પર્મિયેઝ અને ટ્રાન્સએસિટિલેઝ ઉત્સેચકોના સંશ્લેષણ માટે જરૂરી છે?", "opts": ["લેક્ટોઝની હાજરી + ગ્લુકોઝની અભાવ + cAMPની ઉચ્ચ સાંદ્રતા", "લેક્ટોઝની હાજરી + ગ્લુકોઝની હાજરી + cAMPની ઓછી સાંદ્રતા", "લેક્ટોઝની અભાવ + ગ્લુકોઝની અભાવ + cAMPની ઉચ્ચ સાંદ્રતા", "લેક્ટોઝની હાજરી + ગ્લુકોઝની અભાવ + cAMPની ઓછી સાંદ્રતા"], "ans": 0, "exp": "લેક્ટેઝ, પર્મિયેઝ અને ટ્રાન્સએસિટિલેઝ ઉત્સેચકોના સંશ્લેષણ માટે લેક્ટોઝની હાજરી, ગ્લુકોઝની અભાવ અને cAMPની ઉચ્ચ સાંદ્રતા જરૂરી છે. લેક્ટોઝ રિપ્રેસરને નિષ્ક્રિય કરે છે, ગ્લુકોઝની અભાવમાં cAMPની સાંદ્રતા ઉચ્ચ રહે છે, અને CAP-cAMP કોમ્પ્લેક્સ રચાય છે, જેથી ઓપેરોન સક્રિય થાય છે. વિકલ્પ B ખોટો છે કારણ કે ગ્લુકોઝની હાજરીમાં cAMPની સાંદ્રતા ઓછી થાય છે. વિકલ્પ C ખોટો છે કારણ કે લેક્ટોઝની અભાવમાં રિપ્રેસર સક્રિય રહે છે. વિકલ્પ D ખોટો છે કારણ કે cAMPની ઓછી સાંદ્રતામાં CAP-cAMP કોમ્પ્લેક્સ રચાતો નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, જ્યારે કેપ (CAP) પ્રોટીન cAMP સાથે જોડાય છે, ત્યારે તે ઓપેરોનના પ્રમોટર પ્રદેશ સાથે કેવી રીતે સંકળાય છે?", "opts": ["તે RNA પોલિમરેઝને બંધ કરે છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે", "તે DNA પર બંધાય છે અને RNA પોલિમરેઝની બંધન ક્ષમતા વધારે છે", "તે લેક્ટોઝને સીધું જોડીને ઓપેરોનને સક્રિય કરે છે", "તે રિપ્રેસર પ્રોટીન સાથે જોડાઈને તેને અક્રિય કરે છે"], "ans": 1, "exp": "કેપ (CAP) પ્રોટીન cAMP સાથે જોડાયા પછી DNA પરના પ્રમોટર પ્રદેશ સાથે બંધાય છે અને RNA પોલિમરેઝની બંધન ક્ષમતા વધારે છે, જે ટ્રાન્સક્રિપ્શનને પ્રોત્સાહન આપે છે. A) ખોટું છે કારણ કે કેપ-cAMP કોમ્પ્લેક્સ ટ્રાન્સક્રિપ્શનને અટકાવતું નથી. C) ખોટું છે કારણ કે લેક્ટોઝ સીધું જોડાતું નથી. D) ખોટું છે કારણ કે કેપ-cAMP રિપ્રેસર પ્રોટીન સાથે સંકળાતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં, લેક્ટોઝના પાચન વિના, કયા પદાર્થનું સ્વાદુપિંડ (પેનક્રિયાસ) દ્વારા સ્રાવ થતું રહે છે?", "opts": ["એમાઇલેઝ", "લાઇપેઝ", "ટ્રિપ્સિન", "લેક્ટેઝ"], "ans": 0, "exp": "લેક્ટોઝ અસહિષ્ણુતા ધરાવતી વ્યક્તિમાં લેક્ટેઝ ઉત્સેચકનું ઉત્પાદન થતું નથી, પરંતુ એમાઇલેઝ (કાર્બોદિતના પાચન માટે) સ્વાદુપિંડ દ્વારા સ્રાવ થતું રહે છે. B) લાઇપેઝ ચરબીના પાચન માટે, C) ટ્રિપ્સિન પ્રોટીનના પાચન માટે, D) લેક્ટેઝ લેક્ટોઝના પાચન માટે જરૂરી છે પરંતુ અસહિષ્ણુતામાં તે ઉત્પન્ન થતું નથી.", "ref": "Std 12 - અધ્યાય 3: માનવ પાચન તંત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, જ્યારે ગ્લુકોઝની સાંદ્રતા ઓછી હોય અને લેક્ટોઝની હાજરી હોય, ત્યારે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["cAMPનું સ્તર વધે છે", "CAP-cAMP કોમ્પ્લેક્સ બને છે અને ઓપેરોનને સક્રિય કરે છે", "લેક્ટેઝ ઉત્સેચકનું સંશ્લેષણ થાય છે", "રિપ્રેસર પ્રોટીન લેક્ટોઝ ઓપેરેટર સાથે બંધાય છે"], "ans": 3, "exp": "ગ્લુકોઝની ઓછી સાંદ્રતામાં cAMPનું સ્તર વધે છે (A સાચું), CAP-cAMP કોમ્પ્લેક્સ બને છે અને ઓપેરોનને સક્રિય કરે છે (B સાચું), લેક્ટેઝ ઉત્સેચકનું સંશ્લેષણ થાય છે (C સાચું). પરંતુ રિપ્રેસર પ્રોટીન લેક્ટોઝની હાજરીમાં ઓપેરેટર સાથે બંધાય નહીં (D ખોટું).", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, નીચેનામાંથી કયું જીન લેક્ટોઝના પરિવહન માટે જવાબદાર છે?", "opts": ["lacZ", "lacY", "lacA", "lacI"], "ans": 1, "exp": "lacY જીન લેક્ટોઝના પરિવહન (પર્મિયેઝ) માટે જવાબદાર છે. lacZ લેક્ટેઝ ઉત્સેચક માટે (A ખોટું), lacA ટ્રાન્સએસિટિલેઝ માટે (C ખોટું), lacI રિપ્રેસર પ્રોટીન માટે (D ખોટું).", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક્ટોઝ ઓપેરોનમાં, જ્યારે લેક્ટોઝ અને ગ્લુકોઝ બંને હાજર હોય, ત્યારે નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["લેક્ટોઝ ઓપેરોન પૂરેપૂરું સક્રિય થાય છે", "લેક્ટોઝ ઓપેરોન પૂરેપૂરું નિષ્ક્રિય થાય છે", "લેક્ટોઝ ઓપેરોન અર્ધ-સક્રિય અવસ્થામાં રહે છે", "લેક્ટેઝ ઉત્સેચકનું સંશ્લેષણ મહત્તમ સ્તરે થાય છે"], "ans": 2, "exp": "લેક્ટોઝ અને ગ્લુકોઝ બંને હાજર હોવા છતાં, ગ્લુકોઝની હાજરીને લીધે cAMPનું સ્તર ઓછું રહે છે, જેથી CAP-cAMP કોમ્પ્લેક્સ બનતો નથી અને ઓપેરોન પૂરેપૂરું સક્રિય થતું નથી. પરંતુ લેક્ટોઝની હાજરીને લીધે રિપ્રેસર પ્રોટીન અક્રિય થાય છે, જેથી ઓપેરોન અર્ધ-સક્રિય અવસ્થામાં રહે છે. A, B, D ખોટાં છે કારણ કે ઓપેરોન પૂરેપૂરું સક્રિય અથવા નિષ્ક્રિય થતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
