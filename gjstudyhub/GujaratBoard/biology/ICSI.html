@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICSI</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ICSI</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ICSI</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 19 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 19 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ઇન્ટ્રાસાયટોપ્લાઝ્મિક શુક્રાણુ ઇન્જેક્શન (ICSI) પદ્ધતિમાં શુક્રાણુને અંડકોષમાં દાખલ કરવા માટે કયા ઉત્સેચકનો ઉપયોગ થાય છે જે વર્ણસૂત્રીય અખંડિતતા જાળવવામાં મદદરૂપ થાય છે?", "opts": ["હાયલ્યુરોનીડેઝ", "પ્રોટીએઝ", "લાઇસોઝાઇમ", "કોલાજેનેઝ"], "ans": 0, "exp": "ICSI પદ્ધતિમાં શુક્રાણુને અંડકોષના પદાર્થમાં દાખલ કરવા માટે હાયલ્યુરોનીડેઝ ઉત્સેચકનો ઉપયોગ થાય છે, જે અંડકોષના કોષદ્રવ્યમાં રહેલા હાયલ્યુરોનિક એસિડને તોડીને શુક્રાણુને પ્રવેશ કરાવવામાં મદદ કરે છે. આ ઉત્સેચક વર્ણસૂત્રીય અખંડિતતા જાળવવામાં પણ મદદરૂપ થાય છે. પ્રોટીએઝ પ્રોટીન તોડે છે, લાઇસોઝાઇમ બેક્ટેરિયાને નષ્ટ કરે છે, અને કોલાજેનેઝ કોલાજેન તંતુઓને તોડે છે, જે આ પ્રક્રિયામાં ઉપયોગી નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ICSI પદ્ધતિમાં શુક્રાણુને સીધું અંડકોષના કયા ભાગમાં ઇન્જેક્ટ કરવામાં આવે છે, જે સામાન્ય ફલીકરણથી અલગ છે?", "opts": ["કોષકેન્દ્ર", "કોષરસપટલ", "કોષદ્રવ્ય", "કોષદીવાલ"], "ans": 2, "exp": "ICSI પદ્ધતિમાં શુક્રાણુને સીધું અંડકોષના કોષદ્રવ્ય (સાઇટોપ્લાઝમ)માં ઇન્જેક્ટ કરવામાં આવે છે, જ્યારે સામાન્ય ફલીકરણમાં શુક્રાણુ અંડકોષના કોષરસપટલને પાર કરીને અંદર પ્રવેશ કરે છે. કોષકેન્દ્રમાં સીધું ઇન્જેક્શન કરવામાં આવતું નથી, અને અંડકોષમાં કોષદીવાલ હોતી નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ICSI પદ્ધતિ માટે ખોટું છે?", "opts": ["આ પદ્ધતિનો ઉપયોગ ઓલિગોસ્પર્મિયા (ઓછા શુક્રાણુઓ) ધરાવતા પુરુષોમાં થઈ શકે છે", "ICSI પદ્ધતિમાં શુક્રાણુને કૃત્રિમ રીતે અંડકોષમાં દાખલ કરવામાં આવે છે", "આ પદ્ધતિમાં ફલિતાંડનું નિર્માણ માત્ર પ્રયોગશાળામાં જ શક્ય છે", "ICSI પદ્ધતિનો ઉપયોગ એઝૂસ્પર્મિયા (શુક્રાણુઓની ગેરહાજરી) ધરાવતા પુરુષોમાં થઈ શકતો નથી"], "ans": 3, "exp": "ICSI પદ્ધતિનો ઉપયોગ એઝૂસ્પર્મિયા (શુક્રાણુઓની ગેરહાજરી) ધરાવતા પુરુષોમાં પણ થઈ શકે છે, જો શુક્રપિંડમાંથી શુક્રાણુઓ મેળવી શકાય. ઓલિગોસ્પર્મિયા ધરાવતા પુરુષોમાં આ પદ્ધતિનો ઉપયોગ સામાન્ય છે. શુક્રાણુને કૃત્રિમ રીતે અંડકોષમાં દાખલ કરવામાં આવે છે, અને ફલિતાંડનું નિર્માણ પ્રયોગશાળામાં થાય છે, પરંતુ આ પદ્ધતિ એઝૂસ્પર્મિયા ધરાવતા પુરુષોમાં પણ ઉપયોગી છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ICSI પદ્ધતિમાં શુક્રાણુને અંડકોષમાં દાખલ કર્યા બાદ ફલિતાંડના નિર્માણ માટે કયા તબક્કાનું નિરીક્ષણ કરવું જરૂરી છે?", "opts": ["પ્રોન્યુક્લિયસ તબક્કો", "મોરુલા તબક્કો", "બ્લાસ્ટોસિસ્ટ તબક્કો", "ગેસ્ટ્રુલા તબક્કો"], "ans": 0, "exp": "ICSI પદ્ધતિમાં શુક્રાણુને અંડકોષમાં દાખલ કર્યા બાદ ફલિતાંડના નિર્માણ માટે પ્રોન્યુક્લિયસ તબક્કાનું નિરીક્ષણ કરવું જરૂરી છે, જેમાં શુક્રાણુ અને અંડકોષના કોષકેન્દ્ર એકબીજાની નજીક આવે છે. મોરુલા, બ્લાસ્ટોસિસ્ટ અને ગેસ્ટ્રુલા તબક્કા ફલિતાંડના વિકાસના પછીના તબક્કા છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ICSI પદ્ધતિ સાથે સંકળાયેલી એક મુખ્ય જોખમી બાબત કઈ છે જે અન્ય સહાયક પ્રજનન તકનીકોથી અલગ છે?", "opts": ["બહુવિધ ગર્ભધારણનું જોખમ", "જનીનિક અનિયમિતતાનું વધુ જોખમ", "અંડાશયના હાઇપરસ્ટિમ્યુલેશનનું જોખમ", "ગર્ભાશયમાં ફલિતાંડનું અયોગ્ય સ્થાપન"], "ans": 1, "exp": "ICSI પદ્ધતિ સાથે સંકળાયેલી એક મુખ્ય જોખમી બાબત જનીનિક અનિયમિતતાનું વધુ જોખમ છે, કારણ કે આ પદ્ધતિમાં શુક્રાણુની કુદરતી પસંદગી પ્રક્રિયા બાયપાસ થાય છે. બહુવિધ ગર્ભધારણ, અંડાશયનું હાઇપરસ્ટિમ્યુલેશન અને ફલિતાંડનું અયોગ્ય સ્થાપન અન્ય સહાયક પ્રજનન તકનીકોમાં પણ જોવા મળે છે, પરંતુ ICSIમાં જનીનિક અનિયમિતતાનું જોખમ વિશેષ છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષના કોષદીવાલ ભેદન કરવા માટે કયા ભૌતિક પદાર્થનો ઉપયોગ કરવામાં આવે છે, જે અંડકોષને નુકસાન પહોંચાડ્યા વગર ઇન્જેક્શન સક્ષમ બનાવે છે?", "opts": ["માઈક્રોપીપેટની સૂક્ષ્મ કાચની નળી", "પોલિમર-લેપિત સ્ટીલની સૂઈ", "પ્લેટિનમની નાની ટ્યુબ", "સિલિકોન કોટેડ ટિટેનિયમ સૂઈ"], "ans": 0, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરવા માટે માઈક્રોપીપેટની સૂક્ષ્મ કાચની નળીનો ઉપયોગ થાય છે, જે અત્યંત પાતળી અને નાજુક હોય છે, જેથી અંડકોષને નુકસાન થાય નહીં. બાકીના વિકલ્પો (B, C, D) અયોગ્ય છે કારણ કે તેઓ અંડકોષને નુકસાન પહોંચાડી શકે છે અથવા ICSI પદ્ધતિમાં વપરાતા નથી.", "ref": "Std 12 - પ્રકરણ 3: મનુષ્યમાં પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કર્યા પછી, ફલનની સફળતા માટે કયા હોર્મોનની ભૂમિકા મહત્વપૂર્ણ બને છે?", "opts": ["એસ્ટ્રોજન", "પ્રોજેસ્ટેરોન", "હ્યુમન કોરિયોનિક ગોનાડોટ્રોપિન (hCG)", "ફોલિકલ-સ્ટિમ્યુલેટિંગ હોર્મોન (FSH)"], "ans": 2, "exp": "ICSI પછી, હ્યુમન કોરિયોનિક ગોનાડોટ્રોપિન (hCG) હોર્મોન ફલિતાંડના વિકાસ અને ગર્ભાશયની દીવાલમાં તેના ઇમ્પ્લાન્ટેશન માટે મહત્વપૂર્ણ છે. એસ્ટ્રોજન (A) અને પ્રોજેસ્ટેરોન (B) ગર્ભાવસ્થા દરમિયાન મહત્વપૂર્ણ છે, પરંતુ ICSI પછી તાત્કાલિક ફલન માટે hCG વધુ સીધી ભૂમિકા ભજવે છે. FSH (D) ફોલિકલ વિકાસ સાથે સંકળાયેલ છે, પરંતુ ICSI પછીની પ્રક્રિયામાં નહીં.", "ref": "Std 12 - પ્રકરણ 3: મનુષ્યમાં પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરવા પહેલા, કયા પગલાં દ્વારા શુક્રાણુને 'કેપેસિટેટેડ' કરવામાં આવે છે?", "opts": ["શુક્રાણુને ઉચ્ચ તાપમાને ગરમ કરવા", "શુક્રાણુને કોષરસમાં ઉમેરીને રાસાયણિક પ્રક્રિયા દ્વારા", "શુક્રાણુને યાંત્રિક રીતે તોડવા", "શુક્રાણુને કૃત્રિમ રીતે વિકસાવવા"], "ans": 1, "exp": "ICSI પહેલા, શુક્રાણુને કોષરસમાં ઉમેરીને રાસાયણિક પ્રક્રિયા દ્વારા 'કેપેસિટેટેડ' કરવામાં આવે છે, જેથી તે અંડકોષ સાથે જોડાઈ શકે. ઉચ્ચ તાપમાન (A), યાંત્રિક તોડવું (C), અથવા કૃત્રિમ વિકાસ (D) એ અયોગ્ય પદ્ધતિઓ છે અને શુક્રાણુને નુકસાન પહોંચાડી શકે છે.", "ref": "Std 12 - પ્રકરણ 3: મનુષ્યમાં પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, અંડકોષમાં શુક્રાણુ ઇન્જેક્ટ કર્યા પછી, ફલિતાંડના નિર્માણ માટે કયા જનીનની સક્રિયતા આવશ્યક છે?", "opts": ["પિતૃ જનીન (Paternal genes)", "માતૃ જનીન (Maternal genes)", "પિતૃ અને માતૃ બંને જનીન", "મિટોકોન્ડ્રિયલ DNA"], "ans": 2, "exp": "ફલિતાંડના નિર્માણ માટે પિતૃ અને માતૃ બંને જનીનની સક્રિયતા આવશ્યક છે, કારણ કે ફલન દરમિયાન બંને જનીન મળીને નવા જીવના વિકાસ માટે જરૂરી માહિતી પૂરી પાડે છે. મિટોકોન્ડ્રિયલ DNA (D) માત્ર માતૃ પાસેથી જ વારસામાં મળે છે, પરંતુ ફલિતાંડના નિર્માણ માટે તે સીધી રીતે જવાબદાર નથી. પિતૃ (A) અથવા માતૃ (B) જનીન એકલા પૂરતા નથી.", "ref": "Std 12 - પ્રકરણ 3: મનુષ્યમાં પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, કયા પરિબળને લીધે ફલનની સફળતા દર ઘટી શકે છે, જ્યારે શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરવામાં આવે છે?", "opts": ["અંડકોષના કોષદીવાલની જાડાઈ વધુ હોવી", "શુક્રાણુની ગતિશીલતા ઓછી હોવી", "અંડકોષમાં કોષકેન્દ્રનું અભાવ હોવું", "શુક્રાણુમાં DNA નુકસાન હોવું"], "ans": 3, "exp": "શુક્રાણુમાં DNA નુકસાન (D) હોવાને લીધે ફલનની સફળતા દર ઘટી શકે છે, કારણ કે નુકસાનગ્રસ્ત DNA ફલિતાંડના યોગ્ય વિકાસને અટકાવી શકે છે. અંડકોષના કોષદીવાલની જાડાઈ (A) ICSI દરમિયાન સીધી અસર કરતી નથી, કારણ કે શુક્રાણુ સીધું ઇન્જેક્ટ કરવામાં આવે છે. શુક્રાણુની ગતિશીલતા (B) ICSIમાં મહત્વપૂર્ણ નથી, કારણ કે શુક્રાણુને યાંત્રિક રીતે અંડકોષમાં દાખલ કરવામાં આવે છે. અંડકોષમાં કોષકેન્દ્રનો અભાવ (C) અશક્ય છે, કારણ કે અંડકોષમાં કોષકેન્દ્ર હાજર જ હોય છે.", "ref": "Std 12 - પ્રકરણ 3: મનુષ્યમાં પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરતા પહેલા, શુક્રાણુના કયા ભાગને કાપીને દૂર કરવામાં આવે છે, જેનાથી તે અંડકોષના કોષદીવાલને ભેદી શકે છે?", "opts": ["શુક્રાણુના શીર્ષ (Head) ભાગને", "શુક્રાણુના મધ્ય ભાગ (Midpiece)ને", "શુક્રાણુના પૂંછડી (Tail) ભાગને", "શુક્રાણુના એક્રોઝોમ (Acrosome)ને"], "ans": 3, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરતા પહેલા, શુક્રાણુના એક્રોઝોમ (Acrosome) ભાગને કાપીને દૂર કરવામાં આવે છે, કારણ કે એક્રોઝોમમાં રહેલા ઉત્સેચકો અંડકોષના કોષદીવાલને ભેદન કરવા માટે જરૂરી હોય છે. શીર્ષ ભાગ (A) શુક્રાણુના DNA ધરાવે છે, મધ્ય ભાગ (B) મિટોકોન્ડ્રિયા ધરાવે છે, અને પૂંછડી (C) શુક્રાણુની ગતિશીલતામાં મદદ કરે છે, પરંતુ એક્રોઝોમ (D) જ કોષદીવાલ ભેદન માટે જવાબદાર હોય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરવા માટે વપરાતી સૂક્ષ્મ પિપેટ (micropipette)ની નોકના વ્યાસનો આશરે કેટલો હોય છે?", "opts": ["0.5 માઇક્રોમીટર", "1.0 માઇક્રોમીટર", "3.0 માઇક્રોમીટર", "5.0 માઇક્રોમીટર"], "ans": 2, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરવા માટે વપરાતી સૂક્ષ્મ પિપેટની નોકનો વ્યાસ આશરે 3.0 માઇક્રોમીટર (C) હોય છે. 0.5 માઇક્રોમીટર (A) અને 1.0 માઇક્રોમીટર (B) એટલા નાના હોય છે કે શુક્રાણુને પકડી શકાતું નથી, જ્યારે 5.0 માઇક્રોમીટર (D) એટલો મોટો હોય છે કે અંડકોષને નુકસાન પહોંચાડી શકે છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કર્યા પછી, ફલિતાંડના નિર્માણ માટે કયા જનીનની સક્રિયતા જરૂરી હોય છે, જે પિતૃ અને માતૃ જનીનોમાં સમાનરૂપે વહેંચાયેલા હોય છે?", "opts": ["H19 જનીન", "IGF2 જનીન", "SNRPN જનીન", "ઉપરોક્ત પૈકી કોઈ નહીં"], "ans": 0, "exp": "ICSI પદ્ધતિમાં, ફલિતાંડના નિર્માણ માટે H19 જનીન (A)ની સક્રિયતા જરૂરી હોય છે, કારણ કે તે પિતૃ અને માતૃ જનીનોમાં સમાનરૂપે વહેંચાયેલા હોય છે. IGF2 જનીન (B) અને SNRPN જનીન (C) પિતૃ જનીનોમાંથી વારસાગત હોય છે, પરંતુ H19 જનીન માતૃ જનીનોમાંથી વારસાગત હોય છે. આથી, H19 જનીન જ સક્રિય થવું જરૂરી હોય છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ઇન્ટ્રાસાયટોપ્લાઝ્મિક શુક્રાણુ ઇન્જેક્શન (ICSI) પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કર્યા બાદ ફલિતાંડના વિભાજન માટે જરૂરી પ્રોટીન સંશ્લેષણની પ્રક્રિયામાં નીચેનામાંથી કયું પરિબળ સૌથી વધુ મહત્ત્વપૂર્ણ છે, જે અન્ય સહાયક પ્રજનન તકનીકોમાં જોવા મળતું નથી?", "opts": ["અંડકોષના કોષકેન્દ્રમાં હાજર mRNAનું સક્રિયકરણ", "શુક્રાણુના મિટોકોન્ડ્રિયામાંથી મુક્ત થતા ATPનું પ્રમાણ", "અંડકોષના કોષરસમાં હાજર કેલ્શિયમ આયનોની સાંદ્રતા", "શુક્રાણુના એક્રોસોમમાંથી મુક્ત થતા હાયલ્યુરોનિડેઝ ઉત્સેચકનું પ્રમાણ"], "ans": 2, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુને સીધું અંડકોષના કોષરસમાં ઇન્જેક્ટ કરવામાં આવે છે, જેના કારણે કેલ્શિયમ આયનોની સાંદ્રતામાં અચાનક વધારો થાય છે. આ કેલ્શિયમ આયનો ફલનની પ્રક્રિયા શરૂ કરવા માટે જરૂરી હોય છે, જે ફલિતાંડના વિભાજન અને પ્રોટીન સંશ્લેષણ માટે મહત્ત્વપૂર્ણ છે. અન્ય વિકલ્પો જેમ કે mRNA સક્રિયકરણ (A) સામાન્ય ફલનમાં પણ જોવા મળે છે, ATPનું પ્રમાણ (B) શુક્રાણુની ગતિશીલતા માટે મહત્ત્વપૂર્ણ છે પરંતુ ફલન પછીના વિભાજન માટે નહીં, અને હાયલ્યુરોનિડેઝ ઉત્સેચક (D) અંડકોષના કોષદીવાલ ભેદન માટે જરૂરી છે, જે ICSIમાં જરૂરી નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લઈને ICSI પદ્ધતિ સંબંધિત યોગ્ય વિકલ્પ પસંદ કરો:\n\n(1) ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કરતા પહેલા તેના પૂંછડીના ભાગને કાપીને દૂર કરવામાં આવે છે.\n(2) ICSI પદ્ધતિમાં, અંડકોષના કોષકેન્દ્રમાં શુક્રાણુના પ્રવેશ બાદ, ફલિતાંડના નિર્માણ માટે પ્રોન્યુક્લિયસનું સંમિલન જરૂરી છે.\n(3) ICSI પદ્ધતિમાં, શુક્રાણુના એક્રોસોમમાંથી મુક્ત થતા ઉત્સેચકો અંડકોષના કોષદીવાલને ભેદવામાં મદદ કરે છે.\n(4) ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કર્યા બાદ, ફલિતાંડના વિભાજન માટે જરૂરી ઉર્જા શુક્રાણુના મિટોકોન્ડ્રિયામાંથી મેળવવામાં આવે છે.", "opts": ["વિધાન 1 અને 2 સાચાં છે, 3 અને 4 ખોટાં છે", "વિધાન 2 અને 3 સાચાં છે, 1 અને 4 ખોટાં છે", "વિધાન 1, 2 અને 4 સાચાં છે, 3 ખોટું છે", "વિધાન 2 સાચું છે, 1, 3 અને 4 ખોટાં છે"], "ans": 3, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુની પૂંછડીને કાપીને દૂર કરવામાં આવે છે કારણ કે તે ફક્ત ગતિશીલતા માટે જરૂરી છે, જે ICSIમાં જરૂરી નથી (વિધાન 1 સાચું). ફલન બાદ પ્રોન્યુક્લિયસનું સંમિલન ફલિતાંડના નિર્માણ માટે જરૂરી છે (વિધાન 2 સાચું). ICSIમાં એક્રોસોમ ઉત્સેચકોની જરૂર નથી કારણ કે શુક્રાણુને સીધું અંડકોષમાં ઇન્જેક્ટ કરવામાં આવે છે (વિધાન 3 ખોટું). ફલિતાંડના વિભાજન માટે જરૂરી ઉર્જા અંડકોષના મિટોકોન્ડ્રિયામાંથી મેળવવામાં આવે છે, શુક્રાણુના મિટોકોન્ડ્રિયા નહીં (વિધાન 4 ખોટું છે, પરંતુ આ વિધાનમાં 'શુક્રાણુના મિટોકોન્ડ્રિયા'ને બદલે 'અંડકોષના મિટોકોન્ડ્રિયા' હોવું જોઈએ, તેથી આ વિધાન ખોટું ગણાય). આથી સાચો વિકલ્પ C છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને પ્રજનન સ્વાસ્થ્ય", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, શુક્રાણુને અંડકોષમાં ઇન્જેક્ટ કર્યા પહેલા, શુક્રાણુને 'કેપેસિટેટેડ' કરવા માટે કયા પદાર્થનો ઉપયોગ કરવામાં આવે છે, જે શુક્રાણુની કોષદીવાલને નરમ બનાવે છે?", "opts": ["હેપારિન", "હાયાલ્યુરોનિડેઝ", "કોલેજનેઝ", "પ્રોટીએઝ"], "ans": 0, "exp": "ICSI પદ્ધતિમાં, શુક્રાણુને 'કેપેસિટેટેડ' કરવા માટે હેપારિનનો ઉપયોગ કરવામાં આવે છે, જે શુક્રાણુની કોષદીવાલને નરમ બનાવે છે અને અંડકોષ સાથેના ફલન માટે તૈયાર કરે છે. B) હાયાલ્યુરોનિડેઝ અંડકોષની કોષદીવાલને ભેદન કરવા માટે વપરાય છે, પરંતુ શુક્રાણુની કેપેસિટેશન માટે નહીં. C) કોલેજનેઝ અને D) પ્રોટીએઝ એ ઉત્સેચકો છે જે કોષદીવાલના ઘટકોને તોડી શકે છે, પરંતુ કેપેસિટેશન પ્રક્રિયામાં નહીં.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, ફલન પછીના ભ્રૂણના વિકાસ દરમિયાન, કયા હોર્મોનની અછતને લીધે ગર્ભાશયની દીવાલમાં ભ્રૂણનું રોપણ નિષ્ફળ જાય છે?", "opts": ["પ્રોજેસ્ટેરોન", "ઇસ્ટ્રોજન", "એચસીજી (hCG)", "એફએસએચ (FSH)"], "ans": 0, "exp": "ICSI પદ્ધતિમાં, ફલન પછીના ભ્રૂણના વિકાસ દરમિયાન, પ્રોજેસ્ટેરોન હોર્મોનની અછતને લીધે ગર્ભાશયની દીવાલમાં ભ્રૂણનું રોપણ નિષ્ફળ જાય છે. પ્રોજેસ્ટેરોન ગર્ભાશયની દીવાલને મજબૂત અને પોષક યુક્ત બનાવે છે, જે ભ્રૂણના રોપણ માટે જરૂરી છે. ઇસ્ટ્રોજન (B) ગર્ભાશયની વૃદ્ધિ માટે જરૂરી છે, પરંતુ રોપણ માટે પ્રોજેસ્ટેરોન જેવી મહત્વની ભૂમિકા ભજવતું નથી. એચસીજી (C) ગર્ભાવસ્થા દરમિયાન પ્રોજેસ્ટેરોનના ઉત્પાદનને ટકાવી રાખે છે, પરંતુ રોપણ માટે સીધી જરૂરિયાત નથી. એફએસએચ (D) અંડકોષના વિકાસ માટે જરૂરી છે, પરંતુ રોપણ સાથે સીધો સંબંધ નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, ફલન પછીના ભ્રૂણને ગર્ભાશયમાં સ્થાપિત કરવા પહેલા, નીચેનામાંથી કયા તબક્કે ભ્રૂણને 'કલ્ચર મીડિયમ'માં રાખવામાં આવે છે?", "opts": ["2-કોષીય તબક્કે", "4-કોષીય તબક્કે", "8-કોષીય તબક્કે", "બ્લાસ્ટોસિસ્ટ તબક્કે"], "ans": 3, "exp": "ICSI પદ્ધતિમાં, ફલન પછી ભ્રૂણને ગર્ભાશયમાં સ્થાપિત કરવા પહેલા, તેને 'કલ્ચર મીડિયમ'માં બ્લાસ્ટોસિસ્ટ તબક્કે સુધી વિકસાવવામાં આવે છે. 2-કોષીય, 4-કોષીય, અને 8-કોષીય તબક્કે ભ્રૂણને અત્યંત સંવેદનશીલ ગણવામાં આવે છે, તેથી તેને સીધા ગર્ભાશયમાં સ્થાપિત કરવામાં આવતું નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન (Human Reproduction)", "ch": ""}, {"q": "ICSI પદ્ધતિમાં, નીચેનામાંથી કયું વિધાન અંડકોષની ગુણવત્તા સાથે સંકળાયેલું નથી, જે ફલનની સફળતાને અસર કરે છે?", "opts": ["અંડકોષના કોષદીવાલની જાડાઈ", "અંડકોષમાં મિટોકોન્ડ્રિયાની સંખ્યા", "અંડકોષના કોષરસમાં કેલ્શિયમ આયનની સાંદ્રતા", "અંડકોષના કોષકેન્દ્રમાં વર્ણસૂત્રોની સંખ્યા"], "ans": 0, "exp": "ICSI પદ્ધતિમાં, અંડકોષની ગુણવત્તા તેના કોષરસ (સાયટોપ્લાઝમ) અને કોષકેન્દ્ર (ન્યુક્લિયસ) પર આધારિત હોય છે. મિટોકોન્ડ્રિયા (B) એનર્જી ઉત્પાદન માટે, કેલ્શિયમ આયન (C) ફલન પ્રક્રિયામાં મહત્વની ભૂમિકા ભજવે છે, અને વર્ણસૂત્રોની સંખ્યા (D) અનુવંશિકતા માટે મહત્વની છે. કોષદીવાલની જાડાઈ (A) ફલનની સફળતાને અસર કરતું નથી, કારણ કે ICSIમાં શુક્રાણુને સીધું કોષરસમાં ઇન્જેક્ટ કરવામાં આવે છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
