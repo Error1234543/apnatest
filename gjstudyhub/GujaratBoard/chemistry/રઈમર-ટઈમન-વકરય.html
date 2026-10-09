@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>રાઈમર-ટાઈમાન વિક્રિયા</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>રાઈમર-ટાઈમાન વિક્રિયા</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">રાઈમર-ટાઈમાન વિક્રિયા</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલિક સંયોજનનું ઓર્થો-ફોર્મિલેશન કરવા માટે નીચેનામાંથી કયું સંયોજન જરૂરી છે?", "opts": ["ક્લોરોફોર્મ અને સોડિયમ હાઇડ્રોક્સાઇડ", "ડાયક્લોરોમિથેન અને પોટેશિયમ હાઇડ્રોક્સાઇડ", "કાર્બન ટેટ્રાક્લોરાઇડ અને સોડિયમ હાઇડ્રોક્સાઇડ", "ક્લોરોફોર્મ અને પોટેશિયમ હાઇડ્રોક્સાઇડ"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલિક સંયોજનનું ઓર્થો-ફોર્મિલેશન કરવા માટે ક્લોરોફોર્મ અને સોડિયમ હાઇડ્રોક્સાઇડનો ઉપયોગ થાય છે. ક્લોરોફોર્મમાંથી ડાયક્લોરોકાર્બિન ઉત્પન્ન થાય છે, જે ફિનોલ સાથે પ્રક્રિયા કરી ઓર્થો-ફોર્મિલેશન કરે છે. બાકીના વિકલ્પોમાં ડાયક્લોરોમિથેન કે કાર્બન ટેટ્રાક્લોરાઇડ યોગ્ય ડાયક્લોરોકાર્બિન ઉત્પન્ન કરી શકતા નથી, અને પોટેશિયમ હાઇડ્રોક્સાઇડનો ઉપયોગ આ પ્રક્રિયામાં પ્રમાણભૂત નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલ સાથે ક્લોરોફોર્મ અને આલ્કલીની પ્રક્રિયાથી મુખ્યત્વે કયું ઉત્પાદન મળે છે?", "opts": ["બેન્ઝાલ્ડિહાઇડ", "સેલિસિલાલ્ડિહાઇડ", "પેરા-હાઇડ્રોક્સિબેન્ઝાલ્ડિહાઇડ", "ઓર્થો-હાઇડ્રોક્સિબેન્ઝોઇક એસિડ"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલ સાથે ક્લોરોફોર્મ અને આલ્કલીની પ્રક્રિયાથી મુખ્યત્વે ઓર્થો-ફોર્મિલેશન થાય છે, જેના પરિણામે સેલિસિલાલ્ડિહાઇડ મળે છે. બેન્ઝાલ્ડિહાઇડ ફિનોલમાંથી સીધું મળતું નથી, પેરા-હાઇડ્રોક્સિબેન્ઝાલ્ડિહાઇડ ઓછું પ્રમાણમાં મળે છે, અને ઓર્થો-હાઇડ્રોક્સિબેન્ઝોઇક એસિડ આ પ્રક્રિયાનું ઉત્પાદન નથી.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ડાયક્લોરોકાર્બિન (CCl₂) ની ભૂમિકા શું છે?", "opts": ["તે ફિનોલ સાથે ઇલેક્ટ્રોફિલિક પ્રક્રિયા કરી ઓર્થો-ફોર્મિલેશન કરે છે", "તે આલ્કલી સાથે પ્રક્રિયા કરી ફિનોલને સક્રિય કરે છે", "તે ફિનોલનું ઓક્સિડેશન કરી એલ્ડિહાઇડમાં રૂપાંતર કરે છે", "તે ફિનોલ સાથે ન્યુક્લિયોફિલિક પ્રક્રિયા કરી કાર્બોક્સિલિક એસિડ બનાવે છે"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ડાયક્લોરોકાર્બિન (CCl₂) ઇલેક્ટ્રોફિલ તરીકે કાર્ય કરે છે અને ફિનોલના ઓર્થો સ્થાને હુમલો કરી ઓર્થો-ફોર્મિલેશન કરે છે. તે આલ્કલી સાથે પ્રક્રિયા કરી ફિનોલને સક્રિય કરતું નથી, ન તો ઓક્સિડેશન કે ન્યુક્લિયોફિલિક પ્રક્રિયામાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "નીચેનામાંથી કયું સંયોજન રાઈમર-ટાઈમાન વિક્રિયા માટે યોગ્ય સબસ્ટ્રેટ નથી?", "opts": ["ફિનોલ", "પેરા-ક્રેસોલ", "એનિસોલ", "બેન્ઝિન"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયા માટે ફિનોલિક સંયોજનો જરૂરી છે, જેમાં હાઇડ્રોક્સિલ સમૂહ (-OH) હાજર હોય. બેન્ઝિનમાં હાઇડ્રોક્સિલ સમૂહ ન હોવાથી તે આ વિક્રિયા માટે યોગ્ય સબસ્ટ્રેટ નથી. ફિનોલ, પેરા-ક્રેસોલ અને એનિસોલ (જેમાં -OCH₃ સમૂહ હોવા છતાં ફિનોલિક લક્ષણો ધરાવે છે) યોગ્ય સબસ્ટ્રેટ છે.", "ref": "Std 12 - પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં જો ફિનોલને બદલે એનિલિનનો ઉપયોગ કરવામાં આવે, તો શું થશે?", "opts": ["ઓર્થો-ફોર્મિલેશન થશે અને ઓર્થો-એમિનોબેન્ઝાલ્ડિહાઇડ મળશે", "પ્રક્રિયા થશે નહીં કારણ કે એનિલિન ફિનોલ જેવું પ્રતિક્રિયાત્મક નથી", "પેરા-ફોર્મિલેશન થશે અને પેરા-એમિનોબેન્ઝાલ્ડિહાઇડ મળશે", "એનિલિનનું ઓક્સિડેશન થઈ એનિલિન બ્લેક બનશે"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયા મુખ્યત્વે ફિનોલિક સંયોજનો માટે છે. એનિલિનમાં એમિનો સમૂહ (-NH₂) હોવાથી તે ફિનોલ જેવું પ્રતિક્રિયાત્મક નથી અને આ વિક્રિયા માટે યોગ્ય સબસ્ટ્રેટ નથી. તેથી પ્રક્રિયા થશે નહીં. ઓર્થો કે પેરા-ફોર્મિલેશન થતું નથી, અને એનિલિન બ્લેક પણ આ પ્રક્રિયામાં બનતું નથી.", "ref": "Std 12 - પ્રકરણ 13: એમાઇન", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલની જગ્યાએ બેન્ઝાલ્ડિહાઇડનો ઉપયોગ કરવામાં આવે, તો મુખ્ય ઉત્પાદન કયું બનશે?", "opts": ["સેલિસિલિક એસિડ", "બેન્ઝોઇક એસિડ", "ફિનોલિક એલ્ડિહાઇડ", "ઓ-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ"], "ans": 3, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલની જગ્યાએ બેન્ઝાલ્ડિહાઇડનો ઉપયોગ કરવામાં આવે તો, ડાયક્લોરોકાર્બિન (CCl2) ની પ્રક્રિયાથી ઓ-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ બનશે. સેલિસિલિક એસિડ (A) અને ફિનોલિક એલ્ડિહાઇડ (C) ફિનોલના સબસ્ટ્રેટ માટે જ મળે છે, બેન્ઝોઇક એસિડ (B) આ પ્રક્રિયામાં બનતું નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - એલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મના બદલે કયું સંયોજન વાપરી શકાય છે જેથી ડાયક્લોરોકાર્બિન ઉત્પન્ન થાય?", "opts": ["કાર્બન ટેટ્રાક્લોરાઇડ", "મિથાઇલ ક્લોરાઇડ", "ક્લોરલ હાઇડ્રેટ", "ડાયક્લોરોમિથેન"], "ans": 2, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મ (CHCl3) ની જગ્યાએ ક્લોરલ હાઇડ્રેટ (CCl3CHO) વાપરી શકાય છે, કારણ કે તે આલ્કલીની હાજરીમાં ડાયક્લોરોકાર્બિન (CCl2) ઉત્પન્ન કરે છે. કાર્બન ટેટ્રાક્લોરાઇડ (A) અને ડાયક્લોરોમિથેન (D) ડાયક્લોરોકાર્બિન બનાવતાં નથી, જ્યારે મિથાઇલ ક્લોરાઇડ (B) પણ યોગ્ય નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - એલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલ સાથે પ્રક્રિયા કરતા ક્લોરોફોર્મ અને આલ્કલીની ભૂમિકા શું છે?", "opts": ["ક્લોરોફોર્મ ઓક્સિડાઇઝિંગ એજન્ટ તરીકે કામ કરે છે", "આલ્કલી કેટાલિસ્ટ તરીકે કામ કરે છે અને ડાયક્લોરોકાર્બિન ઉત્પન્ન કરે છે", "ક્લોરોફોર્મ રિડક્ટિંગ એજન્ટ તરીકે કામ કરે છે", "આલ્કલી ફિનોલને ડિપ્રોટોનેટ કરે છે"], "ans": 1, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં આલ્કલી (NaOH) કેટાલિસ્ટ તરીકે કામ કરે છે અને ક્લોરોફોર્મ સાથે પ્રક્રિયા કરીને ડાયક્લોરોકાર્બિન (CCl2) ઉત્પન્ન કરે છે, જે ફિનોલ સાથે ઓર્થો-ફોર્મિલેશન કરે છે. ક્લોરોફોર્મ ઓક્સિડાઇઝિંગ (A) અથવા રિડક્ટિંગ (C) એજન્ટ નથી, અને આલ્કલી ફિનોલને ડિપ્રોટોનેટ કરતું નથી (D).", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - એલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં નીચેનામાંથી કયું સંયોજન ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થવાનું કારણ બનશે નહીં?", "opts": ["ફિનોલ", "ક્રેસોલ", "એનિસોલ", "બેન્ઝિલ એલ્કોહોલ"], "ans": 3, "exp": "રાઈમર-ટાઈમાન વિક્રિયા ફિનોલિક સંયોજનો (A, B, C) માટે જ યોગ્ય છે, કારણ કે તેઓ ઓર્થો-પોઝિશનમાં હાઇડ્રોજન ધરાવે છે. બેન્ઝિલ એલ્કોહોલ (D) ફિનોલિક નથી, તેથી તે આ પ્રક્રિયામાં ઓર્થો-ફોર્મિલેશન થવાનું કારણ બનશે નહીં.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - એલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલ સાથે પ્રક્રિયા કરતા, જો ક્લોરોફોર્મની જગ્યાએ બ્રોમોફોર્મ વાપરવામાં આવે, તો મુખ્ય ઉત્પાદન કયું બનશે?", "opts": ["સેલિસિલિક એસિડ", "ઓ-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ", "2,4-ડાયબ્રોમોફિનોલ", "બેન્ઝોઇક એસિડ"], "ans": 1, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મની જગ્યાએ બ્રોમોફોર્મ વાપરવામાં આવે તો પણ ડાયહેલોકાર્બિન (CBr2) ઉત્પન્ન થશે, જે ફિનોલ સાથે ઓર્થો-ફોર્મિલેશન કરીને ઓ-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ બનાવશે. સેલિસિલિક એસિડ (A) અને બેન્ઝોઇક એસિડ (D) આ પ્રક્રિયામાં બનતાં નથી, જ્યારે 2,4-ડાયબ્રોમોફિનોલ (C) આ પ્રક્રિયાનું ઉત્પાદન નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પ્રકરણ 11 - એલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલ સાથે ક્લોરોફોર્મ અને સોડિયમ હાઇડ્રોક્સાઇડની પ્રક્રિયા દરમિયાન નીચેનામાંથી કયું મધ્યવર્તી સંયોજન ઉત્પન્ન થાય છે, જે પછી ઓર્થો-ફોર્મિલેશન તરફ દોરી જાય છે?", "opts": ["ડાયક્લોરોકાર્બિન (:CCl₂)", "ક્લોરોમિથેન (CH₂Cl)", "ફોર્મિલ ક્લોરાઇડ (HCOCl)", "કાર્બન મોનોક્સાઇડ (CO)"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મ (CHCl₃) અને આલ્કલી (NaOH)ની હાજરીમાં ડાયક્લોરોકાર્બિન (:CCl₂) ઉત્પન્ન થાય છે, જે ફિનોલના ઓર્થો-પોઝિશનમાં હુમલો કરે છે અને ઓર્થો-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડનું નિર્માણ કરે છે. બાકીના વિકલ્પો (B, C, D) આ પ્રક્રિયામાં મધ્યવર્તી તરીકે ઉત્પન્ન થતાં નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પાઠ 11 - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલની જગ્યાએ ક્રેસોલનો ઉપયોગ કરવામાં આવે, તો નીચેનામાંથી કયું ઉત્પાદન મળશે?", "opts": ["ઓર્થો-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ", "2-હાઇડ્રોક્સી-5-મિથાઇલબેન્ઝાલ્ડિહાઇડ", "પેરા-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ", "3-હાઇડ્રોક્સી-4-મિથાઇલબેન્ઝાલ્ડિહાઇડ"], "ans": 1, "exp": "ક્રેસોલ (મિથાઇલફિનોલ) રાઈમર-ટાઈમાન વિક્રિયામાં ભાગ લે છે, પરંતુ મિથાઇલ સમૂહની હાજરીને કારણે ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થાય છે, જેથી 2-હાઇડ્રોક્સી-5-મિથાઇલબેન્ઝાલ્ડિહાઇડ ઉત્પન્ન થાય છે. વિકલ્પ A ફિનોલ માટેનું ઉત્પાદન છે, જ્યારે C અને D ક્રેસોલ માટે યોગ્ય નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પાઠ 11 - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં નીચેનામાંથી કયું સંયોજન ઓર્થો-ફોર્મિલેશનને પ્રોત્સાહન આપતું નથી, પરંતુ મેટા-પોઝિશનમાં પ્રક્રિયા કરે છે?", "opts": ["ફિનોલ", "એનિસોલ (મિથોક્સીબેન્ઝીન)", "બેન્ઝાલ્ડિહાઇડ", "સેલિસિલિક એસિડ"], "ans": 2, "exp": "બેન્ઝાલ્ડિહાઇડ રાઈમર-ટાઈમાન વિક્રિયામાં ભાગ લેતું નથી, કારણ કે તેની રચનામાં ઓર્થો-પોઝિશનમાં હાઇડ્રોજન નથી હોતો. એનિસોલ (B) અને સેલિસિલિક એસિડ (D) ઓર્થો-ફોર્મિલેશન કરે છે, જ્યારે ફિનોલ (A) પણ ઓર્થો-પોઝિશનમાં પ્રક્રિયા કરે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પાઠ 11 - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મના બદલે બ્રોમોફોર્મ વાપરવામાં આવે, તો નીચેનામાંથી કયું ઉત્પાદન મળશે?", "opts": ["ઓર્થો-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ", "ઓર્થો-હાઇડ્રોક્સી-ડાયબ્રોમોબેન્ઝાલ્ડિહાઇડ", "ઓર્થો-બ્રોમોબેન્ઝાલ્ડિહાઇડ", "ઓર્થો-હાઇડ્રોક્સી-મોનોબ્રોમોબેન્ઝાલ્ડિહાઇડ"], "ans": 0, "exp": "બ્રોમોફોર્મ (CHBr₃) વાપરતા પણ રાઈમર-ટાઈમાન વિક્રિયા ઓર્થો-ફોર્મિલેશન તરફ દોરી જાય છે, પરંતુ ઉત્પાદન ઓર્થો-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ જ રહે છે, કારણ કે ડાયબ્રોમોકાર્બિન (:CBr₂) પણ ઓર્થો-પોઝિશનમાં હુમલો કરે છે. વિકલ્પ B, C, અને D અયોગ્ય છે કારણ કે તેઓ બ્રોમિન યુક્ત ઉત્પાદનો સૂચવે છે, જે આ પ્રક્રિયામાં ઉત્પન્ન થતાં નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પાઠ 11 - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં નીચેનામાંથી કયું સંયોજન પ્રક્રિયામાં ભાગ લેતું નથી, કારણ કે તે ઓર્થો-પોઝિશનમાં હાઇડ્રોજન ધરાવતું નથી?", "opts": ["ઓ-ક્રેસોલ", "પી-ક્રેસોલ", "2,4-ડાયમિથાઇલફિનોલ", "3-નાઇટ્રોફિનોલ"], "ans": 2, "exp": "2,4-ડાયમિથાઇલફિનોલમાં ઓર્થો-પોઝિશનમાં હાઇડ્રોજન નથી હોતો, જેથી તે રાઈમર-ટાઈમાન વિક્રિયામાં ભાગ લેતું નથી. ઓ-ક્રેસોલ (A) અને 3-નાઇટ્રોફિનોલ (D) ઓર્થો-પોઝિશનમાં હાઇડ્રોજન ધરાવે છે, જ્યારે પી-ક્રેસોલ (B) પણ પ્રક્રિયામાં ભાગ લે છે, પરંતુ ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થાય છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: પાઠ 11 - આલ્કોહોલ, ફિનોલ અને ઇથર", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં ફિનોલની જગ્યાએ સેલિસિલિક એસિડનો ઉપયોગ કરવામાં આવે, તો મુખ્ય ઉત્પાદન કયું હશે?", "opts": ["૫-હાઇડ્રોક્સી-૨-કાર્બોક્સીબેન્ઝાલ્ડિહાઇડ", "૨-હાઇડ્રોક્સી-૫-કાર્બોક્સીબેન્ઝાલ્ડિહાઇડ", "૩-હાઇડ્રોક્સી-૬-કાર્બોક્સીબેન્ઝાલ્ડિહાઇડ", "૨,૫-ડાયહાઇડ્રોક્સીબેન્ઝોઇક એસિડ"], "ans": 0, "exp": "સેલિસિલિક એસિડમાં ફિનોલિક હાઇડ્રોક્સિલ સમૂહ અને કાર્બોક્સિલ સમૂહ ઓર્થો-પોઝિશનમાં છે. રાઈમર-ટાઈમાન વિક્રિયામાં, ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થાય છે, પરંતુ કાર્બોક્સિલ સમૂહના કારણે, ફોર્મિલ સમૂહ તેની બાજુમાં (પોઝિશન ૫) જશે. આથી, ૫-હાઇડ્રોક્સી-૨-કાર્બોક્સીબેન્ઝાલ્ડિહાઇડ બનશે. બાકીના વિકલ્પો અયોગ્ય સ્થાને ફોર્મિલેશન દર્શાવે છે.", "ref": "Std 12 - Chapter 11: એલ્ડિહાઇડ, કીટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં, જો ક્લોરોફોર્મની જગ્યાએ આયોડોફોર્મ વાપરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["પ્રક્રિયા વેગ વધશે કારણ કે આયોડિન વધુ પ્રતિક્રિયાશીલ છે", "પ્રક્રિયા ધીમી પડશે કારણ કે C-I બંધ C-Cl કરતાં વધુ મજબૂત છે", "ડાયઆયોડોકાર્બિન બનશે અને પ્રક્રિયા સામાન્ય રીતે ચાલશે", "આયોડોફોર્મ અસ્થિર હોવાથી પ્રક્રિયા થશે નહીં"], "ans": 2, "exp": "આયોડોફોર્મ (CHI3) રાઈમર-ટાઈમાન વિક્રિયામાં ક્લોરોફોર્મની જેમ જ કામ કરે છે. આલ્કલીની હાજરીમાં, આયોડોફોર્મથી ડાયઆયોડોકાર્બિન (:CI2) બનશે, જે પછી ફિનોલ સાથે ઓર્થો-ફોર્મિલેશન કરશે. C-I બંધ C-Cl કરતાં નબળો છે, પરંતુ પ્રક્રિયા સામાન્ય રીતે ચાલુ રહે છે. આથી, વિકલ્પ C સાચો છે.", "ref": "Std 12 - Chapter 11: એલ્ડિહાઇડ, કીટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં, જો ફિનોલની જગ્યાએ પેરા-ક્રેસોલનો ઉપયોગ કરવામાં આવે, તો નીચેનામાંથી કયું ઉત્પાદન મુખ્યત્વે મળશે?", "opts": ["૨-હાઇડ્રોક્સી-૫-મિથાઇલબેન્ઝાલ્ડિહાઇડ", "૪-હાઇડ્રોક્સી-૩-મિથાઇલબેન્ઝાલ્ડિહાઇડ", "૨-મિથાઇલ-૫-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ", "૨,૫-ડાયહાઇડ્રોક્સી-૧-મિથાઇલબેન્ઝિન"], "ans": 1, "exp": "પેરા-ક્રેસોલમાં મિથાઇલ સમૂહ પેરા-પોઝિશનમાં છે. રાઈમર-ટાઈમાન વિક્રિયામાં, ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થાય છે, પરંતુ મિથાઇલ સમૂહના કારણે, ફોર્મિલ સમૂહ તેની બાજુમાં (પોઝિશન ૩) જશે. આથી, ૪-હાઇડ્રોક્સી-૩-મિથાઇલબેન્ઝાલ્ડિહાઇડ બનશે. બાકીના વિકલ્પો અયોગ્ય સ્થાને ફોર્મિલેશન દર્શાવે છે.", "ref": "Std 12 - Chapter 11: એલ્ડિહાઇડ, કીટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં, જો ફિનોલ સાથે ક્લોરોફોર્મ અને પોટેશિયમ હાઇડ્રોક્સાઇડની પ્રક્રિયા કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["પ્રક્રિયામાં ડાયક્લોરોકાર્બિન (:CCl2) મધ્યવર્તી તરીકે બનશે", "ઉત્પાદન તરીકે સલ્ફોનિક એસિડ બનશે", "પ્રક્રિયા ઓર્થો-પોઝિશનમાં થશે", "આલ્કલીની હાજરી પ્રક્રિયા માટે આવશ્યક છે"], "ans": 1, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં, ફિનોલ સાથે ક્લોરોફોર્મ અને આલ્કલીની પ્રક્રિયાથી ઓર્થો-હાઇડ્રોક્સીબેન્ઝાલ્ડિહાઇડ બનશે. ડાયક્લોરોકાર્બિન મધ્યવર્તી તરીકે બનશે (A સાચું), પ્રક્રિયા ઓર્થો-પોઝિશનમાં થશે (C સાચું), અને આલ્કલીની હાજરી પ્રક્રિયા માટે આવશ્યક છે (D સાચું). સલ્ફોનિક એસિડ બનતું નથી, આથી B ખોટું છે.", "ref": "Std 12 - Chapter 11: એલ્ડિહાઇડ, કીટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "રાઈમર-ટાઈમાન વિક્રિયામાં, જો ફિનોલની જગ્યાએ ૨-મેથોક્સીફિનોલ (ગ્વાયાકોલ)નો ઉપયોગ કરવામાં આવે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થશે અને મુખ્ય ઉત્પાદન ૨-મેથોક્સી-૬-ફોર્મિલફિનોલ હશે", "મેટા-પોઝિશનમાં ફોર્મિલેશન થશે અને મુખ્ય ઉત્પાદન ૫-મેથોક્સી-૨-ફોર્મિલફિનોલ હશે", "પ્રક્રિયા થશે નહીં, કારણ કે મેથોક્સી સમૂહ ઇલેક્ટ્રોન-આકર્ષક છે અને ઓર્થો-પોઝિશનને અવરોધે છે", "ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થશે, પરંતુ મુખ્ય ઉત્પાદન ૪-મેથોક્સી-૨-ફોર્મિલફિનોલ હશે"], "ans": 0, "exp": "રાઈમર-ટાઈમાન વિક્રિયામાં, ૨-મેથોક્સીફિનોલ (ગ્વાયાકોલ)માં મેથોક્સી સમૂહ ઓર્થો-પરા નિર્દેશક છે, જે ઓર્થો-પોઝિશનમાં ફોર્મિલેશનને પ્રોત્સાહન આપે છે. ઓર્થો-પોઝિશનમાં ફોર્મિલેશન થવાથી મુખ્ય ઉત્પાદન ૨-મેથોક્સી-૬-ફોર્મિલફિનોલ મળે છે. વિકલ્પ B ખોટો છે કારણ કે મેટા-પોઝિશનમાં ફોર્મિલેશન થતું નથી. વિકલ્પ C ખોટો છે કારણ કે મેથોક્સી સમૂહ ઇલેક્ટ્રોન-દાતા છે અને પ્રક્રિયાને પ્રોત્સાહન આપે છે. વિકલ્પ D ખોટો છે કારણ કે ૪-પોઝિશનમાં ફોર્મિલેશન થતું નથી.", "ref": "Std 12 - Chapter 11: એલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
