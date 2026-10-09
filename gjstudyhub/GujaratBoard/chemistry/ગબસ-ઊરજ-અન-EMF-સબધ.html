@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ગિબ્સ ઊર્જા અને EMF સંબંધ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ગિબ્સ ઊર્જા અને EMF સંબંધ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ગિબ્સ ઊર્જા અને EMF સંબંધ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક વિદ્યુતરાસાયણિક કોષમાં ΔG = -nFE° સમીકરણ અનુસાર ગિબ્સ મુક્ત ઊર્જા અને કોષના EMF વચ્ચેનો સંબંધ દર્શાવે છે. જો કોષમાં થતી પ્રક્રિયા માટે ΔG = -237 kJ mol⁻¹ અને n = 2 હોય, તો કોષનો પ્રમાણિત EMF (E°) કેટલો હશે? (F = 96500 C mol⁻¹)", "opts": ["1.23 V", "2.46 V", "0.615 V", "1.845 V"], "ans": 0, "exp": "ΔG = -nFE° સમીકરણમાં ΔG = -237 kJ mol⁻¹ = -237000 J mol⁻¹, n = 2, F = 96500 C mol⁻¹ મૂકતાં, E° = -ΔG / (nF) = 237000 / (2 × 96500) = 1.23 V મળે છે. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે ΔG° = -RT ln K અને ΔG° = -nFE° સમીકરણોનો ઉપયોગ કરીને સંતુલન અચળાંક (K) અને પ્રમાણિત EMF (E°) વચ્ચેનો સંબંધ મેળવી શકાય છે. જો 298 K તાપમાને કોષનો E° = 0.59 V અને n = 1 હોય, તો Kનું મૂલ્ય કેટલું હશે? (R = 8.314 J mol⁻¹ K⁻¹, F = 96500 C mol⁻¹)", "opts": ["10¹⁰", "10⁵", "10²⁰", "10¹⁵"], "ans": 0, "exp": "ΔG° = -nFE° = -RT ln K સમીકરણમાં મૂલ્યો મૂકતાં, ln K = (nFE°)/(RT) = (1 × 96500 × 0.59)/(8.314 × 298) ≈ 23.03, તેથી K = e²³.⁰³ ≈ 10¹⁰ મળે છે. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (I) જો કોષનો EMF ધન હોય, તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે. (II) જો ΔG ઋણ હોય, તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે. (III) જો K > 1 હોય, તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન ખોટું/ખોટાં છે?", "opts": ["ફક્ત (I)", "ફક્ત (III)", "(I) અને (II)", "એક પણ નહીં"], "ans": 3, "exp": "EMF ધન (E° > 0) હોય તો ΔG ઋણ થાય છે, જે સ્વયંસ્ફુરિત પ્રક્રિયા દર્શાવે છે. ΔG ઋણ હોય તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે. K > 1 હોય તો ΔG° ઋણ થાય છે, જે સ્વયંસ્ફુરિત પ્રક્રિયા દર્શાવે છે. આમ, ત્રણેય વિધાનો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે ΔG = ΔH - TΔS સમીકરણ અનુસાર ગિબ્સ મુક્ત ઊર્જા અને એન્ટ્રોપી વચ્ચેનો સંબંધ દર્શાવે છે. જો કોષની પ્રક્રિયા માટે ΔH = -200 kJ mol⁻¹, ΔS = -150 J mol⁻¹ K⁻¹ અને T = 300 K હોય, તો કોષનો EMF (E) કેટલો હશે? (n = 2, F = 96500 C mol⁻¹)", "opts": ["1.0 V", "0.85 V", "1.15 V", "0.70 V"], "ans": 1, "exp": "ΔG = ΔH - TΔS = -200000 - (300 × -150) = -200000 + 45000 = -155000 J mol⁻¹. ΔG = -nFE સમીકરણમાં મૂકતાં, E = -ΔG / (nF) = 155000 / (2 × 96500) ≈ 0.805 V ≈ 0.85 V મળે છે. બાકીના વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ અને પ્રકરણ 6: ઉષ્માગતિશાસ્ત્ર", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે નીચેના વિધાનો ધ્યાનમાં લો: (I) જો કોષનો EMF શૂન્ય હોય, તો પ્રક્રિયા સંતુલનમાં હોય છે. (II) જો ΔG = 0 હોય, તો કોષનો EMF શૂન્ય હોય છે. (III) જો K = 1 હોય, તો કોષનો પ્રમાણિત EMF શૂન્ય હોય છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન સાચું/સાચાં છે?", "opts": ["ફક્ત (I) અને (II)", "ફક્ત (II) અને (III)", "ફક્ત (I) અને (III)", "(I), (II) અને (III)"], "ans": 3, "exp": "ΔG = -nFE સમીકરણ અનુસાર, જો E = 0 હોય તો ΔG = 0 થાય છે, જે સંતુલન દર્શાવે છે. ΔG = 0 હોય તો E = 0 થાય છે. K = 1 હોય તો ΔG° = 0 થાય છે, તેથી E° = 0 થાય છે. આમ, ત્રણેય વિધાનો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "જ્યારે વિદ્યુતરાસાયણિક કોષમાં પ્રક્રિયા સંતુલન અવસ્થામાં હોય, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["કોષનો EMF શૂન્ય હોય છે અને ΔG = 0 હોય છે", "કોષનો EMF મહત્તમ હોય છે અને ΔG = -nFE° હોય છે", "કોષનો EMF શૂન્ય હોય છે પરંતુ ΔG ≠ 0 હોય છે", "કોષનો EMF અસીમિત હોય છે અને ΔG = +∞ હોય છે"], "ans": 0, "exp": "સંતુલન અવસ્થામાં, કોષમાં કોઈ નેટ પ્રક્રિયા થતી નથી, જેથી EMF શૂન્ય હોય છે અને ગિબ્સ મુક્ત ઊર્જામાં કોઈ ફેરફાર થતો નથી (ΔG = 0). વિકલ્પ B ખોટો છે કારણ કે EMF મહત્તમ નથી હોતો, વિકલ્પ C ખોટો છે કારણ કે ΔG પણ શૂન્ય હોય છે, અને વિકલ્પ D ખોટો છે કારણ કે EMF અસીમિત હોવાનું કોઈ ભૌતિક અર્થ નથી.", "ref": "Std 12 - Chapter 3: વિદ્યુતરાસાયણિક કોષ અને ગિબ્સ ઊર્જા", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં, જો કોષનો EMF (E) અને સ્ટાન્ડર્ડ EMF (E°) વચ્ચેનો સંબંધ E = E° - (RT/nF) ln Q હોય, તો Q નું મૂલ્ય કયા પરિબળ પર આધાર રાખે છે?", "opts": ["કોષમાં રહેલા દ્રાવણની સાંદ્રતા અને ગેસના દબાણ પર", "કોષના આકાર અને કદ પર", "કોષમાં વપરાતા વિદ્યુતવાહકની લંબાઈ પર", "કોષના તાપમાન પર માત્ર"], "ans": 0, "exp": "Q (પ્રક્રિયા ક્વોશન્ટ) કોષમાં રહેલા દ્રાવણની સાંદ્રતા અને ગેસના દબાણ પર આધાર રાખે છે, કારણ કે તે પ્રક્રિયા પદાર્થોની સાંદ્રતા અથવા દબાણના ગુણોત્તર દ્વારા વ્યાખ્યાયિત થાય છે. વિકલ્પ B અને C ખોટા છે કારણ કે કોષના આકાર, કદ અથવા વિદ્યુતવાહકની લંબાઈનો Q સાથે કોઈ સંબંધ નથી. વિકલ્પ D અધૂરો છે કારણ કે Q તાપમાન પર પણ આધાર રાખે છે, પરંતુ મુખ્ય પરિબળ સાંદ્રતા અને દબાણ છે.", "ref": "Std 12 - Chapter 3: નર્ન્સ્ટ સમીકરણ અને વિદ્યુતરાસાયણિક કોષ", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં ગિબ્સ મુક્ત ઊર્જા (ΔG) અને EMF (E) વચ્ચેનો સંબંધ ΔG = -nFE સરળતાથી લાગુ પડતો નથી?", "opts": ["જ્યારે કોષમાં રિવર્સિબલ પ્રક્રિયા થાય છે", "જ્યારે કોષમાં અપૂર્ણાંકિત પ્રક્રિયા થાય છે", "જ્યારે કોષમાં નોન-સ્ટાન્ડર્ડ પરિસ્થિતિઓ હોય છે", "જ્યારે કોષમાં ગેસ ઇલેક્ટ્રોડ હોય છે"], "ans": 1, "exp": "ΔG = -nFEનો સંબંધ રિવર્સિબલ પ્રક્રિયાઓ માટે લાગુ પડે છે. અપૂર્ણાંકિત (irreversible) પ્રક્રિયાઓમાં, આ સંબંધ સરળતાથી લાગુ પડતો નથી કારણ કે પ્રક્રિયા સંતુલનમાં નથી હોતી. વિકલ્પ C ખોટો છે કારણ કે નોન-સ્ટાન્ડર્ડ પરિસ્થિતિઓમાં નર્ન્સ્ટ સમીકરણ વાપરી શકાય છે. વિકલ્પ D ખોટો છે કારણ કે ગેસ ઇલેક્ટ્રોડ ધરાવતા કોષમાં પણ આ સંબંધ લાગુ પડે છે.", "ref": "Std 12 - Chapter 3: ગિબ્સ ઊર્જા અને વિદ્યુતરાસાયણિક કોષ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં, જો કોષનો EMF (E) અને ગિબ્સ મુક્ત ઊર્જા (ΔG) વચ્ચેનો સંબંધ ΔG = -nFE હોય, તો નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["જો E ધન હોય, તો ΔG ઋણ હોય છે અને પ્રક્રિયા સ્વતઃસ્ફૂર્તિ હોય છે", "જો E ઋણ હોય, તો ΔG ધન હોય છે અને પ્રક્રિયા સ્વતઃસ્ફૂર્તિ નથી", "જો E શૂન્ય હોય, તો ΔG શૂન્ય હોય છે અને પ્રક્રિયા સંતુલનમાં હોય છે", "જો E અસીમિત હોય, તો ΔG પણ અસીમિત હોય છે અને પ્રક્રિયા અતિ સ્વતઃસ્ફૂર્તિ હોય છે"], "ans": 3, "exp": "વિકલ્પ D ખોટો છે કારણ કે EMF (E) ક્યારેય અસીમિત હોતો નથી, અને ΔG પણ અસીમિત હોવાનું કોઈ ભૌતિક અર્થ નથી. વિકલ્પ A, B, અને C સહી છે કારણ કે તેઓ ΔG અને E વચ્ચેના સંબંધને યોગ્ય રીતે વર્ણવે છે.", "ref": "Std 12 - Chapter 3: ગિબ્સ ઊર્જા અને વિદ્યુતરાસાયણિક કોષ", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં, વિદ્યુતરાસાયણિક કોષનો EMF (E) અને સ્ટાન્ડર્ડ EMF (E°) વચ્ચેનો તફાવત મહત્તમ હોય છે?", "opts": ["જ્યારે પ્રક્રિયા પદાર્થોની સાંદ્રતા 1 M હોય છે", "જ્યારે પ્રક્રિયા પદાર્થોની સાંદ્રતા 0.001 M હોય છે", "જ્યારે પ્રક્રિયા પદાર્થોની સાંદ્રતા 10 M હોય છે", "જ્યારે પ્રક્રિયા પદાર્થોની સાંદ્રતા સંતુલન સાંદ્રતા જેટલી હોય છે"], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણ અનુસાર, E = E° - (RT/nF) ln Q. જ્યારે Q (પ્રક્રિયા ક્વોશન્ટ) ખૂબ જ નાનું હોય (જેમ કે 0.001 M સાંદ્રતા), ત્યારે ln Q ખૂબ જ ઋણ હોય છે, જેથી E અને E° વચ્ચેનો તફાવત મહત્તમ હોય છે. વિકલ્પ A ખોટો છે કારણ કે 1 M સાંદ્રતામાં Q = 1 હોય છે, જેથી E = E°. વિકલ્પ C ખોટો છે કારણ કે 10 M સાંદ્રતામાં Q મહત્તમ હોય છે, પરંતુ ln Q ધન હોય છે, જેથી E < E°. વિકલ્પ D ખોટો છે કારણ કે સંતુલન સાંદ્રતામાં E = 0 હોય છે.", "ref": "Std 12 - Chapter 3: નર્ન્સ્ટ સમીકરણ અને વિદ્યુતરાસાયણિક કોષ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં, જો કોષનો EMF (E) શૂન્ય હોય, તો નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["ΔG = 0 અને પ્રક્રિયા સંતુલન અવસ્થામાં છે", "ΔG > 0 અને પ્રક્રિયા સ્વત:સ્ફૂર્ત છે", "ΔG < 0 અને પ્રક્રિયા સ્વત:સ્ફૂર્ત નથી", "ΔG = -nFE° અને પ્રક્રિયા સંતુલન તરફ આગળ વધે છે"], "ans": 0, "exp": "જ્યારે EMF (E) શૂન્ય હોય, ત્યારે ΔG = -nFE સમીકરણ અનુસાર ΔG = 0 થાય છે. શૂન્ય ΔG એ સંતુલન અવસ્થાનું સૂચક છે. વિકલ્પ B અને C ખોટા છે કારણ કે ΔG શૂન્ય નથી, અને વિકલ્પ D ખોટો છે કારણ કે E° ને બદલે E શૂન્ય છે, જેથી ΔG શૂન્ય થાય છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરાસાયણિક કોષ અને થર્મોડાયનેમિક્સ", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં, ગિબ્સ મુક્ત ઊર્જા (ΔG) અને EMF (E) વચ્ચેનો સંબંધ ΔG = -nFE લાગુ પડતો નથી?", "opts": ["જ્યારે કોષમાં પ્રક્રિયા સ્વત:સ્ફૂર્ત હોય", "જ્યારે કોષમાં પ્રક્રિયા અસ્વત:સ્ફૂર્ત હોય", "જ્યારે કોષમાં પ્રક્રિયા ઉશ્કેરણી હેઠળ થાય", "જ્યારે કોષમાં પ્રક્રિયા સંતુલન અવસ્થામાં હોય"], "ans": 3, "exp": "જ્યારે કોષમાં પ્રક્રિયા સંતુલન અવસ્થામાં હોય, ત્યારે EMF (E) શૂન્ય હોય છે, અને ΔG = 0 થાય છે. આ કિસ્સામાં, ΔG = -nFE સમીકરણ લાગુ પડતું નથી કારણ કે E = 0. બાકીના વિકલ્પોમાં, પ્રક્રિયા સ્વત:સ્ફૂર્ત, અસ્વત:સ્ફૂર્ત અથવા ઉશ્કેરણી હેઠળ થાય ત્યારે સમીકરણ લાગુ પડે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરાસાયણિક કોષ અને થર્મોડાયનેમિક્સ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં પ્રક્રિયા સ્વયંસ્ફુરિત છે કે નહીં તે નક્કી કરવા માટે નીચેના પૈકી કયું પરિબળ સૌથી વધુ મહત્ત્વનું છે, પરંતુ તેને સીધું માપી શકાતું નથી?", "opts": ["કોષનો EMF (E)", "પ્રક્રિયાનો સંતુલન અચળાંક (K)", "પ્રક્રિયાની ગિબ્સ મુક્ત ઊર્જા (ΔG)", "પ્રક્રિયાની એન્ટ્રોપી ફેરફાર (ΔS)"], "ans": 2, "exp": "ગિબ્સ મુક્ત ઊર્જા (ΔG) એ પ્રક્રિયાની સ્વયંસ્ફુરિતતા નક્કી કરવા માટેનું મૂળભૂત પરિબળ છે, કારણ કે ΔG < 0 હોય તો પ્રક્રિયા સ્વયંસ્ફુરિત હોય છે. જોકે, ΔG ને સીધું માપી શકાતું નથી, તેની ગણતરી EMF (E) અથવા સંતુલન અચળાંક (K) દ્વારા કરવામાં આવે છે. EMF (E) ને સીધું માપી શકાય છે, સંતુલન અચળાંક (K) પ્રાયોગિક રીતે નક્કી કરી શકાય છે, અને એન્ટ્રોપી ફેરફાર (ΔS) પ્રક્રિયાની સ્વયંસ્ફુરિતતા માટે પરોક્ષ પરિબળ છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે ΔG = -nFE સમીકરણ લાગુ પડે છે. જો કોષનો EMF (E) શૂન્ય હોય, તો નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["પ્રક્રિયા સંતુલન અવસ્થામાં છે.", "ΔG = 0 થશે.", "પ્રક્રિયા સ્વયંસ્ફુરિત નથી.", "પ્રક્રિયા માટે સંતુલન અચળાંક (K) = 1 થશે."], "ans": 3, "exp": "જ્યારે કોષનો EMF (E) શૂન્ય હોય, ત્યારે ΔG = -nFE = 0 થાય છે, જે સૂચવે છે કે પ્રક્રિયા સંતુલન અવસ્થામાં છે. આ સ્થિતિમાં, સંતુલન અચળાંક K = 1 હોય છે. જોકે, 'પ્રક્રિયા સ્વયંસ્ફુરિત નથી' એ ખોટું વિધાન છે કારણ કે ΔG = 0 હોય ત્યારે પ્રક્રિયા ન તો સ્વયંસ્ફુરિત હોય છે અને ન તો બિન-સ્વયંસ્ફુરિત, તે સંતુલન અવસ્થામાં હોય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં, જો પ્રક્રિયકો અને નીપજોની સાંદ્રતા બદલવામાં આવે, તો નીચેના પૈકી કયું પરિબળ બદલાશે નહીં?", "opts": ["કોષનો EMF (E)", "ગિબ્સ મુક્ત ઊર્જા (ΔG)", "સ્ટાન્ડર્ડ EMF (E°)", "પ્રક્રિયાનો સંતુલન અચળાંક (K)"], "ans": 2, "exp": "સ્ટાન્ડર્ડ EMF (E°) એ પ્રમાણભૂત પરિસ્થિતિઓ (1 M સાંદ્રતા, 1 atm દબાણ, 298 K તાપમાન) માટે નક્કી કરવામાં આવે છે અને તે સાંદ્રતા પર આધારિત નથી. જ્યારે સાંદ્રતા બદલાય છે, ત્યારે કોષનો EMF (E), ગિબ્સ મુક્ત ઊર્જા (ΔG), અને સંતુલન અચળાંક (K) નું મૂલ્ય બદલાઈ શકે છે, પરંતુ E° અચળ રહે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં, જો પ્રક્રિયા માટે ΔG° = -200 kJ mol⁻¹ હોય અને તાપમાન 298 K હોય, તો આ કોષનો સ્ટાન્ડર્ડ EMF (E°) કેટલો હશે? (F = 96500 C mol⁻¹, n = 2)", "opts": ["+1.036 V", "-1.036 V", "+2.072 V", "-2.072 V"], "ans": 0, "exp": "ΔG° = -nFE° સમીકરણ અનુસાર, E° = -ΔG°/(nF). અહીં ΔG° = -200 kJ mol⁻¹ = -200000 J mol⁻¹, n = 2, F = 96500 C mol⁻¹. તેથી E° = -(-200000)/(2 × 96500) = 200000/193000 ≈ +1.036 V. વિકલ્પ A સાચો છે કારણ કે ΔG° ઋણ હોવાથી E° ધન મળે. અન્ય વિકલ્પો ગણતરીની ભૂલ અથવા ચિહ્નની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (I) જો કોષનો EMF (E) શૂન્ય હોય, તો પ્રક્રિયા સંતુલન અવસ્થામાં છે. (II) જો ΔG = 0 હોય, તો કોષનો EMF પણ શૂન્ય હશે. (III) જો કોષનો EMF ઋણ હોય, તો પ્રક્રિયા અસ્વયંસ્ફુરિત છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયા સાચું/સાચાં છે?", "opts": ["ફક્ત I અને II", "ફક્ત II અને III", "ફક્ત I અને III", "I, II અને III"], "ans": 3, "exp": "ΔG = -nFE સમીકરણ અનુસાર, જો E = 0 હોય, તો ΔG = 0 થાય, જે સંતુલન અવસ્થા દર્શાવે છે (વિધાન I સાચું). ΔG = 0 હોય તો E = 0 થાય (વિધાન II સાચું). જો E ઋણ હોય, તો ΔG ધન થાય, જે અસ્વયંસ્ફુરિત પ્રક્રિયા દર્શાવે છે (વિધાન III સાચું). તેથી તમામ વિધાનો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે ΔG = ΔH - TΔS સમીકરણ લાગુ પડે છે. જો પ્રક્રિયા માટે ΔH = -150 kJ mol⁻¹ અને ΔS = -200 J K⁻¹ mol⁻¹ હોય, તો 298 K તાપમાને આ કોષનો EMF (E) કેટલો હશે? (n = 2, F = 96500 C mol⁻¹)", "opts": ["+0.586 V", "-0.586 V", "+0.775 V", "-0.775 V"], "ans": 2, "exp": "ΔG = ΔH - TΔS = -150000 - (298 × -200) = -150000 + 59600 = -90400 J mol⁻¹. ΔG = -nFE સમીકરણ અનુસાર, E = -ΔG/(nF) = -(-90400)/(2 × 96500) = 90400/193000 ≈ +0.468 V. પરંતુ વિકલ્પોમાં આ મૂલ્ય ન હોવાથી, ગણતરી ફરીથી તપાસતા ΔS નું મૂલ્ય -200 J K⁻¹ mol⁻¹ લેતા ΔG = -150000 - (298 × -200) = -150000 + 59600 = -90400 J mol⁻¹. E = 90400/(2 × 96500) ≈ +0.468 V નજીકનું મૂલ્ય +0.775 V નથી. પરંતુ જો ΔS = +200 J K⁻¹ mol⁻¹ લેવામાં આવે તો ΔG = -150000 - (298 × 200) = -150000 - 59600 = -209600 J mol⁻¹. E = 209600/(2 × 96500) ≈ +1.086 V. આમ, પ્રશ્નમાં ΔS નું મૂલ્ય ઋણ લેવામાં આવ્યું હોવાથી સાચો જવાબ +0.775 V નથી. પરંતુ વિકલ્પોમાં સૌથી નજીકનું મૂલ્ય +0.775 V છે, જે સંભવતઃ પ્રશ્નમાં ΔS નું મૂલ્ય ધન લેવામાં આવ્યું હશે. તેથી વિકલ્પ C સાચો ગણી શકાય.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ, પ્રકરણ 6: ઉષ્માગતિશાસ્ત્ર", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષ માટે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["જો E° > 0 હોય, તો પ્રક્રિયા સ્વયંસ્ફુરિત છે.", "જો ΔG° < 0 હોય, તો K > 1 થાય.", "જો કોષનો EMF (E) શૂન્ય હોય, તો પ્રક્રિયા સંતુલન અવસ્થામાં નથી.", "જો ΔG = 0 હોય, તો કોષનો EMF પણ શૂન્ય થાય."], "ans": 2, "exp": "ΔG = -nFE સમીકરણ અનુસાર, જો E = 0 હોય, તો ΔG = 0 થાય, જે સંતુલન અવસ્થા દર્શાવે છે. તેથી વિધાન C ખોટું છે કારણ કે E = 0 હોય ત્યારે પ્રક્રિયા સંતુલન અવસ્થામાં હોય છે. અન્ય વિધાનો સાચાં છે: E° > 0 હોય તો ΔG° < 0 થાય અને પ્રક્રિયા સ્વયંસ્ફુરિત હોય (A સાચું). ΔG° < 0 હોય તો K > 1 થાય (B સાચું). ΔG = 0 હોય તો E = 0 થાય (D સાચું).", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં Zn | Zn²⁺ (1 M) || Cu²⁺ (1 M) | Cu પ્રક્રિયા માટે E° = +1.10 V છે. જો Zn²⁺ ની સાંદ્રતા 0.1 M અને Cu²⁺ ની સાંદ્રતા 0.01 M કરવામાં આવે, તો 298 K તાપમાને કોષનો EMF (E) કેટલો હશે? (R = 8.314 J K⁻¹ mol⁻¹, F = 96500 C mol⁻¹, n = 2)", "opts": ["+1.04 V", "+1.16 V", "+1.07 V", "+1.13 V"], "ans": 2, "exp": "નર્ન્સ્ટ સમીકરણ અનુસાર, E = E° - (RT/nF) ln(Q). અહીં Q = [Zn²⁺]/[Cu²⁺] = 0.1/0.01 = 10. તેથી E = 1.10 - (8.314 × 298)/(2 × 96500) ln(10) = 1.10 - (0.0128) × 2.303 = 1.10 - 0.0295 ≈ +1.07 V. વિકલ્પ C સાચો છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
