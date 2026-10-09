@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - રોગપ્રતિકારક શક્તિ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 રોગપ્રતિકારક શક્તિ</span>
+                <span>🎯 Hard</span>
+                <span>📝 31 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે એન્ટિજન પ્રથમ વખત શરીરમાં પ્રવેશે છે ત્યારે પ્રાથમિક પ્રતિચારી પ્રતિભાવમાં કયા કોષો સૌથી પહેલા સક્રિય થાય છે અને કયા એન્ટિબોડીનું સ્રાવ સૌથી વધુ થાય છે?", "options": ["A) B-કોષો સક્રિય થાય છે અને IgM એન્ટિબોડીનું સ્રાવ વધુ થાય છે", "B) T-કોષો સક્રિય થાય છે અને IgG એન્ટિબોડીનું સ્રાવ વધુ થાય છે", "C) મેક્રોફેજ સક્રિય થાય છે અને IgA એન્ટિબોડીનું સ્રાવ વધુ થાય છે", "D) પ્લાઝ્મા કોષો સક્રિય થાય છે અને IgE એન્ટિબોડીનું સ્રાવ વધુ થાય છે"], "correct": 0, "explanation": "પ્રાથમિક પ્રતિચારી પ્રતિભાવમાં, B-કોષો એન્ટિજનને ઓળખીને સક્રિય થાય છે અને પ્લાઝ્મા કોષોમાં રૂપાંતરિત થાય છે, જે IgM એન્ટિબોડીનું સ્રાવ કરે છે. IgM એ પ્રાથમિક પ્રતિભાવનો પ્રથમ અને મુખ્ય એન્ટિબોડી છે. T-કોષો પ્રાથમિક પ્રતિભાવમાં સહાયક ભૂમિકા ભજવે છે પરંતુ IgG એન્ટિબોડીનો ઉત્પાદન બાદમાં થાય છે. મેક્રોફેજ એન્ટિજનને ગળી જાય છે પરંતુ એન્ટિબોડી ઉત્પાદન કરતા નથી. IgA અને IgE એન્ટિબોડી પ્રાથમિક પ્રતિભાવમાં મુખ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 1}, {"question": "કયા પ્રકારના રોગપ્રતિકારક પ્રતિભાવમાં સ્મૃતિ કોષો (Memory cells) બનાવવામાં આવતા નથી?", "options": ["A) સક્રિય પ્રતિરક્ષા (Active immunity)", "B) નિષ્ક્રિય પ્રતિરક્ષા (Passive immunity)", "C) પ્રાકૃતિક સક્રિય પ્રતિરક્ષા (Natural active immunity)", "D) કૃત્રિમ સક્રિય પ્રતિરક્ષા (Artificial active immunity)"], "correct": 1, "explanation": "નિષ્ક્રિય પ્રતિરક્ષામાં, શરીરને બાહ્ય સ્રોત (જેવા કે એન્ટિબોડી) દ્વારા એન્ટિબોડી પૂરા પાડવામાં આવે છે, જેથી શરીરની રોગપ્રતિકારક વ્યવસ્થા સક્રિય રીતે કોઈ એન્ટિજન સામે પ્રતિક્રિયા આપતી નથી. આથી સ્મૃતિ કોષો બનાવવામાં આવતા નથી. સક્રિય પ્રતિરક્ષા (પ્રાકૃતિક અથવા કૃત્રિમ)માં, શરીર એન્ટિજન સામે પ્રતિક્રિયા આપે છે અને સ્મૃતિ કોષો બનાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 2}, {"question": "એલર્જી પ્રતિક્રિયામાં કયા એન્ટિબોડી અને કોષોની ભૂમિકા મુખ્ય છે?", "options": ["A) IgE અને માસ્ટ કોષો", "B) IgG અને ન્યૂટ્રોફિલ", "C) IgM અને B-કોષો", "D) IgA અને T-કોષો"], "correct": 0, "explanation": "એલર્જી પ્રતિક્રિયામાં, IgE એન્ટિબોડી એલર્જન સાથે જોડાય છે અને માસ્ટ કોષોને સક્રિય કરે છે, જે હિસ્ટામિન જેવા પદાર્થો મુક્ત કરે છે અને એલર્જીના લક્ષણો ઉત્પન્ન કરે છે. IgG, IgM, અને IgA એન્ટિબોડી એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી. ન્યૂટ્રોફિલ અને T-કોષો એલર્જી પ્રતિક્રિયામાં મુખ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 3}, {"question": "કયા રોગમાં શરીરની રોગપ્રતિકારક વ્યવસ્થા શરીરના સ્વયંના કોષો પર હુમલો કરે છે?", "options": ["A) એડ્સ (AIDS)", "B) સ્વયંપ્રતિરક્ષા રોગ (Autoimmune disease)", "C) કર્કરોગ (Cancer)", "D) ટ્યુબરક્યુલોસિસ (Tuberculosis)"], "correct": 1, "explanation": "સ્વયંપ્રતિરક્ષા રોગમાં, રોગપ્રતિકારક વ્યવસ્થા શરીરના સ્વયંના કોષો અથવા પેશીઓ પર હુમલો કરે છે, જેમ કે રૂમેટોઇડ આર્થરાઇટિસ અથવા લ્યુપસ. એડ્સમાં, રોગપ્રતિકારક વ્યવસ્થા નબળી પડે છે પરંતુ સ્વયંના કોષો પર હુમલો કરતી નથી. કર્કરોગમાં, કોષો અનિયંત્રિત રીતે વૃદ્ધિ પામે છે પરંતુ રોગપ્રતિકારક વ્યવસ્થા સ્વયંના કોષો પર હુમલો કરતી નથી. ટ્યુબરક્યુલોસિસ બેક્ટેરિયલ ઇન્ફેક્શન છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 4}, {"question": "કયા હોર્મોન દ્વારા થાયમસ ગ્લાંડ (Thymus gland)ની ક્રિયા નિયંત્રિત થાય છે અને તે કયા કોષોના પરિપક્વતામાં મદદ કરે છે?", "options": ["A) થાયરોક્સિન, T-કોષો", "B) થાયમોસિન, T-કોષો", "C) એડ્રિનેલિન, B-કોષો", "D) ઇન્સ્યુલિન, મેક્રોફેજ"], "correct": 1, "explanation": "થાયમસ ગ્લાંડ દ્વારા સ્રાવ થતો થાયમોસિન હોર્મોન T-કોષોના પરિપક્વતામાં મહત્વની ભૂમિકા ભજવે છે. થાયરોક્સિન થાયરોઇડ ગ્લાંડ દ્વારા સ્રાવ થાય છે અને ચયાપચયને નિયંત્રિત કરે છે. એડ્રિનેલિન એડ્રિનલ ગ્લાંડ દ્વારા સ્રાવ થાય છે અને તણાવ પ્રતિક્રિયામાં ભાગ લે છે. ઇન્સ્યુલિન પેન્ક્રિયાસ દ્વારા સ્રાવ થાય છે અને રક્તમાં ગ્લુકોઝના સ્તરને નિયંત્રિત કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 5}, {"question": "જ્યારે કોઈ વ્યક્તિને એચઆઈવી (HIV) ચેપ લાગે છે, ત્યારે તેની રોગપ્રતિકારક શક્તિમાં કયો કોષ સૌથી પહેલા નાશ પામે છે, જેના કારણે સંક્રમણ વિકસિત થાય છે?", "options": ["A) બી-લસિકાકોષ (B-lymphocytes)", "B) ટી-હેલ્પર કોષ (T-helper cells)", "C) સાયટોટોક્સિક ટી-કોષ (Cytotoxic T-cells)", "D) મેક્રોફેજ (Macrophages)"], "correct": 1, "explanation": "એચઆઈવી વાયરસ ટી-હેલ્પર કોષો (CD4+ કોષો) પર હુમલો કરે છે અને તેમનો નાશ કરે છે. ટી-હેલ્પર કોષો રોગપ્રતિકારક પ્રતિભાવને નિયંત્રિત કરવામાં મહત્વની ભૂમિકા ભજવે છે, જેથી તેમના નાશથી રોગપ્રતિકારક વ્યવસ્થા નબળી પડે છે અને સંક્રમણ વિકસિત થાય છે. બી-લસિકાકોષ, સાયટોટોક્સિક ટી-કોષ અને મેક્રોફેજ પર અસર થતી નથી અથવા તો પછીના તબક્કે થાય છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 6}, {"question": "કોઈ વ્યક્તિને પહેલી વખત ટેટનસના ટીકા (Vaccine) આપવામાં આવે છે. બીજી વખત ટેટનસનો ચેપ લાગે ત્યારે શરીરનો પ્રતિચાર કેવો હશે?", "options": ["A) પ્રાથમિક પ્રતિચારી પ્રતિભાવ (Primary immune response)", "B) દ્વિતીય પ્રતિચારી પ્રતિભાવ (Secondary immune response)", "C) તાત્કાલિક એલર્જી પ્રતિક્રિયા (Immediate hypersensitivity reaction)", "D) ઓટોઇમ્યુન પ્રતિક્રિયા (Autoimmune reaction)"], "correct": 1, "explanation": "પહેલી વખત ટીકા આપવાથી શરીરમાં સ્મૃતિ કોષો (Memory cells) બને છે. જ્યારે બીજી વખત એન્ટિજન (ટેટનસ) પ્રવેશે છે, ત્યારે સ્મૃતિ કોષો તરત જ પ્રતિક્રિયા આપે છે, જેને દ્વિતીય પ્રતિચારી પ્રતિભાવ કહેવાય છે. પ્રાથમિક પ્રતિભાવ પહેલી વખત એન્ટિજન પ્રવેશે ત્યારે થાય છે. તાત્કાલિક એલર્જી પ્રતિક્રિયા અને ઓટોઇમ્યુન પ્રતિક્રિયા અહીં લાગુ પડતી નથી.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 7}, {"question": "નીચેનામાંથી કયો એન્ટિબોડી પ્લેસેન્ટા (નાળ)ને પાર કરી શકે છે અને ભ્રૂણને પેસિવ ઇમ્યુનિટી પ્રદાન કરે છે?", "options": ["A) IgA", "B) IgM", "C) IgG", "D) IgE"], "correct": 2, "explanation": "IgG એન્ટિબોડી પ્લેસેન્ટા (નાળ)ને પાર કરી શકે છે અને ભ્રૂણને પેસિવ ઇમ્યુનિટી (પેઢુ રોગપ્રતિકારક શક્તિ) પ્રદાન કરે છે. IgA સ્તન્ય (દૂધ) દ્વારા શિશુને મળે છે, IgM મોટો હોવાથી પ્લેસેન્ટા પાર કરી શકતો નથી, અને IgE એલર્જી પ્રતિક્રિયામાં ભૂમિકા ભજવે છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 8}, {"question": "કોઈ વ્યક્તિને રક્તાધાન (Blood transfusion) દરમિયાન રક્ત વહન કરતી વખતે એલર્જી પ્રતિક્રિયા થાય છે. આ પ્રતિક્રિયા માટે કયા એન્ટિબોડી જવાબદાર છે?", "options": ["A) IgG", "B) IgM", "C) IgA", "D) IgE"], "correct": 3, "explanation": "IgE એન્ટિબોડી એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવે છે. જ્યારે શરીરમાં એલર્જન (Allergen) પ્રવેશે છે, ત્યારે IgE મસ્ટ કોષો (Mast cells) સાથે જોડાઈને હિસ્ટામિન નિકાલમાં મદદ કરે છે, જે એલર્જીના લક્ષણો તરફ દોરી જાય છે. IgG, IgM, અને IgA એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 9}, {"question": "નીચેનામાંથી કયો રોગ રોગપ્રતિકારક વ્યવસ્થા સાથે સંકળાયેલ નથી?", "options": ["A) એડ્સ (AIDS)", "B) લ્યુપસ (Lupus)", "C) રહેમેટોઇડ આર્થરાઇટિસ (Rheumatoid arthritis)", "D) હિમોફિલિયા (Haemophilia)"], "correct": 3, "explanation": "હિમોફિલિયા (Haemophilia) એ રક્તના થકવાનો રોગ છે, જે રક્ત ગંઠાવા માટે જવાબદાર ફેક્ટરની ઉણપને કારણે થાય છે. એડ્સ (AIDS) એ રોગપ્રતિકારક વ્યવસ્થા પર હુમલો કરનાર વાયરસ છે, લ્યુપસ અને રહેમેટોઇડ આર્થરાઇટિસ ઓટોઇમ્યુન રોગો છે, જેમાં રોગપ્રતિકારક વ્યવસ્થા શરીરના સ્વયંના કોષો પર હુમલો કરે છે.", "ncert_ref": "Class XII - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 10}, {"question": "જ્યારે મેક્રોફેજ કોષ દ્વારા એન્ટિજનની પ્રસ્તુતિ (Antigen presentation) કરવામાં આવે છે, ત્યારે તે કયા કોષોને સક્રિય કરે છે, જેમાં MHC-II અણુઓની ભૂમિકા મહત્વપૂર્ણ હોય છે?", "options": ["A) સાયટોટોક્સિક ટી-કોષ (CD8+)", "B) હેલ્પર ટી-કોષ (CD4+)", "C) બી-કોષ (B-cells)", "D) નેચરલ કિલર કોષ (NK cells)"], "correct": 1, "explanation": "મેક્રોફેજ કોષ દ્વારા એન્ટિજનની પ્રસ્તુતિ MHC-II અણુઓ દ્વારા થાય છે, જે હેલ્પર ટી-કોષ (CD4+)ને સક્રિય કરે છે. સાયટોટોક્સિક ટી-કોષ (CD8+) MHC-I અણુઓ સાથે જોડાય છે, બી-કોષ એન્ટિજનની પ્રસ્તુતિ માટે MHC-IIનો ઉપયોગ કરે છે પરંતુ મેક્રોફેજ દ્વારા સીધી સક્રિયતા નથી, અને નેચરલ કિલર કોષ (NK cells) MHC-સ્વતંત્ર રીતે કામ કરે છે.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારક વ્યવસ્થા", "difficulty": "Hard", "num": 11}, {"question": "નીચેનામાંથી કયો રોગપ્રતિકારક પ્રતિભાવ એવો છે જેમાં એન્ટિબોડી-મધ્યસ્થી પ્રતિક્રિયા (Antibody-mediated response) થતી નથી, પરંતુ સીધી કોષીય પ્રતિક્રિયા (Cell-mediated response) થાય છે?", "options": ["A) ટ્યુબર્ક્યુલોસિસ (TB)", "B) ટેટનસ", "C) ડિફ્થેરિયા", "D) હેપેટાઇટિસ B"], "correct": 0, "explanation": "ટ્યુબર્ક્યુલોસિસ (TB) એક ઉદાહરણ છે જ્યાં સીધી કોષીય પ્રતિકારકતા (Cell-mediated immunity) મુખ્ય ભૂમિકા ભજવે છે, જેમાં ટી-કોષ અને મેક્રોફેજ સક્રિય થાય છે. ટેટનસ, ડિફ્થેરિયા અને હેપેટાઇટિસ B એ એન્ટિબોડી-મધ્યસ્થી પ્રતિક્રિયા (Humoral immunity) દ્વારા નિયંત્રિત થાય છે.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારક વ્યવસ્થા", "difficulty": "Hard", "num": 12}, {"question": "જ્યારે કોઈ વ્યક્તિને રોગપ્રતિકારક વ્યવસ્થા દ્વારા સ્વ-સંરક્ષણ (Self-tolerance) તૂટી જાય છે, ત્યારે કયો રોગ ઉદ્ભવી શકે છે જેમાં શરીરના સ્વયંના કોષો પર હુમલો થાય છે?", "options": ["A) એડ્સ (AIDS)", "B) રુમાટોઇડ આર્થરાઇટિસ (Rheumatoid Arthritis)", "C) એલર્જીક રાઇનાઇટિસ (Allergic Rhinitis)", "D) એસ્ટેમા (Asthma)"], "correct": 1, "explanation": "રુમાટોઇડ આર્થરાઇટિસ (Rheumatoid Arthritis) એક ઓટોઇમ્યુન રોગ છે જ્યાં રોગપ્રતિકારક વ્યવસ્થા સ્વયંના કોષો પર હુમલો કરે છે. એડ્સ (AIDS) રોગપ્રતિકારક વ્યવસ્થાની કમજોરીને કારણે થાય છે, જ્યારે એલર્જીક રાઇનાઇટિસ અને એસ્ટેમા એલર્જી સાથે સંકળાયેલા રોગ છે.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારક વ્યવસ્થા", "difficulty": "Hard", "num": 13}, {"question": "નીચેનામાંથી કયો એન્ટિજન-એન્ટિબોડી કોમ્પ્લેક્સ કોમ્પ્લિમેન્ટ વ્યવસ્થા (Complement system)ને સક્રિય કરતો નથી?", "options": ["A) IgG", "B) IgM", "C) IgA", "D) IgE"], "correct": 3, "explanation": "IgE એન્ટિબોડી કોમ્પ્લિમેન્ટ વ્યવસ્થાને સક્રિય કરતો નથી. IgG અને IgM કોમ્પ્લિમેન્ટ વ્યવસ્થાને સક્રિય કરે છે, જ્યારે IgA મ્યુકોસલ સપાટી પર કામ કરે છે પરંતુ કોમ્પ્લિમેન્ટને સીધી રીતે સક્રિય કરતો નથી.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારક વ્યવસ્થા", "difficulty": "Hard", "num": 14}, {"question": "જ્યારે કોઈ વ્યક્તિને પહેલી વખત એન્ટિજનનો સામનો થાય છે, ત્યારે પ્રાથમિક પ્રતિચારી પ્રતિભાવમાં કયા એન્ટિબોડીનો સ્તર સૌથી પહેલા વધે છે?", "options": ["A) IgG", "B) IgM", "C) IgA", "D) IgD"], "correct": 1, "explanation": "પ્રાથમિક પ્રતિચારી પ્રતિભાવમાં, IgM એન્ટિબોડીનો સ્તર સૌથી પહેલા વધે છે. IgG પછીના તબક્કે વધે છે, જ્યારે IgA અને IgDનો સ્તર પ્રાથમિક પ્રતિભાવમાં મહત્વનો નથી.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારક વ્યવસ્થા", "difficulty": "Hard", "num": 15}, {"question": "જ્યારે કોઈ વ્યક્તિને રોગપ્રતિકારક વ્યવસ્થામાં T-કોષોની કસર થાય છે, ત્યારે નીચેનામાંથી કયો રોગ સૌથી વધુ સંભાવના ધરાવે છે?", "options": ["A) ટાયપ 1 મધુમેહ (Type 1 Diabetes)", "B) રૂમેટોઈડ આર્થરાઇટિસ (Rheumatoid Arthritis)", "C) સિકલ સેલ એનિમિયા (Sickle Cell Anemia)", "D) હિમોફિલિયા (Hemophilia)"], "correct": 0, "explanation": "ટાયપ 1 મધુમેહ એ ઓટોઇમ્યુન રોગ છે જેમાં T-કોષો બીટા-કોષો પર હુમલો કરે છે, જે ઇન્સ્યુલિન ઉત્પન્ન કરે છે. રૂમેટોઈડ આર્થરાઇટિસ પણ ઓટોઇમ્યુન છે, પરંતુ તે સાંધાઓને અસર કરે છે. સિકલ સેલ એનિમિયા અને હિમોફિલિયા અનુવંશિક રોગો છે, T-કોષો સાથે સીધો સંબંધ ધરાવતા નથી.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 16}, {"question": "નીચેનામાંથી કયો એન્ટિબોડી પ્રથમ વખત એન્ટિજનનો સામનો થતાં જ બનવાનું શરૂ કરે છે અને તેની સાંદ્રતા ધીમે ધીમે વધે છે?", "options": ["A) IgG", "B) IgM", "C) IgA", "D) IgE"], "correct": 1, "explanation": "IgM એ પ્રાથમિક પ્રતિચારી પ્રતિભાવ દરમિયાન પ્રથમ બનતો એન્ટિબોડી છે. IgG પછીથી બનવાનું શરૂ થાય છે અને લાંબા ગાળા સુધી ટકી રહે છે. IgA શ્લેષ્મલ તંત્રમાં મુખ્ય ભૂમિકા ભજવે છે, જ્યારે IgE એલર્જી પ્રતિક્રિયાઓ સાથે સંકળાયેલ છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 17}, {"question": "જ્યારે કોઈ વ્યક્તિને એન્ટિજનનો સામનો થાય છે, ત્યારે નીચેનામાંથી કયા કોષો દ્વારા એન્ટિજનની પ્રસ્તુતિ (Antigen presentation) કરવામાં આવતી નથી?", "options": ["A) મેક્રોફેજ", "B) ડેન્ડ્રિટિક કોષો", "C) B-કોષો", "D) ન્યૂટ્રોફિલ્સ"], "correct": 3, "explanation": "મેક્રોફેજ, ડેન્ડ્રિટિક કોષો અને B-કોષો એન્ટિજન પ્રસ્તુત કરનારા કોષો (APCs) છે. ન્યૂટ્રોફિલ્સ ફેગોસાઇટોસિસમાં ભાગ લે છે, પરંતુ એન્ટિજન પ્રસ્તુત કરતા નથી.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 18}, {"question": "નીચેનામાંથી કયો રોગપ્રતિકારક પ્રતિભાવમાં સાયટોકાઇન (Cytokine)ની ભૂમિકા સૌથી ઓછી છે?", "options": ["A) એન્ટિબોડી-મધ્યસ્થી પ્રતિક્રિયા (Antibody-mediated response)", "B) કોષ-મધ્યસ્થી પ્રતિક્રિયા (Cell-mediated response)", "C) એલર્જી પ્રતિક્રિયા (Allergic reaction)", "D) ઓટોઇમ્યુન પ્રતિક્રિયા (Autoimmune reaction)"], "correct": 0, "explanation": "એન્ટિબોડી-મધ્યસ્થી પ્રતિક્રિયામાં B-કોષો દ્વારા એન્ટિબોડીનું ઉત્પાદન થાય છે, જ્યારે સાયટોકાઇન મુખ્યત્વે T-કોષો અને મેક્રોફેજ દ્વારા ઉત્પન્ન થાય છે. કોષ-મધ્યસ્થી, એલર્જી અને ઓટોઇમ્યુન પ્રતિક્રિયાઓમાં સાયટોકાઇનની મહત્વપૂર્ણ ભૂમિકા હોય છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 19}, {"question": "જ્યારે કોઈ વ્યક્તિને એચઆઈવી (HIV) ચેપ લાગે છે, ત્યારે નીચેનામાંથી કયા કોષોની સંખ્યા સૌથી પહેલા ઘટે છે?", "options": ["A) B-કોષો", "B) CD4+ T-કોષો", "C) CD8+ T-કોષો", "D) મેક્રોફેજ"], "correct": 1, "explanation": "HIV મુખ્યત્વે CD4+ T-કોષો (હેલ્પર T-કોષો)ને લક્ષ્ય બનાવે છે અને તેમની સંખ્યા ઘટાડે છે. B-કોષો, CD8+ T-કોષો અને મેક્રોફેજની સંખ્યા પછીથી અસર થાય છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 20}, {"question": "જ્યારે કોઈ વ્યક્તિને રોગપ્રતિકારક વ્યવસ્થામાં B-કોષો દ્વારા ઉત્પન્ન થતાં એન્ટિબોડીની સાંદ્રતા ઘટે છે, ત્યારે નીચેનામાંથી કયો રોગ સૌથી વધુ સંભવિત છે?", "options": ["A) ટ્યુબરક્યુલોસિસ (TB)", "B) એડ્સ (AIDS)", "C) ટેટનસ (Tetanus)", "D) મેલેરિયા (Malaria)"], "correct": 1, "explanation": "B-કોષો એન્ટિબોડી ઉત્પન્ન કરે છે, અને એચઆઈવી (HIV) દ્વારા B-કોષો અને CD4+ T-કોષો નાશ પામે છે, જે એડ્સ (AIDS) તરફ દોરી જાય છે. ટ્યુબરક્યુલોસિસ, ટેટનસ અને મેલેરિયા એ બેક્ટેરિયલ અથવા પરોપજીવી રોગો છે જેમાં એન્ટિબોડીની ભૂમિકા મર્યાદિત છે, પરંતુ એડ્સમાં રોગપ્રતિકારક વ્યવસ્થાનું પૂર્ણ નિષ્ક્રિય થવું જોવા મળે છે.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારકતા (Human Health and Disease)", "difficulty": "Hard", "num": 21}, {"question": "નીચેનામાંથી કયું વિધાન સાયટોટોક્સિક T-કોષો (Tc કોષો) વિશે સાચું નથી?", "options": ["A) તે કોષીય મધ્યસ્થી પ્રતિકારમાં ભાગ લે છે અને એન્ટિજન-યુક્ત કોષોને નષ્ટ કરે છે.", "B) તે CD8+ રિસેપ્ટર ધરાવે છે અને MHC-I અણુ દ્વારા એન્ટિજન ઓળખે છે.", "C) તે B-કોષોને સક્રિય કરવા માટે સાયટોકાઇન ઉત્પન્ન કરે છે.", "D) તે વાયરસ-સંક્રમિત કોષો અને કૅન્સર કોષોને મારી નાખવામાં મહત્વની ભૂમિકા ભજવે છે."], "correct": 2, "explanation": "સાયટોટોક્સિક T-કોષો (Tc કોષો) કોષીય મધ્યસ્થી પ્રતિકારમાં ભાગ લે છે અને એન્ટિજન-યુક્ત કોષોને નષ્ટ કરે છે (A સાચું). તે CD8+ રિસેપ્ટર ધરાવે છે અને MHC-I અણુ દ્વારા એન્ટિજન ઓળખે છે (B સાચું). તે વાયરસ-સંક્રમિત કોષો અને કૅન્સર કોષોને મારી નાખવામાં મહત્વની ભૂમિકા ભજવે છે (D સાચું). પરંતુ તે B-કોષોને સક્રિય કરવા માટે સાયટોકાઇન ઉત્પન્ન કરતું નથી — આ કામ T-હેલ્પર કોષો (Th કોષો) કરે છે (C ખોટું).", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 22}, {"question": "જ્યારે કોઈ વ્યક્તિને રોગપ્રતિકારક વ્યવસ્થામાં કોમ્પ્લિમેન્ટ વ્યવસ્થા (Complement system)ની કસર થાય છે, ત્યારે નીચેનામાંથી કયો રોગ સૌથી વધુ સંભવિત છે?", "options": ["A) એડ્સ (AIDS)", "B) લ્યુપસ (Lupus)", "C) પુનરાવર્તિત બૅક્ટેરિયલ સંક્રમણ", "D) ડાયાબિટીસ મેલિટસ"], "correct": 2, "explanation": "કોમ્પ્લિમેન્ટ વ્યવસ્થા બૅક્ટેરિયલ સંક્રમણ વિરુદ્ધ પ્રતિકારમાં મહત્વની ભૂમિકા ભજવે છે. તેની કસર થવાથી શરીર બૅક્ટેરિયાને અસરકારક રીતે નષ્ટ કરી શકતું નથી, જેથી પુનરાવર્તિત બૅક્ટેરિયલ સંક્રમણ થવાની સંભાવના વધે છે (C સાચું). એડ્સ (AIDS) T-કોષોની કસર સાથે સંકળાયેલ છે (A ખોટું). લ્યુપસ ઓટોઇમ્યુન રોગ છે (B ખોટું). ડાયાબિટીસ મેલિટસ ઇન્સ્યુલિનની કસર સાથે સંકળાયેલ છે (D ખોટું).", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 23}, {"question": "નીચેનામાંથી કયો એન્ટિબોડી કોષીય મધ્યસ્થી પ્રતિકાર (Cell-mediated immunity)માં સીધી ભૂમિકા ભજવતો નથી?", "options": ["A) IgG", "B) IgM", "C) IgE", "D) IgA"], "correct": 0, "explanation": "કોષીય મધ્યસ્થી પ્રતિકાર (Cell-mediated immunity)માં T-કોષો મુખ્ય ભૂમિકા ભજવે છે, જ્યારે એન્ટિબોડી-મધ્યસ્થી પ્રતિકાર (Humoral immunity)માં B-કોષો દ્વારા ઉત્પન્ન થતાં એન્ટિબોડી ભૂમિકા ભજવે છે. IgG એન્ટિબોડી એન્ટિજનને બાંધીને કોમ્પ્લિમેન્ટ વ્યવસ્થા અને ફેગોસાઇટોસિસને સક્રિય કરે છે, પરંતુ તે કોષીય મધ્યસ્થી પ્રતિકારમાં સીધી ભૂમિકા ભજવતો નથી (A સાચું). IgM, IgE, અને IgA પણ કોષીય મધ્યસ્થી પ્રતિકારમાં સીધી ભૂમિકા ભજવતા નથી, પરંતુ પ્રશ્નમાં સૌથી યોગ્ય ઉત્તર IgG છે કારણ કે તે એન્ટિબોડી-મધ્યસ્થી પ્રતિકારમાં મુખ્ય ભૂમિકા ભજવે છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 24}, {"question": "નીચેનામાંથી કયું વિધાન ઓટોઇમ્યુન રોગો (Autoimmune diseases) વિશે સાચું નથી?", "options": ["A) ઓટોઇમ્યુન રોગોમાં રોગપ્રતિકારક વ્યવસ્થા શરીરના સ્વયંના કોષો પર હુમલો કરે છે.", "B) ર્યુમેટોઇડ આર્થરાઇટિસ ઓટોઇમ્યુન રોગ છે જેમાં સાંધાઓ પર હુમલો થાય છે.", "C) ટાઇપ-1 ડાયાબિટીસમાં, રોગપ્રતિકારક વ્યવસ્થા ઇન્સ્યુલિન ઉત્પન્ન કરતા બીટા કોષોને નષ્ટ કરે છે.", "D) એલર્જી પ્રતિક્રિયા ઓટોઇમ્યુન રોગનું ઉદાહરણ છે."], "correct": 3, "explanation": "ઓટોઇમ્યુન રોગોમાં રોગપ્રતિકારક વ્યવસ્થા શરીરના સ્વયંના કોષો પર હુમલો કરે છે (A સાચું). ર્યુમેટોઇડ આર્થરાઇટિસ ઓટોઇમ્યુન રોગ છે જેમાં સાંધાઓ પર હુમલો થાય છે (B સાચું). ટાઇપ-1 ડાયાબિટીસમાં, રોગપ્રતિકારક વ્યવસ્થા ઇન્સ્યુલિન ઉત્પન્ન કરતા બીટા કોષોને નષ્ટ કરે છે (C સાચું). એલર્જી પ્રતિક્રિયા ઓટોઇમ્યુન રોગ નથી, પરંતુ તે હાઇપરસેન્સિટિવિટી પ્રતિક્રિયા છે (D ખોટું).", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 25}, {"question": "જ્યારે કોઈ વ્યક્તિને માયેલોઇડ લ્યુકેમિયા (Myeloid leukemia) થાય છે, ત્યારે નીચેનામાંથી કયા કોષોની સંખ્યામાં અસાધારણ વૃદ્ધિ જોવા મળે છે, જે રોગપ્રતિકારક પ્રતિભાવને અસર કરે છે?", "options": ["A) લસિકાકોષો (Lymphocytes)", "B) ન્યુટ્રોફિલ્સ (Neutrophils)", "C) બેસોફિલ્સ (Basophils)", "D) મોનોસાઇટ્સ (Monocytes)"], "correct": 1, "explanation": "માયેલોઇડ લ્યુકેમિયામાં, ન્યુટ્રોફિલ્સ (બી-કોષો અથવા T-કોષો નહીં)ની અસાધારણ વૃદ્ધિ થાય છે, જે મજ્જામાંથી ઉત્પન્ન થાય છે. આ કોષો રોગપ્રતિકારક વ્યવસ્થામાં પ્રથમ રક્ષણ લાઇન તરીકે કામ કરે છે. લસિકાકોષો (A) લસિકા વ્યવસ્થા સાથે સંકળાયેલ છે, બેસોફિલ્સ (C) એલર્જી પ્રતિક્રિયામાં ભાગ લે છે, અને મોનોસાઇટ્સ (D) મેક્રોફેજમાં રૂપાંતરિત થાય છે, પરંતુ માયેલોઇડ લ્યુકેમિયામાં ન્યુટ્રોફિલ્સની વૃદ્ધિ મુખ્ય લક્ષણ છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 26}, {"question": "નીચેનામાંથી કયો રોગપ્રતિકારક પ્રતિભાવમાં, એન્ટિજન-એન્ટિબોડી કોમ્પ્લેક્સ દ્વારા કોમ્પ્લિમેન્ટ વ્યવસ્થા સક્રિય થતી નથી, પરંતુ સીધી રીતે કોષીય પ્રતિકાર (Cell-mediated immunity) દ્વારા નિયંત્રિત થાય છે?", "options": ["A) ટ્યુબર્ક્યુલોસિસ (Tuberculosis)", "B) ટેટનસ (Tetanus)", "C) ડિફ્થેરિયા (Diphtheria)", "D) મેમિંજાઇટિસ (Meningitis)"], "correct": 0, "explanation": "ટ્યુબર્ક્યુલોસિસ (A) એક ઇન્ટ્રાસેલ્યુલર બેક્ટેરિયા (Myobacterium tuberculosis) દ્વારા થાય છે, જેના વિરુદ્ધ કોષીય પ્રતિકાર (Cell-mediated immunity) દ્વારા પ્રતિભાવ આપવામાં આવે છે, જેમાં T-કોષો અને મેક્રોફેજની મુખ્ય ભૂમિકા હોય છે. ટેટનસ (B) અને ડિફ્થેરિયા (C) એ ટોક્સિન-મધ્યસ્થી રોગો છે, જ્યાં એન્ટિબોડી-મધ્યસ્થી પ્રતિકાર મુખ્ય ભૂમિકા ભજવે છે. મેમિંજાઇટિસ (D) બેક્ટેરિયા અથવા વાયરસ દ્વારા થઈ શકે, પરંતુ તે એન્ટિબોડી-મધ્યસ્થી પ્રતિકાર દ્વારા પણ નિયંત્રિત થાય છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 27}, {"question": "જ્યારે કોઈ વ્યક્તિને રોગપ્રતિકારક વ્યવસ્થામાં T-હેલ્પર કોષો (Th કોષો)ની કસર થાય છે, ત્યારે નીચેનામાંથી કયો રોગ સૌથી વધુ સંવેદનશીલ બને છે?", "options": ["A) એચઆઈવી (HIV)", "B) ડાયાબિટીસ મેલિટસ (Diabetes mellitus)", "C) હિપેટાઇટિસ B (Hepatitis B)", "D) સિકલ સેલ એનિમિયા (Sickle cell anemia)"], "correct": 0, "explanation": "T-હેલ્પર કોષો (Th કોષો) રોગપ્રતિકારક વ્યવસ્થામાં કેંદ્રીય ભૂમિકા ભજવે છે, ખાસ કરીને એચઆઈવી (HIV) દ્વારા હુમલો થતાં આ કોષો નષ્ટ થાય છે, જેના કારણે રોગપ્રતિકારક વ્યવસ્થા નબળી પડે છે. ડાયાબિટીસ મેલિટસ (B) મેટાબોલિક ડિસઓર્ડર છે, હિપેટાઇટિસ B (C) યકૃતને અસર કરે છે, અને સિકલ સેલ એનિમિયા (D) રક્તના કોષો સાથે સંકળાયેલ જન્યુક્ત રોગ છે, જે T-હેલ્પર કોષોની કસર સાથે સીધો સંબંધ ધરાવતો નથી.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 28}, {"question": "નીચેનામાંથી કયું વિધાન ઇન્ટરફેરોન (Interferon) વિશે સાચું નથી?", "options": ["A) તે વાયરસ દ્વારા સંક્રમિત કોષો દ્વારા સ્રાવવામાં આવે છે.", "B) તે નજીકના કોષોને વાયરલ સંક્રમણ વિરુદ્ધ રક્ષણ આપે છે.", "C) તે સીધી રીતે વાયરસને નષ્ટ કરે છે.", "D) તે રોગપ્રતિકારક વ્યવસ્થાની ઇનેટ (innate) શાખા સાથે સંકળાયેલ છે."], "correct": 2, "explanation": "ઇન્ટરફેરોન (Interferon) વાયરસ દ્વારા સંક્રમિત કોષો દ્વારા સ્રાવવામાં આવે છે (A) અને નજીકના કોષોને વાયરલ સંક્રમણ વિરુદ્ધ રક્ષણ આપે છે (B). તે રોગપ્રતિકારક વ્યવસ્થાની ઇનેટ શાખા સાથે સંકળાયેલ છે (D). પરંતુ તે સીધી રીતે વાયરસને નષ્ટ કરતું નથી (C), બલ્કે તે કોષોને વાયરલ રીપ્લિકેશન અટકાવવા માટે પ્રેરિત કરે છે.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 29}, {"question": "જ્યારે કોઈ વ્યક્તિને ટ્યુબરક્યુલોસિસ (TB) ચેપ લાગે છે, ત્યારે તેની રોગપ્રતિકારક વ્યવસ્થામાં નીચેનામાંથી કયા કોષો દ્વારા એન્ટિજનની પ્રસ્તુતિ કરવામાં આવે છે અને તે પછી કયા કોષો સક્રિય થાય છે?", "options": ["A) મેક્રોફેજ દ્વારા એન્ટિજન પ્રસ્તુત કરવામાં આવે છે અને તે પછી સાયટોટોક્સિક T-કોષો (Tc) સક્રિય થાય છે", "B) ડેન્ડ્રિટિક કોષો દ્વારા એન્ટિજન પ્રસ્તુત કરવામાં આવે છે અને તે પછી T-હેલ્પર કોષો (Th) સક્રિય થાય છે", "C) B-કોષો દ્વારા એન્ટિજન પ્રસ્તુત કરવામાં આવે છે અને તે પછી પ્લાઝ્મા કોષો સક્રિય થાય છે", "D) ન્યુટ્રોફિલ દ્વારા એન્ટિજન પ્રસ્તુત કરવામાં આવે છે અને તે પછી નેચરલ કિલર કોષો સક્રિય થાય છે"], "correct": 0, "explanation": "ટ્યુબરક્યુલોસિસ (TB) ચેપમાં, મેક્રોફેજ એન્ટિજનને ફેગોસાઇટોઝ કરે છે અને તેને MHC-II અણુ સાથે જોડીને T-કોષોને પ્રસ્તુત કરે છે. આ પ્રક્રિયા પછી સાયટોટોક્સિક T-કોષો (Tc) સક્રિય થાય છે, જે સંક્રમિત મેક્રોફેજને નષ્ટ કરે છે. વિકલ્પ A સાચો છે. વિકલ્પ Bમાં, ડેન્ડ્રિટિક કોષો પણ એન્ટિજન પ્રસ્તુત કરે છે, પરંતુ TBમાં મુખ્ય ભૂમિકા મેક્રોફેજની હોય છે. વિકલ્પ C અને D અસત્ય છે કારણ કે B-કોષો અને ન્યુટ્રોફિલ એન્ટિજન પ્રસ્તુત કરતા નથી.", "ncert_ref": "Class XII - Chapter 8: મનુષ્યમાં રોગપ્રતિકારકતા", "difficulty": "Hard", "num": 30}, {"question": "ટ્યુબરક્યુલોસિસ (TB) ચેપ દરમિયાન, મેક્રોફેજ કોષો દ્વારા કયા સાયટોકાઇનનું સ્રાવ થવાથી T-કોષોની સક્રિયતા વધે છે અને ગ્રેન્યુલોમા (Granuloma) ની રચના થાય છે?", "options": ["A) ઇન્ટરલ્યુકિન-2 (IL-2)", "B) ઇન્ટરફેરોન-ગામા (IFN-γ)", "C) ટ્યુમર નેક્રોસિસ ફેક્ટર-આલ્ફા (TNF-α)", "D) ઇન્ટરલ્યુકિન-4 (IL-4)"], "correct": 2, "explanation": "ટ્યુબરક્યુલોસિસ દરમિયાન, મેક્રોફેજ કોષો દ્વારા TNF-α નું સ્રાવ થવાથી T-કોષોની સક્રિયતા વધે છે અને ગ્રેન્યુલોમા ની રચના થાય છે. TNF-α મેક્રોફેજને એકત્રિત કરવામાં અને ગ્રેન્યુલોમા બનાવવામાં મદદ કરે છે. IL-2 અને IFN-γ મુખ્યત્વે T-કોષો દ્વારા સ્રાવવામાં આવે છે, જ્યારે IL-4 Th2 પ્રતિભાવ સાથે સંકળાયેલ છે, જે ટ્યુબરક્યુલોસિસમાં મુખ્ય ભૂમિકા ભજવતું નથી.", "ncert_ref": "Class XII - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "difficulty": "Hard", "num": 31}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
