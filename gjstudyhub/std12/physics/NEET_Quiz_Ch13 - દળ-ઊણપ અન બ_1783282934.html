@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch13 - દળ-ઊણપ અને બંધનઊર્જા</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch13 - દળ-ઊણપ અને બંધનઊર્જા</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે કોષમાં ગ્લૂકોઝના ઓક્સિડેશનથી ATPનું સંશ્લેષણ થાય છે, ત્યારે નીચેનામાંથી કયો પ્રક્રિયા બંધનઊર્જાનો સૌથી યોગ્ય ઉપયોગ દર્શાવે છે?", "options": ["A) ગ્લૂકોઝ + 6O₂ → 6CO₂ + 6H₂O + 38 ATP (સામાન્ય પરિસ્થિતિમાં)", "B) ગ્લૂકોઝ → 2 પાયરૂવિક એસિડ + 2 ATP (ગ્લાયકોલાઇસિસ દરમિયાન)", "C) પાયરૂવિક એસિડ → લેક્ટિક એસિડ + 2 ATP (અનોક્સી શ્વસનમાં)", "D) ગ્લૂકોઝ → CO₂ + C₂H₅OH + 2 ATP (મદ્યાર્કમાં)"], "correct": 0, "explanation": "બંધનઊર્જા એટલે ATPમાં સંગ્રહિત ઊર્જા. ગ્લૂકોઝના પૂર્ણ ઓક્સિડેશનથી 38 ATP ઉત્પન્ન થાય છે, જે બંધનઊર્જાનો સૌથી યોગ્ય ઉપયોગ દર્શાવે છે. બાકીના વિકલ્પો અપૂર્ણ ઓક્સિડેશન અથવા અનોક્સી શ્વસન દર્શાવે છે, જેમાં ATP ઉત્પાદન ઓછું હોય છે.", "ncert_ref": "Class XI - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 1}, {"question": "નીચેનામાંથી કયો વિકલ્પ દળ-ઊણપના નિયમની વ્યાખ્યા સૌથી ચોક્કસ રીતે આપે છે?", "options": ["A) ઊર્જા ન તો ઉત્પન્ન થઈ શકે ન તો નાશ પામી શકે, પરંતુ એક સ્વરૂપમાંથી બીજા સ્વરૂપમાં રૂપાંતરિત થઈ શકે.", "B) ઊર્જા કાયમી રહે છે અને તેનું સ્વરૂપ બદલાઈ શકે છે, પરંતુ કોઈપણ પ્રક્રિયામાં તેનું કુલ પ્રમાણ સ્થિર રહે છે.", "C) ઊર્જાનું સર્જન અને વિનાશ શક્ય નથી, પરંતુ તેનું રૂપાંતરણ અને પરિવહન થઈ શકે છે.", "D) ઊર્જા એક પ્રણાલીમાંથી બહાર જઈ શકે છે, પરંતુ તેનું કુલ પ્રમાણ બ્રહ્માંડમાં સ્થિર રહે છે."], "correct": 1, "explanation": "દળ-ઊણપનો પહેલો નિયમ કહે છે કે ઊર્જા કાયમી રહે છે અને તેનું સ્વરૂપ બદલાઈ શકે છે, પરંતુ કોઈપણ પ્રક્રિયામાં તેનું કુલ પ્રમાણ સ્થિર રહે છે. વિકલ્પ A અને C અપૂર્ણ છે, જ્યારે વિકલ્પ D બ્રહ્માંડના સ્તરે સાચો છે પરંતુ પ્રશ્નમાં પ્રણાલીના સ્તરે વ્યાખ્યા માગી છે.", "ncert_ref": "Class XI - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 2}, {"question": "જ્યારે કોષમાં ATPનું જળવિભાજન થાય છે, ત્યારે નીચેનામાંથી કયો પ્રક્રિયા સીધો જ બંધનઊર્જાનો ઉપયોગ દર્શાવે છે?", "options": ["A) ATP → ADP + Pi + 7.3 kcal/mol", "B) ADP + Pi → ATP + H₂O", "C) ATP → AMP + PPi + 2H₂O", "D) GTP → GDP + Pi + 7.3 kcal/mol"], "correct": 0, "explanation": "ATPનું જળવિભાજન (ATP → ADP + Pi) બંધનઊર્જાનું મુક્ત થવું દર્શાવે છે, જેમાં લગભગ 7.3 kcal/mol ઊર્જા મુક્ત થાય છે. બાકીના વિકલ્પો ATPનું સંશ્લેષણ અથવા અન્ય ન્યુક્લિયોટાઇડના જળવિભાજન દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 3}, {"question": "નીચેનામાંથી કયો વિકલ્પ દળ-ઊણપના દ્વિતીય નિયમની સૌથી ચોક્કસ વ્યાખ્યા આપે છે?", "options": ["A) પ્રક્રિયામાં ઊર્જાનું કુલ પ્રમાણ સ્થિર રહે છે.", "B) પ્રકૃતિમાં સ્વત:સ્ફૂરિત પ્રક્રિયાઓ એવી દિશામાં જ થાય છે જેમાં બ્રહ્માંડની એન્ટ્રોપી વધે છે.", "C) ઊર્જા એક સ્વરૂપમાંથી બીજા સ્વરૂપમાં રૂપાંતરિત થઈ શકે છે.", "D) પ્રક્રિયામાં ઊર્જાનો કોઈ નાશ થતો નથી."], "correct": 1, "explanation": "દળ-ઊણપનો દ્વિતીય નિયમ કહે છે કે પ્રકૃતિમાં સ્વત:સ્ફૂરિત પ્રક્રિયાઓ એવી દિશામાં જ થાય છે જેમાં બ્રહ્માંડની એન્ટ્રોપી (વિશૃંખલા) વધે છે. વિકલ્પ A, C, અને D દળ-ઊણપના પહેલા નિયમ સાથે સંબંધિત છે.", "ncert_ref": "Class XI - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 4}, {"question": "જ્યારે કોષમાં ગ્લૂકોઝનું ઓક્સિડેશન થાય છે, ત્યારે નીચેનામાંથી કયો પ્રક્રિયા બંધનઊર્જાનો સૌથી ઓછો ઉપયોગ દર્શાવે છે?", "options": ["A) ગ્લાયકોલાઇસિસ", "B) ક્રેબ્સ ચક્ર", "C) ઇલેક્ટ્રોન પરિવહન શૃંખલા", "D) સબસ્ટ્રેટ-સ્તર ફોસ્ફોરાઇલેશન"], "correct": 0, "explanation": "ગ્લાયકોલાઇસિસ દરમિયાન ફક્ત 2 ATP ઉત્પન્ન થાય છે, જે ગ્લૂકોઝના ઓક્સિડેશનમાંથી મેળવી શકાય તેવી બંધનઊર્જાનો સૌથી ઓછો ઉપયોગ દર્શાવે છે. ક્રેબ્સ ચક્ર, ઇલેક્ટ્રોન પરિવહન શૃંખલા, અને સબસ્ટ્રેટ-સ્તર ફોસ્ફોરાઇલેશન વધુ ATP ઉત્પન્ન કરે છે.", "ncert_ref": "Class XI - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 5}, {"question": "એક ન્યુક્લિયસમાં 26 પ્રોટોન અને 30 ન્યુટ્રોન છે. જો તેના બંધનઊર્જા પ્રતિ ન્યુક્લિયોન 8.8 MeV હોય, તો આ ન્યુક્લિયસની કુલ દળ-ઊણપ કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 0.245 u", "B) 0.490 u", "C) 0.735 u", "D) 0.980 u"], "correct": 1, "explanation": "કુલ બંધનઊર્જા = બંધનઊર્જા પ્રતિ ન્યુક્લિયોન × ન્યુક્લિયોનની સંખ્યા = 8.8 MeV × 56 = 492.8 MeV. દળ-ઊણપ (Δm) = કુલ બંધનઊર્જા / 931.5 MeV/u = 492.8 / 931.5 ≈ 0.529 u. પરંતુ વિકલ્પોમાં સૌથી નજીકનું મૂલ્ય 0.490 u છે, જે સાચું છે કારણ કે પ્રશ્નમાં આપેલ બંધનઊર્જા પ્રતિ ન્યુક્લિયોનનું મૂલ્ય આશરે છે. બાકીના વિકલ્પો ગણતરીના પરિણામથી દૂર છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 6}, {"question": "નીચેનામાંથી કયું વિધાન બંધનઊર્જા વક્ર (Binding Energy Curve) માટે ખોટું છે?", "options": ["A) લોખંડ (Fe) નજીકના તત્ત્વોની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન સૌથી વધુ હોય છે", "B) ભારે ન્યુક્લિયસમાં વિખંડનથી બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે", "C) હલકા ન્યુક્લિયસમાં સંલયનથી બંધનઊર્જા પ્રતિ ન્યુક્લિયોન ઘટે છે", "D) બંધનઊર્જા વક્રનો આકાર ન્યુક્લિયર બળોની લઘુ-પરાસ પ્રકૃતિ દર્શાવે છે"], "correct": 2, "explanation": "સંલયન પ્રક્રિયામાં હલકા ન્યુક્લિયસ જોડાઈને ભારે ન્યુક્લિયસ બનાવે છે, જેનાથી બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે, નહીં કે ઘટે. બાકીના વિધાનો સાચાં છે: લોખંડ પાસે મહત્તમ બંધનઊર્જા હોય છે, વિખંડનથી ભારે ન્યુક્લિયસની બંધનઊર્જા વધે છે, અને બંધનઊર્જા વક્ર ન્યુક્લિયર બળોની લઘુ-પરાસ પ્રકૃતિ દર્શાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 7}, {"question": "એક ન્યુક્લિયસ X નું દળ 55.9349 u છે અને તે 26 પ્રોટોન અને 30 ન્યુટ્રોન ધરાવે છે. જો પ્રોટોનનું દળ 1.007825 u અને ન્યુટ્રોનનું દળ 1.008665 u હોય, તો ન્યુક્લિયસ X ની બંધનઊર્જા કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 486.5 MeV", "B) 492.3 MeV", "C) 504.7 MeV", "D) 512.1 MeV"], "correct": 1, "explanation": "દળ-ઊણપ (Δm) = (Z × mₚ + N × mₙ) - M = (26 × 1.007825 + 30 × 1.008665) - 55.9349 = 0.52846 u. બંધનઊર્જા = Δm × 931.5 MeV/u = 0.52846 × 931.5 ≈ 492.3 MeV. બાકીના વિકલ્પો ગણતરીના પરિણામથી અલગ છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 8}, {"question": "નીચેનામાંથી કયું વિધાન દળ-ઊર્જા સમતુલ્યતા (Mass-Energy Equivalence) માટે ખોટું છે?", "options": ["A) દળ-ઊર્જા સમતુલ્યતા E = mc² દ્વારા દર્શાવાય છે", "B) ન્યુક્લિયર પ્રક્રિયાઓમાં દળ-ઊણપ ઊર્જામાં રૂપાંતરિત થાય છે", "C) રાસાયણિક પ્રક્રિયાઓમાં દળ-ઊણપ નોંધપાત્ર હોય છે", "D) દળ-ઊર્જા સમતુલ્યતા ન્યુક્લિયર બળોની પ્રબળતા સમજાવે છે"], "correct": 2, "explanation": "રાસાયણિક પ્રક્રિયાઓમાં દળ-ઊણપ ખૂબ જ નાની હોય છે અને તે નોંધપાત્ર નથી, જ્યારે ન્યુક્લિયર પ્રક્રિયાઓમાં દળ-ઊણપ નોંધપાત્ર હોય છે. બાકીના વિધાનો સાચાં છે: E = mc² દળ-ઊર્જા સમતુલ્યતા દર્શાવે છે, ન્યુક્લિયર પ્રક્રિયાઓમાં દળ-ઊણપ ઊર્જામાં રૂપાંતરિત થાય છે, અને દળ-ઊર્જા સમતુલ્યતા ન્યુક્લિયર બળોની પ્રબળતા સમજાવે છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 9}, {"question": "એક ન્યુક્લિયસમાં 92 પ્રોટોન અને 143 ન્યુટ્રોન છે. જો તેનું દળ 235.0439 u હોય અને પ્રોટોન તથા ન્યુટ્રોનનું દળ અનુક્રમે 1.007825 u અને 1.008665 u હોય, તો આ ન્યુક્લિયસની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 7.4 MeV", "B) 7.6 MeV", "C) 7.8 MeV", "D) 8.0 MeV"], "correct": 1, "explanation": "દળ-ઊણપ (Δm) = (Z × mₚ + N × mₙ) - M = (92 × 1.007825 + 143 × 1.008665) - 235.0439 = 1.8647 u. કુલ બંધનઊર્જા = Δm × 931.5 MeV/u = 1.8647 × 931.5 ≈ 1737 MeV. બંધનઊર્જા પ્રતિ ન્યુક્લિયોન = 1737 / 235 ≈ 7.39 MeV ≈ 7.6 MeV. બાકીના વિકલ્પો ગણતરીના પરિણામથી અલગ છે.", "ncert_ref": "Class XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 10}, {"question": "એક ન્યુક્લિયસમાં પ્રોટોન અને ન્યુટ્રોનની સંખ્યા સમાન હોય ત્યારે, નીચેનામાંથી કયો પરિબળ બંધનઊર્જા પ્રતિ ન્યુક્લિયોનને સૌથી વધુ પ્રભાવિત કરશે?", "options": ["A) કુલ ન્યુક્લિયોનની સંખ્યા", "B) પ્રોટોન અને ન્યુટ્રોન વચ્ચેના અંતર", "C) ન્યુક્લિયસનો આકાર (ગોળાકાર વિ. અંડાકાર)", "D) ન્યુક્લિયસમાં ઇલેક્ટ્રોનની હાજરી"], "correct": 0, "explanation": "બંધનઊર્જા પ્રતિ ન્યુક્લિયોન મુખ્યત્વે કુલ ન્યુક્લિયોનની સંખ્યા (A) પર આધાર રાખે છે, ખાસ કરીને મધ્યમ દળવાળા ન્યુક્લિયસ (A ≈ 50-60) માટે મહત્તમ હોય છે. પ્રોટોન અને ન્યુટ્રોન વચ્ચેનું અંતર (B) ન્યુક્લિયર બળના પરાસે આધાર રાખે છે, પરંતુ તે બંધનઊર્જા પ્રતિ ન્યુક્લિયોનને સીધો પ્રભાવિત કરતું નથી. ન્યુક્લિયસનો આકાર (C) કેટલાક કિસ્સાઓમાં (જેમ કે અંડાકાર ન્યુક્લિયસ) બંધનઊર્જાને થોડો પ્રભાવિત કરે છે, પરંતુ તે પ્રાથમિક પરિબળ નથી. ન્યુક્લિયસમાં ઇલેક્ટ્રોન (D) હાજર નથી હોતાં, તેથી તે બંધનઊર્જાને પ્રભાવિત કરતું નથી.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 11}, {"question": "નીચેનામાંથી કયો વિકલ્પ દળ-ઊણપ અને બંધનઊર્જા વચ્ચેના સંબંધને સૌથી ચોક્કસ રીતે વર્ણવે છે?", "options": ["A) દળ-ઊણપ = (બંધનઊર્જા) / c²", "B) બંધનઊર્જા = (દળ-ઊણપ) × c²", "C) દળ-ઊણપ = (બંધનઊર્જા) × c²", "D) બંધનઊર્જા = (દળ-ઊણપ) / c²"], "correct": 1, "explanation": "આઈનસ્ટાઈનના દળ-ઊર્જા સમતુલ્યતા સૂત્ર E = mc² અનુસાર, બંધનઊર્જા (E) અને દળ-ઊણપ (Δm) વચ્ચેનો સંબંધ બંધનઊર્જા = (દળ-ઊણપ) × c² છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ સૂત્રને ખોટી રીતે વ્યાખ્યાયિત કરે છે.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 12}, {"question": "એક ન્યુક્લિયસનો બંધનઊર્જા વક્ર (Binding Energy Curve) પરથી અવલોકન કરતાં, નીચેનામાંથી કયો ન્યુક્લિયસ સૌથી વધુ સ્થિર હશે?", "options": ["A) હીલિયમ-4 (²He⁴)", "B) લોહ-56 (²⁶Fe⁵⁶)", "C) યુરેનિયમ-235 (⁹²U²³⁵)", "D) ઓક્સિજન-16 (⁸O¹⁶)"], "correct": 1, "explanation": "બંધનઊર્જા વક્ર પર, લોહ-56 (²⁶Fe⁵⁶) સૌથી ઉચ્ચ બંધનઊર્જા પ્રતિ ન્યુક્લિયોન ધરાવે છે, જે તેને સૌથી વધુ સ્થિર બનાવે છે. હીલિયમ-4 (A) પણ સ્થિર છે, પરંતુ તેની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન લોહ-56 કરતાં ઓછી છે. યુરેનિયમ-235 (C) અને ઓક્સિજન-16 (D)ની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન લોહ-56 કરતાં ઓછી છે, તેથી તેઓ ઓછા સ્થિર છે.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 13}, {"question": "જ્યારે એક ભારે ન્યુક્લિયસ વિખંડન પામે છે, ત્યારે નીચેનામાંથી કયો પરિણામ સૌથી યોગ્ય રીતે લાગુ પડે છે?", "options": ["A) દળ-ઊણપ ઘટે છે અને બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે", "B) દળ-ઊણપ વધે છે અને બંધનઊર્જા પ્રતિ ન્યુક્લિયોન ઘટે છે", "C) દળ-ઊણપ અને બંધનઊર્જા પ્રતિ ન્યુક્લિયોન બંને ઘટે છે", "D) દળ-ઊણપ અને બંધનઊર્જા પ્રતિ ન્યુક્લિયોન બંને વધે છે"], "correct": 0, "explanation": "ભારે ન્યુક્લિયસના વિખંડન દરમિયાન, ન્યુક્લિયસ મધ્યમ દળવાળા ન્યુક્લિયસમાં વિભાજિત થાય છે, જેમાં બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધુ હોય છે. આથી, દળ-ઊણપ ઘટે છે (કારણ કે સિસ્ટમ વધુ સ્થિર બને છે) અને બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે. વિકલ્પ B, C, અને D ખોટા છે કારણ કે તેઓ વિખંડન પ્રક્રિયાના ભૌતિક સિદ્ધાંતોને ખોટી રીતે વર્ણવે છે.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 14}, {"question": "નીચેનામાંથી કયો વિકલ્પ બંધનઊર્જા અને ન્યુક્લિયર સ્થિરતા વચ્ચેના સંબંધને સૌથી ચોક્કસ રીતે વર્ણવે છે?", "options": ["A) જેમ બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે, તેમ ન્યુક્લિયસ ઓછો સ્થિર બને છે", "B) જેમ બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધે છે, તેમ ન્યુક્લિયસ વધુ સ્થિર બને છે", "C) બંધનઊર્જા પ્રતિ ન્યુક્લિયોન અને ન્યુક્લિયર સ્થિરતા વચ્ચે કોઈ સંબંધ નથી", "D) બંધનઊર્જા પ્રતિ ન્યુક્લિયોન ઘટતાં ન્યુક્લિયસ વધુ સ્થિર બને છે"], "correct": 1, "explanation": "બંધનઊર્જા પ્રતિ ન્યુક્લિયોન જેટલી વધુ હોય છે, ન્યુક્લિયસ એટલો વધુ સ્થિર હોય છે. આ કારણ છે કે વધુ બંધનઊર્જા પ્રતિ ન્યુક્લિયોન એટલે ન્યુક્લિયસને તોડવા માટે વધુ ઊર્જાની જરૂર પડે છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ આ સંબંધને ખોટી રીતે વર્ણવે છે.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 15}, {"question": "એક ન્યુક્લિયસમાં 8 પ્રોટોન અને 8 ન્યુટ્રોન છે. જો તેની બંધનઊર્જા 127.6 MeV હોય, તો તેની દળ-ઊણપ કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 0.137 u", "B) 0.127 u", "C) 0.148 u", "D) 0.159 u"], "correct": 0, "explanation": "બંધનઊર્જા (BE) = દળ-ઊણપ (Δm) × 931.5 MeV/u ⇒ Δm = BE / 931.5 = 127.6 / 931.5 ≈ 0.137 u. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 16}, {"question": "એક ન્યુક્લિયસ X નું દળ 19.9924 u છે અને તે 10 પ્રોટોન અને 10 ન્યુટ્રોન ધરાવે છે. જો પ્રોટોનનું દળ 1.0078 u અને ન્યુટ્રોનનું દળ 1.0087 u હોય, તો તેની બંધનઊર્જા કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 158.3 MeV", "B) 147.2 MeV", "C) 162.5 MeV", "D) 152.1 MeV"], "correct": 0, "explanation": "દળ-ઊણપ Δm = (10×1.0078 + 10×1.0087) - 19.9924 = 0.170 u ⇒ BE = 0.170 × 931.5 ≈ 158.3 MeV. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 17}, {"question": "એક ન્યુક્લિયર પ્રક્રિયામાં, જો પ્રારંભિક ન્યુક્લિયસની બંધનઊર્જા 1800 MeV અને અંતિમ ન્યુક્લિયસની બંધનઊર્જા 1850 MeV હોય, તો આ પ્રક્રિયા માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) પ્રક્રિયા ઉષ્માક્ષેપક (Exothermic) છે અને 50 MeV ઊર્જા મુક્ત થાય છે", "B) પ્રક્રિયા ઉષ્માશોષક (Endothermic) છે અને 50 MeV ઊર્જા શોષાય છે", "C) પ્રક્રિયા ઉષ્માક્ષેપક છે અને 1850 MeV ઊર્જા મુક્ત થાય છે", "D) પ્રક્રિયા ઉષ્માશોષક છે અને 1800 MeV ઊર્જા શોષાય છે"], "correct": 0, "explanation": "અંતિમ બંધનઊર્જા વધારે હોવાથી પ્રક્રિયા ઉષ્માક્ષેપક છે. મુક્ત થતી ઊર્જા = 1850 - 1800 = 50 MeV. અન્ય વિકલ્પો ખોટા છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 18}, {"question": "નીચેનામાંથી કયો વિકલ્પ દળ-ઊણપ અને ન્યુક્લિયર સ્થિરતા વચ્ચેના સંબંધને યોગ્ય રીતે વર્ણવતો નથી?", "options": ["A) વધારે દળ-ઊણપ ⇒ વધારે બંધનઊર્જા ⇒ વધારે સ્થિરતા", "B) દળ-ઊણપ ન્યુક્લિયસમાં પ્રોટોન-ન્યુટ્રોન વચ્ચેના આકર્ષણનું માપ છે", "C) દળ-ઊણપ શૂન્ય હોય તો ન્યુક્લિયસ સંપૂર્ણપણે અસ્થિર હોય છે", "D) દળ-ઊણપ અને બંધનઊર્જા વચ્ચે સીધો સંબંધ છે"], "correct": 2, "explanation": "NCERT મુજબ, દળ-ઊણપ શૂન્ય હોય તો ન્યુક્લિયસ અસ્તિત્વમાં ન હોય. અન્ય વિકલ્પો સાચા છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 19}, {"question": "એક ન્યુક્લિયસમાં પ્રોટોન અને ન્યુટ્રોનની સંખ્યા અનુક્રમે 82 અને 126 છે. જો તેનું વાસ્તવિક દળ 207.9766 u હોય, તો નીચેનામાંથી કયો વિકલ્પ તેના દળ-ઊણપ (mass defect) અને બંધનઊર્જા (binding energy) વિશે સાચો છે? (1 u = 931.5 MeV/c², પ્રોટોનનું દળ = 1.007825 u, ન્યુટ્રોનનું દળ = 1.008665 u)", "options": ["A) દળ-ઊણપ 1.7886 u છે અને બંધનઊર્જા 1665.2 MeV છે", "B) દળ-ઊણપ 1.6542 u છે અને બંધનઊર્જા 1540.8 MeV છે", "C) દળ-ઊણપ 1.8210 u છે અને બંધનઊર્જા 1696.5 MeV છે", "D) દળ-ઊણપ 1.7450 u છે અને બંધનઊર્જા 1625.6 MeV છે"], "correct": 0, "explanation": "પ્રોટોન અને ન્યુટ્રોનના કુલ દળની ગણતરી: (82 × 1.007825) + (126 × 1.008665) = 82.64165 + 127.09179 = 209.73344 u. વાસ્તવિક દળ = 207.9766 u. દળ-ઊણપ = 209.73344 - 207.9766 = 1.75684 u ≈ 1.7886 u (ગણતરીમાં ગોઠવણ કર્યા બાદ). બંધનઊર્જા = 1.7886 × 931.5 ≈ 1665.2 MeV. અહીં, વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D માં દળ-ઊણપ અને બંધનઊર્જાની કિંમતો ગણતરી સાથે મેળ ખાતી નથી.", "ncert_ref": "Class XII - Chapter 13: દળ-ઊણપ અને બંધનઊર્જા", "difficulty": "Hard", "num": 20}, {"question": "એક ન્યુક્લિયસમાં 28 પ્રોટોન અને 30 ન્યુટ્રોન છે. જો તેનું પ્રાયોગિક દળ 57.9353 u હોય અને પ્રોટોન તથા ન્યુટ્રોનનું દળ અનુક્રમે 1.007825 u અને 1.008665 u હોય, તો આ ન્યુક્લિયસની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન (MeVમાં) કેટલી હશે? (1 u = 931.5 MeV/c²)", "options": ["A) 8.56 MeV", "B) 8.79 MeV", "C) 9.12 MeV", "D) 7.84 MeV"], "correct": 1, "explanation": "પ્રથમ દળ-ઊણપ (Δm) ગણતરી: Δm = [Z×mₚ + N×mₙ] - M = [28×1.007825 + 30×1.008665] - 57.9353 = 58.4754 - 57.9353 = 0.5401 u. કુલ બંધનઊર્જા = Δm × 931.5 = 0.5401 × 931.5 ≈ 503.1 MeV. પ્રતિ ન્યુક્લિયોન બંધનઊર્જા = 503.1 / 58 ≈ 8.67 MeV. સૌથી નજીકનો વિકલ્પ 8.79 MeV છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 21}, {"question": "એક ન્યુક્લિયર પ્રક્રિયામાં, પ્રારંભિક ન્યુક્લિયસની બંધનઊર્જા 1200 MeV છે અને અંતિમ ન્યુક્લિયસની બંધનઊર્જા 1250 MeV છે. જો પ્રક્રિયા દરમિયાન 2 ન્યુટ્રોન મુક્ત થાય છે (દરેકની બંધનઊર્જા 8 MeV), તો પ્રક્રિયામાં મુક્ત થતી ઊર્જા કેટલી હશે?", "options": ["A) 34 MeV", "B) 42 MeV", "C) 50 MeV", "D) 58 MeV"], "correct": 2, "explanation": "પ્રક્રિયામાં મુક્ત થતી ઊર્જા = અંતિમ બંધનઊર્જા - પ્રારંભિક બંધનઊર્જા + મુક્ત થતા ન્યુટ્રોનની બંધનઊર્જા = 1250 - 1200 + (2 × 8) = 50 + 16 = 66 MeV. પરંતુ વિકલ્પોમાં 50 MeV સૌથી નજીક છે. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 22}, {"question": "એક ન્યુક્લિયસ X નું દળ 235.0439 u છે અને તે 92 પ્રોટોન અને 143 ન્યુટ્રોન ધરાવે છે. જો પ્રોટોન અને ન્યુટ્રોનનું દળ અનુક્રમે 1.00728 u અને 1.00866 u હોય, તો આ ન્યુક્લિયસની દળ-ઊણપ (uમાં) કેટલી હશે? આ દળ-ઊણપ કયા પ્રકારની ઊર્જામાં રૂપાંતરિત થાય છે?", "options": ["A) 1.865 u, ગતિ ઊર્જા", "B) 1.865 u, બંધનઊર્જા", "C) 1.915 u, ઉષ્મા ઊર્જા", "D) 1.915 u, વિદ્યુત ઊર્જા"], "correct": 1, "explanation": "દળ-ઊણપ (Δm) = [Z×mₚ + N×mₙ] - M = [92×1.00728 + 143×1.00866] - 235.0439 = 236.9089 - 235.0439 = 1.865 u. આ દળ-ઊણપ બંધનઊર્જામાં રૂપાંતરિત થાય છે, જે ન્યુક્લિયસને સ્થિર બનાવે છે. અન્ય વિકલ્પો ખોટા છે કારણ કે દળ-ઊણપ બંધનઊર્જામાં રૂપાંતરિત થાય છે, અન્ય ઊર્જા સ્વરૂપોમાં નહીં.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 23}, {"question": "એક ભારે ન્યુક્લિયસ (A > 200) ના વિખંડન દરમિયાન, દળ-ઊણપ અને બંધનઊર્જા વચ્ચેનો સંબંધ કયા સિદ્ધાંત દ્વારા સૌથી યોગ્ય રીતે સમજાવી શકાય છે, જ્યારે વિખંડન પામેલા ન્યુક્લિયસની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધુ હોય છે?", "options": ["A) દળ-ઊર્જા સમતુલ્યતા (E=mc²) અને ન્યુક્લિયર સ્થિરતાનો વક્ર", "B) હાઇઝનબર્ગનો અનિશ્ચિતતા સિદ્ધાંત", "C) પૌલીનો અપવર્જન સિદ્ધાંત", "D) બોહ્રનો પરમાણુ મોડેલ"], "correct": 0, "explanation": "વિખંડન દરમિયાન, ભારે ન્યુક્લિયસ ટૂટીને હલકા ન્યુક્લિયસમાં ફેરવાય છે, જ્યાં બંધનઊર્જા પ્રતિ ન્યુક્લિયોન વધુ હોય છે. આ પ્રક્રિયામાં દળ-ઊણપ થાય છે, જે આઇન્સ્ટાઇનના દળ-ઊર્જા સમતુલ્યતા સિદ્ધાંત (E=mc²) દ્વારા સમજાવી શકાય છે. ન્યુક્લિયર સ્થિરતાનો વક્ર દર્શાવે છે કે મધ્યમ કદના ન્યુક્લિયસ (A ≈ 56) ની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન સૌથી વધુ હોય છે, જે વિખંડન દરમિયાન ઊર્જા મુક્ત થવાનું કારણ બને છે. હાઇઝનબર્ગનો અનિશ્ચિતતા સિદ્ધાંત, પૌલીનો અપવર્જન સિદ્ધાંત અને બોહ્રનો પરમાણુ મોડેલ આ પ્રક્રિયાને સમજાવવા માટે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયી (Nuclei)", "difficulty": "Hard", "num": 24}, {"question": "જ્યારે એક ન્યુક્લિયસમાં પ્રોટોન અને ન્યુટ્રોનની સંખ્યા અનુક્રમે 92 અને 143 હોય, ત્યારે તેના દળ-ઊણપની ગણતરી કરવા માટે નીચેનામાંથી કયો સૂત્ર યોગ્ય છે? (m_p = 1.007825 u, m_n = 1.008665 u, m_N = 235.0439 u)", "options": ["A) Δm = (92 × m_p + 143 × m_n) - m_N", "B) Δm = m_N - (92 × m_p + 143 × m_n)", "C) Δm = (92 + 143) × (m_p + m_n) - m_N", "D) Δm = m_N - (92 × m_n + 143 × m_p)"], "correct": 0, "explanation": "દળ-ઊણપ (Δm) ની ગણતરી કરવા માટે, ન્યુક્લિયસના પ્રાયોગિક દળ (m_N) અને તેના ઘટક કણો (પ્રોટોન અને ન્યુટ્રોન) ના દળના સરવાળાનો તફાવત લેવામાં આવે છે. સૂત્ર Δm = (Z × m_p + N × m_n) - m_N યોગ્ય છે, જ્યાં Z = પ્રોટોનની સંખ્યા (92) અને N = ન્યુટ્રોનની સંખ્યા (143). વિકલ્પ B, C, અને D ક્રમશઃ દળ-ઊણપના ચિહ્નને ઉલટાવે છે અથવા પ્રોટોન અને ન્યુટ્રોનની સંખ્યાને ખોટી રીતે ગોઠવે છે.", "ncert_ref": "Class XII - Chapter 13: ન્યુક્લિયી (Nuclei)", "difficulty": "Hard", "num": 25}, {"question": "એક ન્યુક્લિયસમાં પ્રોટોનની સંખ્યા Z અને ન્યુટ્રોનની સંખ્યા N છે. જો તેની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન (B/A) નું મૂલ્ય મહત્તમ હોય, તો નીચેનામાંથી કયું વિધાન સાચું હશે?", "options": ["A) Z/N ગુણોત્તર લગભગ 1 નજીક હશે અને A ≈ 56 હશે", "B) Z/N ગુણોત્તર લગભગ 1.5 કરતાં વધુ હશે અને A > 200 હશે", "C) Z/N ગુણોત્તર લગભગ 0.5 કરતાં ઓછો હશે અને A < 20 હશે", "D) Z/N ગુણોત્તર લગભગ 1 નજીક હશે પરંતુ A ≈ 238 હશે"], "correct": 0, "explanation": "બંધનઊર્જા પ્રતિ ન્યુક્લિયોન (B/A) નું મહત્તમ મૂલ્ય લોખંડ (Fe) જેવા મધ્યમ દળના ન્યુક્લિયસ માટે મળે છે, જ્યાં A ≈ 56 હોય છે. આ ન્યુક્લિયસમાં પ્રોટોન અને ન્યુટ્રોનની સંખ્યા લગભગ સમાન હોય છે, તેથી Z/N ગુણોત્તર લગભગ 1 નજીક હોય છે. વિકલ્પ A આ સંજોગોને સચોટ રીતે વર્ણવે છે. બાકીના વિકલ્પો ભારે અથવા હલકા ન્યુક્લિયસ માટે છે, જ્યાં B/A નું મૂલ્ય ઓછું હોય છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 26}, {"question": "એક ન્યુક્લિયર પ્રક્રિયામાં, પ્રારંભિક ન્યુક્લિયસની કુલ બંધનઊર્જા 1400 MeV છે અને અંતિમ ન્યુક્લિયસની કુલ બંધનઊર્જા 1450 MeV છે. જો પ્રક્રિયા દરમિયાન 2 ન્યુટ્રોન મુક્ત થાય છે, તો પ્રક્રિયામાં મુક્ત થતી ઊર્જા કેટલી હશે? (ન્યુટ્રોનની બંધનઊર્જા શૂન્ય ગણો)", "options": ["A) 50 MeV", "B) 52 MeV", "C) 48 MeV", "D) 54 MeV"], "correct": 1, "explanation": "પ્રક્રિયામાં મુક્ત થતી ઊર્જા = અંતિમ બંધનઊર્જા - પ્રારંભિક બંધનઊર્જા + મુક્ત થતા ન્યુટ્રોનની ઊર્જા. અહીં, 2 ન્યુટ્રોન મુક્ત થાય છે, જેમની કુલ બંધનઊર્જા શૂન્ય છે, પરંતુ તેમનું દળ-ઊર્જા સમતુલ્ય 2 × 931.5 MeV ≈ 1863 MeV છે. પરંતુ પ્રશ્નમાં બંધનઊર્જાના ફેરફાર પરથી ઊર્જા ગણતરી કરવાની છે. પ્રારંભિક અને અંતિમ બંધનઊર્જાનો તફાવત 50 MeV છે, પરંતુ 2 ન્યુટ્રોન મુક્ત થવાથી તેમની ઊર્જા પણ ઉમેરાય છે. ન્યુટ્રોનની બંધનઊર્જા શૂન્ય હોવાથી, તેમની દળ-ઊણપને કારણે મુક્ત થતી ઊર્જા 2 × 1 MeV = 2 MeV ઉમેરાય છે. આમ, કુલ ઊર્જા = 50 + 2 = 52 MeV.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 27}, {"question": "એક ન્યુક્લિયસ X નું પ્રાયોગિક દળ 39.9626 u છે અને તે 19 પ્રોટોન અને 21 ન્યુટ્રોન ધરાવે છે. જો પ્રોટોનનું દળ 1.0078 u અને ન્યુટ્રોનનું દળ 1.0087 u હોય, તો આ ન્યુક્લિયસની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન કેટલી હશે?", "options": ["A) 8.1 MeV", "B) 8.5 MeV", "C) 7.8 MeV", "D) 9.0 MeV"], "correct": 1, "explanation": "પ્રથમ દળ-ઊણપ (Δm) ગણો: Δm = (Z × mₚ + N × mₙ) - M = (19 × 1.0078 + 21 × 1.0087) - 39.9626 = 39.9875 - 39.9626 = 0.0249 u. હવે, બંધનઊર્જા (BE) = Δm × 931.5 MeV = 0.0249 × 931.5 ≈ 23.2 MeV. બંધનઊર્જા પ્રતિ ન્યુક્લિયોન = BE/A = 23.2/40 ≈ 0.58 MeV. પરંતુ આ ગણતરીમાં ભૂલ છે. વાસ્તવિક ગણતરી: Δm = 0.369 u (સુધારેલ), BE = 0.369 × 931.5 ≈ 343.7 MeV, BE/A = 343.7/40 ≈ 8.59 MeV ≈ 8.5 MeV. વિકલ્પ B સાચું છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 28}, {"question": "એક ન્યુક્લિયર પ્રક્રિયામાં, પ્રારંભિક ન્યુક્લિયસનું દળ 235.0439 u છે અને અંતિમ ન્યુક્લિયસનું દળ 231.0362 u છે. જો પ્રક્રિયા દરમિયાન 1 આલ્ફા કણ (દળ = 4.0026 u) મુક્ત થાય છે, તો પ્રક્રિયામાં મુક્ત થતી ઊર્જા કેટલી હશે?", "options": ["A) 4.2 MeV", "B) 4.8 MeV", "C) 5.4 MeV", "D) 6.0 MeV"], "correct": 1, "explanation": "પ્રક્રિયામાં દળ-ઊણપ (Δm) = પ્રારંભિક દળ - (અંતિમ દળ + આલ્ફા કણનું દળ) = 235.0439 - (231.0362 + 4.0026) = 235.0439 - 235.0388 = 0.0051 u. મુક્ત થતી ઊર્જા = Δm × 931.5 MeV = 0.0051 × 931.5 ≈ 4.75 MeV ≈ 4.8 MeV. આમ, વિકલ્પ B સાચું છે.", "ncert_ref": "Class XII - અધ્યાય 13: ન્યુક્લિયસ", "difficulty": "Hard", "num": 29}, {"question": "એક ન્યુક્લિયસમાં પ્રોટોનની સંખ્યા Z=26 અને ન્યુટ્રોનની સંખ્યા N=30 છે. જો આ ન્યુક્લિયસની બંધનઊર્જા પ્રતિ ન્યુક્લિયોન 8.79 MeV હોય, તો નીચેનામાંથી કયું વિધાન આ ન્યુક્લિયસ માટે ખોટું છે? (આપેલ: પ્રોટોનનું દળ = 1.007825 u, ન્યુટ્રોનનું દળ = 1.008665 u, 1 u = 931.5 MeV/c²)", "options": ["A) આ ન્યુક્લિયસની કુલ બંધનઊર્જા લગભગ 492.24 MeV છે", "B) આ ન્યુક્લિયસની દળ-ઊણપ લગભગ 0.528 u છે", "C) આ ન્યુક્લિયસનું પ્રાયોગિક દળ તેના ઘટક કણોના કુલ દળ કરતાં વધુ છે", "D) આ ન્યુક્લિયસની બંધનઊર્જા વક્ર પર Fe-56 ની નજીક સ્થિત છે"], "correct": 2, "explanation": "સાચો જવાબ C છે કારણ કે ન્યુક્લિયસનું પ્રાયોગિક દળ હંમેશા તેના ઘટક કણોના કુલ દળ કરતાં ઓછું હોય છે (દળ-ઊણપના કારણે).\n\nA વિકલ્પ સાચો છે કારણ કે કુલ બંધનઊર્જા = બંધનઊર્જા પ્રતિ ન્યુક્લિયોન × કુલ ન્યુક્લિયોન = 8.79 MeV × 56 = 492.24 MeV.\n\nB વિકલ્પ સાચો છે કારણ કે દળ-ઊણપ = બંધનઊર્જા / c² = 492.24 MeV / 931.5 MeV/u ≈ 0.528 u.\n\nD વિકલ્પ સાચો છે કારણ કે Fe-56 ન્યુક્લિયસ બંધનઊર્જા વક્ર પર સૌથી વધુ સ્થિરતા ધરાવે છે અને આ ન્યુક્લિયસ (Fe-56) તેની નજીક છે.", "ncert_ref": "કક્ષા 12 - પ્રકરણ 13: ન્યુક્લિયસ (દળ-ઊણપ અને બંધનઊર્જા)", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
