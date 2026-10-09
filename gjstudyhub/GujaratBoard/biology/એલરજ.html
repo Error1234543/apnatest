@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>એલર્જી</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>એલર્જી</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">એલર્જી</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એલર્જી પ્રતિક્રિયા દરમિયાન મસ્ટ કોષોમાંથી મુક્ત થતું રસાયણ કયું છે, જે રક્તવાહિનીઓની પારગમ્યતા વધારીને સોજો ઉત્પન્ન કરે છે?", "opts": ["હિસ્ટામિન", "ઇન્ટરફેરોન", "ઇમ્યુનોગ્લોબ્યુલિન E (IgE)", "પ્રોસ્ટાગ્લેન્ડિન"], "ans": 0, "exp": "હિસ્ટામિન એ મસ્ટ કોષોમાંથી મુક્ત થતું પ્રાથમિક રસાયણ છે, જે એલર્જી પ્રતિક્રિયા દરમિયાન રક્તવાહિનીઓની પારગમ્યતા વધારીને સોજો ઉત્પન્ન કરે છે. ઇન્ટરફેરોન વાયરસ સામેની પ્રતિકારક ક્રિયામાં ભાગ લે છે, IgE એ એન્ટીબોડી છે જે એલર્જી પ્રતિક્રિયાને પ્રેરે છે પરંતુ સોજો ઉત્પન્ન કરતું નથી, અને પ્રોસ્ટાગ્લેન્ડિન એ પીડા અને સોજો સાથે સંબંધિત છે પરંતુ મસ્ટ કોષોમાંથી મુક્ત થતું પ્રાથમિક રસાયણ નથી.", "ref": "Std 12 - પ્રકરણ 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયામાં IgE એન્ટીબોડીનું કયું કાર્ય સૌથી મહત્વપૂર્ણ છે?", "opts": ["બેક્ટેરિયાને નિષ્ક્રિય કરવું", "મસ્ટ કોષો અને બેસોફિલ્સને સક્રિય કરવા", "વાયરસને નાશ કરવું", "રક્ત કણોને ઉત્પન્ન કરવી"], "ans": 1, "exp": "IgE એન્ટીબોડી એલર્જી પ્રતિક્રિયામાં મસ્ટ કોષો અને બેસોફિલ્સને સક્રિય કરે છે, જે હિસ્ટામિન જેવા રસાયણો મુક્ત કરે છે. બેક્ટેરિયા અને વાયરસ સામેનું રક્ષણ IgG અને IgM જેવા એન્ટીબોડી દ્વારા થાય છે, જ્યારે રક્ત કણોનું ઉત્પાદન હિમોપોઈસિસ પ્રક્રિયા દ્વારા થાય છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન કયો સાયટોકાઈન મસ્ટ કોષોની ડિગ્રેન્યુલેશનને પ્રેરે છે?", "opts": ["ઇન્ટરલ્યુકિન-2 (IL-2)", "ઇન્ટરલ્યુકિન-4 (IL-4)", "ટ્યુમર નેક્રોસિસ ફેક્ટર-આલ્ફા (TNF-α)", "ગામા ઇન્ટરફેરોન (IFN-γ)"], "ans": 1, "exp": "ઇન્ટરલ્યુકિન-4 (IL-4) એલર્જી પ્રતિક્રિયામાં મસ્ટ કોષોની ડિગ્રેન્યુલેશનને પ્રેરે છે અને IgE ઉત્પાદનને ઉત્તેજે છે. IL-2 T-કોષોના પ્રસરણમાં ભાગ લે છે, TNF-α સોજો અને એપોપ્ટોસિસ સાથે સંબંધિત છે, અને IFN-γ વાયરસ અને ઇન્ટ્રાસેલ્યુલર પેથોજેન સામેની પ્રતિક્રિયામાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એનાફિલેક્સિસ એ એલર્જીની કયા પ્રકારની પ્રતિક્રિયા છે, જે ત્વરિત અને ગંભીર હોય છે?", "opts": ["ટાઈપ I (ત્વરિત હાયપરસેન્સિટિવિટી)", "ટાઈપ II (એન્ટીબોડી-મેડિયેટેડ સાયટોટોક્સિસિટી)", "ટાઈપ III (ઇમ્યુન કોમ્પ્લેક્સ-મેડિયેટેડ)", "ટાઈપ IV (ડિલેડ હાયપરસેન્સિટિવિટી)"], "ans": 0, "exp": "એનાફિલેક્સિસ એ ટાઈપ I હાયપરસેન્સિટિવિટી પ્રતિક્રિયા છે, જે IgE દ્વારા મેડિયેટ થાય છે અને ત્વરિત અને ગંભીર હોય છે. ટાઈપ II એન્ટીબોડી-મેડિયેટેડ સાયટોટોક્સિસિટી છે, ટાઈપ III ઇમ્યુન કોમ્પ્લેક્સ-મેડિયેટેડ છે, અને ટાઈપ IV ડિલેડ હાયપરસેન્સિટિવિટી છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયામાં કયો કોષ IgE એન્ટીબોડી સાથે બંધાયેલો હોય છે અને હિસ્ટામિન મુક્ત કરે છે?", "opts": ["T-કોષ", "B-કોષ", "મસ્ટ કોષ", "ન્યુટ્રોફિલ"], "ans": 2, "exp": "મસ્ટ કોષો IgE એન્ટીબોડી સાથે બંધાયેલા હોય છે અને એલર્જી પ્રતિક્રિયા દરમિયાન હિસ્ટામિન મુક્ત કરે છે. T-કોષ અને B-કોષ પ્રતિરક્ષા પ્રતિક્રિયામાં ભાગ લે છે પરંતુ હિસ્ટામિન મુક્ત કરતા નથી, જ્યારે ન્યુટ્રોફિલ ફેગોસાઇટોસિસમાં ભાગ લે છે.", "ref": "Std 12 - પ્રકરણ 10: પ્રતિરક્ષાતંત્ર", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, હિસ્ટામિનની અસરને રોકવા માટે કયો એન્ટિહિસ્ટામિન દવા વપરાય છે, જે H1 રિસેપ્ટરને અવરોધે છે?", "opts": ["એડ્રિનાલિન", "કોર્ટિકોસ્ટેરોઈડ", "લોરાટાડિન", "એસ્પિરિન"], "ans": 2, "exp": "લોરાટાડિન એ H1 રિસેપ્ટર એન્ટાગોનિસ્ટ છે, જે હિસ્ટામિનની અસરને અવરોધે છે અને એલર્જીના લક્ષણોને ઘટાડે છે. એડ્રિનાલિન એ એનાફિલેક્સિસમાં વપરાતી આપતકાલીન દવા છે, કોર્ટિકોસ્ટેરોઈડ એ દાહક પ્રતિક્રિયાને ઘટાડે છે, અને એસ્પિરિન એ દર્દનિવારક છે, પરંતુ એન્ટિહિસ્ટામિન નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને એલર્જી", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયામાં, કયો કોષ ટીશ્યુમાં હિસ્ટામિન, હેપારિન અને સેરોટોનિન જેવા મેદિયેટરો મુક્ત કરે છે?", "opts": ["B-લિમ્ફોસાઇટ", "T-લિમ્ફોસાઇટ", "મસ્ટ કોષ", "ન્યૂટ્રોફિલ"], "ans": 2, "exp": "મસ્ટ કોષ એલર્જી પ્રતિક્રિયા દરમિયાન હિસ્ટામિન, હેપારિન અને સેરોટોનિન જેવા મેદિયેટરો મુક્ત કરે છે. B-લિમ્ફોસાઇટ એન્ટિબોડી ઉત્પન્ન કરે છે, T-લિમ્ફોસાઇટ કોષીય પ્રતિરક્ષામાં ભાગ લે છે, અને ન્યૂટ્રોફિલ બેક્ટેરિયા વિરુદ્ધ લડે છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને એલર્જી", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયામાં, કયો એન્ટીબોડી ક્લાસ મસ્ટ કોષ અને બેસોફિલ્સ સાથે બંધાયેલો હોય છે અને એલર્જીની પ્રતિક્રિયાને પ્રેરે છે?", "opts": ["IgG", "IgM", "IgA", "IgE"], "ans": 3, "exp": "IgE એન્ટીબોડી એલર્જી પ્રતિક્રિયામાં મસ્ટ કોષ અને બેસોફિલ્સ સાથે બંધાયેલો હોય છે અને એલર્જીની પ્રતિક્રિયાને પ્રેરે છે. IgG, IgM, અને IgA એન્ટીબોડી ક્લાસ એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને એલર્જી", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો સાયટોકાઈન મસ્ટ કોષોની ડિગ્રેન્યુલેશનને પ્રેરે છે અને હિસ્ટામિન મુક્ત કરાવે છે?", "opts": ["ઇન્ટરલ્યુકિન-2", "ઇન્ટરફેરોન-ગામા", "ઇન્ટરલ્યુકિન-4", "ટ્યુમર નેક્રોસિસ ફેક્ટર-આલ્ફા"], "ans": 2, "exp": "ઇન્ટરલ્યુકિન-4 (IL-4) એલર્જી પ્રતિક્રિયા દરમિયાન મસ્ટ કોષોની ડિગ્રેન્યુલેશનને પ્રેરે છે અને હિસ્ટામિન મુક્ત કરાવે છે. ઇન્ટરલ્યુકિન-2 અને ઇન્ટરફેરોન-ગામા કોષીય પ્રતિરક્ષામાં ભાગ લે છે, જ્યારે ટ્યુમર નેક્રોસિસ ફેક્ટર-આલ્ફા દાહક પ્રતિક્રિયામાં ભાગ લે છે.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને એલર્જી", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયામાં, કયો પ્રકારનો હાયપરસેન્સિટિવિટી ટાઈપ I એલર્જી પ્રતિક્રિયા સાથે સંકળાયેલો છે?", "opts": ["ટાઈપ II - સાયટોટોક્સિક", "ટાઈપ III - ઇમ્યુન કોમ્પ્લેક્સ", "ટાઈપ IV - ડિલેયડ હાયપરસેન્સિટિવિટી", "ટાઈપ I - ત્વરિત હાયપરસેન્સિટિવિટી"], "ans": 3, "exp": "ટાઈપ I હાયપરસેન્સિટિવિટી એલર્જી પ્રતિક્રિયા સાથે સંકળાયેલો છે, જે ત્વરિત અને IgE-મધ્યસ્થી પ્રતિક્રિયા છે. ટાઈપ II, III, અને IV હાયપરસેન્સિટિવિટી એલર્જી પ્રતિક્રિયા સાથે સંકળાયેલા નથી.", "ref": "Std 12 - Chapter 10: પ્રતિરક્ષાતંત્ર અને એલર્જી", "ch": ""}, {"q": "એક દર્દીને પરાગરજથી એલર્જી છે. તેને શ્વાસ લેવામાં તકલીફ, ખંજવાળ અને ત્વચા પર લાલ ચકામા દેખાય છે. આ પ્રતિક્રિયામાં IgE એન્ટીબોડીનું ઉત્પાદન વધે છે. આ પ્રક્રિયામાં નીચેનામાંથી કયો કોષ પ્રાથમિક રીતે IgE સાથે સંકળાયેલો નથી, પરંતુ એલર્જી પ્રતિક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે?", "opts": ["ન્યુટ્રોફિલ્સ", "ઇઓસિનોફિલ્સ", "બેસોફિલ્સ", "મેક્રોફેજ"], "ans": 0, "exp": "IgE એન્ટીબોડી મુખ્યત્વે મસ્ટ કોષો અને બેસોફિલ્સ સાથે જોડાય છે, જ્યારે ઇઓસિનોફિલ્સ એલર્જી પ્રતિક્રિયામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે પરંતુ IgE સાથે સીધા જોડાયેલા હોતા નથી. ન્યુટ્રોફિલ્સ એલર્જી પ્રતિક્રિયામાં પ્રાથમિક રીતે સંકળાયેલા નથી, પરંતુ તેઓ બેક્ટેરિયલ ચેપ સામે લડવામાં મદદ કરે છે. તેથી સાચો જવાબ ન્યુટ્રોફિલ્સ છે, કારણ કે તે IgE સાથે સંકળાયેલા નથી અને એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક સંશોધનમાં જાણવા મળ્યું કે કેટલાક વ્યક્તિઓમાં એલર્જી પ્રતિક્રિયા દરમિયાન IL-4 અને IL-13 સાયટોકાઈનનું ઉત્પાદન વધે છે. આ સાયટોકાઈનનું મુખ્ય કાર્ય શું છે, જે એલર્જી પ્રતિક્રિયામાં મહત્વપૂર્ણ છે?", "opts": ["B-કોષોને IgG ઉત્પાદન માટે પ્રેરિત કરે છે", "B-કોષોને IgE ઉત્પાદન માટે પ્રેરિત કરે છે", "મસ્ટ કોષોની ડિગ્રેન્યુલેશનને અટકાવે છે", "ટી-કોષોને સાયટોટોક્સિક પ્રતિક્રિયા માટે સક્રિય કરે છે"], "ans": 1, "exp": "IL-4 અને IL-13 સાયટોકાઈન B-કોષોને IgE એન્ટીબોડી ઉત્પાદન માટે પ્રેરિત કરે છે, જે એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવે છે. IgG ઉત્પાદન માટે પ્રેરિત કરવું એ એલર્જી પ્રતિક્રિયાનું લક્ષણ નથી. મસ્ટ કોષોની ડિગ્રેન્યુલેશનને અટકાવવાનું કાર્ય આ સાયટોકાઈનનું નથી. ટી-કોષોને સાયટોટોક્સિક પ્રતિક્રિયા માટે સક્રિય કરવું એ એલર્જી પ્રતિક્રિયાનું લક્ષણ નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને ખોરાકથી એલર્જી છે અને તેને પેટમાં દુખાવો, ઊલટી અને ઝાડા જેવા લક્ષણો દેખાય છે. આ પ્રતિક્રિયામાં IgE ઉપરાંત કયો અન્ય એન્ટીબોડી વર્ગ સંકળાયેલો હોઈ શકે છે, જે આંતરડાની મ્યુકોસામાં સ્થાનિક પ્રતિક્રિયા ઉત્પન્ન કરે છે?", "opts": ["IgA", "IgM", "IgG", "IgD"], "ans": 0, "exp": "IgA એન્ટીબોડી મ્યુકોસલ સપાટી પર જોવા મળે છે અને ખોરાકથી થતી એલર્જી પ્રતિક્રિયામાં સ્થાનિક પ્રતિક્રિયા ઉત્પન્ન કરવામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. IgM અને IgG રુધિરમાં વધુ સક્રિય હોય છે, જ્યારે IgD એન્ટીબોડીની ભૂમિકા હજુ સ્પષ્ટ નથી અને તે એલર્જી પ્રતિક્રિયામાં સીધી રીતે સંકળાયેલી નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક અભ્યાસમાં જાણવા મળ્યું કે કેટલાક વ્યક્તિઓમાં એલર્જી પ્રતિક્રિયા દરમિયાન Th2 કોષોનું પ્રમાણ વધે છે. Th2 કોષોનું મુખ્ય કાર્ય શું છે, જે એલર્જી પ્રતિક્રિયામાં મહત્વપૂર્ણ છે?", "opts": ["સાયટોટોક્સિક ટી-કોષોને સક્રિય કરે છે", "B-કોષોને એન્ટીબોડી ઉત્પાદન માટે પ્રેરિત કરે છે", "મેક્રોફેજને સક્રિય કરે છે", "ન્યુટ્રોફિલ્સને આકર્ષિત કરે છે"], "ans": 1, "exp": "Th2 કોષો B-કોષોને એન્ટીબોડી (ખાસ કરીને IgE) ઉત્પાદન માટે પ્રેરિત કરે છે, જે એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવે છે. સાયટોટોક્સિક ટી-કોષોને સક્રિય કરવા એ Th1 કોષોનું કાર્ય છે. મેક્રોફેજને સક્રિય કરવા અને ન્યુટ્રોફિલ્સને આકર્ષિત કરવા એ એલર્જી પ્રતિક્રિયાનું લક્ષણ નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક દર્દીને દવાની એલર્જી છે અને તેને ત્વચા પર લાલ ચકામા અને સોજો દેખાય છે. આ પ્રતિક્રિયામાં હિસ્ટામિન ઉપરાંત કયો મેદિયેટર મુખ્યત્વે સોજો અને દુખાવો ઉત્પન્ન કરવામાં ભાગ ભજવે છે?", "opts": ["સેરોટોનિન", "પ્રોસ્ટાગ્લાન્ડિન", "હેપારિન", "લ્યુકોટ્રિઈન"], "ans": 3, "exp": "લ્યુકોટ્રિઈન એ એલર્જી પ્રતિક્રિયામાં મુખ્ય મેદિયેટર છે, જે સોજો અને દુખાવો ઉત્પન્ન કરવામાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે. સેરોટોનિન અને હેપારિન મસ્ટ કોષોમાંથી મુક્ત થાય છે, પરંતુ તે સોજો અને દુખાવો ઉત્પન્ન કરવામાં મુખ્ય ભૂમિકા ભજવતા નથી. પ્રોસ્ટાગ્લાન્ડિન પણ સોજો ઉત્પન્ન કરે છે, પરંતુ લ્યુકોટ્રિઈન એ વધુ શક્તિશાળી મેદિયેટર છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો ઇમ્યુનોગ્લોબ્યુલિન ક્લાસ મસ્ટ કોષ અને બેસોફિલ્સની સપાટી પરના FcεRI રિસેપ્ટર સાથે બંધાયેલો હોય છે અને એલર્જેનની હાજરીમાં ડિગ્રેન્યુલેશનને પ્રેરે છે?", "opts": ["IgG", "IgM", "IgE", "IgA"], "ans": 2, "exp": "IgE એ એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવે છે. તે મસ્ટ કોષ અને બેસોફિલ્સની સપાટી પરના FcεRI રિસેપ્ટર સાથે બંધાયેલો હોય છે. જ્યારે એલર્જેન સાથે બંધાય ત્યારે તે ડિગ્રેન્યુલેશનને પ્રેરે છે અને હિસ્ટામિન જેવા મેદિયેટરો મુક્ત કરે છે. IgG, IgM, અને IgA એ એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો સાયટોકાઈન Th2 કોષો દ્વારા સ્રાવવામાં આવે છે અને તે B કોષોને IgE ઉત્પાદન માટે પ્રેરે છે?", "opts": ["IFN-γ", "IL-4", "TNF-α", "IL-12"], "ans": 1, "exp": "IL-4 એ Th2 કોષો દ્વારા સ્રાવવામાં આવતો સાયટોકાઈન છે જે B કોષોને IgE ઉત્પાદન માટે પ્રેરે છે. IFN-γ, TNF-α, અને IL-12 એ Th1 કોષો સાથે સંકળાયેલા સાયટોકાઈન છે અને એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો મેદિયેટર રક્તવાહિનીઓની પારગમ્યતા વધારે છે અને બ્રોન્કોસ્પઝમને પ્રેરે છે?", "opts": ["હેપારિન", "હિસ્ટામિન", "સેરોટોનિન", "પ્રોસ્ટાગ્લેન્ડિન"], "ans": 1, "exp": "હિસ્ટામિન એ મુખ્ય મેદિયેટર છે જે રક્તવાહિનીઓની પારગમ્યતા વધારે છે અને બ્રોન્કોસ્પઝમને પ્રેરે છે. હેપારિન એ એન્ટીકોએગ્યુલન્ટ છે, સેરોટોનિન એ વાસોકોન્સ્ટ્રિક્ટર છે, અને પ્રોસ્ટાગ્લેન્ડિન એ ઇન્ફ્લેમેશનમાં ભૂમિકા ભજવે છે પરંતુ હિસ્ટામિન જેવી અસર કરતા નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો કોષ એલર્જેનને પ્રસ્તુત કરે છે અને Th2 કોષોને પ્રેરે છે?", "opts": ["B કોષ", "T કોષ", "ડેન્ડ્રિટિક કોષ", "મસ્ટ કોષ"], "ans": 2, "exp": "ડેન્ડ્રિટિક કોષ એ એલર્જેનને પ્રસ્તુત કરે છે અને Th2 કોષોને પ્રેરે છે. B કોષ એન્ટીબોડી ઉત્પાદન માટે જવાબદાર છે, T કોષ એ ઇમ્યુન પ્રતિક્રિયામાં ભૂમિકા ભજવે છે પરંતુ એલર્જેન પ્રસ્તુત કરતા નથી, અને મસ્ટ કોષ એ હિસ્ટામિન મુક્ત કરે છે.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}, {"q": "એલર્જી પ્રતિક્રિયા દરમિયાન, કયો પ્રક્રિયા મસ્ટ કોષોની ડિગ્રેન્યુલેશન પછી થાય છે અને તે ઇન્ફ્લેમેશનને પ્રેરે છે?", "opts": ["ફેગોસાયટોસિસ", "કોમ્પ્લિમેન્ટ એક્ટિવેશન", "લ્યુકોટ્રાયન ઉત્પાદન", "એન્ટીબોડી-મેધિત સાયટોટોક્સિસિટી"], "ans": 2, "exp": "લ્યુકોટ્રાયન ઉત્પાદન એ મસ્ટ કોષોની ડિગ્રેન્યુલેશન પછી થતી પ્રક્રિયા છે અને તે ઇન્ફ્લેમેશનને પ્રેરે છે. ફેગોસાયટોસિસ એ બેક્ટેરિયા વિરુદ્ધની પ્રતિક્રિયા છે, કોમ્પ્લિમેન્ટ એક્ટિવેશન એ ઇમ્યુન પ્રતિક્રિયાનો ભાગ છે પરંતુ એલર્જી પ્રતિક્રિયામાં મુખ્ય ભૂમિકા ભજવતા નથી, અને એન્ટીબોડી-મેધિત સાયટોટોક્સિસિટી એ ટાઈપ II હાયપરસેન્સિટિવિટી સાથે સંકળાયેલી છે.", "ref": "Std 12 - પ્રકરણ 10: માનવ પ્રતિરક્ષાતંત્ર અને રોગપ્રતિકારકતા", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
