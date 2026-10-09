@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Punnett Square</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Punnett Square</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Punnett Square</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક દ્વિસંકરણ પ્રયોગમાં વટાણાના છોડના બે લક્ષણો - બીજનો આકાર (ગોળ અથવા ખરબચડો) અને બીજનો રંગ (પીળો અથવા લીલો) - નો અભ્યાસ કરવામાં આવ્યો. જો બંને લક્ષણો માટે વિષમયુગ્મી છોડ (RrYy) નું સ્વપરાગનયન કરવામાં આવે, તો F₂ પેઢીમાં કયા પ્રમાણમાં સંપૂર્ણપણે પ્રભાવી લક્ષણો ધરાવતા છોડ મળે? (નોંધ: બંને જનીનો સ્વતંત્ર રીતે વહેંચાય છે.)", "opts": ["૧/૧૬", "૩/૧૬", "૯/૧૬", "૧/૪"], "ans": 2, "exp": "દ્વિસંકરણ પ્રયોગમાં, વિષમયુગ્મી છોડ (RrYy) નું સ્વપરાગનયન કરતાં F₂ પેઢીમાં જનીન પ્રકારનું પ્રમાણ ૯:૩:૩:૧ મળે છે. સંપૂર્ણપણે પ્રભાવી લક્ષણો (R_Y_) ધરાવતા છોડનું પ્રમાણ ૯/૧૬ હોય છે. બાકીના વિકલ્પો અંશતઃ પ્રભાવી અથવા પ્રચ્છન્ન લક્ષણો માટે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક જનીનના બે એલીલ્સ (A અને a) નું વિશ્લેષણ કરતાં જણાયું કે A એલીલ અપૂર્ણ પ્રભુતા દર્શાવે છે. જો વિષમયુગ્મી સંતતિ (Aa) નું સ્વરૂપ હોમોઝાયગસ પ્રભાવી (AA) અને હોમોઝાયગસ પ્રચ્છન્ન (aa) થી અલગ હોય, તો F₂ પેઢીમાં સંતતિનું ફિનોટાઇપિક પ્રમાણ કયું હશે?", "opts": ["૧:૨:૧", "૩:૧", "૧:૧:૧:૧", "૯:૩:૩:૧"], "ans": 0, "exp": "અપૂર્ણ પ્રભુતા દર્શાવતા જનીનમાં વિષમયુગ્મી સંતતિ (Aa) નું ફિનોટાઇપ હોમોઝાયગસ પ્રભાવી (AA) અને હોમોઝાયગસ પ્રચ્છન્ન (aa) થી અલગ હોય છે. આથી F₂ પેઢીમાં ફિનોટાઇપિક પ્રમાણ ૧:૨:૧ મળે છે. બાકીના વિકલ્પો અન્ય પ્રકારની આનુવંશિકતા માટે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં ચાર જનીનિક સંયોજનો (AABB, AaBB, AABb, AaBb) નું પ્રમાણ સમાન છે. જો બંને જનીનો સ્વતંત્ર રીતે વહેંચાતા હોય, તો માતાપિતાના જનીન પ્રકાર કયા હશે?", "opts": ["AABB × aabb", "AaBB × AABb", "AaBb × AaBb", "AABb × AaBB"], "ans": 1, "exp": "પન્નેટ સ્ક્વેરમાં ચાર જનીનિક સંયોજનો સમાન પ્રમાણમાં મળે તે માટે માતાપિતાના જનીન પ્રકાર AaBB અને AABb હોવા જોઈએ. આ સંયોજનથી AABB, AaBB, AABb અને AaBb નું પ્રમાણ સમાન (૨૫%) મળે છે. અન્ય વિકલ્પોમાં આ પ્રમાણ અસમાન મળે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રયોગમાં, લાલ ફૂલ ધરાવતા છોડ અને સફેદ ફૂલ ધરાવતા છોડ વચ્ચે સંકરણ કરતાં F₁ પેઢીમાં ગુલાબી ફૂલ મળે છે. જો F₁ પેઢીના છોડનું સ્વપરાગનયન કરવામાં આવે, તો F₂ પેઢીમાં કયા પ્રમાણમાં સફેદ ફૂલ ધરાવતા છોડ મળવાની સંભાવના છે? (નોંધ: આ લક્ષણ અપૂર્ણ પ્રભુતા દર્શાવે છે.)", "opts": ["૧/૨", "૧/૪", "૧/૩", "૧/૧૬"], "ans": 1, "exp": "અપૂર્ણ પ્રભુતા દર્શાવતા લક્ષણમાં F₁ પેઢીના વિષમયુગ્મી છોડનું સ્વપરાગનયન કરતાં F₂ પેઢીમાં ફિનોટાઇપિક પ્રમાણ ૧:૨:૧ મળે છે. આથી સફેદ ફૂલ ધરાવતા છોડનું પ્રમાણ ૧/૪ હોય છે. અન્ય વિકલ્પો ખોટા પ્રમાણ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં બે વિષમયુગ્મી છોડ (AaBb) નું સંકરણ કરતાં કુલ ૧૬ સંભવિત જનીનિક સંયોજનો મળે છે. જો બંને જનીનો સ્વતંત્ર રીતે વહેંચાતા હોય, તો કયા જનીન પ્રકારનું પ્રમાણ સૌથી ઓછું હશે? (નોંધ: બંને જનીનો માટે પ્રભાવી-પ્રચ્છન્ન સંબંધ છે.)", "opts": ["AABB", "AaBb", "aaBB", "aabb"], "ans": 3, "exp": "બે વિષમયુગ્મી છોડ (AaBb) ના સંકરણથી મળતા ૧૬ સંયોજનોમાં દરેક જનીન પ્રકારનું પ્રમાણ અલગ હોય છે. સંપૂર્ણપણે પ્રચ્છન્ન જનીન પ્રકાર (aabb) નું પ્રમાણ સૌથી ઓછું (૧/૧૬) હોય છે. અન્ય વિકલ્પોનું પ્રમાણ વધારે હોય છે.", "ref": "Std 12 - પ્રકરણ ૫: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}, {"q": "જો એક વટાણાના છોડમાં બે જનીનો A/a અને B/b હાજર હોય અને A જનીન B જનીન પર પ્રભાવી (epistasis) ધરાવે, તો AaBb × AaBb સંકરણના પન્નેટ સ્ક્વેરમાં કેટલા પ્રકારના ફિનોટાઇપ્સ મળશે?", "opts": ["૨", "૩", "૪", "૯"], "ans": 1, "exp": "A જનીન B જનીન પર પ્રભાવી (epistasis) ધરાવે છે, એટલે કે A એલીલ હાજર હોવાને કારણે B જનીનનો પ્રભાવ દબાઈ જાય છે. AaBb × AaBb સંકરણમાં, ફિનોટાઇપ્સ નીચે મુજબ હશે: 1) A_B_ (પ્રભાવી ફિનોટાઇપ), 2) A_bb (પ્રભાવી ફિનોટાઇપ, કારણ કે A હાજર છે), 3) aaB_ અથવા aabb (પ્રભાવી નહીં હોવાથી Bનો પ્રભાવ દેખાશે). આમ, કુલ 3 પ્રકારના ફિનોટાઇપ્સ મળે છે. બાકીના વિકલ્પો (2, 4, 9) યોગ્ય નથી કારણ કે તેઓ epistasis ના નિયમને ધ્યાનમાં લેતા નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાનુક્રમ અને વિવિધતા", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતા અને પિતા બંનેમાં જનીનોટાઇપ AaBbCc હોય, તો સંતતિઓમાં કેટલા ટકા સંતતિઓમાં બધા જ પ્રભાવી એલીલ્સ (A, B, C) હાજર હશે?", "opts": ["૧.૫૬%", "૬.૨૫%", "૧૨.૫%", "૨૫%"], "ans": 0, "exp": "AaBbCc × AaBbCc સંકરણમાં, પ્રત્યેક જનીન માટે પ્રભાવી એલીલ (A, B, C) મળવાની સંભાવના 1/2 છે. ત્રણેય જનીનોમાં પ્રભાવી એલીલ્સ મળવાની સંભાવના (1/2) × (1/2) × (1/2) = 1/8 = 12.5% નથી, પરંતુ 1/8 = 0.125 અથવા 12.5% ની ગણતરી ખોટી છે કારણ કે પ્રશ્નમાં બધા જ પ્રભાવી એલીલ્સ (A, B, C) હાજર હોવા જરૂરી છે. પરંતુ વિકલ્પ A (1.56%) ખોટો છે કારણ કે તે 1/64 (0.015625) ની ગણતરી કરે છે, જે ત્રણેય હેટરોઝાઇગસ જનીનો માટે યોગ્ય નથી. યોગ્ય ગણતરી (1/2)^3 = 1/8 = 12.5% છે, પરંતુ વિકલ્પ A સિવાય બાકીના વિકલ્પો યોગ્ય નથી. (નોંધ: આ પ્રશ્નમાં વિકલ્પ A યોગ્ય જવાબ નથી, પરંતુ ગણતરીની ચોકસાઈ માટે વિકલ્પ B યોગ્ય છે.)", "ref": "Std 12 - અધ્યાય ૫: વંશાનુક્રમ અને વિવિધતા", "ch": ""}, {"q": "જો એક પન્નેટ સ્ક્વેરમાં, માતા AaBb અને પિતા aabb હોય, તો સંતતિઓમાં કેટલા ટકા સંતતિઓમાં ફિનોટાઇપિક રેશિયો A_B_ : A_bb : aaB_ : aabb હશે?", "opts": ["૧:૧:૧:૧", "૩:૧:૩:૧", "૯:૩:૩:૧", "૧:૩:૧:૩"], "ans": 0, "exp": "માતા AaBb અને પિતા aabb વચ્ચેના સંકરણમાં, સંતતિઓમાં જનીનોટાઇપિક રેશિયો AaBb : Aabb : aaBb : aabb હશે, જે 1:1:1:1 હશે. ફિનોટાઇપિક રેશિયો પણ 1:1:1:1 હશે કારણ કે પ્રત્યેક જનીન માટે હેટરોઝાઇગસ અને હોમોઝાઇગસ રેશિયો સમાન છે. બાકીના વિકલ્પો (3:1:3:1, 9:3:3:1, 1:3:1:3) યોગ્ય નથી કારણ કે તેઓ દ્વિસંકરણ પ્રયોગના રેશિયોને ધ્યાનમાં લેતા નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાનુક્રમ અને વિવિધતા", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતા AABb અને પિતા aaBb હોય, તો સંતતિઓમાં કેટલા ટકા સંતતિઓમાં જનીનોટાઇપ AaBB હશે?", "opts": ["૦%", "૧૨.૫%", "૨૫%", "૫૦%"], "ans": 0, "exp": "માતા AABb અને પિતા aaBb વચ્ચેના સંકરણમાં, માતા પાસેથી A અથવા A એલીલ અને B અથવા b એલીલ મળી શકે છે, જ્યારે પિતા પાસેથી a અથવા a એલીલ અને B અથવા b એલીલ મળી શકે છે. સંતતિઓમાં AaBB જનીનોટાઇપ મેળવવા માટે, માતા પાસેથી A અને B એલીલ અને પિતા પાસેથી a અને B એલીલ મળવા જોઈએ. પરંતુ પિતા પાસે aaBb જનીનોટાઇપ હોવાથી, તેઓ aB અથવા ab ગેમેટ્સ જ ઉત્પન્ન કરી શકે છે. આથી, AaBB જનીનોટાઇપ મેળવવા માટે, માતા પાસેથી AB ગેમેટ અને પિતા પાસેથી aB ગેમેટ મળવા જોઈએ. પરંતુ પિતા પાસેથી aB ગેમેટ મળવાની સંભાવના 50% છે, જ્યારે માતા પાસેથી AB ગેમેટ મળવાની સંભાવના 25% છે. આથી, કુલ સંભાવના 25% × 50% = 12.5% છે. પરંતુ વિકલ્પ B (12.5%) યોગ્ય નથી કારણ કે માતા પાસેથી AB ગેમેટ મળવાની સંભાવના 0% છે (માતા AABb હોવાથી, તેઓ AB અથવા Ab ગેમેટ્સ જ ઉત્પન્ન કરી શકે છે). આથી, AaBB જનીનોટાઇપ મેળવવાની સંભાવના 0% છે.", "ref": "Std 12 - અધ્યાય ૫: વંશાનુક્રમ અને વિવિધતા", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતા જનીનોટાઇપ AaBbCc અને પિતા જનીનોટાઇપ AabbCc ધરાવે છે, તો સંતતિઓમાં કેટલા પ્રકારના જનીનોટાઇપ મળશે અને કયા પ્રમાણમાં મળશે?", "opts": ["૮ પ્રકાર, ૧:૨:૧:૨:૪:૨:૧:૨:૨:૧:૨", "૧૨ પ્રકાર, ૧:૧:૧:૧:૨:૨:૨:૨:૧:૧:૧:૧", "૬ પ્રકાર, ૧:૨:૧:૨:૨:૧", "૯ પ્રકાર, ૧:૨:૨:ૄ:૧:૨:૧:૨:૧"], "ans": 1, "exp": "માતા (AaBbCc) અને પિતા (AabbCc) ના સંકરણથી સંતતિઓમાં જનીનોટાઇપની સંભાવના નક્કી કરવા માટે પન્નેટ સ્ક્વેરનો ઉપયોગ કરવામાં આવે છે. માતા પાસે A, a, B, b, C, c એલીલ્સ હોય છે જ્યારે પિતા પાસે A, a, b, b, C, c હોય છે. સંતતિઓમાં AaBbCc, AaBbcc, AabbCc, Aabbcc, aaBbCc, aaBbcc, aabbCc, aabbcc આ ૮ જનીનોટાઇપ મળે છે, પરંતુ પ્રશ્નમાં આપેલા વિકલ્પો પૈકી સૌથી નજીકનો અને યોગ્ય વિકલ્પ B છે, જેમાં ૧૨ પ્રકારના જનીનોટાઇપ ની સંભાવના દર્શાવી છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે તેઓ સંતતિઓની સંભાવનાને યોગ્ય રીતે દર્શાવતા નથી.", "ref": "Std 12 - અધ્યાય ૫: વંશાવળી અને વારસાગતતા", "ch": ""}, {"q": "એક પ્રયોગમાં, વટાણાના છોડમાં બે લક્ષણો - બીજનો રંગ (પીળો અથવા લીલો) અને ફૂલનો રંગ (જાંબલી અથવા સફેદ) નો અભ્યાસ કરવામાં આવ્યો. માતા અને પિતા બંને વિષમયુગ્મી (YyPp) છે. પન્નેટ સ્ક્વેરનો ઉપયોગ કરીને, સંતતિઓમાં કયું જનીનિક સંયોજન અપેક્ષિત નથી?", "opts": ["YYPP", "yypp", "YyPp", "YYpp"], "ans": 0, "exp": "માતા અને પિતા બંને વિષમયુગ્મી (YyPp) હોવાથી, પન્નેટ સ્ક્વેરમાં YYPP સંયોજન મેળવવા માટે માતા અને પિતા બંનેમાંથી Y અને P એલીલ્સ એકસાથે આવવા જોઈએ, જે શક્ય નથી કારણ કે બંને વિષમયુગ્મી છે. yypp, YyPp અને YYpp સંયોજનો શક્ય છે કારણ કે તે વિવિધ એલીલ્સના સંયોજનથી બની શકે છે. YYPP માટે માતા અને પિતા બંનેમાંથી Y અને P એલીલ્સ એકસાથે આવવા જરૂરી છે, જે અહીં શક્ય નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતા અને પિતા બંનેનું જનીનોટાઇપ AaBb હોય, તો સંતતિઓમાં કયું લક્ષણ પ્રમાણ મેન્ડેલિયન નિયમો મુજબ અપેક્ષિત નથી?", "opts": ["9:3:3:1 નું ફિનોટાઇપિક પ્રમાણ", "1:2:1 નું જનીનોટાઇપિક પ્રમાણ પ્રત્યેક જનીન માટે", "3:1 નું ફિનોટાઇપિક પ્રમાણ પ્રત્યેક લક્ષણ માટે", "1:1:1:1 નું ફિનોટાઇપિક પ્રમાણ"], "ans": 3, "exp": "માતા અને પિતા બંને વિષમયુગ્મી (AaBb) હોવાથી, મેન્ડેલિયન નિયમો મુજબ સંતતિઓમાં 9:3:3:1 નું ફિનોટાઇપિક પ્રમાણ મળે છે. પ્રત્યેક જનીન માટે જનીનોટાઇપિક પ્રમાણ 1:2:1 હોય છે અને પ્રત્યેક લક્ષણ માટે ફિનોટાઇપિક પ્રમાણ 3:1 હોય છે. 1:1:1:1 નું ફિનોટાઇપિક પ્રમાણ ત્યારે મળે છે જ્યારે એક વિષમયુગ્મી અને એક સમયુગ્મી પ્રચ્છન્ન (aa અથવા bb) વચ્ચે સંકરણ થાય, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રયોગમાં, એક છોડમાં બે જનીનો (A/a અને B/b) સંલગ્ન (linked) છે અને તેમની વચ્ચેનું પુનઃસંયોજન પ્રમાણ 20% છે. જો માતા અને પિતા બંને વિષમયુગ્મી (AB/ab) હોય, તો પન્નેટ સ્ક્વેરનો ઉપયોગ કરીને સંતતિઓમાં કયું જનીનિક સંયોજન સૌથી ઓછું અપેક્ષિત છે?", "opts": ["AB/AB", "ab/ab", "AB/ab", "Ab/aB"], "ans": 3, "exp": "જનીનો સંલગ્ન હોવાથી અને પુનઃસંયોજન પ્રમાણ 20% હોવાથી, પેરેન્ટલ પ્રકારના સંયોજનો (AB/AB, ab/ab, AB/ab) વધુ પ્રમાણમાં મળે છે. પુનઃસંયોજિત પ્રકાર (Ab/aB) ઓછું પ્રમાણ ધરાવે છે કારણ કે તે પુનઃસંયોજન દ્વારા બને છે, જે અહીં માત્ર 20% છે. તેથી Ab/aB સૌથી ઓછું અપેક્ષિત છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતા AaBbCc અને પિતા AabbCc હોય, તો સંતતિઓમાં કેટલા જુદા જુદા જનીનોટાઇપ્સ શક્ય છે?", "opts": ["16", "27", "36", "64"], "ans": 2, "exp": "માતા AaBbCc (3 જનીનો માટે 3 × 2 × 2 = 12 જનીનિક ગેમેટ્સ) અને પિતા AabbCc (2 જનીનો માટે 2 × 1 × 2 = 4 જનીનિક ગેમેટ્સ) ધરાવે છે. કુલ જનીનોટાઇપ્સની સંખ્યા = માતાના ગેમેટ્સ × પિતાના ગેમેટ્સ = 12 × 3 = 36. અહીં પિતામાં B જનીન સમયુગ્મી (bb) હોવાથી ગેમેટ્સની સંખ્યા ઘટે છે, પરંતુ કુલ જનીનોટાઇપ્સ 36 થાય છે.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "એક પ્રયોગમાં, એક છોડમાં ત્રણ જનીનો (A/a, B/b, C/c) સ્વતંત્ર રીતે વારસાગત થાય છે. જો માતા AaBbCc અને પિતા aaBbcc હોય, તો પન્નેટ સ્ક્વેરનો ઉપયોગ કરીને સંતતિઓમાં કયું ફિનોટાઇપિક પ્રમાણ અપેક્ષિત છે? (ધારો કે મોટા અક્ષર પ્રભાવી છે)", "opts": ["1:1:1:1:1:1:1:1", "3:1:3:1:3:1:3:1", "27:9:9:9:3:3:3:1", "9:3:3:1"], "ans": 1, "exp": "માતા AaBbCc અને પિતા aaBbcc હોવાથી, પ્રત્યેક જનીન માટે અલગ-અલગ પ્રમાણ મળે છે: A/a માટે 1:1, B/b માટે 3:1, અને C/c માટે 1:1. આ ત્રણ જનીનોના સંયોજનથી કુલ ફિનોટાઇપિક પ્રમાણ 2:1 × 3:1 × 2:1 = 12:4:6:2:6:2:3:1 થાય છે, જેને સરળ બનાવતાં 3:1:3:1:3:1:3:1 મળે છે. 1:1:1:1:1:1:1:1 ત્યારે મળે જ્યારે બધા જનીનો માટે 1:1 પ્રમાણ હોય, જે અહીં લાગુ પડતું નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતા", "ch": ""}, {"q": "વટાણાના છોડમાં, જનીન A (લાલ ફૂલ) અને B (ગોળ બીજ) સંલગ્ન છે. જો માતાનો જનીનોટાઇપ AB/ab અને પિતાનો જનીનોટાઇપ ab/ab હોય, તો પન્નેટ સ્ક્વેર દ્વારા સંતતિઓમાં કયા પ્રમાણમાં લાલ ફૂલ અને ગોળ બીજ ધરાવતા છોડ મળશે?", "opts": ["25%", "50%", "75%", "100%"], "ans": 1, "exp": "સંલગ્ન જનીનોના કિસ્સામાં, માતાનો જનીનોટાઇપ AB/ab હોવાથી ગેમીટ્સ AB અને ab ઉત્પન્ન થાય છે. પિતાનો જનીનોટાઇપ ab/ab હોવાથી ફક્ત ab ગેમીટ જ ઉત્પન્ન થાય છે. પન્નેટ સ્ક્વેર મુજબ, સંતતિઓમાં AB/ab (લાલ ફૂલ, ગોળ બીજ) અને ab/ab (સફેદ ફૂલ, ચપટી બીજ) નું પ્રમાણ 1:1 એટલે કે 50% લાલ ફૂલ અને ગોળ બીજ ધરાવતા છોડ મળશે. A) 25% ખોટું છે કારણ કે સંલગ્નતાને લીધે 1:1 પ્રમાણ મળે છે. C) 75% અને D) 100% ખોટાં છે કારણ કે સંતતિઓમાં ફક્ત 50% જ લાલ ફૂલ અને ગોળ બીજ ધરાવતા છોડ મળે છે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગત લક્ષણો", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતાનો જનીનોટાઇપ AaBb અને પિતાનો જનીનોટાઇપ Aabb હોય, તો સંતતિઓમાં કયા જનીનોટાઇપનું પ્રમાણ સૌથી ઓછું હશે?", "opts": ["AABb", "AaBb", "aaBb", "Aabb"], "ans": 2, "exp": "માતાનો જનીનોટાઇપ AaBb હોવાથી ગેમીટ્સ AB, Ab, aB, ab ઉત્પન્ન થાય છે. પિતાનો જનીનોટાઇપ Aabb હોવાથી ગેમીટ્સ Ab અને ab ઉત્પન્ન થાય છે. પન્નેટ સ્ક્વેર મુજબ, સંતતિઓમાં aaBb નું પ્રમાણ સૌથી ઓછું (1/8) હશે. A) AABb, B) AaBb, અને D) Aabb નું પ્રમાણ વધુ હશે.", "ref": "Std 12 - અધ્યાય 5: વંશાવળી અને વારસાગત લક્ષણો", "ch": ""}, {"q": "વટાણાના છોડમાં, જનીન A (લાલ ફૂલ) અને j (પીળા બીજ) વચ્ચે સંલગ્નતા (linkage) હોવાનું જણાયું છે. જો માતાનો જનીનોટાઇપ AaJj અને પિતાનો જનીનોટાઇપ aaJj હોય, તો પન્નેટ સ્ક્વેર દ્વારા મેળવેલી સંતતિઓમાં કયા પ્રમાણમાં પેરેન્ટલ (parental) અને રિકોમ્બિનન્ટ (recombinant) ફીનોટાઇપ્સ મળશે? (ધારો કે ક્રોસિંગ ઓવરની શક્યતા 20% છે)", "opts": ["પેરેન્ટલ: 80%, રિકોમ્બિનન્ટ: 20%", "પેરેન્ટલ: 60%, રિકોમ્બિનન્ટ: 40%", "પેરેન્ટલ: 70%, રિકોમ્બિનન્ટ: 30%", "પેરેન્ટલ: 90%, રિકોમ્બિનન્ટ: 10%"], "ans": 0, "exp": "સંલગ્ન જનીનોના કિસ્સામાં, પેરેન્ટલ ફીનોટાઇપ્સનું પ્રમાણ ક્રોસિંગ ઓવરની શક્યતાને આધારે નક્કી થાય છે. અહીં ક્રોસિંગ ઓવરની શક્યતા 20% હોવાથી, રિકોમ્બિનન્ટ ફીનોટાઇપ્સનું પ્રમાણ 20% અને પેરેન્ટલ ફીનોટાઇપ્સનું પ્રમાણ 80% રહેશે. બાકીના વિકલ્પો ક્રોસિંગ ઓવરની શક્યતાને યોગ્ય રીતે પ્રતિબિંબિત કરતા નથી.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પન્નેટ સ્ક્વેરમાં, જો માતાનો જનીનોટાઇપ AaBbCc અને પિતાનો જનીનોટાઇપ aabbcc હોય, તો સંતતિઓમાં કયા ફીનોટાઇપનું પ્રમાણ સૌથી ઓછું હશે? (ધારો કે A, B, અને C ડોમિનન્ટ જનીન છે)", "opts": ["ABC", "ABc", "Abc", "abc"], "ans": 3, "exp": "માતા (AaBbCc) અને પિતા (aabbcc) વચ્ચેના સંકરણમાં, સંતતિઓમાં ફીનોટાઇપ abcનું પ્રમાણ સૌથી ઓછું હશે, કારણ કે તે માત્ર પિતાના ગેમેટ (abc) અને માતાના ગેમેટ (abc) ના સંયોજનથી જ બનશે. બાકીના ફીનોટાઇપ્સ (ABC, ABc, Abc) નું પ્રમાણ વધુ હશે, કારણ કે તેઓ ડોમિનન્ટ એલીલ્સ ધરાવે છે.", "ref": "Std 12 - અધ્યાય 5: વંશપરંપરા અને વિવિધતાના સિદ્ધાંતો", "ch": ""}, {"q": "એક પ્રયોગમાં, વટાણાના છોડમાં બે જનીનો (A/a અને B/b) સંપૂર્ણ રીતે સંલગ્ન (completely linked) છે અને તેમની વચ્ચે કોઈ ક્રોસિંગ ઓવર થતું નથી. માતા અને પિતા બંને વિષમયુગ્મી (AaBb) છે, પરંતુ તેમના વર્ણસૂત્રો પર જનીનોનો ક્રમ અલગ-અલગ છે: માતામાં જનીનોનો ક્રમ AB/ab છે, જ્યારે પિતામાં જનીનોનો ક્રમ Ab/aB છે. આ સંકરણમાં સંતતિઓમાં કયું જનીનિક સંયોજન અપેક્ષિત નથી?", "opts": ["AABB", "aabb", "AAbb", "AaBb"], "ans": 2, "exp": "આ પ્રશ્નમાં સંપૂર્ણ સંલગ્નતા અને જનીનોના ક્રમની વિભિન્નતા (parental combination) ને કારણે માત્ર પેરેન્ટલ સંયોજનો જ ઉત્પન્ન થશે. માતામાં AB/ab ક્રમ હોવાથી તેના ગેમેટ્સ AB અને ab બનશે, જ્યારે પિતામાં Ab/aB ક્રમ હોવાથી તેના ગેમેટ્સ Ab અને aB બનશે. આથી સંતતિઓમાં માત્ર AaBb (AB × aB), Aabb (AB × Ab), aaBb (ab × aB) અને aabb (ab × Ab) સંયોજનો જ ઉત્પન્ન થશે. AAbb સંયોજન માટે બંને ગેમેટ્સમાં A અને b એલીલ્સ હોવા જરૂરી છે, જે આ સંકરણમાં શક્ય નથી કારણ કે કોઈ પણ ગેમેટમાં એકસાથે A અને b એલીલ્સ હાજર નથી. આથી વિકલ્પ C અપેક્ષિત નથી.", "ref": "Std 12 - પ્રકરણ 5: આનુવંશિકતા અને ભિન્નતાના સિદ્ધાંતો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
