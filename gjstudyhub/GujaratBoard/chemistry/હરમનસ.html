@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>હોર્મોન્સ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>હોર્મોન્સ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">હોર્મોન્સ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયું હોર્મોન પ્રાણીઓમાં જોવા મળે છે પરંતુ વનસ્પતિઓમાં જોવા મળતું નથી અને તેનું મુખ્ય કાર્ય રુધિરમાં ગ્લુકોઝનું પ્રમાણ નિયંત્રિત કરવાનું છે?", "opts": ["ઇન્સ્યુલિન", "થાઇરોક્સિન", "ઓક્ઝિન", "એડ્રીનાલિન"], "ans": 0, "exp": "ઇન્સ્યુલિન એક પ્રાણીજ હોર્મોન છે જે સ્વાદુપિંડમાંથી સ્રાવિત થાય છે અને રુધિરમાં ગ્લુકોઝનું પ્રમાણ ઘટાડે છે. થાઇરોક્સિન અને એડ્રીનાલિન પણ પ્રાણીજ હોર્મોન છે, પરંતુ તેમનું મુખ્ય કાર્ય અનુક્રમે ચયાપચય અને તણાવ પ્રતિભાવ છે. ઓક્ઝિન વનસ્પતિજ હોર્મોન છે જે વૃદ્ધિને નિયંત્રિત કરે છે, તેથી તે પ્રાણીઓમાં જોવા મળતું નથી.", "ref": "Std 11 - પ્રકરણ 15: વનસ્પતિઓમાં વૃદ્ધિ અને વિકાસ, Std 12 - પ્રકરણ 10: માનવ કલ્યાણમાં જીવવિજ્ઞાન", "ch": ""}, {"q": "એક વિદ્યાર્થીએ હોર્મોન સંબંધિત નીચેના વિધાનો વાંચ્યા: (i) વનસ્પતિઓમાં એબ્સિસિક એસિડ પર્ણોના ખરવા માટે જવાબદાર છે. (ii) પ્રાણીઓમાં વૃદ્ધિ હોર્મોનનું સ્રાવણ પિટ્યુટરી ગ્રંથિમાંથી થાય છે. (iii) ઇન્સ્યુલિન અને ગ્લુકાગોન બંને સ્વાદુપિંડમાંથી સ્રાવિત થાય છે પરંતુ તેમના કાર્યો વિરોધી છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો ખોટું/ખોટાં છે?", "opts": ["માત્ર (i)", "માત્ર (ii)", "માત્ર (iii)", "એક પણ નહીં"], "ans": 3, "exp": "વિધાન (i) સાચું છે કારણ કે એબ્સિસિક એસિડ વનસ્પતિઓમાં પર્ણોના ખરવા માટે જવાબદાર છે. વિધાન (ii) સાચું છે કારણ કે વૃદ્ધિ હોર્મોન પિટ્યુટરી ગ્રંથિમાંથી સ્રાવિત થાય છે. વિધાન (iii) પણ સાચું છે કારણ કે ઇન્સ્યુલિન અને ગ્લુકાગોન બંને સ્વાદુપિંડમાંથી સ્રાવિત થાય છે અને તેમના કાર્યો વિરોધી છે (ઇન્સ્યુલિન ગ્લુકોઝનું પ્રમાણ ઘટાડે છે, જ્યારે ગ્લુકાગોન વધારે છે). તેથી એક પણ વિધાન ખોટું નથી.", "ref": "Std 11 - પ્રકરણ 15: વનસ્પતિઓમાં વૃદ્ધિ અને વિકાસ, Std 12 - પ્રકરણ 8: માનવ શરીરવિજ્ઞાન-II", "ch": ""}, {"q": "નીચેના હોર્મોન અને તેમના સ્રાવ સ્થાનની જોડીઓમાંથી કઈ જોડી ખોટી છે?", "opts": ["થાઇરોક્સિન - થાઇરોઇડ ગ્રંથિ", "એડ્રીનાલિન - એડ્રીનલ મેડ્યુલા", "ટેસ્ટોસ્ટેરોન - અંડાશય", "પ્રોલેક્ટિન - પિટ્યુટરી ગ્રંથિ"], "ans": 2, "exp": "થાઇરોક્સિન થાઇરોઇડ ગ્રંથિમાંથી, એડ્રીનાલિન એડ્રીનલ મેડ્યુલામાંથી અને પ્રોલેક્ટિન પિટ્યુટરી ગ્રંથિમાંથી સ્રાવિત થાય છે, જે સાચું છે. જોકે, ટેસ્ટોસ્ટેરોન નરોમાં વૃષણમાંથી સ્રાવિત થાય છે, અંડાશયમાંથી નહીં. અંડાશયમાંથી ઇસ્ટ્રોજન અને પ્રોજેસ્ટેરોન સ્રાવિત થાય છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ શરીરવિજ્ઞાન-II", "ch": ""}, {"q": "એક પ્રયોગમાં, વનસ્પતિના અગ્રકલિકાને કાપી નાખવામાં આવે છે. આ પરિસ્થિતિમાં નીચેના પૈકી કયું પરિણામ જોવા મળે તેવી શક્યતા સૌથી વધુ છે?", "opts": ["વનસ્પતિની ઊંચાઈમાં અચાનક વધારો થશે", "વનસ્પતિની પાર્શ્વશાખાઓની વૃદ્ધિ અટકી જશે", "વનસ્પતિની પાર્શ્વશાખાઓની વૃદ્ધિ વધશે", "વનસ્પતિના મૂળની વૃદ્ધિ અટકી જશે"], "ans": 2, "exp": "વનસ્પતિના અગ્રકલિકામાં ઓક્ઝિન હોર્મોન ઉત્પન્ન થાય છે, જે પાર્શ્વશાખાઓની વૃદ્ધિને અવરોધે છે (અગ્રીય પ્રભુત્વ). જ્યારે અગ્રકલિકા કાપી નાખવામાં આવે છે, ત્યારે ઓક્ઝિનનું પ્રમાણ ઘટે છે, જેના કારણે પાર્શ્વશાખાઓની વૃદ્ધિ વધે છે. બાકીના વિકલ્પો આ પરિસ્થિતિ સાથે સુસંગત નથી.", "ref": "Std 11 - પ્રકરણ 15: વનસ્પતિઓમાં વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "નીચેના પૈકી કયું હોર્મોન 'તણાવ હોર્મોન' તરીકે ઓળખાય છે અને તેનું સ્રાવણ એડ્રીનલ ગ્રંથિના મેડ્યુલા ભાગમાંથી થાય છે?", "opts": ["કોર્ટિસોલ", "એડ્રીનાલિન", "થાઇરોક્સિન", "ઇન્સ્યુલિન"], "ans": 1, "exp": "એડ્રીનાલિનને 'તણાવ હોર્મોન' તરીકે ઓળખવામાં આવે છે અને તે એડ્રીનલ ગ્રંથિના મેડ્યુલા ભાગમાંથી સ્રાવિત થાય છે. તે તણાવની સ્થિતિમાં હૃદયના ધબકારા, રુધિરનું દબાણ અને ઊર્જા પ્રદાન કરવામાં મદદ કરે છે. કોર્ટિસોલ પણ તણાવ પ્રતિભાવમાં સામેલ છે, પરંતુ તે એડ્રીનલ કોર્ટેક્સમાંથી સ્રાવિત થાય છે. થાઇરોક્સિન અને ઇન્સ્યુલિન તણાવ હોર્મોન નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ શરીરવિજ્ઞાન-II", "ch": ""}, {"q": "વનસ્પતિઓમાં ઓક્સિન હોર્મોનનું સ્રાવણ ક્યાં થાય છે અને તેનો પ્રાથમિક કાર્ય કયો છે?", "opts": ["અગ્રકલિકામાં થાય છે અને કોષવિભાજનને ઉત્તેજિત કરે છે", "પર્ણોમાં થાય છે અને ફળના પરિપક્વતાને ઉત્તેજિત કરે છે", "મૂળના અગ્રભાગમાં થાય છે અને મૂળના વિકાસને અટકાવે છે", "ફૂલોમાં થાય છે અને બીજના અંકુરણને પ્રેરિત કરે છે"], "ans": 0, "exp": "ઓક્સિન હોર્મોનનું સ્રાવણ વનસ્પતિના અગ્રકલિકામાં (ટિપ) થાય છે અને તેનો પ્રાથમિક કાર્ય કોષવિભાજનને ઉત્તેજિત કરવાનો છે. ઓપ્શન B ખોટું છે કારણ કે ફળના પરિપક્વતાને ઉત્તેજિત કરનાર હોર્મોન ઇથિલીન છે. ઓપ્શન C ખોટું છે કારણ કે ઓક્સિન મૂળના વિકાસને પ્રોત્સાહન આપે છે, અટકાવતું નથી. ઓપ્શન D ખોટું છે કારણ કે બીજના અંકુરણને પ્રેરિત કરનાર હોર્મોન જિબરેલિન છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "નીચેના પૈકી કયું હોર્મોન મનુષ્યમાં રક્તમાં ગ્લુકોઝના સ્તરને ઘટાડવા માટે જવાબદાર છે અને તેનું સ્રાવણ ક્યાં થાય છે?", "opts": ["ઇન્સ્યુલિન, અગ્નાશયના એલ્ફા કોષોમાં", "ગ્લુકેગોન, અગ્નાશયના બીટા કોષોમાં", "ઇન્સ્યુલિન, અગ્નાશયના બીટા કોષોમાં", "એડ્રિનેલિન, અધિવૃક્ક ગ્રંથિમાં"], "ans": 2, "exp": "ઇન્સ્યુલિન હોર્મોન રક્તમાં ગ્લુકોઝના સ્તરને ઘટાડવા માટે જવાબદાર છે અને તેનું સ્રાવણ અગ્નાશયના બીટા કોષોમાં થાય છે. ઓપ્શન A ખોટું છે કારણ કે ઇન્સ્યુલિન એલ્ફા કોષોમાં સ્રાવાતું નથી. ઓપ્શન B ખોટું છે કારણ કે ગ્લુકેગોન ગ્લુકોઝના સ્તરને વધારે છે અને તે બીટા કોષોમાં સ્રાવાતું નથી. ઓપ્શન D ખોટું છે કારણ કે એડ્રિનેલિન અધિવૃક્ક ગ્રંથિમાં સ્રાવાતું હોર્મોન છે પરંતુ તે ગ્લુકોઝના સ્તરને વધારે છે.", "ref": "Std 12 - પ્રકરણ 22: મનુષ્યમાં હોર્મોનલ સંકલન અને નિયંત્રણ", "ch": ""}, {"q": "જ્યારે વનસ્પતિ પર પ્રકાશની અસમાન વિતરણ થાય છે, ત્યારે તેની વૃદ્ધિ કયા હોર્મોનના કારણે પ્રકાશ તરફ વળે છે?", "opts": ["જિબરેલિન", "સાયટોકાઇનિન", "ઓક્સિન", "એબ્સિસિક એસિડ"], "ans": 2, "exp": "વનસ્પતિ પર પ્રકાશની અસમાન વિતરણ થાય ત્યારે ઓક્સિન હોર્મોનના અસમાન વિતરણના કારણે વનસ્પતિ પ્રકાશ તરફ વળે છે (ફોટોટ્રોપિઝમ). ઓક્સિન પ્રકાશની દિશામાં ઓછું સ્રાવાય છે, જેથી કોષવિભાજન પ્રકાશની વિરુદ્ધ દિશામાં વધુ થાય છે. ઓપ્શન A, B, અને D ખોટા છે કારણ કે આ હોર્મોનો પ્રકાશ તરફ વળવાના ગુણધર્મ માટે જવાબદાર નથી.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "મનુષ્યમાં થાયરોઇડ ગ્રંથિથી સ્રાવાતા હોર્મોનનો કયો જૂથ સરેરાશ ચયાપચય દરને નિયંત્રિત કરે છે?", "opts": ["T3 અને T4", "કેલ્સિટોનિન અને PTH", "એડ્રિનેલિન અને નોરએડ્રિનેલિન", "ઇન્સ્યુલિન અને ગ્લુકેગોન"], "ans": 0, "exp": "થાયરોઇડ ગ્રંથિથી સ્રાવાતા T3 (ટ્રાયઆયોડોથાયરોનિન) અને T4 (થાયરોક્સિન) હોર્મોન સરેરાશ ચયાપચય દરને નિયંત્રિત કરે છે. ઓપ્શન B ખોટું છે કારણ કે કેલ્સિટોનિન અને PTH કેલ્શિયમના સંતુલનને નિયંત્રિત કરે છે. ઓપ્શન C ખોટું છે કારણ કે એડ્રિનેલિન અને નોરએડ્રિનેલિન અધિવૃક્ક ગ્રંથિમાંથી સ્રાવાતા હોર્મોન છે અને તણાવ પ્રતિભાવમાં ભૂમિકા ભજવે છે. ઓપ્શન D ખોટું છે કારણ કે ઇન્સ્યુલિન અને ગ્લુકેગોન રક્તમાં ગ્લુકોઝના સ્તરને નિયંત્રિત કરે છે.", "ref": "Std 12 - પ્રકરણ 22: મનુષ્યમાં હોર્મોનલ સંકલન અને નિયંત્રણ", "ch": ""}, {"q": "નીચેના પૈકી કયું હોર્મોન વનસ્પતિઓમાં પર્ણપાત (Leaf fall)ને પ્રેરિત કરે છે અને તેનો ઉપયોગ કૃષિમાં પાકની કાપણી પહેલા પર્ણોને સૂકવવા માટે થાય છે?", "opts": ["ઇથિલીન", "એબ્સિસિક એસિડ", "જિબરેલિન", "સાયટોકાઇનિન"], "ans": 1, "exp": "એબ્સિસિક એસિડ હોર્મોન વનસ્પતિઓમાં પર્ણપાતને પ્રેરિત કરે છે અને તેનો ઉપયોગ કૃષિમાં પાકની કાપણી પહેલા પર્ણોને સૂકવવા માટે થાય છે. ઓપ્શન A ખોટું છે કારણ કે ઇથિલીન ફળના પરિપક્વતાને ઉત્તેજિત કરે છે. ઓપ્શન C ખોટું છે કારણ કે જિબરેલિન કોષવિભાજન અને લાંબી વૃદ્ધિને ઉત્તેજિત કરે છે. ઓપ્શન D ખોટું છે કારણ કે સાયટોકાઇનિન કોષવિભાજનને ઉત્તેજિત કરે છે અને વૃદ્ધિને પ્રોત્સાહન આપે છે.", "ref": "Std 12 - પ્રકરણ 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "વનસ્પતિઓમાં જીબરેલિન હોર્મોનનું સ્રાવણ ક્યાં થાય છે અને તેનો પ્રાથમિક કાર્ય કયો છે?", "opts": ["અગ્રકલિકામાં થાય છે અને કોષવિભાજનને પ્રેરિત કરે છે", "પર્ણોમાં થાય છે અને બીજના અંકુરણને અટકાવે છે", "મૂળની ટોચે થાય છે અને મૂળની વૃદ્ધિને પ્રેરિત કરે છે", "બીજ અને અંકુરિત બીજમાં થાય છે અને કોષની લંબાઈમાં વૃદ્ધિ કરે છે"], "ans": 3, "exp": "જીબરેલિન હોર્મોનનું સ્રાવણ મુખ્યત્વે બીજ અને અંકુરિત બીજમાં થાય છે. તેનો પ્રાથમિક કાર્ય કોષની લંબાઈમાં વૃદ્ધિ કરવાનો છે, જે વનસ્પતિની ઊંચાઈમાં વૃદ્ધિ માટે જવાબદાર છે. અગ્રકલિકામાં ઓક્સિન સ્રાવાય છે (A ખોટું), પર્ણોમાં એબ્સિસિક એસિડ સ્રાવાય છે જે બીજના અંકુરણને અટકાવે છે (B ખોટું), અને મૂળની ટોચે ઓક્સિન સ્રાવાય છે જે મૂળની વૃદ્ધિને પ્રેરિત કરે છે (C ખોટું).", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "મનુષ્યમાં એડ્રિનલ ગ્રંથિથી સ્રાવાતા નીચેના હોર્મોનમાંથી કયું હોર્મોન 'લડાઈ અથવા પલાયન' પ્રતિક્રિયા સાથે સંકળાયેલું છે?", "opts": ["કોર્ટિઝોલ", "એલ્ડોસ્ટેરોન", "એડ્રિનલિન", "ટેસ્ટોસ્ટેરોન"], "ans": 2, "exp": "એડ્રિનલ ગ્રંથિથી સ્રાવાતા એડ્રિનલિન હોર્મોન 'લડાઈ અથવા પલાયન' પ્રતિક્રિયા સાથે સંકળાયેલું છે. કોર્ટિઝોલ તણાવ હોર્મોન છે (A ખોટું), એલ્ડોસ્ટેરોન રક્તદાબ અને ઇલેક્ટ્રોલાઇટ સંતુલન નિયંત્રિત કરે છે (B ખોટું), અને ટેસ્ટોસ્ટેરોન પુરુષ લૈંગિક હોર્મોન છે (D ખોટું).", "ref": "Std 12 - અધ્યાય 22: મનુષ્યમાં રસાયણિક સંકેતન અને નિયંત્રણ", "ch": ""}, {"q": "વનસ્પતિઓમાં ઇથિલીન હોર્મોનનો પ્રાથમિક કાર્ય કયો છે?", "opts": ["કોષવિભાજનને પ્રેરિત કરવું", "પર્ણપાતને પ્રેરિત કરવું અને ફળોને પાકવા માટે પ્રેરિત કરવું", "મૂળની વૃદ્ધિને પ્રેરિત કરવી", "પ્રકાશસંશ્લેષણના દરને વધારવો"], "ans": 1, "exp": "ઇથિલીન હોર્મોનનો પ્રાથમિક કાર્ય પર્ણપાતને પ્રેરિત કરવો અને ફળોને પાકવા માટે પ્રેરિત કરવો છે. કોષવિભાજનને ઓક્સિન પ્રેરિત કરે છે (A ખોટું), મૂળની વૃદ્ધિને ઓક્સિન પ્રેરિત કરે છે (C ખોટું), અને પ્રકાશસંશ્લેષણના દરને ઇથિલીન વધારતું નથી (D ખોટું).", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "મનુષ્યમાં પિટ્યુટરી ગ્રંથિથી સ્રાવાતા નીચેના હોર્મોનમાંથી કયું હોર્મોન થાયરોઇડ ગ્રંથિને પ્રેરિત કરે છે?", "opts": ["વૃદ્ધિ હોર્મોન (GH)", "પ્રોલેક્ટિન", "થાયરોઇડ-ઉત્તેજક હોર્મોન (TSH)", "એડ્રિનોકોર્ટિકોટ્રોપિક હોર્મોન (ACTH)"], "ans": 2, "exp": "થાયરોઇડ-ઉત્તેજક હોર્મોન (TSH) પિટ્યુટરી ગ્રંથિથી સ્રાવાય છે અને થાયરોઇડ ગ્રંથિને પ્રેરિત કરે છે. વૃદ્ધિ હોર્મોન (GH) વૃદ્ધિને પ્રેરિત કરે છે (A ખોટું), પ્રોલેક્ટિન દૂધ ઉત્પાદનને પ્રેરિત કરે છે (B ખોટું), અને એડ્રિનોકોર્ટિકોટ્રોપિક હોર્મોન (ACTH) એડ્રિનલ ગ્રંથિને પ્રેરિત કરે છે (D ખોટું).", "ref": "Std 12 - અધ્યાય 22: મનુષ્યમાં રસાયણિક સંકેતન અને નિયંત્રણ", "ch": ""}, {"q": "વનસ્પતિઓમાં સાયટોકાઇનિન હોર્મોનનો પ્રાથમિક કાર્ય કયો છે?", "opts": ["કોષવિભાજનને અટકાવવું", "કોષવિભાજનને પ્રેરિત કરવું અને અગ્રકલિકાની પ્રાથમિકતાને રાખવી", "મૂળની વૃદ્ધિને અટકાવવી", "પર્ણપાતને પ્રેરિત કરવું"], "ans": 1, "exp": "સાયટોકાઇનિન હોર્મોનનો પ્રાથમિક કાર્ય કોષવિભાજનને પ્રેરિત કરવો અને અગ્રકલિકાની પ્રાથમિકતાને રાખવો છે. કોષવિભાજનને અટકાવવું તેનું કાર્ય નથી (A ખોટું), મૂળની વૃદ્ધિને અટકાવવી તેનું કાર્ય નથી (C ખોટું), અને પર્ણપાતને ઇથિલીન પ્રેરિત કરે છે (D ખોટું).", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "વનસ્પતિઓમાં એબ્સિસિક એસિડ (ABA) અને ઇથિલીન હોર્મોનની ભૂમિકા વિશે નીચેના વિધાનો પર વિચારો: (i) ABA પર્ણપાતને પ્રેરિત કરે છે, (ii) ઇથિલીન ફળના પાકવાને ઉત્તેજિત કરે છે, (iii) ABA બીજના સુપ્તાવસ્થાને તોડે છે, (iv) ઇથિલીન કોષવિભાજનને પ્રેરિત કરે છે. કયા વિધાનો સાચાં છે?", "opts": ["(i) અને (ii)", "(i), (ii) અને (iii)", "(ii) અને (iv)", "(i), (iii) અને (iv)"], "ans": 0, "exp": "એબ્સિસિક એસિડ (ABA) પર્ણપાતને પ્રેરિત કરે છે અને બીજના સુપ્તાવસ્થાને જાળવી રાખે છે, પરંતુ તોડતું નથી. ઇથિલીન ફળના પાકવાને ઉત્તેજિત કરે છે, પરંતુ કોષવિભાજનને પ્રેરિત કરતું નથી. આથી, ફક્ત (i) અને (ii) સાચાં છે.", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "મનુષ્યમાં એડ્રિનલ કોર્ટેક્સ દ્વારા સ્રાવાતા હોર્મોન વિશે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["કોર્ટિઝોલ રક્તમાં ગ્લુકોઝના સ્તરને વધારે છે", "એલ્ડોસ્ટેરોન સોડિયમ અને પોટેશિયમના સંતુલનને નિયંત્રિત કરે છે", "એન્ડ્રોજન પુરુષ લિંગ હોર્મોન તરીકે કાર્ય કરે છે", "એપીનેફ્રિન હૃદયના ધબકારાને ધીમો પાડે છે"], "ans": 3, "exp": "એપીનેફ્રિન (એડ્રિનાલિન) એડ્રિનલ મેડ્યુલા દ્વારા સ્રાવાતું હોર્મોન છે, જે હૃદયના ધબકારાને વધારે છે, નહીં કે ધીમો પાડે. કોર્ટિઝોલ, એલ્ડોસ્ટેરોન અને એન્ડ્રોજન એડ્રિનલ કોર્ટેક્સ દ્વારા સ્રાવાતા હોર્મોન છે અને તેમની ભૂમિકાઓ ક્રમશઃ સાચી છે.", "ref": "Std 12 - અધ્યાય 22: મનુષ્યમાં રસાયણિક સંકેતન અને નિયંત્રણ", "ch": ""}, {"q": "વનસ્પતિઓમાં હોર્મોનની આંતરક્રિયા વિશે નીચેના પૈકી કયું વિધાન સાચું નથી?", "opts": ["ઓક્સિન અને જીબરેલિન વૃદ્ધિને પ્રેરિત કરે છે, પરંતુ તેમની આંતરક્રિયા વિરોધી હોય છે", "સાયટોકાઇનિન અને ઓક્સિન કોષવિભાજનને પ્રેરિત કરે છે", "એબ્સિસિક એસિડ ઓક્સિન અને જીબરેલિનના પ્રભાવને અવરોધે છે", "ઇથિલીન અને એબ્સિસિક એસિડ પર્ણપાતને પ્રેરિત કરે છે"], "ans": 0, "exp": "ઓક્સિન અને જીબરેલિન બંને વૃદ્ધિને પ્રેરિત કરે છે અને તેમની આંતરક્રિયા સામાન્ય રીતે સહકારી હોય છે, વિરોધી નહીં. બાકીના વિધાનો સાચાં છે.", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}, {"q": "મનુષ્યમાં હાઇપોથેલામસ અને પિટ્યુટરી ગ્રંથિ વચ્ચેના સંબંધ વિશે નીચેના પૈકી કયું વિધાન સાચું છે?", "opts": ["હાઇપોથેલામસ પિટ્યુટરી ગ્રંથિને નિયંત્રિત કરતું નથી", "હાઇપોથેલામસ પિટ્યુટરી ગ્રંથિને હોર્મોન દ્વારા નિયંત્રિત કરે છે, પરંતુ ન્યુરોન દ્વારા નહીં", "હાઇપોથેલામસ પિટ્યુટરી ગ્રંથિને હોર્મોન અને ન્યુરોન બંને દ્વારા નિયંત્રિત કરે છે", "પિટ્યુટરી ગ્રંથિ હાઇપોથેલામસને નિયંત્રિત કરે છે"], "ans": 2, "exp": "હાઇપોથેલામસ પિટ્યુટરી ગ્રંથિને હોર્મોન (રિલીઝિંગ હોર્મોન) અને ન્યુરોન (ન્યુરોહોર્મોન) બંને દ્વારા નિયંત્રિત કરે છે. પિટ્યુટરી ગ્રંથિ હાઇપોથેલામસને નિયંત્રિત કરતી નથી.", "ref": "Std 12 - અધ્યાય 22: મનુષ્યમાં રસાયણિક સંકેતન અને નિયંત્રણ", "ch": ""}, {"q": "વનસ્પતિઓમાં હોર્મોન અને તેમના કાર્યોની જોડીઓમાંથી કઈ જોડી ખોટી છે?", "opts": ["ઓક્સિન - કોષ લંબાયમાન વૃદ્ધિ", "જીબરેલિન - બીજના અંકુરણને પ્રેરિત કરવું", "સાયટોકાઇનિન - કોષવિભાજનને અવરોધવું", "એબ્સિસિક એસિડ - સ્ટોમેટા બંધ કરવું"], "ans": 2, "exp": "સાયટોકાઇનિન કોષવિભાજનને પ્રેરિત કરે છે, અવરોધતું નથી. બાકીની જોડીઓ સાચી છે.", "ref": "Std 12 - અધ્યાય 15: વનસ્પતિ વૃદ્ધિ અને વિકાસ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
