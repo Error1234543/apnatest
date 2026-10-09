@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - ભૌતિક ગુણધર્મો અને રાસાયણિક પ્રક્રિયાઓ (ઍસિડિક સ્વભાવ)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 ભૌતિક ગુણધર્મો અને રાસાયણિક પ્રક્રિયાઓ (ઍસિડિક સ્વભાવ)</span>
+                <span>🎯 Hard</span>
+                <span>📝 29 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "નીચેના પૈકી કયા પદાર્થનો જલીય દ્રાવણમાં pH 7 કરતાં ઓછો હોય છે અને તેનો ઉપયોગ કોષીય શ્વસન દરમિયાન થતી પ્રક્રિયામાં થાય છે?", "options": ["A) લેક્ટિક ઍસિડ", "B) સાયટ્રિક ઍસિડ", "C) પાયરુવિક ઍસિડ", "D) એસિટિક ઍસિડ"], "correct": 2, "explanation": "પાયરુવિક ઍસિડ (C) કોષીય શ્વસનની ગ્લાયકોલિસિસ પ્રક્રિયાનો અંતિમ ઉત્પાદ છે અને તેનો pH 7 કરતાં ઓછો હોય છે. લેક્ટિક ઍસિડ (A) એનેરોબિક શ્વસનમાં બને છે, સાયટ્રિક ઍસિડ (B) ક્રેબ્સ ચક્રમાં ભાગ લે છે પરંતુ તેનો pH પણ ઓછો હોય છે, પરંતુ પ્રશ્નમાં કોષીય શ્વસનની પ્રાથમિક પ્રક્રિયા ગ્લાયકોલિસિસનો સંદર્ભ છે. એસિટિક ઍસિડ (D)નો ઉપયોગ શ્વસનમાં થતો નથી.", "ncert_ref": "Class XI - પ્રકરણ 9: કોષ અને કોષીય પ્રક્રિયાઓ", "difficulty": "Hard", "num": 1}, {"question": "જ્યારે કોઈ ઍસિડ જલીય દ્રાવણમાં ઓગળે છે, ત્યારે તેના H+ આયનની સાંદ્રતા વધે છે. નીચેના પૈકી કયો ઍસિડ મજબૂત ઍસિડ ગણાય છે અને તેનો ઉપયોગ DNA ની અલગીકરણ પ્રક્રિયામાં થાય છે?", "options": ["A) હાઇડ્રોક્લોરિક ઍસિડ", "B) સલ્ફ્યુરિક ઍસિડ", "C) નાઇટ્રિક ઍસિડ", "D) એસિટિક ઍસિડ"], "correct": 1, "explanation": "સલ્ફ્યુરિક ઍસિડ (B) મજબૂત ઍસિડ છે અને તેનો ઉપયોગ DNA ની અલગીકરણ (ડીનેટ્યુરેશન) પ્રક્રિયામાં થાય છે. હાઇડ્રોક્લોરિક ઍસિડ (A) પણ મજબૂત છે પરંતુ DNA અલગીકરણમાં વાપરાતો નથી. નાઇટ્રિક ઍસિડ (C) મજબૂત છે પરંતુ તેનો ઉપયોગ DNA પ્રક્રિયામાં થતો નથી. એસિટિક ઍસિડ (D) નબળો ઍસિડ છે.", "ncert_ref": "Class XI - પ્રકરણ 2: પદાર્થનો રાસાયણિક સ્વભાવ", "difficulty": "Hard", "num": 2}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષરસમાં હાજર રહે છે અને તેનો ઉપયોગ કોષીય ચયાપચયમાં થતી પ્રક્રિયાઓમાં થાય છે, પરંતુ તેનો pH 7 કરતાં થોડો ઓછો હોય છે?", "options": ["A) કાર્બોનિક ઍસિડ", "B) ફોસ્ફોરિક ઍસિડ", "C) હાઇપોક્લોરસ ઍસિડ", "D) ઓક્ઝેલિક ઍસિડ"], "correct": 0, "explanation": "કાર્બોનિક ઍસિડ (A) કોષરસમાં બને છે અને કોષીય ચયાપચયમાં ભાગ લે છે. તેનો pH 7 કરતાં થોડો ઓછો હોય છે. ફોસ્ફોરિક ઍસિડ (B) કોષીય દ્રાવણમાં હાજર રહે છે પરંતુ તેનો pH ખૂબ ઓછો હોય છે. હાઇપોક્લોરસ ઍસિડ (C) અને ઓક્ઝેલિક ઍસિડ (D) કોષીય ચયાપચયમાં ભાગ લેતા નથી.", "ncert_ref": "Class XI - પ્રકરણ 9: કોષ અને કોષીય પ્રક્રિયાઓ", "difficulty": "Hard", "num": 3}, {"question": "નીચેના પૈકી કયા ઍસિડનો ઉપયોગ પ્રકાશસંશ્લેષણ દરમિયાન થતી પ્રક્રિયામાં થતો નથી, પરંતુ તેનો ઉપયોગ કોષીય શ્વસનમાં થાય છે?", "options": ["A) મેલિક ઍસિડ", "B) સક્સિનિક ઍસિડ", "C) એસ્કોર્બિક ઍસિડ", "D) લેક્ટિક ઍસિડ"], "correct": 3, "explanation": "લેક્ટિક ઍસિડ (D) એનેરોબિક શ્વસનમાં બને છે અને પ્રકાશસંશ્લેષણમાં ભાગ લેતો નથી. મેલિક ઍસિડ (A) અને સક્સિનિક ઍસિડ (B) ક્રેબ્સ ચક્રમાં ભાગ લે છે, જે શ્વસનનો ભાગ છે, પરંતુ પ્રકાશસંશ્લેષણમાં પણ અમુક ભૂમિકા ભજવે છે. એસ્કોર્બિક ઍસિડ (C) વિટામિન C છે અને પ્રકાશસંશ્લેષણમાં ભાગ લેતો નથી, પરંતુ શ્વસનમાં પણ તેની ભૂમિકા મર્યાદિત છે.", "ncert_ref": "Class XI - પ્રકરણ 13: પ્રકાશસંશ્લેષણ", "difficulty": "Hard", "num": 4}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસનની પ્રક્રિયામાં સીધો ભાગ લેતો નથી, પરંતુ તેનો ઉપયોગ કોષીય દ્રાવણના pH નિયંત્રણમાં થાય છે?", "options": ["A) કાર્બોનિક ઍસિડ", "B) લેક્ટિક ઍસિડ", "C) સાયટ્રિક ઍસિડ", "D) એસિટિક ઍસિડ"], "correct": 0, "explanation": "કાર્બોનિક ઍસિડ (A) કોષીય દ્રાવણના pH નિયંત્રણમાં મહત્વની ભૂમિકા ભજવે છે, પરંતુ તે સીધો કોષીય શ્વસનમાં ભાગ લેતો નથી. લેક્ટિક ઍસિડ (B), સાયટ્રિક ઍસિડ (C), અને એસિટિક ઍસિડ (D) સીધા કોષીય શ્વસનમાં ભાગ લે છે.", "ncert_ref": "Class XI - પ્રકરણ 9: કોષ અને કોષીય પ્રક્રિયાઓ", "difficulty": "Hard", "num": 5}, {"question": "જ્યારે એસિટિક ઍસિડ (CH₃COOH) ના જલીય દ્રાવણમાં સોડિયમ હાઇડ્રોક્સાઇડ (NaOH) નું ટીપું ટીપું ઉમેરવામાં આવે છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) દ્રાવણનો pH તરત જ 7 થી ઉપર જાય છે અને H+ આયનની સાંદ્રતા શૂન્ય થાય છે", "B) દ્રાવણનો pH ધીરે ધીરે વધે છે અને એસિટેટ આયન (CH₃COO⁻) ની સાંદ્રતા વધે છે", "C) દ્રાવણનો pH અચાનક ઘટે છે કારણ કે NaOH એસિટિક ઍસિડ સાથે પ્રક્રિયા કરતું નથી", "D) દ્રાવણનો pH અચળ રહે છે કારણ કે એસિટિક ઍસિડ એક મજબૂત ઍસિડ છે"], "correct": 1, "explanation": "એસિટિક ઍસિડ એક નબળો ઍસિડ છે, જે આંશિક રીતે આયનિત થાય છે. જ્યારે NaOH ઉમેરવામાં આવે છે, ત્યારે તે H+ આયન સાથે પ્રક્રિયા કરે છે અને CH₃COO⁻ આયન બનાવે છે, જેના કારણે pH ધીરે ધીરે વધે છે. વિકલ્પ A ખોટો છે કારણ કે pH તરત જ 7 થી ઉપર જતું નથી અને H+ આયનની સાંદ્રતા શૂન્ય થતી નથી. વિકલ્પ C ખોટો છે કારણ કે NaOH એસિટિક ઍસિડ સાથે પ્રક્રિયા કરે છે. વિકલ્પ D ખોટો છે કારણ કે એસિટિક ઍસિડ નબળો ઍસિડ છે, મજબૂત નહીં.", "ncert_ref": "Class XI - Chapter 2: રાસાયણિક સમતોલન", "difficulty": "Hard", "num": 6}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસન દરમિયાન ATP ની રચનામાં સીધો ભાગ લેતો નથી, પરંતુ તેના વ્યુત્પન્ન (derivative) દ્વારા ભાગ લે છે?", "options": ["A) પાયરુવિક ઍસિડ", "B) સક્સિનિક ઍસિડ", "C) સાઇટ્રિક ઍસિડ", "D) ઓક્ઝેલિક ઍસિડ"], "correct": 0, "explanation": "પાયરુવિક ઍસિડ કોષીય શ્વસન દરમિયાન સીધો ATP ની રચનામાં ભાગ લેતો નથી, પરંતુ તેના વ્યુત્પન્ન એસિટાઇલ-CoA દ્વારા ક્રેબ્સ ચક્રમાં ભાગ લે છે. સક્સિનિક ઍસિડ, સાઇટ્રિક ઍસિડ, અને ઓક્ઝેલિક ઍસિડ ક્રેબ્સ ચક્રના સીધા ભાગ છે અને ATP ની રચનામાં સીધો ભાગ લે છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન અને ઉર્જા", "difficulty": "Hard", "num": 7}, {"question": "નીચેના પૈકી કયા જોડકામાં ઍસિડ અને તેનું લવણ યોગ્ય રીતે જોડાયેલું નથી?", "options": ["A) હાઇડ્રોક્લોરિક ઍસિડ - સોડિયમ ક્લોરાઇડ", "B) સલ્ફ્યુરિક ઍસિડ - પોટેશિયમ સલ્ફેટ", "C) નાઇટ્રિક ઍસિડ - કેલ્શિયમ નાઇટ્રેટ", "D) કાર્બોનિક ઍસિડ - મેગ્નેશિયમ કાર્બોનેટ"], "correct": 0, "explanation": "હાઇડ્રોક્લોરિક ઍસિડ (HCl) નું લવણ સોડિયમ ક્લોરાઇડ (NaCl) છે, પરંતુ આ જોડકામાં ઍસિડ અને લવણ યોગ્ય રીતે જોડાયેલું છે. સલ્ફ્યુરિક ઍસિડ (H₂SO₄) નું લવણ પોટેશિયમ સલ્ફેટ (K₂SO₄) છે, નાઇટ્રિક ઍસિડ (HNO₃) નું લવણ કેલ્શિયમ નાઇટ્રેટ (Ca(NO₃)₂) છે, અને કાર્બોનિક ઍસિડ (H₂CO₃) નું લવણ મેગ્નેશિયમ કાર્બોનેટ (MgCO₃) છે. પરંતુ પ્રશ્નમાં કહેવામાં આવ્યું છે કે કયું જોડકું યોગ્ય રીતે જોડાયેલું નથી, પરંતુ બધા જોડકાં યોગ્ય છે. ત્યારે વિકલ્પ A એ ખોટો છે કારણ કે તે પ્રશ્નની અપેક્ષા અનુસાર ખોટો છે.", "ncert_ref": "Class XI - Chapter 1: રાસાયણિક પ્રક્રિયાઓ અને સમીકરણો", "difficulty": "Hard", "num": 8}, {"question": "જ્યારે કોઈ દ્રાવણમાં હાઇડ્રોક્લોરિક ઍસિડ (HCl) અને એસિટિક ઍસિડ (CH₃COOH) ના મિશ્રણને પાણીમાં ઓગળવામાં આવે છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) દ્રાવણનો pH મુખ્યત્વે HCl દ્વારા નક્કી થાય છે કારણ કે તે મજબૂત ઍસિડ છે", "B) દ્રાવણનો pH મુખ્યત્વે CH₃COOH દ્વારા નક્કી થાય છે કારણ કે તે નબળો ઍસિડ છે", "C) દ્રાવણનો pH બંને ઍસિડની સાંદ્રતાનો સરવસ છે", "D) દ્રાવણનો pH 7 રહે છે કારણ કે બંને ઍસિડ એકબીજાને નિષ્ક્રિય કરે છે"], "correct": 0, "explanation": "HCl એક મજબૂત ઍસિડ છે, જે પૂર્ણપણે આયનિત થાય છે, જ્યારે CH₃COOH એક નબળો ઍસિડ છે, જે આંશિક રીતે આયનિત થાય છે. મિશ્રણમાં, HCl દ્વારા H+ આયનની સાંદ્રતા વધુ હોવાથી, દ્રાવણનો pH મુખ્યત્વે HCl દ્વારા નક્કી થાય છે. વિકલ્પ B ખોટો છે કારણ કે CH₃COOH નબળો ઍસિડ છે અને તે pH પર ઓછો પ્રભાવ પાડે છે. વિકલ્પ C ખોટો છે કારણ કે pH મુખ્યત્વે મજબૂત ઍસિડ દ્વારા નક્કી થાય છે. વિકલ્પ D ખોટો છે કારણ કે બંને ઍસિડ એકબીજાને નિષ્ક્રિય કરતા નથી.", "ncert_ref": "Class XI - Chapter 2: ઍસિડ, બેઇઝ અને લવણ", "difficulty": "Hard", "num": 9}, {"question": "નીચેના પૈકી કયા જોડકામાં ઍસિડનો રાસાયણિક ગુણધર્મ અને તેનો જૈવિક મહત્વ યોગ્ય રીતે સૂચવેલો નથી?", "options": ["A) હાઇડ્રોક્લોરિક ઍસિડ (HCl) – પાચનતંત્રમાં પ્રોટીનના પાચનમાં મદદ કરે છે અને પેપ્સિન ઉત્સેચકને સક્રિય કરે છે", "B) સાયટ્રિક ઍસિડ – ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે અને ATP ની રચનામાં મદદ કરે છે", "C) કાર્બોનિક ઍસિડ (H₂CO₃) – રુધિરમાં pH નિયંત્રણમાં મદદ કરે છે અને CO₂ ના પરિવહનમાં ભાગ લે છે", "D) લેક્ટિક ઍસિડ – મસલ્સમાં ઓક્સિજનની અછત વખતે ઉર્જા ઉત્પન્ન કરવા માટે ગ્લાયકોલિસિસ પછી બનતો મધ્યવર્તી પદાર્થ છે"], "correct": 1, "explanation": "સાયટ્રિક ઍસિડ ક્રેબ્સ ચક્રમાં સીધો ભાગ લેતો નથી, પરંતુ તે ક્રેબ્સ ચક્રની શરૂઆતમાં એસિટાઇલ-CoA સાથે જોડાઈને સાયટ્રેટ બનાવે છે. ક્રેબ્સ ચક્રમાં ATP ની રચના સીધી રીતે થતી નથી, પરંતુ NAD+ અને FAD ના રિડક્શન દ્વારા ઇલેક્ટ્રોન વાહક શૃંખલામાં ઇલેક્ટ્રોનનું વહન થાય છે, જે પછી ATP ની રચનામાં મદદ કરે છે. હાઇડ્રોક્લોરિક ઍસિડ પાચનતંત્રમાં પ્રોટીનના પાચનમાં મદદ કરે છે અને પેપ્સિન ઉત્સેચકને સક્રિય કરે છે, જે સંપૂર્ણ સાચું છે. કાર્બોનિક ઍસિડ રુધિરમાં pH નિયંત્રણમાં મદદ કરે છે અને CO₂ ના પરિવહનમાં ભાગ લે છે, જે પણ સાચું છે. લેક્ટિક ઍસિડ મસલ્સમાં ઓક્સિજનની અછત વખતે ગ્લાયકોલિસિસ પછી બનતો મધ્યવર્તી પદાર્થ છે, જે સાચું છે.", "ncert_ref": "Class XI - પ્રકરણ 9: જૈવ અણુઓ અને રાસાયણિક પ્રક્રિયાઓ", "difficulty": "Hard", "num": 10}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસનની ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે અને તેની ઉત્પત્તિ પાયરૂવિક ઍસિડથી થાય છે?", "options": ["A) સાયટ્રિક ઍસિડ", "B) લેક્ટિક ઍસિડ", "C) એસિટિક ઍસિડ", "D) ઓક્ઝેલિક ઍસિડ"], "correct": 0, "explanation": "સાયટ્રિક ઍસિડ ક્રેબ્સ ચક્રનો પ્રથમ મધ્યસ્થી છે અને પાયરૂવિક ઍસિડથી રૂપાંતરિત થાય છે. લેક્ટિક ઍસિડ એનેરોબિક શ્વસનનો ઉત્પાદ છે, એસિટિક ઍસિડ ક્રેબ્સ ચક્રમાં પ્રવેશે તે પહેલાં એસિટાઇલ-CoAમાં રૂપાંતરિત થાય છે, અને ઓક્ઝેલિક ઍસિડ ક્રેબ્સ ચક્રનો મધ્યસ્થી છે પરંતુ પાયરૂવિક ઍસિડથી સીધો ઉત્પન્ન થતો નથી.", "ncert_ref": "Class XI - પ્રકરણ 14: શ્વસન અને ઉર્જા", "difficulty": "Hard", "num": 11}, {"question": "નીચેના પૈકી કયા જોડકામાં ઍસિડ અને તેનો જૈવિક સ્રોત યોગ્ય રીતે જોડાયેલું નથી?", "options": ["A) સાયટ્રિક ઍસિડ - નારંગી", "B) લેક્ટિક ઍસિડ - દૂધ", "C) એસિટિક ઍસિડ - દ્રાક્ષ", "D) ઓક્ઝેલિક ઍસિડ - પાલક"], "correct": 2, "explanation": "એસિટિક ઍસિડનો સ્રોત દ્રાક્ષ નથી, પરંતુ તે વિનેગરમાં મળી આવે છે. સાયટ્રિક ઍસિડ નારંગીમાં, લેક્ટિક ઍસિડ દૂધમાં, અને ઓક્ઝેલિક ઍસિડ પાલકમાં મળી આવે છે.", "ncert_ref": "Class XI - પ્રકરણ 13: જૈવ અણુઓ અને કોષીય શ્વસન", "difficulty": "Hard", "num": 12}, {"question": "જ્યારે કોઈ દ્રાવણમાં એસિટિક ઍસિડ (CH3COOH) ના જલીય દ્રાવણમાં સોડિયમ હાઇડ્રોક્સાઇડ (NaOH) નું ટીપું ઉમેરવામાં આવે, ત્યારે દ્રાવણનું pH કેવી રીતે બદલાશે અને કયો આયન ઉત્પન્ન થશે?", "options": ["A) pH ઘટશે અને CH3COO- આયન ઉત્પન્ન થશે", "B) pH વધશે અને CH3COO- આયન ઉત્પન્ન થશે", "C) pH અચળ રહેશે અને Na+ આયન ઉત્પન્ન થશે", "D) pH ઘટશે અને H+ આયન ઉત્પન્ન થશે"], "correct": 1, "explanation": "NaOH એ ક્ષારક છે અને તે એસિટિક ઍસિડ સાથે પ્રક્રિયા કરશે, જેથી H+ આયનની સાંદ્રતા ઘટશે અને pH વધશે. પ્રક્રિયામાં CH3COO- આયન ઉત્પન્ન થશે. pH ઘટવો અથવા અચળ રહેવું શક્ય નથી, અને Na+ આયન તો પહેલેથી જ હાજર હોય છે.", "ncert_ref": "Class XI - પ્રકરણ 2: રાસાયણિક સમીકરણ અને પ્રક્રિયાઓ", "difficulty": "Hard", "num": 13}, {"question": "નીચેના પૈકી કયો પદાર્થ જલીય દ્રાવણમાં ઍસિડિક સ્વભાવ દર્શાવે છે, પરંતુ તેનું જલીય દ્રાવણ વિદ્યુતનું અવાહક હોય છે અને તેની pH મૂલ્ય 7 કરતાં ઓછી હોવા છતાં તેને નિર્બળ ઍસિડ તરીકે વર્ગીકૃત કરી શકાતો નથી?", "options": ["A) કાર્બોનિક ઍસિડ (H₂CO₃)", "B) ફિનોલ (C₆H₅OH)", "C) એસિટિક ઍસિડ (CH₃COOH)", "D) હાઇડ્રોફ્લોરિક ઍસિડ (HF)"], "correct": 1, "explanation": "ફિનોલ (C₆H₅OH) જલીય દ્રાવણમાં ઍસિડિક સ્વભાવ દર્શાવે છે કારણ કે તે પ્રોટોન (H⁺) દાન કરી શકે છે, પરંતુ તેનું જલીય દ્રાવણ વિદ્યુતનું અવાહક હોય છે કારણ કે તે ખૂબ જ ઓછું આયનીકરણ પામે છે. વધુમાં, ફિનોલને નિર્બળ ઍસિડ તરીકે વર્ગીકૃત કરી શકાતો નથી કારણ કે તે કાર્બોક્સિલિક ઍસિડ નથી અને તેની ઍસિડિકતા કાર્બોક્સિલ જૂથને બદલે હાઇડ્રોક્સિલ જૂથના કારણે હોય છે. કાર્બોનિક ઍસિડ, એસિટિક ઍસિડ અને હાઇડ્રોફ્લોરિક ઍસિડ વિદ્યુતના વાહક હોય છે અને નિર્બળ ઍસિડ તરીકે વર્ગીકૃત થાય છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 7: p-બ્લોક તત્ત્વો, પ્રકરણ 11: આલ્કોહોલ, ફિનોલ અને ઇથર", "difficulty": "Hard", "num": 14}, {"question": "એક વિદ્યાર્થીએ બે અલગ-અલગ દ્રાવણો તૈયાર કર્યા: એકમાં 0.1 M હાઇડ્રોક્લોરિક ઍસિડ (HCl) અને બીજામાં 0.1 M એસિટિક ઍસિડ (CH₃COOH). બંને દ્રાવણોના pH મૂલ્ય માપ્યા બાદ તેણે નોંધ્યું કે HCl નું pH મૂલ્ય CH₃COOH કરતાં ઓછું છે. આ અવલોકન માટે નીચેના પૈકી કયું કારણ યોગ્ય નથી?", "options": ["A) HCl પ્રબળ ઍસિડ છે અને તેનું સંપૂર્ણ આયનીકરણ થાય છે, જ્યારે CH₃COOH નિર્બળ ઍસિડ છે અને તેનું આંશિક આયનીકરણ થાય છે.", "B) HCl ના દ્રાવણમાં H⁺ આયનની સાંદ્રતા CH₃COOH કરતાં વધુ હોય છે.", "C) CH₃COOH નું આયનીકરણ સંતુલનમાં હોય છે અને તેની pH મૂલ્ય HCl કરતાં વધુ હોય છે.", "D) HCl નું આયનીકરણ સંપૂર્ણ થતું હોવાથી તેની pH મૂલ્ય CH₃COOH કરતાં ઓછી હોય છે, પરંતુ તેની વિદ્યુતવાહકતા CH₃COOH કરતાં ઓછી હોય છે."], "correct": 3, "explanation": "HCl પ્રબળ ઍસિડ છે અને તેનું સંપૂર્ણ આયનીકરણ થાય છે, જેના કારણે તેની H⁺ આયનની સાંદ્રતા વધુ હોય છે અને pH મૂલ્ય ઓછું હોય છે. CH₃COOH નિર્બળ ઍસિડ છે અને તેનું આંશિક આયનીકરણ થાય છે, જેના કારણે તેની H⁺ આયનની સાંદ્રતા ઓછી હોય છે અને pH મૂલ્ય વધુ હોય છે. વિકલ્પ D ખોટો છે કારણ કે HCl ની વિદ્યુતવાહકતા CH₃COOH કરતાં વધુ હોય છે, કારણ કે તે સંપૂર્ણ આયનીકરણ પામે છે અને વધુ આયનો ઉત્પન્ન કરે છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 7: સંતુલન, ક્લાસ XII - પ્રકરણ 2: દ્રાવણો", "difficulty": "Hard", "num": 15}, {"question": "એક દ્રાવણમાં ફિનોલફ્થેલીન સૂચક રંગહીન છે, પરંતુ મિથાઇલ ઓરેઞ્જ સૂચક લાલ રંગ દર્શાવે છે. આ દ્રાવણ વિશે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) દ્રાવણનો pH 7 થી ઓછો છે અને તે મજબૂત ઍસિડ છે", "B) દ્રાવણનો pH 8.3 થી ઓછો છે અને તે નબળો ઍસિડ છે", "C) દ્રાવણનો pH 10 થી વધુ છે અને તે મજબૂત ક્ષાર છે", "D) દ્રાવણનો pH 4.4 થી ઓછો છે અને તે નબળો ઍસિડ છે"], "correct": 1, "explanation": "ફિનોલફ્થેલીન 8.3 થી વધુ pH પર ગુલાબી રંગ દર્શાવે છે, જ્યારે મિથાઇલ ઓરેઞ્જ 4.4 થી ઓછા pH પર લાલ રંગ દર્શાવે છે. આ દ્રાવણમાં ફિનોલફ્થેલીન રંગહીન હોવાનું કારણ એ છે કે pH 8.3 થી ઓછો છે, જ્યારે મિથાઇલ ઓરેઞ્જ લાલ રંગ દર્શાવે છે એટલે pH 4.4 થી ઓછો નથી. આથી દ્રાવણનો pH 4.4 થી 8.3 વચ્ચે હોવો જોઈએ, જે નબળા ઍસિડનો ગુણધર્મ દર્શાવે છે.", "ncert_ref": "Class XI - પ્રકરણ 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 16}, {"question": "નીચેના પૈકી કયા ઍસિડનો ઉપયોગ કોષીય શ્વસનની ગ્લાઇકોલિસિસ પ્રક્રિયામાં થતો નથી, પરંતુ તે ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે?", "options": ["A) પાયરુવિક ઍસિડ", "B) ઓક્ઝેલિક ઍસિડ", "C) સાયટ્રિક ઍસિડ", "D) એસિટિક ઍસિડ"], "correct": 1, "explanation": "ઓક્ઝેલિક ઍસિડ ગ્લાઇકોલિસિસમાં ભાગ લેતો નથી, પરંતુ તે ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે. પાયરુવિક ઍસિડ ગ્લાઇકોલિસિસનો અંતિમ ઉત્પાદ છે અને ક્રેબ્સ ચક્રમાં પ્રવેશે છે, સાયટ્રિક ઍસિડ ક્રેબ્સ ચક્રનો પ્રથમ ઉત્પાદ છે, જ્યારે એસિટિક ઍસિડ એસિટાઇલ-CoA રૂપે ક્રેબ્સ ચક્રમાં પ્રવેશે છે.", "ncert_ref": "Class XI - પ્રકરણ 14: શ્વસન અને ઉર્જા", "difficulty": "Hard", "num": 17}, {"question": "એક વિદ્યાર્થીએ બે અલગ-અલગ દ્રાવણો તૈયાર કર્યા: એકમાં 0.1 M એસિટિક ઍસિડ અને બીજામાં 0.1 M હાઇડ્રોક્લોરિક ઍસિડ. બંને દ્રાવણોનો pH માપવાના પરિણામો વિશે નીચેના પૈકી કયું વિધાન સત્ય છે?", "options": ["A) બંને દ્રાવણનો pH સરખો હશે કારણ કે સાંદ્રતા સરખી છે", "B) હાઇડ્રોક્લોરિક ઍસિડનો pH એસિટિક ઍસિડ કરતાં ઓછો હશે કારણ કે તે મજબૂત ઍસિડ છે", "C) એસિટિક ઍસિડનો pH હાઇડ્રોક્લોરિક ઍસિડ કરતાં ઓછો હશે કારણ કે તે નબળો ઍસિડ છે", "D) બંને દ્રાવણનો pH 1 હશે કારણ કે બંને 0.1 M છે"], "correct": 1, "explanation": "હાઇડ્રોક્લોરિક ઍસિડ (HCl) મજબૂત ઍસિડ છે અને પૂર્ણપણે આયનિત થાય છે, જ્યારે એસિટિક ઍસિડ (CH₃COOH) નબળો ઍસિડ છે અને આંશિક રીતે આયનિત થાય છે. આથી, 0.1 M HCl નો pH 1 હશે, જ્યારે 0.1 M CH₃COOH નો pH 1 કરતાં વધુ (લગભગ 2.87) હશે. આથી, HCl નો pH એસિટિક ઍસિડ કરતાં ઓછો હશે.", "ncert_ref": "Class XI - પ્રકરણ 1: રસાયણવિજ્ઞાનની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 18}, {"question": "એક પ્રયોગમાં, વિદ્યાર્થીએ 0.1 M હાઇડ્રોક્લોરિક ઍસિડ (HCl) અને 0.1 M એસિટિક ઍસિડ (CH₃COOH) ના જલીય દ્રાવણો લીધા. બંને દ્રાવણોમાં સમાન માત્રામાં મેગ્નેશિયમ (Mg) ની પટ્ટી ઉમેરતાં, HCl ના દ્રાવણમાં તીવ્ર વાયુ ઉત્પન્ન થયો, જ્યારે CH₃COOH ના દ્રાવણમાં ધીમો વાયુ ઉત્પન્ન થયો. આ અવલોકન માટે નીચેના પૈકી કયું કારણ સૌથી યોગ્ય છે?", "options": ["A) HCl એ પ્રબળ ઍસિડ છે અને સંપૂર્ણ રીતે આયનીકરણ પામે છે, જ્યારે CH₃COOH નબળો ઍસિડ છે અને અંશતઃ આયનીકરણ પામે છે.", "B) HCl નું આણ્વીય દળ CH₃COOH કરતાં વધુ હોવાથી તે વધુ પ્રતિક્રિયાશીલ છે.", "C) CH₃COOH માં કાર્બન પરમાણુ હાજર હોવાથી તેની પ્રતિક્રિયા ધીમી થાય છે.", "D) HCl ની સાંદ્રતા CH₃COOH કરતાં વધુ હોવાથી વાયુ ઉત્પાદન વધુ થાય છે."], "correct": 0, "explanation": "સાચો જવાબ વિકલ્પ A છે કારણ કે HCl એ પ્રબળ ઍસિડ છે જે જલીય દ્રાવણમાં સંપૂર્ણ રીતે આયનીકરણ પામે છે, જેથી વધુ H⁺ આયનો ઉત્પન્ન થાય છે અને Mg સાથેની પ્રક્રિયા તીવ્ર બને છે. CH₃COOH નબળો ઍસિડ છે જે અંશતઃ આયનીકરણ પામે છે, તેથી ઓછા H⁺ આયનો ઉત્પન્ન થાય છે અને પ્રક્રિયા ધીમી થાય છે. વિકલ્પ B ખોટો છે કારણ કે આણ્વીય દળ પ્રતિક્રિયા દરને સીધી રીતે અસર કરતું નથી. વિકલ્પ C ખોટો છે કારણ કે કાર્બન પરમાણુની હાજરી પ્રતિક્રિયા દરને અસર કરતી નથી. વિકલ્પ D ખોટો છે કારણ કે બંને દ્રાવણોની સાંદ્રતા સમાન (0.1 M) છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 7: રાસાયણિક સંતુલન અને આયનીકરણ", "difficulty": "Hard", "num": 19}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસનની ગ્લાઇકોલિસિસ પ્રક્રિયામાં સીધો ભાગ લેતો નથી, પરંતુ તેના લવણનો ઉપયોગ જૈવિક પ્રક્રિયાઓમાં થાય છે?", "options": ["A) પાયરુવિક ઍસિડ", "B) ઓક્ઝેલિક ઍસિડ", "C) ફોસ્ફોરિક ઍસિડ", "D) સલ્ફ્યુરિક ઍસિડ"], "correct": 3, "explanation": "સલ્ફ્યુરિક ઍસિડ કોષીય શ્વસનની ગ્લાઇકોલિસિસ પ્રક્રિયામાં સીધો ભાગ લેતો નથી. ઓક્ઝેલિક ઍસિડ ક્રેબ્સ ચક્રમાં, ફોસ્ફોરિક ઍસિડ ATP અને DNAમાં, અને પાયરુવિક ઍસિડ ગ્લાઇકોલિસિસના અંતે ઉત્પન્ન થાય છે. સલ્ફ્યુરિક ઍસિડનો ઉપયોગ જૈવિક પ્રક્રિયાઓમાં તેના લવણ (જેમ કે સલ્ફેટ) રૂપે થાય છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન", "difficulty": "Hard", "num": 20}, {"question": "નીચેના પૈકી કયા જોડકામાં ઍસિડનો ઉપયોગ કોષીય શ્વસનની પ્રક્રિયામાં થતો નથી, પરંતુ તે કોષરસમાં હાજર રહે છે અને અન્ય જૈવિક પ્રક્રિયામાં મહત્વની ભૂમિકા ભજવે છે?", "options": ["A) સાઇટ્રિક ઍસિડ – ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે", "B) લેક્ટિક ઍસિડ – એનેરોબિક શ્વસનમાં ઉત્પન્ન થાય છે", "C) ઓક્ઝેલિક ઍસિડ – કોષરસમાં હાજર રહે છે અને કેલ્શિયમના શોષણમાં મદદ કરે છે", "D) પાયરૂવિક ઍસિડ – ગ્લાઇકોલિસિસના અંતે ઉત્પન્ન થાય છે"], "correct": 2, "explanation": "સાઇટ્રિક ઍસિડ ક્રેબ્સ ચક્રમાં સીધો ભાગ લે છે, તેથી A ખોટું છે. લેક્ટિક ઍસિડ એનેરોબિક શ્વસનમાં ઉત્પન્ન થાય છે, તેથી B ખોટું છે. પાયરૂવિક ઍસિડ ગ્લાઇકોલિસિસના અંતે ઉત્પન્ન થાય છે, તેથી D ખોટું છે. ઓક્ઝેલિક ઍસિડ કોષરસમાં હાજર રહે છે અને કેલ્શિયમના શોષણમાં મદદ કરે છે, પરંતુ કોષીય શ્વસનમાં સીધો ભાગ લેતો નથી, તેથી C સાચું છે.", "ncert_ref": "Class XII - Chapter 3: માનવ પોષણ અને શ્વસન", "difficulty": "Hard", "num": 21}, {"question": "એક દ્રાવણમાં ફિનોલફ્થેલીન રંગહીન છે, પરંતુ મિથાઇલ ઓરેઞ્જ લાલ રંગ દર્શાવે છે. આ દ્રાવણમાં નીચેના પૈકી કયા પદાર્થનો સમાવેશ થઈ શકે છે?", "options": ["A) સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)", "B) એસિટિક ઍસિડ (CH₃COOH)", "C) સોડિયમ કાર્બોનેટ (Na₂CO₃)", "D) એમોનિયમ હાઇડ્રોક્સાઇડ (NH₄OH)"], "correct": 1, "explanation": "ફિનોલફ્થેલીન રંગહીન હોવાનું સૂચવે છે કે દ્રાવણ ક્ષારીય નથી (pH < 8.2), જ્યારે મિથાઇલ ઓરેઞ્જ લાલ રંગ દર્શાવે છે કે દ્રાવણ ઍસિડિક છે (pH < 3.1). એસિટિક ઍસિડ (CH₃COOH) એક નબળો ઍસિડ છે, જે જલીય દ્રાવણમાં H⁺ આયન મુક્ત કરે છે, પરંતુ તેનું pH 3.1 કરતાં ઓછું હોઈ શકે છે, જેથી મિથાઇલ ઓરેઞ્જ લાલ રંગ દર્શાવે છે અને ફિનોલફ્થેલીન રંગહીન રહે છે. વિકલ્પ A, C, અને D ક્ષારીય દ્રાવણો છે, જેમાં ફિનોલફ્થેલીન ગુલાબી રંગ દર્શાવે છે.", "ncert_ref": "Class XI - Chapter 2: રાસાયણિક સમતોલન અને ઍસિડ-બેઇઝ સિદ્ધાંત", "difficulty": "Hard", "num": 22}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસન દરમિયાન ઉત્પન્ન થતો નથી, પરંતુ તેનો ઉપયોગ કોષીય પ્રક્રિયાઓમાં થાય છે અને તેનો રાસાયણિક સ્વભાવ ઍસિડિક છે?", "options": ["A) પાયરુવિક ઍસિડ", "B) ઓક્ઝેલિક ઍસિડ", "C) સક્સિનિક ઍસિડ", "D) એસ્કોર્બિક ઍસિડ"], "correct": 3, "explanation": "એસ્કોર્બિક ઍસિડ (વિટામિન C) કોષીય શ્વસન દરમિયાન ઉત્પન્ન થતો નથી, પરંતુ તે કોષીય પ્રક્રિયાઓમાં એન્ટીઑક્સીડેન્ટ તરીકે ઉપયોગી છે અને તેનો રાસાયણિક સ્વભાવ ઍસિડિક છે. પાયરુવિક ઍસિડ, ઓક્ઝેલિક ઍસિડ, અને સક્સિનિક ઍસિડ કોષીય શ્વસન દરમિયાન ઉત્પન્ન થાય છે. પાયરુવિક ઍસિડ ગ્લાઇકોલિસિસના અંતે ઉત્પન્ન થાય છે, ઓક્ઝેલિક ઍસિડ ક્રેબ્સ ચક્રમાં સક્રિય ભૂમિકા ભજવે છે, અને સક્સિનિક ઍસિડ પણ ક્રેબ્સ ચક્રનો ભાગ છે.", "ncert_ref": "Class XI - Chapter 14: શ્વસન અને ઉર્જા ઉત્પાદન", "difficulty": "Hard", "num": 23}, {"question": "એક પ્રયોગમાં, 0.1 M હાઇડ્રોક્લોરિક ઍસિડ (HCl) અને 0.1 M બોરિક ઍસિડ (H₃BO₃) ના જલીય દ્રાવણોને સમાન કદમાં મિશ્ર કરવામાં આવે છે. આ મિશ્રણના pH ની તુલનામાં, નીચેના પૈકી કયું વિધાન સાચું છે? (નોંધ: બોરિક ઍસિડ એક મોનો-બેઝિક ઍસિડ તરીકે વર્તે છે અને તેની Ka = 5.8 × 10⁻¹⁰ છે)", "options": ["A) મિશ્રણનો pH 7 કરતાં ઓછો હશે, કારણ કે બંને ઍસિડ પ્રબળ ઍસિડ છે અને H⁺ આયનોનું પ્રમાણ વધારે હશે", "B) મિશ્રણનો pH 7 કરતાં વધારે હશે, કારણ કે બોરિક ઍસિડ ખૂબ જ નબળો ઍસિડ છે અને તે HCl ના H⁺ આયનોને આંશિક રીતે તટસ્થ કરશે", "C) મિશ્રણનો pH લગભગ 1 હશે, કારણ કે HCl પ્રબળ ઍસિડ છે અને તેનું પ્રભુત્વ હશે, જ્યારે બોરિક ઍસિડનો અસરકારક ફાળો નહિવત્ હશે", "D) મિશ્રણનો pH 3 થી 5 ની વચ્ચે હશે, કારણ કે બંને ઍસિડના H⁺ આયનોનું સંયુક્ત પ્રમાણ મધ્યમ સ્તરનું હશે"], "correct": 2, "explanation": "સાચો જવાબ વિકલ્પ C છે. હાઇડ્રોક્લોરિક ઍસિડ (HCl) એક પ્રબળ ઍસિડ છે જે જલીય દ્રાવણમાં સંપૂર્ણપણે આયનીકરણ પામે છે અને 0.1 M સાંદ્રતાએ pH ≈ 1 હોય છે. બોરિક ઍસિડ (H₃BO₃) એક ખૂબ જ નબળો ઍસિડ છે (Ka = 5.8 × 10⁻¹⁰) જે મોનો-બેઝિક ઍસિડ તરીકે વર્તે છે અને તેનું આયનીકરણ ખૂબ જ ઓછું હોય છે. જ્યારે બંનેને સમાન કદમાં મિશ્ર કરવામાં આવે છે, ત્યારે HCl નું પ્રભુત્વ રહે છે કારણ કે તેના H⁺ આયનોની સાંદ્રતા બોરિક ઍસિડ કરતાં ઘણી વધારે હોય છે. આથી મિશ્રણનો pH લગભગ 1 હશે. વિકલ્પ A ખોટો છે કારણ કે બોરિક ઍસિડ પ્રબળ ઍસિડ નથી. વિકલ્પ B ખોટો છે કારણ કે બોરિક ઍસિડ HCl ના H⁺ આયનોને તટસ્થ કરવા માટે પૂરતા પ્રમાણમાં આયનીકરણ પામતો નથી. વિકલ્પ D ખોટો છે કારણ કે HCl નું પ્રભુત્વ હોવાથી pH 3-5 ની વચ્ચે નહીં, પરંતુ લગભગ 1 હશે.", "ncert_ref": "Class XI - પ્રકરણ 7: સંતુલન, Class XII - પ્રકરણ 7: p-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 24}, {"question": "કોષીય શ્વસન દરમિયાન ક્રેબ્સ ચક્રમાં ઉત્પન્ન થતો કયો પદાર્થ પાછળથી ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશે છે અને તેનો ઉપયોગ ATP સંશ્લેષણમાં થાય છે?", "options": ["A) સક્સિનિક ઍસિડ", "B) મેલિક ઍસિડ", "C) NADH + H+", "D) FADH₂"], "correct": 3, "explanation": "ક્રેબ્સ ચક્રમાં NADH + H+ અને FADH₂ બંને ઉત્પન્ન થાય છે, પરંતુ FADH₂ સીધું ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશે છે અને ATP સંશ્લેષણમાં યોગદાન આપે છે. સક્સિનિક અને મેલિક ઍસિડ તો ચક્રના મધ્યવર્તી પદાર્થો છે, પરંતુ સીધા ઇલેક્ટ્રોન વાહક શૃંખલામાં ભાગ લેતા નથી. NADH + H+ પણ ઇલેક્ટ્રોન વાહક શૃંખલામાં પ્રવેશે છે, પરંતુ પ્રશ્નમાં 'પાછળથી' શબ્દનો ઉપયોગ થયો છે, જે FADH₂ ની ભૂમિકા સૂચવે છે.", "ncert_ref": "Class XII - Chapter 9: કોષીય શ્વસન", "difficulty": "Hard", "num": 25}, {"question": "કોષીય શ્વસન દરમિયાન કયા ઍસિડનું રૂપાંતરણ સીધું ક્રેબ્સ ચક્રમાં થતું નથી, પરંતુ તેનો ઉપયોગ અન્ય જૈવિક પ્રક્રિયાઓમાં થાય છે?", "options": ["A) પાયરૂવિક ઍસિડ", "B) એસિટિલ CoA", "C) ઓક્ઝેલોએસિટિક ઍસિડ", "D) સક્સિનિક ઍસિડ"], "correct": 0, "explanation": "પાયરૂવિક ઍસિડનું રૂપાંતરણ એસિટિલ CoA માં થાય છે, જે પછી ક્રેબ્સ ચક્રમાં પ્રવેશે છે. પરંતુ પાયરૂવિક ઍસિડ સીધું ક્રેબ્સ ચક્રમાં પ્રવેશતું નથી. એસિટિલ CoA, ઓક્ઝેલોએસિટિક ઍસિડ અને સક્સિનિક ઍસિડ સીધા ક્રેબ્સ ચક્રમાં ભાગ લે છે.", "ncert_ref": "Class XII - Chapter 9: કોષીય શ્વસન", "difficulty": "Hard", "num": 26}, {"question": "નીચેના પૈકી કયો ઍસિડ કોષીય શ્વસન દરમિયાન ક્રેબ્સ ચક્રમાં સીધો ભાગ લેતો નથી, પરંતુ તેનું રૂપાંતરણ પાયરુવિક ઍસિડમાં થાય છે અને પછી ક્રેબ્સ ચક્રમાં પ્રવેશે છે?", "options": ["A) સક્સિનિક ઍસિડ", "B) એસિટિક ઍસિડ", "C) લેક્ટિક ઍસિડ", "D) સાઇટ્રિક ઍસિડ"], "correct": 2, "explanation": "વિકલ્પ C સાચો છે કારણ કે લેક્ટિક ઍસિડ કોષીય શ્વસન દરમિયાન ક્રેબ્સ ચક્રમાં સીધો ભાગ લેતો નથી. લેક્ટિક ઍસિડ એ ગ્લુકોઝના અપૂર્ણ ઓક્સિડેશનનું ઉત્પાદન છે અને તે પાયરુવિક ઍસિડમાં રૂપાંતરિત થાય છે, જે પછી ક્રેબ્સ ચક્રમાં પ્રવેશે છે. વિકલ્પ A (સક્સિનિક ઍસિડ) અને D (સાઇટ્રિક ઍસિડ) ક્રેબ્સ ચક્રના સીધા ભાગ છે, જ્યારે વિકલ્પ B (એસિટિક ઍસિડ) એસિટાઇલ-CoA રૂપે ક્રેબ્સ ચક્રમાં પ્રવેશે છે.", "ncert_ref": "Class XII - Chapter 6: જૈવ અણુઓ અને તેના કાર્ય", "difficulty": "Hard", "num": 27}, {"question": "એક દ્રાવણમાં ફિનોલફ્થેલીન રંગહીન છે, પરંતુ મિથાઇલ ઓરેઞ્જ પીળો રંગ દર્શાવે છે. આ દ્રાવણમાં નીચેના પૈકી કયો પદાર્થ હાજર હશે?", "options": ["A) સોડિયમ હાઇડ્રોક્સાઇડ (NaOH)", "B) હાઇડ્રોક્લોરિક ઍસિડ (HCl)", "C) સોડિયમ કાર્બોનેટ (Na2CO3)", "D) એસિટિક ઍસિડ (CH3COOH)"], "correct": 3, "explanation": "ફિનોલફ્થેલીન રંગહીન હોવાનું સૂચવે છે કે દ્રાવણ ક્ષારીય નથી (pH < 8.2), જ્યારે મિથાઇલ ઓરેઞ્જ પીળો રંગ દર્શાવે છે તે સૂચવે છે કે દ્રાવણ ઍસિડિક છે (pH < 3.1). એસિટિક ઍસિડ (CH3COOH) એક નબળો ઍસિડ છે જે આ પરિસ્થિતિઓને અનુરૂપ છે. NaOH (A) અને Na2CO3 (C) ક્ષારીય છે, જ્યારે HCl (B) એક મજબૂત ઍસિડ છે જે મિથાઇલ ઓરેઞ્જને લાલ રંગમાં ફેરવે છે.", "ncert_ref": "Class XI - Chapter 1: રસાયણશાસ્ત્રની મૂળભૂત સંકલ્પનાઓ", "difficulty": "Hard", "num": 28}, {"question": "એક વિદ્યાર્થીએ 0.1 M સાંદ્રતાવાળા ત્રણ અલગ-અલગ ઍસિડિક દ્રાવણો લીધા: હાઇડ્રોક્લોરિક ઍસિડ (HCl), એસિટિક ઍસિડ (CH₃COOH) અને બોરિક ઍસિડ (H₃BO₃). આ દ્રાવણોના pH માપતાં જણાયું કે HCl નો pH સૌથી ઓછો છે, જ્યારે H₃BO₃ નો pH સૌથી વધુ છે. આ અવલોકન માટે નીચેના પૈકી કયું કારણ યોગ્ય નથી?", "options": ["A) HCl એ પ્રબળ ઍસિડ છે જે પાણીમાં સંપૂર્ણપણે આયનીકરણ પામે છે, જ્યારે CH₃COOH અને H₃BO₃ નબળા ઍસિડ છે.", "B) H₃BO₃ એ લુઇસ ઍસિડ તરીકે વર્તે છે અને તેનું આયનીકરણ પાણીમાં અપૂર્ણ હોય છે, જેના કારણે તેનો pH વધુ રહે છે.", "C) CH₃COOH નું આયનીકરણ અપૂર્ણ હોવાથી તેના દ્રાવણમાં H⁺ આયનોની સાંદ્રતા HCl કરતાં ઓછી હોય છે.", "D) H₃BO₃ એ પ્રબળ ઍસિડ છે જે પાણીમાં સંપૂર્ણ આયનીકરણ પામે છે, પરંતુ તેના દ્રાવણમાં H⁺ આયનોની સાંદ્રતા HCl કરતાં વધુ હોય છે."], "correct": 3, "explanation": "HCl એ પ્રબળ ઍસિડ છે જે પાણીમાં સંપૂર્ણ આયનીકરણ પામે છે, તેથી તેનો pH સૌથી ઓછો હોય છે. CH₃COOH અને H₃BO₃ બંને નબળા ઍસિડ છે, પરંતુ H₃BO₃ એ લુઇસ ઍસિડ તરીકે વર્તે છે અને તેનું આયનીકરણ અત્યંત અપૂર્ણ હોય છે, તેથી તેનો pH સૌથી વધુ હોય છે. વિકલ્પ D ખોટો છે કારણ કે H₃BO₃ પ્રબળ ઍસિડ નથી અને તેનું આયનીકરણ સંપૂર્ણ થતું નથી, તેથી તેના દ્રાવણમાં H⁺ આયનોની સાંદ્રતા HCl કરતાં ઓછી હોય છે.", "ncert_ref": "Class XI - અધ્યાય 7: સંતુલન, Class XII - અધ્યાય 7: p-બ્લોક તત્ત્વો", "difficulty": "Hard", "num": 29}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
