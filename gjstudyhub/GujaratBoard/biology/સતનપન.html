@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સ્તનપાન</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>સ્તનપાન</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">સ્તનપાન</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા કોલોસ્ટ્રમમાં કયા પ્રકારના પ્રોટીનની માત્રા સૌથી વધુ હોય છે, જે નવજાત શિશુની પ્રતિરક્ષા વ્યવસ્થાને મજબૂત બનાવે છે?", "opts": ["કેસીન", "લેક્ટોઝ", "ઇમ્યુનોગ્લોબ્યુલિન", "લેક્ટોઅલ્બ્યુમિન"], "ans": 2, "exp": "કોલોસ્ટ્રમમાં ઇમ્યુનોગ્લોબ્યુલિન (વિશેષત: IgA)ની માત્રા સૌથી વધુ હોય છે, જે નવજાત શિશુની પ્રતિરક્ષા વ્યવસ્થાને મજબૂત બનાવે છે. કેસીન અને લેક્ટોઅલ્બ્યુમિન પ્રોટીન છે પરંતુ પ્રતિરક્ષા માટે નહીં, લેક્ટોઝ એક કાર્બોદિત છે.", "ref": "Std 12 - પ્રકરણ 16: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના શરીરમાં કયા હોર્મોનની માત્રા વધવાને કારણે દૂધ ઉત્પાદનમાં વધારો થાય છે?", "opts": ["ઇન્સ્યુલિન", "પ્રોલેક્ટિન", "એડ્રિનેલિન", "થાયરોક્સિન"], "ans": 1, "exp": "પ્રોલેક્ટિન હોર્મોન સ્તનપાન દરમિયાન દૂધ ઉત્પાદનને ઉત્તેજિત કરે છે. ઇન્સ્યુલિન રક્તમાં ગ્લુકોઝની માત્રાને નિયંત્રિત કરે છે, એડ્રિનેલિન તણાવ હોર્મોન છે, અને થાયરોક્સિન ચયાપચયને નિયંત્રિત કરે છે.", "ref": "Std 12 - પ્રકરણ 16: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં કયા વિટામિનની માત્રા સૌથી ઓછી હોય છે, જેને કારણે શિશુઓને પૂરક આહાર આપવાની જરૂર પડે છે?", "opts": ["વિટામિન A", "વિટામિન D", "વિટામિન C", "વિટામિન K"], "ans": 1, "exp": "સ્તનદૂધમાં વિટામિન Dની માત્રા સૌથી ઓછી હોય છે, જેને કારણે શિશુઓને પૂરક આહાર અથવા સપ્લિમેન્ટ આપવાની જરૂર પડે છે. વિટામિન A, C, અને K સ્તનદૂધમાં પૂરતી માત્રામાં હાજર હોય છે.", "ref": "Std 12 - પ્રકરણ 16: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા કયા ઘટકને કારણે શિશુના મગજના વિકાસમાં મદદ મળે છે?", "opts": ["લોહી", "ઓમેગા-3 ફેટી એસિડ", "કેલ્શિયમ", "મેગ્નેશિયમ"], "ans": 1, "exp": "ઓમેગા-3 ફેટી એસિડ (વિશેષત: DHA) શિશુના મગજના વિકાસમાં મહત્વની ભૂમિકા ભજવે છે. લોહી, કેલ્શિયમ, અને મેગ્નેશિયમ પણ મહત્વના છે, પરંતુ મગજના વિકાસ માટે ઓમેગા-3 ફેટી એસિડ સૌથી મહત્વનો છે.", "ref": "Std 12 - પ્રકરણ 16: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના શરીરમાં કયા હોર્મોનની માત્રા ઘટવાને કારણે ઓવ્યુલેશન (અંડપ્રસવ) રોકાય છે?", "opts": ["એસ્ટ્રોજન", "પ્રોજેસ્ટેરોન", "ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન (FSH)", "લ્યુટિનાઇઝિંગ હોર્મોન (LH)"], "ans": 2, "exp": "સ્તનપાન દરમિયાન પ્રોલેક્ટિનની વધુ માત્રા FSH (ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન)ની માત્રાને ઘટાડે છે, જેને કારણે ઓવ્યુલેશન રોકાય છે. એસ્ટ્રોજન અને પ્રોજેસ્ટેરોન પણ પ્રજનન ચક્રમાં ભૂમિકા ભજવે છે, પરંતુ FSHની ઘટના ઓવ્યુલેશનને રોકે છે.", "ref": "Std 12 - પ્રકરણ 16: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'લેક્ટોફેરિન' નું મુખ્ય કાર્ય કયું છે?", "opts": ["શિશુના પાચનતંત્રમાં ઉત્સેચકોની ક્રિયા વેગવાન કરવી", "લોહીમાં આયર્નનું શોષણ વધારવું અને બેક્ટેરિયા વિરોધી ક્રિયા કરવી", "શિશુના હાડકાંના વિકાસ માટે કેલ્શિયમ પૂરું પાડવું", "શિશુના મગજના વિકાસ માટે ઓમેગા-૩ ફેટી એસિડ પૂરું પાડવું"], "ans": 1, "exp": "લેક્ટોફેરિન એ સ્તનદૂધમાં રહેલો એક મહત્વપૂર્ણ પ્રોટીન છે જે આયર્નનું શોષણ વધારે છે અને બેક્ટેરિયા વિરોધી (અન્ટિબેક્ટેરિયલ) ગુણધર્મ ધરાવે છે. આથી, વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D લેક્ટોફેરિનના કાર્ય સાથે સંકળાયેલા નથી. ઉત્સેચકોની ક્રિયા વેગવાન કરવી (A), કેલ્શિયમ પૂરું પાડવું (C), અને ઓમેગા-૩ ફેટી એસિડ પૂરું પાડવું (D) એ લેક્ટોફેરિનના કાર્ય નથી.", "ref": "Std 12 - પ્રકરણ ૪: માનવ પ્રજનન તંત્ર અને સ્તનપાન", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા 'ઇમ્યુનોગ્લોબ્યુલિન A (IgA)' ની ભૂમિકા શું છે?", "opts": ["શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવવું અને સંક્રમણ સામે રક્ષણ આપવું", "શિશુના વિકાસ માટે પ્રોટીન પૂરું પાડવું", "શિશુના પાચનતંત્રમાં ઉત્સેચકોની ક્રિયા નિયંત્રિત કરવી", "શિશુના હૃદયના ધબકારા નિયમિત રાખવા મદદ કરવી"], "ans": 0, "exp": "ઇમ્યુનોગ્લોબ્યુલિન A (IgA) એ સ્તનદૂધમાં રહેલો એક મહત્વપૂર્ણ પ્રતિરક્ષા ઘટક છે જે શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવે છે અને સંક્રમણ સામે રક્ષણ આપે છે. આથી, વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D IgAના કાર્ય સાથે સંકળાયેલા નથી.", "ref": "Std 12 - પ્રકરણ ૪: માનવ પ્રજનન તંત્ર અને સ્તનપાન", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'પ્રીબાયોટિક્સ' નું મુખ્ય કાર્ય કયું છે?", "opts": ["શિશુના આંતરડામાં સારા બેક્ટેરિયા (પ્રોબાયોટિક્સ) ના વિકાસને પ્રોત્સાહન આપવું", "શિશુના લોહીમાં શર્કરાની માત્રા નિયંત્રિત કરવી", "શિશુના મગજના વિકાસ માટે વસા પૂરા પાડવા", "શિશુના હાડકાંના વિકાસ માટે વિટામિન D પૂરું પાડવું"], "ans": 0, "exp": "પ્રીબાયોટિક્સ એ સ્તનદૂધમાં રહેલા કાર્બોદિત ઘટકો છે જે શિશુના આંતરડામાં સારા બેક્ટેરિયા (પ્રોબાયોટિક્સ) ના વિકાસને પ્રોત્સાહન આપે છે. આથી, વિકલ્પ A સાચો છે. વિકલ્પ B, C, અને D પ્રીબાયોટિક્સના કાર્ય સાથે સંકળાયેલા નથી.", "ref": "Std 12 - પ્રકરણ ૪: માનવ પ્રજનન તંત્ર અને સ્તનપાન", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા 'લાઇસોઝાઇમ' નું મુખ્ય કાર્ય કયું છે?", "opts": ["શિશુના પાચનતંત્રમાં પ્રોટીનના પાચનમાં મદદ કરવી", "બેક્ટેરિયાના કોષભિત્તિને તોડીને તેને નષ્ટ કરવું", "શિશુના લોહીમાં કોલેસ્ટ્રોલની માત્રા ઘટાડવી", "શિશુના મગજના વિકાસ માટે આયોડિન પૂરું પાડવું"], "ans": 1, "exp": "લાઇસોઝાઇમ એ સ્તનદૂધમાં રહેલો એક ઉત્સેચક છે જે બેક્ટેરિયાના કોષભિત્તિને તોડીને તેને નષ્ટ કરે છે. આથી, વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D લાઇસોઝાઇમના કાર્ય સાથે સંકળાયેલા નથી.", "ref": "Std 12 - પ્રકરણ ૪: માનવ પ્રજનન તંત્ર અને સ્તનપાન", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'ઓલિગોસેકેરાઇડ્સ' નું મુખ્ય કાર્ય કયું છે?", "opts": ["શિશુના આંતરડામાં પાણીનું શોષણ વધારવું", "શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવવા અને પાચનતંત્રમાં સારા બેક્ટેરિયાને પ્રોત્સાહન આપવું", "શિશુના લોહીમાં ગ્લુકોઝની માત્રા નિયંત્રિત કરવી", "શિશુના હાડકાંના વિકાસ માટે કેલ્શિયમ પૂરું પાડવું"], "ans": 1, "exp": "ઓલિગોસેકેરાઇડ્સ એ સ્તનદૂધમાં રહેલા કાર્બોદિત ઘટકો છે જે શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવે છે અને પાચનતંત્રમાં સારા બેક્ટેરિયાને પ્રોત્સાહન આપે છે. આથી, વિકલ્પ B સાચો છે. વિકલ્પ A, C, અને D ઓલિગોસેકેરાઇડ્સના કાર્ય સાથે સંકળાયેલા નથી.", "ref": "Std 12 - પ્રકરણ ૪: માનવ પ્રજનન તંત્ર અને સ્તનપાન", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'લિપેઝ' ઉત્સેચકનું મુખ્ય કાર્ય કયું છે?", "opts": ["દૂધમાં રહેલા પ્રોટીનને તોડીને એમિનો એસિડમાં રૂપાંતરિત કરવું", "દૂધમાં રહેલા ચરબીને તોડીને ફેટી એસિડ અને ગ્લિસરોલમાં રૂપાંતરિત કરવું", "દૂધમાં રહેલા કાર્બોદિતને તોડીને ગ્લુકોઝમાં રૂપાંતરિત કરવું", "દૂધમાં રહેલા ખનીજ તત્વોને શોષણ યોગ્ય બનાવવું"], "ans": 1, "exp": "લિપેઝ ઉત્સેચકનું મુખ્ય કાર્ય ચરબી (લિપિડ)ને તોડીને ફેટી એસિડ અને ગ્લિસરોલમાં રૂપાંતરિત કરવું છે, જે શિશુના પાચનતંત્ર માટે સરળતાથી શોષાય છે. A) પ્રોટીનને તોડવા માટે પ્રોટિએઝ ઉત્સેચક જવાબદાર હોય છે. C) કાર્બોદિતને તોડવા માટે એમાઇલેઝ જેવા ઉત્સેચક જવાબદાર હોય છે. D) ખનીજ તત્વોના શોષણમાં ઉત્સેચકની ભૂમિકા નહીંવત હોય છે.", "ref": "Std 12 - પાઠ 3: માનવ પોષણ અને પાચન", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા 'લેક્ટોઝ' ના પાચન માટે કયું ઉત્સેચક જવાબદાર છે?", "opts": ["લેક્ટેઝ", "એમાઇલેઝ", "માલ્ટેઝ", "સુક્રેઝ"], "ans": 0, "exp": "લેક્ટોઝ ના પાચન માટે લેક્ટેઝ ઉત્સેચક જવાબદાર છે, જે શિશુના આંતરડામાં ઉત્પન્ન થાય છે. B) એમાઇલેઝ સ્ટાર્ચને તોડવા માટે જવાબદાર છે. C) માલ્ટેઝ માલ્ટોઝને તોડવા માટે જવાબદાર છે. D) સુક્રેઝ સુક્રોઝને તોડવા માટે જવાબદાર છે.", "ref": "Std 12 - પાઠ 3: માનવ પોષણ અને પાચન", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'ઓલિગોસેકેરાઇડ્સ' ની સાંદ્રતા ક્યારે સૌથી વધુ હોય છે?", "opts": ["જન્મ પછીના પ્રથમ 2-3 દિવસમાં", "જન્મ પછીના પ્રથમ 7 દિવસમાં", "જન્મ પછીના પ્રથમ મહિનામાં", "સ્તનપાન બંધ કર્યા પછી"], "ans": 0, "exp": "કોલોસ્ટ્રમ (પ્રથમ દૂધ)માં ઓલિગોસેકેરાઇડ્સની સાંદ્રતા સૌથી વધુ હોય છે, જે જન્મ પછીના પ્રથમ 2-3 દિવસમાં ઉત્પન્ન થાય છે. આ ઓલિગોસેકેરાઇડ્સ શિશુના આંતરડામાં પ્રીબાયોટિક તરીકે કાર્ય કરે છે. B, C, અને D વિકલ્પો અયોગ્ય છે કારણ કે ઓલિગોસેકેરાઇડ્સની સાંદ્રતા સમય જતાં ઘટતી જાય છે.", "ref": "Std 12 - પાઠ 3: માનવ પોષણ અને પાચન", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા 'ટૉરિન' નું મુખ્ય કાર્ય કયું છે?", "opts": ["શિશુના હૃદયના વિકાસમાં મદદ કરવી", "શિશુના મગજ અને ચેતાતંત્રના વિકાસમાં મદદ કરવી", "શિશુના હાડકાંના વિકાસમાં મદદ કરવી", "શિશુના પેશીના વિકાસમાં મદદ કરવી"], "ans": 1, "exp": "ટૉરિન એક એમિનો એસિડ છે જે શિશુના મગજ અને ચેતાતંત્રના વિકાસમાં મહત્વની ભૂમિકા ભજવે છે. A) હૃદયના વિકાસમાં ટૉરિનની ભૂમિકા મર્યાદિત છે. C) હાડકાંના વિકાસમાં કેલ્શિયમ અને વિટામિન D મહત્વના છે. D) પેશીના વિકાસમાં પ્રોટીન અને એમિનો એસિડની ભૂમિકા છે, પરંતુ ટૉરિન વિશેષ રીતે મગજ અને ચેતાતંત્ર માટે મહત્વનું છે.", "ref": "Std 12 - પાઠ 3: માનવ પોષણ અને પાચન", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા 'ઇમ્યુનોગ્લોબ્યુલિન'માંથી કયું શિશુના રક્તપરિભ્રમણમાં જાય છે?", "opts": ["IgA", "IgG", "IgM", "IgE"], "ans": 1, "exp": "માતાના દૂધમાં રહેલા ઇમ્યુનોગ્લોબ્યુલિનમાંથી IgG શિશુના રક્તપરિભ્રમણમાં જાય છે અને શિશુને રોગપ્રતિકારક શક્તિ પ્રદાન કરે છે. A) IgA માતાના દૂધમાં સૌથી પ્રચુર પ્રમાણમાં હોય છે પરંતુ તે રક્તપરિભ્રમણમાં જતું નથી. C) IgM અને D) IgE પણ રક્તપરિભ્રમણમાં જતાં નથી.", "ref": "Std 12 - પાઠ 8: માનવ રોગપ્રતિકારક તંત્ર", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા કયા ઘટકને કારણે શિશુમાં 'નેક્રોટાઇઝિંગ એન્ટેરોકોલાઇટિસ' (NEC) નામના આંતરડાના રોગ સામે રક્ષણ મળે છે?", "opts": ["લેક્ટોફેરિન", "ઇમ્યુનોગ્લોબ્યુલિન A (IgA)", "ઓલિગોસેકેરાઇડ્સ", "લાઇસોઝાઇમ"], "ans": 2, "exp": "સાચો જવાબ: C) ઓલિગોસેકેરાઇડ્સ. માતાના દૂધમાં રહેલા ઓલિગોસેકેરાઇડ્સ શિશુના આંતરડામાં હાનિકારક બેક્ટેરિયાને જોડાઈને તેમને દૂર કરવામાં મદદ કરે છે, જેને કારણે 'નેક્રોટાઇઝિંગ એન્ટેરોકોલાઇટિસ' (NEC) જેવા આંતરડાના રોગ સામે રક્ષણ મળે છે. લેક્ટોફેરિન અને IgA પ્રતિરક્ષા વધારવામાં મદદ કરે છે, પરંતુ NEC સામે સીધું રક્ષણ આપતા નથી. લાઇસોઝાઇમ બેક્ટેરિયાને નષ્ટ કરવામાં મદદ કરે છે, પરંતુ તેનું મુખ્ય કાર્ય NEC સામે રક્ષણ આપવાનું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ કલ્યાણમાં સૂક્ષ્મજીવો", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા કયા ઘટકને કારણે શિશુના આંતરડામાં 'બાયફિડોબેક્ટેરિયા' નામના લાભકારી બેક્ટેરિયાનો વિકાસ થાય છે, જે પાચનતંત્ર માટે ફાયદાકારક છે?", "opts": ["લેક્ટોઝ", "પ્રીબાયોટિક્સ", "લાઇસોઝાઇમ", "કેસીન પ્રોટીન"], "ans": 1, "exp": "સાચો જવાબ: B) પ્રીબાયોટિક્સ. માતાના દૂધમાં રહેલા પ્રીબાયોટિક્સ શિશુના આંતરડામાં લાભકારી બેક્ટેરિયા જેમ કે 'બાયફિડોબેક્ટેરિયા' ના વિકાસને પ્રોત્સાહન આપે છે, જે પાચનતંત્રને સ્વસ્થ રાખવામાં મદદ કરે છે. લેક્ટોઝ એ દૂધનો મુખ્ય કાર્બોદિત છે, પરંતુ તે પ્રીબાયોટિક નથી. લાઇસોઝાઇમ બેક્ટેરિયાને નષ્ટ કરે છે, અને કેસીન પ્રોટીન પોષણ માટે છે, પરંતુ તે બેક્ટેરિયાના વિકાસને પ્રોત્સાહન આપતા નથી.", "ref": "Std 12 - પ્રકરણ 10: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા કયા ઘટકને કારણે શિશુના શરીરમાં 'આયર્ન' નું શોષણ વધે છે, જે એનિમિયા (લોહીની ઉણપ) ને અટકાવવામાં મદદ કરે છે?", "opts": ["વિટામિન C", "લેક્ટોફેરિન", "કેલ્શિયમ", "વિટામિન D"], "ans": 1, "exp": "સાચો જવાબ: B) લેક્ટોફેરિન. માતાના દૂધમાં રહેલું લેક્ટોફેરિન શિશુના શરીરમાં આયર્નનું શોષણ વધારવામાં મદદ કરે છે, જે એનિમિયા (લોહીની ઉણપ) ને અટકાવવામાં મદદરૂપ થાય છે. વિટામિન C પણ આયર્ન શોષણમાં મદદ કરે છે, પરંતુ માતાના દૂધમાં તેની માત્રા મર્યાદિત હોય છે. કેલ્શિયમ અને વિટામિન D આયર્ન શોષણમાં સીધી ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 14: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "સ્તનપાન કરાવતી માતાના દૂધમાં રહેલા કયા ઘટકને કારણે શિશુના શરીરમાં 'એલર્જી' ની શક્યતા ઘટે છે, કારણ કે તે શિશુની રોગપ્રતિકારક શક્તિને નિયંત્રિત કરવામાં મદદ કરે છે?", "opts": ["કેસીન પ્રોટીન", "TGF-β (ટ્રાન્સફોર્મિંગ ગ્રોથ ફેક્ટર-બીટા)", "લેક્ટોઝ", "વિટામિન K"], "ans": 1, "exp": "સાચો જવાબ: B) TGF-β (ટ્રાન્સફોર્મિંગ ગ્રોથ ફેક્ટર-બીટા). માતાના દૂધમાં રહેલું TGF-β શિશુની રોગપ્રતિકારક શક્તિને નિયંત્રિત કરીને એલર્જીની શક્યતા ઘટાડવામાં મદદ કરે છે. કેસીન પ્રોટીન પોષણ માટે છે, લેક્ટોઝ કાર્બોદિત છે, અને વિટામિન K રક્ત જામવામાં મદદ કરે છે, પરંતુ આમાંથી કોઈ પણ એલર્જી નિયંત્રણમાં સીધી ભૂમિકા ભજવતા નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "સ્તનપાન દરમિયાન માતાના દૂધમાં રહેલા કયા ઘટકની માત્રા શિશુની ઉંમર વધવાની સાથે ક્રમશઃ ઘટતી જાય છે, પરંતુ તેનું કાર્ય શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવવા ઉપરાંત આંતરડાના ઉપકલીય કોષો વચ્ચેના જોડાણને મજબૂત કરીને 'લીકી ગટ સિન્ડ્રોમ' નિવારવામાં મદદરૂપ થાય છે?", "opts": ["લેક્ટોફેરિન", "સેક્રેટરી ઇમ્યુનોગ્લોબ્યુલિન A (sIgA)", "લાઇસોઝાઇમ", "ઓલિગોસેકેરાઇડ્સ"], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B) સેક્રેટરી ઇમ્યુનોગ્લોબ્યુલિન A (sIgA) છે. સ્તનપાન દરમિયાન માતાના દૂધમાં sIgA ની માત્રા શિશુની ઉંમર વધવાની સાથે ક્રમશઃ ઘટતી જાય છે. sIgA શિશુના રોગપ્રતિકારક તંત્રને મજબૂત બનાવે છે અને આંતરડાના ઉપકલીય કોષો વચ્ચેના 'ટાઇટ જંક્શન'ને મજબૂત કરીને 'લીકી ગટ સિન્ડ્રોમ' નિવારવામાં મદદરૂપ થાય છે. વિકલ્પ A) લેક્ટોફેરિન આયર્ન બાઇન્ડિંગ પ્રોટીન છે જે બેક્ટેરિયાના વિકાસને અટકાવે છે, પરંતુ તેની માત્રા ઉંમર સાથે ઘટતી નથી. વિકલ્પ C) લાઇસોઝાઇમ બેક્ટેરિયાની કોષદીવાલને તોડે છે, પરંતુ તેનું મુખ્ય કાર્ય રોગપ્રતિકારક નથી. વિકલ્પ D) ઓલિગોસેકેરાઇડ્સ પ્રીબાયોટિક તરીકે કાર્ય કરે છે, પરંતુ તેની માત્રા ઉંમર સાથે ઘટતી નથી અને તે આંતરડાના કોષોના જોડાણને મજબૂત કરતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન અને સ્તનપાન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
