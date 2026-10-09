@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>અણુઓની ગતિનો સિદ્ધાંત Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>અણુઓની ગતિનો સિદ્ધાંત Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા કઈ રાશિ પર આધાર રાખે છે?", "opts": ["વાયુના દબાણ પર", "વાયુના કદ પર", "વાયુના તાપમાન પર", "વાયુના દળ પર"], "ans": 2, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા ફક્ત તાપમાન પર આધાર રાખે છે, જેને કેલ્વિનમાં માપવામાં આવે છે. આ કાઈનેટિક સિદ્ધાંતનો મૂળભૂત સિદ્ધાંત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં રહેલા વાયુના અણુઓની સરેરાશ વર્ગિત ઝડપ (rms speed) 400 m/s છે. જો વાયુનું તાપમાન બમણું કરવામાં આવે, તો નવી rms ઝડપ કેટલી થશે?", "opts": ["200 m/s", "400√2 m/s", "800 m/s", "400 m/s"], "ans": 1, "exp": "rms ઝડપ તાપમાનના વર્ગમૂળના સમપ્રમાણમાં હોય છે. તેથી તાપમાન બમણું કરતાં rms ઝડપ √2 ગણી થાય છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન અણુઓની ગતિના સિદ્ધાંત માટે ખોટું છે?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "અણુઓ વચ્ચેના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "અણુઓનું કદ વાયુપાત્રના કદની સરખામણીમાં નગણ્ય હોય છે.", "અણુઓ વચ્ચે આકર્ષણ બળ હંમેશા હાજર હોય છે."], "ans": 3, "exp": "આદર્શ વાયુના અણુઓની ગતિના સિદ્ધાંત મુજબ, અણુઓ વચ્ચે કોઈ આકર્ષણ બળ હોતું નથી.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા 6.21 × 10⁻²¹ J છે. આ વાયુનું તાપમાન કેટલું હશે? (k = 1.38 × 10⁻²³ J/K)", "opts": ["273 K", "300 K", "450 K", "600 K"], "ans": 1, "exp": "સરેરાશ ગતિ ઊર્જા = (3/2)kT. આ સૂત્રનો ઉપયોગ કરીને T = (2 × 6.21 × 10⁻²¹) / (3 × 1.38 × 10⁻²³) = 300 K મળે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (I) વાયુના અણુઓની સરેરાશ ઝડપ તાપમાન સાથે વધે છે. (II) વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા દબાણ સાથે વધે છે. (III) વાયુના અણુઓની સરેરાશ મુક્ત પથ તાપમાન સાથે વધે છે. કયા વિધાનો સાચાં છે?", "opts": ["ફક્ત I", "ફક્ત I અને II", "ફક્ત I અને III", "I, II અને III"], "ans": 0, "exp": "ફક્ત વિધાન I સાચું છે. સરેરાશ ગતિ ઊર્જા દબાણ પર આધારિત નથી અને સરેરાશ મુક્ત પથ તાપમાન સાથે ઘટે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા કયા પરિબળ પર આધારિત છે?", "opts": ["વાયુનું દબાણ", "વાયુનું તાપમાન", "વાયુનું કદ", "વાયુના અણુઓની સંખ્યા"], "ans": 1, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા ફક્ત તાપમાન પર આધારિત છે, જે કેલ્વિનમાં માપવામાં આવે છે. આ કાઈનેટિક સિદ્ધાંતનો મૂળભૂત સિદ્ધાંત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૩૦૦ K તાપમાને રહેલા વાયુના અણુઓની સરેરાશ વર્ગિત ઝડપ (rms speed) ૫૦૦ m/s છે. જો તાપમાન વધારીને ૬૦૦ K કરવામાં આવે, તો નવી rms ઝડપ કેટલી થશે?", "opts": ["૨૫૦ m/s", "૫૦૦√૨ m/s", "૧૦૦૦ m/s", "૫૦૦ m/s"], "ans": 1, "exp": "rms ઝડપ તાપમાનના વર્ગમૂળના સમપ્રમાણમાં હોય છે. તેથી જો તાપમાન બમણું થાય, તો ઝડપ √૨ ગણી થાય.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં રહેલા વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા ૬.૨૧ × ૧૦⁻²¹ J છે. આ વાયુનું તાપમાન કેટલું હશે? (k = ૧.૩૮ × ૧૦⁻²³ J/K)", "opts": ["૨૭૩ K", "૩૦૦ K", "૪૫૦ K", "૬૦૦ K"], "ans": 1, "exp": "સરેરાશ ગતિ ઊર્જા = (૩/૨)kT. આ સૂત્રનો ઉપયોગ કરીને તાપમાન T = (૨ × ૬.૨૧ × ૧૦⁻²¹) / (૩ × ૧.૩૮ × ૧૦⁻²³) = ૩૦૦ K મળે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (૧) વાયુના અણુઓની સરેરાશ ઝડપ તાપમાન સાથે વધે છે. (૨) વાયુના અણુઓની સરેરાશ ઝડપ દબાણ સાથે વધે છે. (૩) વાયુના અણુઓની સરેરાશ ઝડપ અણુઓના દળ પર આધારિત નથી. ઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો સાચું/સાચાં છે?", "opts": ["ફક્ત ૧", "ફક્ત ૧ અને ૨", "ફક્ત ૧ અને ૩", "૧, ૨ અને ૩"], "ans": 0, "exp": "ફક્ત વિધાન ૧ સાચું છે. અણુઓની સરેરાશ ઝડપ તાપમાન સાથે વધે છે, પરંતુ દબાણ સાથે નહીં અને અણુઓના દળ પર આધારિત હોય છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૩૦૦ K તાપમાને હાઇડ્રોજન વાયુ ભરેલો છે. જો તાપમાન બમણું કરવામાં આવે, તો અણુઓની સરેરાશ વર્ગિત ઝડપ (rms speed) કેટલી થશે?", "opts": ["√૨ ગણી વધશે", "૨ ગણી વધશે", "૪ ગણી વધશે", "અડધી થશે"], "ans": 0, "exp": "સરેરાશ વર્ગિત ઝડપ (v_rms) ∝ √T હોય છે, તેથી તાપમાન બમણું કરતાં ઝડપ √૨ ગણી થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો પૈકી કેટલાં સાચાં છે?\n(૧) વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા તેના દબાણ સાથે સીધો સંબંધ ધરાવે છે.\n(૨) અણુઓની સરેરાશ મુક્ત પથ (mean free path) અણુઓની સંખ્યા ઘનતા પર આધાર રાખે છે.\n(૩) આદર્શ વાયુના અણુઓ વચ્ચે અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.\n(૪) અણુઓની સરેરાશ ઝડપ તેમના દળ પર આધાર રાખતી નથી.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (૨) અને (૩) સાચાં છે. વિધાન (૧) ખોટું છે કારણ કે ગતિ ઊર્જા દબાણ સાથે નહીં, તાપમાન સાથે સંબંધિત છે. વિધાન (૪) ખોટું છે કારણ કે ઝડપ અણુઓના દળ પર આધાર રાખે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૨ મોલ ઓક્સિજન વાયુ ૩૦૦ K તાપમાને ભરેલો છે. જો વાયુનું તાપમાન ૬૦૦ K કરવામાં આવે, તો અણુઓની સરેરાશ ગતિ ઊર્જામાં થતો ફેરફાર કેટલો હશે? (k = બોલ્ટ્ઝમેન અચળાંક)", "opts": ["૩/૨ kT જેટલી વધશે", "૩ kT જેટલી વધશે", "૩/૨ RT જેટલી વધશે", "૩ RT જેટલી વધશે"], "ans": 2, "exp": "સરેરાશ ગતિ ઊર્જા પ્રતિ અણુ (૩/૨)kT હોય છે. ૨ મોલ માટે કુલ ઊર્જા = ૨ × N_A × (૩/૨)kT = ૩ RT. તાપમાન બમણું કરતાં ઊર્જામાં વધારો ૩ RT જેટલો થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં રહેલા વાયુના અણુઓની સરેરાશ વર્ગમૂળ ઝડપ (rms speed) ૪૦૦ m/s છે. જો વાયુનું તાપમાન બમણું કરવામાં આવે, તો નવી rms ઝડપ કેટલી થશે? (અચળ દબાણ ધારો)", "opts": ["૨૦૦ m/s", "૪૦૦√૨ m/s", "૮૦૦ m/s", "૪૦૦ m/s"], "ans": 1, "exp": "rms ઝડપ તાપમાનના વર્ગમૂળના સમપ્રમાણમાં હોય છે. તેથી તાપમાન બમણું કરતાં ઝડપ √૨ ગણી થાય છે, એટલે કે ૪૦૦√૨ m/s.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો પૈકી કેટલાં વિધાનો અણુઓની ગતિના સિદ્ધાંતને અનુરૂપ છે?\n(i) વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.\n(ii) અણુઓની સરેરાશ ગતિ ઊર્જા વાયુના દબાણ પર આધાર રાખે છે.\n(iii) અણુઓ વચ્ચેના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.\n(iv) અણુઓનું કદ વાયુપાત્રના કદની સરખામણીમાં નહિવત્ હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (iii) અને (iv) સાચાં છે. વિધાન (ii) ખોટું છે કારણ કે સરેરાશ ગતિ ઊર્જા ફક્ત તાપમાન પર આધાર રાખે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન અણુઓની ગતિના સિદ્ધાંતની મર્યાદા દર્શાવે છે?", "opts": ["અણુઓ વચ્ચેના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "અણુઓનું કદ વાયુપાત્રના કદની સરખામણીમાં નહિવત્ હોય છે.", "અણુઓ વચ્ચે આંતરઆણ્વિક બળો અસ્તિત્વ ધરાવે છે.", "અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે."], "ans": 2, "exp": "આદર્શ વાયુના સિદ્ધાંતમાં અણુઓ વચ્ચે આંતરઆણ્વિક બળો હોતા નથી, જે વાસ્તવિક વાયુઓમાં જોવા મળે છે. આ સિદ્ધાંતની મર્યાદા છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા કઈ રાશિના સમપ્રમાણમાં હોય છે?", "opts": ["વાયુનું દબાણ", "વાયુનું કદ", "વાયુનું તાપમાન", "વાયુના અણુઓની સંખ્યા"], "ans": 2, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા તેના નિરપેક્ષ તાપમાનના સમપ્રમાણમાં હોય છે, જેને કાઈનેટિક સિદ્ધાંત દ્વારા સમજાવી શકાય છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ અણુઓની ગતિના સિદ્ધાંતને સીધું સમર્થન આપતું નથી?", "opts": ["વાયુનું દબાણ તાપમાન વધતાં વધે છે.", "બ્રાઉનિયન ગતિ", "વાયુનું પ્રસરણ", "પ્રવાહીનું બાષ્પીભવન"], "ans": 3, "exp": "વાયુનું પ્રસરણ અણુઓની ગતિને કારણે થાય છે, પરંતુ તે સીધું અણુઓની ગતિના સિદ્ધાંતને સમર્થન આપતું નથી, જ્યારે બાકીના વિકલ્પો સીધું સમર્થન આપે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં હાઇડ્રોજન અને ઓક્સિજન વાયુ સમાન તાપમાને ભરેલા છે. હાઇડ્રોજન અણુઓની સરેરાશ વર્ગમૂળ ઝડપ (rms speed) ઓક્સિજન અણુઓની સરખામણીએ કેટલી હશે? (H₂ અને O₂ ના પરમાણુ દળ અનુક્રમે ૨ અને ૩૨ છે)", "opts": ["૪ ગણી", "૮ ગણી", "૧૬ ગણી", "૨ ગણી"], "ans": 0, "exp": "rms ઝડપ અણુભારના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે, તેથી H₂ ની ઝડપ O₂ કરતાં √(૩૨/૨) = ૪ ગણી હશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિઊર્જા કઈ રાશિ પર આધારિત નથી?", "opts": ["વાયુનું દબાણ", "વાયુનું તાપમાન", "વાયુના અણુઓની સંખ્યા", "વાયુના અણુઓનો પ્રકાર"], "ans": 0, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિઊર્જા ફક્ત તાપમાન પર આધારિત હોય છે, દબાણ, અણુઓની સંખ્યા કે અણુઓના પ્રકાર પર નહીં.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 2 મોલ હાઇડ્રોજન વાયુ અને 3 મોલ ઓક્સિજન વાયુ 300 K તાપમાને ભરેલા છે. હાઇડ્રોજન અને ઓક્સિજન અણુઓની સરેરાશ ગતિઊર્જાનો ગુણોત્તર કેટલો હશે?", "opts": ["1:1", "1:16", "16:1", "2:3"], "ans": 0, "exp": "સરેરાશ ગતિઊર્જા ફક્ત તાપમાન પર આધારિત હોય છે, અણુઓના પ્રકાર કે સંખ્યા પર નહીં. તેથી બંને વાયુઓની સરેરાશ ગતિઊર્જા સમાન હશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "અણુઓની ગતિના સિદ્ધાંત મુજબ, આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા કઈ રાશિ પર સીધી રીતે આધારિત છે?", "opts": ["વાયુનું દબાણ", "વાયુનું કદ", "વાયુનું તાપમાન", "વાયુના અણુઓની સંખ્યા"], "ans": 2, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા વાયુના નિરપેક્ષ તાપમાન (T) સાથે સીધો સંબંધ ધરાવે છે, જેને સૂત્ર KE = (3/2)kT વડે દર્શાવાય છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન અણુઓની ગતિના સિદ્ધાંતના સંદર્ભમાં ખોટું છે?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "અણુઓ વચ્ચેના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "અણુઓનું કદ વાયુના કુલ કદની સરખામણીમાં નહિવત્ હોય છે.", "અણુઓ વચ્ચે આકર્ષણ બળ હંમેશા અસ્તિત્વ ધરાવે છે."], "ans": 3, "exp": "આદર્શ વાયુના અણુઓ વચ્ચે કોઈ આકર્ષણ કે અપાકર્ષણ બળ હોતું નથી, જે અણુઓની ગતિના સિદ્ધાંતનો મૂળભૂત સિદ્ધાંત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૨ મોલ હાઇડ્રોજન વાયુ ૩૦૦ K તાપમાને ભરેલો છે. જો તાપમાન ૬૦૦ K કરવામાં આવે, તો અણુઓની સરેરાશ ગતિ ઊર્જામાં કેટલો ગુણોત્તર થશે?", "opts": ["૧:૧", "૧:૨", "૧:√૨", "૨:૧"], "ans": 1, "exp": "સરેરાશ ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોય છે. તાપમાન બમણું કરતાં ગતિ ઊર્જા પણ બમણી થાય છે, પરંતુ ગુણોત્તર ૧:૨ નહીં, પરંતુ ૩૦૦ K થી ૬૦૦ K પર ગતિ ઊર્જા બમણી થાય છે, તેથી ગુણોત્તર ૧:૨ નહીં, પરંતુ સરેરાશ ગતિ ઊર્જાનો ગુણોત્તર ૧:૨ નહીં, પણ તાપમાનનો ગુણોત્તર ૧:૨ છે, તેથી ગતિ ઊર્જાનો ગુણોત્તર પણ ૧:૨ થાય છે. (નોંધ: આ પ્રશ્નમાં ગતિ ઊર્જા તાપમાનના સમપ્રમાણમાં હોવાથી સાચો જવાબ ૧:૨ છે.)", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) વાયુના અણુઓની સરેરાશ ઝડપ તાપમાન સાથે વધે છે. \n(ii) વાયુના અણુઓની સરેરાશ ઝડપ અણુભારના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે. \n(iii) વાયુના અણુઓની સરેરાશ ઝડપ દબાણ પર આધારિત નથી. \nઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["ફક્ત (i) અને (ii)", "ફક્ત (i) અને (iii)", "ફક્ત (ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 3, "exp": "વાયુના અણુઓની સરેરાશ ઝડપ (rms speed) તાપમાનના વર્ગમૂળના સમપ્રમાણમાં અને અણુભારના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે. દબાણમાં ફેરફારથી ઝડપ પર કોઈ અસર થતી નથી.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 300 K તાપમાને હાઇડ્રોજન વાયુ ભરેલો છે. જો તાપમાન 600 K કરવામાં આવે, તો અણુઓની વર્ગમૂળ સરેરાશ ઝડપ (rms speed) કેટલા ગણી થશે?", "opts": ["√2 ગણી", "2 ગણી", "1/√2 ગણી", "4 ગણી"], "ans": 0, "exp": "વર્ગમૂળ સરેરાશ ઝડપ (v_rms) તાપમાનના વર્ગમૂળના સમપ્રમાણમાં હોય છે, તેથી તાપમાન બમણું થતાં ઝડપ √2 ગણી થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વાયુઓમાંથી કયો વાયુ આપેલા તાપમાને સૌથી વધુ વર્ગમૂળ સરેરાશ ઝડપ ધરાવશે?", "opts": ["હાઇડ્રોજન (H₂)", "હિલિયમ (He)", "નાઇટ્રોજન (N₂)", "કાર્બન ડાયોક્સાઇડ (CO₂)"], "ans": 0, "exp": "વર્ગમૂળ સરેરાશ ઝડપ આણ્વિક દળના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે. હાઇડ્રોજનનું આણ્વિક દળ સૌથી ઓછું હોવાથી તેની ઝડપ સૌથી વધુ હશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 2 મોલ હાઇડ્રોજન વાયુ અને 1 મોલ ઓક્સિજન વાયુ 300 K તાપમાને ભરેલા છે. આ બંને વાયુઓના અણુઓની સરેરાશ વર્ગમૂળ ઝડપ (rms speed) નો ગુણોત્તર કેટલો હશે?", "opts": ["√8 : 1", "4 : 1", "1 : √8", "1 : 4"], "ans": 0, "exp": "rms ઝડપ v_rms = √(3RT/M) છે, જ્યાં M મોલર દળ છે. હાઇડ્રોજન (M=2) અને ઓક્સિજન (M=32) માટે ગુણોત્તર √(32/2) = √16 = 4 થાય, પરંતુ rms ઝડપનો ગુણોત્તર √8 : 1 થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 300 K તાપમાને રહેલા વાયુના અણુઓની સરેરાશ વર્ગમૂળ ઝડપ (rms speed) 400 m/s છે. જો તાપમાન 600 K કરવામાં આવે, તો નવી rms ઝડપ કેટલી હશે?", "opts": ["200 m/s", "400√2 m/s", "800 m/s", "400 m/s"], "ans": 1, "exp": "rms ઝડપ v_rms ∝ √T છે. તાપમાન બમણું થતાં ઝડપ √2 ગણી થશે, એટલે કે 400√2 m/s.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન અણુઓની ગતિના સિદ્ધાંતની મૂળભૂત ધારણા નથી?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "વાયુના અણુઓ એકબીજા સાથે સંપૂર્ણ સ્થિતિસ્થાપક અથડામણ કરે છે.", "વાયુના અણુઓનું કદ વાયુપાત્રના કદની સરખામણીએ નહિવત્ હોય છે.", "વાયુના અણુઓ વચ્ચે આકર્ષણ બળો અસ્તિત્વ ધરાવે છે."], "ans": 3, "exp": "અણુઓની ગતિના સિદ્ધાંત મુજબ, વાયુના અણુઓ વચ્ચે આકર્ષણ બળો હોતાં નથી. આ ધારણા આદર્શ વાયુ માટે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા તાપમાન સાથે વધે છે.\n(ii) વાયુના અણુઓની વર્ગમૂળ સરેરાશ ઝડપ દબાણ સાથે વધે છે.\n(iii) અણુઓની ગતિ ઊર્જા વાયુના પ્રકાર પર આધારિત નથી.\nઉપરોક્ત વિધાનોમાંથી કયાં વિધાનો સાચાં છે?", "opts": ["ફક્ત (i) અને (ii)", "ફક્ત (i) અને (iii)", "ફક્ત (ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 1, "exp": "વિધાન (i) અને (iii) સાચાં છે, કારણ કે સરેરાશ ગતિ ઊર્જા ફક્ત તાપમાન પર આધારિત છે અને વાયુના પ્રકાર પર નહીં. વિધાન (ii) ખોટું છે કારણ કે વર્ગમૂળ સરેરાશ ઝડપ દબાણ પર આધારિત નથી.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૨ મોલ હાઇડ્રોજન વાયુ અને ૧ મોલ ઓક્સિજન વાયુ ૩૦૦ K તાપમાને ભરેલા છે. આ બંને વાયુઓના અણુઓની વર્ગમૂળ સરેરાશ ઝડપનો ગુણોત્તર (H₂ : O₂) કેટલો હશે?", "opts": ["૧ : ૪", "૪ : ૧", "૧ : √૮", "√૮ : ૧"], "ans": 1, "exp": "વર્ગમૂળ સરેરાશ ઝડપ (rms speed) અણુભારના વર્ગમૂળના વ્યસ્ત પ્રમાણમાં હોય છે. હાઇડ્રોજનનો અણુભાર ૨ અને ઓક્સિજનનો અણુભાર ૩૨ હોવાથી ગુણોત્તર √(૩૨/૨) = √૧૬ = ૪ : ૧ થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનોમાંથી કયાં વિધાનો અણુઓની ગતિના સિદ્ધાંત અનુસાર સાચાં છે? (i) વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે. (ii) અણુઓની ગતિ દરમિયાન તેમની વચ્ચે અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે. (iii) અણુઓની ગતિ ઊર્જા વાયુના દબાણ પર આધારિત છે.", "opts": ["માત્ર (i) અને (ii)", "માત્ર (i) અને (iii)", "(i), (ii) અને (iii)", "માત્ર (ii) અને (iii)"], "ans": 0, "exp": "અણુઓની ગતિના સિદ્ધાંત અનુસાર, અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે અને તેમની અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે, પરંતુ અણુઓની ગતિ ઊર્જા દબાણ પર નહીં, તાપમાન પર આધારિત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 1 મોલ હાઇડ્રોજન વાયુ અને 1 મોલ ઓક્સિજન વાયુ 300 K તાપમાને ભરેલા છે. નીચેનામાંથી કયું વિધાન સાચું છે?", "opts": ["હાઇડ્રોજન અણુઓની સરેરાશ ગતિઊર્જા ઓક્સિજન અણુઓ કરતાં વધુ છે", "ઓક્સિજન અણુઓની સરેરાશ ગતિઊર્જા હાઇડ્રોજન અણુઓ કરતાં વધુ છે", "બંને વાયુઓના અણુઓની સરેરાશ ગતિઊર્જા સમાન છે", "હાઇડ્રોજન અણુઓની rms ઝડપ ઓક્સિજન અણુઓ કરતાં ઓછી છે"], "ans": 2, "exp": "સમાન તાપમાને તમામ વાયુઓના અણુઓની સરેરાશ ગતિઊર્જા સમાન હોય છે, કારણ કે તે માત્ર તાપમાન પર આધારિત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં 2 મોલ નાઇટ્રોજન વાયુ 400 K તાપમાને ભરેલો છે. જો વાયુનું કદ અચળ રાખી તાપમાન 800 K કરવામાં આવે, તો વાયુના દબાણમાં શું ફેરફાર થશે? (અણુઓની ગતિનો સિદ્ધાંત ધ્યાનમાં લો)", "opts": ["દબાણ અડધું થશે", "દબાણ બમણું થશે", "દબાણ ચાર ગણું થશે", "દબાણમાં કોઈ ફેરફાર થશે નહીં"], "ans": 1, "exp": "અચળ કદે વાયુનું દબાણ તાપમાનના સમપ્રમાણમાં હોય છે (ગે-લુસાકનો નિયમ). તાપમાન બમણું થતાં દબાણ પણ બમણું થશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન અણુઓની ગતિના સિદ્ધાંતને અનુરૂપ નથી?", "opts": ["વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.", "અણુઓ વચ્ચેના અથડામણ સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "અણુઓની ગતિ ઊર્જા વાયુના કદ પર આધારિત છે.", "અણુઓનું કદ વાયુપાત્રના કદની સરખામણીમાં નગણ્ય હોય છે."], "ans": 2, "exp": "અણુઓની ગતિ ઊર્જા વાયુના કદ પર આધારિત નથી, પરંતુ તાપમાન પર આધારિત છે. આ સિદ્ધાંતનો મૂળભૂત સિદ્ધાંત છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા માટે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["તે વાયુના દબાણ પર આધારિત છે", "તે વાયુના તાપમાન પર આધારિત છે", "તે વાયુના કદ પર આધારિત છે", "તે વાયુના દળ પર આધારિત છે"], "ans": 1, "exp": "આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા ફક્ત તાપમાન પર આધારિત હોય છે, જેને કેલ્વિન તાપમાનના સમપ્રમાણમાં દર્શાવવામાં આવે છે (KE = 3/2 kT).", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ અણુઓની ગતિના સિદ્ધાંતને સમજાવવા માટે યોગ્ય નથી?", "opts": ["વાયુનું દબાણ પાત્રની દીવાલો પર અણુઓના અથડામણને કારણે ઉત્પન્ન થાય છે", "વાયુનું તાપમાન વધતાં અણુઓની સરેરાશ ગતિ ઊર્જા વધે છે", "વાયુનું કદ ઘટાડતાં અણુઓની સરેરાશ ગતિ ઊર્જા ઘટે છે", "વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે"], "ans": 2, "exp": "વાયુનું કદ ઘટાડતાં અણુઓની સરેરાશ ગતિ ઊર્જા તાપમાન અચળ હોય તો બદલાતી નથી, માત્ર અથડામણની સંખ્યા વધે છે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક વાયુપાત્રમાં ૨ મોલ હાઇડ્રોજન વાયુ અને ૧ મોલ ઓક્સિજન વાયુ ૩૦૦ K તાપમાને ભરેલા છે. નીચેનામાંથી કયું વિધાન સત્ય છે? (R = ૮.૩૧૪ J mol⁻¹ K⁻¹)", "opts": ["હાઇડ્રોજન અને ઓક્સિજન વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા સમાન હશે", "હાઇડ્રોજન વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા ઓક્સિજન વાયુ કરતાં વધુ હશે", "હાઇડ્રોજન વાયુના અણુઓની rms ઝડપ ઓક્સિજન વાયુ કરતાં ઓછી હશે", "બંને વાયુઓના અણુઓની સરેરાશ ગતિ ઊર્જા તાપમાન પર આધારિત નથી"], "ans": 0, "exp": "અણુઓની સરેરાશ ગતિ ઊર્જા માત્ર તાપમાન પર આધાર રાખે છે, વાયુના પ્રકાર પર નહીં. તેથી બંને વાયુઓની સરેરાશ ગતિ ઊર્જા સમાન હશે.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો પૈકી કેટલાં વિધાનો અણુઓની ગતિના સિદ્ધાંત અનુસાર સત્ય છે?\n(i) વાયુના અણુઓ સતત અસ્તવ્યસ્ત ગતિમાં હોય છે.\n(ii) વાયુના અણુઓ વચ્ચે આકર્ષણ બળો અસ્તિત્વ ધરાવે છે.\n(iii) વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા વાયુના તાપમાનના સમપ્રમાણમાં હોય છે.\n(iv) વાયુના અણુઓના સંઘાત સંપૂર્ણપણે સ્થિતિસ્થાપક હોય છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (iii) અને (iv) સત્ય છે. વિધાન (ii) અસત્ય છે કારણ કે આદર્શ વાયુના અણુઓ વચ્ચે આકર્ષણ બળો હોતા નથી.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}, {"q": "એક આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા અને તેના પરમાણ્વીય દળ વચ્ચેનો સંબંધ શું છે? નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["સરેરાશ ગતિ ઊર્જા પરમાણ્વીય દળના વ્યસ્ત પ્રમાણમાં હોય છે", "સરેરાશ ગતિ ઊર્જા પરમાણ્વીય દળના સમપ્રમાણમાં હોય છે", "સરેરાશ ગતિ ઊર્જા પરમાણ્વીય દળથી સ્વતંત્ર હોય છે", "સરેરાશ ગતિ ઊર્જા પરમાણ્વીય દળના વર્ગમૂળના સમપ્રમાણમાં હોય છે"], "ans": 2, "exp": "અણુઓની ગતિના સિદ્ધાંત અનુસાર, આદર્શ વાયુના અણુઓની સરેરાશ ગતિ ઊર્જા માત્ર તાપમાન પર આધારિત હોય છે અને પરમાણ્વીય દળથી સ્વતંત્ર હોય છે. સૂત્ર: KE = (3/2)kT.", "chapter": "અણુઓની ગતિનો સિદ્ધાંત", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "અણુઓની ગતિનો સિદ્ધાંત Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
