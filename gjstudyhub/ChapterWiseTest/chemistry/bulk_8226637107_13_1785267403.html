@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સંકલન સંયોજનો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>સંકલન સંયોજનો Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "નીચેના પૈકી કયું સંયોજન કિલેટિંગ લિગેન્ડ તરીકે વર્તે છે?", "opts": ["NH₃", "H₂O", "EDTA⁴⁻", "Cl⁻"], "ans": 2, "exp": "EDTA⁴⁻ એક પોલિડેન્ટેટ લિગેન્ડ છે જે ધાતુ આયન સાથે એક કરતાં વધુ સ્થાને બંધ બનાવે છે, તેથી તે કિલેટિંગ લિગેન્ડ તરીકે ઓળખાય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજન [Co(NH₃)₅Cl]Cl₂ માં કોબાલ્ટનો ઓક્સિડેશન આંક કેટલો છે?", "opts": ["+2", "+3", "+1", "+4"], "ans": 1, "exp": "સંકલન સંયોજનમાં ક્લોરાઇડ આયન બહાર હોવાથી કોબાલ્ટનો ઓક્સિડેશન આંક +3 છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન પ્રકાશીય સમઘટકતા દર્શાવે છે?", "opts": ["[Co(NH₃)₆]³⁺", "[Co(en)₃]³⁺", "[Co(NH₃)₄Cl₂]⁺", "[Co(NH₃)₅Cl]²⁺"], "ans": 1, "exp": "[Co(en)₃]³⁺ માં 'en' (ઇથીલીનડાયએમાઇન) એક દ્વિદંતીય લિગેન્ડ છે જે પ્રકાશીય સમઘટકતા દર્શાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M60 60 L100 40 L140 60 L120 80 L80 80 Z' fill='none' stroke='black' stroke-width='2'/><text x='80' y='35' font-size='12'>N</text><text x='120' y='35' font-size='12'>N</text><text x='70' y='95' font-size='12'>Co</text><line x1='60' y1='60' x2='40' y2='60' stroke='black' stroke-width='2'/><line x1='140' y1='60' x2='160' y2='60' stroke='black' stroke-width='2'/><text x='30' y='65' font-size='12'>en</text><text x='170' y='65' font-size='12'>en</text><text x='100' y='110' font-size='10'>[Co(en)₃]³⁺</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલા સાચાં છે?\n(i) સંકલન સંયોજનોમાં ધાતુ આયન લુઇસ એસિડ તરીકે વર્તે છે.\n(ii) લિગેન્ડ લુઇસ બેઇઝ તરીકે વર્તે છે.\n(iii) [Fe(CN)₆]⁴⁻ માં Fe નો સવર્ગ આંક 6 છે.\n(iv) સિસ-પ્લેટિન એક પ્રતિકર્કરોગી દવા છે.", "opts": ["1", "2", "3", "4"], "ans": 3, "exp": "વિધાન (i), (ii), (iii) અને (iv) બધાં સાચાં છે. માત્ર (iv) સિવાય બાકીનાં ત્રણ વિધાનો સંકલન સંયોજનોના મૂળભૂત ગુણધર્મો દર્શાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન સૌથી વધુ સ્થિર સંકલન સંયોજન બનાવશે?", "opts": ["NH₃", "H₂O", "CN⁻", "Cl⁻"], "ans": 2, "exp": "CN⁻ એક પ્રબળ ફિલ્ડ લિગેન્ડ છે જે ધાતુ આયન સાથે સૌથી વધુ સ્થિર સંકલન સંયોજન બનાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (I) [Ni(CN)₄]²⁻ સમતલીય ચોરસ છે. (II) [NiCl₄]²⁻ ટેટ્રાહેડ્રલ છે. (III) [Ni(CN)₄]²⁻ પ્રતિચુંબકીય છે. (IV) [NiCl₄]²⁻ અનુચુંબકીય છે. કયા વિધાનો સાચાં છે?", "opts": ["માત્ર I અને II", "માત્ર I, II અને III", "માત્ર II, III અને IV", "I, II, III અને IV"], "ans": 3, "exp": "[Ni(CN)₄]²⁻ સમતલીય ચોરસ અને પ્રતિચુંબકીય છે, જ્યારે [NiCl₄]²⁻ ટેટ્રાહેડ્રલ અને અનુચુંબકીય છે. બધાં વિધાનો સાચાં છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન 'આંતરિક કક્ષક સંકીર્ણ' (inner orbital complex) નું ઉદાહરણ છે?", "opts": ["[CoF₆]³⁻", "[Co(NH₃)₆]³⁺", "[Ni(CO)₄]", "[Fe(H₂O)₆]²⁺"], "ans": 1, "exp": "[Co(NH₃)₆]³⁺ માં Co³⁺ નું d²sp³ સંકરણ થાય છે, જે આંતરિક કક્ષક સંકીર્ણ છે કારણ કે તેમાં (n-1)d કક્ષકોનો ઉપયોગ થાય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંયોજન એમ્બિડેન્ટ લિગેન્ડ ધરાવે છે?", "opts": ["NH₃", "H₂O", "NO₂⁻", "Cl⁻"], "ans": 2, "exp": "NO₂⁻ એમ્બિડેન્ટ લિગેન્ડ છે કારણ કે તે નાઇટ્રો (–NO₂) અથવા નાઇટ્રિટો (–ONO) તરીકે સંકલન કરી શકે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું પ્રતિચુંબકીય (diamagnetic) છે? (Cr = 24, Fe = 26, Co = 27, Ni = 28)", "opts": ["[Cr(NH₃)₆]³⁺", "[Fe(CN)₆]⁴⁻", "[CoF₆]³⁻", "[NiCl₄]²⁻"], "ans": 1, "exp": "[Fe(CN)₆]⁴⁻ માં Fe²⁺ નું ઇલેક્ટ્રોનિક રચના t₂g⁶eg⁰ છે, જેમાં અયુગ્મિત ઇલેક્ટ્રોન ન હોવાથી તે પ્રતિચુંબકીય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલા સાચાં છે?\n(i) [Co(NH₃)₆]³⁺ નો ચુંબકીય ચાકમાત્ર 0 છે.\n(ii) [Ni(CN)₄]²⁻ સમતલીય ચોરસ છે.\n(iii) [Fe(H₂O)₆]²⁺ નો રંગ લીલો છે.\n(iv) [Cu(NH₃)₄]²⁺ માં Cu²⁺ ની સવર્ગાંક સંખ્યા 4 છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "(i) અને (ii) સાચાં છે. (iii) ખોટું છે કારણ કે [Fe(H₂O)₆]²⁺ નો રંગ આછો લીલો નહીં પણ આછો વાદળી હોય છે. (iv) ખોટું છે કારણ કે Cu²⁺ ની સવર્ગાંક સંખ્યા 4 નહીં પણ 6 છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સમઘટકતા (isomerism) દર્શાવતું નથી?", "opts": ["[Co(en)₃]³⁺", "[Pt(NH₃)₂Cl₂]", "[Cr(NH₃)₅(NO₂)]Cl₂", "[Co(NH₃)₄Cl₂]⁺"], "ans": 0, "exp": "[Co(en)₃]³⁺ માં બધા લિગેન્ડ્સ સમાન હોવાથી તે સમઘટકતા દર્શાવતું નથી, જ્યારે અન્ય વિકલ્પોમાં ભૌમિતિક અથવા આયનીય સમઘટકતા શક્ય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે દર્શાવેલ સંકલન સંયોજનની રચના માટે યોગ્ય નામ શું છે?\n(સંરચના: [Pt(NH₃)(Py)(Cl)(Br)])\n(નોંધ: Py = પિરિડિન)", "opts": ["એમિનક્લોરોબ્રોમોપિરિડિનપ્લેટિનમ(II)", "એમિનબ્રોમોક્લોરોપિરિડિનપ્લેટિનમ(II)", "બ્રોમોક્લોરોએમિનપિરિડિનપ્લેટિનમ(II)", "ક્લોરોબ્રોમોએમિનપિરિડિનપ્લેટિનમ(II)"], "ans": 3, "exp": "લિગેન્ડ્સને અંગ્રેજી મૂળાક્ષરોના ક્રમમાં ગોઠવવામાં આવે છે: એમિન (NH₃), બ્રોમો (Br), ક્લોરો (Cl), પિરિડિન (Py). તેથી સાચું નામ ક્લોરોબ્રોમોએમિનપિરિડિનપ્લેટિનમ(II) છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><rect x='10' y='10' width='200' height='100' fill='none' stroke='black'/><text x='110' y='30' text-anchor='middle' font-size='12'>Pt</text><line x1='60' y1='50' x2='110' y2='20' stroke='black'/><text x='35' y='45' text-anchor='middle' font-size='10'>NH₃</text><line x1='160' y1='50' x2='110' y2='20' stroke='black'/><text x='185' y='45' text-anchor='middle' font-size='10'>Py</text><line x1='60' y1='90' x2='110' y2='120' stroke='black'/><text x='35' y='95' text-anchor='middle' font-size='10'>Cl</text><line x1='160' y1='90' x2='110' y2='120' stroke='black'/><text x='185' y='95' text-anchor='middle' font-size='10'>Br</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન પ્રકાશીય સમઘટકતા (optical isomerism) દર્શાવતું નથી?", "opts": ["[Co(en)₃]³⁺", "[Co(en)₂Cl₂]⁺", "[Pt(NH₃)₂Cl₂]", "[Cr(ox)₃]³⁻"], "ans": 2, "exp": "[Pt(NH₃)₂Cl₂] સમતલીય ચોરસ રચના ધરાવે છે અને તે અસમમિત કેન્દ્ર ધરાવતું ન હોવાથી પ્રકાશીય સમઘટકતા દર્શાવતું નથી.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન પ્રબળક્ષેત્ર લિગેન્ડ ધરાવે છે અને નીચી સ્પિન રચના બનાવે છે?", "opts": ["[Fe(H₂O)₆]²⁺", "[Fe(CN)₆]⁴⁻", "[CoF₆]³⁻", "[NiCl₄]²⁻"], "ans": 1, "exp": "CN⁻ પ્રબળક્ષેત્ર લિગેન્ડ છે જે ઇલેક્ટ્રોન યુગ્મને જોડી બનાવવા પ્રેરે છે, તેથી [Fe(CN)₆]⁴⁻ નીચી સ્પિન રચના ધરાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન સમતલીય ચોરસ (square planar) ભૂમિતિ ધરાવે છે?", "opts": ["[Ni(CN)₄]²⁻", "[NiCl₄]²⁻", "[Co(NH₃)₆]³⁺", "[Fe(H₂O)₆]²⁺"], "ans": 0, "exp": "[Ni(CN)₄]²⁻ માં Ni²⁺ d⁸ ઇલેક્ટ્રોન રચના ધરાવે છે અને પ્રબળક્ષેત્ર લિગેન્ડ CN⁻ ની હાજરીમાં સમતલીય ચોરસ ભૂમિતિ બનાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><rect x='50' y='40' width='120' height='40' fill='none' stroke='black' stroke-width='2'/><line x1='50' y1='40' x2='170' y2='80' stroke='black' stroke-width='2'/><line x1='170' y1='40' x2='50' y2='80' stroke='black' stroke-width='2'/><text x='40' y='35' font-size='12'>CN</text><text x='180' y='35' font-size='12'>CN</text><text x='40' y='85' font-size='12'>CN</text><text x='180' y='85' font-size='12'>CN</text><circle cx='110' cy='60' r='15' fill='none' stroke='black' stroke-width='2'/><text x='105' y='65' font-size='14'>Ni</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) [Co(NH₃)₆]³⁺ માં Co નો ઓક્સિડેશન આંક +3 છે.\n(ii) [Fe(CN)₆]⁴⁻ માં Fe નો સવર્ગ આંક 6 છે.\n(iii) [Ni(CN)₄]²⁻ માં Ni ની સવર્ગ સંખ્યા 4 છે.\n(iv) [Cu(NH₃)₄]²⁺ માં Cu નો સવર્ગ આંક 2 છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "(i), (ii) અને (iii) વિધાનો સાચાં છે. (iv) વિધાન ખોટું છે કારણ કે [Cu(NH₃)₄]²⁺ માં Cu નો સવર્ગ આંક 4 છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન બાહ્ય કક્ષકીય સંકીર્ણ (outer orbital complex) છે?", "opts": ["[Co(NH₃)₆]³⁺", "[Fe(CN)₆]⁴⁻", "[Ni(CN)₄]²⁻", "[CoF₆]³⁻"], "ans": 3, "exp": "[CoF₆]³⁻ માં F⁻ નબળુંક્ષેત્ર લિગેન્ડ છે જે sp³d² સંકરણ બનાવે છે અને બાહ્ય કક્ષકીય સંકીર્ણ રચે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં સાચાં છે?\n(i) [Co(NH₃)₆]³⁺ નો ચુંબકીય ચાકમાત્ર શૂન્ય છે.\n(ii) [Ni(CN)₄]²⁻ સમતલીય ચોરસ રચના ધરાવે છે.\n(iii) [Fe(CN)₆]⁴⁻ માં Fe ની ઓક્સિડેશન અવસ્થા +2 છે.", "opts": ["એક પણ નહીં", "માત્ર એક", "માત્ર બે", "ત્રણેય"], "ans": 3, "exp": "(i) Co³⁺ d⁶ નીચું સ્પિન છે, ચુંબકીય ચાકમાત્ર શૂન્ય; (ii) Ni²⁺ d⁸ સમતલીય ચોરસ; (iii) Fe ની ઓક્સિડેશન અવસ્થા +2 છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું *અપવાદરૂપે* જલીય દ્રાવણમાં આયનોમાં વિભાજિત થતું નથી?", "opts": ["[Co(NH₃)₅Cl]Cl₂", "[Pt(NH₃)₂Cl₂]", "[Cr(H₂O)₆]Cl₃", "K₄[Fe(CN)₆]"], "ans": 1, "exp": "[Pt(NH₃)₂Cl₂] એક તટસ્થ સંકીર્ણ છે જે જલીય દ્રાવણમાં આયનોમાં વિભાજિત થતું નથી.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે દર્શાવેલ સંકલન સંયોજનની રચના માટે યોગ્ય નામ શું છે? (SVG જુઓ)", "opts": ["ટ્રાન્સ-ડાયએમ્માઇનડાયક્લોરોપ્લેટિનમ(II)", "સિસ-ડાયએમ્માઇનડાયક્લોરોપ્લેટિનમ(II)", "ટ્રાન્સ-ટેટ્રાએમ્માઇનડાયક્લોરોપ્લેટિનમ(IV)", "સિસ-ટેટ્રાએમ્માઇનડાયક્લોરોપ્લેટિનમ(IV)"], "ans": 1, "exp": "આપેલ રચનામાં બે Cl અને બે NH₃ ટ્રાન્સ સ્થિતિમાં છે, તેથી તેનું નામ ટ્રાન્સ-ડાયએમ્માઇનડાયક્લોરોપ્લેટિનમ(II) છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><rect x='10' y='10' width='200' height='100' fill='none' stroke='black'/><text x='110' y='30' text-anchor='middle' font-size='12'>Pt</text><line x1='60' y1='60' x2='110' y2='30' stroke='black'/><line x1='160' y1='60' x2='110' y2='30' stroke='black'/><line x1='110' y1='90' x2='110' y2='30' stroke='black'/><line x1='110' y1='30' x2='110' y2='-10' stroke='black'/><text x='35' y='75' text-anchor='middle' font-size='10'>Cl</text><text x='185' y='75' text-anchor='middle' font-size='10'>Cl</text><text x='85' y='105' text-anchor='middle' font-size='10'>NH₃</text><text x='135' y='105' text-anchor='middle' font-size='10'>NH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન સમતલીય ચતુષ્કોણીય (square planar) ભૂમિતિ ધરાવે છે?", "opts": ["[Co(NH₃)₆]³⁺", "[Ni(CN)₄]²⁻", "[Fe(CN)₆]⁴⁻", "[CoCl₄]²⁻"], "ans": 1, "exp": "[Ni(CN)₄]²⁻ માં Ni²⁺ d⁸ રચના ધરાવે છે અને પ્રબળ ક્ષેત્ર લિગેન્ડ CN⁻ હોવાથી સમતલીય ચતુષ્કોણીય ભૂમિતિ બનાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન પ્રકાશીય સમઘટકતા (optical isomerism) દર્શાવી શકે છે?", "opts": ["[Co(en)₃]³⁺", "[Co(NH₃)₄Cl₂]⁺", "[Pt(NH₃)₂Cl₂]", "[Fe(C₂O₄)₃]³⁻"], "ans": 0, "exp": "[Co(en)₃]³⁺ માં ત્રણ દ્વિદંતીય લિગેન્ડ en હોવાથી તે અસમમિતી ધરાવે છે અને પ્રકાશીય સમઘટકતા દર્શાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M110 20 L130 40 L110 60 L90 40 Z' fill='none' stroke='black'/><path d='M110 60 L130 80 L110 100 L90 80 Z' fill='none' stroke='black'/><path d='M70 40 L90 60 L70 80 L50 60 Z' fill='none' stroke='black'/><text x='110' y='15' text-anchor='middle'>Co</text><text x='140' y='45' font-size='10'>en</text><text x='140' y='85' font-size='10'>en</text><text x='40' y='65' font-size='10'>en</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો:\n(i) [CoF₆]³⁻ એ બાહ્ય કક્ષકીય સંકીર્ણ છે.\n(ii) [Co(NH₃)₆]³⁺ એ આંતરિક કક્ષકીય સંકીર્ણ છે.\n(iii) [Fe(CN)₆]⁴⁻ એ પ્રતિચુંબકીય છે.\n(iv) [NiCl₄]²⁻ એ સમચતુષ્કોણીય ભૂમિતિ ધરાવે છે.", "opts": ["માત્ર (i) અને (ii) સાચાં છે", "(i), (ii) અને (iii) સાચાં છે", "(ii), (iii) અને (iv) સાચાં છે", "બધાં જ સાચાં છે"], "ans": 1, "exp": "(i) F⁻ નબળું ક્ષેત્ર લિગેન્ડ હોવાથી બાહ્ય કક્ષકીય સંકીર્ણ બનાવે છે. (ii) NH₃ પ્રબળ ક્ષેત્ર લિગેન્ડ હોવાથી આંતરિક કક્ષકીય સંકીર્ણ બનાવે છે. (iii) [Fe(CN)₆]⁴⁻ માં Fe²⁺ d⁶ રચના ધરાવે છે અને બધા ઇલેક્ટ્રોન યુગ્મિત હોવાથી પ્રતિચુંબકીય છે. (iv) ખોટું છે કારણ કે [NiCl₄]²⁻ સમચતુષ્કોણીય નહીં પણ ચતુષ્કોણીય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન સૌથી વધુ સ્થિરતા ધરાવે છે? (લિગેન્ડ ક્ષેત્ર સ્થિરતા ઊર્જા (LFSE) ને ધ્યાનમાં લો)", "opts": ["[CoF₆]³⁻", "[Co(H₂O)₆]³⁺", "[Co(CN)₆]³⁻", "[Co(NH₃)₆]³⁺"], "ans": 2, "exp": "CN⁻ સૌથી પ્રબળ ક્ષેત્ર લિગેન્ડ હોવાથી [Co(CN)₆]³⁻ માં સૌથી વધુ લિગેન્ડ ક્ષેત્ર સ્થિરતા ઊર્જા (LFSE) મળે છે, જે તેને સૌથી વધુ સ્થિર બનાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન આયનીય સમઘટકતા (ionization isomerism) દર્શાવી શકે છે?", "opts": ["[Co(NH₃)₅SO₄]Br", "[Co(NH₃)₅Br]SO₄", "[Co(NH₃)₆]Cl₃", "[Co(en)₃]Cl₃"], "ans": 0, "exp": "[Co(NH₃)₅SO₄]Br અને [Co(NH₃)₅Br]SO₄ આયનીય સમઘટકો છે, પરંતુ પ્રશ્નમાં માત્ર પ્રથમ વિકલ્પ આપેલ છે જે આયનીય સમઘટકતા દર્શાવી શકે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું આંતરિક કક્ષકીય સંકીર્ણ (inner orbital complex) છે?", "opts": ["[CoF₆]³⁻", "[Co(NH₃)₆]³⁺", "[Ni(CN)₄]²⁻", "[FeF₆]³⁻"], "ans": 1, "exp": "[Co(NH₃)₆]³⁺ માં Co³⁺ d²sp³ સંકરણ ધરાવે છે, જે આંતરિક કક્ષકીય સંકીર્ણ બનાવે છે, જ્યારે અન્ય બાહ્ય કક્ષકીય સંકીર્ણ છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલ સંકલન સંયોજનની રચના દર્શાવતી આકૃતિ પૈકી કઈ સાચી છે? (M = ધાતુ, L = લિગેન્ડ)", "opts": ["સમતલીય ચતુષ્કોણીય (square planar) [PtCl₄]²⁻", "ચતુષ્કોણીય પિરામિડલ (square pyramidal) [Ni(CN)₅]³⁻", "અષ્ટફલકીય (octahedral) [Co(NH₃)₆]³⁺", "ટેટ્રાહેડ્રલ (tetrahedral) [NiCl₄]²⁻"], "ans": 2, "exp": "[Co(NH₃)₆]³⁺ અષ્ટફલકીય રચના ધરાવે છે, જ્યારે અન્ય વિકલ્પો અનુક્રમે સમતલીય ચતુષ્કોણીય, પિરામિડલ અને ટેટ્રાહેડ્રલ રચના ધરાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><circle cx='110' cy='60' r='30' fill='none' stroke='black'/><line x1='110' y1='30' x2='110' y2='90' stroke='black'/><line x1='80' y1='60' x2='140' y2='60' stroke='black'/><line x1='110' y1='60' x2='150' y2='30' stroke='black'/><line x1='110' y1='60' x2='150' y2='90' stroke='black'/><line x1='110' y1='60' x2='70' y2='30' stroke='black'/><line x1='110' y1='60' x2='70' y2='90' stroke='black'/><text x='110' y='15' text-anchor='middle'>NH₃</text><text x='155' y='35' text-anchor='start'>NH₃</text><text x='155' y='85' text-anchor='start'>NH₃</text><text x='65' y='35' text-anchor='end'>NH₃</text><text x='65' y='85' text-anchor='end'>NH₃</text><text x='110' y='105' text-anchor='middle'>NH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન પ્રતિચુંબકીય (diamagnetic) છે?", "opts": ["[Fe(CN)₆]⁴⁻", "[FeF₆]³⁻", "[CoF₆]³⁻", "[NiCl₄]²⁻"], "ans": 0, "exp": "[Fe(CN)₆]⁴⁻ માં Fe²⁺ નું ઇલેક્ટ્રોનીય રચના t₂g⁶eg⁰ છે, જેમાં કોઈ અયુગ્મિત ઇલેક્ટ્રોન નથી, તેથી તે પ્રતિચુંબકીય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનની રચનામાં કયું લિગેન્ડ દ્વિદંતીય (bidentate) છે?", "opts": ["NH₃", "H₂O", "en (ઇથીલિનડાયએમાઇન)", "Cl⁻"], "ans": 2, "exp": "ઇથીલિનડાયએમાઇન (en) બે દાતા પરમાણુઓ ધરાવે છે, તેથી તે દ્વિદંતીય લિગેન્ડ છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L70 40 M70 40 L90 60 M90 60 L110 40 M110 40 L130 60 M70 40 L70 20 M110 40 L110 20 M70 20 L90 20 M90 20 L110 20' stroke='black' fill='none'/><text x='60' y='80' font-size='12'>en</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં વિધાનો સાચાં છે?\n(i) [Co(NH₃)₅SO₄]Br અને [Co(NH₃)₅Br]SO₄ આયનીકરણ સમઘટકો છે.\n(ii) [Cr(H₂O)₆]³⁺ નો રંગ જાંબલી હોય છે.\n(iii) [Ni(CN)₄]²⁻ માં Ni ની ઓક્સિડેશન અવસ્થા +2 છે.\n(iv) [Fe(C₂O₄)₃]³⁻ પ્રકાશીય સમઘટકતા દર્શાવે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 3, "exp": "વિધાન (i), (ii), (iii) અને (iv) સાચાં છે. માત્ર વિધાન (ii) માં રંગ લીલો હોય છે, તેથી તે ખોટું છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનની રચના માટે યોગ્ય નામ અને ભૂમિતિ દર્શાવો: K₃[Fe(CN)₆]", "opts": ["પોટેશિયમ હેક્ઝાસાયનોફેરેટ(III), અષ્ટફલકીય", "પોટેશિયમ હેક્ઝાસાયનોફેરેટ(II), સમતલીય ચોરસ", "પોટેશિયમ હેક્ઝાસાયનોફેરેટ(III), સમતલીય ચોરસ", "પોટેશિયમ હેક્ઝાસાયનોફેરેટ(II), અષ્ટફલકીય"], "ans": 0, "exp": "K₃[Fe(CN)₆] માં Fe³⁺ છે અને તે અષ્ટફલકીય ભૂમિતિ ધરાવે છે, જેનું નામ પોટેશિયમ હેક્ઝાસાયનોફેરેટ(III) છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "{'text': 'નીચેના વિધાનોને ધ્યાનમાં લઈને સાચો વિકલ્પ પસંદ કરો:', 'statements': ['I. [Ni(CN)₄]²⁻ સમતલીય ચોરસ અને પ્રતિચુંબકીય છે.', 'II. [NiCl₄]²⁻ ટેટ્રાહેડ્રલ અને અનુચુંબકીય છે.', 'III. [CoF₆]³⁻ અષ્ટફલકીય અને અનુચુંબકીય છે.']}", "opts": ["માત્ર I અને II સાચાં છે", "માત્ર II અને III સાચાં છે", "માત્ર I અને III સાચાં છે", "I, II અને III ત્રણેય સાચાં છે"], "ans": 3, "exp": "I, II અને III ત્રણેય વિધાનો સાચાં છે કારણ કે [Ni(CN)₄]²⁻ પ્રતિચુંબકીય અને સમતલીય ચોરસ છે, [NiCl₄]²⁻ અનુચુંબકીય અને ટેટ્રાહેડ્રલ છે, અને [CoF₆]³⁻ અનુચુંબકીય અને અષ્ટફલકીય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન સમતલીય ચોરસ (square planar) ભૂમિતિ ધરાવતું નથી?", "opts": ["[Pt(NH₃)₂Cl₂]", "[Ni(CN)₄]²⁻", "[Cu(NH₃)₄]²⁺", "[CoCl₄]²⁻"], "ans": 3, "exp": "[CoCl₄]²⁻ એ ચતુષ્ફલકીય (tetrahedral) ભૂમિતિ ધરાવે છે, જ્યારે અન્ય ત્રણ સમતલીય ચોરસ ભૂમિતિ ધરાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું પ્રતિચુંબકીય (diamagnetic) છે?", "opts": ["[Fe(CN)₆]⁴⁻", "[FeF₆]³⁻", "[CoF₆]³⁻", "[NiCl₄]²⁻"], "ans": 0, "exp": "[Fe(CN)₆]⁴⁻ માં Fe²⁺ નું d⁶ ઇલેક્ટ્રોનીય રચના નીચા સ્પિન સંકુલ બનાવે છે, જેમાં બધા ઇલેક્ટ્રોન યુગ્મિત હોય છે, તેથી તે પ્રતિચુંબકીય છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના લિગેન્ડોમાંથી કયો દ્વિદંતીય (bidentate) લિગેન્ડ નથી?", "opts": ["ઑક્ઝેલેટ (C₂O₄²⁻)", "ઇથિલીનડાયએમાઇન (en)", "ગ્લાયસિનેટ (gly⁻)", "એમોનિયા (NH₃)"], "ans": 3, "exp": "એમોનિયા (NH₃) એકદંતીય (monodentate) લિગેન્ડ છે, જ્યારે અન્ય ત્રણ દ્વિદંતીય લિગેન્ડ છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M40 60 L80 40 L120 60 L100 80 L60 80 Z' fill='none' stroke='black'/><text x='50' y='30' font-size='12'>C₂O₄²⁻</text><line x1='40' y1='60' x2='30' y2='70' stroke='black'/><line x1='120' y1='60' x2='130' y2='70' stroke='black'/><text x='150' y='60' font-size='12'>en</text><path d='M160 40 L180 40 L180 80 L160 80 Z' fill='none' stroke='black'/><text x='165' y='55' font-size='10'>NH₂</text><text x='165' y='75' font-size='10'>NH₂</text><text x='190' y='60' font-size='12'>NH₃</text><circle cx='200' cy='60' r='10' fill='none' stroke='black'/><text x='200' y='65' font-size='10' text-anchor='middle'>N</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લઈને કેટલાં વિધાનો સાચાં છે?\n(i) [Co(NH₃)₆]³⁺ એ આંતરિક કક્ષકીય સંકુલ (inner orbital complex) છે.\n(ii) [Ni(CN)₄]²⁻ એ સમતલીય ચોરસ ભૂમિતિ ધરાવે છે.\n(iii) [FeF₆]³⁻ એ બાહ્ય કક્ષકીય સંકુલ (outer orbital complex) છે.\n(iv) [Cu(NH₃)₄]²⁺ એ ચતુષ્ફલકીય ભૂમિતિ ધરાવે છે.", "opts": ["1", "2", "3", "4"], "ans": 2, "exp": "વિધાન (i), (ii) અને (iii) સાચાં છે, જ્યારે વિધાન (iv) ખોટું છે કારણ કે [Cu(NH₃)₄]²⁺ સમતલીય ચોરસ ભૂમિતિ ધરાવે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના સંકલન સંયોજનોમાંથી કયું સંયોજન બહુદંતીય (polydentate) લિગેન્ડ ધરાવતું નથી?", "opts": ["EDTA⁴⁻ સાથેનું [Ca(EDTA)]²⁻", "ઓક્ઝેલેટ (C₂O₄²⁻) સાથેનું [Fe(ox)₃]³⁻", "ઇથિલિનડાયએમાઇન (en) સાથેનું [Co(en)₃]³⁺", "એમોનિયા (NH₃) સાથેનું [Cu(NH₃)₄]²⁺"], "ans": 3, "exp": "NH₃ એકદંતીય લિગેન્ડ છે, જ્યારે EDTA⁴⁻, ઓક્ઝેલેટ અને ઇથિલિનડાયએમાઇન બહુદંતીય લિગેન્ડ છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંકલન સંયોજનની રચના માટે કયું વિધાન ખોટું છે? (SVG આકૃતિ જુઓ)", "opts": ["આ સંયોજન સમતલીય ચોરસ રચના ધરાવે છે.", "આ સંયોજન પ્રકાશીય સમઘટકતા દર્શાવી શકે છે.", "આ સંયોજનમાં ધાતુ આયનનું સંકરણ dsp² છે.", "આ સંયોજનમાં લિગેન્ડ મજબૂત ક્ષેત્ર લિગેન્ડ છે."], "ans": 1, "exp": "આ સંયોજન સમતલીય ચોરસ રચના ધરાવે છે, જે પ્રકાશીય સમઘટકતા દર્શાવતું નથી. પ્રકાશીય સમઘટકતા અષ્ટફલકીય કિરાલ રચનામાં જોવા મળે છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><rect x='10' y='10' width='200' height='100' fill='none' stroke='black'/><text x='110' y='20' text-anchor='middle' font-size='12'>Pt</text><line x1='30' y1='40' x2='90' y2='40' stroke='black'/><text x='60' y='35' text-anchor='middle' font-size='10'>Cl</text><line x1='130' y1='40' x2='190' y2='40' stroke='black'/><text x='160' y='35' text-anchor='middle' font-size='10'>Cl</text><line x1='110' y1='60' x2='110' y2='100' stroke='black'/><text x='110' y='115' text-anchor='middle' font-size='10'>NH₃</text><line x1='110' y1='60' x2='50' y2='80' stroke='black'/><text x='70' y='85' text-anchor='middle' font-size='10'>NH₃</text><line x1='110' y1='60' x2='170' y2='80' stroke='black'/><text x='150' y='85' text-anchor='middle' font-size='10'>NH₃</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચે આપેલા સંકલન સંયોજન [Co(NH₃)₄Cl₂]⁺ ના સમઘટકોની સંખ્યા કેટલી છે?", "opts": ["1", "2", "3", "4"], "ans": 1, "exp": "[Co(NH₃)₄Cl₂]⁺ ઑક્ટાહેડ્રલ સંકલન સંયોજન છે જે સિસ અને ટ્રાન્સ સમઘટકતા દર્શાવે છે, તેથી કુલ 2 સમઘટકો છે.", "chapter": "સંકલન સંયોજનો", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><rect x='10' y='10' width='200' height='100' fill='none' stroke='black'/><text x='110' y='30' text-anchor='middle' font-size='12'>Co</text><line x1='110' y1='40' x2='160' y2='60' stroke='black'/><text x='170' y='65' font-size='10'>NH₃</text><line x1='110' y1='40' x2='60' y2='60' stroke='black'/><text x='50' y='65' font-size='10'>NH₃</text><line x1='110' y1='40' x2='110' y2='100' stroke='black'/><text x='110' y='110' font-size='10'>NH₃</text><line x1='110' y1='40' x2='110' y2='-20' stroke='black'/><text x='110' y='-10' font-size='10'>NH₃</text><line x1='110' y1='40' x2='160' y2='20' stroke='black'/><text x='170' y='15' font-size='10'>Cl</text><line x1='110' y1='40' x2='60' y2='20' stroke='black'/><text x='50' y='15' font-size='10'>Cl</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું સંકલન સંયોજન વર્ણપટીય શ્રેણી (Spectrochemical series)માં સૌથી નબળું લિગેન્ડ છે?", "opts": ["CN⁻", "NH₃", "F⁻", "CO"], "ans": 2, "exp": "વર્ણપટીય શ્રેણીમાં લિગેન્ડની પ્રબળતા નિર્ધારિત કરવામાં આવે છે, જેમાં F⁻ સૌથી નબળું લિગેન્ડ ગણાય છે કારણ કે તે નબળું ક્ષેત્ર ઉત્પન્ન કરે છે.", "chapter": "સંકલન સંયોજનો", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "સંકલન સંયોજનો Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
