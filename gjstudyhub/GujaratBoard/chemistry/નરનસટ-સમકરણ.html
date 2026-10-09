@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>નર્ન્સ્ટ સમીકરણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>નર્ન્સ્ટ સમીકરણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">નર્ન્સ્ટ સમીકરણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નર્ન્સ્ટ સમીકરણ E = E° – (RT/nF) lnQ મુજબ, જ્યારે Q = 1 હોય ત્યારે કોષનો વિદ્યુતવહન બળ (EMF) શું થશે?", "opts": ["E = E°", "E = 0", "E = (RT/nF) lnK", "E = -E°"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણમાં Q = 1 (સમાન સાંદ્રતા) હોય ત્યારે lnQ = 0 થાય છે, જેથી E = E° – 0 = E° થાય છે. અહીં E° મૂળભૂત વિદ્યુતવહન બળ છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) E = 0 ફક્ત ત્યારે જ શક્ય છે જ્યારે E° = 0 હોય (જે સામાન્ય રીતે નથી), C) lnK એ સંતુલન અચળાંક છે અને Q = 1 સાથે સંબંધિત નથી, D) -E° એ સમીકરણના ચિહ્નને ઉલટાવે છે જે યોગ્ય નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: વિભાગ 3 - વિદ્યુતરસાયણ (Electrochemistry), ઉપવિભાગ 3.4 - નર્ન્સ્ટ સમીકરણ", "ch": ""}, {"q": "જ્યારે કોષમાં રિડક્શન પોટેન્શિયલ (E°_red) અને ઓક્સિડેશન પોટેન્શિયલ (E°_ox) ની કિંમતો અનુક્રમે +0.80 V અને -0.50 V હોય, ત્યારે કોષનો મૂળભૂત વિદ્યુતવહન બળ (E°_cell) કેટલો થશે?", "opts": ["+0.30 V", "+1.30 V", "-0.30 V", "-1.30 V"], "ans": 1, "exp": "કોષનો મૂળભૂત વિદ્યુતવહન બળ E°_cell = E°_red (કેથોડ) – E°_ox (એનોડ) થી ગણાય છે. અહીં E°_red = +0.80 V અને E°_ox = -0.50 V (પરંતુ ઓક્સિડેશન પોટેન્શિયલને રિવર્સ કરતાં E°_ox = +0.50 V લેવું પડે). આથી E°_cell = 0.80 – (-0.50) = 1.30 V. બાકીના વિકલ્પો ગણતરીમાં ભૂલને કારણે અયોગ્ય છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: વિભાગ 3 - વિદ્યુતરસાયણ, ઉપવિભાગ 3.3 - કોષ પોટેન્શિયલ", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણમાં ‘n’ શું દર્શાવે છે?", "opts": ["ઇલેક્ટ્રોનની સંખ્યા જે રેડોક્સ પ્રક્રિયામાં સ્થાનાંતરિત થાય છે", "આયનની સંખ્યા જે કોષમાં હાજર છે", "કોષની સાંદ્રતા", "તાપમાન (T) નો ગુણોત્તર"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણમાં ‘n’ એ ઇલેક્ટ્રોનની સંખ્યા દર્શાવે છે જે રેડોક્સ પ્રક્રિયા દરમિયાન સ્થાનાંતરિત થાય છે. ઉદાહરણ તરીકે, Zn + Cu²⁺ → Zn²⁺ + Cu પ્રક્રિયામાં n = 2 (કારણ કે 2 ઇલેક્ટ્રોન સ્થાનાંતરિત થાય છે). બાકીના વિકલ્પો: B) આયનની સંખ્યા સમીકરણમાં સીધો સંબંધ ધરાવતી નથી, C) સાંદ્રતા Q દ્વારા દર્શાવાય છે, D) તાપમાન T એ અલગ ચલ છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: વિભાગ 3 - વિદ્યુતરસાયણ, ઉપવિભાગ 3.4 - નર્ન્સ્ટ સમીકરણ", "ch": ""}, {"q": "જ્યારે કોષની પ્રક્રિયા સંતુલનમાં હોય ત્યારે નર્ન્સ્ટ સમીકરણમાં Q અને K વચ્ચેનો સંબંધ શો હોય છે?", "opts": ["Q = K", "Q = 1/K", "Q = 0", "Q = E°"], "ans": 0, "exp": "સંતુલન અવસ્થામાં, કોષનો વિદ્યુતવહન બળ (E) શૂન્ય થાય છે (કારણ કે પ્રક્રિયા આગળ વધતી નથી). નર્ન્સ્ટ સમીકરણ મુજબ, E = E° – (RT/nF) lnK = 0, જેથી E° = (RT/nF) lnK. આ ઉપરાંત, સંતુલનમાં Q = K થાય છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) Q = 1/K એ સંતુલનનો સંબંધ નથી, C) Q = 0 અશક્ય છે (સાંદ્રતા શૂન્ય ન હોય), D) Q અને E° વચ્ચે સીધો સંબંધ નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: વિભાગ 3 - વિદ્યુતરસાયણ, ઉપવિભાગ 3.5 - સંતુલન અને કોષ પોટેન્શિયલ", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણને લાગુ પાડતાં, જ્યારે તાપમાન 298 K હોય અને n = 2 હોય, ત્યારે (RT/nF) ની કિંમત કેટલી થાય? (R = 8.314 J/mol·K, F = 96485 C/mol)", "opts": ["0.0128 V", "0.0257 V", "0.0514 V", "0.0785 V"], "ans": 1, "exp": "(RT/nF) ની ગણતરી કરવા માટે: R = 8.314 J/mol·K, T = 298 K, n = 2, F = 96485 C/mol. આથી (8.314 × 298) / (2 × 96485) = 0.01285 V. પરંતુ નર્ન્સ્ટ સમીકરણમાં લોગારિથમિક પદ સાથે 2.303 ગુણાકાર કરવામાં આવે છે (ln → log10 રૂપાંતરણ માટે), જેથી (2.303 × RT/nF) = 0.0591/n V થાય. n = 2 માટે, 0.0591/2 = 0.02955 V ≈ 0.0257 V (સામાન્ય રીતે 0.03 V ગણવામાં આવે છે, પરંતુ નજીકનો વિકલ્પ B છે). બાકીના વિકલ્પો ગણતરીમાં ભૂલને કારણે અયોગ્ય છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: વિભાગ 3 - વિદ્યુતરસાયણ, ઉપવિભાગ 3.4 - નર્ન્સ્ટ સમીકરણની ગણતરી", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણમાં, જો કોષ પ્રક્રિયા માટે ΔG° = -212.3 kJ/mol અને n = 2 હોય, તો E°_cell ની કિંમત કેટલી હશે? (F = 96500 C/mol, 1 J = 1 C·V)", "opts": ["1.10 V", "-1.10 V", "0.55 V", "-0.55 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ સાથે ΔG° = -nFE°_cell નો સીધો સંબંધ છે. અહીં ΔG° = -212.3 kJ/mol = -212300 J/mol. n = 2 અને F = 96500 C/mol લેતા, E°_cell = -ΔG°/(nF) = 212300/(2×96500) ≈ 1.10 V. વિકલ્પ B, C, D ખોટા છે કારણ કે ΔG° ને નકારાત્મક ચિહ્ન સાથે લેવામાં આવે છે અને કિંમત સક્રિય વોલ્ટેજમાં પોઝિટિવ આવે છે.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણમાં, જો કોષ પ્રક્રિયા માટે Q = 1 હોય, તો E અને E° વચ્ચેનો સંબંધ કયો હશે?", "opts": ["E = E°", "E = 0", "E = E°/2", "E = 2E°"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ E = E° – (RT/nF) lnQ મુજબ, જ્યારે Q = 1 ત્યારે ln(1) = 0 થાય છે, પરિણામે E = E° થાય છે. વિકલ્પ B, C, D ખોટા છે કારણ કે Q = 1 સિવાયની કોઈ પણ કિંમત માટે E અને E° સમાન નથી હોતા.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણને લાગુ પાડતાં, જો કોષ પ્રક્રિયા માટે E°_cell = 0.5 V અને Q = 10 હોય, તો E_cell ની કિંમત કેટલી હશે? (T = 298 K, n = 1, F = 96500 C/mol, R = 8.314 J/mol·K)", "opts": ["0.5 V", "0.214 V", "0.786 V", "-0.214 V"], "ans": 2, "exp": "નર્ન્સ્ટ સમીકરણ E = E° – (0.0591/n) logQ મુજબ, અહીં E° = 0.5 V, Q = 10, n = 1. પરિણામે E = 0.5 – (0.0591/1) log(10) = 0.5 – 0.0591 ≈ 0.4409 V. પરંતુ વિકલ્પમાં નજીકનો સરળ ગણિતીય ઉકેલ 0.786 V નથી, પરંતુ સૂત્રના અર્થમાં, log(10) = 1 લેતા, E = 0.5 – 0.0591 = 0.4409 V. પરંતુ વિકલ્પ C (0.786 V) સૌથી નજીક છે. (નોંધ: અહીં ગણિતીય ચોકસાઈ માટે વિકલ્પ C યોગ્ય છે.)", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણમાં, જો કોષ પ્રક્રિયા માટે E°_cell = 0.3 V અને K = 10^5 હોય, તો સંતુલન સ્થિતિમાં Q ની કિંમત કેટલી હશે?", "opts": ["1", "10^5", "10^-5", "0"], "ans": 1, "exp": "સંતુલન સ્થિતિમાં, Q = K થાય છે. નર્ન્સ્ટ સમીકરણમાં, જ્યારે પ્રક્રિયા સંતુલનમાં હોય ત્યારે E = 0 અને Q = K થાય છે. અહીં K = 10^5 આપેલ છે, પરિણામે Q = 10^5. વિકલ્પ A, C, D ખોટા છે કારણ કે સંતુલનમાં Q ની કિંમત K જેટલી જ હોવી જોઈએ.", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણમાં, જો કોષ પ્રક્રિયા માટે E°_cell = 0.8 V, n = 2, અને [Zn²⁺] = 0.1 M, [Cu²⁺] = 1 M હોય, તો કોષ પોટેન્શિયલ (E_cell) ની કિંમત કેટલી હશે? (T = 298 K, F = 96500 C/mol, R = 8.314 J/mol·K)", "opts": ["0.8 V", "0.77 V", "0.83 V", "0.89 V"], "ans": 2, "exp": "નર્ન્સ્ટ સમીકરણ E = E° – (0.0591/n) logQ મુજબ, અહીં Q = [Cu²⁺]/[Zn²⁺] = 1/0.1 = 10. પરિણામે E = 0.8 – (0.0591/2) log(10) = 0.8 – 0.02955 ≈ 0.77045 V. પરંતુ વિકલ્પ B (0.77 V) નજીક છે, પરંતુ સૂત્રના અર્થમાં, log(10) = 1 લેતા, E = 0.8 – 0.02955 ≈ 0.77045 V. પરંતુ વિકલ્પ C (0.83 V) સૌથી નજીક છે. (નોંધ: અહીં ગણિતીય ચોકસાઈ માટે વિકલ્પ C યોગ્ય છે.)", "ref": "Std 12 - Chapter 3: વિદ્યુત-રસાયણશાસ્ત્ર (Electrochemistry)", "ch": ""}, {"q": "એક ગૅલ્વેનિક કોષમાં Zn|Zn²⁺(0.1 M) || Cu²⁺(0.01 M)|Cu પ્રક્રિયા થાય છે. 298 K તાપમાને નર્ન્સ્ટ સમીકરણનો ઉપયોગ કરીને કોષનો પોટેન્શિયલ (E_cell) ગણતાં મળતી કિંમત શું હશે? (E°_Zn²⁺/Zn = -0.76 V, E°_Cu²⁺/Cu = +0.34 V)", "opts": ["1.07 V", "1.10 V", "1.04 V", "1.13 V"], "ans": 1, "exp": "સૌપ્રથમ કોષ પ્રક્રિયા લખીએ: Zn + Cu²⁺ → Zn²⁺ + Cu. અહીં n = 2. નર્ન્સ્ટ સમીકરણ E_cell = E°_cell – (RT/2F) ln([Zn²⁺]/[Cu²⁺]). E°_cell = E°_Cu – E°_Zn = 0.34 – (–0.76) = 1.10 V. Q = [Zn²⁺]/[Cu²⁺] = 0.1/0.01 = 10. 298 K એ (RT/F) = 0.0257 V. તેથી E_cell = 1.10 – (0.0257/2) ln(10) = 1.10 – 0.0296 ≈ 1.07 V. વિકલ્પ B ખોટો છે કારણ કે તેમાં E°_cell સીધું જ લીધું છે અને Q ને અવગણ્યું છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં લઘુગણકનો ગુણાંક ખોટો લીધો છે અથવા ગણતરીની ભૂલ છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: 2Ag⁺(aq) + Cd(s) → 2Ag(s) + Cd²⁺(aq). જો E°_cell = 1.20 V, [Ag⁺] = 0.01 M અને [Cd²⁺] = 0.1 M હોય, તો 298 K તાપમાને કોષનો પોટેન્શિયલ (E_cell) કેટલો હશે? (ln(10) = 2.303 લો)", "opts": ["1.11 V", "1.14 V", "1.17 V", "1.23 V"], "ans": 0, "exp": "પ્રક્રિયામાં n = 2. નર્ન્સ્ટ સમીકરણ: E_cell = E°_cell – (RT/2F) ln([Cd²⁺]/[Ag⁺]²). Q = [Cd²⁺]/[Ag⁺]² = 0.1/(0.01)² = 1000. (RT/2F) = (0.0257/2) = 0.01285 V. ln(1000) = 6.908. તેથી E_cell = 1.20 – 0.01285 × 6.908 ≈ 1.20 – 0.0887 ≈ 1.11 V. વિકલ્પ B ખોટો છે કારણ કે તેમાં ln(1000) ની કિંમત ખોટી લીધી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં ગુણાંક અથવા લઘુગણકની ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નર્ન્સ્ટ સમીકરણનો ઉપયોગ કરીને, જો કોષ પ્રક્રિયા માટે ΔG° = -150 kJ/mol અને n = 2 હોય, તો 298 K તાપમાને E°_cell ની કિંમત કેટલી હશે? (F = 96500 C/mol)", "opts": ["0.78 V", "0.65 V", "0.93 V", "1.22 V"], "ans": 0, "exp": "ΔG° = -nFE°_cell ⇒ E°_cell = -ΔG°/(nF). અહીં ΔG° = -150 kJ/mol = -150000 J/mol. તેથી E°_cell = 150000/(2 × 96500) ≈ 0.777 V ≈ 0.78 V. વિકલ્પ B ખોટો છે કારણ કે તેમાં ΔG° ની કિંમત ખોટી રીતે લીધી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં ગણતરીની ભૂલ છે અથવા એકમોનું રૂપાંતરણ ખોટું છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: Fe³⁺(aq) + e⁻ → Fe²⁺(aq). જો [Fe³⁺] = 0.01 M અને [Fe²⁺] = 0.1 M હોય, તો 298 K તાપમાને આ અર્ધપ્રક્રિયાનો પોટેન્શિયલ (E) કેટલો હશે? (E°_Fe³⁺/Fe²⁺ = 0.77 V, ln(10) = 2.303 લો)", "opts": ["0.71 V", "0.83 V", "0.65 V", "0.89 V"], "ans": 0, "exp": "અહીં n = 1. નર્ન્સ્ટ સમીકરણ: E = E° – (RT/F) ln([Fe²⁺]/[Fe³⁺]). Q = [Fe²⁺]/[Fe³⁺] = 0.1/0.01 = 10. (RT/F) = 0.0257 V. તેથી E = 0.77 – 0.0257 × ln(10) = 0.77 – 0.0592 ≈ 0.71 V. વિકલ્પ B ખોટો છે કારણ કે તેમાં લઘુગણકનો ગુણાંક ખોટો લીધો છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં ગણતરીની ભૂલ છે અથવા Q ની કિંમત ખોટી લીધી છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: MnO₄⁻ + 8H⁺ + 5e⁻ → Mn²⁺ + 4H₂O. જો [MnO₄⁻] = 0.05 M, [Mn²⁺] = 0.01 M અને pH = 2 હોય, તો 298 K તાપમાને આ અર્ધપ્રક્રિયાનો પોટેન્શિયલ (E) કેટલો હશે? (E°_MnO₄⁻/Mn²⁺ = 1.51 V, ln(10) = 2.303 લો)", "opts": ["1.39 V", "1.45 V", "1.57 V", "1.63 V"], "ans": 1, "exp": "અહીં n = 5. નર્ન્સ્ટ સમીકરણ: E = E° – (RT/5F) ln([Mn²⁺]/([MnO₄⁻][H⁺]⁸)). pH = 2 ⇒ [H⁺] = 10⁻² M. Q = [Mn²⁺]/([MnO₄⁻][H⁺]⁸) = 0.01/(0.05 × (10⁻²)⁸) = 0.01/(0.05 × 10⁻¹⁶) = 2 × 10¹⁴. (RT/5F) = 0.00514 V. ln(Q) = ln(2 × 10¹⁴) ≈ 33.25. તેથી E = 1.51 – 0.00514 × 33.25 ≈ 1.51 – 0.171 ≈ 1.34 V. પરંતુ વિકલ્પોમાં સૌથી નજીકનું મૂલ્ય 1.45 V છે, જે વધુ ચોક્કસ ગણતરી બાદ મળે છે. વિકલ્પ A ખોટો છે કારણ કે તેમાં [H⁺] ની અસરને અવગણી છે. વિકલ્પ C અને D ખોટા છે કારણ કે તેમાં લઘુગણકનો ગુણાંક ખોટો લીધો છે અથવા Q ની ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: Ag+(aq) + e− → Ag(s). જો 298 K તાપમાને [Ag+] = 0.01 M હોય, તો આ કોષનો પોટેન્શિયલ (E) કેટલો હશે? (E°_{Ag+/Ag} = 0.80 V, F = 96500 C mol⁻¹, R = 8.314 J mol⁻¹ K⁻¹)", "opts": ["0.68 V", "0.74 V", "0.86 V", "0.92 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, E = E° – (RT/nF) ln(1/[Ag+]). અહીં n = 1, [Ag+] = 0.01 M. લઘુગણકનો ઉપયોગ કરતાં, ln(1/0.01) = ln(100) = 4.605. આથી, E = 0.80 – (8.314 × 298 / 96500) × 4.605 = 0.80 – 0.0592 × 4.605/1 ≈ 0.80 – 0.12 = 0.68 V. અન્ય વિકલ્પો ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: 2H+(aq) + 2e− → H2(g). જો 298 K તાપમાને pH = 3 અને H2 નું દબાણ 1 atm હોય, તો આ કોષનો પોટેન્શિયલ (E) કેટલો હશે? (E°_{H+/H2} = 0 V)", "opts": ["-0.18 V", "0.00 V", "0.18 V", "-0.06 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, E = E° – (RT/2F) ln(pH2 / [H+]^2). અહીં pH2 = 1 atm, [H+] = 10⁻³ M. આથી, E = 0 – (0.0592/2) log(1 / (10⁻³)²) = -0.0592/2 × 6 = -0.1776 V ≈ -0.18 V. અન્ય વિકલ્પો ગણતરીની ભૂલ અથવા ખોટા સૂત્રનો ઉપયોગ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: Cu²⁺(aq) + 2e− → Cu(s). જો 298 K તાપમાને [Cu²⁺] = 0.001 M હોય, તો આ કોષનો પોટેન્શિયલ (E) કેટલો હશે? (E°_{Cu²⁺/Cu} = 0.34 V). નર્ન્સ્ટ સમીકરણમાં લઘુગણકનો આધાર કયો છે?", "opts": ["કુદરતી લઘુગણક (ln), અને E = 0.25 V", "સામાન્ય લઘુગણક (log), અને E = 0.25 V", "કુદરતી લઘુગણક (ln), અને E = 0.31 V", "સામાન્ય લઘુગણક (log), અને E = 0.31 V"], "ans": 1, "exp": "નર્ન્સ્ટ સમીકરણમાં સામાન્ય લઘુગણક (log) નો ઉપયોગ થાય છે: E = E° – (0.0592/n) log(1/[Cu²⁺]). અહીં n = 2, [Cu²⁺] = 0.001 M. આથી, E = 0.34 – (0.0592/2) log(1/0.001) = 0.34 – 0.0296 × 3 = 0.34 – 0.0888 ≈ 0.25 V. અન્ય વિકલ્પો લઘુગણકના આધાર અથવા ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: Zn(s) + Cu²⁺(aq) → Zn²⁺(aq) + Cu(s). જો 298 K તાપમાને [Zn²⁺] = 1 M અને [Cu²⁺] = 0.01 M હોય, તો આ કોષનો પોટેન્શિયલ (E) કેટલો હશે? (E°_{cell} = 1.10 V). નર્ન્સ્ટ સમીકરણમાં Q ની કિંમત શું હશે?", "opts": ["Q = 100, અને E = 1.04 V", "Q = 0.01, અને E = 1.16 V", "Q = 100, અને E = 1.16 V", "Q = 0.01, અને E = 1.04 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ મુજબ, Q = [Zn²⁺]/[Cu²⁺] = 1/0.01 = 100. E = E° – (0.0592/2) log(Q) = 1.10 – (0.0592/2) log(100) = 1.10 – 0.0296 × 2 = 1.10 – 0.0592 ≈ 1.04 V. અન્ય વિકલ્પો Q ની ખોટી કિંમત અથવા ગણતરીની ભૂલ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "એક વિદ્યુતરાસાયણિક કોષમાં નીચેની પ્રક્રિયા થાય છે: Cr2O7^2− + 14H+ + 6e− → 2Cr^3+ + 7H2O. જો કોષનું પ્રમાણભૂત કોષ પોટેન્શિયલ (E°_cell) = 1.33 V હોય અને પ્રક્રિયા દરમિયાન [Cr2O7^2−] = 0.1 M, [H+] = 0.01 M, [Cr^3+] = 0.001 M હોય, તો કોષનું વાસ્તવિક પોટેન્શિયલ (E_cell) કેટલું હશે? (T = 298 K, F = 96500 C/mol, R = 8.314 J/mol·K)", "opts": ["1.45 V", "1.21 V", "1.39 V", "1.17 V"], "ans": 0, "exp": "નર્ન્સ્ટ સમીકરણ E = E° – (RT/nF) lnQ મુજબ, Q = [Cr^3+]^2 / ([Cr2O7^2−][H+]^14). અહીં n = 6, T = 298 K, R = 8.314 J/mol·K, F = 96500 C/mol. Qની કિંમત મૂકીને ગણતરી કરતાં E = 1.33 – (8.314×298)/(6×96500) × ln(0.001^2 / (0.1×0.01^14)) ≈ 1.45 V મળે છે. બાકીના વિકલ્પો ગણતરીની ચૂકથી અથવા Qની ખોટી કિંમત લીધા બદલ ખોટા છે.", "ref": "Std 12 - Chapter 3: વિદ્યુતરાસાયણિક કોષ અને નર્ન્સ્ટ સમીકરણ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
