@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ધાતુનો કાટ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ધાતુનો કાટ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ધાતુનો કાટ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે લોખંડની સળિયા પર જસતની પતરી ચડાવવામાં આવે છે ત્યારે કાટ લાગવાની પ્રક્રિયામાં કયો પદાર્થ બનાવવામાં આવે છે, જે લોખંડને સંરક્ષણ પૂરું પાડે છે?", "opts": ["લોખંડ(II) ઓક્સાઇડ", "જસત કાર્બોનેટ", "લોખંડ(III) હાઇડ્રોક્સાઇડ", "જસત-લોખંડ મિશ્રધાતુ"], "ans": 2, "exp": "લોખંડ પર જસતની પતરી ચડાવવાથી ગેલ્વેનાઇઝિંગ થાય છે. આ પ્રક્રિયામાં જસત ઓક્સિડાઇઝ થાય છે અને લોખંડને સંરક્ષણ આપે છે. લોખંડ(III) હાઇડ્રોક્સાઇડ (Fe(OH)3) બનાવવામાં આવે છે, જે લોખંડની સપાટી પર એક સંરક્ષણાત્મક સ્તર બનાવે છે. લોખંડ(II) ઓક્સાઇડ (A) અને જસત કાર્બોનેટ (B) આ પ્રક્રિયામાં બનતા નથી. જસત-લોખંડ મિશ્રધાતુ (D) ગેલ્વેનાઇઝિંગ પ્રક્રિયાનું પરિણામ નથી.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગો", "ch": ""}, {"q": "કોપરના પાત્રમાં પાણી સંગ્રહવાના કારણે કાટ લાગે છે. આ પ્રક્રિયામાં કયો પદાર્થ મુખ્યત્વે જવાબદાર હોય છે?", "opts": ["ઓક્સિજન અને કાર્બન ડાયોક્સાઇડ", "હાઇડ્રોજન સલ્ફાઇડ", "ક્લોરાઇડ આયન", "નાઇટ્રોજન ઓક્સાઇડ"], "ans": 0, "exp": "કોપરના પાત્રમાં પાણી સંગ્રહવાના કારણે કાટ લાગવાની પ્રક્રિયામાં ઓક્સિજન અને કાર્બન ડાયોક્સાઇડ મુખ્ય પદાર્થો હોય છે. આ પદાર્થો કોપર સાથે પ્રક્રિયા કરીને કોપર કાર્બોનેટ (CuCO3) અને કોપર હાઇડ્રોક્સાઇડ (Cu(OH)2) બનાવે છે, જે કોપરની સપાટી પર એક હરિયો પડ બનાવે છે. હાઇડ્રોજન સલ્ફાઇડ (B), ક્લોરાઇડ આયન (C), અને નાઇટ્રોજન ઓક્સાઇડ (D) આ પ્રક્રિયામાં મુખ્ય પદાર્થો નથી.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગો", "ch": ""}, {"q": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં કયો પદાર્થ ઉત્પન્ન થાય છે, જે લોખંડની સપાટી પર લાલ રંગનો પડ બનાવે છે?", "opts": ["લોખંડ(II) ઓક્સાઇડ", "લોખંડ(III) ઓક્સાઇડ", "લોખંડ(II,III) ઓક્સાઇડ", "લોખંડ હાઇડ્રોક્સાઇડ"], "ans": 2, "exp": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં લોખંડ(II,III) ઓક્સાઇડ (Fe3O4) ઉત્પન્ન થાય છે, જે લોખંડની સપાટી પર લાલ રંગનો પડ બનાવે છે. લોખંડ(II) ઓક્સાઇડ (A) કાળો રંગનો પડ બનાવે છે, લોખંડ(III) ઓક્સાઇડ (B) લાલ-કથ્થઈ રંગનો પડ બનાવે છે, અને લોખંડ હાઇડ્રોક્સાઇડ (D) હરિયો રંગનો પડ બનાવે છે.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગો", "ch": ""}, {"q": "ક્યારેક લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયા અટકી જાય છે. આનું મુખ્ય કારણ કયું છે?", "opts": ["લોખંડની સપાટી પર ઓક્સાઇડનું સ્તર બનવું", "પાણીની અભાવ", "ઓક્સિજનની અભાવ", "તાપમાનમાં ઘટાડો"], "ans": 0, "exp": "લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયા અટકી જવાનું મુખ્ય કારણ લોખંડની સપાટી પર ઓક્સાઇડનું સ્તર બનવું છે. આ સ્તર લોખંડને વધુ ઓક્સિડેશનથી સંરક્ષણ આપે છે. પાણીની અભાવ (B), ઓક્સિજનની અભાવ (C), અને તાપમાનમાં ઘટાડો (D) પણ કાટ લાગવાની પ્રક્રિયાને અટકાવી શકે છે, પરંતુ મુખ્ય કારણ ઓક્સાઇડનું સ્તર બનવું છે.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગો", "ch": ""}, {"q": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં કયો પદાર્થ બનાવવામાં આવે છે, જે એલ્યુમિનિયમને સંરક્ષણ પૂરું પાડે છે?", "opts": ["એલ્યુમિનિયમ ઓક્સાઇડ", "એલ્યુમિનિયમ હાઇડ્રોક્સાઇડ", "એલ્યુમિનિયમ ક્લોરાઇડ", "એલ્યુમિનિયમ સલ્ફેટ"], "ans": 0, "exp": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં એલ્યુમિનિયમ ઓક્સાઇડ (Al2O3) બનાવવામાં આવે છે, જે એલ્યુમિનિયમની સપાટી પર એક સંરક્ષણાત્મક સ્તર બનાવે છે. એલ્યુમિનિયમ હાઇડ્રોક્સાઇડ (B), એલ્યુમિનિયમ ક્લોરાઇડ (C), અને એલ્યુમિનિયમ સલ્ફેટ (D) આ પ્રક્રિયામાં બનતા નથી.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગો", "ch": ""}, {"q": "લોખંડની સપાટી પર જ્યારે કાટ લાગે છે ત્યારે બનતી કાટની પરતની રચના કયા પ્રકારની હોય છે અને તે કયા રાસાયણિક સૂત્ર દ્વારા દર્શાવી શકાય?", "opts": ["બેઝિક પ્રકારની, Fe(OH)₂", "એસિડિક પ્રકારની, Fe₂O₃·xH₂O", "બેઝિક પ્રકારની, Fe₃O₄", "ઉદાસીન પ્રકારની, FeCO₃"], "ans": 1, "exp": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં બનતી કાટની પરત એસિડિક પ્રકારની હોય છે અને તેનું રાસાયણિક સૂત્ર Fe₂O₃·xH₂O (હાઇડ્રેટેડ આયર્ન ઓક્સાઇડ) હોય છે. વિકલ્પ A મા Fe(OH)₂ બેઝિક છે પરંતુ કાટની પરત એસિડિક હોય છે. વિકલ્પ C મા Fe₃O₄ (મેગ્નેટાઇટ) કાટની પરત નથી. વિકલ્પ D મા FeCO₃ ઉદાસીન છે અને કાટની પરત નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "જ્યારે લોખંડ અને કોપરના સંપર્કમાં પાણી અને ઓક્સિજન હાજર હોય ત્યારે કયા ધાતુનો કાટ લાગવાની પ્રક્રિયા વેગવંતી બને છે અને શા માટે?", "opts": ["લોખંડનો, કારણ કે કોપર લોખંડ કરતાં વધુ સક્રિય છે", "કોપરનો, કારણ કે લોખંડ કોપર કરતાં વધુ સક્રિય છે", "લોખંડનો, કારણ કે કોપર લોખંડ કરતાં ઓછો સક્રિય છે", "કોપરનો, કારણ કે લોખંડ અને કોપર એકસરખી સક્રિયતા ધરાવે છે"], "ans": 2, "exp": "લોખંડ કોપર કરતાં વધુ સક્રિય છે, જેથી લોખંડનો કાટ લાગવાની પ્રક્રિયા વેગવંતી બને છે. કોપર ઓક્સિડેશન પ્રતિકારક છે, જેથી તે લોખંડને ઓક્સિડાઇઝ થવા દે છે. વિકલ્પ A અને B ખોટા છે કારણ કે કોપર લોખંડ કરતાં ઓછો સક્રિય છે. વિકલ્પ D ખોટો છે કારણ કે લોખંડ અને કોપરની સક્રિયતા એકસરખી નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં બનતી સંરક્ષણ પરત કયા પદાર્થની હોય છે અને તે કયા ગુણધર્મને કારણે સંરક્ષણ પૂરું પાડે છે?", "opts": ["Al(OH)₃, જળરોધક", "Al₂O₃, જળરોધક અને ઓક્સિજન-રોધક", "AlCl₃, ઓક્સિજન-રોધક", "Al₂(SO₄)₃, જળરોધક"], "ans": 1, "exp": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં Al₂O₃ (એલ્યુમિનિયમ ઓક્સાઇડ) ની સંરક્ષણ પરત બને છે, જે જળરોધક અને ઓક્સિજન-રોધક હોય છે. વિકલ્પ A, C, અને D મા ઉલ્લેખિત પદાર્થો એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં બનતા નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયામાં કયા આયનની હાજરી કાટ લાગવાની પ્રક્રિયાને વેગવંતી બનાવે છે?", "opts": ["Cl⁻ આયન", "SO₄²⁻ આયન", "NO₃⁻ આયન", "CO₃²⁻ આયન"], "ans": 0, "exp": "Cl⁻ આયન લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયાને વેગવંતી બનાવે છે કારણ કે તે લોખંડની સપાટી પરના સંરક્ષણ પરતને તોડી નાખે છે. SO₄²⁻, NO₃⁻, અને CO₃²⁻ આયનો કાટ લાગવાની પ્રક્રિયાને વેગવંતી બનાવતા નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "કયા ધાતુનો કાટ લાગવાની પ્રક્રિયામાં હાઇડ્રોજન ગેસ ઉત્પન્ન થાય છે અને તે કયા પ્રકારની પ્રક્રિયા દ્વારા થાય છે?", "opts": ["લોખંડ, ઓક્સિડેશન પ્રક્રિયા", "મેગ્નેશિયમ, રિડક્શન પ્રક્રિયા", "જસત, ડિસપ્રોપોર્શન પ્રક્રિયા", "એલ્યુમિનિયમ, હાઇડ્રોલિસિસ પ્રક્રિયા"], "ans": 3, "exp": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં હાઇડ્રોજન ગેસ ઉત્પન્ન થાય છે અને તે હાઇડ્રોલિસિસ પ્રક્રિયા દ્વારા થાય છે. લોખંડ, મેગ્નેશિયમ, અને જસતના કાટ લાગવાની પ્રક્રિયામાં હાઇડ્રોજન ગેસ ઉત્પન્ન થતો નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડ અને જસતના મિશ્રધાતુ (ગેલ્વેનાઇઝ્ડ સ્ટીલ) પર કાટ લાગવાની પ્રક્રિયામાં, જસતની ભૂમિકા શું હોય છે?", "opts": ["જસત ઓક્સિડાઇઝ થઈ જસત ઓક્સાઇડની સ્તર રચે છે, જે લોખંડને સંરક્ષણ આપે છે.", "જસત લોખંડ કરતાં વધુ સક્રિય હોવાથી તે પોતે ઓક્સિડાઇઝ થાય છે અને લોખંડને કાટ લાગવાથી બચાવે છે.", "જસત લોખંડની સપાટી પર અવરોધ રચી, ઓક્સિજન અને પાણીના સંપર્કને અટકાવે છે.", "જસત લોખંડ સાથે રાસાયણિક પ્રક્રિયા કરી, લોખંડને અસક્રિય બનાવે છે."], "ans": 1, "exp": "જસત લોખંડ કરતાં વધુ સક્રિય ધાતુ છે, તેથી તે ગેલ્વેનિક કોષમાં એનોડ તરીકે વર્તે છે અને પોતે ઓક્સિડાઇઝ થાય છે, જ્યારે લોખંડ (કેથોડ) સુરક્ષિત રહે છે. આને ગેલ્વેનાઇઝેશન કહેવાય છે. A) જસત ઓક્સાઇડની સ્તર રચે છે, પરંતુ તે મુખ્ય સંરક્ષણ પદ્ધતિ નથી. C) જસત અવરોધ રચતું નથી, પરંતુ સક્રિયતાથી લોખંડને બચાવે છે. D) જસત લોખંડ સાથે રાસાયણિક પ્રક્રિયા કરતું નથી, પરંતુ ઇલેક્ટ્રોકેમિકલ સંરક્ષણ આપે છે.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "કોપરના પાત્રમાં લોખંડની કીલ મૂકવામાં આવે અને તેને આર્દ્ર હવા સાથે સંપર્કમાં મૂકવામાં આવે, તો કયા ધાતુનો કાટ લાગશે?", "opts": ["કોપર અને લોખંડ બંનેનો કાટ લાગશે.", "ફક્ત કોપરનો કાટ લાગશે.", "ફક્ત લોખંડનો કાટ લાગશે.", "કોઈપણ ધાતુનો કાટ લાગશે નહીં."], "ans": 2, "exp": "લોખંડ કોપર કરતાં વધુ સક્રિય ધાતુ છે, તેથી તે ગેલ્વેનિક કોષમાં એનોડ તરીકે વર્તે છે અને કાટ લાગે છે. કોપર કેથોડ તરીકે વર્તે છે અને સુરક્ષિત રહે છે. A) બંનેનો કાટ લાગતો નથી, કારણ કે કોપર અસક્રિય રહે છે. B) કોપરનો કાટ લાગતો નથી. D) લોખંડનો કાટ અવશ્ય લાગશે.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયામાં, કયો પદાર્થ ઉત્પન્ન થાય છે જે લોખંડની સપાટી પર લાલ-ખરબચડી રંગની પરત રચે છે?", "opts": ["Fe(OH)₂", "Fe(OH)₃", "Fe₂O₃.xH₂O (હાઇડ્રેટેડ ફેરિક ઓક્સાઇડ)", "FeCO₃"], "ans": 2, "exp": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં, લોખંડ ઓક્સિડાઇઝ થઈ હાઇડ્રેટેડ ફેરિક ઓક્સાઇડ (Fe₂O₃.xH₂O) રચે છે, જે લાલ-ખરબચડી રંગની હોય છે. A) Fe(OH)₂ હરિયો રંગનો હોય છે અને પ્રાથમિક ઉત્પાદન છે. B) Fe(OH)₃ કાળો-ખરબચડો રંગનો હોય છે. D) FeCO₃ લોખંડના કાર્બોનેટની રચના થાય છે, પરંતુ તે કાટની લાલ-ખરબચડી પરત નથી.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં, એલ્યુમિનિયમની સપાટી પર બનતી સંરક્ષણ પરત કયા પદાર્થની હોય છે?", "opts": ["Al(OH)₃", "Al₂O₃", "Al₂(SO₄)₃", "AlCl₃"], "ans": 1, "exp": "એલ્યુમિનિયમની સપાટી પર ઓક્સિજન સાથે પ્રક્રિયા કરી એલ્યુમિનિયમ ઓક્સાઇડ (Al₂O₃)ની સ્તર રચે છે, જે એલ્યુમિનિયમને આગળ કાટ લાગવાથી બચાવે છે. A) Al(OH)₃ એલ્યુમિનિયમ હાઇડ્રોક્સાઇડ છે, પરંતુ તે સંરક્ષણ પરત નથી. C) અને D) એલ્યુમિનિયમના અન્ય સંયોજનો છે, પરંતુ તે સંરક્ષણ પરત રચતા નથી.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયામાં, કયા આયનની હાજરી કાટ લાગવાની પ્રક્રિયાને વેગ આપે છે?", "opts": ["Cl⁻", "SO₄²⁻", "NO₃⁻", "CO₃²⁻"], "ans": 0, "exp": "ક્લોરાઇડ આયન (Cl⁻) લોખંડની સપાટી પરની ઓક્સાઇડ પરતને તોડી નાખે છે, જેનાથી કાટ લાગવાની પ્રક્રિયા વેગ પકડે છે. B) સલ્ફેટ આયન (SO₄²⁻) કાટ લાગવાની પ્રક્રિયાને ખાસ વેગ આપતું નથી. C) નાઇટ્રેટ આયન (NO₃⁻) કાટ લાગવાની પ્રક્રિયાને અસર કરતું નથી. D) કાર્બોનેટ આયન (CO₃²⁻) કાટ લાગવાની પ્રક્રિયાને મંદ કરે છે.", "ref": "Std 12 - અધ્યાય 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "નીચેના પૈકી કયા ધાતુના કાટ લાગવાની પ્રક્રિયામાં સંરક્ષણાત્મક ઓક્સાઇડ સ્તર બનતું નથી, પરંતુ કાટ લાગવાની પ્રક્રિયા સતત ચાલુ રહે છે?", "opts": ["એલ્યુમિનિયમ", "લોખંડ", "કોપર", "જસત"], "ans": 1, "exp": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં ફેરિક ઓક્સાઇડ (Fe₂O₃·xH₂O) બને છે, જે છિદ્રાળુ હોય છે અને સંરક્ષણાત્મક સ્તર તરીકે કામ કરતું નથી. તેથી કાટ લાગવાની પ્રક્રિયા સતત ચાલુ રહે છે. એલ્યુમિનિયમ, કોપર અને જસતમાં બનતું ઓક્સાઇડ સ્તર સંરક્ષણાત્મક હોય છે અને કાટ લાગવાની પ્રક્રિયાને અટકાવે છે.", "ref": "Std 12 - પ્રકરણ 7: ધાતુઓનું નિષ્કર્ષણ અને તેમના ગુણધર્મો", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: \n(1) કાટ લાગવાની પ્રક્રિયા એ વિદ્યુતરાસાયણિક પ્રક્રિયા છે. \n(2) કાટ લાગવાની પ્રક્રિયામાં ધાતુનું ઓક્સિડેશન થાય છે અને ઓક્સિજનનું રિડક્શન થાય છે. \n(3) શુષ્ક હવામાં કાટ લાગવાની પ્રક્રિયા ઝડપી હોય છે. \nઉપરોક્ત વિધાનોમાંથી કયું/કયાં વિધાન/વિધાનો ખોટું/ખોટાં છે?", "opts": ["માત્ર (1)", "માત્ર (3)", "(1) અને (2)", "(2) અને (3)"], "ans": 1, "exp": "કાટ લાગવાની પ્રક્રિયા વિદ્યુતરાસાયણિક પ્રક્રિયા છે જેમાં ધાતુનું ઓક્સિડેશન અને ઓક્સિજનનું રિડક્શન થાય છે. આ પ્રક્રિયા આર્દ્ર હવામાં ઝડપી હોય છે, શુષ્ક હવામાં નહીં. તેથી વિધાન (3) ખોટું છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન લોખંડના કાટ લાગવાની પ્રક્રિયામાં ઉત્પન્ન થતું નથી?", "opts": ["Fe₂O₃", "Fe₃O₄", "Fe(OH)₂", "Fe₂(SO₄)₃"], "ans": 3, "exp": "લોખંડના કાટ લાગવાની પ્રક્રિયામાં Fe₂O₃ (ફેરિક ઓક્સાઇડ), Fe₃O₄ (મેગ્નેટાઇટ) અને Fe(OH)₂ (ફેરસ હાઇડ્રોક્સાઇડ) ઉત્પન્ન થાય છે. Fe₂(SO₄)₃ (ફેરિક સલ્ફેટ) કાટ લાગવાની પ્રક્રિયામાં સીધું ઉત્પન્ન થતું નથી, તે સલ્ફ્યુરિક એસિડની હાજરીમાં બને છે.", "ref": "Std 12 - પ્રકરણ 7: ધાતુઓનું નિષ્કર્ષણ અને તેમના ગુણધર્મો", "ch": ""}, {"q": "નીચેના પૈકી કયા કિસ્સામાં કાટ લાગવાની પ્રક્રિયા સૌથી વધુ ઝડપી થશે? ધારો કે બધા કિસ્સામાં સમાન પરિસ્થિતિઓ છે.", "opts": ["શુદ્ધ લોખંડને શુષ્ક હવામાં મૂકવામાં આવે", "લોખંડને આયોડાઇઝ્ડ મીઠાના દ્રાવણમાં ડુબાડવામાં આવે", "લોખંડને શુદ્ધ પાણીમાં ડુબાડવામાં આવે", "લોખંડને કોપરના સંપર્કમાં આર્દ્ર હવામાં મૂકવામાં આવે"], "ans": 3, "exp": "લોખંડને કોપરના સંપર્કમાં આર્દ્ર હવામાં મૂકવામાં આવે ત્યારે વિદ્યુતરાસાયણિક કોષ રચાય છે, જેમાં લોખંડ એનોડ તરીકે અને કોપર કેથોડ તરીકે વર્તે છે. આ પરિસ્થિતિમાં કાટ લાગવાની પ્રક્રિયા સૌથી વધુ ઝડપી થાય છે. આયોડાઇઝ્ડ મીઠું અને શુદ્ધ પાણી કરતાં આર્દ્ર હવા અને વિદ્યુતરાસાયણિક કોષ વધુ પ્રભાવી છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયા માટે ખોટું છે?", "opts": ["એલ્યુમિનિયમની સપાટી પર બનતું ઓક્સાઇડ સ્તર સંરક્ષણાત્મક હોય છે.", "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં Al₂O₃ બને છે.", "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં હાઇડ્રોજન ગેસ ઉત્પન્ન થાય છે.", "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયા વિદ્યુતરાસાયણિક પ્રક્રિયા છે."], "ans": 2, "exp": "એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં Al₂O₃ (એલ્યુમિનિયમ ઓક્સાઇડ) બને છે, જે સંરક્ષણાત્મક સ્તર તરીકે કામ કરે છે. આ પ્રક્રિયા વિદ્યુતરાસાયણિક પ્રક્રિયા છે. પરંતુ એલ્યુમિનિયમના કાટ લાગવાની પ્રક્રિયામાં હાઇડ્રોજન ગેસ ઉત્પન્ન થતો નથી, તે ઝિંક જેવી ધાતુઓમાં જોવા મળે છે.", "ref": "Std 12 - પ્રકરણ 7: ધાતુઓનું નિષ્કર્ષણ અને તેમના ગુણધર્મો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
