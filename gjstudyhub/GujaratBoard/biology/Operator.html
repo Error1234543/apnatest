@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operator</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Operator</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Operator</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ઉત્સેચક ક્રિયામાં 'ઑપરેટર' શબ્દનો ઉપયોગ ક્યાં થાય છે અને તેનું મુખ્ય કાર્ય શું છે?", "opts": ["પ્રોટીન સંશ્લેષણ દરમ્યાન DNA પર રિબોઝોમ બાંધવાનું નિયંત્રણ કરે છે", "જનીન અભિવ્યક્તિને રેગ્યુલેટ કરવા માટે લેક ઓપેરોનમાં પ્રમોટર અને સ્ટ્રક્ચરલ જનીન વચ્ચે સ્થિત થયેલ છે", "RNA પોલિમરેઝને DNA ની કોપી બનાવવા માટે ઉર્જા પૂરી પાડે છે", "કોષકેન્દ્રમાં વર્ણસૂત્રની ગોઠવણી માટે જવાબદાર છે"], "ans": 1, "exp": "ઑપરેટર લેક ઓપેરોનનો એક ભાગ છે, જે જનીન અભિવ્યક્તિને નિયંત્રિત કરે છે. તે પ્રમોટર અને સ્ટ્રક્ચરલ જનીન વચ્ચે સ્થિત થયેલ છે અને રિપ્રેસર પ્રોટીન સાથે બંધન કરીને ટ્રાન્સક્રિપ્શનને અટકાવે છે. A વિકલ્પ રિબોઝોમ બાંધવાનું નિયંત્રણ કરે છે તે ખોટું છે કારણ કે તે ટ્રાન્સલેશન સાથે સંબંધિત છે, નહીં કે ટ્રાન્સક્રિપ્શન સાથે. C વિકલ્પ RNA પોલિમરેઝના કાર્યને ખોટી રીતે વર્ણવે છે, જ્યારે D વિકલ્પ કોષકેન્દ્રની ગોઠવણી સાથે સંબંધિત નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં ઑપરેટર પર રિપ્રેસર પ્રોટીન બંધાય ત્યારે શું થાય છે?", "opts": ["RNA પોલિમરેઝ ઓપરેટરને આરે પાર કરી શકે છે અને ટ્રાન્સક્રિપ્શન ચાલુ રહે છે", "રિપ્રેસર પ્રોટીન ઓપરેટર પર બંધાય છે અને RNA પોલિમરેઝને ટ્રાન્સક્રિપ્શન શરૂ કરવા દેતું નથી", "ઓપરેટર સક્રિય થાય છે અને ટ્રાન્સલેશનની પ્રક્રિયા વેગવાન બને છે", "લેક્ટોઝના અણુઓ ઓપરેટર પર બંધાય છે અને ટ્રાન્સક્રિપ્શનને ઉત્તેજિત કરે છે"], "ans": 1, "exp": "લેક ઓપેરોનમાં, રિપ્રેસર પ્રોટીન ઓપરેટર પર બંધાય છે અને RNA પોલિમરેઝને ટ્રાન્સક્રિપ્શન શરૂ કરવા દેતું નથી, જ્યાં સુધી ઇન્ડ્યુસર (લેક્ટોઝ) રિપ્રેસર સાથે બંધાય નહીં. A વિકલ્પ ખોટું છે કારણ કે રિપ્રેસર બંધાયા પછી RNA પોલિમરેઝ ઓપરેટરને પાર કરી શકતું નથી. C વિકલ્પ ખોટું છે કારણ કે ઓપરેટર ટ્રાન્સલેશન સાથે સીધો સંબંધ ધરાવતો નથી. D વિકલ્પ ખોટું છે કારણ કે લેક્ટોઝ રિપ્રેસર સાથે બંધાય છે, ઓપરેટર સાથે નહીં.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઑપરેટર અને પ્રમોટર વચ્ચેનો તફાવત સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["પ્રમોટર RNA પોલિમરેઝ માટે બંધન સ્થળ છે જ્યારે ઑપરેટર રિપ્રેસર પ્રોટીન માટે બંધન સ્થળ છે", "પ્રમોટર અને ઑપરેટર બંને RNA પોલિમરેઝ માટે બંધન સ્થળ છે", "ઑપરેટર ટ્રાન્સક્રિપ્શનની શરૂઆત માટે જવાબદાર છે જ્યારે પ્રમોટર રેગ્યુલેશન માટે જવાબદાર છે", "પ્રમોટર રિપ્રેસર પ્રોટીન માટે બંધન સ્થળ છે જ્યારે ઑપરેટર RNA પોલિમરેઝ માટે બંધન સ્થળ છે"], "ans": 0, "exp": "પ્રમોટર RNA પોલિમરેઝ માટે બંધન સ્થળ છે અને ટ્રાન્સક્રિપ્શનની શરૂઆત માટે જવાબદાર છે, જ્યારે ઑપરેટર રિપ્રેસર પ્રોટીન માટે બંધન સ્થળ છે અને જનીન અભિવ્યક્તિના નિયંત્રણમાં ભાગ લે છે. B વિકલ્પ ખોટું છે કારણ કે ઑપરેટર RNA પોલિમરેઝ માટે બંધન સ્થળ નથી. C વિકલ્પ ખોટું છે કારણ કે તે પ્રમોટર અને ઑપરેટરના કાર્યોને ઉલટાવે છે. D વિકલ્પ પણ કાર્યોને ખોટી રીતે ઉલટાવે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ગ્લુકોઝ અને લેક્ટોઝ બંને હાજર હોય ત્યારે શું થાય છે?", "opts": ["લેક ઓપેરોન સક્રિય થાય છે અને લેક્ટોઝના ચયાપચય માટે જરૂરી ઉત્સેચકોનું ઉત્પાદન થાય છે", "ગ્લુકોઝના ચયાપચય માટે જરૂરી ઉત્સેચકોનું ઉત્પાદન થાય છે, પરંતુ લેક ઓપેરોન નિષ્ક્રિય રહે છે", "લેક ઓપેરોન અર્ધ-સક્રિય અવસ્થામાં રહે છે અને થોડા ઉત્સેચકોનું ઉત્પાદન થાય છે", "લેક ઓપેરોન પૂરેપૂરું નિષ્ક્રિય થાય છે અને કોઈ ઉત્સેચકોનું ઉત્પાદન થતું નથી"], "ans": 1, "exp": "લેક ઓપેરોનમાં, ગ્લુકોઝ હાજર હોવાથી cAMPનું સ્તર ઓછું રહે છે, જેના કારણે CAP પ્રોટીન સક્રિય થતું નથી. પરિણામે, લેક ઓપેરોન નિષ્ક્રિય રહે છે અને લેક્ટોઝના ચયાપચય માટે જરૂરી ઉત્સેચકોનું ઉત્પાદન થતું નથી. A વિકલ્પ ખોટું છે કારણ કે ગ્લુકોઝ હાજર હોવાથી લેક ઓપેરોન સક્રિય થતું નથી. C વિકલ્પ ખોટું છે કારણ કે લેક ઓપેરોન અર્ધ-સક્રિય અવસ્થામાં રહેતું નથી. D વિકલ્પ ખોટું છે કારણ કે લેક ઓપેરોન પૂરેપૂરું નિષ્ક્રિય થતું નથી, પરંતુ ગ્લુકોઝના હાજર હોવાથી તે નિષ્ક્રિય રહે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ઑપરેટર અને રિપ્રેસર વચ્ચેના સંબંધને સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["રિપ્રેસર પ્રોટીન હંમેશા ઑપરેટર પર બંધાયેલું રહે છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે", "રિપ્રેસર પ્રોટીન ઇન્ડ્યુસરની હાજરીમાં ઑપરેટર પર બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે", "રિપ્રેસર પ્રોટીન ઇન્ડ્યુસરની ગેરહાજરીમાં ઑપરેટર પર બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે", "રિપ્રેસર પ્રોટીન ક્યારેય ઑપરેટર પર બંધાય છે નહીં, પરંતુ તે ટ્રાન્સક્રિપ્શનને ઉત્તેજિત કરે છે"], "ans": 2, "exp": "રિપ્રેસર પ્રોટીન ઇન્ડ્યુસર (લેક્ટોઝ)ની ગેરહાજરીમાં ઑપરેટર પર બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે. જ્યારે ઇન્ડ્યુસર હાજર હોય છે, ત્યારે તે રિપ્રેસર સાથે બંધાય છે, જેના કારણે રિપ્રેસર ઑપરેટર પરથી અલગ થાય છે અને ટ્રાન્સક્રિપ્શન શરૂ થાય છે. A વિકલ્પ ખોટું છે કારણ કે રિપ્રેસર હંમેશા બંધાયેલું રહેતું નથી. B વિકલ્પ ખોટું છે કારણ કે રિપ્રેસર ઇન્ડ્યુસરની હાજરીમાં બંધાય છે નહીં. D વિકલ્પ ખોટું છે કારણ કે રિપ્રેસર ઑપરેટર પર બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે, ત્યારે નીચેનામાંથી કયા જીનની નકલ અટકાવવામાં આવે છે?", "opts": ["લેક-Z જીન", "લેક-Y જીન", "લેક-A જીન", "ઉપરોક્ત તમામ"], "ans": 3, "exp": "લેક ઓપેરોનમાં રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે, જેના કારણે લેક-Z, લેક-Y અને લેક-A જીનની નકલ અટકાવવામાં આવે છે. લેક-Z જીન બીટા-ગેલેક્ટોઝિડેઝ ઉત્સેચકનું નિર્માણ કરે છે, લેક-Y જીન લેક્ટોઝ પર્મિએઝનું નિર્માણ કરે છે, અને લેક-A જીન થાયોગેલેક્ટોઝિડ ટ્રાન્સએસિલેઝનું નિર્માણ કરે છે. રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાયા પછી, આ તમામ જીનની નકલ અટકાવવામાં આવે છે, જેથી લેક્ટોઝના ચયાપચય માટે જરૂરી ઉત્સેચકોનું નિર્માણ થતું નથી. અહીં, ઉપરોક્ત તમામ વિકલ્પો સચોટ છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે સાયક્લિક એમપી (cAMP) અને કેપ (CAP) પ્રોટીન એકસાથે બંધાય છે, ત્યારે નીચેનામાંથી કયા પરિબળ પર અસર થાય છે?", "opts": ["રિપ્રેસર પ્રોટીનની ક્રિયાશીલતા", "આરએનએ પોલિમરેઝની બંધન ક્ષમતા", "ઑપરેટરની રચના", "લેક્ટોઝના વિઘટનની ગતિ"], "ans": 1, "exp": "લેક ઓપેરોનમાં, સાયક્લિક એમપી (cAMP) અને કેપ (CAP) પ્રોટીન એકસાથે બંધાય છે, જેના કારણે આરએનએ પોલિમરેઝની બંધન ક્ષમતા વધે છે. આ કોમ્પ્લેક્સ પ્રમોટર પ્રદેશ સાથે બંધાય છે, જેના કારણે આરએનએ પોલિમરેઝને ઑપરેટર અને પ્રમોટર પ્રદેશ સાથે સરળતાથી બંધાય છે, જેથી જીનની નકલ વધે છે. રિપ્રેસર પ્રોટીનની ક્રિયાશીલતા, ઑપરેટરની રચના, અને લેક્ટોઝના વિઘટનની ગતિ પર સાયક્લિક એમપી અને કેપ પ્રોટીનની કોઈ અસર થતી નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ગ્લુકોઝની હાજરીમાં લેક્ટોઝ ઉમેરવામાં આવે છે, ત્યારે નીચેનામાંથી કયું વિધાન સચોટ છે?", "opts": ["રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને લેક જીનની નકલ અટકાવે છે", "સાયક્લિક એમપીનું સ્તર ઓછું થાય છે અને કેપ પ્રોટીન અક્રિય થાય છે", "લેક જીનની નકલ શરૂ થાય છે પરંતુ ઓછી ગતિએ", "લેક જીનની નકલ પૂર્ણપણે અટકાવવામાં આવે છે"], "ans": 1, "exp": "લેક ઓપેરોનમાં, જ્યારે ગ્લુકોઝની હાજરીમાં લેક્ટોઝ ઉમેરવામાં આવે છે, ત્યારે સાયક્લિક એમપીનું સ્તર ઓછું થાય છે અને કેપ પ્રોટીન અક્રિય થાય છે. ગ્લુકોઝની હાજરીમાં, સાયક્લિક એમપીનું સ્તર ઓછું રહે છે, જેના કારણે કેપ પ્રોટીન અક્રિય થાય છે અને આરએનએ પોલિમરેઝની બંધન ક્ષમતા ઘટે છે. રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને લેક જીનની નકલ અટકાવે છે, પરંતુ આ પ્રક્રિયા સાયક્લિક એમપી અને કેપ પ્રોટીનની ક્રિયાશીલતાથી સ્વતંત્ર છે. લેક જીનની નકલ પૂર્ણપણે અટકાવવામાં આવતી નથી, પરંતુ ઓછી ગતિએ ચાલુ રહે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું પરિબળ ઑપરેટરની ક્રિયાશીલતાને સીધી રીતે અસર કરતું નથી?", "opts": ["રિપ્રેસર પ્રોટીન", "લેક્ટોઝ", "સાયક્લિક એમપી", "આરએનએ પોલિમરેઝ"], "ans": 2, "exp": "લેક ઓપેરોનમાં, સાયક્લિક એમપી (cAMP) ઑપરેટરની ક્રિયાશીલતાને સીધી રીતે અસર કરતું નથી. સાયક્લિક એમપી કેપ પ્રોટીન સાથે બંધાય છે અને પ્રમોટર પ્રદેશ સાથે બંધાય છે, જેના કારણે આરએનએ પોલિમરેઝની બંધન ક્ષમતા વધે છે. રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને લેક જીનની નકલ અટકાવે છે. લેક્ટોઝ રિપ્રેસર પ્રોટીનને બંધનથી મુક્ત કરે છે, જેથી લેક જીનની નકલ શરૂ થાય છે. આરએનએ પોલિમરેઝ ઑપરેટર અને પ્રમોટર પ્રદેશ સાથે બંધાય છે અને જીનની નકલ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનના સંદર્ભમાં, નીચેનામાંથી કયું વિધાન ઑપરેટરની ભૂમિકા અને તેની સાથે સંકળાયેલા પરિબળો વિશે અયોગ્ય છે?", "opts": ["ઑપરેટર એ DNAનો એક વિશિષ્ટ વિભાગ છે જે રિપ્રેસર પ્રોટીન સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે, પરંતુ તે પોતે કોઈ ઉત્સેચકીય પ્રવૃત્તિ ધરાવતું નથી.", "ઑપરેટર પર રિપ્રેસર પ્રોટીન બંધાય ત્યારે RNA પોલિમરેઝ પ્રમોટર સાથે જોડાઈ શકતું નથી, જેના કારણે લેક્ટોઝ ચયાપચય માટે જરૂરી ઉત્સેચકોનું સંશ્લેષણ અટકી જાય છે.", "ઑપરેટર પરિવર્તન (operator mutation) થવાથી રિપ્રેસર પ્રોટીન તેની સાથે જોડાઈ શકતું નથી, જેના કારણે લેક ઓપેરોન સતત સક્રિય રહે છે અને લેક્ટોઝની ગેરહાજરીમાં પણ ઉત્સેચકોનું ઉત્પાદન થાય છે.", "ઑપરેટર વિભાગ પર CAP (Catabolite Activator Protein) પ્રોટીન સીધું જ જોડાઈને ટ્રાન્સક્રિપ્શનને ઉત્તેજિત કરે છે, જેના કારણે ગ્લુકોઝની ગેરહાજરીમાં લેક્ટોઝનું ચયાપચય ઝડપી બને છે."], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. ઑપરેટર એ DNAનો વિશિષ્ટ વિભાગ છે જે રિપ્રેસર પ્રોટીન સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે, પરંતુ CAP પ્રોટીન ઑપરેટર પર સીધું જોડાતું નથી. CAP પ્રોટીન પ્રમોટર વિસ્તારમાં cAMP સાથે જોડાઈને RNA પોલિમરેઝની પ્રવૃત્તિને ઉત્તેજિત કરે છે, જેના કારણે ટ્રાન્સક્રિપ્શન ઝડપી બને છે. આથી વિકલ્પ D અયોગ્ય છે.\n\nવિકલ્પ A યોગ્ય છે કારણ કે ઑપરેટર પોતે ઉત્સેચકીય પ્રવૃત્તિ ધરાવતું નથી અને માત્ર રિપ્રેસર પ્રોટીન સાથે જોડાઈને ટ્રાન્સક્રિપ્શનને અવરોધે છે.\n\nવિકલ્પ B યોગ્ય છે કારણ કે રિપ્રેસર પ્રોટીન ઑપરેટર સાથે જોડાય ત્યારે RNA પોલિમરેઝ પ્રમોટર સાથે જોડાઈ શકતું નથી, જેના કારણે ઉત્સેચકોનું સંશ્લેષણ અટકી જાય છે.\n\nવિકલ્પ C યોગ્ય છે કારણ કે ઑપરેટર પરિવર્તન થવાથી રિપ્રેસર પ્રોટીન જોડાઈ શકતું નથી, જેના કારણે લેક ઓપેરોન સતત સક્રિય રહે છે અને લેક્ટોઝની ગેરહાજરીમાં પણ ઉત્સેચકોનું ઉત્પાદન થાય છે.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ (અનુવંશિક નિયંત્રણ)", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર પર મ્યુટેશન થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે જોવા મળે છે?", "opts": ["રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય નહીં શકે, પરિણામે સતત ટ્રાન્સક્રિપ્શન થાય છે", "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે વધુ મજબૂતાઈથી બંધાય છે, પરિણામે ટ્રાન્સક્રિપ્શન પૂર્ણપણે બંધ થાય છે", "પ્રમોટર ક્ષતિગ્રસ્ત થાય છે, પરિણામે RNA પોલિમરેઝ બંધાય નહીં શકે", "સ્ટ્રક્ચરલ જીનમાં મ્યુટેશન થાય છે, પરિણામે અપૂર્ણ પ્રોટીન બને છે"], "ans": 0, "exp": "ઑપરેટર પર મ્યુટેશન થવાથી રિપ્રેસર પ્રોટીન તેની સાથે બંધાય નહીં શકે, જેથી ટ્રાન્સક્રિપ્શન સતત ચાલુ રહે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) મ્યુટેશનથી રિપ્રેસર બંધન વધે તે સામાન્ય નથી, C) પ્રમોટર પર અસર થતી નથી, D) સ્ટ્રક્ચરલ જીન પર અસર થતી નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર અને પ્રમોટર વચ્ચેનો ક્ષેત્ર નાશ પામે છે, ત્યારે નીચેનામાંથી કયું પરિણામ જોવા મળે છે?", "opts": ["ટ્રાન્સક્રિપ્શનની દરમાં કોઈ ફરક પડતો નથી", "RNA પોલિમરેઝ બંધાય નહીં શકે, પરિણામે ટ્રાન્સક્રિપ્શન થતું નથી", "રિપ્રેસર પ્રોટીન બંધાય નહીં શકે, પરિણામે સતત ટ્રાન્સક્રિપ્શન થાય છે", "લેક્ટોઝ મેટાબોલિઝમ માટે જરૂરી એન્ઝાઇમ્સનું સંપૂર્ણ ઉત્પાદન થાય છે"], "ans": 1, "exp": "ઑપરેટર અને પ્રમોટર વચ્ચેનો ક્ષેત્ર નાશ પામવાથી RNA પોલિમરેઝ પ્રમોટર સાથે બંધાય નહીં શકે, જેથી ટ્રાન્સક્રિપ્શન થતું નથી. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: A) ટ્રાન્સક્રિપ્શનની દર પર અસર થાય છે, C) રિપ્રેસર બંધન પર અસર થતી નથી, D) એન્ઝાઇમ્સનું ઉત્પાદન થતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન ઑપરેટર અને રિપ્રેસર વચ્ચેના સંબંધને સૌથી અયોગ્ય રીતે વર્ણવે છે?", "opts": ["રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે", "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય નહીં શકે જ્યારે લેક્ટોઝ હાજર હોય", "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને ટ્રાન્સક્રિપ્શનને પ્રોત્સાહન આપે છે", "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને RNA પોલિમરેઝને અવરોધે છે"], "ans": 2, "exp": "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાય છે અને ટ્રાન્સક્રિપ્શનને અટકાવે છે, ટ્રાન્સક્રિપ્શનને પ્રોત્સાહન આપતું નથી. બાકીના વિકલ્પો યોગ્ય છે: A) રિપ્રેસર ટ્રાન્સક્રિપ્શનને અટકાવે છે, B) લેક્ટોઝ હાજર હોય ત્યારે રિપ્રેસર બંધાય નહીં, D) RNA પોલિમરેઝને અવરોધે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર પર કોઈ મ્યુટેશન ન હોય પરંતુ રિપ્રેસર પ્રોટીનમાં મ્યુટેશન થાય છે, ત્યારે નીચેનામાંથી કયું પરિણામ જોવા મળે છે?", "opts": ["ટ્રાન્સક્રિપ્શન સતત ચાલુ રહે છે કારણ કે રિપ્રેસર બંધાય નહીં શકે", "ટ્રાન્સક્રિપ્શન પૂર્ણપણે બંધ થાય છે કારણ કે રિપ્રેસર સતત બંધાયેલું રહે છે", "ટ્રાન્સક્રિપ્શનની દરમાં કોઈ ફરક પડતો નથી", "લેક્ટોઝ મેટાબોલિઝમ માટે જરૂરી એન્ઝાઇમ્સનું ઉત્પાદન વધે છે"], "ans": 0, "exp": "રિપ્રેસર પ્રોટીનમાં મ્યુટેશન થવાથી તે ઑપરેટર સાથે બંધાય નહીં શકે, જેથી ટ્રાન્સક્રિપ્શન સતત ચાલુ રહે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: B) રિપ્રેસર સતત બંધાયેલું રહેતું નથી, C) ટ્રાન્સક્રિપ્શનની દર પર અસર થાય છે, D) એન્ઝાઇમ્સનું ઉત્પાદન વધતું નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, નીચેનામાંથી કયું વિધાન ઑપરેટરની ભૂમિકા અને તેની સાથે સંકળાયેલા રેગ્યુલેટરી મેકેનિઝમને સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["ઑપરેટર એ ટ્રાન્સક્રિપ્શનની શરૂઆત માટે જરૂરી પ્રમોટર છે", "ઑપરેટર એ રિપ્રેસર પ્રોટીન માટે બંધન સ્થળ છે, જે ટ્રાન્સક્રિપ્શનને નિયંત્રિત કરે છે", "ઑપરેટર એ RNA પોલિમરેઝ માટે બંધન સ્થળ છે, જે ટ્રાન્સક્રિપ્શનની શરૂઆત કરે છે", "ઑપરેટર એ સ્ટ્રક્ચરલ જીન છે જે એન્ઝાઇમ્સનું કોડિંગ કરે છે"], "ans": 1, "exp": "ઑપરેટર એ રિપ્રેસર પ્રોટીન માટે બંધન સ્થળ છે, જે ટ્રાન્સક્રિપ્શનને નિયંત્રિત કરે છે. બાકીના વિકલ્પો અયોગ્ય છે કારણ કે: A) પ્રમોટર ટ્રાન્સક્રિપ્શનની શરૂઆત માટે જરૂરી છે, C) RNA પોલિમરેઝ પ્રમોટર સાથે બંધાય છે, D) સ્ટ્રક્ચરલ જીન એન્ઝાઇમ્સનું કોડિંગ કરે છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર પર એક એવું મ્યુટેશન થાય છે જે રિપ્રેસર પ્રોટીનને બંધન કરવા દેતું નથી, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["લેક્ટોઝની હાજરીમાં પણ લેક ઓપેરોનના જીનનું સતત ઉત્પાદન થશે", "ગ્લુકોઝની હાજરીમાં લેક ઓપેરોનના જીનનું ઉત્પાદન થશે", "લેક્ટોઝની હાજરીમાં લેક ઓપેરોનના જીનનું ઉત્પાદન બંધ થશે", "રિપ્રેસર પ્રોટીનનું સંરચનાત્મક બદલાવ થશે અને તે ઑપરેટર સાથે બંધાય રહેશે"], "ans": 0, "exp": "ઑપરેટર પર મ્યુટેશન થવાને કારણે રિપ્રેસર પ્રોટીન બંધન કરવા અસમર્થ થાય છે, જેથી લેક ઓપેરોનના જીનનું સતત ઉત્પાદન થાય છે, ભલે લેક્ટોઝ હાજર હોય કે ન હોય. બાકીના વિકલ્પો અયોગ્ય છે: B) ગ્લુકોઝની હાજરીમાં લેક ઓપેરોનનું ઉત્પાદન કેપ-સાયક્લિક એમપી પર આધારિત છે, C) લેક્ટોઝની હાજરીમાં ઉત્પાદન બંધ થવું જોઈએ નહીં, D) રિપ્રેસર પ્રોટીનનું સંરચનાત્મક બદલાવ મ્યુટેશનના કારણે થતું નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે કેપ (CAP) પ્રોટીન અને સાયક્લિક એમપી (cAMP) એકસાથે બંધાય છે, ત્યારે નીચેનામાંથી કયું વિધાન સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["તે રિપ્રેસર પ્રોટીનને ઑપરેટર પર બંધન કરવા પ્રોત્સાહન આપે છે", "તે પ્રમોટર ક્ષેત્ર સાથે બંધાય છે અને RNA પોલિમરેઝની ક્રિયાશીલતા વધારે છે", "તે ઑપરેટર ક્ષેત્રને અવરોધે છે અને જીન ઉત્પાદન રોકે છે", "તે લેક્ટોઝને તોડવા માટે ઉત્સેચક તૈયાર કરે છે"], "ans": 1, "exp": "કેપ પ્રોટીન અને સાયક્લિક એમપી (cAMP) પ્રમોટર ક્ષેત્ર સાથે બંધાય છે અને RNA પોલિમરેઝની ક્રિયાશીલતા વધારે છે, જેથી જીનનું ઉત્પાદન વધે છે. A) રિપ્રેસર પ્રોટીનને પ્રોત્સાહન આપવું અયોગ્ય છે, C) ઑપરેટર ક્ષેત્રને અવરોધવું અયોગ્ય છે, D) ઉત્સેચક તૈયાર કરવું અહીં પ્રસ્તુત નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર પર એક એવું મ્યુટેશન થાય છે કે જે રિપ્રેસર પ્રોટીનને બંધાતું અટકાવે છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે થશે?", "opts": ["લેક્ટોઝની હાજરીમાં પણ લેક જીનનો અભિવ્યક્તિ થશે નહીં", "લેક્ટોઝની હાજરીમાં લેક જીનનો સતત અભિવ્યક્તિ થશે", "ગ્લુકોઝની હાજરીમાં લેક જીનનો અભિવ્યક્તિ થશે", "લેક જીનનો અભિવ્યક્તિ હંમેશા બંધ થશે"], "ans": 1, "exp": "રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાઈને લેક જીનના અભિવ્યક્તિને અટકાવે છે. જો મ્યુટેશનના કારણે રિપ્રેસર બંધાતું અટકે, તો લેક્ટોઝની હાજરીમાં લેક જીનનો સતત અભિવ્યક્તિ થશે. A) ખોટું છે કારણ કે લેક્ટોઝની હાજરીમાં અભિવ્યક્તિ થવો જ જોઈએ. C) ખોટું છે કારણ કે ગ્લુકોઝની હાજરીમાં લેક જીનનો અભિવ્યક્તિ રિપ્રેસર દ્વારા અટકાવવામાં આવે છે, પરંતુ મ્યુટેશનના કારણે રિપ્રેસર બંધાતું નથી, પરંતુ ગ્લુકોઝ હાજર હોવા છતાં લેક જીનનો અભિવ્યક્તિ થશે નહીં. D) ખોટું છે કારણ કે લેક જીનનો અભિવ્યક્તિ બંધ થશે નહીં, પરંતુ સતત થશે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "લેક ઓપેરોનમાં, જ્યારે ઑપરેટર અને પ્રમોટર વચ્ચેનો ડીએનએ ક્ષેત્ર કાપી નાખવામાં આવે છે, ત્યારે નીચેનામાંથી કયું પરિણામ સૌથી યોગ્ય રીતે અપેક્ષિત છે?", "opts": ["લેક ઝીનનું વ્યક્તીકરણ સંપૂર્ણપણે બંધ થશે, કારણ કે પ્રમોટર અને ઑપરેટર વચ્ચેનો સંદેશા તૂટી જશે.", "લેક ઝીનનું વ્યક્તીકરણ સતત થશે, કારણ કે રિપ્રેસર પ્રોટીન બંધાઈ શકશે નહીં.", "લેક ઝીનનું વ્યક્તીકરણ અસ્થિર થશે, કારણ કે આરએનએ પોલિમરેઝ બંધાઈ શકશે નહીં.", "લેક ઝીનનું વ્યક્તીકરણ સામાન્ય રહેશે, કારણ કે પ્રમોટર અને ઑપરેટર વચ્ચેનો ક્ષેત્ર વ્યક્તીકરણ માટે આવશ્યક નથી."], "ans": 0, "exp": "અ) લેક ઝીનનું વ્યક્તીકરણ સંપૂર્ણપણે બંધ થશે, કારણ કે પ્રમોટર અને ઑપરેટર વચ્ચેનો ક્ષેત્ર આરએનએ પોલિમરેઝ માટે આવશ્યક છે, અને તેના કાપી નાખવાથી આરએનએ પોલિમરેઝ બંધાઈ શકતું નથી. બ) ખોટું છે કારણ કે રિપ્રેસર પ્રોટીન ઑપરેટર સાથે બંધાઈ શકે છે, પરંતુ આરએનએ પોલિમરેઝ બંધાઈ શકતું નથી. સ) ખોટું છે કારણ કે આરએનએ પોલિમરેઝ બંધાઈ શકતું નથી, પરંતુ વ્યક્તીકરણ અસ્થિર નહીં પણ સંપૂર્ણ બંધ થશે. ડ) ખોટું છે કારણ કે પ્રમોટર અને ઑપરેટર વચ્ચેનો ક્ષેત્ર વ્યક્તીકરણ માટે આવશ્યક છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન ટ્રિપ્ટોફેન ઓપેરોન (trp operon) માં ઑપરેટરની ભૂમિકા અને લેક ઓપેરોન (lac operon) માં ઑપરેટરની ભૂમિકા વચ્ચેનો મૂળભૂત તફાવત સૌથી સ્પષ્ટ રીતે વર્ણવે છે?", "opts": ["ટ્રિપ્ટોફેન ઓપેરોનમાં ઑપરેટર હંમેશા સક્રિય હોય છે, જ્યારે લેક ઓપેરોનમાં ઑપરેટર નિષ્ક્રિય હોય છે.", "ટ્રિપ્ટોફેન ઓપેરોનમાં ઑપરેટર પર રિપ્રેસર પ્રોટીન ત્યારે જ બંધાય છે જ્યારે ટ્રિપ્ટોફેન હાજર હોય, જ્યારે લેક ઓપેરોનમાં ઑપરેટર પર રિપ્રેસર પ્રોટીન ત્યારે જ બંધાય છે જ્યારે લેક્ટોઝ ગેરહાજર હોય.", "ટ્રિપ્ટોફેન ઓપેરોનમાં ઑપરેટર પર કોઈ રિપ્રેસર પ્રોટીન બંધાતું નથી, જ્યારે લેક ઓપેરોનમાં ઑપરેટર પર રિપ્રેસર પ્રોટીન હંમેશા બંધાયેલું રહે છે.", "ટ્રિપ્ટોફેન ઓપેરોનમાં ઑપરેટરની ભૂમિકા માત્ર પ્રમોટરને સક્રિય કરવાની છે, જ્યારે લેક ઓપેરોનમાં ઑપરેટરની ભૂમિકા માત્ર ટ્રાન્સક્રિપ્શનને અટકાવવાની છે."], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. ટ્રિપ્ટોફેન ઓપેરોનમાં, રિપ્રેસર પ્રોટીન ત્યારે જ ઑપરેટર સાથે જોડાય છે જ્યારે ટ્રિપ્ટોફેન (કોરિપ્રેસર) હાજર હોય છે, જેના કારણે ટ્રાન્સક્રિપ્શન અટકી જાય છે. જ્યારે લેક ઓપેરોનમાં, રિપ્રેસર પ્રોટીન ઑપરેટર સાથે ત્યારે જ જોડાય છે જ્યારે લેક્ટોઝ ગેરહાજર હોય છે, જે ટ્રાન્સક્રિપ્શનને અટકાવે છે. વિકલ્પ A ખોટો છે કારણ કે બંને ઓપેરોનમાં ઑપરેટરની સક્રિયતા પરિસ્થિતિ આધારિત હોય છે. વિકલ્પ C ખોટો છે કારણ કે ટ્રિપ્ટોફેન ઓપેરોનમાં પણ રિપ્રેસર પ્રોટીન ઑપરેટર સાથે જોડાય છે. વિકલ્પ D ખોટો છે કારણ કે ઑપરેટરની ભૂમિકા માત્ર ટ્રાન્સક્રિપ્શનને નિયંત્રિત કરવાની છે, નહીં કે પ્રમોટરને સક્રિય કરવાની.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિકતા અને ઉત્ક્રાંતિ (અનુવાદ નિયંત્રણ)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
