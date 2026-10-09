@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પર્યાવરણીય અસર (CFC</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પર્યાવરણીય અસર (CFC</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પર્યાવરણીય અસર (CFC</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 19 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 19 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ક્લોરોફ્લોરોકાર્બન (CFC) સંયોજનો ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે, પરંતુ નીચેના પૈકી કયું સંયોજન CFC નથી છતાં ઓઝોન સ્તરને નુકસાન પહોંચાડી શકે છે?", "opts": ["કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄)", "મિથેન (CH₄)", "નાઇટ્રસ ઓક્સાઇડ (N₂O)", "હાઇડ્રોક્લોરોફ્લોરોકાર્બન (HCFC)"], "ans": 2, "exp": "સાચો જવાબ: C) નાઇટ્રસ ઓક્સાઇડ (N₂O). CFC સિવાયના અન્ય સંયોજનો પણ ઓઝોન સ્તરને નુકસાન પહોંચાડી શકે છે. નાઇટ્રસ ઓક્સાઇડ (N₂O) સૂર્યના પારજાંબલી કિરણો સાથે પ્રક્રિયા કરી નાઇટ્રિક ઓક્સાઇડ (NO) ઉત્પન્ન કરે છે, જે ઓઝોનના વિઘટનમાં મદદરૂપ બને છે. કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄) અને HCFC એ CFCના વર્ગમાં આવે છે અથવા તેના જેવી જ અસર ધરાવે છે. મિથેન (CH₄) ઓઝોન સ્તરને સીધું નુકસાન પહોંચાડતું નથી, પરંતુ તે ગ્રીનહાઉસ ગેસ તરીકે વાતાવરણને અસર કરે છે.", "ref": "Std 12 - પ્રકરણ 16: પર્યાવરણીય સમસ્યાઓ", "ch": ""}, {"q": "CFC સંયોજનો ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે, કારણ કે તેમાં રહેલા કયા તત્વની હાજરી ઓઝોન સાથે પ્રક્રિયા કરે છે?", "opts": ["કાર્બન (C)", "હાઇડ્રોજન (H)", "ક્લોરિન (Cl)", "ફ્લોરિન (F)"], "ans": 2, "exp": "સાચો જવાબ: C) ક્લોરિન (Cl). CFC સંયોજનોમાં રહેલું ક્લોરિન (Cl) પરમાણુ સૂર્યના પારજાંબલી કિરણોની હાજરીમાં મુક્ત થાય છે અને ઓઝોન (O₃) સાથે પ્રક્રિયા કરી ઓક્સિજન (O₂)માં રૂપાંતરિત કરે છે. કાર્બન અને ફ્લોરિન સીધી રીતે ઓઝોન સાથે પ્રક્રિયા કરતા નથી. હાઇડ્રોજન CFCમાં હાજર હોતું નથી.", "ref": "Std 12 - પ્રકરણ 16: પર્યાવરણીય સમસ્યાઓ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: \n(1) CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે.\n(2) CFC સંયોજનો સૂર્યના પારજાંબલી કિરણો સાથે પ્રક્રિયા કરી ઓઝોનનું ઉત્પાદન વધારે છે.\n(3) CFC સંયોજનોનું વિઘટન થવાથી મુક્ત થતું ક્લોરિન ઓઝોનના અણુઓનો નાશ કરે છે.\nઉપરોક્ત વિધાનોમાંથી કયું/કયા સાચું/સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 1 અને 3", "માત્ર 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "સાચો જવાબ: B) માત્ર 1 અને 3. વિધાન (1) સાચું છે કારણ કે CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે. વિધાન (3) પણ સાચું છે કારણ કે CFCના વિઘટનથી મુક્ત થતું ક્લોરિન ઓઝોનના અણુઓનો નાશ કરે છે. વિધાન (2) ખોટું છે કારણ કે CFC સંયોજનો ઓઝોનનું ઉત્પાદન વધારતા નથી, પરંતુ તેનો નાશ કરે છે.", "ref": "Std 12 - પ્રકરણ 16: પર્યાવરણીય સમસ્યાઓ", "ch": ""}, {"q": "CFC સંયોજનોના ઉપયોગ પર મોન્ટ્રીયલ પ્રોટોકોલ દ્વારા પ્રતિબંધ મૂકવામાં આવ્યો છે. આ પ્રોટોકોલનો મુખ્ય હેતુ શું છે?", "opts": ["ગ્રીનહાઉસ ગેસના ઉત્સર્જનમાં ઘટાડો કરવો", "ઓઝોન સ્તરનું સંરક્ષણ કરવું", "વનનાબૂદી અટકાવવી", "જળ પ્રદૂષણ ઘટાડવું"], "ans": 1, "exp": "સાચો જવાબ: B) ઓઝોન સ્તરનું સંરક્ષણ કરવું. મોન્ટ્રીયલ પ્રોટોકોલનો મુખ્ય હેતુ ઓઝોન સ્તરને નુકસાન પહોંચાડતા પદાર્થો (જેમ કે CFC)ના ઉત્પાદન અને ઉપયોગ પર પ્રતિબંધ મૂકી ઓઝોન સ્તરનું સંરક્ષણ કરવાનો છે. ગ્રીનહાઉસ ગેસના ઉત્સર્જનમાં ઘટાડો કરવો એ ક્યોટો પ્રોટોકોલનો હેતુ છે. વનનાબૂદી અને જળ પ્રદૂષણ આ પ્રોટોકોલના મુખ્ય હેતુ નથી.", "ref": "Std 12 - પ્રકરણ 16: પર્યાવરણીય સમસ્યાઓ", "ch": ""}, {"q": "CFC સંયોજનો ઓઝોન સ્તરને નુકસાન પહોંચાડે છે, પરંતુ નીચેના પૈકી કયું કારણ CFCના ઓઝોન સ્તર પરના પ્રભાવને ઘટાડવામાં મદદરૂપ નથી?", "opts": ["CFC સંયોજનોના ઉત્પાદન અને ઉપયોગ પર પ્રતિબંધ", "ઓઝોન-મૈત્રીપૂર્ણ તકનીકોનો વિકાસ", "વાતાવરણમાં કાર્બન ડાયોક્સાઇડનું પ્રમાણ વધારવું", "વૈકલ્પિક રેફ્રિજન્ટ્સનો ઉપયોગ"], "ans": 2, "exp": "સાચો જવાબ: C) વાતાવરણમાં કાર્બન ડાયોક્સાઇડનું પ્રમાણ વધારવું. કાર્બન ડાયોક્સાઇડનું પ્રમાણ વધવાથી ગ્રીનહાઉસ અસર વધે છે, પરંતુ તે ઓઝોન સ્તરને સીધી રીતે અસર કરતું નથી. CFC સંયોજનોના ઉત્પાદન અને ઉપયોગ પર પ્રતિબંધ, ઓઝોન-મૈત્રીપૂર્ણ તકનીકોનો વિકાસ અને વૈકલ્પિક રેફ્રિજન્ટ્સનો ઉપયોગ ઓઝોન સ્તરના સંરક્ષણમાં મદદરૂપ છે.", "ref": "Std 12 - પ્રકરણ 16: પર્યાવરણીય સમસ્યાઓ", "ch": ""}, {"q": "CFC સંયોજનોના ઓઝોન સ્તરના વિઘટન પ્રક્રિયામાં, નીચેના પૈકી કયું પગલું સૌપ્રથમ બને છે?", "opts": ["CFC અણુઓ UV કિરણો દ્વારા વિઘટન પામી Cl મુક્ત રેડિકલ્સ ઉત્પન્ન કરે છે.", "Cl મુક્ત રેડિકલ્સ O₃ સાથે પ્રક્રિયા કરી O₂ અને ClO ઉત્પન્ન કરે છે.", "ClO મુક્ત રેડિકલ્સ O અણુ સાથે પ્રક્રિયા કરી Cl મુક્ત રેડિકલ્સ પુનઃઉત્પન્ન કરે છે.", "O₃ અણુઓ સીધા જ UV કિરણો દ્વારા વિઘટન પામે છે."], "ans": 0, "exp": "CFC અણુઓ સૌપ્રથમ UV કિરણો દ્વારા વિઘટન પામી Cl મુક્ત રેડિકલ્સ ઉત્પન્ન કરે છે, જે ઓઝોન સ્તરના વિઘટનની શરૂઆત છે. બાકીના પગલાં આ પછી બને છે. વિકલ્પ Dમાં O₃નું સીધું વિઘટન CFCની હાજરીમાં નહીંવત્ થાય, જ્યારે B અને C પગલાં Cl મુક્ત રેડિકલ્સની ઉત્પત્તિ પછી બને છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન CFC અને ઓઝોન સ્તરના સંબંધમાં ખોટું છે?", "opts": ["CFC અણુઓ વાતાવરણના સ્ટ્રેટોસ્ફિયર સુધી પહોંચે છે અને ત્યાં લાંબા સમય સુધી સ્થિર રહે છે.", "CFC દ્વારા ઓઝોન સ્તરના વિઘટનની પ્રક્રિયા શરૂ થાય છે જ્યારે તેઓ UV-B કિરણો દ્વારા વિઘટન પામે છે.", "CFC દ્વારા ઓઝોન સ્તરના વિઘટનથી ત્વચા કૅન્સર અને મોતિયાબિંદુ જેવા રોગોનો ખતરો ઘટે છે.", "CFC સંયોજનોમાં ક્લોરિન અણુઓ ઓઝોન અણુઓ સાથે પ્રક્રિયા કરી તેને વિઘટિત કરે છે."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે કારણ કે ઓઝોન સ્તરના વિઘટનથી UV કિરણોની માત્રા વધે છે, જે ત્વચા કૅન્સર અને મોતિયાબિંદુ જેવા રોગોનો ખતરો વધારે છે, નહીં કે ઘટાડે. બાકીના વિધાનો સાચાં છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "CFC સંયોજનોના પર્યાવરણીય પ્રભાવને લગતા નીચેના વિધાનો ધ્યાનમાં લો: (1) CFC સંયોજનો ગ્લોબલ વોર્મિંગમાં યોગદાન આપે છે. (2) CFC સંયોજનો ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે. (3) CFC સંયોજનો વરસાદી જળમાં ઘોલાય છે. (4) CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે. કયા વિધાનો સાચાં છે?", "opts": ["1, 2 અને 4", "1, 2 અને 3", "2, 3 અને 4", "1, 3 અને 4"], "ans": 0, "exp": "વિધાન 1, 2 અને 4 સાચાં છે. CFC સંયોજનો ગ્લોબલ વોર્મિંગમાં યોગદાન આપે છે, ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે અને વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે. વિધાન 3 ખોટું છે કારણ કે CFC સંયોજનો જળમાં ઘોલાતા નથી.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન CFC નથી પરંતુ ઓઝોન સ્તરના વિઘટનમાં ફાળો આપે છે?", "opts": ["CFCl₃", "CF₂Cl₂", "CH₃Br", "CCl₄"], "ans": 2, "exp": "CH₃Br (મિથાઇલ બ્રોમાઇડ) એક હેલોન છે, જે CFC નથી પરંતુ ઓઝોન સ્તરના વિઘટનમાં ફાળો આપે છે. બાકીના વિકલ્પો (CFCl₃, CF₂Cl₂, CCl₄) CFC સંયોજનો છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "CFC સંયોજનોના ઓઝોન સ્તર પરના પ્રભાવને રોકવા માટે નીચેના પૈકી કયું પગલું સૌથી અસરકારક છે?", "opts": ["CFC સંયોજનોના ઉપયોગ પર તાત્કાલિક પ્રતિબંધ મૂકવો.", "ઓઝોન સ્તરને પુનઃસ્થાપિત કરવા માટે કૃત્રિમ ઓઝોન ઉત્પન્ન કરવો.", "CFC સંયોજનોના વિકલ્પ તરીકે હાઇડ્રોકાર્બનનો ઉપયોગ કરવો.", "વાતાવરણમાં ઓઝોનની માત્રા વધારવા માટે વૃક્ષારોપણ કરવો."], "ans": 0, "exp": "CFC સંયોજનોના ઉપયોગ પર તાત્કાલિક પ્રતિબંધ મૂકવો એ સૌથી અસરકારક પગલું છે કારણ કે CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે અને ઓઝોન સ્તરના વિઘટનને રોકવા માટે તેમના ઉત્સર્જનને રોકવું જરૂરી છે. બાકીના વિકલ્પો અસરકારક નથી અથવા લાંબા ગાળાના ઉકેલ નથી.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "CFC સંયોજનોના ઓઝોન સ્તરના વિઘટન પ્રક્રિયામાં, ક્લોરિન પરમાણુની ભૂમિકા વિશે નીચેના પૈકી કયું વિધાન સૌથી યથાર્થ છે?", "opts": ["ક્લોરિન પરમાણુ ઓઝોન અણુ સાથે પ્રતિક્રિયા કરે છે અને O₂ અણુ બનાવે છે, પરંતુ તે પોતે નષ્ટ થતું નથી.", "ક્લોરિન પરમાણુ ઓઝોન અણુ સાથે પ્રતિક્રિયા કરે છે અને O₂ અણુ બનાવે છે, પરંતુ તે પોતે પણ નષ્ટ થાય છે.", "ક્લોરિન પરમાણુ ઓઝોન અણુ સાથે પ્રતિક્રિયા કરે છે અને ક્લોરિન મોનોક્સાઇડ બનાવે છે, જે પછી ઓઝોન સાથે પ્રતિક્રિયા કરતું નથી.", "ક્લોરિન પરમાણુ ઓઝોન અણુ સાથે પ્રતિક્રિયા કરે છે અને ક્લોરિન ડાયોક્સાઇડ બનાવે છે, જે ઓઝોન સ્તરને સીધું નુકસાન પહોંચાડતું નથી."], "ans": 0, "exp": "ક્લોરિન પરમાણુ ઓઝોન (O₃) સાથે પ્રતિક્રિયા કરે છે અને O₂ અણુ બનાવે છે, પરંતુ તે પોતે નષ્ટ થતું નથી. આ પ્રક્રિયામાં ક્લોરિન પરમાણુ એક ઉત્પ્રેરક તરીકે વર્તે છે, જે ઓઝોનના વિઘટનને વેગ આપે છે. ઓપશન B ખોટું છે કારણ કે ક્લોરિન પરમાણુ નષ્ટ થતું નથી. ઓપશન C અને D ખોટાં છે કારણ કે ક્લોરિન મોનોક્સાઇડ (ClO) અને ક્લોરિન ડાયોક્સાઇડ (ClO₂) ઓઝોન સાથે પ્રતિક્રિયા કરે છે અને ઓઝોન સ્તરને નુકસાન પહોંચાડે છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન CFC નથી, પરંતુ તે ઓઝોન સ્તરના વિઘટનમાં સીધો ફાળો આપે છે?", "opts": ["CFCl₃", "CF₂Cl₂", "N₂O", "CCl₄"], "ans": 2, "exp": "N₂O (નાઇટ્રસ ઓક્સાઇડ) એક હરિતગૃહ વાયુ છે અને ઓઝોન સ્તરના વિઘટનમાં સીધો ફાળો આપે છે, પરંતુ તે CFC નથી. CFCl₃ (CFC-11), CF₂Cl₂ (CFC-12), અને CCl₄ (કાર્બન ટેટ્રાક્લોરાઇડ) એ બધા CFC સંયોજનો છે જે ઓઝોન સ્તરના વિઘટનમાં ફાળો આપે છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "CFC સંયોજનોના ઓઝોન સ્તર પરના પ્રભાવને લગતા નીચેના વિધાનો ધ્યાનમાં લો: (1) CFC સંયોજનો સ્તરોસ્ફિયરમાં પહોંચીને UV કિરણો દ્વારા વિઘટિત થાય છે. (2) CFC સંયોજનોના વિઘટનથી મુક્ત થતા ક્લોરિન પરમાણુઓ ઓઝોન અણુઓ સાથે પ્રતિક્રિયા કરે છે. (3) CFC સંયોજનો ઓઝોન સ્તરના વિઘટનને રોકવા માટે વાતાવરણમાંથી સંપૂર્ણપણે દૂર થઈ ગયા છે. નીચેના પૈકી કયું વિકલ્પ યોગ્ય છે?", "opts": ["ફક્ત (1) અને (2) સાચાં છે.", "ફક્ત (2) અને (3) સાચાં છે.", "ફક્ત (1) અને (3) સાચાં છે.", "(1), (2), અને (3) બધાં સાચાં છે."], "ans": 0, "exp": "વિધાન (1) અને (2) સાચાં છે કારણ કે CFC સંયોજનો સ્તરોસ્ફિયરમાં પહોંચીને UV કિરણો દ્વારા વિઘટિત થાય છે અને મુક્ત થતા ક્લોરિન પરમાણુઓ ઓઝોન અણુઓ સાથે પ્રતિક્રિયા કરે છે. વિધાન (3) ખોટું છે કારણ કે CFC સંયોજનો હજુ પણ વાતાવરણમાં હાજર છે અને તેમના પ્રભાવો લાંબા સમય સુધી ચાલુ રહેશે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "CFC સંયોજનોના પર્યાવરણીય પ્રભાવને લગતા નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["CFC સંયોજનો હવામાં લાંબા સમય સુધી સ્થિર રહે છે.", "CFC સંયોજનો ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે.", "CFC સંયોજનોના ઉપયોગ પર મોન્ટ્રીયલ પ્રોટોકોલ દ્વારા પ્રતિબંધ મૂકવામાં આવ્યો છે.", "CFC સંયોજનો પાણીમાં સરળતાથી દ્રાવ્ય છે."], "ans": 3, "exp": "CFC સંયોજનો પાણીમાં અદ્રાવ્ય છે, તેથી વિધાન (D) ખોટું છે. CFC સંયોજનો હવામાં લાંબા સમય સુધી સ્થિર રહે છે (A), ઓઝોન સ્તરના વિઘટન માટે જવાબદાર છે (B), અને તેમના ઉપયોગ પર મોન્ટ્રીયલ પ્રોટોકોલ દ્વારા પ્રતિબંધ મૂકવામાં આવ્યો છે (C).", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન CFC નથી, પરંતુ તે હરિતગૃહ પ્રભાવમાં ફાળો આપે છે અને ઓઝોન સ્તરના વિઘટનમાં પણ ભૂમિકા ભજવે છે?", "opts": ["CFCl₃", "CF₂ClBr", "CH₄", "CCl₄"], "ans": 2, "exp": "CH₄ (મિથેન) એક હરિતગૃહ વાયુ છે અને ઓઝોન સ્તરના વિઘટનમાં પણ અપ્રત્યક્ષ રીતે ફાળો આપે છે, પરંતુ તે CFC નથી. CFCl₃ (CFC-11), CF₂ClBr (હેલોન-1211), અને CCl₄ (કાર્બન ટેટ્રાક્લોરાઇડ) એ બધા CFC સંયોજનો છે જે ઓઝોન સ્તરના વિઘટનમાં ફાળો આપે છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (1) CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે. (2) CFC સંયોજનો સૂર્યપ્રકાશ દ્વારા વિઘટિત થઈ ક્લોરિન પરમાણુઓ મુક્ત કરે છે. (3) ક્લોરિન પરમાણુઓ ઓઝોન સ્તરના વિઘટનમાં ફાળો આપતાં નથી. (4) ઓઝોન સ્તરનું વિઘટન ત્વચા કૅન્સર અને મોતિયા જેવી સમસ્યાઓનું કારણ બને છે. ઉપરોક્ત વિધાનો પૈકી કયા ખોટા છે?", "opts": ["(1) અને (2)", "(2) અને (3)", "(3) માત્ર", "(1), (2) અને (4)"], "ans": 2, "exp": "વિકલ્પ C સત્ય છે કારણ કે વિધાન (3) ખોટું છે. CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે (વિધાન 1 સત્ય), સૂર્યપ્રકાશ દ્વારા વિઘટિત થઈ ક્લોરિન પરમાણુઓ મુક્ત કરે છે (વિધાન 2 સત્ય), અને ઓઝોન સ્તરનું વિઘટન ત્વચા કૅન્સર અને મોતિયા જેવી સમસ્યાઓનું કારણ બને છે (વિધાન 4 સત્ય). ક્લોરિન પરમાણુઓ ઓઝોન સ્તરના વિઘટનમાં ફાળો આપે છે (વિધાન 3 ખોટું).", "ref": "Std 12 - અધ્યાય 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન CFC નથી, પરંતુ ઓઝોન સ્તરના વિઘટનમાં ક્લોરિન પરમાણુ મુક્ત કરવા માટે સક્ષમ છે અને તેનો ઉપયોગ કૃષિ ક્ષેત્રમાં જંતુનાશક તરીકે થાય છે?", "opts": ["મિથાઇલ ક્લોરોફોર્મ (CH₃CCl₃)", "કાર્બન ટેટ્રાક્લોરાઇડ (CCl₄)", "મિથાઇલ બ્રોમાઇડ (CH₃Br)", "હાઇડ્રોક્લોરોફ્લોરોકાર્બન (HCFC)"], "ans": 2, "exp": "મિથાઇલ બ્રોમાઇડ (CH₃Br) CFC નથી, પરંતુ તે ઓઝોન સ્તરના વિઘટનમાં ક્લોરિન નહીં, પરંતુ બ્રોમિન પરમાણુ મુક્ત કરે છે. જોકે, તે કૃષિ ક્ષેત્રમાં જંતુનાશક તરીકે વપરાય છે અને ઓઝોન સ્તરને નુકસાન પહોંચાડે છે. મિથાઇલ ક્લોરોફોર્મ અને કાર્બન ટેટ્રાક્લોરાઇડ CFC નથી, પરંતુ તેઓ ક્લોરિન પરમાણુ મુક્ત કરે છે, જ્યારે HCFC એ CFC નો વિકલ્પ છે, પરંતુ તે ઓઝોન સ્તરને ઓછું નુકસાન પહોંચાડે છે.", "ref": "Std 12 - પ્રકરણ 14: પર્યાવરણીય રસાયણશાસ્ત્ર", "ch": ""}, {"q": "CFC સંયોજનોના ઓઝોન સ્તર પરના પ્રભાવને લગતા નીચેના કયા વિધાનમાં અપવાદ છે? (1) CFC સંયોજનો સૂર્યના UV કિરણો દ્વારા વિઘટન પામી ક્લોરિન મુક્ત કરે છે, જે ઓઝોન અણુઓનો નાશ કરે છે. (2) CFC સંયોજનો વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે, જે તેમને ઓઝોન સ્તરના વિઘટન માટે જવાબદાર બનાવે છે. (3) CFC સંયોજનોના કારણે ઓઝોન સ્તરનું વિઘટન સમગ્ર વિશ્વમાં સમાન રીતે થાય છે. (4) CFC સંયોજનોના ઉપયોગ પર મોન્ટ્રીયલ પ્રોટોકોલ દ્વારા પ્રતિબંધ મૂકવામાં આવ્યો છે.", "opts": ["માત્ર (1)", "માત્ર (3)", "(1) અને (2)", "(2) અને (4)"], "ans": 1, "exp": "વિધાન (3) અપવાદ છે કારણ કે CFC સંયોજનોના કારણે ઓઝોન સ્તરનું વિઘટન સમગ્ર વિશ્વમાં સમાન રીતે થતું નથી. તે ધ્રુવીય પ્રદેશોમાં (ખાસ કરીને દક્ષિણ ધ્રુવ પર) વધુ જોવા મળે છે, કારણ કે ત્યાંના વિશિષ્ટ હવામાન પરિસ્થિતિઓ (જેમ કે ધ્રુવીય વમળ અને નીચું તાપમાન) CFC ના વિઘટનને વેગ આપે છે. બાકીના વિધાનો સાચાં છે.", "ref": "Std 12 - પ્રકરણ 14: પર્યાવરણીય રસાયણશાસ્ત્ર", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન CFC (ક્લોરોફ્લોરોકાર્બન) અને ઓઝોન સ્તરના વિઘટનના સંબંધમાં અપવાદરૂપ છે?", "opts": ["CFC સંયોજનો સૂર્યપ્રકાશ દ્વારા વિઘટિત થઈ ક્લોરિન મુક્ત કરે છે, જે ઓઝોન સાથે પ્રક્રિયા કરે છે.", "CFC સંયોજનો વાતાવરણના સ્ટ્રેટોસ્ફિયરમાં પહોંચી ઓઝોન સ્તરને નુકસાન પહોંચાડે છે.", "CFC સંયોજનો પાણીમાં દ્રાવ્ય હોવાથી વરસાદ દ્વારા જમીન પર પહોંચે છે અને ઓઝોન સ્તરને અસર કરતું નથી.", "CFC સંયોજનોના વિઘટનથી મુક્ત થતાં ક્લોરિન પરમાણુઓ ઓઝોન અણુને તોડી નાખે છે."], "ans": 2, "exp": "વિકલ્પ C ખોટો છે, કારણ કે CFC સંયોજનો પાણીમાં અદ્રાવ્ય હોવાથી વરસાદ દ્વારા જમીન પર પહોંચતાં નથી. તેઓ વાતાવરણમાં લાંબા સમય સુધી સ્થિર રહે છે અને સ્ટ્રેટોસ્ફિયરમાં પહોંચી ઓઝોન સ્તરને નુકસાન પહોંચાડે છે. વિકલ્પ A, B, અને D સાચા છે, કારણ કે CFC સૂર્યપ્રકાશ દ્વારા વિઘટિત થઈ ક્લોરિન મુક્ત કરે છે, જે ઓઝોન સાથે પ્રક્રિયા કરે છે અને ઓઝોન સ્તરને નુકસાન પહોંચાડે છે.", "ref": "Std 12 - Chapter 16: પર્યાવરણીય મુદ્દાઓ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
