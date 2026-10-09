@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STDs</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>STDs</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">STDs</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "નીચેના પૈકી કયો રોગ બેક્ટેરિયા દ્વારા થતો નથી પરંતુ વાઇરસ દ્વારા થાય છે, અને તેના લક્ષણોમાં જનનાંગ પર ફોડલા પડવા અને દુખાવો થવો સામેલ છે?", "opts": ["ગોનોરિયા", "સિફિલિસ", "હર્પીસ જેનિટાલિસ", "ટ્રાઇકોમોનિયાસિસ"], "ans": 2, "exp": "હર્પીસ જેનિટાલિસ (Herpes Genitalis) હર્પીસ સિમ્પ્લેક્સ વાઇરસ (HSV-2) દ્વારા થાય છે, જેના લક્ષણોમાં જનનાંગ પર ફોડલા પડવા અને દુખાવો થવો સામેલ છે. ગોનોરિયા (A) અને સિફિલિસ (B) બેક્ટેરિયા દ્વારા થાય છે, જ્યારે ટ્રાઇકોમોનિયાસિસ (D) પરજીવી દ્વારા થાય છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક વ્યક્તિને એચઆઈવી સંક્રમણ થયું છે, પરંતુ તેના શરીરમાં એન્ટીબોડી ટેસ્ટ નકારાત્મક આવે છે. આ સ્થિતિ કયા તબક્કામાં હોઈ શકે?", "opts": ["એક્યુટ રીટ્રોવાયરલ સિન્ડ્રોમ", "ક્લિનિકલ લેટન્સી તબક્કો", "એડ્સ તબક્કો", "વિન્ડો પીરિયડ"], "ans": 3, "exp": "વિન્ડો પીરિયડ (D) એ એચઆઈવી સંક્રમણ પછીનો સમયગાળો છે જ્યાં વ્યક્તિ સંક્રમિત હોય છે પરંતુ એન્ટીબોડી ટેસ્ટ નકારાત્મક આવે છે. એક્યુટ રીટ્રોવાયરલ સિન્ડ્રોમ (A)માં લક્ષણો દેખાય છે, ક્લિનિકલ લેટન્સી તબક્કો (B)માં વાઇરસ સક્રિય હોય છે પરંતુ લક્ષણો નહીં, અને એડ્સ તબક્કો (C)માં રોગપ્રતિકારક શક્તિ ખૂબ જ નબળી પડે છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ જનનાંગના કર્કરોગ સાથે સંકળાયેલ છે અને તે હ્યુમન પેપિલોમા વાઇરસ (HPV) દ્વારા થાય છે?", "opts": ["ક્લેમીડિયા", "હેપેટાઇટિસ B", "સર્વાઇકલ કેંસર", "ગોનોરિયા"], "ans": 2, "exp": "સર્વાઇકલ કેંસર (C) હ્યુમન પેપિલોમા વાઇરસ (HPV) દ્વારા થાય છે અને જનનાંગના કર્કરોગ સાથે સંકળાયેલ છે. ક્લેમીડિયા (A) અને ગોનોરિયા (D) બેક્ટેરિયા દ્વારા થાય છે, જ્યારે હેપેટાઇટિસ B (B) લીવરના રોગ સાથે સંકળાયેલ છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક વ્યક્તિને સિફિલિસ છે અને તેના લક્ષણોમાં ત્વચા પર ચકામા અને જનનાંગ પર ઘા દેખાય છે. આ રોગનો કયો તબક્કો છે?", "opts": ["પ્રાથમિક તબક્કો", "દ્વિતીય તબક્કો", "તૃતીય તબક્કો", "ગુપ્ત તબક્કો"], "ans": 1, "exp": "સિફિલિસનો દ્વિતીય તબક્કો (B)માં ત્વચા પર ચકામા અને જનનાંગ પર ઘા દેખાય છે. પ્રાથમિક તબક્કો (A)માં જનનાંગ પર ઘા (ચાન્કર) દેખાય છે, તૃતીય તબક્કો (C)માં ગંભીર અંગોને નુકસાન થાય છે, અને ગુપ્ત તબક્કો (D)માં લક્ષણો દેખાતા નથી.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ પરજીવી દ્વારા થાય છે અને તેના લક્ષણોમાં જનનાંગમાં ખંજવાળ અને પીળા-હરિયા રંગનો સ્રાવ થવો સામેલ છે?", "opts": ["ગોનોરિયા", "ટ્રાઇકોમોનિયાસિસ", "હર્પીસ જેનિટાલિસ", "સિફિલિસ"], "ans": 1, "exp": "ટ્રાઇકોમોનિયાસિસ (B) ટ્રાઇકોમોનાસ વેજાઇનાલિસ નામના પરજીવી દ્વારા થાય છે, જ્યારે તેના લક્ષણોમાં જનનાંગમાં ખંજવાળ અને પીળા-હરિયા રંગનો સ્રાવ થવો સામેલ છે. ગોનોરિયા (A) અને સિફિલિસ (D) બેક્ટેરિયા દ્વારા થાય છે, જ્યારે હર્પીસ જેનિટાલિસ (C) વાઇરસ દ્વારા થાય છે.", "ref": "Std 12 - પ્રકરણ 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "જનનાંગ પરના ઘાવો, પેશાબ કરતી વખતે બળતરા અને પુરુષોમાં સફેદ સ્રાવ એ કયા રોગના લક્ષણો છે, જેનો સારવાર પેનિસિલિન દ્વારા થઈ શકે છે?", "opts": ["ગોનોરિયા (Gonorrhea)", "સિફિલિસ (Syphilis)", "હર્પીઝ સિમ્પ્લેક્સ-2 (Herpes Simplex-2)", "ટ્રાઇકોમોનિયાસિસ (Trichomoniasis)"], "ans": 1, "exp": "સિફિલિસ (Syphilis) ના લક્ષણોમાં જનનાંગ પરના ઘાવો (ચાન્કર), પેશાબ કરતી વખતે બળતરા અને પુરુષોમાં સફેદ સ્રાવનો સમાવેશ થાય છે. આ રોગ ટ્રેપોનીમા પેલિડમ બેક્ટેરિયા દ્વારા થાય છે અને તેનો સારવાર પેનિસિલિન દ્વારા થઈ શકે છે. ગોનોરિયા માટે પણ પેનિસિલિન અસરકારક હોઈ શકે છે, પરંતુ તેના લક્ષણો સિફિલિસથી અલગ હોય છે. હર્પીઝ અને ટ્રાઇકોમોનિયાસિસ વાઇરસ અને પરજીવી દ્વારા થાય છે, જેમના સારવારમાં પેનિસિલિન અસરકારક નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક વ્યક્તિને જનનાંગ પર ચકામા અને ખંજવાળ આવે છે, પરંતુ કોઈ સ્રાવ નથી. ડોક્ટરે તેને એન્ટીવાઇરલ દવા આપી છે. આ રોગ કયો હોવાનું સૂચવે છે?", "opts": ["ક્લેમાઇડિયા (Chlamydia)", "જનનાંગ હર્પીઝ (Genital Herpes)", "ગોનોરિયા (Gonorrhea)", "ટ્રાઇકોમોનિયાસિસ (Trichomoniasis)"], "ans": 1, "exp": "જનનાંગ હર્પીઝ (Genital Herpes) એ હર્પીઝ સિમ્પ્લેક્સ વાઇરસ-2 (HSV-2) દ્વારા થાય છે, જેના લક્ષણોમાં જનનાંગ પર ચકામા અને ખંજવાળ આવે છે, પરંતુ સામાન્ય રીતે કોઈ સ્રાવ થતો નથી. આ રોગનો સારવાર એન્ટીવાઇરલ દવાથી થાય છે. ક્લેમાઇડિયા, ગોનોરિયા અને ટ્રાઇકોમોનિયાસિસ બેક્ટેરિયા અથવા પરજીવી દ્વારા થાય છે, જેમના સારવારમાં એન્ટીબાયોટિક્સ અથવા એન્ટીપરેસાઇટિક દવાઓ વપરાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ માથી ગર્ભમાં રહેલા બાળકને સંક્રમિત થઈ શકે છે અને બાળકમાં અંધત્વ અથવા મગજના વિકાસમાં ખામી ઉત્પન્ન કરી શકે છે?", "opts": ["ગોનોરિયા (Gonorrhea)", "સિફિલિસ (Syphilis)", "એચઆઈવી (HIV)", "હ્યુમન પેપિલોમા વાઇરસ (HPV)"], "ans": 1, "exp": "સિફિલિસ (Syphilis) માથી ગર્ભમાં રહેલા બાળકને સંક્રમિત થઈ શકે છે (કોંગેનિટલ સિફિલિસ) અને તે બાળકમાં અંધત્વ, બહેરાશ અથવા મગજના વિકાસમાં ખામી ઉત્પન્ન કરી શકે છે. ગોનોરિયા અને એચઆઈવી પણ માથી બાળકને સંક્રમિત થઈ શકે છે, પરંતુ તેના લક્ષણો અલગ હોય છે. હ્યુમન પેપિલોમા વાઇરસ (HPV) સામાન્ય રીતે ગર્ભમાં રહેલા બાળકને સંક્રમિત થતો નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક વ્યક્તિને જનનાંગ પર કઠણ, દુખાવાદાર ઘાવો છે અને લસિકા ગાંઠોમાં સોજો આવ્યો છે. આ રોગનો સંક્રમણ માર્ગ કયો છે?", "opts": ["હવા દ્વારા", "દૂષિત પાણી દ્વારા", "શારીરિક સંપર્ક (લૈંગિક સંપર્ક)", "મચ્છરના ડંખ દ્વારા"], "ans": 2, "exp": "જનનાંગ પર કઠણ, દુખાવાદાર ઘાવો અને લસિકા ગાંઠોમાં સોજો એ સિફિલિસ અથવા હર્પીઝ જેવા લૈંગિક સંક્રમિત રોગો (STD) ના લક્ષણો હોઈ શકે છે. આ રોગોનો સંક્રમણ માર્ગ મુખ્યત્વે શારીરિક સંપર્ક (લૈંગિક સંપર્ક) દ્વારા થાય છે. હવા, દૂષિત પાણી અથવા મચ્છરના ડંખ દ્વારા આ રોગો ફેલાતા નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ એવો છે કે જેનો સંક્રમણ માત્ર લૈંગિક સંપર્ક દ્વારા જ નહીં, પરંતુ રક્તાધાન દ્વારા પણ થઈ શકે છે?", "opts": ["ગોનોરિયા (Gonorrhea)", "ટ્રાઇકોમોનિયાસિસ (Trichomoniasis)", "એચઆઈવી (HIV)", "હ્યુમન પેપિલોમા વાઇરસ (HPV)"], "ans": 2, "exp": "એચઆઈવી (HIV) એવો રોગ છે કે જેનો સંક્રમણ લૈંગિક સંપર્ક દ્વારા તો થાય જ છે, પરંતુ રક્તાધાન, સૂઈના વહેંચણ અથવા માથી બાળકને પણ થઈ શકે છે. ગોનોરિયા, ટ્રાઇકોમોનિયાસિસ અને HPV મુખ્યત્વે લૈંગિક સંપર્ક દ્વારા જ ફેલાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ માતાથી ગર્ભમાં રહેલા બાળકને સંક્રમિત થઈ શકે છે અને તેના કારણે બાળકમાં અંધત્વ, બહેરાશ અથવા મગજના વિકાસમાં ખામી ઉત્પન્ન થઈ શકે છે?", "opts": ["ગોનોરિયા", "સિફિલિસ", "ટ્રાયકોમોનિયાસિસ", "ક્લેમાઇડિયા"], "ans": 1, "exp": "સિફિલિસ (Treponema pallidum) માતાથી ગર્ભમાં રહેલા બાળકને સંક્રમિત થઈ શકે છે (કોન્જેનિટલ સિફિલિસ) અને તેના કારણે બાળકમાં અંધત્વ, બહેરાશ, હાડકાંના વિકાસમાં ખામી અથવા મગજના વિકાસમાં ખામી ઉત્પન્ન થઈ શકે છે. ગોનોરિયા અને ક્લેમાઇડિયા પણ ગર્ભમાં બાળકને સંક્રમિત થઈ શકે છે, પરંતુ તેના કારણે અંધત્વ (ગોનોરિયા) અથવા ન્યુમોનિયા (ક્લેમાઇડિયા) થઈ શકે છે. ટ્રાયકોમોનિયાસિસ ગર્ભમાં બાળકને સંક્રમિત થતો નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "જનનાંગ પરના ઘાવો, લસિકા ગાંઠોમાં સોજો અને તાવ એ લક્ષણો કયા રોગના સૂચક છે, જેમાં સ્પાયરોકીટ બેક્ટેરિયા જવાબદાર છે?", "opts": ["ગોનોરિયા (Gonorrhea)", "સિફિલિસ (Syphilis)", "હર્પીઝ (Herpes)", "ટ્રાયકોમોનાયસિસ (Trichomoniasis)"], "ans": 1, "exp": "સિફિલિસ (Syphilis) રોગ ટ્રેપોનીમા પેલિડમ (સ્પાયરોકીટ આકારનું બેક્ટેરિયા) દ્વારા થાય છે, જેમાં લક્ષણો તરીકે જનનાંગ પર ઘાવો, લસિકા ગાંઠોમાં સોજો અને તાવ જોવા મળે છે. ગોનોરિયા નીસેરિયા ગોનોરિઆ દ્વારા થાય છે અને તેના લક્ષણો અલગ હોય છે. હર્પીઝ વાઇરસ દ્વારા થાય છે, જ્યારે ટ્રાયકોમોનાયસિસ પરજીવી દ્વારા થાય છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "જ્યારે એક વ્યક્તિને ગોનોરિયા અને ક્લેમાઇડિયા બંને સંક્રમણ થાય છે, ત્યારે નીચેના પૈકી કયું વિધાન સત્ય છે?", "opts": ["બંને રોગોના લક્ષણો એકસરખા હોવાથી ડોક્ટરને અલગ ઓળખવું અશક્ય હોય છે, પરંતુ એન્ટીબાયોટિકની પસંદગી બંને માટે એકસરખી હોય છે.", "ગોનોરિયા માટે સેફલોસ્પોરિન અને ક્લેમાઇડિયા માટે મેક્રોલાઇડ એન્ટીબાયોટિકની જરૂર પડે છે, કારણ કે બંને રોગોના કારક જુદા જુદા બેક્ટેરિયા છે.", "ક્લેમાઇડિયા સંક્રમણ હોવા છતાં, ગોનોરિયાનું સંક્રમણ થતું નથી, કારણ કે ક્લેમાઇડિયા બેક્ટેરિયા ગોનોરિયા બેક્ટેરિયાને નાશ કરે છે.", "બંને રોગો માટે એક જ એન્ટીબાયોટિક (પેનિસિલિન) પૂરતું હોય છે, કારણ કે બંને નિસેરિયા ગોનોરિઆ અને ક્લેમાઇડિયા ટ્રેકોમેટિસ પેનિસિલિન પ્રત્યે સંવેદનશીલ હોય છે."], "ans": 1, "exp": "બ) શરીરમાં ગોનોરિયા (નિસેરિયા ગોનોરિઆ) અને ક્લેમાઇડિયા (ક્લેમાઇડિયા ટ્રેકોમેટિસ) બંને સંક્રમણ એકસાથે થઈ શકે છે. ગોનોરિયા માટે સેફલોસ્પોરિન (જેમ કે સીફ્ટ્રાયેક્સોન) અને ક્લેમાઇડિયા માટે મેક્રોલાઇડ (જેમ કે અઝીથ્રોમાઇસિન) જેવા એન્ટીબાયોટિકની જરૂર પડે છે, કારણ કે બંને રોગોના કારક બેક્ટેરિયા જુદા જુદા હોય છે અને તેમની એન્ટીબાયોટિક પ્રત્યેની સંવેદનશીલતા અલગ હોય છે. A) ખોટું છે કારણ કે લક્ષણો સમાન હોવા છતાં, એન્ટીબાયોટિકની પસંદગી અલગ હોય છે. C) ખોટું છે કારણ કે ક્લેમાઇડિયા ગોનોરિયા બેક્ટેરિયાને નાશ કરતું નથી. D) ખોટું છે કારણ કે પેનિસિલિન ક્લેમાઇડિયા પ્રત્યે અસરકારક નથી.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "હર્પીસ સિમ્પ્લેક્સ વાઇરસ-2 (HSV-2) ના સંક્રમણ વિશે નીચેના પૈકી કયું વિધાન ખોટું છે?", "opts": ["તે જનનાંગના હર્પીસનું કારણ બને છે અને લૈંગિક સંપર્ક દ્વારા ફેલાય છે.", "સંક્રમિત વ્યક્તિમાં પ્રથમ વખત લક્ષણો દેખાય તે પહેલાં પણ વાઇરસ સંક્રમણ ફેલાવી શકે છે.", "તેના લક્ષણોમાં જનનાંગ પર પાણી ભરેલા ફોસલા અને દુખાવો થાય છે, પરંતુ તે ક્યારેય પુનરાવર્તિત થતું નથી.", "ગર્ભવતી મહિલામાં સંક્રમણ હોવા પર ગર્ભમાં રહેલા બાળકને પણ સંક્રમણ થઈ શકે છે."], "ans": 2, "exp": "C) ખોટું છે કારણ કે હર્પીસ સિમ્પ્લેક્સ વાઇરસ-2 (HSV-2) ના સંક્રમણમાં લક્ષણો પુનરાવર્તિત થઈ શકે છે. A) સત્ય છે કારણ કે HSV-2 જનનાંગના હર્પીસનું કારણ બને છે અને લૈંગિક સંપર્ક દ્વારા ફેલાય છે. B) સત્ય છે કારણ કે વાઇરસ લક્ષણો દેખાય તે પહેલાં પણ સંક્રમણ ફેલાવી શકે છે. D) સત્ય છે કારણ કે ગર્ભવતી મહિલામાં સંક્રમણ હોવા પર ગર્ભમાં રહેલા બાળકને પણ સંક્રમણ થઈ શકે છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "ટ્રાઇકોમોનાયસિસ વિશે નીચેના પૈકી કયું વિધાન સત્ય નથી?", "opts": ["તે ટ્રાઇકોમોનાસ વેજાઇનેલિસ નામના પરજીવી દ્વારા થાય છે.", "પુરુષોમાં આ રોગના લક્ષણો સ્ત્રીઓ કરતાં વધુ ગંભીર હોય છે.", "તેના લક્ષણોમાં સ્ત્રીઓમાં પીળા-હરિયા રંગનો, ફેણવાળો સ્રાવ અને જનનાંગમાં ખંજવાળ થાય છે.", "આ રોગનું નિદાન માઇક્રોસ્કોપ હેઠળ પરજીવીની હાજરી દ્વારા થઈ શકે છે."], "ans": 1, "exp": "B) ખોટું છે કારણ કે ટ્રાઇકોમોનાયસિસમાં સ્ત્રીઓમાં લક્ષણો વધુ સ્પષ્ટ અને ગંભીર હોય છે, જ્યારે પુરુષોમાં લક્ષણો મild અથવા અસ્પષ્ટ હોઈ શકે છે. A) સત્ય છે કારણ કે ટ્રાઇકોમોનાયસિસ ટ્રાઇકોમોનાસ વેજાઇનેલિસ નામના પરજીવી દ્વારા થાય છે. C) સત્ય છે કારણ કે સ્ત્રીઓમાં પીળા-હરિયા રંગનો, ફેણવાળો સ્રાવ અને જનનાંગમાં ખંજવાળ થાય છે. D) સત્ય છે કારણ કે આ રોગનું નિદાન માઇક્રોસ્કોપ હેઠળ પરજીવીની હાજરી દ્વારા થઈ શકે છે.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ એવો છે કે જેનો સંક્રમણ લૈંગિક સંપર્કથી થાય છે, પરંતુ તેના લક્ષણો ત્વચા પર જોવા મળતા નથી અને તે માત્ર સ્ત્રીઓમાં જ જોવા મળે છે?", "opts": ["ટ્રાઇકોમોનાયસિસ", "ગોનોરિયા", "સિફિલિસ", "હર્પીસ"], "ans": 0, "exp": "ટ્રાઇકોમોનાયસિસ (A) એક પરજીવી રોગ છે જે માત્ર સ્ત્રીઓમાં યોનિમાં સંક્રમણ પામે છે અને તેના લક્ષણો ત્વચા પર દેખાતા નથી, પરંતુ યોનિમાં સફેદ-હળવી પીળી સ્રાવ અને ખંજવાળ જેવા લક્ષણો જોવા મળે છે. ગોનોરિયા (B), સિફિલિસ (C), અને હર્પીસ (D) એવા રોગો છે જે પુરુષ અને સ્ત્રી બંનેમાં થાય છે અને તેમના લક્ષણો ત્વચા પર જોવા મળી શકે છે.", "ref": "Std 12 - Chapter 3: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "એક વ્યક્તિને જનનાંગ પર કોઈ લક્ષણ દેખાતા નથી, પરંતુ તેના રક્ત પરીક્ષણમાં એન્ટીબોડી પોઝિટિવ આવે છે. આ સ્થિતિ કયા રોગની સૂચવે છે?", "opts": ["એચઆઈવી", "હેપેટાઇટિસ B", "સિફિલિસ", "ક્લેમાઇડિયા"], "ans": 0, "exp": "એચઆઈવી (A) સંક્રમણના પ્રારંભિક તબક્કામાં કોઈ લક્ષણો દેખાતા નથી, પરંતુ રક્ત પરીક્ષણમાં એન્ટીબોડી પોઝિટિવ આવી શકે છે. હેપેટાઇટિસ B (B) અને સિફિલિસ (C) પણ એન્ટીબોડી ટેસ્ટ દ્વારા શોધી શકાય છે, પરંતુ તેમના લક્ષણો ત્વચા અથવા જનનાંગ પર જોવા મળી શકે છે. ક્લેમાઇડિયા (D) સામાન્ય રીતે જનનાંગમાં સ્રાવ અથવા બળતરા જેવા લક્ષણો દર્શાવે છે.", "ref": "Std 12 - Chapter 3: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ એવો છે કે જેના સંક્રમણ પછી વ્યક્તિના શરીરમાં રોગપ્રતિકારક શક્તિ ખૂબ જ ઓછી થઈ જાય છે અને તેના કારણે અન્ય સંક્રમણો થવાની શક્યતા વધી જાય છે?", "opts": ["સિફિલિસ", "ગોનોરિયા", "એચઆઈવી", "હર્પીસ"], "ans": 2, "exp": "એચઆઈવી (C) સંક્રમણ પછી વ્યક્તિના શરીરમાં રોગપ્રતિકારક શક્તિ (પ્રતિરક્ષાતંત્ર) ખૂબ જ ઓછી થઈ જાય છે, જેના કારણે અન્ય સંક્રમણો થવાની શક્યતા વધી જાય છે. સિફિલિસ (A), ગોનોરિયા (B), અને હર્પીસ (D) એવા રોગો છે જે રોગપ્રતિકારક શક્તિને અસર કરતા નથી.", "ref": "Std 12 - Chapter 3: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}, {"q": "નીચેના પૈકી કયો રોગ એવો છે કે જેના લક્ષણોમાં જનનાંગ પર કઠણ, દુખાવાદાર ઘાવો અને લસિકા ગાંઠોમાં સોજો થાય છે, પરંતુ તેનો સંક્રમણ માત્ર લૈંગિક સંપર્ક દ્વારા જ થતો નથી, પરંતુ રક્તાધાન અથવા સંક્રમિત સૂઈ દ્વારા પણ થઈ શકે છે?", "opts": ["ક્લેમાઇડિયા (Chlamydia)", "એચઆઈવી (HIV)", "હ્યુમન પેપિલોમા વાઇરસ (HPV)", "સિફિલિસ (Syphilis)"], "ans": 3, "exp": "સિફિલિસ એ બેક્ટેરિયલ સંક્રમણ છે જેના લક્ષણોમાં જનનાંગ પર કઠણ, દુખાવાદાર ઘાવો (ચાન્કર) અને લસિકા ગાંઠોમાં સોજો થાય છે. આ રોગનો સંક્રમણ લૈંગિક સંપર્ક દ્વારા થાય છે, પરંતુ રક્તાધાન અથવા સંક્રમિત સૂઈ દ્વારા પણ થઈ શકે છે. ક્લેમાઇડિયા અને એચઆઈવીનો સંક્રમણ રક્તાધાન દ્વારા થઈ શકે છે, પરંતુ ક્લેમાઇડિયાના લક્ષણો સિફિલિસ જેવા નથી. હ્યુમન પેપિલોમા વાઇરસ (HPV) ના લક્ષણો પણ સિફિલિસ જેવા નથી અને તેનો સંક્રમણ રક્તાધાન દ્વારા થતો નથી.", "ref": "Std 12 - Chapter 4: મનુષ્યમાં પ્રજનન તંત્ર અને લૈંગિક આરોગ્ય", "ch": ""}, {"q": "જનનાંગ પરના ઘાવો, પેશાબ કરતી વખતે બળતરા, અને પુરુષોમાં સફેદ સ્રાવ એ લક્ષણો ધરાવતા રોગના સંક્રમણ માટે નીચેના પૈકી કયો પરિબળ સૌથી ઓછો જવાબદાર ગણી શકાય?", "opts": ["નીસેરિયા ગોનોરિઆ", "ટ્રેપોનીમા પેલિડમ", "ક્લેમાઇડિયા ટ્રેકોમેટિસ", "માયકોપ્લાઝમા જીનિટેલિયમ"], "ans": 1, "exp": "નીસેરિયા ગોનોરિઆ (ગોનોરિયા) અને ક્લેમાઇડિયા ટ્રેકોમેટિસ બંને જનનાંગ પરના ઘાવો, બળતરા, અને સફેદ સ્રાવ જેવા લક્ષણોનું કારણ બને છે. માયકોપ્લાઝમા જીનિટેલિયમ પણ યુરેથ્રાઇટિસ અને સ્રાવનું કારણ બની શકે છે. પરંતુ ટ્રેપોનીમા પેલિડમ (સિફિલિસ) મુખ્યત્વે કઠણ, દુખાવાદાર ઘાવો (ચાન્કર) અને પાછળથી ત્વચા પર ચકામા જેવા લક્ષણો દર્શાવે છે, જેમાં પેશાબ કરતી વખતે બળતરા અથવા સફેદ સ્રાવ એટલા પ્રમાણમાં જોવા મળતું નથી. આથી ટ્રેપોનીમા પેલિડમ સૌથી ઓછો જવાબદાર ગણી શકાય.", "ref": "Std 12 - Chapter 8: માનવ સ્વાસ્થ્ય અને રોગો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
