@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પ્રોટીન (પેપ્ટાઈડ બંધ)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>પ્રોટીન (પેપ્ટાઈડ બંધ)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">પ્રોટીન (પેપ્ટાઈડ બંધ)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં 15 એમિનો એસિડ જોડાયેલા છે. આ શૃંખલામાં કેટલા પેપ્ટાઈડ બંધ હાજર હશે?", "opts": ["14", "15", "16", "13"], "ans": 0, "exp": "પેપ્ટાઈડ બંધની સંખ્યા હંમેશા એમિનો એસિડની સંખ્યા કરતાં એક ઓછી હોય છે. અહીં 15 એમિનો એસિડ છે, તેથી 14 પેપ્ટાઈડ બંધ બનશે. વિકલ્પ A સાચો છે. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ પેપ્ટાઈડ બંધની સંખ્યાનું ખોટું ગણતરી દર્શાવે છે.", "ref": "Std 11 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પેપ્ટાઈડ બંધની લાક્ષણિકતાઓ માટે ખોટું છે?", "opts": ["પેપ્ટાઈડ બંધ આંશિક દ્વિબંધ ગુણ ધરાવે છે", "પેપ્ટાઈડ બંધ સંપૂર્ણ સમતલીય હોય છે", "પેપ્ટાઈડ બંધમાં C-N બંધની લંબાઈ સામાન્ય C-N એકલ બંધ કરતાં ઓછી હોય છે", "પેપ્ટાઈડ બંધ હંમેશા ટ્રાન્સ સંરચનામાં જોવા મળે છે"], "ans": 3, "exp": "પેપ્ટાઈડ બંધ સામાન્ય રીતે ટ્રાન્સ સંરચનામાં જોવા મળે છે, પરંતુ પ્રોલિન એમિનો એસિડ સાથે સિસ સંરચના પણ શક્ય છે. તેથી વિકલ્પ D ખોટું છે. બાકીના વિકલ્પો પેપ્ટાઈડ બંધની સાચી લાક્ષણિકતાઓ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 14: બાયોમોલેક્યુલ્સ અને પોલિમર", "ch": ""}, {"q": "એક પ્રયોગમાં, એક ઉત્સેચકને 100°C તાપમાને ગરમ કરવામાં આવે છે. આ ઉત્સેચકની પ્રોટીન સંરચનામાં કયો ફેરફાર સૌથી પહેલા થવાની શક્યતા છે?", "opts": ["પ્રાથમિક સંરચના તૂટી જશે", "દ્વિતીયક સંરચના તૂટી જશે", "તૃતીયક સંરચના તૂટી જશે", "ચતુર્થક સંરચના તૂટી જશે"], "ans": 0, "exp": "ઉચ્ચ તાપમાને સૌથી પહેલા નબળા હાઇડ્રોજન બંધ તૂટે છે, જે દ્વિતીયક સંરચનાને જાળવે છે. તેથી દ્વિતીયક સંરચના તૂટી જશે. પ્રાથમિક સંરચના પેપ્ટાઈડ બંધથી જોડાયેલી હોવાથી તે તૂટતી નથી. તૃતીયક અને ચતુર્થક સંરચના વધુ સ્થિર હોય છે અને પછીથી અસર પામે છે.", "ref": "Std 11 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "નીચેનામાંથી કયું સંયોજન પેપ્ટાઈડ બંધ ધરાવતું નથી?", "opts": ["ઇન્સ્યુલિન", "હિમોગ્લોબિન", "કોલાજન", "ગ્લાયકોજન"], "ans": 3, "exp": "ગ્લાયકોજન એક કાર્બોદિત છે અને તે ગ્લાયકોસિડિક બંધથી બનેલું છે, પેપ્ટાઈડ બંધ ધરાવતું નથી. બાકીના ત્રણ વિકલ્પો પ્રોટીન છે અને તેમાં પેપ્ટાઈડ બંધ હાજર હોય છે.", "ref": "Std 11 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં 50 એમિનો એસિડ છે. જો આ શૃંખલામાંથી એક ટ્રિપ્ટોફેન એમિનો એસિડ દૂર કરવામાં આવે, તો નવા બનેલા પોલિપેપ્ટાઈડમાં કેટલા પેપ્ટાઈડ બંધ હશે?", "opts": ["48", "49", "50", "47"], "ans": 0, "exp": "મૂળ શૃંખલામાં 50 એમિનો એસિડ હોવાથી 49 પેપ્ટાઈડ બંધ હતા. એક એમિનો એસિડ દૂર કરતાં 49 એમિનો એસિડ બાકી રહે છે, તેથી 48 પેપ્ટાઈડ બંધ બનશે. વિકલ્પ A સાચો છે. બાકીના વિકલ્પો ખોટી ગણતરી દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 14: બાયોમોલેક્યુલ્સ અને પોલિમર", "ch": ""}, {"q": "પેપ્ટાઈડ બંધના નિર્માણ દરમિયાન, કયા એમિનો એસિડની સાઇડ ચેઇન (R ગ્રુપ) ના હાજર હોવા છતાં પણ, તેની અનુપસ્થિતિમાં પેપ્ટાઈડ બંધ બનવાની પ્રક્રિયા અવરોધાય છે?", "opts": ["ગ્લાઇસીન", "પ્રોલાઇન", "સિસ્ટીન", "મેથિયોનિન"], "ans": 1, "exp": "પ્રોલાઇન એમિનો એસિડની સાઇડ ચેઇન (R ગ્રુપ) તેની આલ્ફા-એમિનો ગ્રુપ સાથે જોડાયેલી હોય છે, જેથી તે પેપ્ટાઈડ બંધ નિર્માણ દરમિયાન અવરોધ ઉભો કરે છે. ગ્લાઇસીનની સાઇડ ચેઇન માત્ર હાઇડ્રોજન અણુ છે, જેથી તે અવરોધ ઉભો કરતું નથી. સિસ્ટીન અને મેથિયોનિનની સાઇડ ચેઇન પણ પેપ્ટાઈડ બંધ નિર્માણને અસર કરતી નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં, પેપ્ટાઈડ બંધની સંખ્યા અને એમિનો એસિડની સંખ્યા વચ્ચેનો સબંધ કયો છે જ્યારે શૃંખલા ચક્રીય (cyclic) હોય છે?", "opts": ["પેપ્ટાઈડ બંધની સંખ્યા = એમિનો એસિડની સંખ્યા", "પેપ્ટાઈડ બંધની સંખ્યા = એમિનો એસિડની સંખ્યા - 1", "પેપ્ટાઈડ બંધની સંખ્યા = એમિનો એસિડની સંખ્યા + 1", "પેપ્ટાઈડ બંધની સંખ્યા = એમિનો એસિડની સંખ્યા / 2"], "ans": 0, "exp": "ચક્રીય પોલિપેપ્ટાઈડ શૃંખલામાં, પ્રત્યેક એમિનો એસિડ એક પેપ્ટાઈડ બંધ દ્વારા જોડાયેલો હોય છે, જેથી પેપ્ટાઈડ બંધની સંખ્યા એમિનો એસિડની સંખ્યાની બરાબર હોય છે. રેખીય શૃંખલામાં, પેપ્ટાઈડ બંધની સંખ્યા એમિનો એસિડની સંખ્યા કરતાં એક ઓછી હોય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પેપ્ટાઈડ બંધની લાક્ષણિકતાઓ માટે સૌથી યોગ્ય રીતે વર્ણવે છે?", "opts": ["પેપ્ટાઈડ બંધ હાઇડ્રોજન બંધ કરતાં મજબૂત હોય છે અને તે પાણીમાં દ્રાવ્ય હોય છે.", "પેપ્ટાઈડ બંધ કોવેલન્ટ બંધ હોય છે અને તે પાણીમાં અદ્રાવ્ય હોય છે.", "પેપ્ટાઈડ બંધ આયનિક બંધ હોય છે અને તે ઉષ્મા સ્થિર હોય છે.", "પેપ્ટાઈડ બંધ વાન ડર વાલ્સ બળ દ્વારા બનેલો હોય છે અને તે પાણીમાં અસ્થિર હોય છે."], "ans": 1, "exp": "પેપ્ટાઈડ બંધ એ કોવેલન્ટ બંધ છે, જે એમિનો એસિડની કાર્બોક્સિલ ગ્રુપ અને બીજા એમિનો એસિડની એમિનો ગ્રુપ વચ્ચે બને છે. આ બંધ પાણીમાં અદ્રાવ્ય હોય છે. હાઇડ્રોજન બંધ, આયનિક બંધ, અને વાન ડર વાલ્સ બળ એ પેપ્ટાઈડ બંધની લાક્ષણિકતાઓ નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "એક પ્રયોગમાં, એક પોલિપેપ્ટાઈડ શૃંખલાને હાઇડ્રોક્સિલેમીન (NH₂OH) સાથે ઉપચારિત કરવામાં આવે છે. આ ઉપચાર પછી, કયા બંધ તૂટી શકે છે?", "opts": ["પેપ્ટાઈડ બંધ", "ડાઇસલ્ફાઇડ બંધ", "હાઇડ્રોજન બંધ", "આયનિક બંધ"], "ans": 0, "exp": "હાઇડ્રોક્સિલેમીન (NH₂OH) એ પેપ્ટાઈડ બંધને તોડી શકે છે, કારણ કે તે એસિલ ગ્રુપ સાથે પ્રક્રિયા કરે છે. ડાઇસલ્ફાઇડ બંધ, હાઇડ્રોજન બંધ, અને આયનિક બંધ હાઇડ્રોક્સિલેમીન દ્વારા અસરગ્રસ્ત થતાં નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "નીચેનામાંથી કયું એમિનો એસિડ પેપ્ટાઈડ બંધ નિર્માણ દરમિયાન, તેની સાઇડ ચેઇન દ્વારા અતિરિક્ત બંધ નિર્માણ કરી શકે છે, જે પોલિપેપ્ટાઈડ શૃંખલાની રચનામાં મહત્વની ભૂમિકા ભજવે છે?", "opts": ["એલાનિન", "વેલિન", "સિસ્ટીન", "લ્યુસીન"], "ans": 2, "exp": "સિસ્ટીન એમિનો એસિડની સાઇડ ચેઇનમાં થાયોલ ગ્રુપ (-SH) હોય છે, જે ડાઇસલ્ફાઇડ બંધ (-S-S-) નિર્માણ કરી શકે છે. આ બંધ પોલિપેપ્ટાઈડ શૃંખલાની રચનામાં મહત્વની ભૂમિકા ભજવે છે. એલાનિન, વેલિન, અને લ્યુસીનની સાઇડ ચેઇનમાં આ પ્રકારના બંધ નિર્માણ કરવાની ક્ષમતા નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં, પેપ્ટાઈડ બંધના નિર્માણ દરમિયાન કયા એમિનો એસિડની સાઇડ ચેઇન (R ગ્રુપ) ની ભૂમિકા સૌથી ઓછી હોવાનું કહી શકાય?", "opts": ["ગ્લાઇસીન", "પ્રોલીન", "સિસ્ટીન", "લાઇસીન"], "ans": 0, "exp": "ગ્લાઇસીનની સાઇડ ચેઇન માત્ર એક હાઇડ્રોજન અણુ (H) ધરાવે છે, જે પેપ્ટાઈડ બંધ નિર્માણ દરમિયાન કોઈ રાસાયણિક પ્રતિક્રિયામાં ભાગ લેતી નથી. પ્રોલીનની સાઇડ ચેઇન શૃંખલામાં વળાંક પેદા કરે છે, સિસ્ટીન ડિસલ્ફાઇડ બંધ બનાવે છે, અને લાઇસીન ધન ભારિત છે જે પ્રોટીનની રચનામાં મહત્વની ભૂમિકા ભજવે છે. અત્રે ગ્લાઇસીનની સાઇડ ચેઇનની ભૂમિકા સૌથી ઓછી છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રોટીન", "ch": ""}, {"q": "નીચેનામાંથી કયો પેપ્ટાઈડ બંધનો ગુણધર્મ નથી?", "opts": ["તે કોણીય સ્વરૂપ ધરાવે છે", "તે પોલર છે", "તે ડબલ બંધ ધરાવે છે", "તે હાઇડ્રોજન બંધ બનાવી શકે છે"], "ans": 2, "exp": "પેપ્ટાઈડ બંધ એકલ બંધ (સિંગલ બંધ) છે, જે કાર્બોક્સિલ ગ્રુપ (-COOH) અને એમિનો ગ્રુપ (-NH2) વચ્ચે બને છે. તે કોણીય સ્વરૂપ ધરાવે છે (A), પોલર છે (B), અને હાઇડ્રોજન બંધ બનાવી શકે છે (D). ડબલ બંધ (C) પેપ્ટાઈડ બંધનો ગુણધર્મ નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રોટીન", "ch": ""}, {"q": "એક પ્રયોગમાં, પોલિપેપ્ટાઈડ શૃંખલાને ટ્રિપ્સિન ઉત્સેચક સાથે ઉપચારિત કરવામાં આવે છે. નીચેનામાંથી કયા એમિનો એસિડના ક્રમમાં ટ્રિપ્સિન દ્વારા વિભાજન થશે?", "opts": ["લાઇસીન - સેરીન", "એસ્પાર્ટિક એસિડ - ગ્લુટામિક એસિડ", "આર્જિનિન - પ્રોલીન", "ગ્લાઇસીન - એલાનીન"], "ans": 0, "exp": "ટ્રિપ્સિન ઉત્સેચક પોલિપેપ્ટાઈડ શૃંખલાને લાઇસીન અથવા આર્જિનિન પછી વિભાજન કરે છે. લાઇસીન - સેરીન (A) અને આર્જિનિન - પ્રોલીન (C) બંને સંયોજનો ટ્રિપ્સિન દ્વારા વિભાજન પામે છે, પરંતુ લાઇસીન - સેરીન સૌથી સામાન્ય અને સીધું ઉદાહરણ છે. એસ્પાર્ટિક એસિડ અને ગ્લુટામિક એસિડ (B) ટ્રિપ્સિન દ્વારા વિભાજન પામતું નથી, અને ગ્લાઇસીન - એલાનીન (D) પણ ટ્રિપ્સિન દ્વારા વિભાજન પામતું નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રોટીન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પેપ્ટાઈડ બંધના સ્વરૂપ વિશે ખોટું છે?", "opts": ["પેપ્ટાઈડ બંધમાં C-N બંધ હાજર છે", "પેપ્ટાઈડ બંધમાં કાર્બન અને નાઇટ્રોજન વચ્ચેનો બંધ સંપૂર્ણપણે એકલ બંધ છે", "પેપ્ટાઈડ બંધમાં કાર્બન અને ઓક્સિજન વચ્ચે ડબલ બંધ હાજર છે", "પેપ્ટાઈડ બંધમાં હાઇડ્રોજન બંધ બનાવવાની ક્ષમતા છે"], "ans": 1, "exp": "પેપ્ટાઈડ બંધમાં C-N બંધ હાજર છે (A), અને તે કાર્બન અને નાઇટ્રોજન વચ્ચેનો બંધ છે, પરંતુ તે સંપૂર્ણપણે એકલ બંધ નથી. તે આંશિક ડબલ બંધ લાક્ષણિકતાઓ ધરાવે છે (રેઝોનન્સ સ્ટ્રક્ચરને કારણે). કાર્બન અને ઓક્સિજન વચ્ચે ડબલ બંધ હાજર છે (B), અને પેપ્ટાઈડ બંધ હાઇડ્રોજન બંધ બનાવી શકે છે (D). અત્રે વિધાન (B) ખોટું છે કારણ કે તે પેપ્ટાઈડ બંધને સંપૂર્ણપણે એકલ બંધ તરીકે વર્ણવે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રોટીન", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં, નીચેનામાંથી કયા એમિનો એસિડની હાજરીથી શૃંખલામાં ડિસલ્ફાઇડ બંધ બનવાની શક્યતા સૌથી વધુ છે?", "opts": ["મિથાયોનિન", "સિસ્ટીન", "ટાયરોસિન", "ફિનાઇલએલાનીન"], "ans": 1, "exp": "ડિસલ્ફાઇડ બંધ સિસ્ટીન એમિનો એસિડની સાઇડ ચેઇનમાં હાજર સલ્ફહાઇડ્રિલ ગ્રુપ (-SH) વચ્ચે બને છે. મિથાયોનિન (A)માં સલ્ફર હાજર છે પરંતુ તે ડિસલ્ફાઇડ બંધ બનાવતું નથી. ટાયરોસિન (C) અને ફિનાઇલએલાનીન (D)માં સલ્ફર હાજર નથી, અત્રે સિસ્ટીન (B) સૌથી યોગ્ય ઉત્તર છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પ્રોટીન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન પેપ્ટાઈડ બંધના હાઇડ્રોલિસિસ વિશે ખોટું છે?", "opts": ["પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ એમિનો એસિડમાં પરિણમે છે", "ઉત્સેચક પેપ્સિન પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ કરે છે", "પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ એ એન્ડોથર્મિક પ્રક્રિયા છે", "પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ એ એક્સોથર્મિક પ્રક્રિયા છે"], "ans": 3, "exp": "પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ એ એન્ડોથર્મિક પ્રક્રિયા છે (C), કારણ કે તેને પાણીના અણુઓના ટૂટવા અને નવા બંધો બનાવવા માટે ઉર્જાની જરૂર પડે છે. પેપ્ટાઈડ બંધનું હાઇડ્રોલિસિસ એમિનો એસિડમાં પરિણમે છે (A) અને પેપ્સિન ઉત્સેચક દ્વારા કરવામાં આવે છે (B). પરંતુ તે એક્સોથર્મિક નથી (D).", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને વર્ગીકરણ", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં, નીચેનામાંથી કયા એમિનો એસિડની સાઇડ ચેઇન પેપ્ટાઈડ બંધના નિર્માણ દરમિયાન કોઈપણ પ્રતિક્રિયામાં ભાગ લેતી નથી?", "opts": ["લાઇસીન", "એસ્પાર્ટિક એસિડ", "ગ્લુટામિક એસિડ", "વેલિન"], "ans": 3, "exp": "વેલિન (D) એ એક એલિફેટિક એમિનો એસિડ છે, જેની સાઇડ ચેઇન પેપ્ટાઈડ બંધના નિર્માણ દરમિયાન કોઈપણ પ્રતિક્રિયામાં ભાગ લેતી નથી. લાઇસીન (A), એસ્પાર્ટિક એસિડ (B), અને ગ્લુટામિક એસિડ (C) એમિનો એસિડની સાઇડ ચેઇન પેપ્ટાઈડ બંધના નિર્માણ દરમિયાન હાઇડ્રોજન બંધ અથવા આયનિક બંધ બનાવી શકે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને વર્ગીકરણ", "ch": ""}, {"q": "નીચેનામાંથી કયું સંયોજન પેપ્ટાઈડ બંધના હાઇડ્રોલિસિસને વેગ આપે છે, પરંતુ તે પોતે પેપ્ટાઈડ બંધ ધરાવતું નથી?", "opts": ["ટ્રિપ્સિન", "પેપ્સિન", "હાઇડ્રોક્લોરિક એસિડ", "કાઇમોટ્રિપ્સિન"], "ans": 2, "exp": "હાઇડ્રોક્લોરિક એસિડ (C) એ પેપ્ટાઈડ બંધના હાઇડ્રોલિસિસને વેગ આપે છે, પરંતુ તે પોતે પેપ્ટાઈડ બંધ ધરાવતું નથી. ટ્રિપ્સિન (A), પેપ્સિન (B), અને કાઇમોટ્રિપ્સિન (D) એ ઉત્સેચક છે જે પેપ્ટાઈડ બંધ ધરાવે છે અને પેપ્ટાઈડ બંધના હાઇડ્રોલિસિસને વેગ આપે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને વર્ગીકરણ", "ch": ""}, {"q": "એક પોલિપેપ્ટાઈડ શૃંખલામાં, જો પેપ્ટાઈડ બંધની સંખ્યા એમિનો એસિડની સંખ્યાથી એક ઓછી હોય, તો નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["શૃંખલા રેખીય (linear) હોઈ શકે છે.", "શૃંખલા ચક્રીય (cyclic) હોઈ શકે છે.", "શૃંખલામાં ઓછામાં ઓછું એક એમિનો એસિડ હાજર હોવું જરૂરી છે.", "શૃંખલામાં ડાયસલ્ફાઇડ બંધ હાજર હોવો જરૂરી છે."], "ans": 3, "exp": "પેપ્ટાઈડ બંધની સંખ્યા એમિનો એસિડની સંખ્યાથી એક ઓછી હોવાનું કારણ એ છે કે રેખીય શૃંખલામાં n એમિનો એસિડ માટે n-1 પેપ્ટાઈડ બંધ હોય છે. ચક્રીય શૃંખલામાં પણ n એમિનો એસિડ માટે n પેપ્ટાઈડ બંધ હોય છે, પરંતુ પ્રશ્નમાં પેપ્ટાઈડ બંધની સંખ્યા n-1 છે, જેથી શૃંખલા રેખીય હોઈ શકે છે. ઓછામાં ઓછું એક એમિનો એસિડ હાજર હોવું જરૂરી છે, પરંતુ ડાયસલ્ફાઇડ બંધ હાજર હોવો જરૂરી નથી. ડાયસલ્ફાઇડ બંધ ફક્ત સિસ્ટીન જેવા એમિનો એસિડની હાજરીમાં જ બને છે, જે અહીં જરૂરી નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને પોલિમર", "ch": ""}, {"q": "એક પ્રોટીનમાં તૃતીયક બંધારણ (tertiary structure) ના સ્થાયીકરણ માટે જવાબદાર બળોમાં પેપ્ટાઈડ બંધની ભૂમિકા વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["પેપ્ટાઈડ બંધ હાઇડ્રોજન બંધના નિર્માણમાં ભાગ લઈ શકે છે, જે તૃતીયક બંધારણને સ્થિર કરે છે.", "પેપ્ટાઈડ બંધની પ્લેનર (planar) પ્રકૃતિ પ્રોટીનના ફોલ્ડિંગમાં અવરોધ ઉભો કરી શકે છે, જે તૃતીયક બંધારણને અસ્થિર બનાવે છે.", "પેપ્ટાઈડ બંધની ધ્રુવીયતા (polarity) પ્રોટીનના આંતરિક ભાગમાં હાઇડ્રોફોબિક ક્રિયાપ્રતિક્રિયાઓને પ્રોત્સાહન આપે છે, જે તૃતીયક બંધારણને સ્થિર કરે છે.", "પેપ્ટાઈડ બંધ સીધી રીતે ડિસલ્ફાઇડ બંધના નિર્માણમાં ભાગ લેતો નથી, પરંતુ તે પ્રોટીનના ફોલ્ડિંગને અસર કરી શકે છે."], "ans": 2, "exp": "પેપ્ટાઈડ બંધની ધ્રુવીયતા પ્રોટીનના આંતરિક ભાગમાં હાઇડ્રોફોબિક ક્રિયાપ્રતિક્રિયાઓને પ્રોત્સાહન આપતી નથી. હકીકતમાં, પેપ્ટાઈડ બંધ ધ્રુવીય હોય છે અને તે પ્રોટીનના બાહ્ય ભાગમાં જળ સાથે ક્રિયાપ્રતિક્રિયા કરે છે. હાઇડ્રોફોબિક ક્રિયાપ્રતિક્રિયાઓ મુખ્યત્વે એમિનો એસિડની બિનધ્રુવીય સાઇડ ચેઇન વચ્ચે થાય છે. વિકલ્પ A સાચો છે કારણ કે પેપ્ટાઈડ બંધ હાઇડ્રોજન બંધ બનાવી શકે છે. વિકલ્પ B પણ સાચો છે કારણ કે પેપ્ટાઈડ બંધની પ્લેનર પ્રકૃતિ ફોલ્ડિંગમાં અવરોધ ઉભો કરી શકે છે. વિકલ્પ D સાચો છે કારણ કે પેપ્ટાઈડ બંધ ડિસલ્ફાઇડ બંધમાં સીધો ભાગ લેતો નથી.", "ref": "Std 12 - પ્રકરણ 9: બાયોમોલેક્યુલ્સ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
