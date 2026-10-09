@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>પરમાણુનું બંધારણ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>પરમાણુનું બંધારણ Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની પ્રથમ કક્ષામાંથી ત્રીજી કક્ષામાં સંક્રમણ થાય ત્યારે ઉત્સર્જાતી ઊર્જા શોધો. (R = 2.18 × 10⁻¹⁸ J)", "opts": ["1.937 × 10⁻¹⁸ J", "2.18 × 10⁻¹⁸ J", "1.55 × 10⁻¹⁸ J", "2.42 × 10⁻¹⁸ J"], "ans": 0, "exp": "ΔE = R (1/n₁² - 1/n₂²) = 2.18 × 10⁻¹⁸ (1/1² - 1/3²) = 1.937 × 10⁻¹⁸ J.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન બોહરના પરમાણુ મોડેલ માટે ખોટું છે?", "opts": ["ઇલેક્ટ્રોન નિશ્ચિત કક્ષામાં પરિભ્રમણ કરે છે અને ઊર્જા ઉત્સર્જિત કરતા નથી.", "ઇલેક્ટ્રોનની કક્ષાની ત્રિજ્યા n²ના સમપ્રમાણમાં હોય છે.", "ઇલેક્ટ્રોનની ઊર્જા ક્વોન્ટાઇઝ્ડ હોય છે અને તેનું મૂલ્ય n સાથે વધે છે.", "ઇલેક્ટ્રોનની કક્ષામાં કોણીય વેગમાન mvr = nh/2π હોય છે."], "ans": 2, "exp": "બોહર મોડેલ મુજબ ઇલેક્ટ્રોનની ઊર્જા n સાથે ઘટે છે, વધતી નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક ઇલેક્ટ્રોનની તરંગલંબાઈ 1.5 Å છે. તેની ગતિ શોધો. (h = 6.626 × 10⁻³⁴ J s, mₑ = 9.1 × 10⁻³¹ kg)", "opts": ["4.85 × 10⁶ m/s", "3.22 × 10⁶ m/s", "7.28 × 10⁶ m/s", "1.21 × 10⁶ m/s"], "ans": 0, "exp": "λ = h/mv ⇒ v = h/mλ = 6.626 × 10⁻³⁴ / (9.1 × 10⁻³¹ × 1.5 × 10⁻¹⁰) = 4.85 × 10⁶ m/s.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું ક્વોન્ટમ આંકનું સંયોજન શક્ય નથી?", "opts": ["n = 3, l = 2, m = -2", "n = 2, l = 1, m = 0", "n = 4, l = 3, m = -4", "n = 1, l = 0, m = 0"], "ans": 2, "exp": "l = 3 માટે m = -3, -2, -1, 0, +1, +2, +3 હોઈ શકે, m = -4 શક્ય નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની પ્રથમ ઉત્તેજિત અવસ્થામાં કુલ ઊર્જા કેટલી હોય છે? (R = 2.18 × 10⁻¹⁸ J)", "opts": ["-5.45 × 10⁻¹⁹ J", "-2.18 × 10⁻¹⁸ J", "-1.36 × 10⁻¹⁹ J", "-3.03 × 10⁻¹⁹ J"], "ans": 0, "exp": "Eₙ = -R/n² ⇒ E₂ = -2.18 × 10⁻¹⁸ / 4 = -5.45 × 10⁻¹⁹ J.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની પ્રથમ કક્ષામાંથી ત્રીજી કક્ષામાં સંક્રાંતિ થાય ત્યારે ઉત્સર્જાતા વિકિરણની તરંગલંબાઈ કેટલી હશે? (રીડબર્ગ અચળાંક R = 1.097 × 10⁷ m⁻¹)", "opts": ["9.12 × 10⁻⁸ m", "1.026 × 10⁻⁷ m", "1.216 × 10⁻⁷ m", "6.56 × 10⁻⁷ m"], "ans": 1, "exp": "1/λ = R(1/1² - 1/3²) = R(8/9) ⇒ λ = 9/(8R) = 1.026 × 10⁻⁷ m.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયા ક્વોન્ટમ આંકોનો સમૂહ અશક્ય છે?", "opts": ["n = 3, l = 2, m = -2, s = +½", "n = 2, l = 1, m = 0, s = -½", "n = 4, l = 3, m = -4, s = +½", "n = 1, l = 0, m = 0, s = +½"], "ans": 2, "exp": "l ની કિંમત 0 થી (n-1) સુધીની હોય છે, અને m ની કિંમત -l થી +l સુધીની હોય છે. l = 3 માટે m = -4 અશક્ય છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "ઇલેક્ટ્રોનની તરંગ પ્રકૃતિ દર્શાવતો પ્રયોગ કયો છે?", "opts": ["ફોટોઇલેક્ટ્રિક અસર", "ડેવિસન-જર્મર પ્રયોગ", "મિલિકનનો તેલબિંદુ પ્રયોગ", "રધરફોર્ડનો સોનાનો વરખ પ્રયોગ"], "ans": 1, "exp": "ડેવિસન-જર્મર પ્રયોગમાં ઇલેક્ટ્રોનની વિવર્તન ઘટના દ્વારા તરંગ પ્રકૃતિ સાબિત થઈ.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન હાઇઝનબર્ગના અનિશ્ચિતતાના સિદ્ધાંત સાથે સુસંગત નથી?", "opts": ["કોઈ પણ કણની સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે માપી શકાતા નથી.", "ઇલેક્ટ્રોનની સ્થિતિ અને વેગનું ગુણનફળ h/4π કરતાં ઓછું હોઈ શકે નહીં.", "આ સિદ્ધાંત મોટા કણો માટે અવગણી શકાય તેવો છે.", "આ સિદ્ધાંત અનુસાર ઇલેક્ટ્રોનનું કક્ષકમાં ચોક્કસ સ્થાન નક્કી કરી શકાય છે."], "ans": 3, "exp": "હાઇઝનબર્ગનો સિદ્ધાંત જણાવે છે કે ઇલેક્ટ્રોનનું ચોક્કસ સ્થાન અને વેગ એકસાથે નક્કી કરી શકાતું નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની ઉર્જા સ્તર માટે બોહર મોડેલ અનુસાર, જ્યારે ઇલેક્ટ્રોન n = 3 થી n = 2 માં સંક્રમણ કરે છે, ત્યારે ઉત્સર્જિત વિકિરણની તરંગલંબાઇ કેટલી હશે? (R = 1.097 × 10⁷ m⁻¹)", "opts": ["656.3 nm", "486.1 nm", "434.0 nm", "410.2 nm"], "ans": 0, "exp": "બોહર મોડેલ મુજબ, 1/λ = R(1/n₁² - 1/n₂²). અહીં n₁ = 2, n₂ = 3 લેતાં λ = 656.3 nm મળે છે, જે હાઇડ્રોજનના બામર શ્રેણીની પ્રથમ રેખા છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંતને યોગ્ય રીતે વર્ણવે છે?", "opts": ["પરમાણુમાં ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એક સાથે ચોક્કસ રીતે નક્કી કરી શકાતા નથી.", "પરમાણુમાં ઇલેક્ટ્રોનની ઉર્જા અને સમય એક સાથે ચોક્કસ રીતે નક્કી કરી શકાતા નથી.", "પરમાણુમાં પ્રોટોન અને ન્યૂટ્રોનની સંખ્યા એક સાથે ચોક્કસ રીતે નક્કી કરી શકાતી નથી.", "પરમાણુમાં ઇલેક્ટ્રોનની સ્થિતિ અને વેગનું ગુણનફળ હંમેશા h/4π કરતાં વધુ હોય છે."], "ans": 0, "exp": "હાઇઝનબર્ગનો અનિશ્ચિતતા સિદ્ધાંત જણાવે છે કે કોઈ કણની સ્થિતિ (Δx) અને વેગ (Δp) એક સાથે ચોક્કસ રીતે માપી શકાતા નથી, અને Δx·Δp ≥ h/4π.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક ઇલેક્ટ્રોનની ચતુર્થ ક્વોન્ટમ સંખ્યા (mₛ) નું મૂલ્ય શું હોઈ શકે?", "opts": ["+1/2 અથવા -1/2", "0, +1, +2", "-1, 0, +1", "1, 2, 3, 4"], "ans": 0, "exp": "ચતુર્થ ક્વોન્ટમ સંખ્યા (mₛ) ઇલેક્ટ્રોનના સ્પિનને દર્શાવે છે, જે +1/2 અથવા -1/2 હોઈ શકે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન પાઉલીનો અપવર્જન સિદ્ધાંતને લાગુ પડતું નથી?", "opts": ["એક જ પરમાણુમાં બે ઇલેક્ટ્રોનના ચારેય ક્વોન્ટમ સંખ્યાઓ સમાન હોઈ શકે છે.", "એક જ કક્ષકમાં બે ઇલેક્ટ્રોન વિરુદ્ધ સ્પિન ધરાવે છે.", "પરમાણુમાં ઇલેક્ટ્રોનનું વિતરણ પાઉલીના સિદ્ધાંતને અનુસરે છે.", "પાઉલીનો સિદ્ધાંત ફક્ત ફર્મિઓન કણો માટે લાગુ પડે છે."], "ans": 0, "exp": "પાઉલીનો અપવર્જન સિદ્ધાંત જણાવે છે કે એક જ પરમાણુમાં બે ઇલેક્ટ્રોનના ચારેય ક્વોન્ટમ સંખ્યાઓ સમાન હોઈ શકતી નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક પરમાણુની ઇલેક્ટ્રોન રચના 1s² 2s² 2p⁶ 3s² 3p⁵ છે. આ પરમાણુનો પરમાણુ ક્રમાંક અને સમૂહ કયો હશે?", "opts": ["પરમાણુ ક્રમાંક 17, સમૂહ 17", "પરમાણુ ક્રમાંક 17, સમૂહ 7", "પરમાણુ ક્રમાંક 15, સમૂહ 15", "પરમાણુ ક્રમાંક 19, સમૂહ 1"], "ans": 0, "exp": "ઇલેક્ટ્રોન રચના મુજબ કુલ ઇલેક્ટ્રોન = 17, તેથી પરમાણુ ક્રમાંક 17 છે. છેલ્લું ઇલેક્ટ્રોન p-કક્ષકમાં હોવાથી સમૂહ 17 (હેલોજન) છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન બોહરના પરમાણુ મોડેલ માટે અયોગ્ય છે?", "opts": ["ઇલેક્ટ્રોન નિશ્ચિત કક્ષાઓમાં જ પરિભ્રમણ કરે છે.", "ઇલેક્ટ્રોનની કક્ષાની ત્રિજ્યા n²ના સમપ્રમાણમાં હોય છે.", "ઇલેક્ટ્રોનની ઊર્જા કક્ષાના ક્રમાંકના વ્યસ્ત પ્રમાણમાં હોય છે.", "ઇલેક્ટ્રોનની કક્ષામાં કોણીય વેગમાન h/2πના પૂર્ણાંક ગુણાંકમાં હોય છે."], "ans": 2, "exp": "બોહર મોડેલ મુજબ ઇલેક્ટ્રોનની ઊર્જા કક્ષાના ક્રમાંકના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે, નહીં કે વ્યસ્ત પ્રમાણમાં.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક ઇલેક્ટ્રોનની તરંગલંબાઈ 2 Å છે. આ ઇલેક્ટ્રોનનો વેગ કેટલો હશે? (h = 6.626 × 10⁻³⁴ J s, mₑ = 9.1 × 10⁻³¹ kg)", "opts": ["3.64 × 10⁶ m/s", "7.28 × 10⁶ m/s", "1.82 × 10⁶ m/s", "5.46 × 10⁶ m/s"], "ans": 0, "exp": "દ બ્રોગ્લી સમીકરણ λ = h/mv મુજબ v = h/mλ = 6.626 × 10⁻³⁴ / (9.1 × 10⁻³¹ × 2 × 10⁻¹⁰) = 3.64 × 10⁶ m/s.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંતનું સાચું વર્ણન કરતું નથી?", "opts": ["ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એકસાથે ચોક્કસ રીતે નક્કી કરી શકાતા નથી.", "ઇલેક્ટ્રોનની ઊર્જા અને સમય એકસાથે ચોક્કસ રીતે નક્કી કરી શકાતા નથી.", "ઇલેક્ટ્રોનનું દળ અને વેગ એકસાથે ચોક્કસ રીતે નક્કી કરી શકાતા નથી.", "ઇલેક્ટ્રોનની સ્થિતિ અને વેગના ગુણનફળની અનિશ્ચિતતા h/4π કરતાં ઓછી ન હોઈ શકે."], "ans": 2, "exp": "હાઇઝનબર્ગનો સિદ્ધાંત સ્થિતિ-વેગ, ઊર્જા-સમય જેવા યુગ્મ ચલોને લાગુ પડે છે, દળ-વેગને નહીં.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું પરમાણુ ઇલેક્ટ્રોન રચના ધરાવતું નથી?", "opts": ["1s² 2s² 2p⁶ 3s¹", "1s² 2s² 2p⁶ 3s² 3p⁵", "1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d⁴", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d¹⁰ 4s¹"], "ans": 2, "exp": "3d⁴ પહેલાં 4s² ભરાય છે, પરંતુ સાચી રચના 1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ 3d⁵ હોવી જોઈએ.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનાં વિધાનોમાંથી કેટલાં સાચાં છે? (i) ક્વોન્ટમ આંક n=3 માટે કુલ 9 કક્ષકો શક્ય છે. (ii) ચુંબકીય ક્વોન્ટમ આંક mₗ = +2 માટે કક્ષકનો આકાર d-પ્રકારનો હોય છે. (iii) સ્પિન ક્વોન્ટમ આંક mₛ = -1/2 ઇલેક્ટ્રોનની ઘડિયાળની દિશામાં ભ્રમણ દર્શાવે છે.", "opts": ["એક પણ નહીં", "એક", "બે", "ત્રણ"], "ans": 2, "exp": "(i) સાચું (3s, 3p, 3d ⇒ 1+3+5=9), (ii) સાચું, (iii) ખોટું (mₛ = -1/2 ઘડિયાળની વિરુદ્ધ દિશા દર્શાવે છે).", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક પરમાણુની ઇલેક્ટ્રોન રચના 1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ છે. આ પરમાણુ કયા તત્ત્વનું છે અને તેનો સમૂહ કયો છે?", "opts": ["સોડિયમ, સમૂહ 1", "પોટેશિયમ, સમૂહ 1", "કેલ્શિયમ, સમૂહ 2", "સ્કેન્ડિયમ, સમૂહ 3"], "ans": 1, "exp": "આ ઇલેક્ટ્રોન રચના પોટેશિયમ (K)ની છે, જેનો અણુક્રમાંક 19 છે અને તે સમૂહ 1માં આવે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન ક્વોન્ટમ સંખ્યાઓ માટે ખોટું છે?", "opts": ["પ્રિન્સિપલ ક્વોન્ટમ સંખ્યા (n) કક્ષાની કદ અને ઊર્જા નક્કી કરે છે.", "એઝિમથલ ક્વોન્ટમ સંખ્યા (l) કક્ષકના આકારને દર્શાવે છે.", "મેગ્નેટિક ક્વોન્ટમ સંખ્યા (mₗ) કક્ષકની દિશા નક્કી કરે છે.", "સ્પિન ક્વોન્ટમ સંખ્યા (mₛ) ઇલેક્ટ્રોનની સ્થિતિ નક્કી કરે છે."], "ans": 3, "exp": "સ્પિન ક્વોન્ટમ સંખ્યા (mₛ) ઇલેક્ટ્રોનના સ્પિનની દિશા દર્શાવે છે, સ્થિતિ નહીં.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક ઇલેક્ટ્રોનની ડી બ્રોગ્લી તરંગલંબાઈ 2 Å છે. આ ઇલેક્ટ્રોનની ગતિજ ઊર્જા કેટલી હશે? (h = 6.626 × 10⁻³⁴ J s, mₑ = 9.11 × 10⁻³¹ kg)", "opts": ["6.03 × 10⁻¹⁸ J", "3.02 × 10⁻¹⁸ J", "1.51 × 10⁻¹⁸ J", "9.05 × 10⁻¹⁸ J"], "ans": 0, "exp": "ડી બ્રોગ્લી તરંગલંબાઈ λ = h/p ⇒ p = h/λ. ગતિજ ઊર્જા KE = p²/2m = (h/λ)²/2m = 6.03 × 10⁻¹⁸ J.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુમાં ઇલેક્ટ્રોનની પ્રથમ ઉત્તેજિત અવસ્થામાં કક્ષીય કોણીય વેગમાનનું મૂલ્ય કેટલું હોય છે?", "opts": ["h / 2π", "h / π", "√2 h / 2π", "0"], "ans": 2, "exp": "બોહરના મોડલ મુજબ, ઉત્તેજિત અવસ્થામાં કક્ષીય કોણીય વેગમાન √(l(l+1)) h/2π હોય છે, જ્યાં l=1 માટે √2 h/2π મળે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "એક ઇલેક્ટ્રોનની તરંગલંબાઈ 3 Å છે. આ ઇલેક્ટ્રોનની ગતિ ઊર્જા કેટલી હશે? (h = 6.626 × 10⁻³⁴ J s, mₑ = 9.1 × 10⁻³¹ kg)", "opts": ["6.03 × 10⁻¹⁸ J", "1.67 × 10⁻¹⁸ J", "3.34 × 10⁻¹⁸ J", "4.15 × 10⁻¹⁸ J"], "ans": 1, "exp": "ડી બ્રોગ્લી સમીકરણ λ = h/p અને ગતિ ઊર્જા K = p²/2m નો ઉપયોગ કરીને ગણતરી કરતાં K = h²/(2mλ²) = 1.67 × 10⁻¹⁸ J મળે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પરમાણુ ઇલેક્ટ્રોન રચનાઓમાંથી કઈ રચના અશક્ય છે?", "opts": ["1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d⁵ 4s¹", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d⁹ 4s²", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d⁴ 4s²"], "ans": 2, "exp": "3d⁵ 4s¹ રચના ક્રોમિયમ (Cr) માટે સાચી છે, પરંતુ 3d⁹ 4s² રચના અશક્ય છે કારણ કે d-કક્ષકો અર્ધપૂર્ણ અથવા સંપૂર્ણ ભરાયેલી સ્થિરતા ધરાવે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પરમાણુ ઇલેક્ટ્રોન રચનાઓમાંથી કયું તત્ત્વ આલ્કલી ધાતુ નથી?", "opts": ["1s² 2s² 2p⁶ 3s¹", "1s² 2s¹", "1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d¹⁰ 4s¹"], "ans": 3, "exp": "1s² 2s² 2p⁶ 3s² 3p⁶ 3d¹⁰ 4s¹ એ કોપર (Cu) ની ઇલેક્ટ્રોન રચના છે, જે સંક્રાંતિ ધાતુ છે, જ્યારે અન્ય ત્રણ આલ્કલી ધાતુઓ છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંતનું ખોટું વર્ણન કરે છે?", "opts": ["ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે માપી શકાય છે.", "ઇલેક્ટ્રોનની સ્થિતિ અને વેગના ગુણનફળની અનિશ્ચિતતા h/4π કરતાં ઓછી ન હોઈ શકે.", "આ સિદ્ધાંત ક્વોન્ટમ યંત્રશાસ્ત્રનો પાયો છે.", "આ સિદ્ધાંત મોટા પદાર્થો માટે અવગણી શકાય તેટલો નાનો હોય છે."], "ans": 0, "exp": "હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંત મુજબ, ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે માપી શકાતા નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પરમાણુ રચનાઓમાંથી કઈ રચના અયોગ્ય છે?", "opts": ["1s² 2s² 2p⁶ 3s² 3p⁵ (ક્લોરિન)", "1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ (પોટેશિયમ)", "1s² 2s² 2p⁶ 3s² 3p⁶ 3d¹⁰ 4s² (ઝિંક)", "1s² 2s² 2p⁶ 3s² 3p⁶ 4s² 3d⁴ (ક્રોમિયમ)"], "ans": 3, "exp": "ક્રોમિયમની સાચી ઇલેક્ટ્રોન રચના 1s² 2s² 2p⁶ 3s² 3p⁶ 4s¹ 3d⁵ છે, કારણ કે અર્ધપૂર્ણ d-કક્ષક વધુ સ્થિરતા આપે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનાં વિધાનોમાંથી કેટલાં સાચાં છે?\n(i) બોહરના મોડલ મુજબ, ઇલેક્ટ્રોન નિશ્ચિત કક્ષામાં જ ફરે છે.\n(ii) હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંત મુજબ, ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે જાણી શકાય છે.\n(iii) દ બ્રોગ્લીના સિદ્ધાંત મુજબ, દરેક ગતિશીલ કણ સાથે તરંગ સંકળાયેલો હોય છે.\n(iv) શ્રોડિંગર સમીકરણ ઇલેક્ટ્રોનની તરંગ પ્રકૃતિનું વર્ણન કરે છે.", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (i), (iii) અને (iv) સાચાં છે. વિધાન (ii) ખોટું છે કારણ કે હાઇઝનબર્ગના સિદ્ધાંત મુજબ સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે જાણી શકાતા નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન હાઇઝનબર્ગના અનિશ્ચિતતાના સિદ્ધાંતને યોગ્ય રીતે વર્ણવતું નથી?", "opts": ["પરમાણુમાં ઇલેક્ટ્રોનની ચોક્કસ સ્થિતિ અને વેગ એકસાથે નક્કી કરી શકાતા નથી.", "ઇલેક્ટ્રોનની સ્થિતિ અને વેગના અનિશ્ચિતતાનો ગુણાકાર h/4π કરતાં વધુ અથવા સમાન હોય છે.", "આ સિદ્ધાંત મુજબ ઇલેક્ટ્રોનની સ્થિતિ અને વેગ બંને એકસાથે ચોક્કસ રીતે માપી શકાય છે.", "આ સિદ્ધાંત ક્વોન્ટમ યંત્રશાસ્ત્રનો પાયો છે."], "ans": 2, "exp": "હાઇઝનબર્ગના અનિશ્ચિતતાના સિદ્ધાંત મુજબ, ઇલેક્ટ્રોનની સ્થિતિ અને વેગ બંને એકસાથે ચોક્કસ રીતે માપી શકાતા નથી.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુમાં ઇલેક્ટ્રોનનું કોણીય વેગમાન ક્વોન્ટાઇઝ્ડ હોય છે. બોહર મોડલ મુજબ, જ્યારે ઇલેક્ટ્રોન n=3 થી n=2 કક્ષામાં સંક્રમણ કરે છે ત્યારે ઉત્સર્જિત વિકિરણની તરંગલંબાઈ કેટલી હશે? (R = 1.097 × 10^7 m⁻¹)", "opts": ["656.3 nm", "486.1 nm", "434.0 nm", "410.2 nm"], "ans": 0, "exp": "બોહર મોડલ મુજબ, 1/λ = R(1/n₁² - 1/n₂²). અહીં n₁=2, n₂=3 લેતાં λ = 656.3 nm મળે છે, જે હાઇડ્રોજનના બામર શ્રેણીની પ્રથમ રેખા છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું પરમાણુ ઓર્બિટલ આકારમાં ગોળાકાર નથી?", "opts": ["1s", "2s", "2p", "3s"], "ans": 2, "exp": "s-ઓર્બિટલ્સ ગોળાકાર હોય છે, જ્યારે p-ઓર્બિટલ્સ ડમ્બબેલ આકારના હોય છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "<svg width='220' height='120' viewBox='0 0 220 120'><path d='M50 60 L170 60 M50 60 Q80 30 110 60 Q140 90 170 60 M50 60 Q80 90 110 60 Q140 30 170 60' stroke='black' fill='none'/><text x='110' y='20' text-anchor='middle'>p-ઓર્બિટલ</text></svg>", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) પાઉલીનો અપવર્જન સિદ્ધાંત મુજબ એક જ પરમાણુમાં બે ઇલેક્ટ્રોનના ચારેય ક્વોન્ટમ આંક સમાન હોઈ શકે નહીં. (ii) હુંડનો નિયમ મુજબ સમાન ઊર્જાના ઓર્બિટલ્સમાં ઇલેક્ટ્રોન જોડ બનાવતા પહેલાં એકલા ભરાય છે. (iii) આફબાઉ સિદ્ધાંત મુજબ ઇલેક્ટ્રોન ઉચ્ચ ઊર્જાના ઓર્બિટલ્સમાં પહેલાં ભરાય છે. ઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર (i) અને (ii)", "માત્ર (i) અને (iii)", "માત્ર (ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 0, "exp": "વિધાન (i) અને (ii) સાચાં છે. વિધાન (iii) ખોટું છે કારણ કે આફબાઉ સિદ્ધાંત મુજબ ઇલેક્ટ્રોન નિમ્ન ઊર્જાના ઓર્બિટલ્સમાં પહેલાં ભરાય છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના પૈકી કયું વિધાન બોહરના પરમાણુ મોડેલના સંદર્ભમાં ખોટું છે?", "opts": ["ઇલેક્ટ્રોન નિશ્ચિત કક્ષાઓમાં જ પરિભ્રમણ કરે છે અને ઊર્જા ઉત્સર્જિત કે શોષિત કરતા નથી.", "ઇલેક્ટ્રોનની કક્ષાની ત્રિજ્યા તેના ક્વોન્ટમ આંક (n)ના વર્ગના સમપ્રમાણમાં હોય છે.", "ઇલેક્ટ્રોનની ઊર્જા તેના ક્વોન્ટમ આંક (n)ના વ્યસ્ત પ્રમાણમાં હોય છે.", "ઇલેક્ટ્રોન જ્યારે એક કક્ષામાંથી બીજી કક્ષામાં સંક્રમણ કરે છે ત્યારે ઊર્જાનું શોષણ કે ઉત્સર્જન ફક્ત ફોટોન સ્વરૂપે થાય છે."], "ans": 2, "exp": "બોહરના મોડેલ મુજબ, ઇલેક્ટ્રોનની ઊર્જા ક્વોન્ટમ આંક (n)ના વ્યસ્ત વર્ગના સમપ્રમાણમાં હોય છે, નહીં કે વ્યસ્ત પ્રમાણમાં.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની પ્રથમ ઉત્તેજિત અવસ્થામાંથી મૂળભૂત અવસ્થામાં સંક્રમણ દરમિયાન ઉત્સર્જિત વર્ણપટ રેખાની તરંગલંબાઈ કેટલી હશે? (રીડબર્ગ અચળાંક R = 1.097 × 10⁷ m⁻¹ લો)", "opts": ["912 Å", "1216 Å", "6563 Å", "4861 Å"], "ans": 1, "exp": "હાઇડ્રોજન પરમાણુમાં n=2 થી n=1 સંક્રમણ માટે રીડબર્ગ સૂત્ર 1/λ = R(1/1² - 1/2²) અનુસાર λ = 1216 Å મળે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "બોહરના પરમાણુ મોડેલ મુજબ, હાઇડ્રોજન પરમાણુના ઇલેક્ટ્રોનની કક્ષામાં કયું ક્વૉન્ટમ નંબર સતત રહે છે?", "opts": ["પ્રિન્સિપલ ક્વૉન્ટમ નંબર (n)", "એઝિમથલ ક્વૉન્ટમ નંબર (l)", "મેગ્નેટિક ક્વૉન્ટમ નંબર (m)", "સ્પિન ક્વૉન્ટમ નંબર (s)"], "ans": 0, "exp": "બોહરના મોડેલમાં ઇલેક્ટ્રોનની કક્ષા પ્રિન્સિપલ ક્વૉન્ટમ નંબર (n) વડે નક્કી થાય છે, જે સતત રહે છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "બોહરના પરમાણુ મોડલ અનુસાર, હાઇડ્રોજન પરમાણુમાં ઇલેક્ટ્રોનની કક્ષાની ત્રિજ્યા માટે કયું સૂત્ર યોગ્ય છે?", "opts": ["rₙ = n²a₀", "rₙ = n²h²/(4π²me²)", "rₙ = n²ε₀h²/(πme²)", "rₙ = a₀/n²"], "ans": 2, "exp": "બોહર મોડલ મુજબ, હાઇડ્રોજન પરમાણુમાં nમી કક્ષાની ત્રિજ્યા rₙ = n²ε₀h²/(πme²) છે, જ્યાં a₀ બોહર ત્રિજ્યા છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના ક્વોન્ટમ આંકોના સમૂહમાંથી કયો સમૂહ હાઇડ્રોજન પરમાણુમાં ઇલેક્ટ્રોન માટે અશક્ય છે?", "opts": ["(3, 2, -2, +1/2)", "(2, 1, 0, -1/2)", "(1, 0, 0, +1/2)", "(2, 2, -1, +1/2)"], "ans": 3, "exp": "જ્યારે n = 2 હોય ત્યારે lનું મૂલ્ય 0 અથવા 1 હોઈ શકે, પરંતુ l = 2 અશક્ય છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેના વિધાનો પૈકી કેટલાં સાચાં છે?\n(i) હાઇઝનબર્ગના અનિશ્ચિતતા સિદ્ધાંત મુજબ, ઇલેક્ટ્રોનની સ્થિતિ અને વેગ એકસાથે ચોક્કસપણે માપી શકાતા નથી.\n(ii) ડી બ્રોગ્લીના તરંગ સિદ્ધાંત મુજબ, ઇલેક્ટ્રોનને તરંગ તરીકે ગણી શકાય છે.\n(iii) બોહરના મોડલ મુજબ, ઇલેક્ટ્રોનની કક્ષામાં કોણીય વેગમાનનું મૂલ્ય h/2π ના પૂર્ણાંક ગુણાંકમાં હોય છે.\n(iv) રુથરફોર્ડના મોડલ મુજબ, પરમાણુનું સમગ્ર ધન વીજભાર અને દળ કેન્દ્રમાં કેન્દ્રિત હોય છે.", "opts": ["ચારેય", "ત્રણ", "બે", "એક"], "ans": 0, "exp": "બધાં જ વિધાનો સાચાં છે: (i) હાઇઝનબર્ગનો અનિશ્ચિતતા સિદ્ધાંત, (ii) ડી બ્રોગ્લીનો તરંગ સિદ્ધાંત, (iii) બોહરનું કોણીય વેગમાનનું નિયમન, (iv) રુથરફોર્ડનું કેન્દ્રીય મોડલ.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}, {"q": "નીચેનામાંથી કયું વિધાન બોહરના પરમાણુ મોડલના સંદર્ભમાં ખોટું છે?", "opts": ["ઇલેક્ટ્રોન માત્ર ચોક્કસ ત્રિજ્યાવાળી કક્ષાઓમાં જ પરિભ્રમણ કરી શકે છે.", "ઇલેક્ટ્રોનની ઊર્જા કક્ષાના ક્રમાંક (n) પર આધારિત નથી.", "ઇલેક્ટ્રોન કક્ષા બદલતી વખતે ઊર્જાનું શોષણ અથવા ઉત્સર્જન કરે છે.", "ઇલેક્ટ્રોનની કોણીય વેગમાન ક્વોન્ટાઇઝ્ડ હોય છે."], "ans": 1, "exp": "બોહરના મોડલ મુજબ, ઇલેક્ટ્રોનની ઊર્જા કક્ષાના ક્રમાંક (n) પર આધારિત હોય છે, તેથી વિધાન ખોટું છે.", "chapter": "પરમાણુનું બંધારણ", "svg": "", "subject": "CHEMISTRY"}];
+const SUBJECTS=[{"name": "CHEMISTRY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "પરમાણુનું બંધારણ Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
