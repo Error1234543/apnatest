@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>તંત્રિકા નિયંત્રણ અને સહનિયમન Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>તંત્રિકા નિયંત્રણ અને સહનિયમન Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "માનવ મગજના કયા ભાગને 'નાનું મગજ' કહેવામાં આવે છે અને તે મુખ્યત્વે શેના માટે જવાબદાર છે?", "opts": ["મધ્ય મગજ – દ્રષ્ટિ અને શ્રવણ પ્રતિક્રિયાઓ", "અનુમસ્તિષ્ક – શારીરિક સંતુલન અને સ્નાયુ સંકલન", "લંબમજ્જા – શ્વાસોચ્છવાસ અને હૃદયના ધબકારા", "થેલેમસ – સંવેદનાઓનું નિયંત્રણ"], "ans": 1, "exp": "અનુમસ્તિષ્કને 'નાનું મગજ' કહે છે અને તે શારીરિક સંતુલન, સ્નાયુ સંકલન અને ચોક્કસ હલનચલન માટે જવાબદાર છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ચેતાકોષ (ન્યુરોન) માટે ખોટું છે?", "opts": ["ચેતાકોષના કોષકેન્દ્ર ધરાવતા ભાગને કોષકાય કહે છે.", "ડેન્ડ્રાઇટ્સ વિદ્યુત આવેગને કોષકાય તરફ લઈ જાય છે.", "એક્સોન વિદ્યુત આવેગને કોષકાયથી દૂર લઈ જાય છે.", "ચેતાકોષમાં માયલિન આવરણ હોતું નથી."], "ans": 3, "exp": "ચેતાકોષમાં માયલિન આવરણ હોય છે, જે વિદ્યુત આવેગના વહનને ઝડપી બનાવે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "સહાનુભૂતિશીલ ચેતાતંત્ર (Sympathetic Nervous System) ની પ્રવૃત્તિ દરમિયાન નીચેનામાંથી કઈ ઘટના થતી નથી?", "opts": ["હૃદયના ધબકારા વધે છે.", "આંખની કીકી પહોળી થાય છે.", "પાચનતંત્રની પ્રવૃત્તિ વધે છે.", "શ્વાસોચ્છવાસનો દર વધે છે."], "ans": 2, "exp": "સહાનુભૂતિશીલ ચેતાતંત્ર પાચનતંત્રની પ્રવૃત્તિ ઘટાડે છે, કારણ કે તે 'લડાઈ કે ભાગો' પ્રતિભાવ સાથે સંકળાયેલું છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) રીફ્લેક્સ કમાનમાં મગજનો સમાવેશ થતો નથી. (2) રીફ્લેક્સ ક્રિયા સ્વૈચ્છિક હોય છે. (3) રીફ્લેક્સ ક્રિયા મેરુરજ્જુ દ્વારા નિયંત્રિત થાય છે. ઉપરોક્ત વિધાનોમાંથી કયું/કયા સાચું/સાચાં છે?", "opts": ["માત્ર 1 અને 3", "માત્ર 2 અને 3", "માત્ર 1", "માત્ર 3"], "ans": 0, "exp": "રીફ્લેક્સ કમાનમાં મગજનો સમાવેશ થતો નથી અને તે મેરુરજ્જુ દ્વારા નિયંત્રિત થાય છે. રીફ્લેક્સ ક્રિયા અસ્વૈચ્છિક હોય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિને મગજના કયા ભાગને નુકસાન થવાથી શરીરનું તાપમાન, ભૂખ અને તરસનું નિયંત્રણ ખોરવાઈ શકે છે?", "opts": ["થેલેમસ", "હાયપોથેલેમસ", "લંબમજ્જા", "અનુમસ્તિષ્ક"], "ans": 1, "exp": "હાયપોથેલેમસ શરીરનું તાપમાન, ભૂખ, તરસ અને અન્ય હોમિયોસ્ટેટિક કાર્યોનું નિયંત્રણ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "માનવ મગજના કયા ભાગમાં શરીરનું તાપમાન, ભૂખ અને તરસનું નિયંત્રણ થાય છે?", "opts": ["લંબમજ્જા (Medulla oblongata)", "પોન્સ (Pons)", "હાયપોથેલેમસ (Hypothalamus)", "થેલેમસ (Thalamus)"], "ans": 2, "exp": "હાયપોથેલેમસ મગજનો મહત્વનો ભાગ છે જે શરીરના આંતરિક પર્યાવરણનું નિયંત્રણ કરે છે, જેમાં તાપમાન, ભૂખ અને તરસનો સમાવેશ થાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન ચેતાકોષ (Neuron) માટે ખોટું છે?", "opts": ["ચેતાકોષમાં કોષકેન્દ્ર હાજર હોય છે.", "ચેતાકોષમાં ડેન્ડ્રાઇટ્સ અને એક્સોન બંને હોય છે.", "ચેતાકોષ વિભાજન પામી શકે છે.", "ચેતાકોષ વિદ્યુત આવેગનું વહન કરે છે."], "ans": 2, "exp": "પુખ્ત ચેતાકોષો વિભાજન પામતા નથી, કારણ કે તેઓ G0 તબક્કામાં હોય છે અને નવી ચેતાકોષોનું નિર્માણ થતું નથી.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "સ્વયંવર્તી ચેતાતંત્ર (Autonomic Nervous System) ના બે વિભાગો કયા છે?", "opts": ["સહાનુભૂતિશીલ (Sympathetic) અને પરાનુભૂતિશીલ (Parasympathetic)", "કેન્દ્રીય (Central) અને પરિધીય (Peripheral)", "સંવેદી (Sensory) અને ચાલક (Motor)", "મગજ (Brain) અને કરોડરજ્જુ (Spinal cord)"], "ans": 0, "exp": "સ્વયંવર્તી ચેતાતંત્ર બે મુખ્ય વિભાગોમાં વહેંચાયેલું છે: સહાનુભૂતિશીલ અને પરાનુભૂતિશીલ, જે શરીરની અનૈચ્છિક ક્રિયાઓનું નિયંત્રણ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન એડ્રિનલ મેડ્યુલા (Adrenal medulla) દ્વારા સ્ત્રાવિત થાય છે?", "opts": ["ઇન્સ્યુલિન (Insulin)", "એડ્રિનાલિન (Adrenaline)", "થાઇરોક્સિન (Thyroxine)", "ગ્લુકાગોન (Glucagon)"], "ans": 1, "exp": "એડ્રિનલ મેડ્યુલા એડ્રિનાલિન અને નોરએડ્રિનાલિન હોર્મોન્સનો સ્ત્રાવ કરે છે, જે શરીરને તણાવની સ્થિતિમાં પ્રતિક્રિયા આપવામાં મદદ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચે આપેલા વિધાનોને ધ્યાનમાં લો: (1) સિનેપ્સ (Synapse) એ બે ચેતાકોષો વચ્ચેનો સંપર્કસ્થાન છે. (2) સિનેપ્સમાં રાસાયણિક સંદેશાવાહકોને ન્યુરોટ્રાન્સમીટર કહે છે. (3) સિનેપ્સમાં વિદ્યુત આવેગનું સીધું વહન થાય છે. (4) સિનેપ્સ માત્ર મગજમાં જ જોવા મળે છે. ઉપરોક્ત વિધાનોમાંથી કેટલા સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (1) અને (2) સાચાં છે. સિનેપ્સમાં વિદ્યુત આવેગનું સીધું વહન થતું નથી અને સિનેપ્સ માત્ર મગજમાં જ નહીં, પરંતુ સમગ્ર ચેતાતંત્રમાં જોવા મળે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિને અકસ્માતમાં કરોડરજ્જુને નુકસાન થાય છે, જેના કારણે તેના શરીરના નીચેના ભાગમાં સંવેદના અને હલનચલન બંધ થઈ જાય છે. આ સ્થિતિને શું કહેવાય છે?", "opts": ["પેરાપ્લેજિયા", "હેમિપ્લેજિયા", "ક્વાડ્રિપ્લેજિયા", "એફેસિયા"], "ans": 0, "exp": "પેરાપ્લેજિયા એ સ્થિતિ છે જેમાં કરોડરજ્જુને નુકસાન થવાથી શરીરના નીચેના ભાગમાં સંવેદના અને હલનચલન ગુમાવાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન પિટ્યુટરી ગ્રંથિ દ્વારા સ્ત્રાવિત થતું નથી?", "opts": ["વૃદ્ધિ હોર્મોન (Growth Hormone)", "થાઇરોઇડ ઉત્તેજક હોર્મોન (TSH)", "ઇન્સ્યુલિન", "એડ્રિનોકોર્ટિકોટ્રોપિક હોર્મોન (ACTH)"], "ans": 2, "exp": "ઇન્સ્યુલિન સ્વાદુપિંડના લેંગરહાન્સના ટાપુઓમાંથી સ્ત્રાવિત થાય છે, જ્યારે પિટ્યુટરી ગ્રંથિ અન્ય ત્રણ હોર્મોનનો સ્ત્રાવ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચે આપેલા વિધાનોને ધ્યાનમાં લો: (1) સહાનુભૂતિશીલ ચેતાતંત્ર હૃદયના ધબકારા અને રુધિરદાબ વધારે છે. (2) પરાનુભૂતિશીલ ચેતાતંત્ર પાચનતંત્રની પ્રવૃત્તિને ઉત્તેજિત કરે છે. (3) સહાનુભૂતિશીલ ચેતાતંત્ર પુપિલને સંકોચે છે. (4) પરાનુભૂતિશીલ ચેતાતંત્ર શ્વાસોચ્છવાસની ગતિ ઘટાડે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (1) અને (2) સાચાં છે. વિધાન (3) ખોટું છે કારણ કે સહાનુભૂતિશીલ ચેતાતંત્ર પુપિલને વિસ્તારે છે, અને વિધાન (4) ખોટું છે કારણ કે પરાનુભૂતિશીલ ચેતાતંત્ર શ્વાસોચ્છવાસની ગતિને નિયંત્રિત કરે છે, પરંતુ તેને ઘટાડવાનું ચોક્કસ કાર્ય નથી.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ચેતાતંત્રમાં 'રેસ્ટિંગ મેમ્બ્રેન પોટેન્શિયલ' માટે મુખ્યત્વે જવાબદાર આયનો કયા છે?", "opts": ["Na⁺ અને K⁺", "Ca²⁺ અને Mg²⁺", "Cl⁻ અને K⁺", "Na⁺ અને Cl⁻"], "ans": 0, "exp": "રેસ્ટિંગ મેમ્બ્રેન પોટેન્શિયલ મુખ્યત્વે Na⁺ અને K⁺ આયનોના અસંતુલિત વિતરણ અને Na⁺-K⁺ પંપની ક્રિયાથી જાળવાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન 'સિનેપ્સ' માટે ખોટું છે?", "opts": ["સિનેપ્સમાં વિદ્યુત આવેગનું રાસાયણિક સંકેતમાં રૂપાંતર થાય છે.", "સિનેપ્ટિક ક્લેફ્ટમાં ન્યુરોટ્રાન્સમીટર મુક્ત થાય છે.", "સિનેપ્સ માત્ર ઉત્તેજક (excitatory) હોઈ શકે છે.", "સિનેપ્સ ચેતાકોષો વચ્ચે સંકેત પ્રસારણમાં મદદ કરે છે."], "ans": 2, "exp": "સિનેપ્સ ઉત્તેજક (excitatory) અથવા અવરોધક (inhibitory) બંને પ્રકારના હોઈ શકે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિને અચાનક ભય લાગે ત્યારે તેના શરીરમાં કયા હોર્મોનનું સ્ત્રાવ વધે છે અને તેનું મુખ્ય કાર્ય શું છે?", "opts": ["ઇન્સ્યુલિન - રક્ત શર્કરાનું નિયંત્રણ", "એડ્રેનાલિન - શરીરને 'ફાઇટ અથવા ફ્લાઇટ' માટે તૈયાર કરવું", "થાઇરોક્સિન - ચયાપચય દર વધારવો", "ગ્લુકાગોન - યકૃતમાં ગ્લાયકોજેનનું વિઘટન"], "ans": 1, "exp": "ભયની સ્થિતિમાં એડ્રેનાલિન હોર્મોનનું સ્ત્રાવ વધે છે, જે શરીરને તાત્કાલિક પ્રતિક્રિયા માટે તૈયાર કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1. પરાવર્તી કમાન (reflex arc)માં મગજનો સીધો સમાવેશ થતો નથી. 2. પરાવર્તી ક્રિયા સ્વૈચ્છિક હોય છે. 3. પરાવર્તી કમાનમાં સંવેદી અને ચાલક ચેતાકોષોનો સમાવેશ થાય છે. ઉપરોક્ત વિધાનોમાંથી કયા સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 1 અને 3", "માત્ર 2 અને 3", "1, 2 અને 3"], "ans": 1, "exp": "પરાવર્તી કમાનમાં મગજનો સીધો સમાવેશ થતો નથી અને તેમાં સંવેદી તથા ચાલક ચેતાકોષોનો સમાવેશ થાય છે. પરાવર્તી ક્રિયા અસ્વૈચ્છિક હોય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના મગજના કયા ભાગમાં શ્વાસોચ્છવાસ, હૃદયના ધબકારા અને રુધિરનું દબાણ જેવી મૂળભૂત શારીરિક ક્રિયાઓનું નિયંત્રણ થાય છે?", "opts": ["મસ્તિષ્ક (Cerebrum)", "અનુમસ્તિષ્ક (Cerebellum)", "થેલેમસ (Thalamus)", "મજ્જાતંતુ (Medulla oblongata)"], "ans": 3, "exp": "મજ્જાતંતુ મગજનો નીચેનો ભાગ છે જે શ્વાસોચ્છવાસ, હૃદયના ધબકારા અને રુધિર દબાણ જેવી મૂળભૂત શારીરિક ક્રિયાઓનું નિયંત્રણ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ચેતાતંત્રમાં 'રેનવિયરના ગાંઠ' (Nodes of Ranvier) નું મુખ્ય કાર્ય શું છે?", "opts": ["ચેતાક્ષને પોષણ પૂરું પાડવું", "ચેતા આવેગના વહનની ગતિ વધારવી", "ન્યુરોટ્રાન્સમીટરનું સંશ્લેષણ કરવું", "ચેતાક્ષને યાંત્રિક આધાર આપવો"], "ans": 1, "exp": "રેનવિયરના ગાંઠ ચેતાક્ષ પરના માયલિન આવરણમાં અવકાશ છે, જે સોલ્ટેટરી વહન દ્વારા ચેતા આવેગની ગતિને ઝડપી બનાવે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન 'ફાઇટ-ઓર-ફ્લાઇટ' પ્રતિભાવમાં સીધી રીતે સંકળાયેલું નથી?", "opts": ["એડ્રેનાલિન", "નોરએડ્રેનાલિન", "કોર્ટિસોલ", "ઇન્સ્યુલિન"], "ans": 3, "exp": "ઇન્સ્યુલિન રક્ત શર્કરાના નિયમન માટે જવાબદાર છે, જ્યારે એડ્રેનાલિન, નોરએડ્રેનાલિન અને કોર્ટિસોલ તણાવ પ્રતિભાવમાં ભાગ લે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક ચેતાક્ષમાં સોડિયમ-પોટેશિયમ પંપ (Na⁺-K⁺ ATPase) દ્વારા પ્રત્યેક ચક્રમાં કેટલા આયનોનું પરિવહન થાય છે?", "opts": ["2 Na⁺ બહાર અને 3 K⁺ અંદર", "3 Na⁺ બહાર અને 2 K⁺ અંદર", "2 Na⁺ અંદર અને 3 K⁺ બહાર", "3 Na⁺ અંદર અને 2 K⁺ બહાર"], "ans": 1, "exp": "સોડિયમ-પોટેશિયમ પંપ પ્રત્યેક ચક્રમાં 3 Na⁺ આયનોને કોષની બહાર અને 2 K⁺ આયનોને કોષની અંદર પરિવહન કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ચેતાકોષનું લક્ષણ નથી?", "opts": ["અમીટોસિસ દ્વારા વિભાજન થવું", "ન્યુરોટ્રાન્સમીટરનું સંશ્લેષણ કરવું", "ઊર્જા માટે ગ્લુકોઝ પર આધારિત હોવું", "આયનોના સક્રિય પરિવહન માટે ATP નો ઉપયોગ કરવો"], "ans": 0, "exp": "ચેતાકોષો સામાન્ય રીતે વિભાજન પામતા નથી (અમીટોસિસ દ્વારા નહીં), જ્યારે અન્ય તમામ લક્ષણો ચેતાકોષોમાં જોવા મળે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન 'ફાઇટ-ઓર-ફ્લાઇટ' પ્રતિભાવ (fight-or-flight response) સાથે સંકળાયેલું નથી?", "opts": ["એડ્રેનાલિન (Adrenaline)", "નોરએડ્રેનાલિન (Noradrenaline)", "કોર્ટિસોલ (Cortisol)", "ઇન્સ્યુલિન (Insulin)"], "ans": 3, "exp": "ઇન્સ્યુલિન રુધિરમાં શર્કરાના સ્તરને નિયંત્રિત કરે છે, જ્યારે એડ્રેનાલિન, નોરએડ્રેનાલિન અને કોર્ટિસોલ તણાવની સ્થિતિમાં શરીરને તૈયાર કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1. સહાનુભૂતિશીલ ચેતાતંત્ર (Sympathetic nervous system) હૃદયના ધબકારા વધારે છે. 2. પરાનુભૂતિશીલ ચેતાતંત્ર (Parasympathetic nervous system) લાળરસનું સ્રાવણ વધારે છે. 3. સહાનુભૂતિશીલ ચેતાતંત્ર પુપિલને સંકોચે છે. 4. પરાનુભૂતિશીલ ચેતાતંત્ર પાચનક્રિયાને ઉત્તેજિત કરે છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન 1 અને 2 સાચાં છે. વિધાન 3 ખોટું છે કારણ કે સહાનુભૂતિશીલ ચેતાતંત્ર પુપિલને વિસ્તારે છે. વિધાન 4 સાચું છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વ્યક્તિને અકસ્માતમાં કરોડરજ્જુના થોરાસિક ભાગને નુકસાન થાય છે. આ નુકસાનને કારણે નીચેનામાંથી કયું કાર્ય પ્રભાવિત થવાની શક્યતા સૌથી ઓછી છે?", "opts": ["પગની હલનચલન", "હાથની હલનચલન", "શ્વાસોચ્છવાસ", "મૂત્રાશયનું નિયંત્રણ"], "ans": 1, "exp": "થોરાસિક ભાગનું નુકસાન હાથ અને ધડના કાર્યને અસર કરે છે, પરંતુ પગની હલનચલન મુખ્યત્વે કટિ અને સેક્રલ ભાગ દ્વારા નિયંત્રિત થાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના મગજના કયા ભાગને 'જીવનનું નિયંત્રણ કેન્દ્ર' કહેવામાં આવે છે, જે શ્વાસોચ્છવાસ, હૃદયના ધબકારા અને રક્તદબાણ જેવી મહત્વપૂર્ણ ક્રિયાઓનું નિયમન કરે છે?", "opts": ["મસ્તિષ્ક (Cerebrum)", "લંબમજ્જા (Medulla oblongata)", "પોન્સ (Pons)", "અનુમસ્તિષ્ક (Cerebellum)"], "ans": 1, "exp": "લંબમજ્જા મગજનો નીચેનો ભાગ છે જે શ્વાસોચ્છવાસ, હૃદયના ધબકારા અને રક્તદબાણ જેવી અનૈચ્છિક ક્રિયાઓનું નિયમન કરે છે, તેથી તેને 'જીવનનું નિયંત્રણ કેન્દ્ર' કહેવાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન એડ્રિનલ મેડ્યુલા (Adrenal medulla) દ્વારા સ્ત્રાવિત થાય છે અને 'ફાઇટ-ઓર-ફ્લાઇટ' પ્રતિભાવમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે?", "opts": ["ઇન્સ્યુલિન (Insulin)", "એડ્રેનાલિન (Adrenaline)", "થાઇરોક્સિન (Thyroxine)", "ગ્લુકાગોન (Glucagon)"], "ans": 1, "exp": "એડ્રેનાલિન એડ્રિનલ મેડ્યુલા દ્વારા સ્ત્રાવિત થાય છે અને તણાવની સ્થિતિમાં 'ફાઇટ-ઓર-ફ્લાઇટ' પ્રતિભાવને ઉત્તેજિત કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "પરાવર્તી કમાન (Reflex arc)માં નીચેનામાંથી કયો ઘટક હાજર હોતો નથી?", "opts": ["સંવેદી ચેતાકોષ (Sensory neuron)", "મોટર ચેતાકોષ (Motor neuron)", "મગજ (Brain)", "સંયોજક ચેતાકોષ (Interneuron)"], "ans": 2, "exp": "પરાવર્તી કમાનમાં મગજ સીધું સંકળાયેલું હોતું નથી. તે કરોડરજ્જુ દ્વારા નિયંત્રિત થાય છે અને ઝડપી પ્રતિભાવ માટે મગજને બાયપાસ કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ચેતાતંત્રમાં 'સાયનેપ્સ' (synapse) ની વ્યાખ્યા શું છે?", "opts": ["બે ચેતાકોષો વચ્ચેનો ભૌતિક સંપર્ક જ્યાં વિદ્યુત આવેગ સીધો પસાર થાય છે", "એક ચેતાકોષના અક્ષતંતુ અને બીજા ચેતાકોષના કોષકાય અથવા અક્ષતંતુ વચ્ચેનું રાસાયણિક જોડાણ જ્યાં ન્યુરોટ્રાન્સમીટર દ્વારા સંકેતોનું વહન થાય છે", "ચેતાકોષના કોષકેન્દ્ર અને અક્ષતંતુ વચ્ચેનો વિસ્તાર જ્યાં પ્રોટીન સંશ્લેષણ થાય છે", "સ્વયંવર્તી ચેતાતંત્રના સંવેદી ચેતાકોષો વચ્ચેનું જોડાણ"], "ans": 1, "exp": "સાયનેપ્સ એ બે ચેતાકોષો વચ્ચેનું રાસાયણિક જોડાણ છે જ્યાં ન્યુરોટ્રાન્સમીટર દ્વારા સંકેતોનું વહન થાય છે, જે વિદ્યુત આવેગને રાસાયણિક સંકેતમાં રૂપાંતરિત કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું હોર્મોન 'ફાઇટ ઓર ફ્લાઇટ' (fight or flight) પ્રતિભાવમાં સૌથી મહત્ત્વપૂર્ણ ભૂમિકા ભજવે છે?", "opts": ["ઇન્સ્યુલિન", "થાઇરોક્સિન", "એડ્રેનાલિન", "પ્રોલેક્ટિન"], "ans": 2, "exp": "એડ્રેનાલિન (એપિનેફ્રિન) એ એડ્રેનલ મેડ્યુલા દ્વારા સ્ત્રાવિત હોર્મોન છે જે તણાવપૂર્ણ પરિસ્થિતિઓમાં હૃદયના ધબકારા, રક્તદબાણ અને ઊર્જા ઉપલબ્ધતા વધારીને 'ફાઇટ ઓર ફ્લાઇટ' પ્રતિભાવને સક્રિય કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ચેતાકોષનું લક્ષણ નથી?", "opts": ["ચેતાકોષમાં કોષકેન્દ્ર હાજર હોય છે.", "ચેતાકોષ વિભાજન પામી શકે છે.", "ચેતાકોષમાં ડેન્ડ્રાઇટ્સ અને એક્સોન હોય છે.", "ચેતાકોષ વિદ્યુત-રાસાયણિક સંકેતો પ્રસારિત કરે છે."], "ans": 1, "exp": "પુખ્ત ચેતાકોષો વિભાજન પામતા નથી, કારણ કે તેઓ વિભાજનની ક્ષમતા ગુમાવે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું હોર્મોન 'ફાઇટ ઓર ફ્લાઇટ' (Fight or Flight) પ્રતિભાવમાં સૌથી વધુ સક્રિય હોય છે?", "opts": ["ઇન્સ્યુલિન", "થાઇરોક્સિન", "એડ્રેનાલિન", "પ્રોલેક્ટિન"], "ans": 2, "exp": "એડ્રેનાલિન (એપિનેફ્રિન) એડ્રેનલ મેડ્યુલા દ્વારા સ્ત્રાવિત થાય છે અને 'ફાઇટ ઓર ફ્લાઇટ' પ્રતિભાવમાં મુખ્ય ભૂમિકા ભજવે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "મનુષ્યના ચેતાતંત્રમાં 'સહાનુભૂતિશીલ ચેતાતંત્ર' (sympathetic nervous system) ની પ્રાથમિક ક્રિયા કઈ છે?", "opts": ["હૃદયના ધબકારા અને રુધિરદાબ ઘટાડવો", "'ફાઇટ ઓર ફ્લાઇટ' (fight or flight) પ્રતિભાવને સક્રિય કરવો", "પાચનક્રિયાને વેગ આપવો", "શરીરને આરામ અને પાચનની સ્થિતિમાં લાવવું"], "ans": 1, "exp": "'સહાનુભૂતિશીલ ચેતાતંત્ર' તણાવ કે ભયની સ્થિતિમાં શરીરને તાત્કાલિક પ્રતિભાવ માટે તૈયાર કરે છે, જેને 'ફાઇટ ઓર ફ્લાઇટ' પ્રતિભાવ કહે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'રેનવિયરના ગાંઠો' (Nodes of Ranvier) માટે ખોટું છે?", "opts": ["તેઓ મજ્જાપડ (myelin sheath) વચ્ચેના અંતરાલો છે", "તેઓ ચેતાક્ષ (axon) પર આવેલા છે", "તેઓ ચેતા આવેગના વહનને ધીમું પાડે છે", "તેઓ કૂદકામય વહન (saltatory conduction) માટે જવાબદાર છે"], "ans": 2, "exp": "રેનવિયરના ગાંઠો ચેતા આવેગના વહનને ઝડપી બનાવે છે, કારણ કે આવેગ એક ગાંઠથી બીજી ગાંઠ પર કૂદકો મારે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયો હોર્મોન એડ્રિનલ મેડ્યુલા (adrenal medulla) દ્વારા સ્ત્રાવિત થતો નથી?", "opts": ["એડ્રિનાલિન (Adrenaline)", "નોરએડ્રિનાલિન (Noradrenaline)", "કોર્ટિસોલ (Cortisol)", "આપેલ તમામ એડ્રિનલ મેડ્યુલા દ્વારા સ્ત્રાવિત થાય છે"], "ans": 2, "exp": "કોર્ટિસોલ એડ્રિનલ કોર્ટેક્સ દ્વારા સ્ત્રાવિત થાય છે, જ્યારે એડ્રિનાલિન અને નોરએડ્રિનાલિન એડ્રિનલ મેડ્યુલા દ્વારા સ્ત્રાવિત થાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: 1. સ્વયંવર્તી ચેતાતંત્ર (Autonomic nervous system) ના બે ભાગ છે: સહાનુભૂતિશીલ અને પરાસહાનુભૂતિશીલ. 2. સ્વયંવર્તી ચેતાતંત્ર હૃદયના ધબકારા, પાચન અને શ્વસન જેવી અનૈચ્છિક ક્રિયાઓને નિયંત્રિત કરે છે. 3. સ્વયંવર્તી ચેતાતંત્રની ક્રિયાઓ હંમેશા સભાન નિયંત્રણ હેઠળ હોય છે. ઉપરોક્ત વિધાનોમાંથી કયા સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2 અને 3", "માત્ર 1 અને 3", "1, 2 અને 3"], "ans": 0, "exp": "સ્વયંવર્તી ચેતાતંત્ર અનૈચ્છિક ક્રિયાઓને નિયંત્રિત કરે છે અને તેના બે ભાગ છે: સહાનુભૂતિશીલ અને પરાસહાનુભૂતિશીલ. તેની ક્રિયાઓ સભાન નિયંત્રણ હેઠળ હોતી નથી.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "સહનિયમન અને તંત્રિકા નિયંત્રણમાં 'સાયનેપ્સ' (synapse) ની વ્યાખ્યા શું છે?", "opts": ["બે ચેતાકોષો વચ્ચેનો ભૌતિક સંપર્ક જ્યાં વિદ્યુત આવેગનું પ્રસરણ થાય છે", "બે ચેતાકોષો વચ્ચેનો અવકાશ જ્યાં રાસાયણિક સંદેશાવાહકો દ્વારા આવેગનું પ્રસરણ થાય છે", "ચેતાકોષના કોષકેન્દ્ર અને કોષરસ વચ્ચેનો ભાગ જ્યાં પ્રોટીન સંશ્લેષણ થાય છે", "ચેતાકોષના એક્સોન અને ડેન્ડ્રાઇટ વચ્ચેનો સીધો જોડાણ જ્યાં વિદ્યુત પ્રવાહ પસાર થાય છે"], "ans": 1, "exp": "સાયનેપ્સ એ બે ચેતાકોષો વચ્ચેનો અવકાશ છે જ્યાં ન્યુરોટ્રાન્સમીટર દ્વારા રાસાયણિક સંકેતોનું પ્રસરણ થાય છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન 'પરાવર્તી કમાન' (Reflex Arc) માટે ખોટું છે?", "opts": ["પરાવર્તી ક્રિયા મગજની સીધી સંમતિ વગર થાય છે", "પરાવર્તી કમાનમાં ચેતાકોષોની સંખ્યા હંમેશા ત્રણ હોય છે", "પરાવર્તી ક્રિયા સ્વયંવર્તી ચેતાતંત્રનો ભાગ છે", "પરાવર્તી કમાનમાં સંવેદી અને ચાલક ચેતાકોષો સીધો સંપર્ક ધરાવે છે"], "ans": 1, "exp": "પરાવર્તી કમાનમાં સામાન્ય રીતે સંવેદી ચેતાકોષ, આંતરચેતાકોષ અને ચાલક ચેતાકોષનો સમાવેશ થાય છે, પરંતુ કેટલાક કિસ્સામાં આંતરચેતાકોષ વગર પણ ક્રિયા થઈ શકે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "સહનિયંત્રિત પ્રતિક્રિયા (Coordinated response) માટે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["સ્વયંવરત ચેતાતંત્ર (Autonomic nervous system) અને અંતઃસ્ત્રાવી તંત્ર (Endocrine system) બંને સહભાગી થાય છે.", "સહનિયંત્રિત પ્રતિક્રિયામાં ચેતાકોષો દ્વારા ઝડપી સંકેતો મોકલવામાં આવે છે, જ્યારે અંતઃસ્ત્રાવો ધીમી પરંતુ લાંબા સમય સુધી અસર કરે છે.", "સહનિયંત્રિત પ્રતિક્રિયા માટે માત્ર ચેતાતંત્ર જ જવાબદાર છે, અંતઃસ્ત્રાવોની કોઈ ભૂમિકા નથી.", "હાયપોથેલેમસ (Hypothalamus) ચેતાતંત્ર અને અંતઃસ્ત્રાવી તંત્ર વચ્ચે સંકલનનું કાર્ય કરે છે."], "ans": 2, "exp": "સહનિયંત્રિત પ્રતિક્રિયામાં ચેતાતંત્ર અને અંતઃસ્ત્રાવી તંત્ર બંને સહભાગી થાય છે. માત્ર ચેતાતંત્ર જ જવાબદાર નથી.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}, {"q": "રુધિરમાં Na⁺ અને K⁺ આયનોની સાંદ્રતાનું નિયમન કરતું ચેતાકોષનું પંપ કયું ઉત્સેચક ધરાવે છે?", "opts": ["Na⁺-K⁺ ATPase", "Ca²⁺ ATPase", "H⁺-K⁺ ATPase", "Mg²⁺ ATPase"], "ans": 0, "exp": "Na⁺-K⁺ ATPase ઉત્સેચક ચેતાકોષની કોષપટલમાં રહીને Na⁺ અને K⁺ આયનોનું સક્રિય પરિવહન કરે છે.", "chapter": "તંત્રિકા નિયંત્રણ અને સહનિયમન", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "તંત્રિકા નિયંત્રણ અને સહનિયમન Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
