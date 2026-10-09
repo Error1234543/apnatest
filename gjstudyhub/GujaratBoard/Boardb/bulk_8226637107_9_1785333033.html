@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>જૈવતકનિકી અને તેના ઉપયોગો Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>જૈવતકનિકી અને તેના ઉપયોગો Mock Test</h1><div class="sub">GSEB Board Exam • 50 Questions • Max Marks 50</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 50 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 50 Questions | GSEB Board Exam</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "જનીન ઇજનેરીની મદદથી ઉત્પાદિત પ્રથમ માનવ હોર્મોન કયું હતું?", "opts": ["ઇન્સ્યુલિન", "ગ્રોથ હોર્મોન", "ઇન્ટરફેરોન", "એડ્રિનાલિન"], "ans": 0, "exp": "જનીન ઇજનેરીની મદદથી ઇ. કોલી બેક્ટેરિયામાંથી માનવ ઇન્સ્યુલિનનું ઉત્પાદન કરવામાં આવ્યું હતું, જે ડાયાબિટીસના દર્દીઓ માટે ઉપયોગી છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકનો મુખ્ય હેતુ શું છે?", "opts": ["DNA ના નાના ટુકડાનું મોટી માત્રામાં પ્રવર્ધન કરવું", "પ્રોટીનનું સંશ્લેષણ કરવું", "કોષોનું વિભાજન કરવું", "વર્ણસૂત્રોનું અલગીકરણ કરવું"], "ans": 0, "exp": "PCR ટેકનિકનો ઉપયોગ DNA ના નાના ભાગનું લાખો-કરોડો નકલો બનાવવા માટે થાય છે, જે જનીન વિશ્લેષણમાં મદદરૂપ છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ' ઉત્સેચકનો ઉપયોગ શેના માટે થાય છે?", "opts": ["DNA ને ચોક્કસ સ્થાને કાપવા માટે", "પ્રોટીનનું સંશ્લેષણ કરવા માટે", "કોષોનું વિભાજન કરવા માટે", "કાર્બોદિતનું પાચન કરવા માટે"], "ans": 0, "exp": "રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચક DNA ને ચોક્કસ બેઇઝ અનુક્રમ પર કાપવા માટે વપરાય છે, જે જનીન ઇજનેરીમાં મહત્વપૂર્ણ છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ બાયોટેકનોલોજીનો ઉપયોગ નથી?", "opts": ["ઇન્સ્યુલિનનું ઉત્પાદન", "બાયોગેસનું ઉત્પાદન", "પ્રકાશસંશ્લેષણની ક્રિયા", "જનીન થેરાપી"], "ans": 2, "exp": "પ્રકાશસંશ્લેષણ એ કુદરતી જૈવિક ક્રિયા છે, જ્યારે બાકીના વિકલ્પો બાયોટેકનોલોજીના ઉપયોગના ઉદાહરણો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન જનીન થેરાપી માટે ખોટું છે?", "opts": ["આ થેરાપીનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે", "તેનો ઉપયોગ માત્ર પ્રાણીઓમાં જ થઈ શકે છે, મનુષ્યમાં નહીં", "આ પદ્ધતિમાં ખામીયુક્ત જનીનને સ્વસ્થ જનીન વડે બદલવામાં આવે છે", "તેનો ઉપયોગ કેન્સર જેવા રોગોના ઉપચારમાં પણ થઈ શકે છે"], "ans": 1, "exp": "જનીન થેરાપીનો ઉપયોગ મનુષ્યમાં આનુવંશિક રોગોના ઉપચાર માટે થાય છે, માત્ર પ્રાણીઓમાં જ નહીં.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીના ક્ષેત્રમાં 'બાયોપાઇરસી' શબ્દનો અર્થ શું થાય છે?", "opts": ["જૈવિક સંસાધનોનું અનધિકૃત વ્યાપારીકરણ", "જનીન ઇજનેરી દ્વારા નવા સજીવોનું નિર્માણ", "કૃત્રિમ રીતે પ્રોટીનનું ઉત્પાદન", "જૈવિક કચરાનું નિકાલ"], "ans": 0, "exp": "બાયોપાઇરસી એટલે કોઈ દેશ કે સમુદાયના જૈવિક સંસાધનો કે પરંપરાગત જ્ઞાનનું અનધિકૃત રીતે વ્યાપારીકરણ કરવું.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવિક ખાતર (બાયોફર્ટિલાઇઝર)નું નથી?", "opts": ["રાઇઝોબિયમ બેક્ટેરિયા", "એઝોટોબેક્ટર બેક્ટેરિયા", "યુરિયા", "માયકોરાઇઝા ફૂગ"], "ans": 2, "exp": "યુરિયા એ રાસાયણિક ખાતર છે, જ્યારે રાઇઝોબિયમ, એઝોટોબેક્ટર અને માયકોરાઇઝા જૈવિક ખાતરો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરીની મદદથી કયા પ્રકારના બેક્ટેરિયામાંથી ઇન્સ્યુલિનનું ઉત્પાદન કરવામાં આવે છે?", "opts": ["એશેરીશીયા કોલાઈ", "સ્ટ્રેપ્ટોકોકસ", "બેસિલસ સબટીલીસ", "સ્યુડોમોનાસ"], "ans": 0, "exp": "જનીન ઇજનેરી દ્વારા ઇન્સ્યુલિનનું ઉત્પાદન એશેરીશીયા કોલાઈ નામના બેક્ટેરિયામાંથી કરવામાં આવે છે, કારણ કે તેનો ઉપયોગ આનુવંશિક રીતે સરળ છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન PCR (પોલિમરેઝ ચેઇન રિએક્શન) માટે ખોટું છે?", "opts": ["PCR નો ઉપયોગ DNA ના નાના ટુકડાને મોટી માત્રામાં કૉપી કરવા માટે થાય છે.", "PCR માટે DNA પોલિમરેઝ ઉત્સેચક જરૂરી છે.", "PCR પ્રક્રિયામાં ઉચ્ચ તાપમાન (90°C થી વધુ) નો ઉપયોગ થતો નથી.", "PCR નો ઉપયોગ ફોરેન્સિક વિજ્ઞાનમાં થાય છે."], "ans": 2, "exp": "PCR પ્રક્રિયામાં ઉચ્ચ તાપમાન (90°C થી વધુ) નો ઉપયોગ DNA ને ડિનેચર કરવા માટે થાય છે, તેથી આ વિધાન ખોટું છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપીનો મુખ્ય હેતુ શું છે?", "opts": ["રોગપ્રતિકારક શક્તિ વધારવી", "ખામીયુક્ત જનીનને સુધારવું અથવા બદલવું", "નવા પ્રોટીનનું ઉત્પાદન કરવું", "વનસ્પતિમાં વધુ પોષક તત્વો ઉત્પન્ન કરવા"], "ans": 1, "exp": "જનીન થેરાપીનો મુખ્ય હેતુ ખામીયુક્ત જનીનને સુધારવું અથવા તેને સામાન્ય જનીન વડે બદલવાનો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવતકનિકીનો ઉપયોગ નથી?", "opts": ["ગોલ્ડન રાઇસમાં વિટામિન A નું ઉત્પાદન", "પેનિસિલિનનું ઉત્પાદન ફૂગ દ્વારા", "ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયા દ્વારા", "પ્રકાશસંશ્લેષણ દ્વારા ગ્લુકોઝનું નિર્માણ"], "ans": 3, "exp": "પ્રકાશસંશ્લેષણ એ કુદરતી પ્રક્રિયા છે અને તે જૈવતકનિકીનો ઉપયોગ નથી.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "કયા પ્રકારની જૈવતકનિકીનો ઉપયોગ કરીને ટ્રાન્સજેનિક છોડ બનાવવામાં આવે છે?", "opts": ["જનીન ઇજનેરી", "કોષ સંવર્ધન", "પ્રોટોપ્લાસ્ટ ફ્યુઝન", "ટીશ્યુ કલ્ચર"], "ans": 0, "exp": "ટ્રાન્સજેનિક છોડ બનાવવા માટે જનીન ઇજનેરીનો ઉપયોગ થાય છે, જેમાં બહારના જનીનને છોડના જનીનોમમાં દાખલ કરવામાં આવે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન જનીન થેરાપી માટે સાચું નથી?", "opts": ["આનુવંશિક રોગોના ઉપચાર માટે ઉપયોગી છે", "રોગગ્રસ્ત જનીનને સ્વસ્થ જનીન વડે બદલવામાં આવે છે", "માત્ર બેક્ટેરિયામાં જ ઉપયોગી છે", "વાયરસનો વાહક તરીકે ઉપયોગ થઈ શકે છે"], "ans": 2, "exp": "જનીન થેરાપી માનવ કોષોમાં ઉપયોગી છે, માત્ર બેક્ટેરિયામાં નહીં.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'પ્લાસ્મિડ' નો ઉપયોગ શેના માટે થાય છે?", "opts": ["જનીનનું વહન કરવા માટે", "પ્રોટીનનું સંશ્લેષણ કરવા માટે", "કોષોનું વિભાજન કરવા માટે", "ઉત્સેચકનું ઉત્પાદન કરવા માટે"], "ans": 0, "exp": "પ્લાસ્મિડ બેક્ટેરિયામાં જોવા મળતું નાનું વર્તુળાકાર DNA છે, જે જનીન ઇજનેરીમાં જનીન વહન માટે વપરાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીના ક્ષેત્રમાં 'જનીન થેરાપી'નો મુખ્ય હેતુ શું છે?", "opts": ["નવી પ્રજાતિઓનું નિર્માણ કરવું", "રોગગ્રસ્ત જનીનોને સ્વસ્થ જનીનો વડે બદલવા", "પ્રોટીનનું વધુ ઉત્પાદન કરવું", "વનસ્પતિઓમાં પ્રતિકારક શક્તિ વધારવી"], "ans": 1, "exp": "જનીન થેરાપીનો ઉપયોગ રોગગ્રસ્ત અથવા ખામીયુક્ત જનીનોને સ્વસ્થ જનીનો વડે બદલીને રોગોનો ઉપચાર કરવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકમાં નીચેનામાંથી કયું પગલું સાચું નથી?", "opts": ["DNA નું વિનૈસર્ગીકરણ (Denaturation)", "પ્રાઇમરનું જોડાણ (Annealing)", "DNA પોલિમરેઝ ઉત્સેચક દ્વારા વિસ્તરણ (Extension)", "RNA નું પ્રત્યાંકન (Transcription)"], "ans": 3, "exp": "PCR ટેકનિકમાં DNA ના વિસ્તરણ માટે DNA પોલિમરેઝ ઉત્સેચકનો ઉપયોગ થાય છે, RNA પ્રત્યાંકન સામેલ નથી.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'બાયોસેન્સર'નો ઉપયોગ શું છે?", "opts": ["જનીનોનું સ્થાનાંતરણ કરવા", "જૈવિક અણુઓની હાજરી અને સાંદ્રતા માપવા", "નવી પ્રજાતિઓનું નિર્માણ કરવા", "પ્રોટીનનું સંશ્લેષણ કરવા"], "ans": 1, "exp": "બાયોસેન્સરનો ઉપયોગ જૈવિક અણુઓ જેમ કે ગ્લુકોઝ, લેક્ટિક એસિડ વગેરેની હાજરી અને સાંદ્રતા માપવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીના ક્ષેત્રમાં 'રિકોમ્બિનન્ટ ડીએનએ ટેકનોલોજી'નો ઉપયોગ શેના માટે થાય છે?", "opts": ["નવી પ્રજાતિઓનું નિર્માણ કરવા", "જનીનને એક સજીવમાંથી બીજા સજીવમાં સ્થાનાંતરિત કરવા", "પ્રોટીનનું સીધું સંશ્લેષણ કરવા", "કોષોને વિભાજિત કરવા"], "ans": 1, "exp": "રિકોમ્બિનન્ટ ડીએનએ ટેકનોલોજીનો ઉપયોગ જનીનને એક સજીવમાંથી બીજા સજીવમાં સ્થાનાંતરિત કરીને ઇચ્છિત લક્ષણો મેળવવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન બાયોટેકનોલોજીના ઉપયોગ માટે ખોટું છે?", "opts": ["બાયોટેકનોલોજીનો ઉપયોગ દવાઓના ઉત્પાદનમાં થાય છે.", "બાયોટેકનોલોજીનો ઉપયોગ કૃષિમાં જનીન પરિવર્તિત પાકો બનાવવા માટે થાય છે.", "બાયોટેકનોલોજીનો ઉપયોગ માત્ર પ્રાણીઓના સુધારણા માટે થાય છે.", "બાયોટેકનોલોજીનો ઉપયોગ પર્યાવરણીય સફાઇ માટે થાય છે."], "ans": 2, "exp": "બાયોટેકનોલોજીનો ઉપયોગ માત્ર પ્રાણીઓના સુધારણા માટે જ નહીં, પરંતુ વનસ્પતિઓ, સૂક્ષ્મજીવો અને પર્યાવરણીય કાર્યોમાં પણ થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપીનો ઉપયોગ શેના માટે થાય છે?", "opts": ["નવા પ્રકારના ખોરાકનું ઉત્પાદન કરવા", "આનુવંશિક રોગોનો ઉપચાર કરવા", "વનસ્પતિઓને રોગમુક્ત કરવા", "પ્રાણીઓના પ્રજનનમાં સુધારો કરવા"], "ans": 1, "exp": "જનીન થેરાપીનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે, જેમાં ખામીયુક્ત જનીનને સુધારવામાં આવે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત 'ગોલ્ડન રાઇસ'માં કયું વિટામિન વધુ પ્રમાણમાં હોય છે?", "opts": ["વિટામિન A", "વિટામિન B", "વિટામિન C", "વિટામિન D"], "ans": 0, "exp": "'ગોલ્ડન રાઇસ'માં બીટા-કેરોટિન (વિટામિન Aનું પૂર્વગામી)નું પ્રમાણ વધારવામાં આવે છે, જે આંખના સ્વાસ્થ્ય માટે જરૂરી છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકમાં DNAના વિસ્તરણ માટે કયો ઉત્સેચક ઉપયોગમાં લેવાય છે?", "opts": ["DNA લાઇગેઝ", "ટાક પોલિમરેઝ", "રિવર્સ ટ્રાન્સક્રિપ્ટેઝ", "રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ"], "ans": 1, "exp": "PCRમાં DNAના વિસ્તરણ માટે ટાક પોલિમરેઝ ઉત્સેચકનો ઉપયોગ થાય છે, જે ઉચ્ચ તાપમાને સક્રિય રહે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત ઇન્સ્યુલિનનું નામ શું છે?", "opts": ["હ્યુમ્યુલિન", "હ્યુમેન ઇન્સ્યુલિન", "બાયોઇન્સ્યુલિન", "રિકોમ્બિનન્ટ ઇન્સ્યુલિન"], "ans": 0, "exp": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત ઇન્સ્યુલિનને 'હ્યુમ્યુલિન' તરીકે ઓળખવામાં આવે છે, જે માનવ ઇન્સ્યુલિન જેવું જ હોય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'બાયોફોર્ટિફિકેશન' શબ્દનો અર્થ શું છે?", "opts": ["ખાદ્ય પદાર્થોમાં પોષક તત્ત્વોનું પ્રમાણ વધારવું", "જંતુનાશક દવાઓનું ઉત્પાદન", "જનીન ઇજનેરી દ્વારા નવી જાતિઓનું નિર્માણ", "કોષોનું કૃત્રિમ રીતે ઉત્પાદન"], "ans": 0, "exp": "બાયોફોર્ટિફિકેશન એ ખાદ્ય પદાર્થોમાં વિટામિન, ખનિજ તત્ત્વો વગેરેનું પ્રમાણ વધારવાની પ્રક્રિયા છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ બાયોટેકનોલોજીનો ઉપયોગ કરીને પર્યાવરણીય સફાઈ માટે થાય છે?", "opts": ["બાયોરિમેડિયેશન", "જનીન થેરાપી", "PCR ટેકનિક", "ક્લોનિંગ"], "ans": 0, "exp": "બાયોરિમેડિયેશનમાં સૂક્ષ્મજીવોનો ઉપયોગ કરીને પ્રદૂષિત પર્યાવરણને શુદ્ધ કરવામાં આવે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપીમાં વપરાતા વાહક (વેક્ટર) તરીકે મુખ્યત્વે કયા પ્રકારના વાઇરસનો ઉપયોગ થાય છે?", "opts": ["રેટ્રોવાઇરસ", "બેક્ટેરિયોફેજ", "એડેનોવાઇરસ", "હર્પિસ વાઇરસ"], "ans": 0, "exp": "રેટ્રોવાઇરસનો ઉપયોગ જનીન થેરાપીમાં વાહક તરીકે થાય છે કારણ કે તે પોતાનું જનીન દ્રવ્ય યજમાન કોષના DNAમાં સંકલિત કરી શકે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત 'Bt કપાસ'માં કયા બેક્ટેરિયાના જનીનનો ઉપયોગ થાય છે?", "opts": ["બેસિલસ થુરિન્જિએન્સિસ", "એશેરીચિયા કોલાઈ", "સ્ટ્રેપ્ટોકોકસ મ્યુટન્સ", "ક્લોસ્ટ્રિડિયમ બોટ્યુલિનમ"], "ans": 0, "exp": "Bt કપાસમાં બેસિલસ થુરિન્જિએન્સિસ (Bt) બેક્ટેરિયાના જનીનનો ઉપયોગ કરવામાં આવે છે, જે કીટકો સામે પ્રતિરોધકતા આપે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "PCR (પોલિમરેઝ ચેઇન રિએક્શન) ટેકનિકનો ઉપયોગ શામાં થાય છે?", "opts": ["DNAના નાના ટુકડાનું મોટા પ્રમાણમાં પ્રતિકૃતિ બનાવવા", "પ્રોટીનનું સંશ્લેષણ કરવા", "કોષોનું વિભાજન કરવા", "એન્ટિબોડીનું ઉત્પાદન કરવા"], "ans": 0, "exp": "PCR ટેકનિકનો ઉપયોગ DNAના નાના ભાગને ઝડપથી અને મોટી માત્રામાં કૉપી કરવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જનીન થેરાપીનો ઉપયોગ દર્શાવતું નથી?", "opts": ["એડિનોસાઇન ડીએમિનેઝ (ADA)ની ઉણપનું સારવાર", "સિકલ સેલ એનીમિયાનું સારવાર", "ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયામાં કરાવવું", "કેન્સરના સારવાર માટે જનીનનું સ્થાનાંતરણ"], "ans": 2, "exp": "ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયામાં કરાવવું એ જનીન ઇજનેરીનો ઉપયોગ છે, જ્યારે જનીન થેરાપી રોગના સારવાર માટે જનીનનું સ્થાનાંતરણ કરે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'બાયોરિએક્ટર'નો મુખ્ય હેતુ શું છે?", "opts": ["DNAના ટુકડાઓને અલગ કરવા", "સૂક્ષ્મજીવો અથવા કોષોનું મોટા પાયે ઉત્પાદન કરવું", "જનીનનું સ્થાનાંતરણ કરવું", "પ્રોટીનનું શુદ્ધીકરણ કરવું"], "ans": 1, "exp": "બાયોરિએક્ટરનો ઉપયોગ સૂક્ષ્મજીવો અથવા કોષોનું મોટા પાયે ઉત્પાદન કરીને જૈવિક પદાર્થોનું ઉત્પાદન કરવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું બાયોટેકનોલોજીનું ઉદાહરણ પર્યાવરણીય સફાઈ (બાયોરિમિડિયેશન) સાથે સંકળાયેલું નથી?", "opts": ["તેલના ઢોળાવને સાફ કરવા માટે બેક્ટેરિયાનો ઉપયોગ", "ભારે ધાતુઓને દૂર કરવા માટે છોડનો ઉપયોગ", "પ્લાસ્ટિકના કચરાનું વિઘટન કરવા માટે ફૂગનો ઉપયોગ", "ઇન્સ્યુલિનનું ઉત્પાદન કરવા માટે બેક્ટેરિયાનો ઉપયોગ"], "ans": 3, "exp": "ઇન્સ્યુલિનનું ઉત્પાદન કરવા માટે બેક્ટેરિયાનો ઉપયોગ બાયોફાર્માસ્યુટિકલ્સ સાથે સંબંધિત છે, જ્યારે અન્ય વિકલ્પો પર્યાવરણીય સફાઈ સાથે સંબંધિત છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન થેરાપીના સંદર્ભમાં નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["જનીન થેરાપીમાં ખામીયુક્ત જનીનને સ્વસ્થ જનીન વડે બદલવામાં આવે છે.", "આ પદ્ધતિનો ઉપયોગ આનુવંશિક રોગોના ઉપચાર માટે થાય છે.", "જનીન થેરાપીમાં વાઇરસનો ઉપયોગ વાહક તરીકે થતો નથી.", "આ પદ્ધતિનો ઉપયોગ કૅન્સર જેવા રોગોના ઉપચારમાં પણ થઈ શકે છે."], "ans": 2, "exp": "જનીન થેરાપીમાં વાઇરસનો ઉપયોગ વાહક તરીકે થાય છે, જે સ્વસ્થ જનીનને કોષોમાં પહોંચાડે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'પ્રતિજૈવિક પ્રતિરોધકતા'ના નિયંત્રણ માટે કયું તકનિકી પગલું મુખ્ય રીતે ઉપયોગમાં લેવાય છે?", "opts": ["જનીન થેરાપી", "PCR પદ્ધતિ", "RNA ઇન્ટરફિયરન્સ (RNAi)", "ક્રિસ્પર-કેસ9 જનીન એડિટિંગ"], "ans": 3, "exp": "ક્રિસ્પર-કેસ9 જનીન એડિટિંગ તકનિકનો ઉપયોગ કરીને બેક્ટેરિયાના પ્રતિજૈવિક પ્રતિરોધક જનીનોને નિષ્ક્રિય કરી શકાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવતકનિકીના ઉપયોગથી તૈયાર થયેલું નથી?", "opts": ["ઇન્સ્યુલિન", "Bt કપાસ", "પેનિસિલિન", "ગોલ્ડન રાઇસ"], "ans": 2, "exp": "પેનિસિલિન એ ફૂગ દ્વારા કુદરતી રીતે ઉત્પન્ન થતું પ્રતિજૈવિક છે, જ્યારે બાકીના ઉત્પાદનો જૈવતકનિકીનો ઉપયોગ કરીને તૈયાર કરવામાં આવે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'બાયોસેન્સર'નો મુખ્ય ઉપયોગ શું છે?", "opts": ["જનીન ક્લોનિંગ માટે", "પ્રોટીનનું ઉત્પાદન કરવા", "જૈવિક અણુઓનું ઝડપી અને ચોક્કસ નિદાન કરવા", "DNA સિક્વન્સિંગ માટે"], "ans": 2, "exp": "બાયોસેન્સરનો ઉપયોગ જૈવિક અણુઓ જેમ કે ગ્લુકોઝ, કોલેસ્ટેરોલ વગેરેનું ઝડપી અને ચોક્કસ નિદાન કરવા માટે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન જૈવતકનિકીના ઉપયોગ માટે ખોટું છે?", "opts": ["જનીન થેરાપી દ્વારા આનુવંશિક રોગોનો ઉપચાર કરી શકાય છે.", "PCR પદ્ધતિનો ઉપયોગ DNAના નાના નમૂનાઓનું વિસ્તરણ કરવા થાય છે.", "બાયોરિએક્ટરમાં માત્ર બેક્ટેરિયાનું જ ઉત્પાદન કરી શકાય છે.", "ટ્રાન્સજેનિક છોડ પર્યાવરણીય પરિસ્થિતિઓ સામે પ્રતિરોધક બની શકે છે."], "ans": 2, "exp": "બાયોરિએક્ટરમાં બેક્ટેરિયા ઉપરાંત યીસ્ટ, ફૂગ અને સસ્તન કોષોનું પણ ઉત્પાદન કરી શકાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'એગ્રોબેક્ટેરિયમ ટ્યુમેફેસિયન્સ'નો ઉપયોગ શેના માટે થાય છે?", "opts": ["પ્રતિજૈવિક ઉત્પાદન માટે", "ટ્રાન્સજેનિક છોડ બનાવવા માટે જનીન સ્થાનાંતરણમાં વાહક તરીકે", "PCR પ્રક્રિયામાં DNA પોલિમરેઝ ઉત્સેચક તરીકે", "જનીન થેરાપીમાં વાઇરસ વાહક તરીકે"], "ans": 1, "exp": "એગ્રોબેક્ટેરિયમ ટ્યુમેફેસિયન્સનો ઉપયોગ ટ્રાન્સજેનિક છોડ બનાવવા માટે જનીન સ્થાનાંતરણમાં વાહક તરીકે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીના ક્ષેત્રમાં 'બાયોફોર્ટિફિકેશન' શબ્દનો અર્થ શું છે?", "opts": ["ખાદ્ય પદાર્થોમાં પોષક તત્વોનું પ્રમાણ વધારવું", "જંતુનાશકોનું ઉત્પાદન કરવું", "જનીન પરિવર્તિત સજીવોનું ઉત્પાદન કરવું", "પ્રોટીનનું સંશ્લેષણ કરવું"], "ans": 0, "exp": "બાયોફોર્ટિફિકેશન એ ખાદ્ય પદાર્થોમાં પોષક તત્વો જેમ કે વિટામિન અને ખનીજોનું પ્રમાણ વધારવાની પ્રક્રિયા છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'રિકોમ્બિનન્ટ ડીએનએ ટેકનોલોજી'નો ઉપયોગ કરીને કયા પ્રકારના પ્રોટીનનું ઉત્પાદન કરવામાં આવે છે?", "opts": ["ઇન્સ્યુલિન", "હિમોગ્લોબિન", "માયોસિન", "કોલાજન"], "ans": 0, "exp": "રિકોમ્બિનન્ટ ડીએનએ ટેકનોલોજીનો ઉપયોગ કરીને માનવ ઇન્સ્યુલિનનું ઉત્પાદન કરવામાં આવે છે, જે ડાયાબિટીસના દર્દીઓ માટે ઉપયોગી છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ જૈવતકનિકીના ઉપયોગથી પર્યાવરણીય સફાઈ માટેનું છે?", "opts": ["બાયોફર્ટિલાઇઝરનું ઉત્પાદન", "બાયોરિમિડિયેશન", "જનીન થેરાપી", "ટીશ્યુ કલ્ચર"], "ans": 1, "exp": "બાયોરિમિડિયેશન એ જૈવતકનિકીનો ઉપયોગ કરીને પ્રદૂષિત પર્યાવરણને સ્વચ્છ કરવાની પદ્ધતિ છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "બાયોટેકનોલોજીમાં 'જીનેટિકલી મોડિફાઇડ ઓર્ગેનિઝમ્સ' (GMO) નું ઉદાહરણ નીચેનામાંથી કયું છે?", "opts": ["સ્વદેશી ગાય", "Bt કપાસ", "સામાન્ય ઘઉં", "પારંપરિક ડાંગર"], "ans": 1, "exp": "Bt કપાસ એ જીનેટિકલી મોડિફાઇડ ઓર્ગેનિઝમ (GMO) છે, જેમાં બેસિલસ થુરિન્જિએન્સિસના જનીનનો ઉપયોગ કરવામાં આવ્યો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત ઇન્સ્યુલિનનું નામ શું છે જે માનવ ઇન્સ્યુલિન સાથે સમાન હોય છે?", "opts": ["હ્યુમ્યુલિન", "ઇન્ટરફેરોન", "સોમાટોટ્રોપિન", "ઇન્ટરલ્યુકિન"], "ans": 0, "exp": "હ્યુમ્યુલિન એ જનીન ઇજનેરી દ્વારા ઉત્પાદિત માનવ ઇન્સ્યુલિન છે, જે ડાયાબિટીસના દર્દીઓ માટે ઉપયોગી છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન બાયોટેકનોલોજીના ક્ષેત્રમાં 'રિકોમ્બિનન્ટ DNA ટેક્નોલોજી' માટે સાચું નથી?", "opts": ["રિકોમ્બિનન્ટ DNA ટેક્નોલોજીમાં બે અલગ-અલગ સ્રોતના DNAને જોડવામાં આવે છે.", "આ ટેક્નોલોજીનો ઉપયોગ ઇન્સ્યુલિન ઉત્પાદનમાં થાય છે.", "રિકોમ્બિનન્ટ DNA ટેક્નોલોજીમાં માત્ર એક જ પ્રકારના ઉત્સેચકનો ઉપયોગ થાય છે.", "આ ટેક્નોલોજીનો ઉપયોગ જનીન થેરાપીમાં થાય છે."], "ans": 2, "exp": "રિકોમ્બિનન્ટ DNA ટેક્નોલોજીમાં વિવિધ ઉત્સેચકો જેમ કે રેસ્ટ્રીક્શન એન્ડોન્યુક્લિએઝ અને DNA લાઇગેઝનો ઉપયોગ થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું બાયોટેકનોલોજીનું ઉદાહરણ **નથી**?", "opts": ["ઇન્સ્યુલિનનું બેક્ટેરિયા દ્વારા ઉત્પાદન", "PCR પદ્ધતિ દ્વારા DNAની નકલો બનાવવી", "ક્લોનિંગ દ્વારા ડોલી ઘેટાનું નિર્માણ", "પ્રકાશસંશ્લેષણ દ્વારા ગ્લુકોઝનું નિર્માણ"], "ans": 3, "exp": "પ્રકાશસંશ્લેષણ એ કુદરતી જૈવિક પ્રક્રિયા છે, જ્યારે બાકીના વિકલ્પો બાયોટેકનોલોજીના ઉપયોગો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત ઇન્સ્યુલિનનું નિર્માણ કરવા માટે નીચેનામાંથી કયું સાધન અથવા તકનિક પ્રાથમિક રીતે ઉપયોગમાં લેવાય છે?", "opts": ["પ્રતિજૈવિક પ્રતિકાર જનીન ધરાવતા પ્લાસ્મિડ્સ", "રિસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચકો", "DNA લાઇગેઝ ઉત્સેચકો", "ટ્રાન્સજેનિક પ્રાણીઓ"], "ans": 1, "exp": "ઇન્સ્યુલિન જનીનને કાપવા અને વાહક DNAમાં જોડવા માટે રિસ્ટ્રિક્શન એન્ડોન્યુક્લિએઝ ઉત્સેચકોનો ઉપયોગ પ્રાથમિક તબક્કે થાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'જનીન થેરાપી'નો મુખ્ય હેતુ શું છે?", "opts": ["રોગપ્રતિકારક શક્તિ વધારવી", "ખામીયુક્ત જનીનને કાર્યરત જનીન વડે બદલવું અથવા સુધારવું", "નવા પ્રોટીનનું ઉત્પાદન કરવું", "વનસ્પતિમાં વધુ પોષક તત્વો ઉત્પન્ન કરવા"], "ans": 1, "exp": "જનીન થેરાપીનો મુખ્ય હેતુ ખામીયુક્ત જનીનને કાર્યરત જનીન વડે બદલીને રોગોનો ઉપચાર કરવાનો છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'બાયોરિએક્ટર'નો ઉપયોગ શું છે?", "opts": ["DNA નું વિશ્લેષણ કરવા", "જૈવિક પદાર્થોનું મોટા પાયે ઉત્પાદન કરવા", "વનસ્પતિઓને પ્રકાશસંશ્લેષણ માટે પ્રોત્સાહિત કરવા", "પ્રાણીઓમાં હોર્મોનનું સ્તર માપવા"], "ans": 1, "exp": "બાયોરિએક્ટરનો ઉપયોગ જૈવિક પદાર્થોનું મોટા પાયે ઉત્પાદન કરવા માટે થાય છે, જેમ કે પ્રોટીન અથવા ઉત્સેચકો.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જૈવતકનિકીમાં 'પ્રતિજૈવિક પ્રતિરોધકતા'નો સામનો કરવા માટે નીચેનામાંથી કઈ તકનિકનો ઉપયોગ થાય છે?", "opts": ["જનીન થેરાપી", "ક્રિસ્પર-કેસ9 તકનિક", "એન્ટિસેન્સ ટેકનોલોજી", "પ્રતિજૈવિક ઉત્પાદન માટે નવા સૂક્ષ્મજીવોનું જનીન ઇજનેરી"], "ans": 3, "exp": "પ્રતિજૈવિક પ્રતિરોધકતા ઘટાડવા માટે નવા પ્રકારના પ્રતિજૈવિકો ઉત્પન્ન કરવા જનીન ઇજનેરી દ્વારા સૂક્ષ્મજીવોનું રૂપાંતરણ કરવામાં આવે છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: (1) ઇન્સ્યુલિનનું ઉત્પાદન બેક્ટેરિયામાં જનીન ઇજનેરી દ્વારા થાય છે. (2) બીટી કપાસમાં બેસિલસ થુરિન્જિએન્સિસનું જનીન દાખલ કરવામાં આવે છે. (3) જનીન થેરાપીમાં ખામીયુક્ત જનીનને સ્વસ્થ જનીન દ્વારા બદલવામાં આવે છે. (4) PCR તકનિકનો ઉપયોગ DNA નકલો બનાવવા માટે થાય છે. ઉપરના કેટલા વિધાનો સાચાં છે?", "opts": ["માત્ર 1 અને 2", "માત્ર 2, 3 અને 4", "માત્ર 1, 2 અને 3", "1, 2, 3 અને 4"], "ans": 3, "exp": "ઇન્સ્યુલિનનું ઉત્પાદન, બીટી કપાસ અને જનીન થેરાપી જનીન ઇજનેરીના ઉપયોગો છે, જ્યારે PCR DNA નકલો બનાવવા માટે છે, પરંતુ તે જનીન ઇજનેરી નથી.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}, {"q": "જનીન ઇજનેરી દ્વારા ઉત્પાદિત ઇન્સ્યુલિનનું ઉત્પાદન કરવા માટે નીચેનામાંથી કયા સૂક્ષ્મજીવનો ઉપયોગ થાય છે?", "opts": ["ઇ. કોલાઈ (Escherichia coli)", "એગ્રોબેક્ટેરિયમ ટ્યુમેફેસિયન્સ (Agrobacterium tumefaciens)", "બેસિલસ થુરિન્જિએન્સિસ (Bacillus thuringiensis)", "સ્ટ્રેપ્ટોકોકસ (Streptococcus)"], "ans": 0, "exp": "જનીન ઇજનેરી દ્વારા માનવ ઇન્સ્યુલિનનું ઉત્પાદન કરવા માટે ઇ. કોલાઈ બેક્ટેરિયાનો ઉપયોગ થાય છે, કારણ કે તેના જનીનોમાં માનવ ઇન્સ્યુલિન જનીન દાખલ કરીને મોટા પાયે ઉત્પાદન કરી શકાય છે.", "chapter": "જૈવતકનિકી અને તેના ઉપયોગો", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 49, "count": 50}];
+const MARKS_C=1, MARKS_W=0;
+const DURATION=60*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "જૈવતકનિકી અને તેના ઉપયોગો Mock Test\nGSEB Board Exam\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
