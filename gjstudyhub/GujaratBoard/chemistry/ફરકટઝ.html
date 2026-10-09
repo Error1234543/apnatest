@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ફ્રુક્ટોઝ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ફ્રુક્ટોઝ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ફ્રુક્ટોઝ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ફ્રુક્ટોઝના બંધારણ વિશે નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["તે પેન્ટોઝ શર્કરા છે અને ફ્યુરેનોઝ વલય ધરાવે છે.", "તે હેક્સોઝ શર્કરા છે અને પાયરેનોઝ વલય ધરાવે છે.", "તે હેક્સોઝ શર્કરા છે અને ફ્યુરેનોઝ વલય ધરાવે છે.", "તે ડાયસેકેરાઇડ છે અને ગ્લુકોઝના બે અણુઓથી બને છે."], "ans": 2, "exp": "ફ્રુક્ટોઝ એ હેક્સોઝ શર્કરા (6 કાર્બન) છે અને તે ફ્યુરેનોઝ વલય ધરાવે છે. A ખોટું છે કારણ કે ફ્રુક્ટોઝ પેન્ટોઝ નથી. B ખોટું છે કારણ કે તે પાયરેનોઝ વલય ધરાવતું નથી. D ખોટું છે કારણ કે ફ્રુક્ટોઝ મોનોસેકેરાઇડ છે, ડાયસેકેરાઇડ નહીં.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "ફ્રુક્ટોઝનું શોષણ લોહીમાં ક્યાં થાય છે?", "opts": ["મુખ્યત્વે જઠરમાં", "મુખ્યત્વે બારણું આંતરડામાં", "મુખ્યત્વે મોટા આંતરડામાં", "મુખ્યત્વે યકૃતમાં"], "ans": 1, "exp": "ફ્રુક્ટોઝનું શોષણ મુખ્યત્વે બારણું આંતરડામાં (small intestine) થાય છે, જ્યાં તે સક્રિય પરિવહન દ્વારા શોષાય છે. A ખોટું છે કારણ કે જઠરમાં શોષણ થતું નથી. C ખોટું છે કારણ કે મોટા આંતરડામાં શોષણ થતું નથી. D ખોટું છે કારણ કે યકૃતમાં શોષણ થતું નથી, પરંતુ ચયાપચય થાય છે.", "ref": "Std 12 - પ્રકરણ 15: પાચન અને શોષણ", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ફ્રુક્ટોઝ ફ્રુક્ટોકાઇનેઝ ઉત્સેચક દ્વારા ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફેરવાય છે.", "ફ્રુક્ટોઝ-1-ફોસ્ફેટને ફ્રુક્ટોઝ-1,6-બાયસ્ફોસ્ફેટમાં ફેરવવા માટે એલ્ડોલેઝ B જરૂરી છે.", "ફ્રુક્ટોઝનો ચયાપચય ગ્લાયકોલાઇસિસના માર્ગ દ્વારા થાય છે.", "ફ્રુક્ટોઝનો ચયાપચય મુખ્યત્વે મસ્તિષ્કમાં થાય છે."], "ans": 3, "exp": "ફ્રુક્ટોઝનો ચયાપચય મુખ્યત્વે યકૃતમાં થાય છે, મસ્તિષ્કમાં નહીં. A, B, અને C સત્ય છે કારણ કે ફ્રુક્ટોઝ ફ્રુક્ટોકાઇનેઝ દ્વારા ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફેરવાય છે, ત્યારબાદ એલ્ડોલેઝ B દ્વારા ફ્રુક્ટોઝ-1,6-બાયસ્ફોસ્ફેટમાં ફેરવાય છે અને ગ્લાયકોલાઇસિસના માર્ગ દ્વારા ચયાપચય પામે છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "ફ્રુક્ટોઝ અને ગ્લુકોઝ વચ્ચેનો તફાવત કયો છે?", "opts": ["ફ્રુક્ટોઝ એ કેટોનિક શર્કરા છે જ્યારે ગ્લુકોઝ એ એલ્ડિહાઇડ શર્કરા છે.", "ફ્રુક્ટોઝ એ એલ્ડિહાઇડ શર્કરા છે જ્યારે ગ્લુકોઝ એ કેટોનિક શર્કરા છે.", "ફ્રુક્ટોઝ અને ગ્લુકોઝ બંને એલ્ડિહાઇડ શર્કરા છે.", "ફ્રુક્ટોઝ અને ગ્લુકોઝ બંને કેટોનિક શર્કરા છે."], "ans": 0, "exp": "ફ્રુક્ટોઝ એ કેટોનિક શર્કરા (કીટોન ગ્રુપ ધરાવે છે) છે જ્યારે ગ્લુકોઝ એ એલ્ડિહાઇડ શર્કરા (એલ્ડિહાઇડ ગ્રુપ ધરાવે છે) છે. B, C, અને D ખોટા છે કારણ કે તેઓ બંધારણીય તફાવતને ચોક્કસ રીતે વર્ણવતા નથી.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "ફ્રુક્ટોઝના સંરચનાત્મક સૂત્ર વિશે નીચેનામાંથી કયું વિધાન સત્ય નથી?", "opts": ["ફ્રુક્ટોઝમાં 6 કાર્બન પરમાણુઓ હોય છે.", "ફ્રુક્ટોઝમાં 5 હાઇડ્રોક્સિલ ગ્રુપ હોય છે.", "ફ્રુક્ટોઝમાં એક કીટોન ગ્રુપ હોય છે.", "ફ્રુક્ટોઝમાં એક એલ્ડિહાઇડ ગ્રુપ હોય છે."], "ans": 3, "exp": "ફ્રુક્ટોઝ એ કેટોનિક શર્કરા છે, જેમાં એક કીટોન ગ્રુપ (C=O) હોય છે, એલ્ડિહાઇડ ગ્રુપ નહીં. A, B, અને C સત્ય છે કારણ કે ફ્રુક્ટોઝમાં 6 કાર્બન, 5 હાઇડ્રોક્સિલ ગ્રુપ, અને એક કીટોન ગ્રુપ હોય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવ અણુઓ અને તેમના કાર્યો", "ch": ""}, {"q": "ફ્રુક્ટોઝનો ચયાપચય ક્યાં પ્રક્રિયા દ્વારા શરૂ થાય છે અને તે માટે કયું ઉત્સેચક જવાબદાર છે?", "opts": ["ગ્લાયકોલાઇસિસ, હેક્સોકિનેઝ", "ફ્રુક્ટોઝ-1-ફોસ્ફેટ પથ, ફ્રુક્ટોકિનેઝ", "ફ્રુક્ટોઝ-6-ફોસ્ફેટ પથ, ફોસ્ફોફ્રુક્ટોકિનેઝ", "પેન્ટોઝ ફોસ્ફેટ પથ, ફ્રુક્ટોઝ-બાયફોસ્ફેટેઝ"], "ans": 1, "exp": "ફ્રુક્ટોઝનો ચયાપચય મુખ્યત્વે યકૃતમાં ફ્રુક્ટોઝ-1-ફોસ્ફેટ પથ દ્વારા શરૂ થાય છે, જ્યાં ફ્રુક્ટોકિનેઝ ઉત્સેચક તેને ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફેરવે છે. A ખોટું છે કારણ કે હેક્સોકિનેઝ ગ્લુકોઝ માટે વધુ સક્રિય હોય છે. C ખોટું છે કારણ કે ફ્રુક્ટોઝ-6-ફોસ્ફેટ પથ ફ્રુક્ટોઝનો પ્રાથમિક પથ નથી. D ખોટું છે કારણ કે પેન્ટોઝ ફોસ્ફેટ પથ ફ્રુક્ટોઝના ચયાપચયનો પ્રાથમિક માર્ગ નથી.", "ref": "Std 12 - Chapter 9: ખોરાકમાંથી ઊર્જા મેળવવી (બાયોકેમિસ્ટ્રી)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન બનતો મુખ્ય મધ્યવર્તી પદાર્થ કયો છે, જે ગ્લાયકોલાઇસિસમાં પ્રવેશે છે?", "opts": ["ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટ", "ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટ", "પાયરૂવિક એસિડ", "ગ્લુકોઝ-6-ફોસ્ફેટ"], "ans": 0, "exp": "ફ્રુક્ટોઝનો ચયાપચય થતાં તે ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત થાય છે, જે પછી ગ્લાયકોલાઇસિસમાં પ્રવેશે છે. B ખોટું છે કારણ કે ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટ ગ્લુકોઝના ચયાપચયનો મધ્યવર્તી પદાર્થ છે. C ખોટું છે કારણ કે પાયરૂવિક એસિડ ગ્લાયકોલાઇસિસનો અંતિમ ઉત્પાદન છે, પરંતુ ફ્રુક્ટોઝનો મધ્યવર્તી પદાર્થ નથી. D ખોટું છે કારણ કે ગ્લુકોઝ-6-ફોસ્ફેટ ગ્લુકોઝના ચયાપચયનો મધ્યવર્તી પદાર્થ છે.", "ref": "Std 12 - Chapter 9: ખોરાકમાંથી ઊર્જા મેળવવી (બાયોકેમિસ્ટ્રી)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચયમાં, ફ્રુક્ટોઝ-1-ફોસ્ફેટને કયા ઉત્સેચક દ્વારા વિભાજિત કરવામાં આવે છે?", "opts": ["ફોસ્ફોફ્રુક્ટોકિનેઝ", "એલ્ડોલેઝ B", "ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટેઝ", "હેક્સોકિનેઝ"], "ans": 1, "exp": "ફ્રુક્ટોઝ-1-ફોસ્ફેટને એલ્ડોલેઝ B ઉત્સેચક દ્વારા ગ્લિસરાલ્ડિહાઇડ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત કરવામાં આવે છે. A ખોટું છે કારણ કે ફોસ્ફોફ્રુક્ટોકિનેઝ ફ્રુક્ટોઝ-6-ફોસ્ફેટને ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટમાં ફેરવે છે. C ખોટું છે કારણ કે ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટેઝ ફ્રુક્ટોઝ-1,6-બાયફોસ્ફેટને ફ્રુક્ટોઝ-6-ફોસ્ફેટમાં ફેરવે છે. D ખોટું છે કારણ કે હેક્સોકિનેઝ ગ્લુકોઝને ગ્લુકોઝ-6-ફોસ્ફેટમાં ફેરવે છે.", "ref": "Std 12 - Chapter 9: ખોરાકમાંથી ઊર્જા મેળવવી (બાયોકેમિસ્ટ્રી)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, કયા પદાર્થની ઉણપ હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સનું કારણ બને છે?", "opts": ["ફ્રુક્ટોકિનેઝ", "એલ્ડોલેઝ B", "ફોસ્ફોફ્રુક્ટોકિનેઝ", "ગ્લુકોઝ-6-ફોસ્ફેટેઝ"], "ans": 1, "exp": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સ એલ્ડોલેઝ B ઉત્સેચકની ઉણપને કારણે થાય છે, જે ફ્રુક્ટોઝ-1-ફોસ્ફેટને વિભાજિત કરવામાં અસમર્થ હોય છે. A ખોટું છે કારણ કે ફ્રુક્ટોકિનેઝની ઉણપ ફ્રુક્ટોઝના ચયાપચયને અસર કરે છે પરંતુ હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સનું કારણ નથી. C ખોટું છે કારણ કે ફોસ્ફોફ્રુક્ટોકિનેઝની ઉણપ ગ્લાયકોલાઇસિસને અસર કરે છે. D ખોટું છે કારણ કે ગ્લુકોઝ-6-ફોસ્ફેટેઝની ઉણપ ગ્લાયકોજન સ્ટોરેજ રોગો સાથે સંબંધિત છે.", "ref": "Std 12 - Chapter 9: ખોરાકમાંથી ઊર્જા મેળવવી (બાયોકેમિસ્ટ્રી)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, કયા પદાર્થનો સંગ્રહ યકૃતમાં થતો નથી?", "opts": ["ગ્લાયકોજન", "ફ્રુક્ટોઝ-1-ફોસ્ફેટ", "ગ્લુકોઝ-6-ફોસ્ફેટ", "પાયરૂવિક એસિડ"], "ans": 1, "exp": "ફ્રુક્ટોઝ-1-ફોસ્ફેટ યકૃતમાં સંગ્રહિત થતું નથી, પરંતુ તે તરત જ એલ્ડોલેઝ B દ્વારા વિભાજિત થાય છે. A ખોટું છે કારણ કે ગ્લાયકોજન યકૃતમાં સંગ્રહિત થાય છે. C ખોટું છે કારણ કે ગ્લુકોઝ-6-ફોસ્ફેટ ગ્લાયકોજન સંશ્લેષણ માટે વપરાય છે. D ખોટું છે કારણ કે પાયરૂવિક એસિડ આગળના ચયાપચય માટે વપરાય છે.", "ref": "Std 12 - Chapter 9: ખોરાકમાંથી ઊર્જા મેળવવી (બાયોકેમિસ્ટ્રી)", "ch": ""}, {"q": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સ વાળા વ્યક્તિમાં ફ્રુક્ટોઝ-1-ફોસ્ફેટનું સંગ્રહણ ક્યાં થાય છે, જેનાથી કોષીય ક્ષતિ થાય છે?", "opts": ["યકૃતમાં", "મગજમાં", "માંસપેશીમાં", "વૃક્કમાં"], "ans": 0, "exp": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સમાં, ફ્રુક્ટોઝ-1-ફોસ્ફેટ એલ્ડોલેઝ B ઉત્સેચકની ઉણપને કારણે વિભાજિત થતું નથી, પરિણામે તે યકૃતમાં સંગ્રહ પામે છે અને કોષીય ક્ષતિ કરે છે. મગજ, માંસપેશી અને વૃક્કમાં આવું સંગ્રહણ થતું નથી.", "ref": "Std 12 - અધ્યાય 9: ખોરાકમાં રાસાયણિક પ્રક્રિયાઓ (બાયોકેમિકલ પ્રોસેસીઝ)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, ફ્રુક્ટોઝ-1-ફોસ્ફેટને ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત કરવા માટે કયો ઉત્સેચક જરૂરી છે?", "opts": ["હેક્સોકિનેઝ", "ફ્રુક્ટોકિનેઝ", "એલ્ડોલેઝ B", "ફોસ્ફોફ્રુક્ટોકિનેઝ-1"], "ans": 2, "exp": "ફ્રુક્ટોઝ-1-ફોસ્ફેટને ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત કરવા માટે એલ્ડોલેઝ B ઉત્સેચક જરૂરી છે. હેક્સોકિનેઝ ફ્રુક્ટોઝને ફ્રુક્ટોઝ-6-ફોસ્ફેટમાં રૂપાંતરિત કરે છે, ફ્રુક્ટોકિનેઝ ફ્રુક્ટોઝને ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં રૂપાંતરિત કરે છે, અને ફોસ્ફોફ્રુક્ટોકિનેઝ-1 ગ્લાયકોલાઇસિસમાં ભાગ લે છે.", "ref": "Std 12 - અધ્યાય 9: ખોરાકમાં રાસાયણિક પ્રક્રિયાઓ (બાયોકેમિકલ પ્રોસેસીઝ)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, કયો પદાર્થ સીધો જ ગ્લાયકોલાઇસિસમાં પ્રવેશે છે અને કોઈપણ ઉત્સેચકીય પ્રક્રિયા વગર ગ્લુકોઝ-6-ફોસ્ફેટમાં રૂપાંતરિત થઈ શકે છે?", "opts": ["ફ્રુક્ટોઝ-6-ફોસ્ફેટ", "ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ", "ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટ", "ફ્રુક્ટોઝ-1,6-બાઇસફોસ્ફેટ"], "ans": 0, "exp": "ફ્રુક્ટોઝ-6-ફોસ્ફેટ સીધો જ ગ્લાયકોલાઇસિસમાં પ્રવેશે છે અને ફોસ્ફોહેક્સોઝ આઈસોમેરેઝ ઉત્સેચક દ્વારા ગ્લુકોઝ-6-ફોસ્ફેટમાં રૂપાંતરિત થાય છે. ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટ ગ્લાયકોલાઇસિસના મધ્યવર્તી પદાર્થો છે, પરંતુ તે સીધો રૂપાંતરણ નથી. ફ્રુક્ટોઝ-1,6-બાઇસફોસ્ફેટ ગ્લાયકોલાઇસિસનો મધ્યવર્તી પદાર્થ છે, પરંતુ તે સીધો ગ્લુકોઝ-6-ફોસ્ફેટમાં રૂપાંતરિત થતું નથી.", "ref": "Std 12 - અધ્યાય 9: ખોરાકમાં રાસાયણિક પ્રક્રિયાઓ (બાયોકેમિકલ પ્રોસેસીઝ)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, કયો પદાર્થ યકૃતમાં ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટના સંશ્લેષણને ઉત્તેજિત કરે છે, જે ગ્લાયકોલાઇસિસને પ્રોત્સાહન આપે છે?", "opts": ["ઇન્સ્યુલિન", "ગ્લુકાગોન", "ફ્રુક્ટોઝ-1-ફોસ્ફેટ", "એટીપી (ATP)"], "ans": 2, "exp": "ફ્રુક્ટોઝ-1-ફોસ્ફેટ યકૃતમાં ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટના સંશ્લેષણને ઉત્તેજિત કરે છે, જે ગ્લાયકોલાઇસિસને પ્રોત્સાહન આપે છે. ઇન્સ્યુલિન અને ગ્લુકાગોન હોર્મોન છે જે ગ્લુકોઝના ચયાપચયને નિયંત્રિત કરે છે, પરંતુ ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટના સંશ્લેષણમાં સીધો ભાગ લેતા નથી. એટીપી (ATP) ઉર્જાનું સ્રોત છે, પરંતુ તે ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટના સંશ્લેષણને ઉત્તેજિત કરતું નથી.", "ref": "Std 12 - અધ્યાય 9: ખોરાકમાં રાસાયણિક પ્રક્રિયાઓ (બાયોકેમિકલ પ્રોસેસીઝ)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, કયો પદાર્થ ગ્લુકોનિયોજેનેસિસને પ્રોત્સાહન આપે છે, જ્યારે તેની અતિરેક માત્રા હોય છે?", "opts": ["ફ્રુક્ટોઝ-1-ફોસ્ફેટ", "ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ", "ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટ", "પાયરુવેટ"], "ans": 1, "exp": "ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ ગ્લુકોનિયોજેનેસિસને પ્રોત્સાહન આપે છે, જ્યારે તેની અતિરેક માત્રા હોય છે. ફ્રુક્ટોઝ-1-ફોસ્ફેટ, ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટ અને પાયરુવેટ ગ્લુકોનિયોજેનેસિસમાં સીધો ભાગ લેતા નથી.", "ref": "Std 12 - અધ્યાય 9: ખોરાકમાં રાસાયણિક પ્રક્રિયાઓ (બાયોકેમિકલ પ્રોસેસીઝ)", "ch": ""}, {"q": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સ ધરાવતી વ્યક્તિમાં, ફ્રુક્ટોઝ-1-ફોસ્ફેટના સંગ્રહણને કારણે કયા અંગમાં કોષીય નુકસાન થાય છે, જેનાથી હાયપોગ્લાયસીમિયા અને યકૃતની ખરાબી થાય છે?", "opts": ["મગજ", "યકૃત", "કિડની", "હૃદય"], "ans": 1, "exp": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સમાં, ફ્રુક્ટોઝ-1-ફોસ્ફેટનું સંગ્રહણ મુખ્યત્વે યકૃતના કોષોમાં થાય છે, જેનાથી યકૃતની કોષીય ક્રિયાઓ ખોરવાઈ જાય છે અને હાયપોગ્લાયસીમિયા (રક્તમાં ગ્લુકોઝનું નીચું સ્તર) થાય છે. મગજ, કિડની અને હૃદયમાં આ પ્રકારનું સંગ્રહણ થતું નથી, તેથી તે ખોટા વિકલ્પો છે.", "ref": "Std 12 - પાઠ 9: ખોરાક, પોષણ અને શરીરમાં ઉર્જા (Carbohydrate Metabolism)", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, ફ્રુક્ટોકાઇનેઝ ઉત્સેચકની ક્રિયાશીલતા માટે નીચેનામાંથી કયું વિધાન અયોગ્ય છે?", "opts": ["ફ્રુક્ટોકાઇનેઝ ઉત્સેચક ફ્રુક્ટોઝને ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફોસ્ફોરાયલેટ કરે છે.", "ફ્રુક્ટોકાઇનેઝ ઉત્સેચકની ક્રિયાશીલતા માટે મેગ્નેશિયમ આયન (Mg²⁺) જરૂરી છે.", "ફ્રુક્ટોકાઇનેઝ ઉત્સેચકની ક્રિયાશીલતા એડિનોસિન ટ્રાઇફોસ્ફેટ (ATP) દ્વારા નિયંત્રિત થાય છે.", "ફ્રુક્ટોકાઇનેઝ ઉત્સેચક યકૃત, મૂત્રપિંડ અને આંતરડામાં જોવા મળે છે, પરંતુ સ્નાયુ પેશીમાં નહીં."], "ans": 2, "exp": "ફ્રુક્ટોકાઇનેઝ ઉત્સેચક ફ્રુક્ટોઝને ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફોસ્ફોરાયલેટ કરે છે અને આ પ્રક્રિયા માટે મેગ્નેશિયમ આયન (Mg²⁺) જરૂરી છે. આ ઉત્સેચક યકૃત, મૂત્રપિંડ અને આંતરડામાં જોવા મળે છે, પરંતુ સ્નાયુ પેશીમાં નહીં. જોકે, ફ્રુક્ટોકાઇનેઝની ક્રિયાશીલતા ATP દ્વારા નિયંત્રિત થતી નથી, તેના બદલે તેની પ્રવૃત્તિ ફ્રુક્ટોઝની ઉપલબ્ધતા પર આધારિત છે. તેથી વિકલ્પ C અયોગ્ય છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ અને ઉત્સેચકો", "ch": ""}, {"q": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સ (HFI) ધરાવતી વ્યક્તિમાં, ફ્રુક્ટોઝના ચયાપચયમાં અવરોધને કારણે નીચેનામાંથી કયું પરિણામ જોવા મળતું નથી?", "opts": ["હાઈપોગ્લાયસેમિયા (લોહીમાં ગ્લુકોઝનું નીચું પ્રમાણ).", "યકૃતમાં ફ્રુક્ટોઝ-1-ફોસ્ફેટનું સંચયન.", "ગ્લુકોનિયોજેનેસિસમાં વધારો થવો.", "એડિનોસિન ટ્રાઇફોસ્ફેટ (ATP) અને અકાર્બનિક ફોસ્ફેટ (Pi) નું ઘટાડો."], "ans": 2, "exp": "હેરેડિટરી ફ્રુક્ટોઝ ઇનટોલેરન્સ (HFI) ધરાવતી વ્યક્તિમાં ફ્રુક્ટોઝ-1-ફોસ્ફેટનું સંચયન થાય છે, જેના કારણે હાઈપોગ્લાયસેમિયા, ATP અને અકાર્બનિક ફોસ્ફેટનું ઘટાડો થાય છે. જોકે, ગ્લુકોનિયોજેનેસિસમાં વધારો થતો નથી, તેના બદલે તે અવરોધાય છે કારણ કે ફ્રુક્ટોઝ-1-ફોસ્ફેટ એલ્ડોલેઝ B ઉત્સેચકની ક્રિયાને અવરોધે છે. તેથી વિકલ્પ C ખોટું છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ અને ચયાપચયિક વિકારો", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચયમાં, ફ્રુક્ટોઝ-1-ફોસ્ફેટને ગ્લિસરાલ્ડિહાઇડ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત કરવા માટે જવાબદાર ઉત્સેચક કયો છે, અને આ પ્રક્રિયામાં કયો પદાર્થ મુખ્ય મધ્યવર્તી તરીકે કાર્ય કરે છે?", "opts": ["ફ્રુક્ટોકાઇનેઝ; ફ્રુક્ટોઝ-1-ફોસ્ફેટ.", "એલ્ડોલેઝ B; ફ્રુક્ટોઝ-1,6-બાઇસફોસ્ફેટ.", "એલ્ડોલેઝ B; ફ્રુક્ટોઝ-1-ફોસ્ફેટ.", "ટ્રાયોઝ કાઇનેઝ; ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટ."], "ans": 2, "exp": "ફ્રુક્ટોઝ-1-ફોસ્ફેટને ગ્લિસરાલ્ડિહાઇડ અને ડાયહાઇડ્રોક્સીએસિટોન ફોસ્ફેટમાં વિભાજિત કરવા માટે એલ્ડોલેઝ B ઉત્સેચક જવાબદાર છે. આ પ્રક્રિયામાં ફ્રુક્ટોઝ-1-ફોસ્ફેટ મુખ્ય મધ્યવર્તી પદાર્થ તરીકે કાર્ય કરે છે. ફ્રુક્ટોકાઇનેઝ ફ્રુક્ટોઝને ફ્રુક્ટોઝ-1-ફોસ્ફેટમાં ફોસ્ફોરાયલેટ કરે છે, જ્યારે ટ્રાયોઝ કાઇનેઝ ગ્લિસરાલ્ડિહાઇડને ગ્લિસરાલ્ડિહાઇડ-3-ફોસ્ફેટમાં ફોસ્ફોરાયલેટ કરે છે. તેથી વિકલ્પ C સાચો છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ અને ચયાપચયિક માર્ગો", "ch": ""}, {"q": "ફ્રુક્ટોઝના ચયાપચયમાં, નીચેનામાંથી કયું વિધાન ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટ (F2,6BP) ની ભૂમિકા વિશે ખોટું છે?", "opts": ["F2,6BP ગ્લાયકોલાઇસિસને ઉત્તેજિત કરે છે અને ગ્લુકોનિયોજેનેસિસને અવરોધે છે.", "F2,6BP નું સંશ્લેષણ ફ્રુક્ટોઝ-6-ફોસ્ફેટ દ્વારા થાય છે અને તે ફોસ્ફોફ્રુક્ટોકાઇનેઝ-2 (PFK-2) દ્વારા નિયંત્રિત થાય છે.", "ફ્રુક્ટોઝના ચયાપચય દરમિયાન, F2,6BP નું સ્તર વધવાથી યકૃતમાં ગ્લુકોઝનું ઉત્પાદન વધે છે.", "F2,6BP ફોસ્ફોફ્રુક્ટોકાઇનેઝ-1 (PFK-1) ની ક્રિયાશીલતા વધારે છે, જે ગ્લાયકોલાઇસિસને પ્રોત્સાહન આપે છે."], "ans": 2, "exp": "ફ્રુક્ટોઝ-2,6-બાઇસફોસ્ફેટ (F2,6BP) ગ્લાયકોલાઇસિસને ઉત્તેજિત કરે છે અને ગ્લુકોનિયોજેનેસિસને અવરોધે છે. તેનું સંશ્લેષણ ફ્રુક્ટોઝ-6-ફોસ્ફેટ દ્વારા થાય છે અને ફોસ્ફોફ્રુક્ટોકાઇનેઝ-2 (PFK-2) દ્વારા નિયંત્રિત થાય છે. F2,6BP ફોસ્ફોફ્રુક્ટોકાઇનેઝ-1 (PFK-1) ની ક્રિયાશીલતા વધારે છે, જે ગ્લાયકોલાઇસિસને પ્રોત્સાહન આપે છે. જોકે, F2,6BP નું સ્તર વધવાથી યકૃતમાં ગ્લુકોઝનું ઉત્પાદન ઘટે છે, નહીં કે વધે. તેથી વિકલ્પ C ખોટું છે.", "ref": "Std 12 - પ્રકરણ 9: જૈવિક અણુઓ અને ચયાપચયિક નિયમન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
