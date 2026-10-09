@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વનસ્પતિઓમાં વહન Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>વનસ્પતિઓમાં વહન Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "વનસ્પતિઓમાં પાણીનું ઉપર તરફનું વહન મુખ્યત્વે કયા પેશી તંત્ર દ્વારા થાય છે?", "opts": ["અન્નવાહક પેશી (Phloem)", "દ્રવ્યવાહક પેશી (Xylem)", "મૃદુતક પેશી (Parenchyma)", "સ્થૂલકોણક પેશી (Collenchyma)"], "ans": 1, "exp": "વનસ્પતિઓમાં પાણી અને ખનીજ ક્ષારોનું ઉપર તરફનું વહન દ્રવ્યવાહક પેશી (Xylem) દ્વારા થાય છે, જેને જલવાહક પેશી પણ કહે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન વનસ્પતિઓમાં 'સંલગ્નતા-તણાવ સિદ્ધાંત' (Cohesion-Tension Theory) માટે ખોટું છે?", "opts": ["પાણીના અણુઓ વચ્ચે સંલગ્નતા બળ કાર્ય કરે છે.", "પર્ણોમાંથી બાષ્પોત્સર્જનને કારણે તણાવ ઉત્પન્ન થાય છે.", "આ સિદ્ધાંત મૂળ દાબ (Root Pressure) પર આધારિત છે.", "પાણીના સ્તંભને તૂટતા અટકાવવા સંલગ્નતા મહત્વની છે."], "ans": 2, "exp": "સંલગ્નતા-તણાવ સિદ્ધાંત મૂળ દાબ પર આધારિત નથી, પરંતુ બાષ્પોત્સર્જન દ્વારા ઉત્પન્ન થતા તણાવ અને પાણીના અણુઓ વચ્ચેની સંલગ્નતા પર આધારિત છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખનીજ ક્ષારોનું શોષણ મુખ્યત્વે કયા ભાગમાં થાય છે?", "opts": ["પર્ણો", "પ્રકાંડ", "મૂળરોમ કોષો", "ફલોએમ"], "ans": 2, "exp": "ખનીજ ક્ષારોનું શોષણ મુખ્યત્વે મૂળરોમ કોષો દ્વારા થાય છે, જે જમીનમાંથી આયનોનું સક્રિય શોષણ કરે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન વનસ્પતિઓમાં ખોરાકના વહન માટે સાચું નથી?", "opts": ["ખોરાકનું વહન અન્નવાહક પેશી (Phloem) દ્વારા થાય છે.", "ખોરાકનું વહન દબાણ પ્રવાહ સિદ્ધાંત (Pressure Flow Hypothesis) દ્વારા સમજાવી શકાય છે.", "ખોરાકનું વહન હંમેશા ઉપરથી નીચે તરફ થાય છે.", "સુક્રોઝ એ ખોરાકના વહનનો મુખ્ય સ્વરૂપ છે."], "ans": 2, "exp": "ખોરાકનું વહન અન્નવાહક પેશીમાં ઉપર અને નીચે બંને દિશામાં થઈ શકે છે, જે વનસ્પતિની જરૂરિયાત મુજબ નક્કી થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં બાષ્પોત્સર્જનની ક્રિયા માટે નીચેના પૈકી કયું પરિબળ સૌથી ઓછું અસરકારક છે?", "opts": ["હવાનું તાપમાન", "હવાનો ભેજ", "પવનની ગતિ", "જમીનમાં પાણીની માત્રા"], "ans": 3, "exp": "બાષ્પોત્સર્જન પર હવાનું તાપમાન, ભેજ અને પવનની ગતિ સીધી અસર કરે છે, જ્યારે જમીનમાં પાણીની માત્રા પરોક્ષ રીતે અસર કરે છે અને તે સૌથી ઓછું અસરકારક પરિબળ છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન વનસ્પતિઓમાં 'સંલગ્નતા-તાણ સિદ્ધાંત' (Cohesion-Tension Theory) માટે ખોટું છે?", "opts": ["પાણીના અણુઓ વચ્ચે સંલગ્નતા બળ કાર્ય કરે છે.", "પાણીના અણુઓ અને જાયલેમની દીવાલ વચ્ચે આસંજન બળ કાર્ય કરે છે.", "પાણીનું વહન સક્રિય પ્રક્રિયા છે જે ATP નો ઉપયોગ કરે છે.", "પર્ણોમાંથી બાષ્પોત્સર્જનને કારણે તાણ ઉત્પન્ન થાય છે."], "ans": 2, "exp": "સંલગ્નતા-તાણ સિદ્ધાંત મુજબ પાણીનું વહન નિષ્ક્રિય પ્રક્રિયા છે અને તેમાં ATP નો ઉપયોગ થતો નથી.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખનીજ ક્ષારોનું મૂળ દ્વારા શોષણ મુખ્યત્વે કઈ પ્રક્રિયા દ્વારા થાય છે?", "opts": ["આસૃતિ (Osmosis)", "સક્રિય વહન (Active Transport)", "પ્રસરણ (Diffusion)", "બાષ્પોત્સર્જન (Transpiration)"], "ans": 1, "exp": "ખનીજ ક્ષારોનું શોષણ સામાન્ય રીતે સક્રિય વહન દ્વારા થાય છે, જેમાં ઊર્જાનો ઉપયોગ થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વનસ્પતિના પર્ણમાંથી એક કલાકમાં ૫ ગ્રામ પાણીનું બાષ્પોત્સર્જન થાય છે. જો આ વનસ્પતિના મૂળ દ્વારા ૨૦ ગ્રામ પાણીનું શોષણ થાય, તો કેટલું પાણી વનસ્પતિના અન્ય ભાગોમાં વપરાશ કે સંગ્રહ માટે ઉપલબ્ધ થશે? (ધારો કે અન્ય કોઈ નુકસાન નથી)", "opts": ["૫ ગ્રામ", "૧૦ ગ્રામ", "૧૫ ગ્રામ", "૨૦ ગ્રામ"], "ans": 2, "exp": "કુલ શોષાયેલ પાણી (૨૦ ગ્રામ) માંથી બાષ્પોત્સર્જન દ્વારા ગુમાવેલ પાણી (૫ ગ્રામ) બાદ કરતાં ૧૫ ગ્રામ પાણી બાકી રહે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં જલવાહક પેશી (xylem) દ્વારા પાણીનું વહન મુખ્યત્વે કયા બળોના સંયોજનથી થાય છે?", "opts": ["મૂળદાબ અને બાષ્પોત્સર્જન ખેંચાણ", "કેશિકાત્વ અને મૂળદાબ", "બાષ્પોત્સર્જન ખેંચાણ અને કોષરસનું દબાણ", "અભિસરણ અને સક્રિય વહન"], "ans": 0, "exp": "વનસ્પતિઓમાં પાણીનું વહન મૂળદાબ (root pressure) અને બાષ્પોત્સર્જન ખેંચાણ (transpiration pull)ના સંયોજનથી થાય છે, જે જલવાહક પેશીમાં ઉપર તરફ પાણી ખેંચે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન વનસ્પતિઓમાં ખનીજતત્ત્વોના વહન માટે ખોટું છે?", "opts": ["ખનીજતત્ત્વોનું વહન મુખ્યત્વે જલવાહક પેશી દ્વારા થાય છે.", "ખનીજતત્ત્વોનું વહન સક્રિય વહન અને નિષ્ક્રિય વહન બંને દ્વારા થઈ શકે છે.", "ખનીજતત્ત્વોનું વહન હંમેશા મૂળથી પ્રકાંડ તરફ એકમાર્ગી હોય છે.", "ખનીજતત્ત્વોનું શોષણ મૂળરોમ કોષો દ્વારા થાય છે."], "ans": 2, "exp": "ખનીજતત્ત્વોનું વહન એકમાર્ગી હોવું જરૂરી નથી; કેટલાક તત્ત્વો ફ્લોએમ દ્વારા ઉપર અને નીચે બંને દિશામાં વહન કરી શકે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખાદ્ય પદાર્થોનું વહન કરતી પેશી કઈ છે અને તેનું વહન કયા સ્વરૂપમાં થાય છે?", "opts": ["ફ્લોએમ, સુક્રોઝ", "જલવાહક, ગ્લુકોઝ", "ફ્લોએમ, ગ્લુકોઝ", "જલવાહક, સુક્રોઝ"], "ans": 0, "exp": "ફ્લોએમ પેશી ખાદ્ય પદાર્થોનું વહન કરે છે, જે મુખ્યત્વે સુક્રોઝ (sucrose) સ્વરૂપમાં થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન વનસ્પતિઓમાં વહન પ્રણાલી માટે સાચું નથી?", "opts": ["જલવાહક પેશી મૃત કોષોની બનેલી હોય છે.", "ફ્લોએમ પેશી જીવંત કોષોની બનેલી હોય છે.", "બાષ્પોત્સર્જન ખેંચાણ માત્ર રાત્રિ દરમિયાન કાર્યરત હોય છે.", "મૂળદાબ સકારાત્મક દબાણ ઉત્પન્ન કરે છે."], "ans": 2, "exp": "બાષ્પોત્સર્જન ખેંચાણ દિવસ દરમિયાન સક્રિય હોય છે, જ્યારે પ્રકાશસંશ્લેષણ અને બાષ્પોત્સર્જનની ક્રિયા ચાલુ હોય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં પાણીના વહન માટે જવાબદાર મુખ્ય બળ કયું છે જે પાણીને મૂળથી પર્ણો સુધી ઉપર તરફ ખેંચે છે?", "opts": ["મૂળદાબ (Root pressure)", "બાષ્પોત્સર્જન ખેંચાણ (Transpiration pull)", "કેશિકાત્વ (Capillarity)", "સંલગ્નતા-તણાવ સિદ્ધાંત (Cohesion-tension theory)માં સંલગ્નતા"], "ans": 1, "exp": "બાષ્પોત્સર્જન ખેંચાણ એ પાણીના વહનનું મુખ્ય બળ છે, જે પર્ણોમાંથી પાણીના બાષ્પીભવનને કારણે ઉત્પન્ન થાય છે અને પાણીને ઉપર તરફ ખેંચે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન વનસ્પતિઓમાં ખનીજ ક્ષારોના શોષણ માટે ખોટું છે?", "opts": ["ખનીજ ક્ષારોનું શોષણ મુખ્યત્વે સક્રિય વહન દ્વારા થાય છે.", "ખનીજ ક્ષારોનું શોષણ પાણીના શોષણથી સ્વતંત્ર રીતે થાય છે.", "ખનીજ ક્ષારોનું શોષણ ફક્ત મૂળરોમ કોષો દ્વારા થાય છે.", "ખનીજ ક્ષારોનું શોષણ ઉર્જા (ATP)ના ઉપયોગથી થાય છે."], "ans": 2, "exp": "ખનીજ ક્ષારોનું શોષણ મૂળરોમ કોષો ઉપરાંત મૂળના અન્ય કોષો દ્વારા પણ થઈ શકે છે, અને તે સક્રિય વહન દ્વારા થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ફ્લોએમ દ્વારા ખોરાકના વહન માટે જવાબદાર મુખ્ય પદ્ધતિ કઈ છે?", "opts": ["સંલગ્નતા-તણાવ સિદ્ધાંત (Cohesion-tension theory)", "દબાણ પ્રવાહ પદ્ધતિ (Pressure flow hypothesis)", "મૂળદાબ (Root pressure)", "બાષ્પોત્સર્જન ખેંચાણ (Transpiration pull)"], "ans": 1, "exp": "ફ્લોએમ દ્વારા ખોરાકનું વહન દબાણ પ્રવાહ પદ્ધતિ દ્વારા થાય છે, જેમાં ખોરાક ઉચ્ચ દબાણવાળા વિસ્તારથી નિમ્ન દબાણવાળા વિસ્તાર તરફ વહન પામે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વનસ્પતિના પર્ણમાંથી એક કલાકમાં 2 ગ્રામ પાણીનું બાષ્પોત્સર્જન થાય છે. જો આ વનસ્પતિના મૂળ દ્વારા 1.5 ગ્રામ પાણીનું શોષણ થતું હોય, તો આ પરિસ્થિતિમાં શું થશે?", "opts": ["વનસ્પતિમાં પાણીની ઉણપ થશે અને તે કરમાશે.", "વનસ્પતિમાં પાણીનો સંગ્રહ વધશે અને તે ફૂલશે.", "વનસ્પતિમાં પાણીનું સંતુલન જળવાઈ રહેશે.", "વનસ્પતિ વધુ પાણીનું શોષણ કરવાનું શરૂ કરશે."], "ans": 0, "exp": "બાષ્પોત્સર્જન દ્વારા પાણીનું નુકસાન શોષણ કરતાં વધુ છે, તેથી વનસ્પતિમાં પાણીની ઉણપ થશે અને તે કરમાશે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "કથન (A): વનસ્પતિઓમાં ખનીજ ક્ષારોનું વહન મુખ્યત્વે જাইলમ દ્વારા થાય છે.\nકારણ (R): ખનીજ ક્ષારો પાણીમાં દ્રાવ્ય સ્વરૂપે હોય છે અને પાણી સાથે જ વહન પામે છે.", "opts": ["A અને R બંને સાચાં છે અને R એ Aની સાચી સમજૂતી છે.", "A અને R બંને સાચાં છે પરંતુ R એ Aની સાચી સમજૂતી નથી.", "A સાચું છે પરંતુ R ખોટું છે.", "A ખોટું છે પરંતુ R સાચું છે."], "ans": 0, "exp": "ખનીજ ક્ષારો પાણીમાં દ્રાવ્ય સ્વરૂપે હોય છે અને જাইলમ દ્વારા પાણી સાથે વહન પામે છે, તેથી કથન અને કારણ બંને સાચાં છે અને કારણ એ કથનની સાચી સમજૂતી છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન 'સંલગ્નતા-તણાવ સિદ્ધાંત' (Cohesion-Tension Theory) માટે ખોટું છે?", "opts": ["પાણીના અણુઓ વચ્ચેની સંલગ્નતા પાણીના સ્તંભને અખંડિત રાખવામાં મદદ કરે છે.", "બાષ્પોત્સર્જનને કારણે પર્ણોમાં ઉત્પન્ન થતો તણાવ પાણીને ઉપર ખેંચે છે.", "મૂળદાબ એ પાણીના ઉપર તરફના વહનનું મુખ્ય બળ છે.", "આ સિદ્ધાંત ડિક્સન અને જોલી દ્વારા પ્રસ્તાવિત કરવામાં આવ્યો હતો."], "ans": 2, "exp": "સંલગ્નતા-તણાવ સિદ્ધાંત મુજબ, મૂળદાબ એ પાણીના વહનનું મુખ્ય બળ નથી, પરંતુ બાષ્પોત્સર્જન ખેંચાણ મુખ્ય બળ છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ 'સક્રિય વહન' (Active Transport)નું નથી?", "opts": ["મૂળરોમ દ્વારા ખનીજ ક્ષારોનું શોષણ", "પાણીનું ઓસ્મોસિસ દ્વારા શોષણ", "પ્રકાંડમાં ખનીજ ક્ષારોનું વહન", "પર્ણોમાંથી ખનીજ ક્ષારોનું પુનઃવિતરણ"], "ans": 1, "exp": "પાણીનું ઓસ્મોસિસ દ્વારા શોષણ એ નિષ્ક્રિય વહન (Passive Transport) છે, જ્યારે ખનીજ ક્ષારોનું શોષણ અને વહન સામાન્ય રીતે સક્રિય વહન દ્વારા થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં 'સંલગ્નતા-તણાવ સિદ્ધાંત' (Cohesion-Tension Theory) કઈ પ્રક્રિયા સમજાવવા માટે વપરાય છે?", "opts": ["પ્રકાશસંશ્લેષણ દરમિયાન કાર્બન ડાયોક્સાઇડનું શોષણ", "પાણીનું મૂળથી પર્ણો સુધીનું ઉપર તરફનું વહન", "ખનીજ ક્ષારોનું મૂળમાં શોષણ", "કાર્બોહાઇડ્રેટ્સનું ફ્લોએમ દ્વારા વહન"], "ans": 1, "exp": "'સંલગ્નતા-તણાવ સિદ્ધાંત' વનસ્પતિઓમાં પાણીના ઉપર તરફના વહનની પ્રક્રિયા સમજાવે છે, જેમાં પાણીના અણુઓની સંલગ્નતા અને બાષ્પોત્સર્જનથી ઉત્પન્ન થતો તણાવ મુખ્ય ભૂમિકા ભજવે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન વનસ્પતિઓમાં ખનિજક્ષારના શોષણ માટે ખોટું છે?", "opts": ["ખનિજક્ષારનું શોષણ મુખ્યત્વે સક્રિય વહન દ્વારા થાય છે.", "ખનિજક્ષારનું શોષણ મૂળરોમ કોષો દ્વારા થાય છે.", "ખનિજક્ષારનું શોષણ ફક્ત જલવહન સાથે જ થાય છે.", "ખનિજક્ષારનું શોષણ ઉર્જા આધારિત પ્રક્રિયા છે."], "ans": 2, "exp": "ખનિજક્ષારનું શોષણ જલવહનથી સ્વતંત્ર રીતે થઈ શકે છે અને તે મુખ્યત્વે સક્રિય વહન દ્વારા થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ફ્લોએમ દ્વારા ખાદ્યપદાર્થોનું વહન કઈ પ્રક્રિયા દ્વારા થાય છે?", "opts": ["સંલગ્નતા-તણાવ સિદ્ધાંત", "દબાણ પ્રવાહ પરિકલ્પના (Pressure flow hypothesis)", "કેશિકાત્વ", "આસૃતિ (Osmosis)"], "ans": 1, "exp": "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન દબાણ પ્રવાહ પરિકલ્પના (Pressure flow hypothesis) અનુસાર થાય છે, જેમાં દ્રાવણનું ઉચ્ચ દબાણથી નિમ્ન દબાણ તરફ વહન થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "એક વનસ્પતિના પર્ણમાંથી એક કલાકમાં 3 ગ્રામ પાણીનું બાષ્પોત્સર્જન થાય છે. જો આ વનસ્પતિના મૂળ દ્વારા એક કલાકમાં 5 ગ્રામ પાણી શોષાય છે, તો આ વનસ્પતિમાં પાણીનું ચોખ્ખું શોષણ કેટલું થાય છે?", "opts": ["2 ગ્રામ", "3 ગ્રામ", "5 ગ્રામ", "8 ગ્રામ"], "ans": 0, "exp": "ચોખ્ખું શોષણ = કુલ શોષણ - બાષ્પોત્સર્જન = 5 ગ્રામ - 3 ગ્રામ = 2 ગ્રામ.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં જલવહન (water transport) માટે જવાબદાર મુખ્ય બળ કયું છે, જે પાણીને મૂળથી ઉપરના ભાગો સુધી ખેંચે છે?", "opts": ["મૂળદાબ (root pressure)", "સંલગ્નતા-તણાવ સિદ્ધાંત (cohesion-tension theory)", "સક્રિય વહન (active transport)", "જલવાહક પેશીનું કેશિકા બળ (capillary action)"], "ans": 1, "exp": "સંલગ્નતા-તણાવ સિદ્ધાંત અનુસાર, પાણીના અણુઓની સંલગ્નતા અને બાષ્પોત્સર્જન દ્વારા ઉત્પન્ન થતા તણાવને કારણે પાણી ઉપર તરફ ખેંચાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું વિધાન વનસ્પતિઓમાં ખનિજતત્ત્વોના શોષણ માટે ખોટું છે?", "opts": ["ખનિજતત્ત્વોનું શોષણ મુખ્યત્વે સક્રિય વહન દ્વારા થાય છે.", "ખનિજતત્ત્વોનું શોષણ માત્ર જલવાહક પેશી (xylem) દ્વારા થાય છે.", "ખનિજતત્ત્વોનું શોષણ મૂળરોમ કોષો દ્વારા થાય છે.", "ખનિજતત્ત્વોનું શોષણ માટે ઊર્જા (ATP) ની જરૂર પડે છે."], "ans": 1, "exp": "ખનિજતત્ત્વોનું શોષણ મૂળરોમ કોષો દ્વારા થાય છે અને તે સક્રિય વહન દ્વારા થાય છે, પરંતુ તે માત્ર જલવાહક પેશી દ્વારા જ થતું નથી.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેના પૈકી કયું ઉદાહરણ સક્રિય વહન (active transport) નું નથી?", "opts": ["મૂળ દ્વારા ખનિજતત્ત્વોનું શોષણ", "પાણીનું મૂળરોમ કોષોમાં પ્રવેશવું", "પોટેશિયમ આયનોનું કોષમાં પ્રવેશવું", "સોડિયમ-પોટેશિયમ પંપનું કાર્ય"], "ans": 1, "exp": "પાણીનું મૂળરોમ કોષોમાં પ્રવેશવું આસૃતિ (osmosis) દ્વારા થાય છે, જે નિષ્ક્રિય વહન છે, જ્યારે બાકીના ઉદાહરણો સક્રિય વહનના છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં બાષ્પોત્સર્જન (transpiration) નું મુખ્ય કાર્ય શું છે?", "opts": ["પાણી અને ખનિજતત્ત્વોનું શોષણ વધારવું", "પાણીનું ઉપર તરફ વહન અને ઠંડક પૂરી પાડવી", "કાર્બોદિતનું વહન સરળ બનાવવું", "ઓક્સિજનનું શોષણ વધારવું"], "ans": 1, "exp": "બાષ્પોત્સર્જન દ્વારા પાણીનું ઉપર તરફ વહન થાય છે અને તે વનસ્પતિને ઠંડક પૂરી પાડવામાં મદદ કરે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં જલવહન (water transport) માટે જવાબદાર મુખ્ય બળ કયું છે જે પાણીને મૂળથી ઉપર તરફ ખેંચે છે?", "opts": ["મૂળદાબ (root pressure)", "બાષ્પોત્સર્જન ખેંચાણ (transpiration pull)", "જલસંયોજન (imbibition)", "સક્રિય વહન (active transport)"], "ans": 1, "exp": "બાષ્પોત્સર્જન ખેંચાણ એ વનસ્પતિઓમાં પાણીના ઉપર તરફના વહનનું મુખ્ય બળ છે, જે પર્ણોમાંથી પાણીના બાષ્પીભવનને કારણે ઉત્પન્ન થાય છે અને સંલગ્નતા-તણાવ સિદ્ધાંત (cohesion-tension theory) દ્વારા સમજાવી શકાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખાદ્યપદાર્થો (કાર્બોદિત)ના વહન માટે જવાબદાર પેશી કઈ છે અને આ વહન કયા સ્વરૂપમાં થાય છે?", "opts": ["જલવાહિની (xylem), ગ્લુકોઝ", "ફ્લોએમ (phloem), સુક્રોઝ", "જલવાહિની (xylem), સુક્રોઝ", "ફ્લોએમ (phloem), સ્ટાર્ચ"], "ans": 1, "exp": "વનસ્પતિઓમાં ખાદ્યપદાર્થોનું વહન ફ્લોએમ પેશી દ્વારા થાય છે અને તે મુખ્યત્વે સુક્રોઝ સ્વરૂપમાં વહન પામે છે, જેને સંક્રમણ (translocation) કહે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં બાષ્પોત્સર્જન (transpiration)ની ક્રિયા માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["બાષ્પોત્સર્જન પાણીના ઉપર તરફના વહનમાં મદદરૂપ થાય છે.", "બાષ્પોત્સર્જન વનસ્પતિને ઠંડી રાખવામાં મદદ કરે છે.", "બાષ્પોત્સર્જન ફક્ત રાત્રિ દરમિયાન થાય છે.", "બાષ્પોત્સર્જન વાયુરંધ્રો (stomata) દ્વારા મુખ્યત્વે થાય છે."], "ans": 2, "exp": "બાષ્પોત્સર્જન મુખ્યત્વે દિવસ દરમિયાન થાય છે જ્યારે વાયુરંધ્રો ખુલ્લા હોય છે, અને તે પાણીના ઉપર તરફના વહન તેમજ વનસ્પતિના તાપમાન નિયંત્રણમાં મદદરૂપ થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ફ્લોએમ દ્વારા ખાદ્યપદાર્થોના વહન માટે નીચેનામાંથી કયું વિધાન સાચું નથી?", "opts": ["ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન દબાણ-પ્રવાહ સિદ્ધાંત (pressure-flow hypothesis) દ્વારા થાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન હંમેશા ઉપરથી નીચે તરફ થાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન સક્રિય વહન દ્વારા થાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન સંલગ્ન કોષો (companion cells)ની મદદથી થાય છે."], "ans": 1, "exp": "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન ઉપરથી નીચે તેમજ નીચેથી ઉપર તરફ પણ થઈ શકે છે, જે વનસ્પતિની જરૂરિયાત પર આધારિત છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખનીજ ક્ષારોના શોષણ માટે જવાબદાર મુખ્ય પદ્ધતિ કઈ છે, જેને 'સક્રિય વહન' તરીકે ઓળખવામાં આવે છે?", "opts": ["આસૃતિ (Diffusion)", "સાનુકૂલિત પ્રસરણ (Facilitated diffusion)", "પ્રોટીન પંપ દ્વારા સક્રિય વહન (Active transport via protein pumps)", "અંતઃચૂષણ (Imbibition)"], "ans": 2, "exp": "ખનીજ ક્ષારોનું શોષણ મુખ્યત્વે સક્રિય વહન દ્વારા થાય છે, જેમાં પ્રોટીન પંપ ATP નો ઉપયોગ કરીને ક્ષારોને કોષમાં પ્રવેશ કરાવે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં બાષ્પોત્સર્જન (Transpiration) ની ક્રિયા માટે નીચેનામાંથી કયું પરિબળ સૌથી ઓછી અસર કરે છે?", "opts": ["પર્યાવરણનું તાપમાન", "હવાનો ભેજ (Humidity)", "પવનની ગતિ", "જમીનમાં ખનીજ ક્ષારોની સાંદ્રતા"], "ans": 3, "exp": "બાષ્પોત્સર્જન પર તાપમાન, ભેજ અને પવનની ગતિની સીધી અસર થાય છે, જ્યારે જમીનમાં ખનીજ ક્ષારોની સાંદ્રતા તેને પ્રભાવિત કરતી નથી.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "ફ્લોએમમાં ખાદ્યપદાર્થોના વહન માટે જવાબદાર મુખ્ય પદ્ધતિ કઈ છે, જેને 'સંકોચન-પ્રવાહ મોડેલ' (Mass Flow Hypothesis) તરીકે ઓળખવામાં આવે છે?", "opts": ["સક્રિય વહન (Active transport) માત્ર", "આસૃતિ (Diffusion) અને સક્રિય વહન બંને", "સંકોચન દ્વારા દબાણપૂર્વક વહન (Pressure flow via mass flow)", "અંતઃચૂષણ (Imbibition)"], "ans": 2, "exp": "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન 'સંકોચન-પ્રવાહ મોડેલ' દ્વારા થાય છે, જેમાં સ્રોત (Source) અને સિંક (Sink) વચ્ચે દબાણના તફાવતથી વહન થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખનિજક્ષારોના શોષણ માટે જવાબદાર પ્રાથમિક સક્રિય વહન (primary active transport) પ્રક્રિયામાં કયો ઉત્સેચક મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["પ્રોટોન પંપ (H⁺-ATPase)", "સોડિયમ-પોટેશિયમ પંપ (Na⁺/K⁺-ATPase)", "કેલ્શિયમ પંપ (Ca²⁺-ATPase)", "મેગ્નેશિયમ પંપ (Mg²⁺-ATPase)"], "ans": 0, "exp": "પ્રાથમિક સક્રિય વહનમાં H⁺-ATPase ઉત્સેચક પ્રોટોન (H⁺) ને કોષની બહાર ધકેલીને વિદ્યુતરાસાયણિક ઢોળાંશ ઉત્પન્ન કરે છે, જે ખનિજક્ષારોના શોષણ માટે જરૂરી છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "નીચેનામાંથી કયું વિધાન ફ્લોએમ (phloem) દ્વારા ખાદ્યપદાર્થોના વહન માટે ખોટું છે?", "opts": ["ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન સક્રિય વહન (active transport) દ્વારા થાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન દબાણ પ્રવાહ મોડલ (Pressure Flow Model) દ્વારા સમજાવી શકાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન હંમેશા ઉપરથી નીચેની દિશામાં થાય છે.", "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન સંપૂર્ણપણે પ્રકાશસંશ્લેષણ પર આધારિત છે."], "ans": 2, "exp": "ફ્લોએમમાં ખાદ્યપદાર્થોનું વહન ઉપરથી નીચે તેમજ નીચેથી ઉપરની દિશામાં પણ થઈ શકે છે, જે સ્રોત (source) અને સિંક (sink) વચ્ચેના સંબંધ પર આધારિત છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "ફલોએમ (phloem) દ્વારા ખાદ્યપદાર્થોનું વહન કઈ પ્રક્રિયા દ્વારા થાય છે?", "opts": ["સક્રિય વહન (active transport) અને દબાણ પ્રવાહ મોડેલ (pressure flow model)", "પેસિવ વહન (passive transport) અને કેશિકાત્વ", "બાષ્પોત્સર્જન ખેંચાણ દ્વારા", "મૂળદાબ દ્વારા"], "ans": 0, "exp": "ફલોએમમાં ખાદ્યપદાર્થોનું વહન સક્રિય વહન અને દબાણ પ્રવાહ મોડેલ દ્વારા થાય છે, જેમાં સુક્રોઝનું સ્ત્રોતથી સિંક તરફનું સ્થાનાંતરણ થાય છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં ખનિજક્ષારોનું શોષણ મુખ્યત્વે કયા ભાગમાં થાય છે અને કઈ પ્રક્રિયા દ્વારા થાય છે?", "opts": ["મૂળરોમ કોષો દ્વારા, સક્રિય વહન (active transport)", "પર્ણરંધ્રો દ્વારા, બાષ્પોત્સર્જન ખેંચાણ", "જલવાહક પેશીઓ દ્વારા, પેસિવ વહન", "ફલોએમ દ્વારા, દબાણ પ્રવાહ મોડેલ"], "ans": 0, "exp": "ખનિજક્ષારોનું શોષણ મુખ્યત્વે મૂળરોમ કોષોમાં સક્રિય વહન દ્વારા થાય છે, જે ઉર્જા (ATP)નો ઉપયોગ કરે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "ફ્લોએમ (phloem) દ્વારા ખાદ્યપદાર્થોના વહનમાં નીચેનામાંથી કયું પગલું સક્રિય વહન (active transport) દ્વારા થાય છે?", "opts": ["સુક્રોઝનું ફ્લોએમમાં લોડિંગ (loading)", "સુક્રોઝનું ફ્લોએમમાંથી અનલોડિંગ (unloading)", "ફ્લોએમ રસનું દબાણ પ્રવાહ મોડેલ (pressure flow model) મુજબનું વહન", "સુક્રોઝનું સાથી કોષોમાંથી ચાલની નલિકાઓમાં પ્રસરણ"], "ans": 0, "exp": "સુક્રોઝનું ફ્લોએમમાં લોડિંગ એ સક્રિય વહન છે, જેમાં ATPનો ઉપયોગ કરીને સુક્રોઝને ફ્લોએમમાં ધકેલવામાં આવે છે.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}, {"q": "વનસ્પતિઓમાં જલવહન (water transport) દરમિયાન નીચેના પૈકી કયું પરિબળ સૌથી ઓછું પ્રભાવી છે?", "opts": ["સંલગ્નતા (Cohesion) અને આસંજકતા (Adhesion)", "મૂળદાબ (Root pressure)", "બાષ્પોત્સર્જન ખેંચાણ (Transpiration pull)", "પ્રકાશસંશ્લેષણની ક્રિયા દરમિયાન ઉત્પન્ન થતો ઓક્સિજન"], "ans": 3, "exp": "જલવહનમાં સંલગ્નતા, આસંજકતા, મૂળદાબ અને બાષ્પોત્સર્જન ખેંચાણ મુખ્ય પરિબળો છે, જ્યારે પ્રકાશસંશ્લેષણ દરમિયાન ઉત્પન્ન થતો ઓક્સિજન જલવહનમાં સીધી રીતે ભાગ લેતો નથી.", "chapter": "વનસ્પતિઓમાં વહન", "svg": "", "subject": "BIOLOGY"}];
+const SUBJECTS=[{"name": "BIOLOGY", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "વનસ્પતિઓમાં વહન Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
