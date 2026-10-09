@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>આઇસોમેરિઝમ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>આઇસોમેરિઝમ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">આઇસોમેરિઝમ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક જ કાર્બનિક સંયોજનના બે આઇસોમરો માટે નીચેનાં પૈકી કયું વિધાન ખોટું છે?", "opts": ["બંનેના આણ્વીય સૂત્ર સમાન હોય છે પરંતુ બંધારણીય સૂત્ર અલગ હોય છે", "બંનેના ગલનબિંદુ અને ઉત્કલનબિંદુ સમાન હોય તેવું જરૂરી નથી", "બંનેના રાસાયણિક ગુણધર્મો હંમેશાં સમાન હોય છે કારણ કે તેઓ સમાન ક્રિયાશીલ સમૂહ ધરાવે છે", "બંનેના ભૌતિક ગુણધર્મો જેમ કે દ્રાવ્યતા અને ધ્રુવીયતા અલગ હોઈ શકે છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. આઇસોમરોના આણ્વીય સૂત્ર સમાન હોય છે પરંતુ તેમના બંધારણીય સૂત્ર અલગ હોવાથી તેમના રાસાયણિક ગુણધર્મો પણ અલગ હોઈ શકે છે. ઉદાહરણ તરીકે, કાર્યાત્મક સમૂહ અલગ હોવાથી તેમની પ્રતિક્રિયાત્મકતા બદલાય છે. વિકલ્પ A, B અને D સાચાં છે કારણ કે આઇસોમરોના ભૌતિક ગુણધર્મો જેમ કે ગલનબિંદુ, ઉત્કલનબિંદુ, દ્રાવ્યતા અને ધ્રુવીયતા અલગ હોઈ શકે છે.", "ref": "Std 11 - પ્રકરણ 12: કાર્બનિક રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "ch": ""}, {"q": "નીચેનાં પૈકી કયું સંયોજન સ્ટીરિયોઆઇસોમેરિઝમ દર્શાવતું નથી?", "opts": ["2-બ્યુટીન", "1,2-ડાયક્લોરોસાયક્લોપ્રોપેન", "1-બ્યુટેનોલ", "2,3-ડાયહાઇડ્રોક્સીબ્યુટેન"], "ans": 0, "exp": "સાચો જવાબ વિકલ્પ C છે. 1-બ્યુટેનોલમાં કાર્બન પરમાણુઓ પર અસમમિત કેન્દ્ર (chiral center) નથી હોતું, તેથી તે સ્ટીરિયોઆઇસોમેરિઝમ દર્શાવતું નથી. વિકલ્પ A (2-બ્યુટીન)માં સિસ-ટ્રાન્સ આઇસોમેરિઝમ, વિકલ્પ B (1,2-ડાયક્લોરોસાયક્લોપ્રોપેન)માં ભૌમિતિક આઇસોમેરિઝમ અને વિકલ્પ D (2,3-ડાયહાઇડ્રોક્સીબ્યુટેન)માં પ્રકાશીય આઇસોમેરિઝમ જોવા મળે છે.", "ref": "Std 11 - પ્રકરણ 12: કાર્બનિક રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "ch": ""}, {"q": "એક સંયોજનનું બંધારણીય સૂત્ર CH₃-CH(OH)-CH₂-CH₃ છે. આ સંયોજન માટે નીચેનાં પૈકી કયું વિધાન ખોટું છે?", "opts": ["આ સંયોજન પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે", "આ સંયોજન કાર્યાત્મક સમૂહ આલ્કોહોલ ધરાવે છે", "આ સંયોજનનું IUPAC નામ 2-બ્યુટેનોલ છે", "આ સંયોજનમાં બે અસમમિત કાર્બન પરમાણુઓ છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. આપેલ સંયોજન CH₃-CH(OH)-CH₂-CH₃ (2-બ્યુટેનોલ)માં માત્ર એક જ અસમમિત કાર્બન પરમાણુ (C-2) છે, તેથી તે પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે. વિકલ્પ A, B અને C સાચાં છે કારણ કે તે આલ્કોહોલ સમૂહ ધરાવે છે અને તેનું IUPAC નામ 2-બ્યુટેનોલ છે.", "ref": "Std 11 - પ્રકરણ 12: કાર્બનિક રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "ch": ""}, {"q": "નીચેનાં પૈકી કયું સંયોજન મેટામેરિઝમ દર્શાવતું નથી?", "opts": ["ડાયઇથાઇલ ઇથર અને મિથાઇલ પ્રોપાઇલ ઇથર", "ઇથાઇલ પ્રોપાઇલ કીટોન અને ડાયઇથાઇલ કીટોન", "ઇથેનોલ અને ડાયમિથાઇલ ઇથર", "ઇથાઇલ એસિટેટ અને મિથાઇલ પ્રોપિયોનેટ"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. મેટામેરિઝમ એ કાર્યાત્મક સમૂહ સમાન હોય પરંતુ આલ્કાઇલ સમૂહોની ગોઠવણી અલગ હોય તેવા સંયોજનોમાં જોવા મળે છે. ઇથેનોલ (CH₃CH₂OH) અને ડાયમિથાઇલ ઇથર (CH₃OCH₃) જુદા જુદા કાર્યાત્મક સમૂહ ધરાવે છે, તેથી તેઓ મેટામેરિઝમ દર્શાવતા નથી. વિકલ્પ A, B અને D મેટામેરિક જોડીઓ છે.", "ref": "Std 11 - પ્રકરણ 12: કાર્બનિક રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "ch": ""}, {"q": "એક સંયોજનનું બંધારણીય સૂત્ર CH₃-CH=CH-CH₃ છે. આ સંયોજન માટે નીચેનાં પૈકી કયું વિધાન સાચું નથી?", "opts": ["આ સંયોજન ભૌમિતિક આઇસોમેરિઝમ દર્શાવે છે", "આ સંયોજનનું IUPAC નામ 2-બ્યુટીન છે", "આ સંયોજનમાં કાર્બન-કાર્બન દ્વિબંધ પર સિસ અને ટ્રાન્સ ગોઠવણી શક્ય છે", "આ સંયોજન પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે કારણ કે તેમાં અસમમિત કાર્બન છે"], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે. સંયોજન CH₃-CH=CH-CH₃ (2-બ્યુટીન)માં અસમમિત કાર્બન પરમાણુ નથી હોતો, તેથી તે પ્રકાશીય આઇસોમેરિઝમ દર્શાવતું નથી. તે ભૌમિતિક આઇસોમેરિઝમ (સિસ-ટ્રાન્સ) દર્શાવે છે કારણ કે દ્વિબંધ પર અલગ અલગ સમૂહો જોડાયેલા છે. વિકલ્પ A, B અને C સાચાં છે.", "ref": "Std 11 - પ્રકરણ 12: કાર્બનિક રસાયણશાસ્ત્રના મૂળભૂત સિદ્ધાંતો", "ch": ""}, {"q": "નીચેનાં પૈકી કયા સંયોજનમાં આઇસોમેરિઝમના બધા જ પ્રકાર (બંધારણીય, ભૌમિતિક, પ્રકાશીય) જોવા મળે છે?", "opts": ["2-બ્યુટીન", "2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ", "1,2-ડાયક્લોરોસાયક્લોપ્રોપેન", "2,3-ડાયબ્રોમોબ્યુટેન"], "ans": 3, "exp": "2,3-ડાયબ્રોમોબ્યુટેનમાં બંધારણીય આઇસોમેર (અલગ બંધારણ), ભૌમિતિક આઇસોમર (સિસ-ટ્રાન્સ) અને પ્રકાશીય આઇસોમર (એનન્ટિયોમર) ત્રણેય પ્રકાર જોવા મળે છે. 2-બ્યુટીનમાં ફક્ત ભૌમિતિક આઇસોમર (સિસ-ટ્રાન્સ) જોવા મળે છે. 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડમાં પ્રકાશીય આઇસોમર જોવા મળે છે, પરંતુ ભૌમિતિક નહીં. 1,2-ડાયક્લોરોસાયક્લોપ્રોપેનમાં ફક્ત પ્રકાશીય આઇસોમર જોવા મળે છે.", "ref": "Std 11 - અભ્યાસક્રમ 12: કાર્બનિક રસાયણવિજ્ઞાન - આઇસોમેરિઝમ", "ch": ""}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર C4H8O છે. જો આ સંયોજન પ્રકાશીય સક્રિય હોય, તો તે નીચેનાં પૈકી કયું હોવું જોઈએ?", "opts": ["બ્યુટેન-1-ઓલ", "બ્યુટેન-2-ઓલ", "2-મિથાઇલપ્રોપેન-1-ઓલ", "સાયક્લોબ્યુટેનોલ"], "ans": 1, "exp": "બ્યુટેન-2-ઓલ (CH3-CH(OH)-CH2-CH3)માં કાર્બન-2 પર કિરાલ કેન્દ્ર (asymmetric carbon) હોવાથી તે પ્રકાશીય સક્રિય હોય છે. બ્યુટેન-1-ઓલ અને 2-મિથાઇલપ્રોપેન-1-ઓલમાં કિરાલ કેન્દ્ર નથી, જ્યારે સાયક્લોબ્યુટેનોલમાં પણ કિરાલ કેન્દ્ર નથી.", "ref": "Std 11 - અભ્યાસક્રમ 12: કાર્બનિક રસાયણવિજ્ઞાન - પ્રકાશીય આઇસોમેરિઝમ", "ch": ""}, {"q": "નીચેનાં વિધાનો પૈકી કયું સ્ટીરિયોઆઇસોમરિઝમ માટે સાચું નથી?", "opts": ["સ્ટીરિયોઆઇસોમરોના ભૌતિક ગુણધર્મો (જેવા કે ગલનબિંદુ, ઉત્કલનબિંદુ) અલગ હોવાં જોઈએ.", "સ્ટીરિયોઆઇસોમરોના રાસાયણિક ગુણધર્મો સરખા હોવાં જોઈએ.", "સ્ટીરિયોઆઇસોમરોને અલગ કરવા માટે પોલરિમીટરનો ઉપયોગ થાય છે.", "સ્ટીરિયોઆઇસોમરોના આણ્વીય સૂત્ર અને બંધારણીય સૂત્ર સરખા હોવાં જોઈએ."], "ans": 2, "exp": "સ્ટીરિયોઆઇસોમરોને અલગ કરવા માટે પોલરિમીટરનો ઉપયોગ થતો નથી, કારણ કે પોલરિમીટર ફક્ત પ્રકાશીય આઇસોમરો (એનન્ટિયોમર) માટે ઉપયોગી છે. સ્ટીરિયોઆઇસોમરો (જેવા કે સિસ-ટ્રાન્સ)ને અલગ કરવા માટે અન્ય પદ્ધતિઓ જેવી કે ક્રોમેટોગ્રાફી વાપરવામાં આવે છે. બાકીના વિધાનો સાચા છે.", "ref": "Std 11 - અભ્યાસક્રમ 12: કાર્બનિક રસાયણવિજ્ઞાન - સ્ટીરિયોઆઇસોમેરિઝમ", "ch": ""}, {"q": "નીચેનાં પૈકી કયા સંયોજનમાં મેટામેરિઝમ જોવા મળતું નથી?", "opts": ["C5H12O", "C4H10O", "C3H8O", "C6H14O"], "ans": 2, "exp": "મેટામેરિઝમ એ આલ્કોક્સી સમૂહ (–O–)ની સ્થિતિ સાથે સંબંધિત છે. C3H8O (પ્રોપેનોલ)માં ફક્ત એક આલ્કોક્સી સમૂહ હોવાથી મેટામેરિઝમ શક્ય નથી. C4H10O (બ્યુટેનોલ), C5H12O (પેન્ટેનોલ), અને C6H14O (હેક્ઝેનોલ)માં મેટામેરિઝમ શક્ય છે.", "ref": "Std 11 - અભ્યાસક્રમ 12: કાર્બનિક રસાયણવિજ્ઞાન - મેટામેરિઝમ", "ch": ""}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર C5H10 છે. જો આ સંયોજનમાં સિસ-ટ્રાન્સ આઇસોમેરિઝમ જોવા મળે, તો તે નીચેનાં પૈકી કયું હોવું જોઈએ?", "opts": ["પેન્ટ-1-ઇન", "પેન્ટ-2-ઇન", "2-મિથાઇલબ્યુટ-2-ઇન", "સાયક્લોપેન્ટેન"], "ans": 1, "exp": "પેન્ટ-2-ઇન (CH3-CH=CH-CH2-CH3)માં ડબલ બંધ પર બે અલગ સમૂહો હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ જોવા મળે છે. પેન્ટ-1-ઇનમાં ડબલ બંધ એક છેડે હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ શક્ય નથી. 2-મિથાઇલબ્યુટ-2-ઇનમાં ડબલ બંધ પર બે સરખા મિથાઇલ સમૂહો હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ શક્ય નથી. સાયક્લોપેન્ટેનમાં ડબલ બંધ ન હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ શક્ય નથી.", "ref": "Std 11 - અભ્યાસક્રમ 12: કાર્બનિક રસાયણવિજ્ઞાન - ભૌમિતિક આઇસોમેરિઝમ", "ch": ""}, {"q": "નીચેનાં પૈકી કયું સંયોજન એનાન્ટિયોમર (પ્રતિબિંબ આઇસોમર) દર્શાવતું નથી, પરંતુ ડાયસ્ટીરિયોમર (ડાયસ્ટીરિયોઆઇસોમર) દર્શાવે છે?", "opts": ["2-ક્લોરોબ્યુટેન", "2,3-ડાયક્લોરોબ્યુટેન", "2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડ", "3-હાઇડ્રોક્સીપેન્ટેન-2-ઓન"], "ans": 1, "exp": "2,3-ડાયક્લોરોબ્યુટેનમાં બે કિરાલ કેન્દ્રો હોવાથી તે એનાન્ટિયોમર અને ડાયસ્ટીરિયોમર બંને દર્શાવે છે. 2-ક્લોરોબ્યુટેન અને 2-હાઇડ્રોક્સીપ્રોપેનોઇક એસિડમાં એક જ કિરાલ કેન્દ્ર હોવાથી તે ફક્ત એનાન્ટિયોમર દર્શાવે છે. 3-હાઇડ્રોક્સીપેન્ટેન-2-ઓનમાં એક કિરાલ કેન્દ્ર હોવાથી તે ફક્ત એનાન્ટિયોમર દર્શાવે છે, ડાયસ્ટીરિયોમર નહીં. આથી સાચો જવાબ B છે.", "ref": "Std 12 - Chapter 10: હેલોએલ્કેન અને હેલોએરિન સંયોજનો", "ch": ""}, {"q": "નીચેનાં વિધાનો પૈકી કયું સ્ટીરિયોઆઇસોમરિઝમ માટે ખોટું છે?", "opts": ["સિસ-ટ્રાન્સ આઇસોમરિઝમ એ સ્ટીરિયોઆઇસોમરિઝમનો એક પ્રકાર છે.", "પ્રકાશીય આઇસોમરો સ્ટીરિયોઆઇસોમરો છે.", "સ્ટીરિયોઆઇસોમરોના ભૌતિક ગુણધર્મો સમાન હોતાં નથી.", "સ્ટીરિયોઆઇસોમરોના રાસાયણિક ગુણધર્મો સમાન હોતાં નથી."], "ans": 3, "exp": "સ્ટીરિયોઆઇસોમરોના રાસાયણિક ગુણધર્મો સમાન હોતાં નથી એ વિધાન ખોટું છે, કારણ કે સ્ટીરિયોઆઇસોમરોના રાસાયણિક ગુણધર્મો સમાન હોતાં નથી પરંતુ ભૌતિક ગુણધર્મો અલગ હોતાં નથી. સિસ-ટ્રાન્સ આઇસોમરિઝમ એ સ્ટીરિયોઆઇસોમરિઝમનો એક પ્રકાર છે અને પ્રકાશીય આઇસોમરો સ્ટીરિયોઆઇસોમરો છે. સ્ટીરિયોઆઇસોમરોના ભૌતિક ગુણધર્મો અલગ હોતાં નથી એ વિધાન સાચું છે.", "ref": "Std 12 - Chapter 10: હેલોએલ્કેન અને હેલોએરિન સંયોજનો", "ch": ""}, {"q": "નીચેનાં પૈકી કયું સંયોજન મેઝો આઇસોમર દર્શાવે છે?", "opts": ["2-બ્રોમોબ્યુટેન", "2,3-ડાયબ્રોમોબ્યુટેન", "1-ક્લોરોપ્રોપેન", "2-ક્લોરોપ્રોપેન"], "ans": 1, "exp": "2,3-ડાયબ્રોમોબ્યુટેનમાં બે કિરાલ કેન્દ્રો હોવા છતાં તે મેઝો આઇસોમર દર્શાવે છે, કારણ કે તે સંમિત છે. 2-બ્રોમોબ્યુટેન, 1-ક્લોરોપ્રોપેન અને 2-ક્લોરોપ્રોપેનમાં એક જ કિરાલ કેન્દ્ર હોવાથી તે મેઝો આઇસોમર દર્શાવતું નથી.", "ref": "Std 12 - Chapter 10: હેલોએલ્કેન અને હેલોએરિન સંયોજનો", "ch": ""}, {"q": "નીચેનાં પૈકી કયું વિધાન આઇસોમેરિઝમ માટે સાચું નથી?", "opts": ["બંધારણીય આઇસોમરોના આણ્વીય સૂત્રો સમાન હોતાં નથી.", "ભૌમિતિક આઇસોમરોના આણ્વીય સૂત્રો સમાન હોતાં નથી.", "પ્રકાશીય આઇસોમરોના ભૌતિક ગુણધર્મો અલગ હોતાં નથી.", "મેટામેરિઝમ એ બંધારણીય આઇસોમરિઝમનો એક પ્રકાર છે."], "ans": 0, "exp": "બંધારણીય આઇસોમરોના આણ્વીય સૂત્રો સમાન હોતાં નથી એ વિધાન ખોટું છે, કારણ કે બંધારણીય આઇસોમરોના આણ્વીય સૂત્રો સમાન હોતાં નથી. ભૌમિતિક આઇસોમરોના આણ્વીય સૂત્રો સમાન હોતાં નથી એ વિધાન સાચું છે. પ્રકાશીય આઇસોમરોના ભૌતિક ગુણધર્મો અલગ હોતાં નથી એ વિધાન સાચું છે. મેટામેરિઝમ એ બંધારણીય આઇસોમરિઝમનો એક પ્રકાર છે એ વિધાન સાચું છે.", "ref": "Std 11 - Chapter 12: કાર્બનિક રસાયણશાસ્ત્ર: મૂળભૂત તત્ત્વો અને તકનીકો", "ch": ""}, {"q": "નીચેનાં પૈકી કયું સંયોજન પ્રકાશીય સક્રિય નથી, પરંતુ ભૌમિતિક આઇસોમરિઝમ દર્શાવે છે?", "opts": ["2-બ્યુટીન", "1,2-ડાયક્લોરોઇથેન", "2-પેન્ટીન", "1-ક્લોરોપ્રોપીન"], "ans": 1, "exp": "1,2-ડાયક્લોરોઇથેનમાં સિસ અને ટ્રાન્સ આઇસોમર હોવાથી તે ભૌમિતિક આઇસોમરિઝમ દર્શાવે છે, પરંતુ તે પ્રકાશીય સક્રિય નથી કારણ કે તેમાં કિરાલ કેન્દ્ર નથી. 2-બ્યુટીન, 2-પેન્ટીન અને 1-ક્લોરોપ્રોપીનમાં કિરાલ કેન્દ્ર હોવાથી તે પ્રકાશીય સક્રિય છે.", "ref": "Std 12 - Chapter 10: હેલોએલ્કેન અને હેલોએરિન સંયોજનો", "ch": ""}, {"q": "નીચેના પૈકી કયા સંયોજનમાં **સિસ-ટ્રાન્સ આઇસોમેરિઝમ** અને **પ્રકાશીય આઇસોમેરિઝમ** બંને જોવા મળે છે, પરંતુ તે **મેઝો સંયોજન** નથી?", "opts": ["3-ક્લોરો-2-પેન્ટીન", "2,3-ડાયક્લોરોબ્યુટેન", "2,3-પેન્ટેનડાયોલ", "1,2-ડાયક્લોરોસાયક્લોપ્રોપેન"], "ans": 0, "exp": "3-ક્લોરો-2-પેન્ટીનમાં C=C દ્વિબંધ હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ જોવા મળે છે અને તેનું બંધારણ અસમમિત કાર્બન (chiral carbon) ધરાવે છે, તેથી પ્રકાશીય આઇસોમેરિઝમ પણ દર્શાવે છે. પરંતુ તે મેઝો સંયોજન નથી કારણ કે તેમાં સમમિતિ તલ (plane of symmetry) નથી. 2,3-ડાયક્લોરોબ્યુટેન મેઝો સંયોજન છે, 2,3-પેન્ટેનડાયોલ પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે પરંતુ સિસ-ટ્રાન્સ નહીં, અને 1,2-ડાયક્લોરોસાયક્લોપ્રોપેન ભૌમિતિક આઇસોમેરિઝમ દર્શાવે છે પરંતુ પ્રકાશીય નહીં.", "ref": "Std 12 - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "એક સંયોજનનું આણ્વીય સૂત્ર **C6H12O2** છે. જો આ સંયોજન **કાર્બોક્સિલિક એસિડ** હોય અને તેમાં **પ્રકાશીય આઇસોમેરિઝમ** જોવા મળતું હોય, તો તેનું બંધારણીય સૂત્ર નીચેનાં પૈકી કયું હોઈ શકે?", "opts": ["CH3-CH2-CH2-CH2-CH2-COOH", "CH3-CH2-CH(CH3)-CH2-COOH", "CH3-CH2-CH2-CH(CH3)-COOH", "(CH3)2CH-CH2-CH2-COOH"], "ans": 2, "exp": "સંયોજન C6H12O2 કાર્બોક્સિલિક એસિડ છે અને પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે, તેથી તેમાં અસમમિત કાર્બન (chiral carbon) હોવો જોઈએ. વિકલ્પ C (CH3-CH2-CH2-CH(CH3)-COOH) માં બીજા કાર્બન પર -CH(CH3)- સમૂહ છે, જે અસમમિત કાર્બન છે. અન્ય વિકલ્પોમાં અસમમિત કાર્બન નથી.", "ref": "Std 12 - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "નીચેના વિધાનો પૈકી કયું **ટોટોમેરિઝમ (Tautomerism)** માટે ખોટું છે?\n(1) ટોટોમેરિઝમમાં બે બંધારણીય આઇસોમર એકબીજામાં સંતુલનમાં હોય છે.\n(2) ટોટોમેરિઝમમાં હાઇડ્રોજન પરમાણુનું સ્થાનાંતરણ થાય છે.\n(3) ટોટોમેરિઝમ માત્ર કાર્બોનિલ સંયોજનોમાં જ જોવા મળે છે.\n(4) ટોટોમેરિઝમમાં π-બંધનું સ્થાનાંતરણ થાય છે.", "opts": ["માત્ર (3)", "(1) અને (3)", "(2) અને (4)", "માત્ર (4)"], "ans": 0, "exp": "ટોટોમેરિઝમ માત્ર કાર્બોનિલ સંયોજનોમાં જ નહીં, પરંતુ અન્ય સંયોજનોમાં પણ જોવા મળે છે (જેમ કે નાઇટ્રો સંયોજનો). તેથી વિધાન (3) ખોટું છે. અન્ય વિધાનો સાચાં છે: ટોટોમેરિઝમમાં બે બંધારણીય આઇસોમર સંતુલનમાં હોય છે, હાઇડ્રોજનનું સ્થાનાંતરણ થાય છે, અને π-બંધનું સ્થાનાંતરણ થાય છે.", "ref": "Std 12 - પ્રકરણ 12: આલ્ડિહાઇડ, કિટોન અને કાર્બોક્સિલિક એસિડ", "ch": ""}, {"q": "એક સંયોજનનું બંધારણીય સૂત્ર **CH3-CH=CH-CH(OH)-CH3** છે. આ સંયોજન માટે નીચેનાં પૈકી કયું વિધાન **ખોટું** છે?", "opts": ["આ સંયોજન સિસ-ટ્રાન્સ આઇસોમેરિઝમ દર્શાવે છે.", "આ સંયોજન પ્રકાશીય આઇસોમેરિઝમ દર્શાવે છે.", "આ સંયોજનમાં બે અસમમિત કાર્બન પરમાણુ છે.", "આ સંયોજન મેઝો આઇસોમર દર્શાવતું નથી."], "ans": 2, "exp": "આ સંયોજનમાં માત્ર એક જ અસમમિત કાર્બન (-CH(OH)-) છે, તેથી વિધાન C ખોટું છે. સંયોજનમાં C=C દ્વિબંધ હોવાથી સિસ-ટ્રાન્સ આઇસોમેરિઝમ (A) અને અસમમિત કાર્બન હોવાથી પ્રકાશીય આઇસોમેરિઝમ (B) દર્શાવે છે. મેઝો આઇસોમર માટે બે અસમમિત કાર્બન અને સમમિતિ તલ જરૂરી છે, જે અહીં નથી, તેથી D સાચું છે.", "ref": "Std 12 - પ્રકરણ 10: હેલોઆલ્કેન અને હેલોએરિન", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન **રિંગ-ચેઇન આઇસોમેરિઝમ (Ring-Chain Isomerism)** દર્શાવતું નથી?", "opts": ["ગ્લુકોઝ", "ફ્રુક્ટોઝ", "સુક્રોઝ", "રિબોઝ"], "ans": 2, "exp": "સુક્રોઝ (C) એક ડાયસેકેરાઇડ છે અને તે રિંગ-ચેઇન આઇસોમેરિઝમ દર્શાવતું નથી કારણ કે તેનું બંધારણ નિશ્ચિત છે. ગ્લુકોઝ (A), ફ્રુક્ટોઝ (B), અને રિબોઝ (D) મોનોસેકેરાઇડ છે અને તેઓ રિંગ અને ખુલ્લી શૃંખલા સ્વરૂપમાં અસ્તિત્વ ધરાવે છે, તેથી રિંગ-ચેઇન આઇસોમેરિઝમ દર્શાવે છે.", "ref": "Std 12 - પ્રકરણ 14: બાયોમોલેક્યુલ્સ", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
