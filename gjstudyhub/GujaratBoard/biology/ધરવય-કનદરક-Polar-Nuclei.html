@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ધ્રુવીય કેન્દ્રકો (Polar Nuclei)</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>ધ્રુવીય કેન્દ્રકો (Polar Nuclei)</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">ધ્રુવીય કેન્દ્રકો (Polar Nuclei)</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ડબલ ફલિતીકરણ (Double Fertilization) દરમિયાન ધ્રુવીય કેન્દ્રકોના વિલીન થવાનું મુખ્ય કાર્ય કયું છે?", "opts": ["ભ્રૂણપોષ (Endosperm) ની રચના કરવી", "ભ્રૂણ (Embryo) ની રચના કરવી", "બીજાંડકોષ (Egg cell) ને સક્રિય કરવી", "પુષ્પના રંગને નિયંત્રિત કરવો"], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાનું મુખ્ય કાર્ય ભ્રૂણપોષ (Endosperm) ની રચના કરવી છે, જે બીજના વિકાસ માટે પોષક તત્વો પૂરા પાડે છે. ભ્રૂણ (Embryo) ની રચના શુક્રકોષ અને બીજાંડકોષના વિલીન થવાને કારણે થાય છે. બીજાંડકોષને સક્રિય કરવું એ ધ્રુવીય કેન્દ્રકોનું કાર્ય નથી, અને પુષ્પના રંગને નિયંત્રિત કરવો એ વંશાનુગત લક્ષણ છે, જે ધ્રુવીય કેન્દ્રકો સાથે સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "એક સપુષ્પી વનસ્પતિમાં, ધ્રુવીય કેન્દ્રકો ક્યાં સ્થિત હોય છે?", "opts": ["બીજાંડ (Ovule) ના મધ્ય ભાગમાં", "બીજાંડકોષ (Egg cell) ની બાજુમાં", "બીજાંડાસન (Ovary) ના બાહ્ય આવરણમાં", "પરાગકોષ (Pollen grain) ના અંદર"], "ans": 1, "exp": "ધ્રુવીય કેન્દ્રકો બીજાંડ (Ovule) ના અંદર, બીજાંડકોષ (Egg cell) ની બાજુમાં સ્થિત હોય છે. બીજાંડના મધ્ય ભાગમાં અંતઃસ્તર (Central cell) હોય છે, જેમાં બે ધ્રુવીય કેન્દ્રકો હોય છે. બીજાંડાસનના બાહ્ય આવરણમાં અથવા પરાગકોષના અંદર ધ્રુવીય કેન્દ્રકો સ્થિત નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ડબલ ફલિતીકરણ પછી, ધ્રુવીય કેન્દ્રકોનું વિલીન થઈને બનતી કોષરચના કયા પ્રકારની હોય છે?", "opts": ["હેપ્લોઈડ (n)", "ડિપ્લોઈડ (2n)", "ટ્રિપ્લોઈડ (3n)", "ટેટ્રાપ્લોઈડ (4n)"], "ans": 2, "exp": "ડબલ ફલિતીકરણ દરમિયાન, બે ધ્રુવીય કેન્દ્રકો (અનુક્રમે n + n) વિલીન થઈને ટ્રિપ્લોઈડ (3n) કોષરચના બનાવે છે, જે ભ્રૂણપોષ (Endosperm) ની રચના કરે છે. હેપ્લોઈડ (n) અને ડિપ્લોઈડ (2n) કોષરચના ધ્રુવીય કેન્દ્રકોના વિલીન થવાને કારણે બનતી નથી. ટેટ્રાપ્લોઈડ (4n) કોષરચના પણ આ પ્રક્રિયામાં બનતી નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ વચ્ચેનો મુખ્ય તફાવત કયો છે?", "opts": ["ધ્રુવીય કેન્દ્રકો હેપ્લોઈડ હોય છે જ્યારે બીજાંડકોષ ડિપ્લોઈડ હોય છે", "ધ્રુવીય કેન્દ્રકો ડિપ્લોઈડ હોય છે જ્યારે બીજાંડકોષ હેપ્લોઈડ હોય છે", "ધ્રુવીય કેન્દ્રકો ટ્રિપ્લોઈડ હોય છે જ્યારે બીજાંડકોષ હેપ્લોઈડ હોય છે", "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઈડ હોય છે"], "ans": 3, "exp": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઈડ (n) હોય છે. ડબલ ફલિતીકરણ દરમિયાન, બે હેપ્લોઈડ ધ્રુવીય કેન્દ્રકો વિલીન થઈને ટ્રિપ્લોઈડ (3n) ભ્રૂણપોષ બનાવે છે, પરંતુ મૂળ રૂપે બંને હેપ્લોઈડ હોય છે. બીજાંડકોષ પણ હેપ્લોઈડ હોય છે, જે શુક્રકોષ સાથે વિલીન થઈને ડિપ્લોઈડ (2n) ભ્રૂણ બનાવે છે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "જો કોઈ વનસ્પતિમાં ધ્રુવીય કેન્દ્રકોનું વિલીન થવું ન થાય, તો કયું પરિણામ થશે?", "opts": ["ભ્રૂણપોષ (Endosperm) ની રચના નહીં થાય", "ભ્રૂણ (Embryo) ની રચના નહીં થાય", "બીજાંડ (Ovule) નો વિકાસ અટકી જશે", "પુષ્પના રંગમાં ફેરફાર થશે"], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાને કારણે ભ્રૂણપોષ (Endosperm) ની રચના થાય છે. જો આ વિલીન ન થાય, તો ભ્રૂણપોષ બનશે નહીં, જે બીજના વિકાસ માટે આવશ્યક પોષક તત્વો પૂરા પાડે છે. ભ્રૂણ (Embryo) ની રચના શુક્રકોષ અને બીજાંડકોષના વિલીન થવાને કારણે થાય છે, જે આ પ્રક્રિયાથી અસરગ્રસ્ત નથી. બીજાંડનો વિકાસ અટકી જવો અથવા પુષ્પના રંગમાં ફેરફાર થવો એ ધ્રુવીય કેન્દ્રકોના વિલીન થવાના અભાવે સીધી અસર નથી.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પી વનસ્પતિઓમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "સપુષ્પી વનસ્પતિમાં, ધ્રુવીય કેન્દ્રકોના વિલીન થવાના પ્રક્રિયામાં કયો હોર્મોન મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["ઓક્સિન", "જિબરેલિન", "સાયટોકાઇનિન", "એબ્સિસિક એસિડ"], "ans": 2, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા ડબલ ફલિતીકરણ દરમિયાન થાય છે, જેમાં સાયટોકાઇનિન હોર્મોન કોષવિભાજન અને કોષીય વૃદ્ધિમાં મહત્વની ભૂમિકા ભજવે છે. ઓક્સિન (A) મુખ્યત્વે કોષવિભાજન અને વૃદ્ધિ માટે જવાબદાર છે, પરંતુ ધ્રુવીય કેન્દ્રકોના વિલીન થવામાં તેની પ્રત્યક્ષ ભૂમિકા નથી. જિબરેલિન (B) બીજના અંકુરણમાં મદદ કરે છે, પરંતુ ધ્રુવીય કેન્દ્રકોના વિલીન થવામાં નહીં. એબ્સિસિક એસિડ (D) વૃદ્ધિ અવરોધક છે, જેથી તે આ પ્રક્રિયામાં ભાગ લેતું નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના પરિણામે બનતી કોષરચના કયા પ્રકારના વર્ણસૂત્રો ધરાવે છે?", "opts": ["હેપ્લોઇડ (n)", "ડિપ્લોઇડ (2n)", "ટ્રિપ્લોઇડ (3n)", "ટેટ્રાપ્લોઇડ (4n)"], "ans": 2, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના પરિણામે બનતી કોષરચના (એન્ડોસ્પર્મ) ટ્રિપ્લોઇડ (3n) હોય છે, કારણ કે તે બે ધ્રુવીય કેન્દ્રકો (અનુક્રમે n + n) અને એક શુક્રકોષ (n)ના વિલીન થવાને કારણે બને છે. હેપ્લોઇડ (A) અને ડિપ્લોઇડ (B) કોષરચનાઓ આ પ્રક્રિયાનું પરિણામ નથી. ટેટ્રાપ્લોઇડ (D) પણ આ પ્રક્રિયામાં બનતું નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ વચ્ચેનો કયો તફાવત સાચો છે?", "opts": ["ધ્રુવીય કેન્દ્રકો હેપ્લોઇડ હોય છે, જ્યારે બીજાંડકોષ ડિપ્લોઇડ હોય છે.", "ધ્રુવીય કેન્દ્રકો ડિપ્લોઇડ હોય છે, જ્યારે બીજાંડકોષ હેપ્લોઇડ હોય છે.", "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઇડ હોય છે, પરંતુ ધ્રુવીય કેન્દ્રકો વધુ મોટા હોય છે.", "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને ડિપ્લોઇડ હોય છે, પરંતુ ધ્રુવીય કેન્દ્રકો વધુ સક્રિય હોય છે."], "ans": 2, "exp": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઇડ (n) હોય છે, પરંતુ ધ્રુવીય કેન્દ્રકો કદમાં મોટા હોય છે અને તે બીજાંડકોષ કરતાં વધુ કોષદ્રવ્ય ધરાવે છે. વિકલ્પ A અને B ખોટા છે કારણ કે બંને કોષો હેપ્લોઇડ હોય છે. વિકલ્પ D ખોટો છે કારણ કે બંને કોષો ડિપ્લોઇડ નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા દરમિયાન, કયા કોષીય ઘટકોની સંખ્યામાં વધારો થાય છે?", "opts": ["માઇટોકોન્ડ્રિયા", "રાઇબોઝોમ", "ક્લોરોપ્લાસ્ટ", "ગોલ્જી કોષક"], "ans": 1, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા દરમિયાન, કોષીય ક્રિયાઓમાં વૃદ્ધિ થવાની જરૂરિયાતને કારણે રાઇબોઝોમની સંખ્યામાં વધારો થાય છે, કારણ કે રાઇબોઝોમ પ્રોટીન સંશ્લેષણમાં મહત્વની ભૂમિકા ભજવે છે. માઇટોકોન્ડ્રિયા (A) ઉર્જા ઉત્પાદન માટે જવાબદાર છે, પરંતુ તેની સંખ્યામાં નોંધપાત્ર વધારો થતો નથી. ક્લોરોપ્લાસ્ટ (C) પ્રકાશસંશ્લેષણ માટે જવાબદાર છે, પરંતુ ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયામાં તેની ભૂમિકા નગણ્ય છે. ગોલ્જી કોષક (D) પણ આ પ્રક્રિયામાં પ્રત્યક્ષ ભૂમિકા ભજવતું નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "એક સપુષ્પી વનસ્પતિમાં, પરિપક્વ ભ્રૂણપુટના કોષકેન્દ્રોની ગોઠવણી દરમિયાન ધ્રુવીય કેન્દ્રકો વિશે નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["ધ્રુવીય કેન્દ્રકો હંમેશા ભ્રૂણપુટના મધ્ય ભાગમાં એકબીજાની નજીક ગોઠવાયેલા હોય છે અને એકબીજા સાથે સંપર્કમાં રહે છે", "ધ્રુવીય કેન્દ્રકોનું વિલીન થવું ફલન પહેલાં અથવા ફલન દરમિયાન થઈ શકે છે, જે પ્રજાતિ પર આધારિત છે", "ધ્રુવીય કેન્દ્રકો હંમેશા હેપ્લોઈડ (n) હોય છે અને તેમનું વિલીન થવાથી ડિપ્લોઈડ (2n) દ્વિતીયક કોષકેન્દ્ર બને છે", "કેટલીક વનસ્પતિઓમાં, ધ્રુવીય કેન્દ્રકોનું વિલીન થતું નથી અને તે અલગ રહીને બહુકોષકેન્દ્રીય ભ્રૂણપુટ બનાવે છે"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે. ધ્રુવીય કેન્દ્રકો હંમેશા હેપ્લોઈડ (n) હોતા નથી. સામાન્ય રીતે, ભ્રૂણપુટના વિકાસ દરમિયાન મધ્યસ્થ કોષમાં બે હેપ્લોઈડ ધ્રુવીય કેન્દ્રકો હોય છે, પરંતુ કેટલીક વનસ્પતિઓમાં (જેમ કે પોલીગોનમ પ્રકારના ભ્રૂણપુટમાં) આ કેન્દ્રકો ડિપ્લોઈડ (2n) અથવા તો ટ્રિપ્લોઈડ (3n) પણ હોઈ શકે છે. તેથી વિકલ્પ C ખોટું છે.\n\nવિકલ્પ A સાચું છે કારણ કે ધ્રુવીય કેન્દ્રકો ભ્રૂણપુટના મધ્ય ભાગમાં એકબીજાની નજીક ગોઠવાયેલા હોય છે.\n\nવિકલ્પ B સાચું છે કારણ કે કેટલીક પ્રજાતિઓમાં ધ્રુવીય કેન્દ્રકોનું વિલીન ફલન પહેલાં થાય છે, જ્યારે અન્યમાં ફલન દરમિયાન થાય છે.\n\nવિકલ્પ D પણ સાચું છે કારણ કે કેટલીક વનસ્પતિઓમાં (જેમ કે પેપેવરેસી કુળની વનસ્પતિઓમાં) ધ્રુવીય કેન્દ્રકોનું વિલીન થતું નથી અને તે અલગ રહીને બહુકોષકેન્દ્રીય ભ્રૂણપુટ બનાવે છે.", "ref": "Std 12 - પ્રકરણ 2: પુષ્પીય વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "સપુષ્પી વનસ્પતિમાં, ધ્રુવીય કેન્દ્રકોના વિલીન થવાના સમયે, નીચેનામાંથી કયો જનીનીય ઘટક સક્રિય રીતે પ્રગટ થતો નથી?", "opts": ["એન્ટીપોડલ કોષોના જનીન", "બીજાંડકોષના જનીન", "પરાગકણના જનીન", "ભ્રૂણપુટના સાયટોપ્લાઝમમાં રહેલા મિટોકોન્ડ્રિયલ DNA"], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના સમયે, એન્ટીપોડલ કોષો નાશ પામે છે, તેથી તેમના જનીન પ્રગટ થતાં નથી. બીજાંડકોષ, પરાગકણ અને મિટોકોન્ડ્રિયલ DNA સક્રિય રહે છે. એન્ટીપોડલ કોષોનો ધ્રુવીય કેન્દ્રકો સાથે કોઈ સીધો સંબંધ નથી, તેથી A સાચો વિકલ્પ છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના પરિણામે બનતી ત્રિપ્લોઈડ કોષરચનામાં, નીચેનામાંથી કયા વર્ણસૂત્રોની સંખ્યા સૌથી વધુ હોય છે?", "opts": ["માતૃજ (મા) પાસેથી મળેલા વર્ણસૂત્રો", "પિતૃજ (પિતા) પાસેથી મળેલા વર્ણસૂત્રો", "માતૃજ અને પિતૃજ બંનેમાંથી સરખા પ્રમાણમાં મળેલા વર્ણસૂત્રો", "માતૃજ પાસેથી મળેલા વર્ણસૂત્રો કરતાં પિતૃજ પાસેથી મળેલા વર્ણસૂત્રો વધુ"], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના પરિણામે બનતી ત્રિપ્લોઈડ કોષરચના (એન્ડોસ્પર્મ)માં, બે સેટ માતૃજ (મા) પાસેથી અને એક સેટ પિતૃજ (પિતા) પાસેથી મળે છે. તેથી માતૃજ વર્ણસૂત્રોની સંખ્યા સૌથી વધુ હોય છે. B, C, અને D વિકલ્પો ખોટા છે કારણ કે પિતૃજ વર્ણસૂત્રોની સંખ્યા ઓછી હોય છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "જો કોઈ વનસ્પતિમાં ધ્રુવીય કેન્દ્રકોનું વિલીન થવું અટકી જાય, તો નીચેનામાંથી કયું પરિણામ થશે?", "opts": ["ભ્રૂણપુટનું સંપૂર્ણ વિકાસ થશે નહીં", "એન્ડોસ્પર્મનું નિર્માણ થશે નહીં અને બીજનું પોષણ અટકશે", "પરાગકણનું અંકુરણ થશે નહીં", "બીજાંડકોષનું ફલિતીકરણ થશે નહીં"], "ans": 1, "exp": "ધ્રુવીય કેન્દ્રકોનું વિલીન થવું એન્ડોસ્પર્મના નિર્માણ માટે જરૂરી છે. જો આ પ્રક્રિયા અટકી જાય, તો એન્ડોસ્પર્મ બનશે નહીં, જેના કારણે બીજને પોષણ મળશે નહીં. A, C, અને D વિકલ્પો ખોટા છે કારણ કે ભ્રૂણપુટનું વિકાસ, પરાગકણનું અંકુરણ, અને બીજાંડકોષનું ફલિતીકરણ આ પ્રક્રિયાથી સીધા સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ વચ્ચેનો નીચેનામાંથી કયો તફાવત સાચો નથી?", "opts": ["ધ્રુવીય કેન્દ્રકો હેપ્લોઈડ હોય છે, જ્યારે બીજાંડકોષ ડિપ્લોઈડ હોય છે", "ધ્રુવીય કેન્દ્રકો ભ્રૂણપુટના મધ્ય ભાગમાં સ્થિત હોય છે, જ્યારે બીજાંડકોષ ભ્રૂણપુટના એક છેડે સ્થિત હોય છે", "ધ્રુવીય કેન્દ્રકોનું વિલીન થવું એન્ડોસ્પર્મના નિર્માણ માટે જરૂરી છે, જ્યારે બીજાંડકોષનું ફલિતીકરણ ભ્રૂણના નિર્માણ માટે જરૂરી છે", "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઈડ હોય છે"], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકો અને બીજાંડકોષ બંને હેપ્લોઈડ હોય છે, તેથી A વિકલ્પ ખોટો છે. B, C, અને D વિકલ્પો સાચા છે કારણ કે ધ્રુવીય કેન્દ્રકો ભ્રૂણપુટના મધ્ય ભાગમાં સ્થિત હોય છે, તેમનું વિલીન થવું એન્ડોસ્પર્મના નિર્માણ માટે જરૂરી છે, અને બીજાંડકોષ ભ્રૂણપુટના એક છેડે સ્થિત હોય છે અને તેનું ફલિતીકરણ ભ્રૂણના નિર્માણ માટે જરૂરી છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના સમયે, નીચેનામાંથી કયા કોષીય ઘટકોની સંખ્યામાં વધારો થતો નથી?", "opts": ["મિટોકોન્ડ્રિયા", "રાઇબોઝોમ", "ક્લોરોપ્લાસ્ટ", "એન્ડોપ્લાઝમિક જાળક"], "ans": 2, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાના સમયે, મિટોકોન્ડ્રિયા, રાઇબોઝોમ, અને એન્ડોપ્લાઝમિક જાળકની સંખ્યામાં વધારો થાય છે કારણ કે આ ઘટકો કોષીય ક્રિયાઓ માટે જરૂરી હોય છે. ક્લોરોપ્લાસ્ટની સંખ્યામાં વધારો થતો નથી કારણ કે એન્ડોસ્પર્મમાં પ્રકાશસંશ્લેષણ થતું નથી. તેથી C સાચો વિકલ્પ છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયા કોષીય ઘટકોની સંખ્યામાં વધારો થતો નથી?", "opts": ["રાઇબોઝોમ", "મિટોકોન્ડ્રિયા", "ક્લોરોપ્લાસ્ટ", "એન્ડોપ્લાઝમિક જાળક"], "ans": 2, "exp": "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા દરમિયાન, રાઇબોઝોમ, મિટોકોન્ડ્રિયા અને એન્ડોપ્લાઝમિક જાળકની સંખ્યામાં વધારો થાય છે, કારણ કે આ ઘટકો કોષીય ચયાપચય અને પ્રોટીન સંશ્લેષણમાં મહત્વની ભૂમિકા ભજવે છે. ક્લોરોપ્લાસ્ટની સંખ્યામાં વધારો થતો નથી, કારણ કે એન્ડોસ્પર્મમાં પ્રકાશસંશ્લેષણ થતું નથી.", "ref": "Std 12 - અધ્યાય 2: સપુષ્પી વનસ્પતિમાં લૈંગિક પ્રજનન", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન ધ્રુવીય કેન્દ્રકો વિશે સાચું નથી?", "opts": ["તે બીજાંડકોષના કેન્દ્રક સાથે વિલીન થઈ શકે છે.", "તે ભ્રૂણપુટના મધ્ય ભાગમાં સ્થિત હોય છે.", "તે ડબલ ફલિતીકરણ દરમિયાન સક્રિય ભૂમિકા ભજવે છે.", "તે સપુષ્પી વનસ્પતિમાં હાપ્લોઈડ હોય છે."], "ans": 0, "exp": "ધ્રુવીય કેન્દ્રકો બીજાંડકોષના કેન્દ્રક સાથે વિલીન થતાં નથી. તે ભ્રૂણપુટના મધ્ય ભાગમાં સ્થિત હોય છે અને ડબલ ફલિતીકરણ દરમિયાન સક્રિય ભૂમિકા ભજવે છે. સપુષ્પી વનસ્પતિમાં, ધ્રુવીય કેન્દ્રકો હાપ્લોઈડ (n) હોય છે. આથી, વિધાન A ખોટું છે.", "ref": "Std 12 - અધ્યાય 2: સપુષ્પી વનસ્પતિમાં પ્રજનન", "ch": ""}, {"q": "સપુષ્પી વનસ્પતિમાં, પરિપક્વ ભ્રૂણપુટના મધ્ય ભાગમાં સ્થિત ધ્રુવીય કેન્દ્રકોના સંદર્ભમાં નીચેનામાંથી કયું વિધાન અપવાદરૂપ છે?", "opts": ["ધ્રુવીય કેન્દ્રકો હંમેશા દ્વિકોષકેન્દ્રીય (binucleate) સ્થિતિમાં જોવા મળે છે.", "કેટલીક એકદળી વનસ્પતિઓમાં, ધ્રુવીય કેન્દ્રકોનું વિલીન થયા વગર જ ભ્રૂણપોષ નિર્માણ થઈ શકે છે.", "ધ્રુવીય કેન્દ્રકોનું વિલીન થવાથી ત્રિપ્લોઈડ ભ્રૂણપોષનું નિર્માણ થાય છે.", "ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા ફલન પહેલાં જ પૂર્ણ થઈ જાય છે."], "ans": 3, "exp": "સાચો જવાબ વિકલ્પ D છે કારણ કે ધ્રુવીય કેન્દ્રકોનું વિલીન થવું એ ફલન પછીની ઘટના છે, ફલન પહેલાં નહીં. વિકલ્પ A ખોટો નથી કારણ કે ધ્રુવીય કેન્દ્રકો સામાન્ય રીતે દ્વિકોષકેન્દ્રીય સ્થિતિમાં હોય છે. વિકલ્પ B ખોટો નથી કારણ કે કેટલીક એકદળી વનસ્પતિઓમાં (જેમ કે ઓર્કિડ) ધ્રુવીય કેન્દ્રકોનું વિલીન થયા વગર ભ્રૂણપોષ નિર્માણ થઈ શકે છે. વિકલ્પ C સાચું છે કારણ કે ધ્રુવીય કેન્દ્રકોના વિલીન થવાથી ત્રિપ્લોઈડ ભ્રૂણપોષ બને છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "એક પ્રયોગમાં, વૈજ્ઞાનિકોએ સપુષ્પી વનસ્પતિના ભ્રૂણપુટમાંથી ધ્રુવીય કેન્દ્રકોને અલગ કરીને તેમની જનીનિક સંરચના તપાસી. આ પ્રયોગના પરિણામે નીચેનામાંથી કયું તારણ અયોગ્ય ગણાશે?", "opts": ["ધ્રુવીય કેન્દ્રકોના DNAમાં માતૃ અને પિતૃ બંને વર્ણસૂત્રોના જનીનો હાજર હતા.", "ધ્રુવીય કેન્દ્રકોના DNAમાં માત્ર માતૃ વર્ણસૂત્રોના જનીનો જ હાજર હતા.", "ધ્રુવીય કેન્દ્રકોના DNAમાં કેટલાક જનીનોની અભિવ્યક્તિ ફલન પહેલાં જ શરૂ થઈ ગઈ હતી.", "ધ્રુવીય કેન્દ્રકોના DNAમાં ભ્રૂણપોષના વિકાસ માટે જરૂરી ઉત્સેચકોના જનીનો હાજર હતા."], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે કારણ કે ધ્રુવીય કેન્દ્રકો માતૃ વનસ્પતિના મેગાસ્પોરમાંથી ઉત્પન્ન થાય છે, પરંતુ તેમના DNAમાં માત્ર માતૃ વર્ણસૂત્રો જ હાજર હોય તેવું નથી. ફલન પછી પિતૃ વર્ણસૂત્રો પણ ભ્રૂણપોષમાં આવે છે. વિકલ્પ A ખોટો નથી કારણ કે ફલન પછી ભ્રૂણપોષમાં બંને વર્ણસૂત્રો હાજર હોય છે. વિકલ્પ C અને D સાચા છે કારણ કે ધ્રુવીય કેન્દ્રકોમાં ભ્રૂણપોષના વિકાસ માટે જરૂરી જનીનો અને ઉત્સેચકોની અભિવ્યક્તિ શરૂ થઈ શકે છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}, {"q": "સપુષ્પી વનસ્પતિઓમાં ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયા દરમિયાન, નીચેનામાંથી કયું પરિબળ આ પ્રક્રિયાને પ્રભાવિત કરતું નથી?", "opts": ["પરાગનલિકામાંથી નીકળતા સાયટોકાઈનિન હોર્મોનનું પ્રમાણ", "ભ્રૂણપુટના કોષીય પર્યાવરણનું pH સ્તર", "વનસ્પતિના પર્ણોમાં થતું પ્રકાશસંશ્લેષણ", "ધ્રુવીય કેન્દ્રકોના કોષકેન્દ્રમાં હાજર કેલ્શિયમ આયનોની સાંદ્રતા"], "ans": 2, "exp": "સાચો જવાબ વિકલ્પ C છે કારણ કે વનસ્પતિના પર્ણોમાં થતું પ્રકાશસંશ્લેષણ ધ્રુવીય કેન્દ્રકોના વિલીન થવાની પ્રક્રિયાને સીધું પ્રભાવિત કરતું નથી. વિકલ્પ A ખોટો નથી કારણ કે સાયટોકાઈનિન હોર્મોન ધ્રુવીય કેન્દ્રકોના વિલીનમાં મદદરૂપ થાય છે. વિકલ્પ B ખોટો નથી કારણ કે pH સ્તર કોષીય પ્રક્રિયાઓને પ્રભાવિત કરે છે. વિકલ્પ D ખોટો નથી કારણ કે કેલ્શિયમ આયનો કોષકેન્દ્રીય પ્રક્રિયાઓમાં મહત્વપૂર્ણ ભૂમિકા ભજવે છે.", "ref": "Std 12 - પ્રકરણ 2: સપુષ્પી વનસ્પતિઓમાં લિંગી પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
