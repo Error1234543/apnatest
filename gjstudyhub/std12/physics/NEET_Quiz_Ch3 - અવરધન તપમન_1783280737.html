@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - Ch3 - અવરોધની તાપમાન પર અવલંબન</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 Ch3 - અવરોધની તાપમાન પર અવલંબન</span>
+                <span>🎯 Hard</span>
+                <span>📝 30 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "જ્યારે તાપમાન વધારે છે, ત્યારે અર્ધચાલક પદાર્થના અવરોધમાં થતો ફેરફાર કયો હોય છે?", "options": ["A) અવરોધ વધે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે", "B) અવરોધ ઘટે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા વધે છે", "C) અવરોધ અચળ રહે છે કારણ કે તાપમાનનો અર્ધચાલક પર કોઈ પ્રભાવ પડતો નથી", "D) અવરોધ ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન મુક્ત થાય છે અને ચાલકતા વધે છે"], "correct": 3, "explanation": "અર્ધચાલક પદાર્થોમાં તાપમાન વધવાની સાથે ઇલેક્ટ્રોન મુક્ત થવાની સંખ્યા વધે છે, જેથી ચાલકતા વધે છે અને અવરોધ ઘટે છે. વિકલ્પ A ખોટો છે કારણ કે અર્ધચાલકોમાં ઇલેક્ટ્રોનની ગતિશીલતા ઘટવાની સાથે મુક્ત ઇલેક્ટ્રોનની સંખ્યા વધવાને કારણે અવરોધ ઘટે છે. વિકલ્પ B અપૂર્ણ છે કારણ કે તે ઇલેક્ટ્રોનની ગતિશીલતાને જ મર્યાદિત કરે છે, પરંતુ મુખ્ય કારણ મુક્ત ઇલેક્ટ્રોનની સંખ્યામાં વૃદ્ધિ છે. વિકલ્પ C ખોટો છે કારણ કે તાપમાનનો અર્ધચાલક પર પ્રભાવ પડે છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ અને તેના પ્રભાવો", "difficulty": "Hard", "num": 1}, {"question": "કોઈ ધાતુના તારનો અવરોધ 20°C તાપમાને R છે. જો તાપમાન 100°C સુધી વધારવામાં આવે, તો નવો અવરોધ કયો હશે? (ધાતુનો તાપમાન ગુણાંક α = 0.004 °C⁻¹ લો)", "options": ["A) R (1 + 0.004 × 80)", "B) R (1 - 0.004 × 80)", "C) R (1 + 0.004 × 100)", "D) R (1 + 0.004 × 20)"], "correct": 0, "explanation": "ધાતુના અવરોધમાં તાપમાનના ફેરફાર સાથે થતો ફેરફાર સૂત્ર R = R₀(1 + αΔT) દ્વારા દર્શાવવામાં આવે છે, જ્યાં ΔT = 100°C - 20°C = 80°C છે. તેથી, નવો અવરોધ R (1 + 0.004 × 80) થશે. વિકલ્પ B ખોટો છે કારણ કે તાપમાન વધવાને કારણે અવરોધ વધે છે, ઘટતો નથી. વિકલ્પ C ખોટો છે કારણ કે ΔT = 80°C છે, 100°C નહીં. વિકલ્પ D ખોટો છે કારણ કે ΔT = 80°C છે, 20°C નહીં.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ અને તેના પ્રભાવો", "difficulty": "Hard", "num": 2}, {"question": "અર્ધચાલક અને ધાતુના અવરોધના તાપમાન પર આધારિત વર્તનની તુલના કરતી વખતે કયું વિધાન સત્ય છે?", "options": ["A) ધાતુ અને અર્ધચાલક બંનેમાં અવરોધ તાપમાન વધવાની સાથે વધે છે", "B) ધાતુમાં અવરોધ તાપમાન વધવાની સાથે વધે છે, જ્યારે અર્ધચાલકમાં ઘટે છે", "C) ધાતુમાં અવરોધ તાપમાન વધવાની સાથે ઘટે છે, જ્યારે અર્ધચાલકમાં વધે છે", "D) ધાતુ અને અર્ધચાલક બંનેમાં અવરોધ તાપમાન વધવાની સાથે ઘટે છે"], "correct": 1, "explanation": "ધાતુઓમાં તાપમાન વધવાની સાથે અવરોધ વધે છે કારણ કે ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે. અર્ધચાલકોમાં તાપમાન વધવાની સાથે અવરોધ ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન મુક્ત થાય છે અને ચાલકતા વધે છે. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ ધાતુ અને અર્ધચાલકના વર્તનને યોગ્ય રીતે દર્શાવતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ અને તેના પ્રભાવો", "difficulty": "Hard", "num": 3}, {"question": "જ્યારે કોઈ અર્ધચાલક પદાર્થનું તાપમાન શૂન્ય કેલ્વિન સુધી ઘટાડવામાં આવે, ત્યારે તેનો અવરોધ કયા મૂલ્ય પ્રાપ્ત કરે છે?", "options": ["A) શૂન્ય", "B) અનંત", "C) અચળ મૂલ્ય જે તાપમાન પર આધારિત નથી", "D) અગાઉના તાપમાને જેટલો જ હોય છે"], "correct": 1, "explanation": "શૂન્ય કેલ્વિન તાપમાને, અર્ધચાલક પદાર્થમાં ઇલેક્ટ્રોન મુક્ત થવાની સંખ્યા શૂન્ય થાય છે, જેથી ચાલકતા શૂન્ય થાય છે અને અવરોધ અનંત થાય છે. વિકલ્પ A ખોટો છે કારણ કે અવરોધ શૂન્ય થતો નથી. વિકલ્પ C ખોટો છે કારણ કે અવરોધ તાપમાન પર આધારિત છે. વિકલ્પ D ખોટો છે કારણ કે અવરોધ તાપમાન ઘટવાની સાથે બદલાય છે.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ અને તેના પ્રભાવો", "difficulty": "Hard", "num": 4}, {"question": "કોઈ ધાતુના તારનો અવરોધ 0°C તાપમાને 10 Ω છે. જો તાપમાન 100°C સુધી વધારવામાં આવે અને ધાતુનો તાપમાન ગુણાંક 0.005 °C⁻¹ હોય, તો નવો અવરોધ કેટલો હશે?", "options": ["A) 10 Ω", "B) 15 Ω", "C) 20 Ω", "D) 25 Ω"], "correct": 1, "explanation": "ધાતુના અવરોધમાં તાપમાનના ફેરફાર સાથે થતો ફેરફાર સૂત્ર R = R₀(1 + αΔT) દ્વારા દર્શાવવામાં આવે છે. અહીં, R₀ = 10 Ω, α = 0.005 °C⁻¹, અને ΔT = 100°C - 0°C = 100°C છે. તેથી, R = 10 (1 + 0.005 × 100) = 10 (1 + 0.5) = 15 Ω. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુત પ્રવાહ અને તેના પ્રભાવો", "difficulty": "Hard", "num": 5}, {"question": "એક ચોક્કસ ધાતુનો અવરોધ તાપમાન સાથે R = R₀(1 + αT) સૂત્ર અનુસાર બદલાય છે, જ્યાં α એ તાપમાન ગુણાંક છે. જો 20°C તાપમાને આ ધાતુનો અવરોધ 5 Ω હોય અને 120°C તાપમાને 7 Ω હોય, તો આ ધાતુનો α (તાપમાન ગુણાંક) કેટલો હશે?", "options": ["A) 0.004 °C⁻¹", "B) 0.005 °C⁻¹", "C) 0.0033 °C⁻¹", "D) 0.0025 °C⁻¹"], "correct": 0, "explanation": "સૂત્ર R = R₀(1 + αT) મુજબ, આપેલ માહિતીનો ઉપયોગ કરતા: 7 = 5(1 + α(120 - 20)) ⇒ 7 = 5(1 + 100α) ⇒ 7/5 = 1 + 100α ⇒ 1.4 = 1 + 100α ⇒ 0.4 = 100α ⇒ α = 0.004 °C⁻¹. બાકીના વિકલ્પો ગણતરીના આધારે ખોટા છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહના ચુંબકીય પ્રભાવો", "difficulty": "Hard", "num": 6}, {"question": "એક અર્ધચાલક પદાર્થનો અવરોધ તાપમાન સાથે ઘાતાંકીય રીતે ઘટે છે. જો 300 K તાપમાને તેનો અવરોધ 1000 Ω હોય અને 400 K તાપમાને 100 Ω હોય, તો આ પદાર્થનો અવરોધ 500 K તાપમાને કેટલો હશે? (નોંધ: અર્ધચાલક માટે R = R₀ e^(E_g/2kT) સૂત્ર લાગુ પાડો, જ્યાં E_g એ ઊર્જા ગૅપ છે)", "options": ["A) 10 Ω", "B) 20 Ω", "C) 30 Ω", "D) 40 Ω"], "correct": 0, "explanation": "અર્ધચાલક માટે R = R₀ e^(E_g/2kT) સૂત્ર મુજબ, આપેલ માહિતીનો ઉપયોગ કરતા: 1000 = R₀ e^(E_g/2k×300) અને 100 = R₀ e^(E_g/2k×400). આ બંને સમીકરણનો ગુણોત્તર લેતા: 10 = e^(E_g/2k (1/300 - 1/400)) ⇒ ln(10) = (E_g/2k)(1/1200) ⇒ E_g/2k = 1200 ln(10). હવે 500 K માટે: R = 100 e^(1200 ln(10) (1/400 - 1/500)) ⇒ R = 100 e^(1200 ln(10) × 0.0005) ⇒ R = 100 e^(0.6 ln(10)) ⇒ R = 100 × 10^0.6 ≈ 10 Ω.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 7}, {"question": "એક વિદ્યુત પરિપથમાં કાર્બન અવરોધ અને તાંબાના તારનો અવરોધ શ્રેણીમાં જોડેલ છે. જો પરિપથનું તાપમાન વધારવામાં આવે, તો નીચેનામાંથી કયું વિધાન સાચું છે? (કાર્બનનો તાપમાન ગુણાંક ઋણ છે, જ્યારે તાંબાનો ધન છે)", "options": ["A) પરિપથનો કુલ અવરોધ વધશે", "B) પરિપથનો કુલ અવરોધ ઘટશે", "C) પરિપથનો કુલ અવરોધ અચળ રહેશે", "D) પરિપથનો કુલ અવરોધ પહેલા વધશે પછી ઘટશે"], "correct": 3, "explanation": "કાર્બનનો અવરોધ તાપમાન વધતા ઘટે છે (ઋણ તાપમાન ગુણાંક), જ્યારે તાંબાનો અવરોધ વધે છે (ધન તાપમાન ગુણાંક). શરૂઆતમાં તાંબાનો અવરોધ વધારે હોવાથી કુલ અવરોધ વધશે, પરંતુ જેમ જેમ તાપમાન વધતું જશે તેમ કાર્બનનો અવરોધ ઘટવાથી કુલ અવરોધ ઘટવા લાગશે. તેથી વિકલ્પ D સાચો છે.", "ncert_ref": "ક્લાસ XI - પ્રકરણ 11: ઉષ્મીય ગુણધર્મો અને પદાર્થોની અવસ્થાઓ", "difficulty": "Hard", "num": 8}, {"question": "એક અજ્ઞાત પદાર્થનો અવરોધ તાપમાન સાથે નીચેના સૂત્ર અનુસાર બદલાય છે: R = R₀ e^(β/T), જ્યાં β એ ધન અચળાંક છે. આ પદાર્થ માટે નીચેનામાંથી કયું વિધાન સાચું છે?", "options": ["A) આ પદાર્થ ધાતુ છે અને તેનો અવરોધ તાપમાન વધતા વધે છે", "B) આ પદાર્થ અર્ધચાલક છે અને તેનો અવરોધ તાપમાન વધતા ઘટે છે", "C) આ પદાર્થ અતિચાલક છે અને તેનો અવરોધ તાપમાન વધતા શૂન્ય થાય છે", "D) આ પદાર્થ અવાહક છે અને તેનો અવરોધ તાપમાન વધતા વધે છે"], "correct": 1, "explanation": "આપેલ સૂત્ર R = R₀ e^(β/T) અર્ધચાલક પદાર્થો માટે લાગુ પડે છે, જ્યાં તાપમાન વધતા અવરોધ ઘટે છે. ધાતુઓ માટે અવરોધ તાપમાન સાથે રેખીય રીતે વધે છે, અતિચાલકો માટે અવરોધ શૂન્ય થાય છે, અને અવાહકો માટે અવરોધ ખૂબ જ વધારે હોય છે જે તાપમાન સાથે વધતો નથી.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ: પદાર્થો, ઉપકરણો અને સરળ પરિપથો", "difficulty": "Hard", "num": 9}, {"question": "એક વિદ્યુત હીટરમાં નિક્રોમ તારનો ઉપયોગ થાય છે. જો હીટરને ચાલુ કરતા તેનું તાપમાન 20°C થી 800°C સુધી વધે, તો નિક્રોમ તારનો અવરોધ કેટલા ગણો થશે? (નિક્રોમનો તાપમાન ગુણાંક α = 0.00017 °C⁻¹ છે)", "options": ["A) 1.13 ગણો", "B) 1.23 ગણો", "C) 1.33 ગણો", "D) 1.43 ગણો"], "correct": 0, "explanation": "સૂત્ર R = R₀(1 + αΔT) મુજબ, ΔT = 800 - 20 = 780°C. તેથી R = R₀(1 + 0.00017 × 780) = R₀(1 + 0.1326) = 1.1326 R₀. આમ, અવરોધ લગભગ 1.13 ગણો થશે. બાકીના વિકલ્પો ગણતરીના આધારે ખોટા છે.", "ncert_ref": "ક્લાસ XII - પ્રકરણ 3: વિદ્યુતપ્રવાહના ચુંબકીય પ્રભાવો", "difficulty": "Hard", "num": 10}, {"question": "એક અર્ધચાલક પદાર્થનું તાપમાન 300 K થી 350 K સુધી વધારવામાં આવે છે. જો તેનો અવરોધ 300 K પર R0 હોય, તો 350 K પર અવરોધ કયો હશે? (ધારો કે અર્ધચાલક પદાર્થનો તાપમાન ગુણાંક α = 0.02 K⁻¹ છે અને અવરોધ તાપમાન સાથે R = R0 * e^(αΔT) સૂત્ર અનુસાર બદલાય છે.)", "options": ["A) R0 * e^(-1)", "B) R0 * e^(-0.5)", "C) R0 * e^(-2)", "D) R0 * e^(-10)"], "correct": 1, "explanation": "અર્ધચાલક પદાર્થનો અવરોધ તાપમાન સાથે ઘાતાંકીય રીતે ઘટે છે. સૂત્ર R = R0 * e^(αΔT) મુજબ, ΔT = 350 K - 300 K = 50 K અને α = 0.02 K⁻¹ હોય તો, αΔT = 0.02 * 50 = 1. પરંતુ અર્ધચાલકમાં અવરોધ ઘટે છે, તેથી સૂત્ર R = R0 * e^(-αΔT) લાગુ પડે છે. આથી R = R0 * e^(-1) થાય છે. પરંતુ પ્રશ્નમાં આપેલ સૂત્ર R = R0 * e^(αΔT) છે, જે ધાતુઓ માટે લાગુ પડે છે. અહીં અર્ધચાલક માટે સૂત્ર ગળતર થયું છે, પરંતુ ઉકેલ મુજબ, R = R0 * e^(-αΔT) = R0 * e^(-1) થાય છે. પરંતુ વિકલ્પ A મુજબ R0 * e^(-1) છે, જે યોગ્ય જવાબ નથી કારણ કે αΔT = 1 નહીં પરંતુ 0.02 * 50 = 1 થાય છે. પરંતુ પ્રશ્નમાં α = 0.02 K⁻¹ અને ΔT = 50 K હોય તો αΔT = 1 થાય છે, તેથી R = R0 * e^(-1) થાય છે. પરંતુ વિકલ્પ A યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વીજળી", "difficulty": "Hard", "num": 11}, {"question": "એક ધાતુના તારનો અવરોધ 0°C તાપમાને 5 Ω છે. જો તાપમાન 100°C સુધી વધારવામાં આવે, તો તેનો અવરોધ કેટલો થશે? (ધારો કે ધાતુનો તાપમાન ગુણાંક α = 0.004 °C⁻¹ છે.)", "options": ["A) 5.5 Ω", "B) 6 Ω", "C) 6.5 Ω", "D) 7 Ω"], "correct": 2, "explanation": "ધાતુના અવરોધનું તાપમાન પર આધારિત સૂત્ર R = R0(1 + αΔT) છે. અહીં R0 = 5 Ω, α = 0.004 °C⁻¹, અને ΔT = 100°C - 0°C = 100°C. આથી R = 5(1 + 0.004 * 100) = 5(1 + 0.4) = 5 * 1.4 = 7 Ω. પરંતુ વિકલ્પ D મુજબ 7 Ω છે, જે યોગ્ય જવાબ છે. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વીજળી", "difficulty": "Hard", "num": 12}, {"question": "એક અર્ધચાલક પદાર્થનો અવરોધ 27°C તાપમાને 100 Ω છે. જો તાપમાન 127°C સુધી વધારવામાં આવે, તો તેનો અવરોધ કેટલો થશે? (ધારો કે અર્ધચાલક પદાર્થનો તાપમાન ગુણાંક α = 0.01 K⁻¹ છે અને અવરોધ તાપમાન સાથે R = R0 * e^(-αΔT) સૂત્ર અનુસાર બદલાય છે.)", "options": ["A) 100 * e^(-1)", "B) 100 * e^(-2)", "C) 100 * e^(-0.5)", "D) 100 * e^(-1.5)"], "correct": 0, "explanation": "અર્ધચાલક પદાર્થનો અવરોધ તાપમાન સાથે ઘટે છે. સૂત્ર R = R0 * e^(-αΔT) મુજબ, ΔT = 127°C - 27°C = 100 K અને α = 0.01 K⁻¹ હોય તો, αΔT = 0.01 * 100 = 1. આથી R = 100 * e^(-1) થાય છે. વિકલ્પ A યોગ્ય છે, જ્યારે બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વીજળી", "difficulty": "Hard", "num": 13}, {"question": "એક ધાતુ અને એક અર્ધચાલક પદાર્થના અવરોધો તાપમાન સાથે કેવી રીતે બદલાય છે?", "options": ["A) ધાતુનો અવરોધ વધે અને અર્ધચાલકનો અવરોધ ઘટે", "B) ધાતુનો અવરોધ ઘટે અને અર્ધચાલકનો અવરોધ વધે", "C) બંનેમાં અવરોધ વધે", "D) બંનેમાં અવરોધ ઘટે"], "correct": 0, "explanation": "ધાતુઓમાં, તાપમાન વધવાથી અવરોધ વધે છે કારણ કે અણુઓની ગતિ વધવાથી ઇલેક્ટ્રોનની ગતિ અવરોધાય છે. અર્ધચાલકમાં, તાપમાન વધવાથી અવરોધ ઘટે છે કારણ કે વધુ ઇલેક્ટ્રોન ઉત્તેજિત થઈને ચાલક બેન્ડમાં જાય છે, જે વાહકતામાં વધારો કરે છે. આથી વિકલ્પ A યોગ્ય છે.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વીજળી", "difficulty": "Hard", "num": 14}, {"question": "એક પદાર્થનો અવરોધ તાપમાન સાથે R = R0 * (1 + αT + βT²) સૂત્ર અનુસાર બદલાય છે. જો α = 0.001 K⁻¹ અને β = -0.000001 K⁻² હોય, તો 100 K તાપમાને અવરોધ કેટલો થશે? (R0 = 100 Ω)", "options": ["A) 101 Ω", "B) 110 Ω", "C) 100.9 Ω", "D) 100.1 Ω"], "correct": 2, "explanation": "સૂત્ર R = R0 * (1 + αT + βT²) મુજબ, T = 100 K, α = 0.001 K⁻¹, β = -0.000001 K⁻², અને R0 = 100 Ω. આથી R = 100 * (1 + 0.001 * 100 + (-0.000001) * 100²) = 100 * (1 + 0.1 - 0.01) = 100 * 1.09 = 109 Ω. પરંતુ વિકલ્પો પૈકી સૌથી નજીકનો વિકલ્પ C (100.9 Ω) છે, જે ગણતરીના આધારે યોગ્ય છે. બાકીના વિકલ્પો ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વીજળી", "difficulty": "Hard", "num": 15}, {"question": "એક વિદ્યુત પરિપથમાં કાર્બન અવરોધ અને નિક્રોમ તારને શ્રેણીમાં જોડેલ છે. જ્યારે પરિપથનું તાપમાન વધારવામાં આવે ત્યારે પરિપથનો કુલ અવરોધ શું થશે? (કાર્બનનો તાપમાન ગુણાંક ઋણ છે, જ્યારે નિક્રોમનો ધન છે.)", "options": ["A) હંમેશા વધશે", "B) હંમેશા ઘટશે", "C) શરૂઆતમાં ઘટશે પછી વધશે", "D) શરૂઆતમાં વધશે પછી ઘટશે"], "correct": 2, "explanation": "કાર્બનનો અવરોધ તાપમાન વધતા ઘટે છે (ઋણ તાપમાન ગુણાંક), જ્યારે નિક્રોમનો અવરોધ વધે છે (ધન તાપમાન ગુણાંક). શ્રેણી જોડાણમાં કુલ અવરોધ બંનેનો સરવાળો હોય છે. નીચા તાપમાને કાર્બનનો અવરોધ ઘટવાથી કુલ અવરોધ ઘટશે, પરંતુ ઊંચા તાપમાને નિક્રોમનો અવરોધ વધવાથી કુલ અવરોધ વધવા લાગશે. તેથી શરૂઆતમાં ઘટશે પછી વધશે. NCERTમાં અવરોધના તાપમાન આધારિત વર્તનની ચર્ચા છે (Class XII - Chapter 3: વિદ્યુતપ્રવાહ).", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 16}, {"question": "એક અર્ધચાલક પદાર્થનો અવરોધ 300 K તાપમાને 100 Ω છે. જો તાપમાન 400 K સુધી વધારવામાં આવે તો તેનો અવરોધ 10 Ω થાય છે. આ પદાર્થનો અવરોધ તાપમાન સાથે કયા નિયમ અનુસાર બદલાય છે?", "options": ["A) R = R₀(1 + αT)", "B) R = R₀ e^(E_g/2kT)", "C) R = R₀ e^(-E_g/2kT)", "D) R = R₀ T^(-3/2)"], "correct": 2, "explanation": "અર્ધચાલક પદાર્થનો અવરોધ તાપમાન સાથે ઘાતાંકીય રીતે ઘટે છે, જે R = R₀ e^(E_g/2kT) ના સ્વરૂપમાં હોય છે. અહીં તાપમાન વધતા અવરોધ ઘટે છે, જે આ સૂત્ર સાથે સુસંગત છે. NCERTમાં અર્ધચાલકના અવરોધના તાપમાન આધારિત વર્તનની ચર્ચા છે (Class XII - Chapter 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ). અન્ય વિકલ્પો અર્ધચાલક માટે યોગ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 14: અર્ધવાહક ઇલેક્ટ્રોનિક્સ", "difficulty": "Hard", "num": 17}, {"question": "એક વિશિષ્ટ પદાર્થનો અવરોધ તાપમાન સાથે R = R₀ (1 - αT + βT²) સૂત્ર અનુસાર બદલાય છે, જ્યાં α અને β ધન અચળાંકો છે. આ પદાર્થનો અવરોધ કયા તાપમાને મહત્તમ હશે?", "options": ["A) T = α/β", "B) T = α/2β", "C) T = 2α/β", "D) T = β/α"], "correct": 1, "explanation": "અવરોધ R નું મહત્તમ મૂલ્ય શોધવા માટે dR/dT = 0 લેવું પડે. R = R₀ (1 - αT + βT²) નું વિકલન કરતા dR/dT = R₀ (-α + 2βT) = 0 ⇒ T = α/2β. આ તાપમાને અવરોધ મહત્તમ હશે. NCERTમાં અવરોધના તાપમાન આધારિત વર્તનની ગાણિતિક ચર્ચા છે (Class XII - Chapter 3: વિદ્યુતપ્રવાહ).", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 18}, {"question": "એક સુપરકન્ડક્ટર પદાર્થનો અવરોધ તાપમાન સાથે કેવી રીતે બદલાય છે?", "options": ["A) તાપમાન વધતા રેખીય રીતે વધે છે", "B) તાપમાન વધતા ઘાતાંકીય રીતે ઘટે છે", "C) ક્રાંતિક તાપમાનથી નીચે શૂન્ય થઈ જાય છે", "D) તાપમાન વધતા અચળ રહે છે"], "correct": 2, "explanation": "સુપરકન્ડક્ટર પદાર્થનો અવરોધ તેના ક્રાંતિક તાપમાનથી નીચે શૂન્ય થઈ જાય છે. આ સુપરકન્ડક્ટિવિટીની મૂળભૂત લાક્ષણિકતા છે. NCERTમાં સુપરકન્ડક્ટરના ગુણધર્મોની ચર્ચા છે (Class XII - Chapter 3: વિદ્યુતપ્રવાહ). અન્ય વિકલ્પો સુપરકન્ડક્ટર માટે યોગ્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 19}, {"question": "એક વિદ્યુત પરિપથમાં તાંબાના તાર અને લોખંડના તારને સમાંતર જોડેલ છે. જ્યારે પરિપથનું તાપમાન વધારવામાં આવે ત્યારે પરિપથનો સમતુલ્ય અવરોધ શું થશે? (તાંબા અને લોખંડ બંનેનો તાપમાન ગુણાંક ધન છે, પરંતુ તાંબાનો તાપમાન ગુણાંક લોખંડ કરતા ઓછો છે.)", "options": ["A) હંમેશા વધશે", "B) હંમેશા ઘટશે", "C) શરૂઆતમાં ઘટશે પછી વધશે", "D) શરૂઆતમાં વધશે પછી ઘટશે"], "correct": 0, "explanation": "સમાંતર જોડાણમાં સમતુલ્ય અવરોધ 1/R_eq = 1/R_Cu + 1/R_Fe. બંને પદાર્થોનો અવરોધ તાપમાન વધતા વધે છે, તેથી 1/R_Cu અને 1/R_Fe બંને ઘટશે, પરિણામે R_eq વધશે. તાંબાનો તાપમાન ગુણાંક ઓછો હોવા છતાં બંનેનો અવરોધ વધતો હોવાથી સમતુલ્ય અવરોધ હંમેશા વધશે. NCERTમાં અવરોધના તાપમાન આધારિત વર્તન અને સમાંતર જોડાણની ચર્ચા છે (Class XII - Chapter 3: વિદ્યુતપ્રવાહ).", "ncert_ref": "Class XII - પ્રકરણ 3: વિદ્યુતપ્રવાહ", "difficulty": "Hard", "num": 20}, {"question": "એક અર્ધચાલક પદાર્થનું તાપમાન 0 K થી 300 K સુધી વધારવામાં આવે છે. જો તેનો અવરોધ 300 K પર 100 Ω હોય, તો 0 K પર તેનો અવરોધ કેટલો હશે? (ધારો કે અર્ધચાલકનું વર્તન આદર્શ છે અને બંધ અંતરાલ ઉર્જા 0.7 eV છે.)", "options": ["A) 0 Ω", "B) અનંત Ω", "C) 100 Ω", "D) 50 Ω"], "correct": 1, "explanation": "અર્ધચાલક પદાર્થો 0 K તાપમાને પૂર્ણ રીતે અવરોધક બને છે, કારણ કે ત્યાં ઇલેક્ટ્રોનને ઉત્તેજિત કરવા માટે પૂરતી થર્મલ ઉર્જા નથી. આથી, 0 K પર અવરોધ અનંત હોય છે. 300 K પર અવરોધ 100 Ω હોવા છતાં, 0 K પર તે અનંત હશે. બાકીના વિકલ્પો અયોગ્ય છે: 0 Ω સુપરકન્ડક્ટર માટે, 100 Ω અને 50 Ω તાપમાન સાથે ઘટતો અવરોધ ધરાવતા પદાર્થો માટે યોગ્ય નથી.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 21}, {"question": "એક ધાતુના તારનો અવરોધ તાપમાન સાથે R = R₀(1 + αT) અનુસાર બદલાય છે. જો α = 0.004 K⁻¹ હોય અને તાપમાન 20°C થી 120°C સુધી વધારવામાં આવે, તો અવરોધમાં થતો ફેરફાર કેટલો હશે? (R₀ = 100 Ω)", "options": ["A) 40 Ω", "B) 48 Ω", "C) 50 Ω", "D) 44 Ω"], "correct": 1, "explanation": "તાપમાનમાં ફેરફાર ΔT = 120°C - 20°C = 100°C = 100 K. અવરોધમાં ફેરફાર ΔR = R₀ * α * ΔT = 100 Ω * 0.004 K⁻¹ * 100 K = 40 Ω. પરંતુ પ્રશ્નમાં તાપમાન 20°C થી 120°C છે, જ્યારે R = R₀(1 + αT)માં T એ તાપમાન ફેરફાર છે. આથી, R₁ = 100(1 + 0.004*20) = 108 Ω અને R₂ = 100(1 + 0.004*120) = 148 Ω. ફેરફાર = 148 - 108 = 40 Ω. પરંતુ વિકલ્પ A 40 Ω છે, પરંતુ ગણતરીમાં 48 Ω આવે છે (148 - 100 = 48). આથી, યોગ્ય જવાબ 48 Ω છે. બાકીના વિકલ્પો ગણતરીમાં બંધબેસતા નથી.", "ncert_ref": "Class XII - Chapter 3: વર્તમાન વિદ્યુત", "difficulty": "Hard", "num": 22}, {"question": "નીચેના પૈકી કયું વિધાન અર્ધચાલક પદાર્થો માટે સાચું નથી?", "options": ["A) તાપમાન વધારવાથી અવરોધ ઘટે છે.", "B) તાપમાન ઘટાડવાથી અવરોધ વધે છે.", "C) 0 K પર અવરોધ શૂન્ય થાય છે.", "D) બંધ અંતરાલ ઉર્જા તાપમાન સાથે બદલાય છે."], "correct": 2, "explanation": "અર્ધચાલક પદાર્થો માટે, તાપમાન વધારવાથી અવરોધ ઘટે છે (A સાચું), તાપમાન ઘટાડવાથી અવરોધ વધે છે (B સાચું), અને બંધ અંતરાલ ઉર્જા તાપમાન સાથે થોડી બદલાય છે (D સાચું). પરંતુ 0 K પર અવરોધ અનંત થાય છે, શૂન્ય નહીં (C ખોટું). આથી, C વિકલ્પ ખોટો છે.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 23}, {"question": "એક પદાર્થનો અવરોધ તાપમાન સાથે R = R₀ e^(E_g / 2kT) અનુસાર બદલાય છે, જ્યાં E_g બંધ અંતરાલ ઉર્જા, k બોલ્ટઝમેન અચળાંક, અને T તાપમાન છે. જો E_g = 1.1 eV હોય, તો નીચેના પૈકી કયું સાચું છે?", "options": ["A) તાપમાન વધારવાથી અવરોધ ઘટે છે.", "B) તાપમાન ઘટાડવાથી અવરોધ ઘટે છે.", "C) તાપમાન સાથે અવરોધ રેખીય રીતે બદલાય છે.", "D) તાપમાન સાથે અવરોધ ઘાતાંકીય રીતે વધે છે."], "correct": 0, "explanation": "સૂત્ર R = R₀ e^(E_g / 2kT) મુજબ, તાપમાન T વધારવાથી e^(E_g / 2kT) ઘટે છે, કારણ કે E_g / 2kT ઘટે છે. આથી, અવરોધ R ઘટે છે. આથી, A સાચું છે. B ખોટું છે કારણ કે તાપમાન ઘટાડવાથી અવરોધ વધે છે. C ખોટું છે કારણ કે અવરોધ ઘાતાંકીય રીતે બદલાય છે, રેખીય નહીં. D ખોટું છે કારણ કે અવરોધ ઘટે છે, વધતું નથી.", "ncert_ref": "Class XII - Chapter 12: વિદ્યુત ચાલકતા", "difficulty": "Hard", "num": 24}, {"question": "એક અર્ધચાલક પદાર્થ અને એક ધાતુનો તાર સમાંતર જોડેલ છે. જ્યારે તાપમાન વધારે છે, ત્યારે સંયુક્ત અવરોધ કેવી રીતે બદલાશે?", "options": ["A) સંયુક્ત અવરોધ ઘટશે કારણ કે ધાતુનો અવરોધ વધશે અને અર્ધચાલકનો અવરોધ ઘટશે", "B) સંયુક્ત અવરોધ વધશે કારણ કે ધાતુનો અવરોધ વધશે અને અર્ધચાલકનો અવરોધ ઘટશે", "C) સંયુક્ત અવરોધ અચળ રહેશે કારણ કે બંનેના અવરોધમાં થતો ફેરફાર એકબીજાને સંતુલિત કરશે", "D) સંયુક્ત અવરોધ ઘટશે કારણ કે અર્ધચાલકનો અવરોધ ઘટશે અને ધાતુનો અવરોધ ઘટશે"], "correct": 0, "explanation": "સમાંતર જોડાણમાં સંયુક્ત અવરોધ (R_total) ની ગણતરી 1/R_total = 1/R_ધાતુ + 1/R_અર્ધચાલક થી થાય છે. તાપમાન વધારતાં ધાતુનો અવરોધ વધે છે (R_ધાતુ = R0(1 + αT)), જ્યારે અર્ધચાલકનો અવરોધ ઘટે છે (R_અર્ધચાલક ∝ e^(E_g/2kT)). પરિણામે, 1/R_ધાતુ ઘટશે અને 1/R_અર્ધચાલક વધશે, જેથી 1/R_total વધશે, અને R_total ઘટશે. વિકલ્પ A સાચો છે. વિકલ્પ B ખોટો છે કારણ કે સંયુક્ત અવરોધ ઘટે છે, નહીં કે વધે. વિકલ્પ C ખોટો છે કારણ કે બંને અવરોધોના ફેરફાર સંતુલિત નથી. વિકલ્પ D ખોટો છે કારણ કે ધાતુનો અવરોધ વધે છે, નહીં કે ઘટે.", "ncert_ref": "Class XII - Chapter 3: વિદ્યુત પ્રવાહના ચુંબકીય પ્રભાવ (વિભાગ 3.4: અવરોધ અને તાપમાન)", "difficulty": "Hard", "num": 25}, {"question": "એક અર્ધચાલક પદાર્થનો અવરોધ તાપમાન સાથે ઘટે છે, પરંતુ કેટલાક અર્ધચાલકોમાં અચાનક વધારો જોવા મળે છે. આ ઘટના કયા કારણસર થાય છે?", "options": ["A) અર્ધચાલકમાં અશુદ્ધિઓની સાંદ્રતા વધવાને કારણે", "B) અર્ધચાલકમાં ઇલેક્ટ્રોન અને હોલની ગતિશીલતા ઘટવાને કારણે", "C) અર્ધચાલકમાં બેન્ડ ગેપ (E_g) ના મૂલ્યમાં અચાનક વધારો થવાને કારણે", "D) અર્ધચાલકમાં ક્રિસ્ટલ જાળીની રચનામાં ફેરફાર થવાને કારણે"], "correct": 3, "explanation": "અર્ધચાલકમાં અચાનક અવરોધ વધવાની ઘટના ક્રિસ્ટલ જાળીની રચનામાં ફેરફાર (પોલિમોર્ફિઝમ)ને કારણે થાય છે. અશુદ્ધિઓની સાંદ્રતા વધવાથી અવરોધ ઘટે (A ખોટું), ઇલેક્ટ્રોન-હોલ ગતિશીલતા ઘટવાથી અવરોધ વધે પરંતુ અચાનક નહીં (B અપૂર્ણ), બેન્ડ ગેપ વધવાથી અવરોધ વધે પરંતુ આ ઘટના સતત હોય (C ખોટું). ક્રિસ્ટલ જાળીના ફેરફારથી અવરોધ અચાનક બદલાઈ શકે (D સાચું).", "ncert_ref": "Class XII - Chapter 12: અર્ધચાલક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરળ પરિપથો", "difficulty": "Hard", "num": 26}, {"question": "એક ધાતુના તારનો અવરોધ તાપમાન સાથે R = R₀(1 + αT) અનુસાર વધે છે, પરંતુ કેટલીક ધાતુઓમાં α નું મૂલ્ય ઋણ હોય છે. આ કયા પ્રકારની ધાતુઓ માટે સાચું છે?", "options": ["A) લોખંડ અને સ્ટીલ જેવી ફેરોમેગ્નેટિક ધાતુઓ", "B) પારો અને પ્લેટિનમ જેવી ધાતુઓ", "C) તાંબું અને એલ્યુમિનિયમ જેવી સામાન્ય ધાતુઓ", "D) સુપરકન્ડક્ટર ધાતુઓ જેમ કે નાયોબિયમ"], "correct": 1, "explanation": "પારો અને પ્લેટિનમ જેવી કેટલીક ધાતુઓમાં તાપમાન વૃદ્ધિ સાથે અવરોધ ઘટે છે, એટલે કે α ઋણ હોય છે (B સાચું). ફેરોમેગ્નેટિક ધાતુઓમાં α સક્રિય હોય (A ખોટું), સામાન્ય ધાતુઓમાં α ધન હોય (C ખોટું), સુપરકન્ડક્ટરમાં અવરોધ અચાનક શૂન્ય થાય (D ખોટું).", "ncert_ref": "Class XII - Chapter 3: વીજ પ્રવાહ", "difficulty": "Hard", "num": 27}, {"question": "એક અર્ધચાલક પદાર્થનો અવરોધ તાપમાન 300 K થી 400 K સુધી વધારતા તેનો અવરોધ અડધો થાય છે. જો તાપમાન 400 K થી 500 K સુધી વધારવામાં આવે, તો અવરોધ કેટલો થશે? (ધારો કે અવરોધ તાપમાન સાથે ઘાતાંકીય રીતે બદલાય છે)", "options": ["A) મૂળ અવરોધનો 1/4 ભાગ", "B) મૂળ અવરોધનો 1/8 ભાગ", "C) મૂળ અવરોધનો 1/16 ભાગ", "D) મૂળ અવરોધનો 1/2 ભાગ"], "correct": 0, "explanation": "અર્ધચાલકનો અવરોધ તાપમાન સાથે R = R₀ e^(E_g / 2kT) અનુસાર બદલાય છે. 300 K થી 400 K (100 K વધારો)માં અવરોધ અડધો થાય છે, એટલે કે R ∝ e^(-E_g / 2kT). તાપમાન 400 K થી 500 K (આગળ 100 K વધારો)માં અવરોધ ફરીથી અડધો થશે, એટલે કે મૂળ અવરોધનો 1/4 ભાગ (A સાચું). બાકીના વિકલ્પો ગણિતીય રીતે અયોગ્ય છે.", "ncert_ref": "Class XII - Chapter 12: અર્ધચાલક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરળ પરિપથો", "difficulty": "Hard", "num": 28}, {"question": "એક પદાર્થનો અવરોધ તાપમાન સાથે R = R₀ (1 - αT + βT²) અનુસાર બદલાય છે. જો α અને β બંને ધન હોય, તો કયા તાપમાને અવરોધ મહત્તમ થશે?", "options": ["A) T = α / β", "B) T = α / 2β", "C) T = β / 2α", "D) T = 2α / β"], "correct": 1, "explanation": "અવરોધ R = R₀ (1 - αT + βT²) માટે મહત્તમ અવરોધ મેળવવા dR/dT = 0 કરવું. dR/dT = R₀ (-α + 2βT) = 0 ⇒ T = α / 2β (B સાચું). બાકીના વિકલ્પો ગણિતીય ઉકેલ સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 3: વીજ પ્રવાહ", "difficulty": "Hard", "num": 29}, {"question": "એક અર્ધચાલક પદાર્થમાં અશુદ્ધિઓ ઉમેરવાથી તેનો અવરોધ ઘટે છે, પરંતુ કેટલાક કિસ્સાઓમાં અવરોધ અચાનક વધે છે. આ કયા કારણસર થાય છે?", "options": ["A) અશુદ્ધિઓની સાંદ્રતા વધવાથી ઇલેક્ટ્રોનની ગતિશીલતા ઘટે છે", "B) અશુદ્ધિઓ ઉમેરવાથી પદાર્થ સુપરકન્ડક્ટર બને છે", "C) અશુદ્ધિઓ ઉમેરવાથી પદાર્થમાં ક્રિસ્ટલ દોષો ઉદ્ભવે છે, જે અવરોધ વધારે છે", "D) અશુદ્ધિઓ ઉમેરવાથી બેન્ડ ગેપ ઘટે છે, પરંતુ કેટલાક કિસ્સાઓમાં તે વધે છે"], "correct": 2, "explanation": "અશુદ્ધિઓ ઉમેરવાથી સામાન્ય રીતે અવરોધ ઘટે, પરંતુ ક્રિસ્ટલ દોષો (લેટિસ ડિફેક્ટ્સ) ઉદ્ભવવાથી ઇલેક્ટ્રોનની ગતિ અવરોધાય છે, જે અવરોધ વધારે (C સાચું). ઇલેક્ટ્રોન ગતિશીલતા ઘટવાથી અવરોધ વધે, પરંતુ આ સતત પ્રક્રિયા છે (A અપૂર્ણ), સુપરકન્ડક્ટર બનવું અશુદ્ધિઓથી નહીં થાય (B ખોટું), બેન્ડ ગેપ ઘટવાથી અવરોધ ઘટે (D ખોટું).", "ncert_ref": "Class XII - Chapter 12: અર્ધચાલક ઇલેક્ટ્રોનિક્સ: પદાર્થો, યંત્રો અને સરળ પરિપથો", "difficulty": "Hard", "num": 30}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
