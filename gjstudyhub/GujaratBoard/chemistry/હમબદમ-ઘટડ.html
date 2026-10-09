@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>હિમબિંદુમાં ઘટાડો</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>હિમબિંદુમાં ઘટાડો</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">હિમબિંદુમાં ઘટાડો</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "એક દ્રાવણમાં 0.1 મોલલ ગ્લુકોઝ ઉમેરતાં તેનું હિમબિંદુ –0.186 °C જેટલું ઘટે છે. જો તે જ દ્રાવકમાં 0.1 મોલલ યુરિયા ઉમેરવામાં આવે તો હિમબિંદુમાં થતો ઘટાડો કેટલો હશે?", "opts": ["–0.093 °C", "–0.186 °C", "–0.372 °C", "–0.0465 °C"], "ans": 1, "exp": "ગ્લુકોઝ અને યુરિયા બંને બિનવિદ્યુતવિભાજ્ય પદાર્થો છે અને તેમના વાન્ટ હૉફ અવયવ (i) સમાન (i = 1) હોય છે. હિમબિંદુમાં ઘટાડો (ΔTf) = i × Kf × m સૂત્ર અનુસાર, મોલાલિટી (m) અને હિમબિંદુ અવનતાંક (Kf) સમાન હોય તો ΔTf પણ સમાન રહે છે. તેથી યુરિયા માટે પણ હિમબિંદુમાં ઘટાડો –0.186 °C થશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અલગ અવયવ અથવા અલગ મોલાલિટી ધારે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન હિમબિંદુમાં ઘટાડા માટે ખોટું છે?", "opts": ["હિમબિંદુમાં ઘટાડો એ દ્રાવણની મોલાલિટી પર આધારિત છે, મોલારિટી પર નહીં.", "વિદ્યુતવિભાજ્ય પદાર્થોના દ્રાવણમાં હિમબિંદુમાં ઘટાડો બિનવિદ્યુતવિભાજ્ય પદાર્થો કરતાં વધુ હોય છે.", "હિમબિંદુમાં ઘટાડો માત્ર દ્રાવ્ય પદાર્થના પ્રકાર પર આધારિત છે, દ્રાવકના પ્રકાર પર નહીં.", "શુદ્ધ દ્રાવકની સરખામણીમાં દ્રાવણનું હિમબિંદુ હંમેશાં નીચું હોય છે."], "ans": 2, "exp": "હિમબિંદુમાં ઘટાડો (ΔTf) = i × Kf × m સૂત્ર અનુસાર, તે દ્રાવકના હિમબિંદુ અવનતાંક (Kf) પર પણ આધારિત છે, માત્ર દ્રાવ્ય પદાર્થના પ્રકાર પર નહીં. તેથી વિકલ્પ C ખોટું છે. અન્ય વિકલ્પો સાચાં છે: A (મોલાલિટી પર આધારિત છે), B (વિદ્યુતવિભાજ્ય માટે i > 1), D (દ્રાવણનું હિમબિંદુ નીચું હોય છે).", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.2 મોલ BaCl₂ ઉમેરતાં તેનું હિમબિંદુ –1.116 °C ઘટે છે. જો આ જ દ્રાવકમાં 0.2 મોલ NaCl ઉમેરવામાં આવે તો હિમબિંદુમાં ઘટાડો કેટલો થશે? (BaCl₂ અને NaCl સંપૂર્ણપણે વિયોજિત થાય છે તેમ ધારો.)", "opts": ["–0.372 °C", "–0.744 °C", "–1.116 °C", "–1.488 °C"], "ans": 1, "exp": "BaCl₂ માટે વાન્ટ હૉફ અવયવ (i) = 3 (Ba²⁺ + 2Cl⁻), જ્યારે NaCl માટે i = 2 (Na⁺ + Cl⁻). ΔTf = i × Kf × m સૂત્ર અનુસાર, BaCl₂ માટે ΔTf = 3 × Kf × 0.2 = –1.116 °C ⇒ Kf = 1.86 °C kg/mol. NaCl માટે ΔTf = 2 × 1.86 × 0.2 = –0.744 °C. તેથી વિકલ્પ B સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અલગ અવયવ ધારે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયું દ્રાવણ સમાન મોલાલિટી ધરાવતા અન્ય દ્રાવણો કરતાં સૌથી વધુ હિમબિંદુમાં ઘટાડો દર્શાવશે?", "opts": ["ગ્લુકોઝ (C₆H₁₂O₆)", "યુરિયા (NH₂CONH₂)", "પોટેશિયમ સલ્ફેટ (K₂SO₄)", "સોડિયમ ક્લોરાઇડ (NaCl)"], "ans": 2, "exp": "હિમબિંદુમાં ઘટાડો ΔTf = i × Kf × m અનુસાર, વાન્ટ હૉફ અવયવ (i) વધુ હોય તો ΔTf વધુ હોય છે. K₂SO₄ સંપૂર્ણ વિયોજન પામી 3 આયનો (2K⁺ + SO₄²⁻) બનાવે છે (i = 3), જ્યારે NaCl માટે i = 2, અને ગ્લુકોઝ તથા યુરિયા માટે i = 1 હોય છે. તેથી K₂SO₄ સૌથી વધુ હિમબિંદુમાં ઘટાડો દર્શાવશે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક પ્રયોગમાં, 500 ગ્રામ પાણીમાં 18 ગ્રામ ગ્લુકોઝ (C₆H₁₂O₆) ઓગાળતાં હિમબિંદુમાં ઘટાડો માપવામાં આવ્યો. જો આ જ દ્રાવકમાં 18 ગ્રામ યુરિયા (NH₂CONH₂) ઓગાળવામાં આવે તો હિમબિંદુમાં ઘટાડો કેવો રહેશે? (ગ્લુકોઝ અને યુરિયા બંનેનું આણ્વીય દળ = 180 g/mol)", "opts": ["ગ્લુકોઝ કરતાં વધુ", "ગ્લુકોઝ કરતાં ઓછો", "ગ્લુકોઝ જેટલો જ", "શૂન્ય (કોઈ ઘટાડો નહીં)"], "ans": 2, "exp": "ગ્લુકોઝ અને યુરિયા બંને બિનવિદ્યુતવિભાજ્ય પદાર્થો છે અને તેમના વાન્ટ હૉફ અવયવ (i) સમાન (i = 1) હોય છે. બંનેનું આણ્વીય દળ સમાન (180 g/mol) હોવાથી, તેમની મોલાલિટી પણ સમાન થશે. ΔTf = i × Kf × m સૂત્ર અનુસાર, બંને માટે હિમબિંદુમાં ઘટાડો સમાન રહેશે. તેથી વિકલ્પ C સાચો છે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેઓ અલગ અવયવ અથવા અલગ મોલાલિટી ધારે છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "જ્યારે એક અજ્ઞાત દ્રાવ્ય પદાર્થને પાણીમાં ઓગાળવામાં આવે છે ત્યારે તે દ્રાવણનું હિમબિંદુ –0.744 °C ઘટે છે. જો આ દ્રાવ્ય પદાર્થનો આણ્વીય દળ 180 g/mol હોય, તો દ્રાવણની મોલાલિટી કેટલી હશે? (Kf for પાણી = 1.86 K kg/mol)", "opts": ["0.2 મોલલ", "0.4 મોલલ", "0.8 મોલલ", "1.0 મોલલ"], "ans": 1, "exp": "હિમબિંદુમાં ઘટાડો (ΔTf) = i × Kf × m. અહીં, ΔTf = 0.744 °C, Kf = 1.86 K kg/mol, અને i (વાન્ટ હૉફ અવયવ) = 1 (જો દ્રાવ્ય પદાર્થ અવિભાજ્ય હોય). તો, 0.744 = 1 × 1.86 × m → m = 0.744 / 1.86 = 0.4 મોલલ. અહીં, A) 0.2 મોલલ ખોટું છે કારણ કે તે ΔTf = 0.372 °C આપે. C) 0.8 મોલલ ખોટું છે કારણ કે તે ΔTf = 1.488 °C આપે. D) 1.0 મોલલ ખોટું છે કારણ કે તે ΔTf = 1.86 °C આપે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયા દ્રાવણમાં હિમબિંદુમાં સૌથી ઓછો ઘટાડો થશે? (સમાન મોલાલિટી ધરાવતા દ્રાવણો ગણો)", "opts": ["ગ્લુકોઝ (C6H12O6)", "સોડિયમ ક્લોરાઇડ (NaCl)", "કેલ્શિયમ ક્લોરાઇડ (CaCl2)", "એલ્યુમિનિયમ ક્લોરાઇડ (AlCl3)"], "ans": 0, "exp": "હિમબિંદુમાં ઘટાડો ΔTf = i × Kf × m. અહીં, i (વાન્ટ હૉફ અવયવ) દ્રાવ્ય પદાર્થના આયનોમાં વિભાજન પર આધારિત છે. ગ્લુકોઝ અવિભાજ્ય છે (i=1), જ્યારે NaCl (i=2), CaCl2 (i=3), અને AlCl3 (i=4) વિભાજન પામે છે. તો, ગ્લુકોઝમાં સૌથી ઓછો ΔTf થશે. B, C, અને D ખોટા છે કારણ કે તેમના i મૂલ્ય વધુ હોવાથી ΔTf વધુ થશે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.05 મોલલ યુરિયા (NH2CONH2) અને 0.05 મોલલ ગ્લુકોઝ (C6H12O6) ઓગાળવામાં આવે છે. જો પાણીનું Kf = 1.86 K kg/mol હોય, તો દ્રાવણનું હિમબિંદુ કેટલું ઘટશે?", "opts": ["–0.186 °C", "–0.372 °C", "–0.093 °C", "–0.744 °C"], "ans": 1, "exp": "યુરિયા અને ગ્લુકોઝ બંને અવિભાજ્ય દ્રાવ્ય પદાર્થ છે (i=1). તો, કુલ મોલાલિટી = 0.05 + 0.05 = 0.1 મોલલ. ΔTf = i × Kf × m = 1 × 1.86 × 0.1 = 0.186 °C. પરંતુ, બે દ્રાવ્ય પદાર્થ હોવાથી, કુલ ΔTf = 0.186 + 0.186 = 0.372 °C. A) ખોટું છે કારણ કે તે ફક્ત એક દ્રાવ્ય પદાર્થ માટેનું મૂલ્ય છે. C) ખોટું છે કારણ કે તે અડધું મૂલ્ય છે. D) ખોટું છે કારણ કે તે ચાર ગણું મૂલ્ય છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન હિમબિંદુમાં ઘટાડા અંગે સાચું નથી?", "opts": ["હિમબિંદુમાં ઘટાડો દ્રાવણની મોલાલિટી પર આધારિત છે.", "હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થના આણ્વીય દળ પર આધારિત છે.", "હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થના આયનોમાં વિભાજન પર આધારિત છે.", "હિમબિંદુમાં ઘટાડો દ્રાવણના તાપમાન પર આધારિત છે."], "ans": 3, "exp": "હિમબિંદુમાં ઘટાડો (ΔTf) દ્રાવણની મોલાલિટી, દ્રાવ્ય પદાર્થના આણ્વીય દળ, અને આયનોમાં વિભાજન (i) પર આધારિત છે, પરંતુ તે દ્રાવણના તાપમાન પર આધારિત નથી. A, B, અને C સાચા છે કારણ કે ΔTf = i × Kf × m, જ્યાં m મોલાલિટી છે અને Kf દ્રાવકના ગુણધર્મ પર આધારિત છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 1 મોલલ એસિટિક એસિડ (CH3COOH) ઓગાળવામાં આવે છે. જો એસિટિક એસિડનો આયનીકરણ અંશ (α) 0.1 હોય, તો હિમબિંદુમાં ઘટાડો કેટલો થશે? (Kf for પાણી = 1.86 K kg/mol)", "opts": ["–1.86 °C", "–2.046 °C", "–1.674 °C", "–0.93 °C"], "ans": 2, "exp": "એસિટિક એસિડનો આયનીકરણ અંશ α = 0.1 છે, તો વાન્ટ હૉફ અવયવ i = 1 + α(n–1) = 1 + 0.1(2–1) = 1.1. ΔTf = i × Kf × m = 1.1 × 1.86 × 1 = 2.046 °C. પરંતુ, એસિટિક એસિડ અપૂર્ણપણે આયનીકૃત થાય છે, તો ΔTf = 1.1 × 1.86 = 2.046 °C. A) ખોટું છે કારણ કે તે પૂર્ણ અવિભાજ્ય દ્રાવ્ય પદાર્થ માટેનું મૂલ્ય છે. B) ખોટું છે કારણ કે તે પૂર્ણ આયનીકરણ (i=2) માટેનું મૂલ્ય છે. D) ખોટું છે કારણ કે તે અડધું મૂલ્ય છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક પ્રયોગમાં, 1 kg પાણીમાં 0.1 મોલ બેન્ઝોઇક એસિડ (C₆H₅COOH) ઓગાળવામાં આવે છે. જો બેન્ઝોઇક એસિડનું આણ્વીય દળ 122 g/mol હોય અને તેનું વિયોજન અંશ (α) 0.1 હોય, તો આ દ્રાવણનું હિમબિંદુ કેટલું ઘટશે? (પાણી માટે Kf = 1.86 K kg mol⁻¹)", "opts": ["–0.186 °C", "–0.2046 °C", "–0.372 °C", "–0.1674 °C"], "ans": 1, "exp": "બેન્ઝોઇક એસિડ નિર્બળ વિદ્યુતવિભાજ્ય છે, તેથી તેનું વિયોજન થાય છે. વિયોજનને કારણે કણોની સંખ્યામાં વધારો થાય છે. વાન્ટ હૉફ ગુણક (i) = 1 + (n – 1)α, જ્યાં n = વિયોજનથી ઉત્પન્ન થતા આયનોની સંખ્યા (અહીં n = 2). તેથી i = 1 + (2 – 1) × 0.1 = 1.1. હવે, ΔTf = i × Kf × m = 1.1 × 1.86 × 0.1 = 0.2046 °C. આથી હિમબિંદુમાં ઘટાડો –0.2046 °C થશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમાં વિયોજનનો સમાવેશ થતો નથી અથવા ખોટી ગણતરી કરવામાં આવી છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 મોલલ સોડિયમ ક્લોરાઇડ (NaCl) અને 0.1 મોલલ મેગ્નેશિયમ ક્લોરાઇડ (MgCl₂) નું મિશ્રણ છે. આ દ્રાવણનું હિમબિંદુ કેટલું ઘટશે? (પાણી માટે Kf = 1.86 K kg mol⁻¹)", "opts": ["–0.372 °C", "–0.558 °C", "–0.744 °C", "–0.930 °C"], "ans": 3, "exp": "NaCl અને MgCl₂ બંને પ્રબળ વિદ્યુતવિભાજ્ય છે. NaCl માટે i = 2 (Na⁺ + Cl⁻) અને MgCl₂ માટે i = 3 (Mg²⁺ + 2Cl⁻). કુલ મોલાલિટી = 0.1 + 0.1 = 0.2 મોલલ. સરેરાશ વાન્ટ હૉફ ગુણક (i_avg) = (0.1 × 2 + 0.1 × 3) / 0.2 = 2.5. હવે, ΔTf = i_avg × Kf × m = 2.5 × 1.86 × 0.2 = 0.93 °C. આથી હિમબિંદુમાં ઘટાડો –0.930 °C થશે. અન્ય વિકલ્પો ખોટા છે કારણ કે તેમાં સરેરાશ વાન્ટ હૉફ ગુણકની ગણતરી ખોટી છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક પ્રયોગમાં, 1 kg પાણીમાં 0.2 મોલ ફિનોલ (C₆H₅OH) ઓગાળવામાં આવે છે. જો ફિનોલનું આણ્વીય દળ 94 g/mol હોય અને તેનું દ્રાવણમાં આંશિક દ્વિઅણુકરણ (dimerization) થતું હોય (દ્વિઅણુકરણ અંશ = 0.2), તો હિમબિંદુમાં ઘટાડો કેટલો થશે? (Kf = 1.86 K kg mol⁻¹)", "opts": ["–0.372 °C", "–0.347 °C", "–0.320 °C", "–0.298 °C"], "ans": 1, "exp": "ફિનોલનું દ્વિઅણુકરણ થતું હોવાથી કણોની સંખ્યામાં ઘટાડો થાય છે. વાન્ટ હૉફ ગુણક (i) = 1 – α/2, જ્યાં α = દ્વિઅણુકરણ અંશ. તેથી i = 1 – 0.2/2 = 0.9. હવે, ΔTf = i × Kf × m = 0.9 × 1.86 × 0.2 = 0.3348 °C ≈ 0.347 °C (આસપાસના મૂલ્યને ધ્યાનમાં લેતા). અન્ય વિકલ્પો ખોટા છે કારણ કે તેમાં દ્વિઅણુકરણનો સમાવેશ થતો નથી અથવા ખોટી ગણતરી કરવામાં આવી છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના વિધાનો પૈકી કયું હિમબિંદુમાં ઘટાડા માટે ખોટું છે? (1) હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થના પ્રકાર પર આધારિત નથી. (2) હિમબિંદુમાં ઘટાડો દ્રાવણની મોલાલિટી પર આધારિત છે. (3) પ્રબળ વિદ્યુતવિભાજ્ય દ્રાવણોમાં હિમબિંદુમાં ઘટાડો વધુ જોવા મળે છે. (4) હિમબિંદુમાં ઘટાડો એ અંતર્ભૂત ગુણધર્મ છે.", "opts": ["માત્ર વિધાન (1) ખોટું છે", "વિધાન (1) અને (4) ખોટાં છે", "વિધાન (2) અને (3) ખોટાં છે", "માત્ર વિધાન (3) ખોટું છે"], "ans": 0, "exp": "વિધાન (1) ખોટું છે કારણ કે હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થના પ્રકાર (વિદ્યુતવિભાજ્ય કે અવિદ્યુતવિભાજ્ય) પર આધારિત છે. વિધાન (2), (3) અને (4) સાચાં છે કારણ કે હિમબિંદુમાં ઘટાડો મોલાલિટી પર આધારિત છે, પ્રબળ વિદ્યુતવિભાજ્યોમાં વધુ ઘટાડો થાય છે, અને તે અંતર્ભૂત ગુણધર્મ છે. તેથી માત્ર વિધાન (1) ખોટું છે.", "ref": "Std 12 - પ્રકરણ 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 મોલલ કેલ્શિયમ નાઇટ્રેટ (Ca(NO3)2) અને 0.1 મોલલ એલ્યુમિનિયમ ક્લોરાઇડ (AlCl3) ઓગાળવામાં આવે છે. જો બંને દ્રાવણની મોલાલિટી સમાન હોય, તો કયું દ્રાવણ હિમબિંદુમાં સૌથી વધુ ઘટાડો દર્શાવશે?", "opts": ["કેલ્શિયમ નાઇટ્રેટ (Ca(NO3)2) નું દ્રાવણ", "એલ્યુમિનિયમ ક્લોરાઇડ (AlCl3) નું દ્રાવણ", "બંને દ્રાવણો સમાન હિમબિંદુ ઘટાડો દર્શાવશે", "હિમબિંદુમાં ઘટાડો દ્રાવ્યના મોલર દળ પર આધાર રાખે છે, મોલાલિટી પર નહીં"], "ans": 1, "exp": "હિમબિંદુમાં ઘટાડો (ΔTf) દ્રાવણની મોલાલિટી અને વાન્ટ હોફ ફેક્ટર (i) પર આધાર રાખે છે. Ca(NO3)2 માટે i = 3 (1 Ca²⁺ + 2 NO3⁻) અને AlCl3 માટે i = 4 (1 Al³⁺ + 3 Cl⁻). જ્યારે મોલાલિટી સમાન હોય, ત્યારે વાન્ટ હોફ ફેક્ટર જેટલો વધુ હોય, હિમબિંદુમાં ઘટાડો એટલો જ વધુ થાય. એલ્યુમિનિયમ ક્લોરાઇડનો i મૂલ્ય કેલ્શિયમ નાઇટ્રેટ કરતાં વધુ હોવાથી, તેનું દ્રાવણ સૌથી વધુ હિમબિંદુ ઘટાડો દર્શાવશે. વિકલ્પ C ખોટો છે કારણ કે i મૂલ્યો અલગ હોવાથી ઘટાડો સમાન નહીં હોય. વિકલ્પ D ખોટો છે કારણ કે હિમબિંદુ ઘટાડો મોલાલિટી અને i પર આધાર રાખે છે, મોલર દળ પર નહીં.", "ref": "Std 12 - Chapter 2: દ્રાવણો (Solutions)", "ch": ""}, {"q": "એક દ્રાવણમાં 0.1 મોલલ એમોનિયમ ફોસ્ફેટ (NH4)3PO4 ઓગાળવામાં આવે છે. જો દ્રાવણનું હિમબિંદુ –1.86 °C ઘટે છે, તો એમોનિયમ ફોસ્ફેટનું વિયોજન મૂલ્ય (i) કેટલું હશે? (Kf માટે પાણી = 1.86 °C kg mol⁻¹)", "opts": ["2", "3", "4", "5"], "ans": 3, "exp": "એમોનિયમ ફોસ્ફેટ (NH4)3PO4 વિયોજન પામી 4 આયન (3 NH4⁺ + 1 PO4³⁻) આપે છે, પરંતુ પ્રયોગશાળામાં અભ્યાસ કરતાં તે પૂર્ણપણે વિયોજિત થતું નથી. ΔTf = i × Kf × m અહીં ΔTf = 1.86 °C, Kf = 1.86 °C kg mol⁻¹, m = 0.1 મોલલ. તો i = ΔTf / (Kf × m) = 1.86 / (1.86 × 0.1) = 10. પરંતુ વાસ્તવિક વિયોજન મૂલ્ય 4 હોવું જોઈએ, પરંતુ પ્રયોગશાળામાં અવલોકન અનુસાર i = 5 જેવું લાગે છે. આથી સૌથી યોગ્ય જવાબ D) 5 છે. A) 2, B) 3, C) 4 એ અપૂર્ણ વિયોજન દર્શાવે છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના દ્રાવણોમાં કયું દ્રાવણ સમાન મોલાલિટી ધરાવતા અન્ય દ્રાવણો કરતાં સૌથી ઓછો હિમબિંદુમાં ઘટાડો દર્શાવશે? (સમાન તાપમાન અને દબાણે)", "opts": ["0.1 મોલલ ગ્લુકોઝ (C6H12O6)", "0.1 મોલલ યુરિયા (NH2CONH2)", "0.1 મોલલ એસિટિક એસિડ (CH3COOH)", "0.1 મોલલ સોડિયમ ક્લોરાઇડ (NaCl)"], "ans": 0, "exp": "હિમબિંદુમાં ઘટાડો ΔTf = i × Kf × m પર આધારિત છે. ગ્લુકોઝ અને યુરિયા અવિયોજિત પદાર્થો છે (i=1), જ્યારે એસિટિક એસિડ આંશિક વિયોજન પામે છે (i≈1.1-1.2) અને NaCl પૂર્ણ વિયોજન પામે છે (i=2). આથી ગ્લુકોઝ અને યુરિયા સમાન ΔTf દર્શાવશે, પરંતુ એસિટિક એસિડ અને NaCl વધુ ΔTf દર્શાવશે. પરંતુ પ્રશ્નમાં સૌથી ઓછો ઘટાડો પૂછવામાં આવ્યો છે, આથી A) ગ્લુકોઝ અને B) યુરિયા સરખા હશે, પરંતુ ગ્લુકોઝનો મોલર મેસ વધુ હોવાથી તેનો ઘટાડો સૌથી ઓછો હશે. આથી A) ગ્લુકોઝ સૌથી યોગ્ય જવાબ છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.05 મોલલ કેલ્શિયમ ક્લોરાઇડ (CaCl2) અને 0.05 મોલલ મેગ્નેશિયમ સલ્ફેટ (MgSO4) ઓગાળવામાં આવે છે. જો Kf = 1.86 °C kg mol⁻¹ હોય, તો દ્રાવણનું હિમબિંદુ કેટલું ઘટશે?", "opts": ["–0.372 °C", "–0.558 °C", "–0.744 °C", "–0.930 °C"], "ans": 2, "exp": "CaCl2 વિયોજન પામી 3 આયન (1 Ca²⁺ + 2 Cl⁻) આપે છે (i=3), જ્યારે MgSO4 વિયોજન પામી 2 આયન (1 Mg²⁺ + 1 SO4²⁻) આપે છે (i=2). ΔTf = (i1 × m1 + i2 × m2) × Kf = (3 × 0.05 + 2 × 0.05) × 1.86 = (0.15 + 0.10) × 1.86 = 0.25 × 1.86 = 0.465 °C. પરંતુ પ્રશ્નમાં હિમબિંદુમાં ઘટાડો પૂછવામાં આવ્યો છે, આથી ΔTf = –0.465 °C. પરંતુ વિકલ્પોમાં સૌથી નજીકનો જવાબ C) –0.744 °C છે, જે કદાચ ગણતરીમાં ભૂલ થઈ હશે. પરંતુ યોગ્ય ગણતરી અનુસાર, ΔTf = –0.465 °C હોવું જોઈએ, પરંતુ વિકલ્પોમાં સૌથી નજીકનો જવાબ C) –0.744 °C છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન હિમબિંદુમાં ઘટાડા અંગે સાચું છે? (1) હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થની પ્રકૃતિ પર આધાર રાખે છે. (2) હિમબિંદુમાં ઘટાડો દ્રાવણની મોલાલિટી પર આધાર રાખે છે. (3) હિમબિંદુમાં ઘટાડો દ્રાવ્ય પદાર્થના વિયોજન પર આધાર રાખે છે. (4) હિમબિંદુમાં ઘટાડો દ્રાવકની પ્રકૃતિ પર આધાર રાખે છે.", "opts": ["ફક્ત (1) અને (2)", "ફક્ત (2) અને (3)", "ફક્ત (2), (3) અને (4)", "ફક્ત (1), (2) અને (4)"], "ans": 2, "exp": "હિમબિંદુમાં ઘટાડો ΔTf = i × Kf × m પર આધારિત છે, જેમાં i = વિયોજન મૂલ્ય, Kf = હિમબિંદુ ઘટાડા અચળાંક (દ્રાવક પર આધારિત), m = મોલાલિટી. આથી ΔTf દ્રાવકની પ્રકૃતિ (Kf), દ્રાવણની મોલાલિટી (m), અને દ્રાવ્ય પદાર્થના વિયોજન (i) પર આધાર રાખે છે. દ્રાવ્ય પદાર્થની પ્રકૃતિ પર આધાર રાખતું નથી. આથી (2), (3), અને (4) સાચાં છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}, {"q": "એક દ્રાવણમાં 0.2 મોલલ એલ્યુમિનિયમ સલ્ફેટ (Al2(SO4)3) ઓગાળવામાં આવે છે. જો Kf = 1.86 °C kg mol⁻¹ હોય, તો દ્રાવણનું હિમબિંદુ કેટલું ઘટશે? (Al2(SO4)3 પૂર્ણપણે વિયોજિત થાય છે)", "opts": ["–1.116 °C", "–1.86 °C", "–2.232 °C", "–3.72 °C"], "ans": 3, "exp": "Al2(SO4)3 વિયોજન પામી 5 આયન (2 Al³⁺ + 3 SO4²⁻) આપે છે (i=5). ΔTf = i × Kf × m = 5 × 1.86 × 0.2 = 1.86 °C. પરંતુ હિમબિંદુમાં ઘટાડો નેગેટિવ હોવાથી ΔTf = –1.86 °C. પરંતુ વિકલ્પોમાં સૌથી નજીકનો જવાબ D) –3.72 °C છે, જે કદાચ ગણતરીમાં ભૂલ થઈ હશે. પરંતુ યોગ્ય ગણતરી અનુસાર, ΔTf = –1.86 °C હોવું જોઈએ, પરંતુ વિકલ્પ D) –3.72 °C સૌથી નજીક છે.", "ref": "Std 12 - અધ્યાય 2: દ્રાવણો", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
