@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>વંધ્યત્વ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>વંધ્યત્વ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">વંધ્યત્વ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "જ્યારે સ્ત્રીમાં મૂળ કોષોમાં X-વર્ણસૂત્રની અછત હોય ત્યારે કયું વંધ્યત્વનું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["ટર્નર સિન્ડ્રોમ", "ક્લાઇનફેલ્ટર સિન્ડ્રોમ", "ડાઉન સિન્ડ્રોમ", "હેમોફિલિયા"], "ans": 0, "exp": "ટર્નર સિન્ડ્રોમમાં સ્ત્રીમાં એક X-વર્ણસૂત્રની અછત (45,X) હોય છે, જે અંડાશયના વિકાસને અસર કરે છે અને વંધ્યત્વ તરફ દોરી જાય છે. ક્લાઇનફેલ્ટર સિન્ડ્રોમ (XXY) પુરુષોમાં જોવા મળે છે, ડાઉન સિન્ડ્રોમ 21મા વર્ણસૂત્રના ત્રિગુણીકરણને લીધે થાય છે, અને હેમોફિલિયા રક્તના ગંઠાવાનું રોગ છે, વંધ્યત્વ સાથે સીધો સંબંધ ધરાવતો નથી.", "ref": "Std 12 - પ્રકરણ 5: વંશવેલા અને જનીનિક રોગો", "ch": ""}, {"q": "પુરુષ વંધ્યત્વમાં શુક્રાણુઓની ગતિશીલતામાં ઘટાડો કયા અંગના કાર્યમાં ખામીને કારણે થઈ શકે છે?", "opts": ["અંડકોષ", "પ્રોસ્ટેટ ગ્રંથિ", "વૃષણ", "વાસ ડિફરન્સ"], "ans": 2, "exp": "વૃષણ શુક્રાણુઓનું ઉત્પાદન કરે છે અને તેમની ગતિશીલતા માટે જવાબદાર છે. અંડકોષ શુક્રાણુઓનું સંગ્રહ કરે છે, પ્રોસ્ટેટ ગ્રંથિ શુક્રાણુઓને પોષક દ્રવ્ય પૂરું પાડે છે, અને વાસ ડિફરન્સ શુક્રાણુઓનું વહન કરે છે. શુક્રાણુઓની ગતિશીલતામાં ઘટાડો વૃષણના કાર્યમાં ખામીને કારણે થાય છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "કયું હોર્મોન સ્ત્રીમાં અંડોત્સર્ગને ઉત્તેજિત કરે છે અને તેની અછતે વંધ્યત્વ થઈ શકે છે?", "opts": ["ઇન્સ્યુલિન", "લ્યુટિનાઇઝિંગ હોર્મોન (LH)", "થાયરોક્સિન", "એડ્રિનેલિન"], "ans": 1, "exp": "લ્યુટિનાઇઝિંગ હોર્મોન (LH) અંડોત્સર્ગને ઉત્તેજિત કરે છે. ઇન્સ્યુલિન રક્તમાં ગ્લુકોઝના સ્તરને નિયંત્રિત કરે છે, થાયરોક્સિન ચયાપચયને નિયંત્રિત કરે છે, અને એડ્રિનેલિન તણાવ પ્રતિભાવ સાથે સંબંધિત છે. LHની અછતે અંડોત્સર્ગ થતો નથી, જે વંધ્યત્વ તરફ દોરી જાય છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "પુરુષમાં શુક્રાણુઓની સંખ્યામાં ઘટાડો કયા વાતાવરણીય કારણને લીધે થઈ શકે છે?", "opts": ["વધુ પડતું પાણી પીવું", "તાપમાનમાં વધારો", "ઓક્સિજનની અછત", "કેલ્શિયમની અછત"], "ans": 1, "exp": "વૃષણમાં શુક્રાણુઓનું ઉત્પાદન ઓપ્ટિમમ તાપમાન (34-35°C) પર થાય છે. તાપમાનમાં વધારો શુક્રાણુઓની સંખ્યામાં ઘટાડો કરે છે. વધુ પડતું પાણી પીવું, ઓક્સિજનની અછત, અને કેલ્શિયમની અછત શુક્રાણુઓની સંખ્યા પર સીધી અસર કરતી નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન તંત્ર", "ch": ""}, {"q": "કયું જનીનિક રોગ સ્ત્રી અને પુરુષ બંનેમાં વંધ્યત્વનું કારણ બની શકે છે, પરંતુ તે X-વર્ણસૂત્ર સાથે સંબંધિત નથી?", "opts": ["હેમોફિલિયા", "સિકલ સેલ એનિમિયા", "કલર બ્લાઇન્ડનેસ", "ડ્યુચેન મસ્ક્યુલર ડિસ્ટ્રોફી"], "ans": 1, "exp": "સિકલ સેલ એનિમિયા ઓટોસોમલ રીસેસિવ રોગ છે જે સ્ત્રી અને પુરુષ બંનેમાં વંધ્યત્વનું કારણ બની શકે છે. હેમોફિલિયા, કલર બ્લાઇન્ડનેસ, અને ડ્યુચેન મસ્ક્યુલર ડિસ્ટ્રોફી X-વર્ણસૂત્ર સાથે સંબંધિત રોગો છે.", "ref": "Std 12 - પ્રકરણ 5: વંશવેલા અને જનીનિક રોગો", "ch": ""}, {"q": "સ્ત્રીમાં પોલીસિસ્ટિક ઓવેરિયન સિન્ડ્રોમ (PCOS) ના કિસ્સામાં નીચેનામાંથી કયું પરિવર્તન વંધ્યત્વ તરફ દોરી શકે છે?", "opts": ["FSH નું સ્તર વધુ અને LH નું સ્તર ઓછું હોવું", "એન્ડ્રોજન હોર્મોનનું સ્તર વધી જવું અને ઇન્સ્યુલિન પ્રતિકાર વધવો", "પ્રોજેસ્ટેરોનનું સ્તર વધી જવું અને એસ્ટ્રોજનનું સ્તર ઘટી જવું", "ઓવ્યુલેશન નિયમિત થવું અને એન્ડોમેટ્રિયમનું પાતળું થવું"], "ans": 1, "exp": "PCOS માં એન્ડ્રોજન હોર્મોનનું સ્તર વધી જવું અને ઇન્સ્યુલિન પ્રતિકાર વધવો એ વંધ્યત્વનું મુખ્ય કારણ છે. FSH અને LH ના સ્તરમાં અસંતુલન થાય છે, પરંતુ એન્ડ્રોજન અને ઇન્સ્યુલિન પ્રતિકાર વધવાને કારણે અંડોત્સર્ગ (ઓવ્યુલેશન) થતો નથી, જે વંધ્યત્વ તરફ દોરી જાય છે. વિકલ્પ A, C, અને D PCOS ની લાક્ષણિકતાઓ સાથે મેળ ખાતા નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "પુરુષમાં વંધ્યત્વનું કારણ કયા કોષીય અવયવની ખામીને લીધે શુક્રાણુઓનું ઉત્પાદન ઘટી શકે છે?", "opts": ["સર્ટોલી કોષોની ક્રિયાશીલતામાં ઘટાડો", "લેયડિગ કોષો દ્વારા ટેસ્ટોસ્ટેરોનનું ઉત્પાદન વધવું", "એપિડિડાઇમિસમાં શુક્રાણુઓનું સંગ્રહણ વધવું", "વાસ ડિફરન્સમાં શુક્રાણુઓની ગતિ વધવી"], "ans": 0, "exp": "સર્ટોલી કોષો શુક્રાણુઓના પોષણ અને વિકાસ માટે જરૂરી છે. તેમની ક્રિયાશીલતામાં ઘટાડો થવાથી શુક્રાણુઓનું ઉત્પાદન ઘટે છે, જે વંધ્યત્વ તરફ દોરી શકે છે. લેયડિગ કોષો ટેસ્ટોસ્ટેરોનનું ઉત્પાદન કરે છે, પરંતુ તેનું વધુ ઉત્પાદન વંધ્યત્વનું કારણ બનતું નથી. એપિડિડાઇમિસ અને વાસ ડિફરન્સ શુક્રાણુઓના સંગ્રહ અને પરિવહન માટે જવાબદાર છે, પરંતુ તેમની ક્રિયામાં વધારો વંધ્યત્વનું કારણ બનતો નથી.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "સ્ત્રીમાં વંધ્યત્વનું કારણ કયા અંગમાં થતી સંકોચનની ખામીને લીધે ગર્ભાશયમાં ગર્ભધારણ થતું નથી?", "opts": ["ફેલોપિયન ટ્યુબમાં સંકોચનની ખામી", "ગર્ભાશયના એન્ડોમેટ્રિયમમાં રક્તવાહિનીઓની ખામી", "સર્વિક્સમાં શ્લેષ્મના સ્રાવમાં ઘટાડો", "ઓવરીમાં કોર્પસ લ્યુટિયમનું નિર્માણ ન થવું"], "ans": 0, "exp": "ફેલોપિયન ટ્યુબમાં સંકોચનની ખામીને કારણે અંડકોષ ગર્ભાશય સુધી પહોંચી શકતો નથી, જેના કારણે ગર્ભધારણ થતું નથી. ગર્ભાશયના એન્ડોમેટ્રિયમ, સર્વિક્સ, અને ઓવરીની ખામીઓ પણ વંધ્યત્વનું કારણ બની શકે છે, પરંતુ ફેલોપિયન ટ્યુબની ખામી સૌથી સીધું કારણ છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "પુરુષમાં વંધ્યત્વનું કારણ કયા જનીનિક રોગને લીધે શુક્રાણુઓની રચના અસાધારણ થાય છે?", "opts": ["ક્લાઇનફેલ્ટર સિન્ડ્રોમ (XXY)", "ટર્નર સિન્ડ્રોમ (XO)", "ડાઉન સિન્ડ્રોમ (ટ્રાયસોમી 21)", "હિમોફિલિયા"], "ans": 0, "exp": "ક્લાઇનફેલ્ટર સિન્ડ્રોમ (XXY) પુરુષમાં શુક્રાણુઓની રચના અસાધારણ બનાવે છે, જેના કારણે વંધ્યત્વ થાય છે. ટર્નર સિન્ડ્રોમ (XO) સ્ત્રીમાં જોવા મળે છે, ડાઉન સિન્ડ્રોમ વંધ્યત્વ સાથે સીધો સંબંધ ધરાવતો નથી, અને હિમોફિલિયા રક્તસ્રાવ સાથે સંબંધિત રોગ છે.", "ref": "Std 12 - Chapter 5: વંશપરંપરા અને પરિવર્તન", "ch": ""}, {"q": "સ્ત્રીમાં વંધ્યત્વનું કારણ કયા હોર્મોનની અછતને લીધે ગર્ભાશયની દીવાલ પાતળી રહે છે અને ગર્ભધારણ માટે અનુકૂળ વાતાવરણ નથી બનતું?", "opts": ["એસ્ટ્રોજન", "પ્રોજેસ્ટેરોન", "FSH", "LH"], "ans": 1, "exp": "પ્રોજેસ્ટેરોન હોર્મોન ગર્ભાશયની દીવાલને મોટી અને રક્તવાહિનીઓયુક્ત બનાવે છે, જે ગર્ભધારણ માટે અનુકૂળ વાતાવરણ તૈયાર કરે છે. પ્રોજેસ્ટેરોનની અછતને કારણે ગર્ભાશયની દીવાલ પાતળી રહે છે અને ગર્ભધારણ થતું નથી. એસ્ટ્રોજન, FSH, અને LH પણ પ્રજનન ક્રિયામાં મહત્વની ભૂમિકા ભજવે છે, પરંતુ પ્રોજેસ્ટેરોનની અછત સૌથી સીધું કારણ છે.", "ref": "Std 12 - Chapter 3: માનવ પ્રજનન", "ch": ""}, {"q": "સ્ત્રીમાં ફેલોપિયન ટ્યુબની શલાકા (fimbriae) ની ક્રિયામાં ખામી થવાથી કયું વંધ્યત્વનું કારણ સૌથી વધુ સંભવિત છે?", "opts": ["અંડકોષનું ઉત્પાદન ઘટી જવું", "અંડકોષનું ફેલોપિયન ટ્યુબમાં સ્થાનાંતરણ ન થવું", "ગર્ભાશયની દીવાલમાં ગર્ભધારણ માટેની તૈયારી ન થવી", "પ્રોજેસ્ટેરોન હોર્મોનનું સ્તર ઘટી જવું"], "ans": 1, "exp": "ફેલોપિયન ટ્યુબની શલાકા (fimbriae) અંડકોષને ઓવરીથી ફેલોપિયન ટ્યુબ તરફ ખેંચી લાવવામાં મદદ કરે છે. જો આ ક્રિયામાં ખામી હોય તો અંડકોષ ફેલોપિયન ટ્યુબમાં પ્રવેશી શકતું નથી, જેથી ફલન થતું નથી અને વંધ્યત્વ થાય છે. A) અંડકોષનું ઉત્પાદન ઓવરીની ક્રિયા સાથે સંબંધિત છે, ફેલોપિયન ટ્યુબ સાથે નહીં. C) ગર્ભાશયની દીવાલની તૈયારી પ્રોજેસ્ટેરોન પર આધારિત છે, ફેલોપિયન ટ્યુબ પર નહીં. D) પ્રોજેસ્ટેરોનનું સ્તર ઘટવું ગર્ભાશયની દીવાલને અસર કરે, પરંતુ ફેલોપિયન ટ્યુબની શલાકાની ક્રિયા સાથે સીધો સંબંધ નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "પુરુષમાં વરિષ્ઠ વયે (40+ વર્ષ) વંધ્યત્વનું સૌથી સામાન્ય કારણ કયું હોઈ શકે?", "opts": ["શુક્રાણુઓની સંખ્યામાં ઘટાડો અને તેમની ગુણવત્તામાં ઘટાડો", "ટેસ્ટોસ્ટેરોન હોર્મોનનું સ્તર અચાનક વધી જવું", "શુક્રાણુઓની ગતિશીલતામાં વધારો", "પ્રોસ્ટેટ ગ્રંથિનું કદ ઘટી જવું"], "ans": 0, "exp": "વરિષ્ઠ વયે પુરુષોમાં શુક્રાણુઓની સંખ્યા અને ગુણવત્તા (જેવી કે ગતિશીલતા અને આકાર) માં ઘટાડો થવો એ વંધ્યત્વનું સામાન્ય કારણ છે. B) ટેસ્ટોસ્ટેરોનનું સ્તર વધવું શુક્રાણુઓના ઉત્પાદનને ઉત્તેજિત કરે, પરંતુ વરિષ્ઠ વયે આ સામાન્ય નથી. C) શુક્રાણુઓની ગતિશીલતામાં વધારો વંધ્યત્વનું કારણ બનતું નથી. D) પ્રોસ્ટેટ ગ્રંથિનું કદ ઘટવું વંધ્યત્વ સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "સ્ત્રીમાં એન્ડોમેટ્રિયોસિસ રોગમાં કયું પરિવર્તન વંધ્યત્વ તરફ દોરી શકે છે?", "opts": ["ફેલોપિયન ટ્યુબમાં અવરોધ ઉભો થવો", "અંડકોષનું ઉત્પાદન વધી જવું", "ગર્ભાશયની દીવાલમાં રક્તવાહિનીઓની સંખ્યામાં વધારો થવો", "પ્રોજેસ્ટેરોન હોર્મોનનું સ્તર અચાનક વધી જવું"], "ans": 0, "exp": "એન્ડોમેટ્રિયોસિસમાં, ગર્ભાશયની અંદરની દીવાલ (એન્ડોમેટ્રિયમ) ના પેશી ગર્ભાશયની બહાર વિકસે છે, જેથી ફેલોપિયન ટ્યુબ, ઓવરી અથવા અન્ય અંગોમાં અવરોધ ઉભો થઈ શકે છે, જેથી ફલન અથવા ગર્ભધારણમાં અડચણ ઉભી થાય છે. B) અંડકોષનું ઉત્પાદન વધવું એન્ડોમેટ્રિયોસિસ સાથે સંબંધિત નથી. C) ગર્ભાશયની દીવાલમાં રક્તવાહિનીઓની સંખ્યામાં વધારો એન્ડોમેટ્રિયોસિસનું લક્ષણ નથી. D) પ્રોજેસ્ટેરોનનું સ્તર વધવું એન્ડોમેટ્રિયોસિસ સાથે સીધો સંબંધ ધરાવતું નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "પુરુષમાં ક્લાઇનફેલ્ટર સિન્ડ્રોમ (XXY) ના કિસ્સામાં કયું વંધ્યત્વનું કારણ સૌથી સંભવિત છે?", "opts": ["શુક્રાણુઓનું ઉત્પાદન સામાન્ય રહે છે પરંતુ તેમની ગતિશીલતા ઘટી જાય છે", "શુક્રાણુઓનું ઉત્પાદન ઘટી જાય છે અથવા બંધ થઈ જાય છે", "ટેસ્ટોસ્ટેરોન હોર્મોનનું સ્તર અચાનક વધી જાય છે", "શુક્રાણુઓની સંખ્યા વધી જાય છે પરંતુ તેમની ગુણવત્તા ઘટી જાય છે"], "ans": 1, "exp": "ક્લાઇનફેલ્ટર સિન્ડ્રોમ (XXY) વાળા પુરુષોમાં, અતિરિક્ત X-વર્ણસૂત્રને કારણે શુક્રાણુઓનું ઉત્પાદન ઘટી જાય છે અથવા બંધ થઈ જાય છે, જેથી વંધ્યત્વ થાય છે. A) શુક્રાણુઓની ગતિશીલતા ઘટવી એ મુખ્ય કારણ નથી. C) ટેસ્ટોસ્ટેરોનનું સ્તર વધવું ક્લાઇનફેલ્ટર સિન્ડ્રોમમાં સામાન્ય નથી. D) શુક્રાણુઓની સંખ્યા વધવી એ ક્લાઇનફેલ્ટર સિન્ડ્રોમનું લક્ષણ નથી.", "ref": "Std 12 - પ્રકરણ 5: વંશવેલા અને જનીનિક રોગો", "ch": ""}, {"q": "સ્ત્રીમાં હાઇપોથેલેમસ અથવા પિટ્યુટરી ગ્રંથિની ખામીને કારણે કયું વંધ્યત્વનું કારણ ઉદ્ભવી શકે છે?", "opts": ["ફોલિકલ-સ્ટિમ્યુલેટિંગ હોર્મોન (FSH) અને લ્યુટિનાઇઝિંગ હોર્મોન (LH) નું સ્તર ઘટી જવું", "એસ્ટ્રોજન હોર્મોનનું સ્તર અચાનક વધી જવું", "પ્રોજેસ્ટેરોન હોર્મોનનું સ્તર ઘટી જવું", "ઓક્સિટોસિન હોર્મોનનું સ્તર વધી જવું"], "ans": 0, "exp": "હાઇપોથેલેમસ અને પિટ્યુટરી ગ્રંથિ FSH અને LH હોર્મોનના સ્રાવને નિયંત્રિત કરે છે. જો આ ગ્રંથિઓમાં ખામી હોય તો FSH અને LH નું સ્તર ઘટી જાય છે, જેથી અંડકોષનું ઉત્પાદન અને અંડોત્સર્ગ અવરોધાય છે, પરિણામે વંધ્યત્વ થાય છે. B) એસ્ટ્રોજનનું સ્તર વધવું FSH અને LH ની ખામી સાથે સીધો સંબંધ ધરાવતું નથી. C) પ્રોજેસ્ટેરોનનું સ્તર ઘટવું ગર્ભાશયની દીવાલને અસર કરે, પરંતુ હાઇપોથેલેમસ અથવા પિટ્યુટરી ગ્રંથિની ખામી સાથે સીધો સંબંધ નથી. D) ઓક્સિટોસિન હોર્મોન પ્રસવ અને સ્તનપાન સાથે સંબંધિત છે, વંધ્યત્વ સાથે નહીં.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "એક સ્ત્રીમાં વંધ્યત્વનું કારણ એવું છે કે તેના અંડાશયમાંથી અંડકોષ મુક્ત થતો નથી, પરંતુ અંડાશયમાં જ કોથળીઓ (cysts) બને છે. આ સ્થિતિમાં નીચેનામાંથી કયું હોર્મોનનું સ્તર સામાન્ય કરતાં વધુ હોઈ શકે છે?", "opts": ["પ્રોજેસ્ટેરોન", "ઇન્સ્યુલિન", "લ્યુટિનાઇઝિંગ હોર્મોન (LH)", "ફોલિકલ સ્ટિમ્યુલેટિંગ હોર્મોન (FSH)"], "ans": 2, "exp": "પોલીસિસ્ટિક ઓવેરિયન સિન્ડ્રોમ (PCOS) માં લ્યુટિનાઇઝિંગ હોર્મોન (LH) નું સ્તર સામાન્ય કરતાં વધુ હોય છે, જે અંડકોષના મુક્ત થવામાં અવરોધ ઉભો કરે છે અને અંડાશયમાં કોથળીઓ બનાવે છે. પ્રોજેસ્ટેરોન અંડોત્સર્ગ પછી વધે છે, ઇન્સ્યુલિન પ્રતિકાર સાથે સંબંધિત છે પરંતુ સીધું કારણ નથી, અને FSH નું સ્તર સામાન્ય અથવા ઘટેલું હોય છે.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "એક પુરુષમાં વંધ્યત્વનું કારણ એ છે કે તેના શુક્રાણુઓની પૂંછડી (flagellum) ની રચના અસાધારણ છે, જેના કારણે શુક્રાણુઓની ગતિશીલતા ઘટે છે. આ ખામી કયા કોષીય અવયવની ખામીને કારણે થઈ શકે છે?", "opts": ["કોષકેન્દ્ર (Nucleus)", "મિટોકોન્ડ્રિયા", "ગોલ્ગી કાય (Golgi apparatus)", "સેન્ટ્રીઓલ્સ (Centrioles)"], "ans": 3, "exp": "શુક્રાણુઓની પૂંછડી (flagellum) ની રચના સેન્ટ્રીઓલ્સમાંથી થાય છે. સેન્ટ્રીઓલ્સની ખામીને કારણે પૂંછડીની રચના અસાધારણ થઈ શકે છે, જે શુક્રાણુઓની ગતિશીલતા ઘટાડે છે. કોષકેન્દ્રમાં DNA હોય છે, મિટોકોન્ડ્રિયા ઊર્જા પૂરી પાડે છે, અને ગોલ્ગી કાય પ્રોટીન પ્રક્રિયામાં ભાગ લે છે, પરંતુ પૂંછડીની રચનામાં સીધી ભૂમિકા નથી.", "ref": "Std 11 - પ્રકરણ 8: કોષ: જીવનનો એકમ", "ch": ""}, {"q": "એક સ્ત્રીમાં વંધ્યત્વનું કારણ એ છે કે તેના ગર્ભાશયની દીવાલ (endometrium) પાતળી રહે છે અને ગર્ભધારણ માટે યોગ્ય નથી. આ સ્થિતિ માટે નીચેનામાંથી કયું હોર્મોન જવાબદાર હોઈ શકે છે, જેનું સ્તર ઘટેલું હોય?", "opts": ["ઇસ્ટ્રોજન", "પ્રોલેક્ટિન", "ઓક્સિટોસિન", "થાઇરોક્સિન"], "ans": 0, "exp": "ઇસ્ટ્રોજન ગર્ભાશયની દીવાલ (endometrium) ને જાડું અને ગર્ભધારણ માટે તૈયાર કરે છે. તેનું ઘટેલું સ્તર દીવાલને પાતળી રાખે છે. પ્રોલેક્ટિન દૂધ ઉત્પાદન સાથે સંબંધિત છે, ઓક્સિટોસિન ગર્ભાશયના સંકોચનમાં મદદ કરે છે, અને થાઇરોક્સિન ચયાપચયને નિયંત્રિત કરે છે, પરંતુ ગર્ભાશયની દીવાલની જાડાઈ પર સીધી અસર નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "એક પુરુષમાં વંધ્યત્વનું કારણ એ છે કે તેના શુક્રાણુઓમાં DNA નું નુકસાન થયેલું છે. આ નુકસાન માટે નીચેનામાંથી કયું પરિબળ સૌથી વધુ જવાબદાર હોઈ શકે છે?", "opts": ["વધુ પડતું આલ્કોહોલનું સેવન", "વધુ પડતું કેફીનનું સેવન", "વધુ પડતું વિટામિન C નું સેવન", "વધુ પડતું પ્રોટીનનું સેવન"], "ans": 0, "exp": "વધુ પડતું આલ્કોહોલનું સેવન ઓક્સિડેટિવ તણાવ વધારે છે, જે શુક્રાણુઓમાં DNA નું નુકસાન કરી શકે છે. કેફીનનું વધુ સેવન શુક્રાણુઓની ગતિશીલતા પર અસર કરી શકે છે, પરંતુ DNA નુકસાન સાથે સીધો સંબંધ નથી. વિટામિન C એન્ટીઓક્સિડન્ટ છે અને DNA નુકસાન ઘટાડે છે, જ્યારે પ્રોટીનનું વધુ સેવન શુક્રાણુઓની ગુણવત્તા પર સીધી અસર નથી કરતું.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}, {"q": "એક સ્ત્રીમાં વંધ્યત્વનું કારણ એ છે કે તેના ફેલોપિયન ટ્યુબમાં અવરોધ છે, જેના કારણે અંડકોષ અને શુક્રાણુનું મિલન થઈ શકતું નથી. આ અવરોધ માટે નીચેનામાંથી કયું ચેપી રોગ જવાબદાર હોઈ શકે છે?", "opts": ["હર્પિસ સિમ્પ્લેક્સ વાઇરસ (HSV)", "ક્લેમીડિયા ટ્રેકોમેટિસ (Chlamydia trachomatis)", "હ્યુમન પેપિલોમા વાઇરસ (HPV)", "ઇન્ફ્લુએન્ઝા વાઇરસ"], "ans": 1, "exp": "ક્લેમીડિયા ટ્રેકોમેટિસ બેક્ટેરિયલ ચેપ છે જે ફેલોપિયન ટ્યુબમાં સોજો અને અવરોધનું કારણ બની શકે છે, જે વંધ્યત્વ તરફ દોરી જાય છે. હર્પિસ સિમ્પ્લેક્સ વાઇરસ અને હ્યુમન પેપિલોમા વાઇરસ જનનાંગોને અસર કરે છે, પરંતુ ફેલોપિયન ટ્યુબમાં અવરોધનું કારણ નથી. ઇન્ફ્લુએન્ઝા વાઇરસ શ્વસનતંત્રને અસર કરે છે અને વંધ્યત્વ સાથે સંબંધિત નથી.", "ref": "Std 12 - પ્રકરણ 3: માનવ પ્રજનન", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
