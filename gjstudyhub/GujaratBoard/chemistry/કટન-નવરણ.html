@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>કાટનું નિવારણ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>કાટનું નિવારણ</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">કાટનું નિવારણ</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "કાટનું નિવારણ કરવા માટે લોખંડની સપાટી પર જસતનું લેપન કરવામાં આવે છે. આ પદ્ધતિને શું કહેવાય છે?", "opts": ["ગેલ્વેનાઇઝેશન", "ઇલેક્ટ્રોપ્લેટીંગ", "એનોડાઇઝીંગ", "પેસિવેશન"], "ans": 0, "exp": "ગેલ્વેનાઇઝેશનમાં લોખંડની સપાટી પર જસતનું લેપન કરવામાં આવે છે, જે કાટ થતો અટકાવે છે. ઇલેક્ટ્રોપ્લેટીંગ એ વિદ્યુતપ્રવાહ દ્વારા ધાતુનું લેપન કરવાની પ્રક્રિયા છે, પરંતુ તે સ્પષ્ટપણે જસતનું લેપન નથી. એનોડાઇઝીંગ એલ્યુમિનિયમ માટે વપરાતી પદ્ધતિ છે, જ્યારે પેસિવેશન એ સ્ટેનલેસ સ્ટીલ જેવી ધાતુઓમાં ઓક્સાઇડની પાતળી પરત બનાવવાની પ્રક્રિયા છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: ધાતુશાસ્ત્ર અને કાટનું નિવારણ", "ch": ""}, {"q": "કાટ થવાની પ્રક્રિયામાં નીચેનામાંથી કયો પદાર્થ ઉત્પન્ન થતો નથી?", "opts": ["લોખંડનો હાઇડ્રોક્સાઇડ", "લોખંડનો ઓક્સાઇડ", "લોખંડનો ક્લોરાઇડ", "લોખંડનો સલ્ફેટ"], "ans": 2, "exp": "કાટ થવાની પ્રક્રિયામાં લોખંડનો હાઇડ્રોક્સાઇડ, ઓક્સાઇડ અને સલ્ફેટ ઉત્પન્ન થાય છે, પરંતુ લોખંડનો ક્લોરાઇડ સામાન્ય રીતે ઉત્પન્ન થતો નથી. કાટ થવાની પ્રક્રિયા મુખ્યત્વે ઓક્સિજન અને પાણીની હાજરીમાં લોખંડના ઓક્સિડેશનથી શરૂ થાય છે, જે હાઇડ્રોક્સાઇડ અને ઓક્સાઇડ તરફ દોરી જાય છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: ધાતુશાસ્ત્ર અને કાટનું નિવારણ", "ch": ""}, {"q": "કાટ થતો અટકાવવા માટે લોખંડની સપાટી પર કયો ધાતુનો ઉપયોગ કરવામાં આવે છે જેથી તે લોખંડ કરતાં વધુ સક્રિય હોય અને કાટ થવાને રોકે?", "opts": ["તાંબું", "જસત", "એલ્યુમિનિયમ", "નિકલ"], "ans": 1, "exp": "જસત લોખંડ કરતાં વધુ સક્રિય ધાતુ છે, અને તેનું લેપન કરવાથી લોખંડ કાટ થતો અટકાવે છે. તાંબું, એલ્યુમિનિયમ અને નિકલ લોખંડ કરતાં ઓછા સક્રિય છે, જેથી તેઓ કાટ થતો અટકાવવામાં અસરકારક નથી.", "ref": "Std 12 - રસાયણવિજ્ઞાન: ધાતુશાસ્ત્ર અને કાટનું નિવારણ", "ch": ""}, {"q": "કાટ થવાની પ્રક્રિયામાં નીચેનામાંથી કયો પરિબળ મુખ્ય ભૂમિકા ભજવે છે?", "opts": ["ઉચ્ચ તાપમાન", "ઓક્સિજન અને પાણીની હાજરી", "ઉચ્ચ દબાણ", "નીચું આર્દ્રતા"], "ans": 1, "exp": "કાટ થવાની પ્રક્રિયા મુખ્યત્વે ઓક્સિજન અને પાણીની હાજરીથી શરૂ થાય છે. ઉચ્ચ તાપમાન અને ઉચ્ચ દબાણ કાટ થવાની ગતિને વધારી શકે છે, પરંતુ તેઓ મુખ્ય પરિબળ નથી. નીચું આર્દ્રતા કાટ થવાની ગતિને ઘટાડે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: ધાતુશાસ્ત્ર અને કાટનું નિવારણ", "ch": ""}, {"q": "કાટ થતો અટકાવવા માટે લોખંડની સપાટી પર કયો રાસાયણિક પદાર્થ લાગુ કરવામાં આવે છે જેથી તે સપાટી પર એક રક્ષણાત્મક પરત બનાવે?", "opts": ["હાઇડ્રોક્લોરિક એસિડ", "ફોસ્ફોરિક એસિડ", "સલ્ફ્યુરિક એસિડ", "નાઇટ્રિક એસિડ"], "ans": 1, "exp": "ફોસ્ફોરિક એસિડનો ઉપયોગ લોખંડની સપાટી પર રક્ષણાત્મક પરત બનાવવા માટે થાય છે, જે કાટ થતો અટકાવે છે. હાઇડ્રોક્લોરિક એસિડ, સલ્ફ્યુરિક એસિડ અને નાઇટ્રિક એસિડ લોખંડને નુકસાન પહોંચાડી શકે છે અને કાટ થવાની પ્રક્રિયાને વેગ આપી શકે છે.", "ref": "Std 12 - રસાયણવિજ્ઞાન: ધાતુશાસ્ત્ર અને કાટનું નિવારણ", "ch": ""}, {"q": "લોખંડના પાઇપને જમીનમાં દાટીને વાપરતી વખતે કાટ થતો અટકાવવા માટે નીચેનામાંથી કયો પદ્ધતિ સૌથી યોગ્ય છે?", "opts": ["પાઇપની બહારની સપાટી પર પેઇન્ટ કરવું", "પાઇપને કેથોડિક સંરક્ષણ (Cathodic Protection) પદ્ધતિ વડે જોડવું", "પાઇપની અંદરની સપાટી પર ગ્રીસ લાગુ કરવું", "પાઇપને પ્લાસ્ટિકની ચાદર વડે ઢાંકી દેવું"], "ans": 1, "exp": "કેથોડિક સંરક્ષણ પદ્ધતિમાં, લોખંડના પાઇપને વિદ્યુત રીતે સક્રિય ધાતુ (જેમ કે મેગ્નેશિયમ અથવા જસત) સાથે જોડવામાં આવે છે, જે કાટ થવાની પ્રક્રિયામાં લોખંડને કેથોડ બનાવે છે અને સક્રિય ધાતુ એનોડ બને છે. આથી લોખંડનું કાટ થતું અટકાવી શકાય છે. પેઇન્ટ, ગ્રીસ અથવા પ્લાસ્ટિકની ચાદર ફક્ત ભૌતિક અવરોધ પૂરો પાડે છે, પરંતુ જમીનમાં દાટેલા પાઇપ માટે કેથોડિક સંરક્ષણ સૌથી કાર્યક્ષમ પદ્ધતિ છે.", "ref": "Std 12 - Chapter 4: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડ પર કાટ થવાની પ્રક્રિયામાં નીચેનામાંથી કયો પદાર્થ ઉત્પન્ન થતો નથી?", "opts": ["લોખંડ(II) ઓક્સાઇડ (FeO)", "લોખંડ(III) ઓક્સાઇડ (Fe₂O₃)", "લોખંડ(II,III) ઓક્સાઇડ (Fe₃O₄)", "લોખંડ(IV) ઓક્સાઇડ (FeO₂)"], "ans": 3, "exp": "લોખંડ પર કાટ થવાની પ્રક્રિયામાં લોખંડ(II) ઓક્સાઇડ (FeO), લોખંડ(III) ઓક્સાઇડ (Fe₂O₃), અને લોખંડ(II,III) ઓક્સાઇડ (Fe₃O₄) ઉત્પન્ન થાય છે. પરંતુ લોખંડ(IV) ઓક્સાઇડ (FeO₂) કાટ થવાની પ્રક્રિયામાં ઉત્પન્ન થતું નથી, કારણ કે લોખંડની +4 ઓક્સિડેશન અવસ્થા સ્થિર નથી.", "ref": "Std 12 - Chapter 4: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડની સપાટી પર જસતનું લેપન કરવાથી કાટ થતું અટકાવી શકાય છે. આ પદ્ધતિને શું કહેવાય છે?", "opts": ["એનોડાઇઝિંગ", "ગેલ્વેનાઇઝિંગ", "પાસિવેશન", "ઇલેક્ટ્રોપ્લેટિંગ"], "ans": 1, "exp": "લોખંડની સપાટી પર જસતનું લેપન કરવાની પ્રક્રિયાને ગેલ્વેનાઇઝિંગ કહેવાય છે. આ પદ્ધતિમાં, જસત લોખંડ કરતાં વધુ સક્રિય ધાતુ હોવાથી, તે લોખંડને કાટ થતું અટકાવે છે. એનોડાઇઝિંગ એલ્યુમિનિયમ માટે વાપરાતી પદ્ધતિ છે, પાસિવેશન એ સ્ટીલને કાટ થતું અટકાવવા માટે વાપરાતી પદ્ધતિ છે, અને ઇલેક્ટ્રોપ્લેટિંગ એ વિદ્યુત પ્રવાહ વડે ધાતુનું લેપન કરવાની પ્રક્રિયા છે.", "ref": "Std 12 - Chapter 4: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડ પર કાટ થવાની પ્રક્રિયામાં નીચેનામાંથી કયો પરિબળ સૌથી મહત્વપૂર્ણ ભૂમિકા ભજવે છે?", "opts": ["ઓક્સિજન અને પાણીની હાજરી", "ઉચ્ચ તાપમાન", "ઉચ્ચ દબાણ", "પ્રકાશની હાજરી"], "ans": 0, "exp": "લોખંડ પર કાટ થવાની પ્રક્રિયા માટે ઓક્સિજન અને પાણીની હાજરી અત્યંત મહત્વપૂર્ણ છે. ઓક્સિજન અને પાણીની હાજરીમાં લોખંડ ઓક્સિડાઇઝ થાય છે અને કાટ લાગે છે. ઉચ્ચ તાપમાન કાટ થવાની પ્રક્રિયાને ઝડપી બનાવી શકે છે, પરંતુ તે મુખ્ય પરિબળ નથી. ઉચ્ચ દબાણ અને પ્રકાશની હાજરી કાટ થવાની પ્રક્રિયા પર કોઈ મહત્વપૂર્ણ અસર કરતી નથી.", "ref": "Std 12 - Chapter 4: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડની સપાટી પર કાટ થતું અટકાવવા માટે નીચેનામાંથી કયો રાસાયણિક પદાર્થ સૌથી યોગ્ય છે?", "opts": ["સોડિયમ ક્લોરાઇડ (NaCl)", "પોટેશિયમ ડાયક્રોમેટ (K₂Cr₂O₇)", "એસિટિક એસિડ (CH₃COOH)", "સલ્ફ્યુરિક એસિડ (H₂SO₄)"], "ans": 1, "exp": "પોટેશિયમ ડાયક્રોમેટ (K₂Cr₂O₇) એ લોખંડની સપાટી પર કાટ થતું અટકાવવા માટે વાપરાતો એક કાર્યક્ષમ રાસાયણિક પદાર્થ છે. તે લોખંડની સપાટી પર એક સુરક્ષાત્મક સ્તર બનાવે છે, જે કાટ થવાની પ્રક્રિયાને અટકાવે છે. સોડિયમ ક્લોરાઇડ (NaCl) કાટ થવાની પ્રક્રિયાને ઝડપી બનાવે છે, જ્યારે એસિટિક એસિડ (CH₃COOH) અને સલ્ફ્યુરિક એસિડ (H₂SO₄) લોખંડ સાથે પ્રક્રિયા કરીને કાટ થવાની પ્રક્રિયાને ઝડપી બનાવે છે.", "ref": "Std 12 - Chapter 4: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "નીચેના પૈકી કયું વિધાન કાટના નિવારણ માટેની 'કેથોડિક સંરક્ષણ' પદ્ધતિ માટે ખોટું છે?", "opts": ["આ પદ્ધતિમાં લોખંડને કેથોડ તરીકે રાખીને બીજી વધુ સક્રિય ધાતુને એનોડ તરીકે ઉપયોગમાં લેવામાં આવે છે.", "કેથોડિક સંરક્ષણમાં ઉપયોગમાં લેવાતી વધુ સક્રિય ધાતુ સમયાંતરે બદલવી પડતી નથી.", "આ પદ્ધતિમાં લોખંડનું ઓક્સિડેશન અટકાવવા માટે ઇલેક્ટ્રોનનો પ્રવાહ લોખંડ તરફ દિશામાન કરવામાં આવે છે.", "કેથોડિક સંરક્ષણનો ઉપયોગ જહાજો, પાઇપલાઇન અને ભૂગર્ભ ટાંકીઓમાં કાટ અટકાવવા માટે થાય છે."], "ans": 1, "exp": "કેથોડિક સંરક્ષણ પદ્ધતિમાં વધુ સક્રિય ધાતુ (જેમ કે મેગ્નેશિયમ અથવા ઝિંક) સમયાંતરે બદલવી પડે છે કારણ કે તે ઓક્સિડાઇઝ થઈને ખલાસ થઈ જાય છે. આથી વિકલ્પ B ખોટું છે. વિકલ્પ A, C અને D સાચાં વિધાનો છે કારણ કે તેમાં કેથોડિક સંરક્ષણની યોગ્ય કાર્યપદ્ધતિ અને ઉપયોગોનું વર્ણન કરવામાં આવ્યું છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયો પદાર્થ લોખંડના કાટને અટકાવવા માટે 'ઇનહિબિટર' તરીકે ઉપયોગમાં લેવાતો નથી?", "opts": ["સોડિયમ નાઇટ્રાઇટ", "ક્રોમેટ્સ", "ફોસ્ફેટ્સ", "સોડિયમ ક્લોરાઇડ"], "ans": 3, "exp": "સોડિયમ ક્લોરાઇડ (NaCl) કાટને પ્રોત્સાહન આપે છે કારણ કે તે વિદ્યુતવિભાજ્ય તરીકે કાર્ય કરીને લોખંડના ઓક્સિડેશનને વેગ આપે છે. તેથી તે કાટ અટકાવવા માટે ઇનહિબિટર તરીકે ઉપયોગમાં લેવાતો નથી. સોડિયમ નાઇટ્રાઇટ, ક્રોમેટ્સ અને ફોસ્ફેટ્સ કાટ અટકાવવા માટેના રાસાયણિક ઇનહિબિટર તરીકે ઉપયોગમાં લેવાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "લોખંડના પાઇપને દરિયાના પાણીમાં મૂકવામાં આવે ત્યારે કાટનું નિવારણ કરવા માટે નીચેનામાંથી કઈ પદ્ધતિ સૌથી ઓછી અસરકારક ગણાય?", "opts": ["પાઇપની સપાટી પર ઇપોક્સી કોટિંગ લગાવવું", "પાઇપને મેગ્નેશિયમ ધાતુ સાથે જોડીને કેથોડિક સંરક્ષણ પદ્ધતિનો ઉપયોગ કરવો", "પાઇપની સપાટી પર તાંબાનું લેપન કરવું", "પાઇપમાં કાટ અટકાવવા માટે સોડિયમ નાઇટ્રાઇટ ઉમેરવું"], "ans": 2, "exp": "દરિયાના પાણીમાં તાંબાનું લેપન લોખંડના કાટને અટકાવવા માટે અસરકારક નથી કારણ કે તાંબું લોખંડ કરતાં ઓછું સક્રિય છે, જે ગેલ્વેનિક કોષ બનાવીને લોખંડના કાટને વેગ આપી શકે છે. ઇપોક્સી કોટિંગ, કેથોડિક સંરક્ષણ અને સોડિયમ નાઇટ્રાઇટનો ઉપયોગ કાટ અટકાવવા માટે અસરકારક પદ્ધતિઓ છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો અને સાચો વિકલ્પ પસંદ કરો:\n\n(1) કાટનું નિવારણ કરવા માટે લોખંડની સપાટી પર ક્રોમિયમનું ઇલેક્ટ્રોપ્લેટિંગ કરવામાં આવે છે.\n(2) ક્રોમિયમનું ઇલેક્ટ્રોપ્લેટિંગ કરવાથી લોખંડની સપાટી પર નિષ્ક્રિય ઓક્સાઇડ પડ બને છે.\n(3) ક્રોમિયમનું ઇલેક્ટ્રોપ્લેટિંગ કરવાથી લોખંડની સપાટી પર કાટ લાગવાની પ્રક્રિયા ઝડપી બને છે.", "opts": ["માત્ર (1) અને (2) સાચાં છે", "માત્ર (2) અને (3) સાચાં છે", "માત્ર (1) અને (3) સાચાં છે", "ત્રણેય વિધાનો સાચાં છે"], "ans": 0, "exp": "વિધાન (1) અને (2) સાચાં છે કારણ કે ક્રોમિયમનું ઇલેક્ટ્રોપ્લેટિંગ લોખંડની સપાટી પર નિષ્ક્રિય ઓક્સાઇડ પડ બનાવે છે, જે કાટને અટકાવે છે. વિધાન (3) ખોટું છે કારણ કે ક્રોમિયમનું ઇલેક્ટ્રોપ્લેટિંગ કાટને અટકાવે છે, તેને વેગ આપતું નથી.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "નીચેના પૈકી કયું સંયોજન લોખંડના કાટને અટકાવવા માટે 'વોલાટાઇલ કાટ ઇનહિબિટર' (VCI) તરીકે ઉપયોગમાં લેવાતું નથી?", "opts": ["ડાયસાયક્લોહેક્ઝાઇલ એમોનિયમ નાઇટ્રાઇટ", "બેન્ઝોટ્રાયાઝોલ", "સોડિયમ હાઇડ્રોક્સાઇડ", "મોર્ફોલિન"], "ans": 2, "exp": "સોડિયમ હાઇડ્રોક્સાઇડ (NaOH) વોલાટાઇલ કાટ ઇનહિબિટર તરીકે ઉપયોગમાં લેવાતું નથી. તે પ્રબળ આલ્કલી છે જે કાટને અટકાવવા માટે સીધી રીતે ઉપયોગમાં લેવાતી નથી. ડાયસાયક્લોહેક્ઝાઇલ એમોનિયમ નાઇટ્રાઇટ, બેન્ઝોટ્રાયાઝોલ અને મોર્ફોલિન વોલાટાઇલ કાટ ઇનહિબિટર તરીકે ઉપયોગમાં લેવાય છે.", "ref": "Std 12 - પ્રકરણ 3: વિદ્યુતરસાયણ", "ch": ""}, {"q": "લોખંડની સપાટી પર કાટ થતો અટકાવવા માટે 'ગેલ્વેનાઇઝિંગ' પદ્ધતિમાં નીચેનામાંથી કયો ધાતુનો ઉપયોગ કરવામાં આવે છે, જેથી તે સક્રિય રીતે કાટ થઈને લોખંડને સંરક્ષિત કરે?", "opts": ["તાંબું", "જસત", "એલ્યુમિનિયમ", "નિકેલ"], "ans": 1, "exp": "ગેલ્વેનાઇઝિંગ પદ્ધતિમાં જસતનો ઉપયોગ કરવામાં આવે છે, કારણ કે જસત લોખંડ કરતાં વધુ સક્રિય ધાતુ છે અને તે ઓક્સીડાઇઝ થઈને લોખંડને કાટ થતું અટકાવે છે. તાંબું, એલ્યુમિનિયમ અને નિકેલ એટલા સક્રિય નથી કે લોખંડને સક્રિય રીતે સંરક્ષિત કરી શકે.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "કાટના નિવારણ માટે 'કેથોડિક સંરક્ષણ' પદ્ધતિમાં લોખંડની સપાટીને કેથોડ તરીકે વર્તવવા માટે નીચેનામાંથી કયો ધાતુ એનોડ તરીકે વાપરવામાં આવે છે?", "opts": ["મેગ્નેશિયમ", "ચાંદી", "સોનું", "પ્લેટિનમ"], "ans": 0, "exp": "કેથોડિક સંરક્ષણ પદ્ધતિમાં મેગ્નેશિયમ એનોડ તરીકે વાપરવામાં આવે છે, કારણ કે તે લોખંડ કરતાં વધુ સક્રિય છે અને તે ઓક્સીડાઇઝ થઈને લોખંડને કાટ થતું અટકાવે છે. ચાંદી, સોનું અને પ્લેટિનમ એટલા સક્રિય નથી કે લોખંડને સક્રિય રીતે સંરક્ષિત કરી શકે.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડના કાટને અટકાવવા માટે વાપરાતા 'ઇનહિબિટર' પદાર્થો પૈકી કયો પદાર્થ લોખંડની સપાટી પર અદ્રાવ્ય સ્તર બનાવીને કાટ થતું અટકાવે છે?", "opts": ["સોડિયમ નાઇટ્રાઇટ", "પોટેશિયમ ક્રોમેટ", "ફોસ્ફેટ", "કેલ્શિયમ કાર્બોનેટ"], "ans": 1, "exp": "પોટેશિયમ ક્રોમેટ લોખંડની સપાટી પર અદ્રાવ્ય સ્તર બનાવીને કાટ થતું અટકાવે છે. સોડિયમ નાઇટ્રાઇટ અને ફોસ્ફેટ પાણીમાં દ્રાવ્ય છે અને કાટની પ્રક્રિયાને ધીમી પાડે છે, પરંતુ અદ્રાવ્ય સ્તર બનાવતા નથી. કેલ્શિયમ કાર્બોનેટ પણ અદ્રાવ્ય છે, પરંતુ તે કાટના નિવારણ માટે અસરકારક નથી.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "નીચેનામાંથી કયું વિધાન કાટના નિવારણ માટેની 'પેઇન્ટિંગ' પદ્ધતિ વિશે ખોટું છે?", "opts": ["પેઇન્ટ લોખંડની સપાટીને હવા અને ભેજથી અલગ રાખે છે.", "પેઇન્ટમાં રહેલા ધાતુના કણો લોખંડને કાટ થતું અટકાવે છે.", "પેઇન્ટની સ્તર જાડી હોવી જોઈએ જેથી તે લાંબા સમય સુધી ટકી રહે.", "પેઇન્ટમાં રહેલા રાસાયણિક પદાર્થો કાટની પ્રક્રિયાને ધીમી પાડે છે."], "ans": 1, "exp": "પેઇન્ટમાં રહેલા ધાતુના કણો લોખંડને કાટ થતું અટકાવતા નથી, પરંતુ પેઇન્ટ લોખંડની સપાટીને હવા અને ભેજથી અલગ રાખે છે. પેઇન્ટની સ્તર જાડી હોવી જોઈએ અને તેમાં રહેલા રાસાયણિક પદાર્થો કાટની પ્રક્રિયાને ધીમી પાડે છે.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર (Metallurgy)", "ch": ""}, {"q": "લોખંડના કાટના નિવારણ માટે 'કેથોડિક સંરક્ષણ' પદ્ધતિમાં જો મેગ્નેશિયમનો ટુકડો લોખંડની સપાટી સાથે જોડવામાં આવે, તો નીચેનામાંથી કયું વિધાન ખોટું છે?", "opts": ["મેગ્નેશિયમ એનોડ તરીકે વર્તે છે અને ઓક્સીડાઇઝ થાય છે.", "લોખંડ કેથોડ તરીકે વર્તે છે અને સુરક્ષિત રહે છે.", "મેગ્નેશિયમના ઓક્સીડેશનથી ઉત્પન્ન થતાં ઇલેક્ટ્રોન લોખંડ તરફ વહન પામે છે.", "આ પદ્ધતિમાં લોખંડ અને મેગ્નેશિયમ વચ્ચે રાસાયણિક બંધ બને છે, જે કાટને અટકાવે છે."], "ans": 3, "exp": "કેથોડિક સંરક્ષણ પદ્ધતિમાં, મેગ્નેશિયમ (વિદ્યુત-રાસાયણિક શ્રેણીમાં લોખંડ કરતાં વધુ સક્રિય) એનોડ તરીકે વર્તે છે અને ઓક્સીડાઇઝ થાય છે, જ્યારે લોખંડ કેથોડ તરીકે વર્તે છે અને સુરક્ષિત રહે છે. ઇલેક્ટ્રોન મેગ્નેશિયમથી લોખંડ તરફ વહન પામે છે. પરંતુ લોખંડ અને મેગ્નેશિયમ વચ્ચે કોઈ રાસાયણિક બંધ બનતો નથી; તે વિદ્યુત-રાસાયણિક પ્રક્રિયા છે, રાસાયણિક નહીં. આથી વિકલ્પ D ખોટો છે.", "ref": "Std 12 - Chapter 1: ધાતુશાસ્ત્ર અને તેના ઉપયોગ (ધાતુઓનું સંરક્ષણ)", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
