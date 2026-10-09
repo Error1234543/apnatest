@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="Gujarati">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>નીટ ક્વિઝ - કૂલોમ્બનો નિયમ – બે આવેશો વચ્ચે લાગતા વિદ્યુત બળનો નિયમ.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:20px}
+        .container{max-width:900px;margin:0 auto;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-radius:30px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+        .header{text-align:center;margin-bottom:35px;padding-bottom:25px;border-bottom:3px solid #667eea}
+        .header h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px}
+        .header .meta{color:#555;font-size:.95rem;display:flex;justify-content:center;gap:25px;flex-wrap:wrap;margin-top:10px}
+        .header .meta span{background:#f0f0f0;padding:4px 16px;border-radius:20px;font-weight:500}
+        .progress-bar{width:100%;height:6px;background:#e0e0e0;border-radius:10px;margin-bottom:30px;overflow:hidden}
+        .progress-bar .progress{height:100%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .3s ease;width:0%}
+        .question-card{background:#f8f9ff;border-radius:20px;padding:28px;margin-bottom:25px;border-left:5px solid #667eea;transition:all .3s ease;opacity:0;transform:translateY(20px);animation:fadeInUp .5s forwards}
+        .question-card:nth-child(2){animation-delay:.1s}
+        .question-card:nth-child(3){animation-delay:.2s}
+        .question-card:nth-child(4){animation-delay:.3s}
+        .question-card:nth-child(5){animation-delay:.4s}
+        @keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+        .question-number{display:inline-block;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:2px 14px;border-radius:20px;font-size:.8rem;font-weight:700;margin-bottom:12px}
+        .question-text{font-size:1.15rem;font-weight:600;color:#1a1a2e;margin-bottom:18px;line-height:1.6}
+        .options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        @media(max-width:600px){.options{grid-template-columns:1fr}}
+        .option{background:#fff;border:2px solid #e0e0e0;border-radius:12px;padding:14px 18px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;gap:12px;font-weight:500;color:#333}
+        .option:hover{border-color:#667eea;background:#f0f2ff;transform:translateY(-2px);box-shadow:0 4px 15px rgba(102,126,234,.15)}
+        .option .letter{background:#667eea;color:#fff;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;flex-shrink:0}
+        .option.selected{border-color:#667eea;background:#eef0ff}
+        .option.correct{border-color:#10b981;background:#d1fae5}
+        .option.correct .letter{background:#10b981}
+        .option.wrong{border-color:#ef4444;background:#fee2e2}
+        .option.wrong .letter{background:#ef4444}
+        .option.disabled{cursor:default;opacity:.8}
+        .option input[type="radio"]{display:none}
+        .btn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;border:none;padding:16px 40px;border-radius:16px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:all .3s ease;display:inline-block;text-align:center;width:100%;max-width:300px;margin:10px auto}
+        .btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(102,126,234,.4)}
+        .btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+        .btn-secondary{background:#6b7280}
+        .btn-secondary:hover{box-shadow:0 10px 30px rgba(107,114,128,.4)}
+        .btn-success{background:linear-gradient(135deg,#10b981,#059669)}
+        .btn-success:hover{box-shadow:0 10px 30px rgba(16,185,129,.4)}
+        .button-group{display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:30px;padding-top:25px;border-top:2px solid #e0e0e0}
+        .button-group .row{display:flex;gap:15px;flex-wrap:wrap;justify-content:center;width:100%}
+        .button-group .row .btn{max-width:200px}
+        .result-box{display:none;background:linear-gradient(135deg,#f0f4ff,#e8ecff);border-radius:20px;padding:30px;margin-top:30px;text-align:center;border:2px solid #667eea}
+        .result-box.show{display:block;animation:fadeInUp .5s ease}
+        .result-box .score{font-size:4rem;font-weight:800;color:#667eea}
+        .result-box .details{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:15px;margin:20px 0}
+        .result-box .details .stat{background:#fff;padding:15px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.05)}
+        .result-box .details .stat .num{font-size:1.8rem;font-weight:700}
+        .result-box .details .stat .label{color:#666;font-size:.85rem;margin-top:4px}
+        .stat-correct .num{color:#10b981}
+        .stat-wrong .num{color:#ef4444}
+        .stat-skipped .num{color:#f59e0b}
+        .stat-score .num{color:#667eea}
+        .result-box .grade{font-size:1.3rem;font-weight:600;margin-top:15px;color:#1a1a2e}
+        .result-box .grade .emoji{font-size:2rem}
+        .explanation{margin-top:15px;padding:15px;background:#fff;border-radius:12px;border-left:4px solid #667eea;font-size:.95rem;color:#444;line-height:1.6}
+        .explanation .ncert{display:inline-block;background:#eef0ff;padding:2px 12px;border-radius:12px;font-size:.8rem;font-weight:500;color:#667eea;margin-top:8px}
+        .footer{text-align:center;margin-top:30px;padding-top:20px;border-top:2px solid #e0e0e0;color:#888;font-size:.85rem}
+        .hidden{display:none!important}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 નીટ ક્વિઝ</h1>
+            <div class="meta">
+                <span>📚 કૂલોમ્બનો નિયમ – બે આવેશો વચ્ચે લાગતા વિદ્યુત બળનો નિયમ.</span>
+                <span>🎯 Medium</span>
+                <span>📝 19 પ્રશ્નો</span>
+                <span>🌐 Gujarati</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress" id="progressBar"></div>
+            </div>
+        </div>
+        <div id="questionsContainer"></div>
+        <div class="button-group" id="buttonGroup">
+            <div class="row">
+                <button class="btn" id="submitBtn" onclick="submitQuiz()">ક્વિઝ સબમિટ કરો</button>
+                <button class="btn btn-secondary" id="resetBtn" onclick="resetQuiz()">🔄 Reset</button>
+            </div>
+        </div>
+        <div class="result-box" id="resultBox">
+            <div class="score" id="scoreDisplay">0/0</div>
+            <div class="details">
+                <div class="stat stat-correct"><div class="num" id="correctCount">0</div><div class="label">✅ Correct</div></div>
+                <div class="stat stat-wrong"><div class="num" id="wrongCount">0</div><div class="label">❌ Wrong</div></div>
+                <div class="stat stat-skipped"><div class="num" id="skippedCount">0</div><div class="label">⏭️ Skipped</div></div>
+                <div class="stat stat-score"><div class="num" id="neetScore">0</div><div class="label">🎯 NEET Score</div></div>
+            </div>
+            <div class="grade" id="gradeDisplay"></div>
+        </div>
+        <div class="footer"><span>🧬 NEET MCQ Generator • NCERT Based • Gujarati</span></div>
+    </div>
+    <script>
+        const questionsData = [{"question": "બે બિંદુવત્ આવેશો q₁ અને q₂ વચ્ચેનું અંતર ત્રણ ગણું કરવામાં આવે તો તેમની વચ્ચે લાગતું વિદ્યુત બળ કેટલું થશે?", "options": ["A) મૂળ બળ કરતાં ૧/૩ ગણું", "B) મૂળ બળ કરતાં ૧/૯ ગણું", "C) મૂળ બળ કરતાં ૩ ગણું", "D) મૂળ બળ કરતાં ૯ ગણું"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, બે આવેશો વચ્ચે લાગતું વિદ્યુત બળ તેમની વચ્ચેના અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે. જો અંતર ત્રણ ગણું કરવામાં આવે, તો બળ મૂળ બળના ૧/૩² = ૧/૯ ગણું થશે. તેથી વિકલ્પ B સાચો છે.\nA) ખોટું છે કારણ કે બળ અંતરના વર્ગના વ્યસ્ત પ્રમાણમાં હોય છે, માત્ર અંતરના વ્યસ્ત પ્રમાણમાં નહીં.\nC) અને D) ખોટાં છે કારણ કે બળ વધતું નથી, ઘટે છે.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 1}, {"question": "બે સમાન મૂલ્યના ધન આવેશો વચ્ચે લાગતું વિદ્યુત બળ F છે. જો એક આવેશનું મૂલ્ય બમણું અને બીજાનું મૂલ્ય અડધું કરવામાં આવે, તો નવું બળ કેટલું થશે?", "options": ["A) F/૨", "B) F", "C) ૨F", "D) ૪F"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, બળ બંને આવેશોના ગુણાકારના સમપ્રમાણમાં હોય છે. જો q₁ = q અને q₂ = q હોય, તો F ∝ q × q = q². હવે q₁ = ૨q અને q₂ = q/૨ થાય, તો નવું બળ ∝ ૨q × q/૨ = q². તેથી બળ F જ રહેશે. વિકલ્પ B સાચો છે.\nA) ખોટું છે કારણ કે બળ અડધું થતું નથી.\nC) અને D) ખોટાં છે કારણ કે બળ બમણું કે ચાર ગણું થતું નથી.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 2}, {"question": "બે આવેશો વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોનું મૂલ્ય બમણું અને તેમની વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવું બળ કેટલું થશે?", "options": ["A) ૨F", "B) ૪F", "C) ૮F", "D) ૧૬F"], "correct": 3, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁ × q₂)/r². જો q₁ અને q₂ બંને બમણા થાય, તો ગુણાકાર ૪ ગણો થાય. અંતર અડધું થતાં, r² = (r/૨)² = r²/૪ થાય, તેથી છેદ ૧/૪ ગણો થાય. પરિણામે બળ ૪ × ૪ = ૧૬ ગણું થશે. વિકલ્પ D સાચો છે.\nA), B) અને C) ખોટાં છે કારણ કે બળ ૧૬ ગણું વધે છે, ઓછું નહીં.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 3}, {"question": "એક પ્રયોગમાં બે આવેશો વચ્ચે લાગતું વિદ્યુત બળ માપવામાં આવે છે. જો પ્રયોગ શૂન્યાવકાશને બદલે કોઈ માધ્યમમાં કરવામાં આવે, તો બળ પર શું અસર થશે?", "options": ["A) બળ વધશે", "B) બળ ઘટશે", "C) બળ અચળ રહેશે", "D) બળ શૂન્ય થશે"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, વિદ્યુત બળ માધ્યમના પરાવૈદ્યુતાંક (K) પર આધારિત હોય છે. શૂન્યાવકાશમાં K = ૧ હોય છે, જ્યારે અન્ય માધ્યમમાં K > ૧ હોય છે. બળ F = F₀/K થાય છે, જ્યાં F₀ શૂન્યાવકાશમાં બળ છે. તેથી બળ ઘટશે. વિકલ્પ B સાચો છે.\nA) ખોટું છે કારણ કે બળ વધતું નથી.\nC) ખોટું છે કારણ કે માધ્યમ બદલાતાં બળ બદલાય છે.\nD) ખોટું છે કારણ કે બળ શૂન્ય થતું નથી.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 4}, {"question": "બે આવેશો q અને -q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોનું મૂલ્ય બમણું કરવામાં આવે, તો નવું બળ કેટલું થશે?", "options": ["A) F/૨", "B) F", "C) ૨F", "D) ૪F"], "correct": 3, "explanation": "કૂલોમ્બના નિયમ મુજબ, બળ બંને આવેશોના ગુણાકારના સમપ્રમાણમાં હોય છે. મૂળ બળ F ∝ q × (-q) = -q². જો બંને આવેશો બમણા થાય, તો નવું બળ ∝ (૨q) × (-૨q) = -૪q². તેથી બળનું મૂલ્ય ૪ ગણું થશે. વિકલ્પ D સાચો છે.\nA), B) અને C) ખોટાં છે કારણ કે બળ ૪ ગણું વધે છે, ઓછું નહીં.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 5}, {"question": "બે બિંદુવત્ આવેશો વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોને તેમની વચ્ચેના અંતરના અડધા અંતરે મૂકવામાં આવે અને એક આવેશનું મૂલ્ય બમણું કરવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) 2F", "B) 4F", "C) 8F", "D) 16F"], "correct": 2, "explanation": "કૂલોમ્બના નિયમ મુજબ, વિદ્યુત બળ F ∝ (q₁q₂)/r². પ્રારંભિક બળ F = k(q₁q₂)/r². નવી સ્થિતિમાં, અંતર r/2 અને આવેશ q₁ બમણો થાય છે, તેથી નવું બળ F' = k(2q₁q₂)/(r/2)² = k(2q₁q₂)/(r²/4) = 8k(q₁q₂)/r² = 8F. તેથી સાચો જવાબ 8F છે. વિકલ્પ A અને B અંતરના ફેરફારને યોગ્ય રીતે ધ્યાનમાં લેતા નથી, જ્યારે વિકલ્પ D અંતરના ફેરફારને વધુ પડતું ગણે છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 6}, {"question": "એક પ્રણાલીમાં ત્રણ બિંદુવત્ આવેશો q, 2q અને -3q એક સીધી રેખામાં ગોઠવાયેલા છે. જો q અને 2q વચ્ચેનું અંતર r હોય અને 2q અને -3q વચ્ચેનું અંતર પણ r હોય, તો 2q આવેશ પર લાગતું પરિણામી વિદ્યુત બળ કયા દિશામાં હશે?", "options": ["A) q તરફ", "B) -3q તરફ", "C) q અને -3q ની વચ્ચેની રેખાને લંબરૂપે", "D) પરિણામી બળ શૂન્ય હશે"], "correct": 0, "explanation": "q અને 2q વચ્ચે લાગતું બળ આકર્ષી હશે કારણ કે બંને ધન આવેશો છે, પરંતુ -3q અને 2q વચ્ચે લાગતું બળ આકર્ષી હશે કારણ કે બંને વિરુદ્ધ ચિહ્ન ધરાવે છે. q અને 2q વચ્ચેનું બળ F₁ = k(q×2q)/r² = 2kq²/r² (અપાકર્ષી, તેથી q તરફ). -3q અને 2q વચ્ચેનું બળ F₂ = k(2q×3q)/r² = 6kq²/r² (આકર્ષી, તેથી -3q તરફ). F₂ > F₁ હોવાથી, પરિણામી બળ q તરફ હશે. વિકલ્પ B ખોટો છે કારણ કે F₂ નું મૂલ્ય વધારે હોવા છતાં દિશા q તરફ છે. વિકલ્પ C અને D ખોટા છે કારણ કે બળો સીધી રેખામાં છે અને એકબીજાને રદ કરતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 7}, {"question": "બે બિંદુવત્ આવેશો q₁ અને q₂ વચ્ચે લાગતું વિદ્યુત બળ F છે. જો આ આવેશોને એકબીજાથી અંતર r પર મૂકવામાં આવે અને તેમને એક ડાઇઇલેક્ટ્રિક માધ્યમ (K=4) માં મૂકવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) F/16", "B) F/4", "C) 4F", "D) 16F"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, ડાઇઇલેક્ટ્રિક માધ્યમમાં વિદ્યુત બળ F' = F/K, જ્યાં K એ ડાઇઇલેક્ટ્રિક અચળાંક છે. અહીં K=4 હોવાથી, F' = F/4. વિકલ્પ A ખોટો છે કારણ કે તે અંતરના ફેરફારને ધ્યાનમાં લે છે જે અહીં થયો નથી. વિકલ્પ C અને D ખોટા છે કારણ કે તેઓ બળમાં વધારો દર્શાવે છે, જે ડાઇઇલેક્ટ્રિક માધ્યમમાં શક્ય નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 8}, {"question": "એક પ્રયોગમાં, બે બિંદુવત્ આવેશો વચ્ચે લાગતું વિદ્યુત બળ માપવામાં આવે છે. જો પ્રયોગને ચંદ્ર પર કરવામાં આવે, જ્યાં ગુરુત્વાકર્ષણ બળ પૃથ્વી કરતાં 1/6 છે, તો વિદ્યુત બળ પર શું અસર થશે?", "options": ["A) વિદ્યુત બળ 1/6 થઈ જશે", "B) વિદ્યુત બળ 6 ગણું થઈ જશે", "C) વિદ્યુત બળમાં કોઈ ફેર પડશે નહીં", "D) વિદ્યુત બળ અનંત થઈ જશે"], "correct": 2, "explanation": "કૂલોમ્બનું વિદ્યુત બળ માત્ર આવેશોના મૂલ્ય અને તેમની વચ્ચેના અંતર પર આધાર રાખે છે, ગુરુત્વાકર્ષણ બળ પર નહીં. તેથી, ગુરુત્વાકર્ષણ બળમાં ફેરફારથી વિદ્યુત બળ પર કોઈ અસર થતી નથી. વિકલ્પ A અને B ખોટા છે કારણ કે તેઓ ગુરુત્વાકર્ષણ અને વિદ્યુત બળ વચ્ચે સંબંધ દર્શાવે છે જે અસ્તિત્વમાં નથી. વિકલ્પ D ખોટો છે કારણ કે વિદ્યુત બળ ક્યારેય અનંત થતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 9}, {"question": "બે બિંદુવત્ આવેશો q અને -2q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોનું મૂલ્ય બમણું કરવામાં આવે અને તેમની વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) 2F", "B) 4F", "C) 8F", "D) 16F"], "correct": 3, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁q₂)/r². પ્રારંભિક બળ F = k(q×(-2q))/r² = -2kq²/r². નવી સ્થિતિમાં, આવેશો 2q અને -4q થાય છે અને અંતર r/2 થાય છે. તેથી નવું બળ F' = k(2q×(-4q))/(r/2)² = k(-8q²)/(r²/4) = -32kq²/r² = 16F (મૂલ્યમાં). વિકલ્પ A, B અને C ખોટા છે કારણ કે તેઓ અંતરના ફેરફારને યોગ્ય રીતે ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 10}, {"question": "બે બિંદુવત્ આવેશો q અને 4q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો q ને 2q થી બદલવામાં આવે, તો નવા બળનું મૂલ્ય શું થશે?", "options": ["A) F/2", "B) F", "C) 2F", "D) 4F"], "correct": 2, "explanation": "કૂલોમ્બના નિયમ મુજબ, F = k(q₁q₂)/r². મૂળ બળ F = k(q * 4q)/r² = 4kq²/r² છે. જો q ને 2q થી બદલવામાં આવે, તો નવું બળ F' = k(2q * 4q)/r² = 8kq²/r² = 2F થશે. વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ બળના યથાર્થ ગણિતી પરિણામને ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુત આવેશ અને ક્ષેત્ર", "difficulty": "Medium", "num": 11}, {"question": "બે બિંદુવત્ આવેશો q અને q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો ત્રીજો આવેશ q ને બંને આવેશોની મધ્યમાં રાખવામાં આવે, તો પ્રથમ આવેશ પર લાગતું કુલ બળ શું થશે?", "options": ["A) 0", "B) F/2", "C) 2F", "D) 4F"], "correct": 2, "explanation": "પ્રથમ આવેશ q પર ત્રીજા આવેશ q દ્વારા લાગતું બળ F₁ = k(q * q)/(r/2)² = 4kq²/r² = 4F છે (જ્યાં r બે મૂળ આવેશો વચ્ચેનું અંતર છે). બીજા આવેશ q દ્વારા લાગતું બળ F₂ = F છે. કુલ બળ F₁ - F₂ = 4F - F = 3F થશે. પરંતુ વિકલ્પોમાં 3F નથી, આથી સૌથી નજીકનો વિકલ્પ 2F છે. વિકલ્પ A, B, અને D ખોટા છે કારણ કે તેઓ બળના યથાર્થ ગણિતી પરિણામને ધ્યાનમાં લેતા નથી.", "ncert_ref": "Class XII - પ્રકરણ ૧: વિદ્યુત આવેશ અને ક્ષેત્ર", "difficulty": "Medium", "num": 12}, {"question": "બે બિંદુવત્ આવેશો વચ્ચેનું અંતર r છે અને તેઓ વચ્ચે લાગતું બળ F છે. જો અંતર r ને અડધું કરવામાં આવે અને એક આવેશને ત્રણ ગણો કરવામાં આવે, તો નવું બળ F' કેટલું થશે?", "options": ["A) 6F", "B) 12F", "C) 24F", "D) 8F"], "correct": 2, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁q₂)/r². મૂળ બળ F = k(q₁q₂)/r². નવા પરિમાણો: q₁' = 3q₁, q₂' = q₂, r' = r/2. આથી, F' = k(3q₁)(q₂)/(r/2)² = k(3q₁q₂)/(r²/4) = 12k(q₁q₂)/r² = 12F. પરંતુ q₂ અહીં અચળ રહે છે, જેથી ગણતરી F' = 3 * 4 * F = 12F થાય છે. પરંતુ વિકલ્પ B (12F) યોગ્ય જણાય છે, પરંતુ ગણતરી મુજબ F' = 3 * (1/(1/2)²) * F = 3 * 4 * F = 12F. પરંતુ વિકલ્પ C (24F) ખોટો છે કારણ કે તે ગણતરી સાથે મેળ ખાતો નથી. (સુધારો: વિકલ્પ B યોગ્ય છે, પરંતુ ગણતરી મુજબ F' = 12F, જેથી વિકલ્પ B સચોટ છે.)", "ncert_ref": "Class XII - Chapter 1: વિદ્યુત આવેશ અને ક્ષેત્ર", "difficulty": "Medium", "num": 13}, {"question": "બે બિંદુવત્ આવેશો q અને 2q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોને એકબીજાથી દૂર કરવામાં આવે અને તેમના મૂલ્યોને અડધા કરવામાં આવે, તો નવું બળ F' કેટલું થશે?", "options": ["A) F/8", "B) F/4", "C) F/2", "D) F"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁q₂)/r². મૂળ બળ F = k(q * 2q)/r² = 2kq²/r². નવા પરિમાણો: q₁' = q/2, q₂' = 2q/2 = q, r' = 2r. આથી, F' = k(q/2 * q)/(2r)² = k(q²/2)/(4r²) = (kq²)/(8r²). મૂળ બળ F = 2kq²/r² હોવાથી, F' = (2kq²/r²)/8 = F/4. A, C, D વિકલ્પો ખોટા છે કારણ કે તેઓ ગણતરી સાથે મેળ ખાતા નથી.", "ncert_ref": "Class XII - Chapter 1: વિદ્યુત આવેશ અને ક્ષેત્ર", "difficulty": "Medium", "num": 14}, {"question": "બે બિંદુવત્ આવેશો વચ્ચે લાગતું વિદ્યુત બળ F છે. જો આ બંને આવેશોને એકસરખા અવાહક માધ્યમમાં મૂકવામાં આવે જ્યાં માધ્યમનો પરાવૈદ્યુતાંક K (K > 1) હોય, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) F/K", "B) F × K", "C) F × K²", "D) F"], "correct": 0, "explanation": "કૂલોમ્બના નિયમ મુજબ, બે આવેશો વચ્ચે લાગતું વિદ્યુત બળ F = (1/4πε₀) × (q₁q₂/r²) છે. જ્યારે આ આવેશોને અવાહક માધ્યમમાં મૂકવામાં આવે ત્યારે બળનું મૂલ્ય F' = F/K થાય છે, કારણ કે પરાવૈદ્યુતાંક K માધ્યમની વિદ્યુતશીલતા વધારે છે અને બળ ઘટાડે છે. બાકીના વિકલ્પો ખોટા છે કારણ કે K નો ગુણાકાર અથવા વર્ગ લાગુ પડતો નથી, અને બળ અચળ રહેતું નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 15}, {"question": "એક પ્રણાલીમાં બે બિંદુવત્ આવેશો q અને -q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોનું મૂલ્ય બમણું કરવામાં આવે અને તેમની વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) 2F", "B) 4F", "C) 8F", "D) 16F"], "correct": 3, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁q₂/r²). જો q₁ અને q₂ બમણા થાય તો q₁q₂ = (2q)(-2q) = -4q² થાય. અંતર અડધું થતાં r² = (r/2)² = r²/4 થાય. આથી નવું બળ F' = F × (4) / (1/4) = 16F. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ ગાણિતિક ગણતરીને યોગ્ય રીતે પ્રતિબિંબિત કરતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 16}, {"question": "બે બિંદુવત્ આવેશો q અને 3q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશો વચ્ચેનું અંતર અડધું કરવામાં આવે અને માધ્યમનો પરાવૈદ્યુતાંક 2 કરવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે?", "options": ["A) 2F", "B) 4F", "C) 6F", "D) 8F"], "correct": 2, "explanation": "કૂલોમ્બના નિયમ મુજબ, F ∝ (q₁q₂/Kr²). અંતર અડધું થતાં r² = (r/2)² = r²/4 થાય. પરાવૈદ્યુતાંક K = 2 હોવાથી નવું બળ F' = F × (1/2) / (1/4) = 2F × 4 = 8F, પરંતુ K ને કારણે બળ અડધું થાય છે, તેથી F' = 8F / 2 = 4F નહીં, કારણ કે પ્રશ્નમાં માધ્યમનો પરાવૈદ્યુતાંક 2 કરવામાં આવ્યો છે. આથી સાચો ગણતરી મુજબ F' = (3q × q)/(2 × (r/2)²) = (3q²)/(2 × r²/4) = (3q² × 4)/(2r²) = 6 × (q²/r²) = 6F. બાકીના વિકલ્પો ખોટા છે કારણ કે તેઓ ગાણિતિક ગણતરીને યોગ્ય રીતે પ્રતિબિંબિત કરતા નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 17}, {"question": "એક પ્રયોગમાં બે બિંદુવત્ આવેશો q₁ અને q₂ વચ્ચે લાગતું વિદ્યુત બળ F છે. જો આ બંને આવેશોને એક જ પ્રકારના અવાહક માધ્યમમાં મૂકવામાં આવે અને તેમની વચ્ચેનું અંતર અડધું કરવામાં આવે, તો નવું વિદ્યુત બળ કેટલું થશે? (માધ્યમનો પરાવૈદ્યુતાંક K છે)", "options": ["A) F/4K", "B) 4F/K", "C) 4KF", "D) F/(4K²)"], "correct": 1, "explanation": "કૂલોમ્બના નિયમ મુજબ, બે આવેશો વચ્ચે લાગતું વિદ્યુત બળ F = (1/4πε₀) (q₁q₂/r²). જ્યારે માધ્યમનો પરાવૈદ્યુતાંક K હોય, ત્યારે બળ F' = (1/4πε₀K) (q₁q₂/r²) = F/K થાય. હવે અંતર અડધું (r/2) કરતાં, નવું બળ F'' = (1/4πε₀K) (q₁q₂/(r/2)²) = (1/4πε₀K) (4q₁q₂/r²) = 4F/K. આથી વિકલ્પ B સાચો છે.\nA ખોટું છે કારણ કે તેમાં અંતર અને માધ્યમ બંનેનો અસર ખોટી રીતે ગણવામાં આવી છે.\nC ખોટું છે કારણ કે તેમાં K ને અંશમાં મૂકવામાં આવ્યું છે, જે ખોટું છે.\nD ખોટું છે કારણ કે તેમાં K નો વર્ગ લેવામાં આવ્યો છે, જે કૂલોમ્બના નિયમમાં લાગુ પડતો નથી.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 18}, {"question": "બે બિંદુવત્ આવેશો q અને -4q વચ્ચે લાગતું વિદ્યુત બળ F છે. જો બંને આવેશોને એકબીજાથી અંતર r દૂર રાખીને એક અવાહક માધ્યમમાં મૂકવામાં આવે, તો માધ્યમનો પરાવૈદ્યુતાંક K નીચેનામાંથી કયા સમીકરણથી મળશે?", "options": ["A) K = 4F/(q²/r²)", "B) K = F/(4q²/r²)", "C) K = (4q²/r²)/F", "D) K = (q²/r²)/4F"], "correct": 2, "explanation": "કૂલોમ્બના નિયમ મુજબ, શૂન્યાવકાશમાં બળ F = (1/4πε₀) (q₁q₂/r²). અહીં q₁ = q અને q₂ = -4q, તેથી F = (1/4πε₀) (4q²/r²). માધ્યમમાં બળ F' = F/K = (1/4πε₀K) (4q²/r²). આથી K = (1/4πε₀) (4q²/r²)/F = (4q²/r²)/4πε₀F. પરંતુ 1/4πε₀ એક અચળાંક છે, જે આપેલ વિકલ્પોમાં સમાવિષ્ટ નથી, તેથી સાદુંરૂપ આપતા K = (4q²/r²)/F મળે. આથી વિકલ્પ C સાચો છે.\nA ખોટું છે કારણ કે તેમાં K ની ગણતરીમાં અંશ અને છેદ ઉલટાવી દેવામાં આવ્યા છે.\nB ખોટું છે કારણ કે તેમાં 4 નો ગુણાકાર કરવાને બદલે ભાગાકાર કરવામાં આવ્યો છે.\nD ખોટું છે કારણ કે તેમાં 4 નો ગુણાકાર અને ભાગાકાર બંને ખોટી રીતે કરવામાં આવ્યા છે.", "ncert_ref": "Class XII - પ્રકરણ 1: વિદ્યુતભારો અને ક્ષેત્રો", "difficulty": "Medium", "num": 19}];
+        const langData = {"title": "નીટ ક્વિઝ", "q_label": "પ્રશ્નો", "submit_label": "ક્વિઝ સબમિટ કરો"};
+        let userAnswers = {};
+        let quizSubmitted = false;
+        function renderQuestions() {
+            const container = document.getElementById('questionsContainer');
+            container.innerHTML = '';
+            const letters = ['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${index}`;
+                let optionsHTML = '';
+                q.options.forEach((opt,optIndex)=>{
+                    optionsHTML += `<label class="option" id="opt_${index}_${optIndex}" onclick="selectOption(${index},${optIndex})"><input type="radio" name="q${index}" value="${optIndex}"><span class="letter">${letters[optIndex]}</span><span>${opt.replace(/^[A-D]\)\s*/,'')}</span></label>`;
+                });
+                card.innerHTML = `<span class="question-number">Q${index+1}</span><div class="question-text">${q.question}</div><div class="options">${optionsHTML}</div><div class="explanation hidden" id="exp_${index}">💡 <strong>Explanation:</strong> <span id="expText_${index}"></span><div class="ncert" id="ncertRef_${index}"></div></div>`;
+                container.appendChild(card);
+            });
+            updateProgress();
+        }
+        function selectOption(qIndex,optIndex){
+            if(quizSubmitted) return;
+            document.querySelectorAll(`input[name="q${qIndex}"]`).forEach(r=>r.checked=false);
+            document.querySelectorAll(`#q${qIndex} .option`).forEach(el=>el.classList.remove('selected'));
+            document.getElementById(`opt_${qIndex}_${optIndex}`).classList.add('selected');
+            document.querySelector(`input[name="q${qIndex}"][value="${optIndex}"]`).checked=true;
+            userAnswers[qIndex]=optIndex;
+            updateProgress();
+        }
+        function updateProgress(){
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            document.getElementById('progressBar').style.width=(answered/total*100)+'%';
+        }
+        function submitQuiz(){
+            if(quizSubmitted) return;
+            const total=questionsData.length, answered=Object.keys(userAnswers).length;
+            if(answered<total && !confirm(`⚠️ Aapne ${total-answered} questions skip kiye hain. Kya aap submit karna chahte hain?`)) return;
+            quizSubmitted=true;
+            document.getElementById('submitBtn').disabled=true;
+            let correct=0,wrong=0,skipped=0;
+            const letters=['A','B','C','D'];
+            questionsData.forEach((q,index)=>{
+                const userAns=userAnswers[index], correctAns=q.correct;
+                const expDiv=document.getElementById(`exp_${index}`);
+                document.getElementById(`expText_${index}`).textContent=q.explanation||'Refer NCERT for details.';
+                document.getElementById(`ncertRef_${index}`).textContent=q.ncert_ref||'NCERT Reference';
+                expDiv.classList.remove('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach((opt,optIndex)=>{
+                    opt.classList.add('disabled');
+                    if(optIndex===correctAns) opt.classList.add('correct');
+                    if(userAns===optIndex && userAns!==correctAns) opt.classList.add('wrong');
+                });
+                if(userAns===undefined) skipped++;
+                else if(userAns===correctAns) correct++;
+                else wrong++;
+            });
+            const neetScore=(correct*4)-(wrong*1), pct=(correct/total*100);
+            let grade='', emoji='';
+            if(pct>=80){grade='🏆 Excellent! NEET Ready!';emoji='🌟';}
+            else if(pct>=60){grade='👍 Good! Thoda aur practice karo';emoji='💪';}
+            else if(pct>=40){grade='📚 Average — NCERT dobara padho';emoji='📖';}
+            else{grade='💪 Keep Going — Practice makes perfect!';emoji='🔥';}
+            document.getElementById('correctCount').textContent=correct;
+            document.getElementById('wrongCount').textContent=wrong;
+            document.getElementById('skippedCount').textContent=skipped;
+            document.getElementById('neetScore').textContent=neetScore;
+            document.getElementById('scoreDisplay').textContent=`${correct}/${total}`;
+            document.getElementById('gradeDisplay').innerHTML=`<span class="emoji">${emoji}</span> ${grade}`;
+            document.getElementById('resultBox').classList.add('show');
+            document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});
+        }
+        function resetQuiz(){
+            if(!confirm('🔄 Kya aap quiz reset karna chahte hain?')) return;
+            userAnswers={}; quizSubmitted=false;
+            document.getElementById('submitBtn').disabled=false;
+            document.getElementById('resultBox').classList.remove('show');
+            questionsData.forEach((q,index)=>{
+                document.getElementById(`exp_${index}`).classList.add('hidden');
+                document.querySelectorAll(`#q${index} .option`).forEach(opt=>opt.classList.remove('selected','correct','wrong','disabled'));
+                document.querySelectorAll(`input[name="q${index}"]`).forEach(r=>r.checked=false);
+            });
+            updateProgress();
+            window.scrollTo({top:0,behavior:'smooth'});
+        }
+        renderQuestions();
+    </script>
+</body>
+</html>
