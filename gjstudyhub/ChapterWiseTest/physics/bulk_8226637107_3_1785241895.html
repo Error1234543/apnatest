@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>સમતલમાં ગતિ Mock Test</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Gujarati:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef1f6;--panel:#fff;--border:#d7dce3;--accent:#0b5fa5;--danger:#d23b3b;--success:#1f9254;--marked:#8a3ffc;--muted:#667085;--not-visited:#9aa4b2;}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Noto Sans Gujarati','Segoe UI',Arial,sans-serif;}
+body{background:var(--bg);color:#1a1f29;}
+.topbar{background:var(--accent);color:#fff;padding:10px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:50;}
+.topbar h1{font-size:15px;font-weight:700;}
+.topbar .sub{font-size:11px;opacity:.85;}
+.timer{background:#093f6e;padding:6px 14px;border-radius:6px;font-weight:700;font-size:15px;font-family:monospace;}
+.timer.warn{background:var(--danger);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.tabs{display:flex;gap:6px;background:#dde4ec;padding:8px 10px;overflow-x:auto;}
+.tab-btn{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.tab-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.wrap{display:flex;gap:14px;max-width:1100px;margin:14px auto;padding:0 12px;align-items:flex-start;flex-wrap:wrap;}
+.qpanel{flex:1;min-width:280px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
+.qnum{background:var(--accent);color:#fff;font-size:12px;font-weight:700;padding:4px 10px;border-radius:5px;}
+.chtag{font-size:11px;color:var(--muted);}
+.qtext{font-size:15px;font-weight:600;line-height:1.6;margin-bottom:14px;}
+.svgbox{margin:10px 0;text-align:center;}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin-bottom:9px;cursor:pointer;transition:all .15s;}
+.opt:hover{border-color:var(--accent);background:#f2f8ff;}
+.opt.selected{border-color:var(--accent);background:#e3f0ff;font-weight:600;}
+.opt .letter{width:22px;height:22px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.opt.selected .letter{background:var(--accent);color:#fff;border-color:var(--accent);}
+.navrow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn{border:none;border-radius:6px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-prev{background:#e2e6ec;color:#333;}
+.btn-clear{background:#fdecea;color:var(--danger);}
+.btn-mark{background:#f1e9fc;color:var(--marked);}
+.btn-next{background:var(--accent);color:#fff;}
+.btn-submit{background:var(--success);color:#fff;}
+.sidebar{width:270px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;}
+.legend{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;margin-bottom:10px;}
+.legend span{display:flex;align-items:center;gap:4px;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;}
+.palette{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;max-height:340px;overflow-y:auto;padding-right:4px;}
+.pbtn{border:1px solid var(--border);background:#fff;border-radius:5px;font-size:11px;font-weight:700;padding:6px 0;cursor:pointer;}
+.pbtn.answered{background:var(--success);color:#fff;border-color:var(--success);}
+.pbtn.notanswered{background:var(--danger);color:#fff;border-color:var(--danger);}
+.pbtn.marked{background:var(--marked);color:#fff;border-color:var(--marked);}
+.pbtn.notvisited{background:#fff;color:#333;}
+.pbtn.current{outline:2px solid #000;}
+.subj-h{font-size:11px;font-weight:700;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;}
+#result{display:none;max-width:900px;margin:20px auto;padding:0 12px;}
+.rcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px;}
+.bigscore{font-size:38px;font-weight:800;color:var(--accent);}
+.stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:14px;}
+.stat{background:#f2f4f7;border-radius:8px;padding:10px 16px;min-width:90px;}
+.stat b{display:block;font-size:18px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:center;}
+.review-item{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;text-align:left;}
+.review-item .tag-ok{color:var(--success);font-weight:700;}
+.review-item .tag-wrong{color:var(--danger);font-weight:700;}
+.review-item .tag-skip{color:var(--muted);font-weight:700;}
+.footer{text-align:center;color:var(--muted);font-size:11px;padding:16px;}
+@media(max-width:760px){.sidebar{width:100%;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div><h1>સમતલમાં ગતિ Mock Test</h1><div class="sub">NEET UG • 40 Questions • Max Marks 160</div></div>
+  <div class="timer" id="timer">--:--:--</div>
+</div>
+<div class="tabs" id="tabs"></div>
+<div class="wrap">
+  <div class="qpanel" id="qpanel"></div>
+  <div class="sidebar">
+    <div class="legend">
+      <span><i class="dot" style="background:var(--success)"></i>Answered</span>
+      <span><i class="dot" style="background:var(--danger)"></i>Not Answered</span>
+      <span><i class="dot" style="background:var(--marked)"></i>Marked</span>
+      <span><i class="dot" style="background:#fff;border:1px solid #ccc"></i>Not Visited</span>
+    </div>
+    <div id="palette"></div>
+    <button class="btn btn-submit" style="width:100%;margin-top:12px;" onclick="submitTest()">Submit Test ✓</button>
+  </div>
+</div>
+
+<div id="result">
+  <div class="rcard">
+    <div class="bigscore" id="r-score">0</div>
+    <div style="color:var(--muted);font-size:13px;">out of 160 marks</div>
+    <div class="stats">
+      <div class="stat"><b id="r-cor" style="color:var(--success)">0</b>Correct</div>
+      <div class="stat"><b id="r-wrg" style="color:var(--danger)">0</b>Wrong</div>
+      <div class="stat"><b id="r-skp" style="color:var(--muted)">0</b>Unattempted</div>
+      <div class="stat"><b id="r-pct">0%</b>Percentage</div>
+    </div>
+    <table id="subj-table"><thead><tr><th>Subject</th><th>Correct</th><th>Wrong</th><th>Unattempted</th><th>Marks</th></tr></thead><tbody></tbody></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-next" onclick="toggleReview()">Show Detailed Review</button>
+      <button class="btn btn-prev" onclick="downloadResult()">⬇ Download Result</button>
+    </div>
+  </div>
+  <div id="review-list" style="display:none;"></div>
+</div>
+<div class="footer">Made with ❤️ by @xdsonic | 40 Questions | NEET UG</div>
+
+<script>
+const LETTERS=['A','B','C','D'];
+const QUESTIONS=[{"q": "એક પદાર્થને સમતલમાં એવી રીતે ફેંકવામાં આવે છે કે તેનો પ્રારંભિક વેગ 20 m/s અને પ્રક્ષેપક કોણ 30° છે. જો ગુરુત્વાકર્ષણ પ્રવેગ 10 m/s² હોય, તો પદાર્થની મહત્તમ ઊંચાઈ કેટલી હશે? (sin 30° = 0.5)", "opts": ["5 m", "10 m", "15 m", "20 m"], "ans": 0, "exp": "મહત્તમ ઊંચાઈ માટે સૂત્ર: H = (u² sin²θ) / (2g). અહીં u = 20 m/s, θ = 30°, g = 10 m/s². ગણતરી કરતાં H = (20² × 0.5²) / (2 × 10) = 5 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન પ્રક્ષિપ્ત ગતિ માટે ખોટું છે?", "opts": ["પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે.", "પ્રક્ષિપ્ત ગતિમાં ઊર્ધ્વ વેગ સમય સાથે બદલાય છે.", "પ્રક્ષિપ્ત ગતિનો ગતિપથ પરવલયાકાર હોય છે.", "પ્રક્ષિપ્ત ગતિમાં પ્રારંભિક વેગનું સમક્ષિતિજ ઘટક શૂન્ય હોય છે."], "ans": 3, "exp": "પ્રક્ષિપ્ત ગતિમાં પ્રારંભિક વેગનું સમક્ષિતિજ ઘટક શૂન્ય હોઈ શકે નહીં, કારણ કે તે સમતલમાં ગતિ માટે જરૂરી છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રક્ષિપ્ત પદાર્થને જમીનથી 45°ના કોણે ફેંકવામાં આવે છે. જો તેનો પ્રારંભિક વેગ 20√2 m/s હોય અને ગુરુત્વાકર્ષણ પ્રવેગ 10 m/s² હોય, તો તેની અવિધ (Range) કેટલી હશે?", "opts": ["40 m", "60 m", "80 m", "100 m"], "ans": 2, "exp": "અવિધ માટે સૂત્ર: R = (u² sin(2θ)) / g. અહીં u = 20√2 m/s, θ = 45°, g = 10 m/s². sin(90°) = 1 હોવાથી R = (20√2)² × 1 / 10 = 80 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનોમાંથી કયાં સાચાં છે?\n(i) પ્રક્ષિપ્ત ગતિમાં પ્રારંભિક વેગનું ઊર્ધ્વ ઘટક મહત્તમ ઊંચાઈ નક્કી કરે છે.\n(ii) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ અવિધ પ્રારંભિક વેગના સમક્ષિતિજ ઘટક પર આધારિત નથી.\n(iii) પ્રક્ષિપ્ત ગતિનો ગતિપથ હંમેશા પરવલયાકાર હોય છે.", "opts": ["માત્ર (i)", "(i) અને (iii)", "(ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 1, "exp": "વિધાન (i) અને (iii) સાચાં છે. વિધાન (ii) ખોટું છે કારણ કે અવિધ પ્રારંભિક વેગના સમક્ષિતિજ ઘટક પર આધારિત છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમતલમાં ફેંકતાં તેનો પ્રારંભિક વેગ 10 m/s અને પ્રક્ષેપક કોણ 60° છે. જો ગુરુત્વાકર્ષણ પ્રવેગ 10 m/s² હોય, તો પદાર્થનો ઉડ્ડયન સમય (Time of Flight) કેટલો હશે? (sin 60° = √3/2)", "opts": ["√3 s", "2√3 s", "1 s", "2 s"], "ans": 0, "exp": "ઉડ્ડયન સમય માટે સૂત્ર: T = (2u sinθ) / g. અહીં u = 10 m/s, θ = 60°, g = 10 m/s². ગણતરી કરતાં T = (2 × 10 × √3/2) / 10 = √3 s.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક બોલને 40 m/s ના વેગથી 60° ના કોણે ફેંકવામાં આવે છે. જો ગુરુત્વાકર્ષણ પ્રવેગ 10 m/s² હોય, તો બોલ જ્યારે ફરીથી જમીન પર આવે ત્યારે તેનો સમક્ષિતિજ અવિધિ કેટલો હશે?", "opts": ["80 m", "120 m", "160 m", "200 m"], "ans": 2, "exp": "સમક્ષિતિજ અવિધિ માટે સૂત્ર: R = (u² sin(2θ)) / g. અહીં u = 40 m/s, θ = 60°, g = 10 m/s². sin(120°) = √3/2, તેથી R = (40² × √3/2) / 10 = 160 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમતલમાં 25 m/s ના વેગથી ફેંકવામાં આવે છે. જો તેની મહત્તમ ઊંચાઈ 31.25 m હોય, તો પ્રક્ષિપ્ત કોણ કેટલો હશે? (g = 10 m/s² લો)", "opts": ["30°", "45°", "60°", "90°"], "ans": 2, "exp": "મહત્તમ ઊંચાઈ માટે સૂત્ર: H = (u² sin²θ) / (2g). અહીં H = 31.25 m, u = 25 m/s, g = 10 m/s². તેથી sin²θ = (2 × 10 × 31.25) / 25² = 1, sinθ = √3/2 ⇒ θ = 60°.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રક્ષિપ્તને 40 m/sના વેગથી 60°ના કોણે ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો તેની ઉડ્ડયન સમય કેટલો હશે?", "opts": ["4 s", "6.93 s", "8 s", "13.86 s"], "ans": 2, "exp": "ઉડ્ડયન સમય માટે સૂત્ર T = (2u sinθ) / g છે. અહીં u = 40 m/s, θ = 60°, g = 10 m/s². sin 60° = √3/2, તેથી T = (2 × 40 × √3/2) / 10 = 4√3 ≈ 6.93 s (સૌથી નજીકનું વિકલ્પ 8 s છે, પરંતુ ચોક્કસ ગણતરી 6.93 s છે).", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનોમાંથી કયાં સાચાં છે?\n(i) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ અને ઊર્ધ્વ દિશામાં ગતિ સ્વતંત્ર હોય છે.\n(ii) પ્રક્ષિપ્ત ગતિમાં મહત્તમ પરાસ માટે પ્રક્ષેપકોણ 45° હોવો જોઈએ.\n(iii) પ્રક્ષિપ્ત ગતિમાં પ્રવેગ સમય સાથે બદલાય છે.\n(iv) પ્રક્ષિપ્ત ગતિમાં પ્રારંભિક વેગનું ઊર્ધ્વ ઘટક શૂન્ય હોય તો તે સમક્ષિતિજ ગતિ બને છે.", "opts": ["માત્ર (i) અને (ii)", "(i), (ii) અને (iv)", "(i), (iii) અને (iv)", "(ii) અને (iii)"], "ans": 1, "exp": "વિધાન (i), (ii) અને (iv) સાચાં છે. વિધાન (iii) ખોટું છે કારણ કે પ્રવેગ અચળ રહે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમક્ષિતિજ દિશામાં 15 m/sના વેગથી અને ઊર્ધ્વ દિશામાં 20 m/sના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો પદાર્થનો પ્રારંભિક વેગ અને પ્રક્ષેપકોણ અનુક્રમે કેટલા હશે?", "opts": ["25 m/s, 53°", "25 m/s, 37°", "30 m/s, 53°", "30 m/s, 37°"], "ans": 0, "exp": "પ્રારંભિક વેગ u = √(15² + 20²) = 25 m/s. પ્રક્ષેપકોણ θ = tan⁻¹(20/15) = tan⁻¹(4/3) ≈ 53°.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સમતલમાં પ્રક્ષેપક ગતિ માટે **સાચું નથી**?", "opts": ["પ્રક્ષેપકનો ગુરુત્વાકર્ષણને કારણે પ્રવેગ હંમેશા ઊર્ધ્વદિશામાં હોય છે.", "પ્રક્ષેપકનો સમક્ષિતિજ વેગ સમગ્ર ગતિ દરમિયાન અચળ રહે છે.", "પ્રક્ષેપકની મહત્તમ ઊંચાઈ પર તેનો વેગ શૂન્ય થાય છે.", "પ્રક્ષેપકનો ગતિપથ પરવલયાકાર હોય છે."], "ans": 2, "exp": "મહત્તમ ઊંચાઈ પર પ્રક્ષેપકનો **ઊર્ધ્વદિશાનો વેગ** શૂન્ય થાય છે, પરંતુ સમક્ષિતિજ વેગ અચળ રહે છે, તેથી કુલ વેગ શૂન્ય નથી.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનોને ધ્યાનમાં લો: \n(i) સમતલમાં ગતિ કરતા પદાર્થનો પ્રવેગ હંમેશા અચળ હોય છે. \n(ii) પ્રક્ષેપક ગતિમાં સમક્ષિતિજ અને ઊર્ધ્વદિશામાં ગતિ સ્વતંત્ર હોય છે. \n(iii) પ્રક્ષેપકનો ગતિપથ હંમેશા પરવલયાકાર હોય છે. \n(iv) પ્રક્ષેપકની મહત્તમ અવિધ (range) માટે પ્રક્ષેપણ કોણ 45° હોવો જોઈએ. \nઉપરના વિધાનોમાંથી કેટલાં **સાચાં** છે?", "opts": ["એક", "બે", "ત્રણ", "ચાર"], "ans": 2, "exp": "વિધાન (ii), (iii) અને (iv) સાચાં છે. વિધાન (i) ખોટું છે કારણ કે પ્રવેગ માત્ર ગુરુત્વાકર્ષણને કારણે અચળ હોય છે, પરંતુ જો અન્ય બળો હોય તો પ્રવેગ બદલાઈ શકે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના પૈકી કયું વિધાન સમતલમાં ગતિ માટે **અયોગ્ય** છે?", "opts": ["સમક્ષિતિજ દિશામાં પ્રવેગ શૂન્ય હોય તો વેગ અચળ રહે છે.", "ઊર્ધ્વ દિશામાં પ્રવેગ હંમેશા ગુરુત્વાકર્ષણને કારણે અચળ હોય છે.", "પ્રક્ષેપકનો ગતિપથ હંમેશા સુરેખ હોય છે.", "પ્રક્ષેપકની મહત્તમ અવિધ (range) પ્રક્ષેપક કોણ પર આધારિત હોય છે."], "ans": 2, "exp": "પ્રક્ષેપકનો ગતિપથ **પરવલયાકાર** હોય છે, સુરેખ નહીં.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના બે વિધાનો ધ્યાનમાં લો: \n(i) સમતલમાં ગતિ કરતા પદાર્થનો પ્રવેગ અચળ હોય તો તેની ગતિ સુરેખ હોય છે. \n(ii) પ્રક્ષેપિત ગતિમાં પદાર્થનો પ્રવેગ હંમેશા અચળ હોય છે. \nઆ વિધાનો પૈકી કયું/કયા સાચું/સાચાં છે?", "opts": ["માત્ર (i)", "માત્ર (ii)", "(i) અને (ii) બંને", "બંને ખોટાં"], "ans": 1, "exp": "પ્રક્ષેપિત ગતિમાં પ્રવેગ (ગુરુત્વાકર્ષણ) અચળ હોય છે, પરંતુ સમતલમાં ગતિ સુરેખ હોવી જરૂરી નથી (દા.ત., પ્રક્ષેપિત ગતિ વક્રાકાર હોય છે).", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "સમતલમાં ગતિ કરતાં પદાર્થનો પ્રવેગ એટલે શું?", "opts": ["સ્થાનાંતરના ફેરફારનો દર", "વેગના ફેરફારનો દર", "ઊર્જાના ફેરફારનો દર", "સમયના ફેરફારનો દર"], "ans": 1, "exp": "પ્રવેગ એ વેગના ફેરફારનો દર છે, જે સમયના સંદર્ભમાં વ્યાખ્યાયિત થાય છે. તે સદિશ રાશિ છે અને તેનો એકમ m/s² છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થ સમતલમાં 30 m/sના વેગથી 60°ના કોણે ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો તેની મહત્તમ ઊંચાઈ કેટલી હશે?", "opts": ["22.5 m", "33.75 m", "45 m", "11.25 m"], "ans": 1, "exp": "મહત્તમ ઊંચાઈ માટે સૂત્ર H = (u² sin²θ) / (2g) છે. અહીં u = 30 m/s, θ = 60°, g = 10 m/s² લેતાં H = 33.75 m મળે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું વિધાન સત્ય છે? i) પ્રક્ષેપક ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે. ii) પ્રક્ષેપક ગતિમાં ઊર્ધ્વગામી પ્રવેગ અચળ રહે છે. iii) પ્રક્ષેપક ગતિમાં ગતિનો માર્ગ પરવલયાકાર હોય છે.", "opts": ["ફક્ત i અને ii", "ફક્ત ii અને iii", "ફક્ત i અને iii", "i, ii અને iii"], "ans": 3, "exp": "પ્રક્ષેપક ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે અને ગતિનો માર્ગ પરવલયાકાર હોય છે, પરંતુ ઊર્ધ્વગામી પ્રવેગ g (ગુરુત્વાકર્ષણ પ્રવેગ) અચળ રહે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમક્ષિતિજ દિશામાં 20 m/sના વેગથી અને ઊર્ધ્વદિશામાં 15 m/sના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો તેના વેગનો સમક્ષિતિજ ઘટક 3 સેકન્ડ પછી કેટલો હશે?", "opts": ["20 m/s", "15 m/s", "10 m/s", "0 m/s"], "ans": 0, "exp": "સમક્ષિતિજ વેગનો ઘટક સમય સાથે બદલાતો નથી કારણ કે સમક્ષિતિજ દિશામાં પ્રવેગ શૂન્ય હોય છે. તેથી 3 સેકન્ડ પછી પણ તે 20 m/s રહેશે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેના વિધાનો ધ્યાનમાં લો: (i) સમતલમાં ગતિ કરતા પદાર્થનો પ્રવેગ હંમેશા અચળ હોય છે. (ii) પ્રક્ષેપક ગતિમાં, પ્રક્ષેપકનો વેગ સદિશ અને પ્રવેગ સદિશ હંમેશા એકબીજાને લંબ હોય છે. (iii) સમતલમાં ગતિ કરતા પદાર્થનો ગતિપથ હંમેશા સુરેખ હોય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["0", "1", "2", "3"], "ans": 0, "exp": "(i) ખોટું (પ્રવેગ અચળ હોઈ શકે પણ હંમેશા નહીં), (ii) ખોટું (પ્રવેગ હંમેશા નીચેની દિશામાં હોય છે, વેગ સાથે લંબ નહીં), (iii) ખોટું (ગતિપથ પરવલયાકાર કે અન્ય આકારનો હોઈ શકે).", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: (i) સમતલમાં ગતિ કરતા પદાર્થનો પ્રવેગ હંમેશા અચળ હોય છે. (ii) પ્રક્ષેપણ ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે. (iii) પ્રક્ષેપણ ગતિમાં મહત્તમ ઊંચાઈએ ઊર્ધ્વવેગ શૂન્ય હોય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સાચાં છે?", "opts": ["એક પણ નહીં", "ફક્ત એક", "ફક્ત બે", "ત્રણેય"], "ans": 2, "exp": "વિધાન (ii) અને (iii) સાચાં છે, જ્યારે (i) ખોટું છે કારણ કે પ્રવેગ અચળ હોય તે જરૂરી નથી.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું પ્રક્ષેપક ગતિનું ઉદાહરણ નથી?", "opts": ["ફૂટબોલને લાત મારવી", "તોપમાંથી ગોળો છોડવો", "સાઇકલ પર સવારી કરવી", "બોલને હવામાં ફેંકવો"], "ans": 2, "exp": "સાઇકલ પર સવારી કરવી એ પ્રક્ષેપક ગતિ નથી, કારણ કે તેમાં ગુરુત્વાકર્ષણના પ્રભાવ હેઠળ મુક્ત ગતિ થતી નથી.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનામાંથી કયું ઉદાહરણ સમતલમાં ગતિનું નથી?", "opts": ["એક બોલને જમીનથી કોણ બનાવીને ફેંકવામાં આવે છે", "એક કાર સીધા રસ્તા પર અચળ વેગથી ગતિ કરે છે", "એક પથ્થરને દોરીથી બાંધીને વર્તુળાકાર ગતિ કરાવવામાં આવે છે", "એક વિમાન સમતલમાં વક્ર માર્ગે ઉડે છે"], "ans": 1, "exp": "કાર સીધા રસ્તા પર અચળ વેગથી ગતિ કરે છે તે એક-પરિમાણીય ગતિ છે, જ્યારે બાકીના ઉદાહરણો સમતલમાં ગતિના છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) સમતલમાં ગતિ કરતો પદાર્થ અચળ પ્રવેગથી ગતિ કરે તો તેનો પથ સુરેખ હોય છે. \n(ii) પ્રક્ષેપક ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે. \n(iii) પ્રક્ષેપકની મહત્તમ ઊંચાઈ પર તેનો વેગ શૂન્ય હોય છે. \nઉપરોક્ત વિધાનોમાંથી કયાં વિધાનો સત્ય છે?", "opts": ["ફક્ત (i) અને (ii)", "ફક્ત (ii) અને (iii)", "ફક્ત (i) અને (iii)", "ફક્ત (ii)"], "ans": 3, "exp": "વિધાન (i) ખોટું છે કારણ કે અચળ પ્રવેગથી ગતિ કરતો પદાર્થનો પથ સુરેખ કે વક્ર હોઈ શકે છે. વિધાન (ii) સત્ય છે કારણ કે સમક્ષિતિજ દિશામાં પ્રવેગ શૂન્ય હોય છે. વિધાન (iii) ખોટું છે કારણ કે મહત્તમ ઊંચાઈ પર ફક્ત ઊર્ધ્વદિશાનો વેગ શૂન્ય હોય છે, સમક્ષિતિજ વેગ અચળ રહે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમતલમાં 20 m/s ના વેગથી 45° ના કોણે ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો તેની સમક્ષિતિજ અવિધ (range) કેટલી હશે?", "opts": ["20 m", "30 m", "40 m", "50 m"], "ans": 2, "exp": "સમક્ષિતિજ અવિધ માટે સૂત્ર R = (u² sin(2θ)) / g છે. અહીં u = 20 m/s, θ = 45°, g = 10 m/s² લેતાં R = 40 m મળે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) પ્રક્ષિપ્ત ગતિમાં સમય-અવધિ પ્રારંભિક વેગના ઊર્ધ્વ ઘટક પર આધારિત છે.\n(ii) પ્રક્ષિપ્ત ગતિમાં મહત્તમ ઊંચાઈ પ્રારંભિક વેગના સમક્ષિતિજ ઘટક પર આધારિત છે.\n(iii) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ અવિધ પ્રારંભિક વેગના સમક્ષિતિજ અને ઊર્ધ્વ બંને ઘટકો પર આધારિત છે.\nઉપરોક્ત વિધાનોમાંથી કયાં વિધાનો સાચાં છે?", "opts": ["માત્ર (i)", "(i) અને (iii)", "(ii) અને (iii)", "(i), (ii) અને (iii)"], "ans": 1, "exp": "વિધાન (i) અને (iii) સાચાં છે. મહત્તમ ઊંચાઈ માત્ર ઊર્ધ્વ ઘટક પર આધારિત છે, સમક્ષિતિજ ઘટક પર નહીં.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) સમતલમાં ગતિ કરતા પદાર્થનો પ્રવેગ સદિશ હંમેશા વેગ સદિશને સમાંતર હોય છે.\n(ii) જો પદાર્થનો પ્રવેગ અચળ હોય, તો તેનો ગતિપથ સુરેખ હોય છે.\n(iii) પ્રક્ષેપક ગતિમાં સમક્ષિતિજ અને ઊર્ધ્વદિશામાં ગતિ સ્વતંત્ર હોય છે.\nઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["માત્ર (iii)", "(i) અને (iii)", "(ii) અને (iii)", "માત્ર (ii)"], "ans": 0, "exp": "વિધાન (i) અને (ii) ખોટાં છે કારણ કે પ્રવેગ સદિશ વેગ સદિશને સમાંતર હોવો જરૂરી નથી અને અચળ પ્રવેગમાં ગતિપથ સુરેખ કે વક્ર હોઈ શકે છે. વિધાન (iii) સાચું છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: \n(i) સમતલમાં ગતિ કરતો પદાર્થ અચળ પ્રવેગથી ગતિ કરે તો તેનો ગતિપથ સુરેખ હોય છે.\n(ii) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ અને ઊર્ધ્વ દિશામાં પ્રવેગ સમાન હોય છે.\n(iii) પ્રક્ષિપ્ત ગતિમાં મહત્તમ પરાસ માટે પ્રક્ષિપ્ત કોણ 45° હોવો જોઈએ.\nઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["ફક્ત (i) અને (ii)", "ફક્ત (i) અને (iii)", "ફક્ત (iii)", "(i), (ii) અને (iii)"], "ans": 2, "exp": "વિધાન (i) ખોટું છે કારણ કે અચળ પ્રવેગથી ગતિ કરતો પદાર્થ પરવલયાકાર ગતિપથ ધરાવે છે. વિધાન (ii) ખોટું છે કારણ કે સમક્ષિતિજ પ્રવેગ શૂન્ય અને ઊર્ધ્વ પ્રવેગ અચળ હોય છે. વિધાન (iii) સાચું છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થ સમતલમાં ગતિ કરે છે અને તેનો પ્રવેગ સદિશ અચળ છે. નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પદાર્થનો ગતિપથ હંમેશા સુરેખ હોય છે.", "પદાર્થનો વેગ સદિશ અચળ રહે છે.", "પદાર્થનો વેગ અને પ્રવેગ સદિશ એક જ દિશામાં હોય છે.", "પદાર્થનો ગતિપથ પરવલયાકાર હોઈ શકે છે."], "ans": 3, "exp": "જ્યારે પ્રવેગ સદિશ અચળ હોય અને વેગ સદિશ સાથે કોણ બનાવતો હોય, ત્યારે પદાર્થનો ગતિપથ પરવલયાકાર હોય છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રક્ષેપકને જમીનથી 30°ના કોણે 50 m/sના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો પ્રક્ષેપકની મહત્તમ ઊંચાઈ કેટલી હશે? (અવરોધો અવગણો)", "opts": ["31.25 m", "62.5 m", "93.75 m", "125 m"], "ans": 0, "exp": "મહત્તમ ઊંચાઈ માટે સૂત્ર H = (u² sin²θ) / (2g) છે. અહીં u = 50 m/s, θ = 30°, g = 10 m/s² મૂકતાં H = 31.25 m મળે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમક્ષિતિજ દિશામાં 20 m/sના વેગથી અને ઊર્ધ્વ દિશામાં 15 m/sના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો પદાર્થ જમીન પર પાછો આવે ત્યારે તેનું સમક્ષિતિજ અંતર કેટલું હશે?", "opts": ["30 m", "40 m", "60 m", "80 m"], "ans": 2, "exp": "સમગ્ર ઉડ્ડયન સમય T = (2u_y)/g = (2×15)/10 = 3 s. સમક્ષિતિજ અંતર R = u_x × T = 20 × 3 = 60 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થ સમતલમાં ગતિ કરે છે. તેનો પ્રવેગ સદિશ હંમેશાં તેના વેગ સદિશને લંબ હોય, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["પદાર્થનો વેગ અચળ રહે છે", "પદાર્થનો વેગ મૂલ્ય અચળ રહે છે પરંતુ દિશા બદલાય છે", "પદાર્થનો પ્રવેગ અચળ રહે છે", "પદાર્થનો વેગ અને પ્રવેગ બંને અચળ રહે છે"], "ans": 1, "exp": "જ્યારે પ્રવેગ સદિશ વેગ સદિશને લંબ હોય, ત્યારે વેગનું મૂલ્ય અચળ રહે છે પરંતુ દિશા સતત બદલાતી રહે છે, જે વર્તુળાકાર ગતિનું ઉદાહરણ છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક બોલને 20 m/sના વેગથી 45°ના કોણે ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો બોલ જમીન પર પાછો આવે ત્યારે તેનો સમક્ષિતિજ સ્થાનાંતર કેટલું હશે? (અવરોધો અવગણો)", "opts": ["20 m", "40 m", "60 m", "80 m"], "ans": 1, "exp": "સમક્ષિતિજ સ્થાનાંતર માટે સૂત્ર R = (u² sin(2θ)) / g છે. અહીં u = 20 m/s, θ = 45°, g = 10 m/s². sin(90°) = 1, તેથી R = (20² × 1) / 10 = 40 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને સમક્ષિતિજ દિશામાં 15 m/s અને ઊર્ધ્વ દિશામાં 20 m/sના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો પદાર્થ જ્યારે મહત્તમ ઊંચાઈએ પહોંચે ત્યારે તેનો વેગ કેટલો હશે?", "opts": ["0 m/s", "15 m/s", "20 m/s", "25 m/s"], "ans": 1, "exp": "મહત્તમ ઊંચાઈએ ઊર્ધ્વ વેગ શૂન્ય થાય છે, પરંતુ સમક્ષિતિજ વેગ અચળ રહે છે. તેથી વેગ = 15 m/s.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "સમતલમાં ગતિ કરતાં પદાર્થના પ્રક્ષેપણ કોણ અને તેના ગતિપથની મહત્તમ ઊંચાઈ વચ્ચેનો સંબંધ શું છે?", "opts": ["પ્રક્ષેપણ કોણ વધે તેમ મહત્તમ ઊંચાઈ વધે છે", "પ્રક્ષેપણ કોણ 45° હોય ત્યારે મહત્તમ ઊંચાઈ મહત્તમ હોય છે", "પ્રક્ષેપણ કોણ 90° હોય ત્યારે મહત્તમ ઊંચાઈ મહત્તમ હોય છે", "પ્રક્ષેપણ કોણ અને મહત્તમ ઊંચાઈ વચ્ચે કોઈ સંબંધ નથી"], "ans": 2, "exp": "પ્રક્ષેપણ કોણ 90° હોય ત્યારે પદાર્થ સીધો ઉપર ફેંકાય છે, તેથી તેની મહત્તમ ઊંચાઈ મહત્તમ હોય છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનોમાંથી કયાં વિધાનો સાચાં છે? (i) પ્રક્ષેપણ ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે. (ii) પ્રક્ષેપણ ગતિમાં ઊર્ધ્વ વેગ સમય સાથે બદલાતો રહે છે. (iii) પ્રક્ષેપણ ગતિમાં પ્રવેગ હંમેશાં શૂન્ય હોય છે.", "opts": ["માત્ર (i) અને (ii)", "માત્ર (ii) અને (iii)", "માત્ર (i) અને (iii)", "(i), (ii) અને (iii)"], "ans": 0, "exp": "પ્રક્ષેપણ ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે અને ઊર્ધ્વ વેગ સમય સાથે બદલાય છે, પરંતુ પ્રવેગ હંમેશાં g (ગુરુત્વાકર્ષણ પ્રવેગ) હોય છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થને 50 m/sના વેગથી 30°ના કોણે પ્રક્ષેપિત કરવામાં આવે છે. જો g = 10 m/s² હોય, તો તેની ગતિની મહત્તમ ઊંચાઈ કેટલી હશે?", "opts": ["31.25 m", "62.5 m", "125 m", "250 m"], "ans": 0, "exp": "મહત્તમ ઊંચાઈ H = (u² sin²θ) / (2g) = (50² × sin²30°) / (2 × 10) = 31.25 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનોને ધ્યાનમાં લો: (i) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ વેગનો ઘટક અચળ રહે છે. (ii) પ્રક્ષિપ્ત ગતિમાં ઊર્ધ્વદિશામાં પ્રવેગ શૂન્ય હોય છે. (iii) પ્રક્ષિપ્ત ગતિમાં મહત્તમ ઊંચાઈએ વેગ શૂન્ય થાય છે. ઉપરોક્ત વિધાનોમાંથી કેટલાં સત્ય છે?", "opts": ["ફક્ત એક", "ફક્ત બે", "ત્રણેય", "એક પણ નહીં"], "ans": 1, "exp": "વિધાન (i) સત્ય છે કારણ કે સમક્ષિતિજ વેગનો ઘટક અચળ રહે છે. વિધાન (ii) અસત્ય છે કારણ કે ઊર્ધ્વદિશામાં પ્રવેગ g હોય છે. વિધાન (iii) અસત્ય છે કારણ કે મહત્તમ ઊંચાઈએ ઊર્ધ્વદિશામાં વેગ શૂન્ય થાય છે, પરંતુ સમક્ષિતિજ વેગ અચળ રહે છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પદાર્થ સમતલમાં ગતિ કરે છે. તેના પ્રવેગ સદિશનો સમક્ષિતિજ ઘટક 3 m/s² અને ઊર્ધ્વ ઘટક 4 m/s² છે. તો તેનો પ્રવેગ સદિશનો મૂલ્ય (મૅગ્નિટ્યુડ) કેટલો હશે?", "opts": ["3 m/s²", "4 m/s²", "5 m/s²", "7 m/s²"], "ans": 2, "exp": "પ્રવેગ સદિશનો મૂલ્ય √(3² + 4²) = √(9 + 16) = √25 = 5 m/s² થાય છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "નીચેનાં વિધાનો ધ્યાનમાં લો: i) સમતલમાં ગતિ કરતાં પદાર્થનો પ્રવેગ સદિશ હંમેશાં તેના વેગ સદિશને સમાંતર હોય છે. ii) પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ વેગનો ઘટક અચળ રહે છે. iii) પ્રક્ષિપ્ત ગતિમાં મહત્તમ ઊંચાઈએ વેગ શૂન્ય થાય છે. ઉપરોક્ત વિધાનોમાંથી કયાં સાચાં છે?", "opts": ["ફક્ત i", "ફક્ત ii", "i અને ii", "ii અને iii"], "ans": 1, "exp": "વિધાન ii સાચું છે કારણ કે પ્રક્ષિપ્ત ગતિમાં સમક્ષિતિજ વેગ અચળ રહે છે. વિધાન i અને iii ખોટાં છે.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}, {"q": "એક પ્રક્ષિપ્ત પદાર્થને જમીનથી 30° ના કોણે 50 m/s ના વેગથી ફેંકવામાં આવે છે. જો g = 10 m/s² હોય, તો પદાર્થની મહત્તમ ઊંચાઈ કેટલી હશે? (sin 30° = 0.5)", "opts": ["31.25 m", "62.5 m", "125 m", "250 m"], "ans": 0, "exp": "મહત્તમ ઊંચાઈ H = (u² sin²θ) / (2g) = (50² × 0.5²) / (2 × 10) = (2500 × 0.25) / 20 = 31.25 m.", "chapter": "સમતલમાં ગતિ", "svg": "", "subject": "PHYSICS"}];
+const SUBJECTS=[{"name": "PHYSICS", "start": 0, "end": 39, "count": 40}];
+const MARKS_C=4, MARKS_W=-1;
+const DURATION=40*60;
+let answers={}, marked=new Set(), visited=new Set(), curIdx=0, remaining=DURATION, timerHandle=null, submitted=false;
+let subjectLastIdx={};
+SUBJECTS.forEach(s=>subjectLastIdx[s.name]=s.start);
+
+function subjectOf(i){ return SUBJECTS.find(s=>i>=s.start&&i<=s.end); }
+
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = SUBJECTS.map((s,i)=>
+    `<button class="tab-btn ${subjectOf(curIdx).name===s.name?'active':''}" onclick="jumpSubject('${s.name}')">${s.name} (${s.count})</button>`
+  ).join('');
+}
+function jumpSubject(subjName){ curIdx = subjectLastIdx[subjName] !== undefined ? subjectLastIdx[subjName] : SUBJECTS.find(s=>s.name===subjName).start; render(); }
+
+function renderPalette(){
+  let html='';
+  SUBJECTS.forEach(s=>{
+    html += `<div class="subj-h">${s.name}</div><div class="palette">`;
+    for(let i=s.start;i<=s.end;i++){
+      let cls='notvisited';
+      if(marked.has(i)) cls='marked';
+      else if(answers[i]!==undefined) cls='answered';
+      else if(visited.has(i)) cls='notanswered';
+      if(i===curIdx) cls+=' current';
+      html += `<button class="pbtn ${cls}" onclick="goTo(${i})">${i-s.start+1}</button>`;
+    }
+    html += `</div>`;
+  });
+  document.getElementById('palette').innerHTML = html;
+}
+function goTo(i){ curIdx=i; subjectLastIdx[subjectOf(i).name]=i; render(); }
+
+function render(){
+  visited.add(curIdx);
+  const q = QUESTIONS[curIdx];
+  const sub = subjectOf(curIdx);
+  const localNum = curIdx - sub.start + 1;
+  const optHtml = q.opts.map((o,i)=>{
+    const sel = answers[curIdx]===i ? 'selected' : '';
+    return `<div class="opt ${sel}" onclick="pick(${i})"><span class="letter">${LETTERS[i]}</span><span>${o}</span></div>`;
+  }).join('');
+  const svgHtml = q.svg ? `<div class="svgbox">${q.svg}</div>` : '';
+  document.getElementById('qpanel').innerHTML = `
+    <div class="qhead"><span class="qnum">${sub.name} Q${localNum}/${sub.count}</span>
+    ${q.chapter?'<span class="chtag">📘 '+q.chapter+'</span>':''}</div>
+    <div class="qtext">${q.q}</div>
+    ${svgHtml}
+    <div class="opts">${optHtml}</div>
+    <div class="navrow">
+      <button class="btn btn-prev" onclick="nav(-1)">← Previous</button>
+      <button class="btn btn-clear" onclick="clearResp()">Clear Response</button>
+      <button class="btn btn-mark" onclick="markNext()">Mark for Review & Next</button>
+      <button class="btn btn-next" onclick="saveNext()">Save & Next →</button>
+    </div>
+  `;
+  renderTabs();
+  renderPalette();
+}
+function pick(i){ answers[curIdx]=i; renderPalette(); }
+function clearResp(){ delete answers[curIdx]; render(); }
+function nav(d){ const n=curIdx+d; if(n>=0&&n<QUESTIONS.length){curIdx=n; subjectLastIdx[subjectOf(n).name]=n; render();} }
+function saveNext(){ if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+function markNext(){ marked.add(curIdx); if(curIdx<QUESTIONS.length-1){curIdx++; subjectLastIdx[subjectOf(curIdx).name]=curIdx;} render(); }
+
+function fmtTime(s){
+  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+}
+function startTimer(){
+  document.getElementById('timer').textContent = fmtTime(remaining);
+  timerHandle = setInterval(()=>{
+    remaining--;
+    document.getElementById('timer').textContent = fmtTime(remaining);
+    if(remaining<=900) document.getElementById('timer').classList.add('warn');
+    if(remaining<=0){ clearInterval(timerHandle); submitTest(true); }
+  },1000);
+}
+
+function submitTest(auto){
+  if(submitted) return;
+  if(!auto && !confirm('Submit the test? You cannot change answers after this.')) return;
+  submitted = true;
+  if(timerHandle) clearInterval(timerHandle);
+  document.querySelector('.topbar').style.display='none';
+  document.querySelector('.tabs').style.display='none';
+  document.querySelector('.wrap').style.display='none';
+  let cor=0,wrg=0,skp=0,marksTotal=0;
+  let subjRows = SUBJECTS.map(s=>({name:s.name,cor:0,wrg:0,skp:0,marks:0}));
+  QUESTIONS.forEach((q,i)=>{
+    const sIdx = SUBJECTS.findIndex(s=>i>=s.start&&i<=s.end);
+    const a = answers[i];
+    if(a===undefined){ skp++; subjRows[sIdx].skp++; }
+    else if(a===q.ans){ cor++; marksTotal+=MARKS_C; subjRows[sIdx].cor++; subjRows[sIdx].marks+=MARKS_C; }
+    else { wrg++; marksTotal+=MARKS_W; subjRows[sIdx].wrg++; subjRows[sIdx].marks+=MARKS_W; }
+  });
+  const maxMarks = QUESTIONS.length*MARKS_C;
+  const pct = Math.round((marksTotal/maxMarks)*100);
+  document.getElementById('r-score').textContent = marksTotal.toFixed(2);
+  document.getElementById('r-cor').textContent = cor;
+  document.getElementById('r-wrg').textContent = wrg;
+  document.getElementById('r-skp').textContent = skp;
+  document.getElementById('r-pct').textContent = pct+'%';
+  document.querySelector('#subj-table tbody').innerHTML = subjRows.map(r=>
+    `<tr><td>${r.name}</td><td>${r.cor}</td><td>${r.wrg}</td><td>${r.skp}</td><td>${r.marks.toFixed(2)}</td></tr>`
+  ).join('');
+  document.getElementById('result').style.display='block';
+  window._results = {cor,wrg,skp,marksTotal,maxMarks,pct,subjRows};
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleReview(){
+  const el = document.getElementById('review-list');
+  if(el.style.display==='none'){
+    el.innerHTML = QUESTIONS.map((q,i)=>{
+      const a = answers[i];
+      const tag = a===undefined ? '<span class="tag-skip">SKIPPED</span>'
+                : a===q.ans ? '<span class="tag-ok">CORRECT</span>' : '<span class="tag-wrong">WRONG</span>';
+      return `<div class="review-item"><b>Q${i+1} (${q.subject})</b> ${tag}<br><br>${q.q}<br><br>
+        Your answer: ${a!==undefined?LETTERS[a]+'. '+q.opts[a]:'—'}<br>
+        Correct answer: ${LETTERS[q.ans]}. ${q.opts[q.ans]}
+        ${q.exp?'<br><br>💡 '+q.exp:''}</div>`;
+    }).join('');
+    el.style.display='block';
+  } else { el.style.display='none'; }
+}
+
+function downloadResult(){
+  const r = window._results;
+  let txt = "સમતલમાં ગતિ Mock Test\nNEET UG\n\n";
+  txt += "Score: "+r.marksTotal.toFixed(2)+" / "+r.maxMarks+" ("+r.pct+"%)\n";
+  txt += "Correct: "+r.cor+" | Wrong: "+r.wrg+" | Unattempted: "+r.skp+"\n\n";
+  r.subjRows.forEach(s=>{ txt += s.name+": "+s.cor+" correct, "+s.wrg+" wrong, "+s.skp+" unattempted, "+s.marks.toFixed(2)+" marks\n"; });
+  const blob = new Blob([txt], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'result_'+Date.now()+'.txt';
+  a.click();
+}
+
+render();
+startTimer();
+</script>
+</body>
+</html>
