@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.panel-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;font-family:'JetBrains Mono',monospace;}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.download-bar{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.toast{position:fixed;bottom:20px;right:18px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 15px;font-size:12px;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;font-family:'JetBrains Mono',monospace;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:var(--success);color:var(--success);}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">Quiz</div>
+    <h1>My Quiz</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+
+    
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div class="panel-title" style="margin-bottom:3px;">My Quiz</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">
+          Q<span id="cur-num">1</span> of <span id="tot-num">?</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">⏱️ Timed Exam</div>
+        <div class="meta-badge" id="timer-badge" style="display:block">⏱️ —</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/>
+          <stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <div class="download-bar">
+      <button class="btn btn-outline" onclick="restartQuiz()">↺ Try Again</button>
+      <button class="btn" onclick="downloadResults()">⬇ Results Download</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q":"દ્વિનામી નામકરણ પદ્ધતિ (Binomial Nomenclature) વૈશ્વિક સ્તરે આપનાર અને પ્રચલિત કરનાર વૈજ્ઞાનિક કોણ હતા?","opts":["આર. એચ. વ્હાઇટેકર","કેરોલસ લીનિયસ (Carolus Linnaeus)","ચાર્લ્સ ડાર્વિન","એરિસ્ટોટલ"],"ans":1},{"q":"કેરોલસ લીનિયસ કયા દેશના વતની પ્રકૃતિવાદી અને વૈજ્ઞાનિક હતા?","opts":["જર્મની","સ્વીડન (Sweden)","અમેરિકા","ઇંગ્લેન્ડ"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમો મુજબ વનસ્પતિઓના વૈજ્ઞાનિક નામ નક્કી કરતી આંતરરાષ્ટ્રીય સંસ્થા કઈ છે?","opts":["ICZN","ICBN (International Code for Botanical Nomenclature)","IUCN","NBRI"],"ans":1},{"q":"પ્રાણીઓના વૈજ્ઞાનિક નામકરણ માટે વૈશ્વિક સ્તરે નિયમો બનાવતી સંસ્થા કઈ છે?","opts":["ICBN","ICZN (International Code for Zoological Nomenclature)","WHO","UNESCO"],"ans":1},{"q":"વૈજ્ઞાનિક નામો સામાન્ય રીતે કઈ ભાષામાં હોય છે અથવા કઈ ભાષામાંથી લેવામાં આવે છે?","opts":["અંગ્રેજી","લેટિન (Latin)","ગ્રીક","ફ્રેન્ચ"],"ans":1},{"q":"નામકરણમાં લેટિન ભાષા પસંદ કરવાનું મુખ્ય વૈજ્ઞાનિક કારણ શું છે?","opts":["તે ખૂબ જ લોકપ્રિય આધુનિક ભાષા છે","તે એક 'મૃત ભાષા' (Dead language) છે, જેમાં સમય સાથે ફેરફાર થતા નથી","તે માત્ર ભારતમાં જ બોલાય છે","લીનિયસને માત્ર અંગ્રેજી આવડતું ન હતું"],"ans":1},{"q":"દ્વિનામી નામકરણ પદ્ધતિના નિયમ મુજબ વૈજ્ઞાનિક નામનો પ્રથમ શબ્દ શું દર્શાવે છે?","opts":["જાતિ સંકેત પ્રત્યય","પ્રજાતિ (Genus)","કુળનું નામ","સૃષ્ટિ"],"ans":1},{"q":"દ્વિનામી નામકરણ પદ્ધતિના નિયમ મુજબ વૈજ્ઞાનિક નામનો બીજો શબ્દ શું દર્શાવે છે?","opts":["પ્રજાતિ","જાતિ સંકેત પ્રત્યય (Specific epithet)","ગોત્ર","સંશોધકનું નામ"],"ans":1},{"q":"વૈજ્ઞાનિક નામોને જ્યારે હાથથી લખવામાં (Handwritten) આવે ત્યારે કયો નિયમ પાળવો અનિવાર્ય છે?","opts":["તેને લાલ શાહીથી લખવું","પ્રજાતિ અને જાતિ બંને શબ્દોની નીચે અલગ-અલગ લીટી (Underline) કરવી","બંને શબ્દોની વચ્ચે એક જ સળંગ લીટી કરવી","તેને કૌંસમાં લખવું"],"ans":1},{"q":"વૈજ્ઞાનિક નામોને જ્યારે પુસ્તકોમાં છાપવામાં (Print) આવે ત્યારે કઈ લિપિનો ઉપયોગ થાય છે?","opts":["ઘાટા મોટા અક્ષરો (Bold)","ત્રાંસા અક્ષરો (Italics)","રોમન અક્ષરો","અંડરલાઇન સાથેના અક્ષરો"],"ans":1},{"q":"વૈજ્ઞાનિક નામોનું ત્રાંસા અક્ષરો (Italics) માં છાપકામ શું દર્શાવે છે?","opts":["તેમનું આર્થિક મહત્વ","તેમનો લેટિન ઉદ્ભવ (Latin origin)","વનસ્પતિનો પ્રકાર","વૈજ્ઞાનિકની સહી"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમ મુજબ પ્રજાતિ (Genus) ના નામનો પ્રથમ અક્ષર હંમેશા કેવો હોવો જોઈએ?","opts":["નાની લિપિમાં (Small letter)","મોટી લિપિમાં (Capital letter)","ઇટાલિક અક્ષરમાં","ગમે તેવો ચાલે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમ મુજબ જાતિ (Species) ના નામનો પ્રથમ અક્ષર કેવો હોવો જોઈએ?","opts":["મોટી લિપિમાં (Capital letter)","નાની લિપિમાં (Small letter)","રોમન અક્ષરમાં","ઘાટા અક્ષરમાં"],"ans":1},{"q":"'Mangifera indica Linn.' વૈજ્ઞાનિક નામમાં 'Linn.' શબ્દ શું સૂચવે છે?","opts":["આ વનસ્પતિ લિન્કોલન પ્રદેશમાં થાય છે","આ જાતિનું વર્ણન સૌપ્રથમ કેરોલસ લીનિયસે (Linnaeus) કર્યું હતું","આ નામ અમાન્ય છે","આ વનસ્પતિ ખૂબ નાની છે"],"ans":1},{"q":"વૈજ્ઞાનિકનું નામ (Author citation) વૈજ્ઞાનિક નામમાં ક્યાં અને કેવી રીતે લખવામાં આવે છે?","opts":["પ્રજાતિના નામની પહેલાં મોટી લિપિમાં","જાતિના નામ પછી, સંક્ષિપ્તમાં અને સામાન્ય રોમન અક્ષરોમાં","પ્રજાતિ અને જાતિની વચ્ચે ત્રાંસા અક્ષરોમાં","નામની નીચે લીટી તરીકે"],"ans":1},{"q":"આંબા (Mango) નું સાચું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["mangifera indica","Mangifera indica","Mangifera Indica","MANGIFERA INDICA"],"ans":1},{"q":"લીનિયસે વનસ્પતિઓના વૈજ્ઞાનિક નામો અને નિયમો માટે સૌપ્રથમ કયું પ્રખ્યાત પુસ્તક પ્રકાશિત કર્યું હતું?","opts":["Systema Naturae","Species Plantarum","Genera Plantarum","Philosophia Botanica"],"ans":1},{"q":"વનસ્પતિના નામકરણ માટેનો પાયો ગણાતું પુસ્તક 'Species Plantarum' કયા વર્ષમાં પ્રકાશિત થયું હતું?","opts":["મે, 1753","","",""],"ans":0},{"q":"લીનિયસે પ્રાણીઓના વૈજ્ઞાનિક નામકરણ અને નિયમો માટે પોતાના કયા પુસ્તકની 10મી આવૃત્તિ પ્રસિદ્ધ કરી હતી?","opts":["Species Plantarum","Systema Naturae","Historia Plantarum","Origin of Species"],"ans":1},{"q":"પ્રાણીઓના નામકરણની સત્તાવાર શરૂઆત માનવામાં આવતી 'Systema Naturae' ની 10મી આવૃત્તિ ક્યારે પ્રકાશિત થઈ હતી?","opts":["ઓગસ્ટ, 1758","","",""],"ans":0},{"q":"વૈજ્ઞાનિક નામકરણમાં 'Law of Priority' (અગ્રતાનો નિયમ) એટલે શું?","opts":["જે વૈજ્ઞાનિક મોટા હોય તેનું નામ રાખવું","સજીવ માટે સૌપ્રથમ નિયમોબદ્ધ રીતે પ્રકાશિત થયેલા નામને જ માન્ય રાખવું","અંગ્રેજી નામને હંમેશા અગ્રતા આપવી","દર વર્ષે નવું નામ આપવું"],"ans":1},{"q":"જો કોઈ સજીવના વૈજ્ઞાનિક નામમાં પ્રજાતિ અને જાતિ બંનેના શબ્દો તદ્દન સમાન હોય (જેમ કે Naja naja), તો તેને શું કહેવાય?","opts":["સિનોનિમ (Synonym)","ટૌટોનિમ (Tautonym)","હોમોનિમ","એન્ટોનિમ"],"ans":1},{"q":"પ્રજાતિ અને જાતિનું નામ સરખું હોવું (Tautonyms) એ કઈ સૃષ્ટિના નામકરણમાં સંપૂર્ણપણે અમાન્ય (Not valid) છે?","opts":["પ્રાણી સૃષ્ટિમાં","વનસ્પતિ સૃષ્ટિમાં (ICBN નિયમ મુજબ)","મોનેરા સૃષ્ટિમાં","પ્રોટિસ્ટા સૃષ્ટિમાં"],"ans":1},{"q":"ભારતીય નાગ (Cobra) નું વૈજ્ઞાનિક નામ 'Naja naja' છે, તે નીચેનામાંથી શેનું ઉદાહરણ છે?","opts":["વનસ્પતિ નામકરણ","ટૌટોનિમ (Tautonym)","બહુનામી પદ્ધતિ","અમાન્ય નામ"],"ans":1},{"q":"મનુષ્યનું વૈજ્ઞાનિક નામ 'Homo sapiens' છે, તેમાં 'Homo' શબ્દ શું દર્શાવે છે?","opts":["આપણી જાતિ","આપણી પ્રજાતિ (Genus)","આપણું કુળ","આપણો વર્ગ"],"ans":1},{"q":"સિંહનું વૈજ્ઞાનિક નામ 'Panthera leo' છે, તેમાં 'leo' શબ્દ શું દર્શાવે છે?","opts":["પ્રજાતિ","ચોક્કસ જાતિ સંકેત પ્રત્યય (Specific epithet)","કુળ","ગોત્ર"],"ans":1},{"q":"વૈજ્ઞાનિક નામો સામાન્ય રીતે અન્ય ભાષાના હોય તો પણ તેમનું શું કરવામાં આવે છે?","opts":["તેમને અંગ્રેજીમાં બદલાય છે","તેમનું લેટિનાઇઝેશન (Latinised - લેટિન જેવા બનાવાય) કરાય છે","તેમને અમાન્ય કરાય છે","તેમને ટૂંકા કરાય છે"],"ans":1},{"q":"વૈજ્ઞાનિક નામમાં પ્રજાતિ અને જાતિના અક્ષરોની લંબાઈ (સંખ્યા) સામાન્ય રીતે કેટલી હોવી જોઈએ?","opts":["થી 2 અક્ષરોની","થી 12 અક્ષરોની વચ્ચે","થી વધુ અક્ષરોની","કોઈ મર્યાદા નથી"],"ans":1},{"q":"જો કોઈ વૈજ્ઞાનિક નામમાં ત્રણ શબ્દોનો સમાવેશ થતો હોય (જેમ કે Homo sapiens sapiens), તો તેને કઈ પદ્ધતિ કહેવાય?","opts":["દ્વિનામી પદ્ધતિ","ત્રિનામી નામકરણ પદ્ધતિ (Trinomial Nomenclature)","બહુનામી પદ્ધતિ","એકનામી પદ્ધતિ"],"ans":1},{"q":"ત્રિનામી નામકરણ પદ્ધતિમાં પ્રાણીઓના સંદર્ભમાં ત્રીજો શબ્દ શું દર્શાવે છે?","opts":["ઉપપ્રજાતિ","ઉપજાતિ (Subspecies)","વેરાયટી","કુળ"],"ans":1},{"q":"ત્રિનામી નામકરણ પદ્ધતિમાં વનસ્પતિઓના સંદર્ભમાં ત્રીજો શબ્દ શું દર્શાવે છે?","opts":["ઉપજાતિ","જાત અથવા વેરાયટી (Variety)","પ્રજાતિ","ગોત્ર"],"ans":1},{"q":"બટાકાનું વૈજ્ઞાનિક નામ 'Solanum tuberosum' અને રીંગણનું 'Solanum melongena' છે, આ બંને વનસ્પતિઓમાં શું સમાન છે?","opts":["તેમની જાતિ સમાન છે","તેમની પ્રજાતિ (Genus - Solanum) સમાન છે","તેમના ફળ સમાન છે","તેમના વૈજ્ઞાનિકો જુદા છે"],"ans":1},{"q":"ઘરમાખી (Housefly) નું સાચું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Homo sapiens","Musca domestica","Panthera leo","Solanum tuberosum"],"ans":1},{"q":"ઘઉં (Wheat) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Oryza sativa","Triticum aestivum","Zea mays","Pisum sativum"],"ans":1},{"q":"લીનિયસ પહેલાં સજીવોના નામકરણ માટે વપરાતી લાંબા વર્ણનાત્મક શબ્દોવાળી પદ્ધતિ કઈ હતી?","opts":["દ્વિનામી પદ્ધતિ","બહુનામી નામકરણ પદ્ધતિ (Polynomial Nomenclature)","ત્રિનામી પદ્ધતિ","સ્થાનિક પદ્ધતિ"],"ans":1},{"q":"દ્વિનામી નામકરણ પદ્ધતિનો પ્રારંભિક ખ્યાલ લીનિયસ પહેલાં સૌપ્રથમ કયા વૈજ્ઞાનિકે પોતાના પુસ્તક 'Pinax' માં આપ્યો હતો?","opts":["ગેસ્પાર્ડ બાઉહીન (Gaspard Bauhin)","એરિસ્ટોટલ","જોન રે","થિયોફ્રાસ્ટસ"],"ans":0},{"q":"વૈજ્ઞાનિક નામની પાછળ જો કૌંસમાં કોઈ વૈજ્ઞાનિકનું નામ હોય અને તેની બહાર બીજા વૈજ્ઞાનિકનું નામ હોય, તો તે શું દર્શાવે છે?","opts":["નામ ખોટું છે","મૂળ શોધકનું નામ કૌંસમાં છે અને સુધારો કરનારનું નામ બહાર છે","બંને વૈજ્ઞાનિકો ભાઈઓ છે","વનસ્પતિ લુપ્ત થઈ ગઈ છે"],"ans":1},{"q":"વટાણા (Pea plant) નું સાચું વૈજ્ઞાનિક નામ કયું છે જેનો ઉપયોગ મેન્ડલે પ્રયોગોમાં કર્યો હતો?","opts":["Solanum tuberosum","Pisum sativum","Mangifera indica","Triticum aestivum"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના સાર્વત્રિક નિયમો બનાવવાનો મુખ્ય ઉદ્દેશ્ય શો છે?","opts":["વિશ્વના કોઈપણ ખૂણે સજીવનું એક જ અને અનન્ય (Unique) નામ રહે જેથી ગૂંચવણ ન થાય","લેટિન ભાષાનો પ્રચાર કરવો","નામ અઘરું બનાવવું","સ્થાનિક નામો નાશ કરવા"],"ans":0},{"q":"જો કોઈ વૈજ્ઞાનિક નામ હસ્તલિખિત (Handwritten) હોય અને તેની નીચે લીટી કરવાનું ભૂલી જવાય, તો તે નામ:","opts":["સંપૂર્ણ સાચું ગણાય","વૈજ્ઞાનિક નિયમો અનુસાર ખોટું કે અપૂર્ણ ગણાય","માત્ર ભારતમાં જ સાચું ગણાય","અંગ્રેજી નામ બની જાય"],"ans":1},{"q":"વંદા (Cockroach) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Musca domestica","Periplaneta americana","Rana tigrina","Pila globosa"],"ans":1},{"q":"મકાઈ (Maize) નું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Triticum aestivum","Zea mays","Oryza sativa","Solanum lycopersicum"],"ans":1},{"q":"દીપડા / ચિત્તાનું વૈજ્ઞાનિક નામ 'Panthera pardus' છે, તેમાં 'Panthera' શું દર્શાવે છે?","opts":["જાતિ","પ્રજાતિ (Genus)","કુળ","ગોત્ર"],"ans":1},{"q":"મનુષ્યના વૈજ્ઞાનિક નામ 'Homo sapiens' માં 'sapiens' શબ્દનો અર્થ શું થાય છે?","opts":["સીધા ચાલનારા","જ્ઞાની અથવા બુદ્ધિશાળી (Wise / Intelligent)","સામાજિક પ્રાણી","શિકારી"],"ans":1},{"q":"નીચેનામાંથી કયું વિધાન વૈજ્ઞાનિક નામકરણના નિયમો માટે તદ્દન ખોટું છે?","opts":["પ્રજાતિનું નામ કેપિટલ અક્ષરથી શરૂ થાય છે","જાતિનું નામ પણ કેપિટલ અક્ષરથી જ શરૂ થવું જોઈએ","હસ્તલિખિત નામની નીચે લીટી કરવી જરૂરી છે","વૈજ્ઞાનિક નામો લેટિન ભાષામાંથી ઉદ્ભવેલા છે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણમાં જો બે જુદા જુદા સજીવોને ભૂલથી એક જ નામ આપી દેવાય, તો તેને શું કહે છે?","opts":["સિનોનિમ","હોમોનિમ (Homonym)","ટૌટોનિમ","ઓટોનિમ"],"ans":1},{"q":"લીનિયસને જીવવિજ્ઞાનની કઈ શાખાના પિતા (Father) તરીકે ઓળખવામાં આવે છે?","opts":["કોષવિદ્યા","વર્ગીકરણ વિજ્ઞાન (Father of Taxonomy)","ભ્રૂણવિદ્યા","જનીનવિદ્યા"],"ans":1},{"q":"ડુંગળી (Onion) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Solanum tuberosum","Allium cepa","Brassica oleracea","Raphanus sativus"],"ans":1},{"q":"દેડકા (Frog) નું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Periplaneta americana","Rana tigrina (અથવા Hoplobatrachus tigerinus)","Apis indica","Musca domestica"],"ans":1},{"q":"વૈજ્ઞાનિક નામોમાં જાતિનું નામ (Specific epithet) ક્યારેય પણ કઈ રીતે એકલું વાપરી શકાતું નથી?","opts":["પ્રજાતિના નામ વગર (Without Genus name)","નાના અક્ષર વગર","ઇટાલિક વગર","લીનિયસ વગર"],"ans":0},{"q":"જો કોઈ વનસ્પતિનું વૈજ્ઞાનિક નામ હાથથી લખતી વખતે પ્રજાતિ અને જાતિ બંને વચ્ચે જગ્યા છોડ્યા વગર સળંગ અંડરલાઇન કરવામાં આવે, તો તે નામ:","opts":["આંતરરાષ્ટ્રીય નિયમો (ICBN) અનુસાર ખોટું ગણાય","સંપૂર્ણ સાચું ગણાય","છાપેલા નામ જેવું જ ગણાય","માત્ર ભારતમાં જ માન્ય ગણાય"],"ans":0},{"q":"હોમોનિમ (Homonym) એટલે શું?","opts":["એક જ સજીવના બે જુદા જુદા વૈજ્ઞાનિક નામો","બે જુદા જુદા સજીવોને ભૂલથી અપાયેલું એક જ સરખું વૈજ્ઞાનિક નામ","પ્રજાતિ અને જાતિના નામ સરખા હોવા તે","સ્થાનિક અને વૈજ્ઞાનિક નામ સરખા હોવા તે"],"ans":1},{"q":"કુતરાનું સાચું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Felis catus","Canis lupus familiaris","Panthera tigris","Bos indicus"],"ans":1},{"q":"બિલાડીનું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Canis familiaris","Felis catus","Panthera leo","Elephas maximus"],"ans":1},{"q":"ગાય (ભારતીય ગાય) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Bos indicus","Bubalus bubalis","Capra hircus","Ovis aries"],"ans":0},{"q":"ત્રિનામી નામકરણ પદ્ધતિ (Trinomial Nomenclature) ના પ્રદાતા કોણ હતા?","opts":["કેરોલસ લીનિયસ","હક્સલી અને સ્ટ્રિકલેન્ડ (Huxley and Strickland)","જોન રે","ચાર્લ્સ ડાર્વિન"],"ans":1},{"q":"વૈજ્ઞાનિક નામ 'Gorilla gorilla gorilla' એ નીચેનામાંથી શેનું ઉદાહરણ છે?","opts":["વનસ્પતિ દ્વિનામી નામકરણ","પ્રાણીઓમાં ત્રિનામી અને ટૌટોનિમનું સંયુક્ત ઉદાહરણ","અમાન્ય નામકરણ પદ્ધતિ","પોલિનોમિયલ પદ્ધતિ"],"ans":1},{"q":"લીનિયસ દ્વારા આપવામાં આવેલી નામકરણ પદ્ધતિને 'દ્વિનામી' કેમ કહેવામાં આવે છે?","opts":["કારણ કે તેમાં બે વૈજ્ઞાનિકોના નામ હોય છે","કારણ કે દરેક વૈજ્ઞાનિક નામ બે શબ્દો (પ્રજાતિ + જાતિ) નું બનેલું હોય છે","કારણ કે તે માત્ર બે જ સૃષ્ટિ માટે છે","કારણ કે તેના બે અર્થ નીકળે છે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણમાં 'સિનોનિમ' (Synonym - પર્યાયનામ) એટલે શું?","opts":["એક જ સજીવને આપેલા એકથી વધુ જુદા જુદા વૈજ્ઞાનિક નામો, જેમાંથી પ્રથમ નામ જ માન્ય ગણાય","પ્રજાતિ અને જાતિના સરખા અક્ષરો","ખોટા અક્ષરોવાળું નામ","બીજા વૈજ્ઞાનિકે ચોરી કરેલું નામ"],"ans":0},{"q":"વાઘનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Panthera leo","Panthera tigris","Panthera pardus","Felis chaus"],"ans":1},{"q":"વૈજ્ઞાનિક નામ 'Brassica oleracea var. capitata' (કોબીજ) માં 'var.' શબ્દ શું દર્શાવે છે?","opts":["વેરિએશન (બદલાવ)","વેરાયટી / જાત (Variety)","વૈજ્ઞાનિકનું નામ","અમાન્ય પદ્ધતિ"],"ans":1},{"q":"કોઈ સજીવનું સ્થાનિક નામ (Common name) વૈજ્ઞાનિક નામ કરતાં શા માટે ઉતરતું ગણાય છે?","opts":["તે ખૂબ ટૂંકું હોય છે","તે ભાષા અને પ્રદેશ બદલાતા બદલાઈ જાય છે, જેનાથી ગૂંચવણ થાય છે","તે માત્ર અંગ્રેજીમાં જ હોય છે","સ્થાનિક નામો કોઈ રાખતું નથી"],"ans":1},{"q":"લીનિયસે પોતાના પુસ્તક 'Species Plantarum' માં આશરે કેટલી વનસ્પતિઓની જાતિઓનું દ્વિનામી નામકરણ કર્યું હતું?","opts":["","(આશરે 6000)","",",000"],"ans":1},{"q":"લીનિયસે પોતાના પુસ્તક 'Systema Naturae' ની 10મી આવૃત્તિમાં આશરે કેટલા પ્રાણીઓનું વૈજ્ઞાનિક નામકરણ દર્શાવ્યું હતું?","opts":["","(આશરે 4400)","","લાખ"],"ans":1},{"q":"વૈજ્ઞાનિક નામો હંમેશા લેટિન ભાષામાં જ કેમ લખાય છે, ભલે તેનો ઉદ્ભવ ગમે ત્યાંથી થયો હોય?","opts":["લેટિન દુનિયાની સૌથી સરળ ભાષા છે","આંતરરાષ્ટ્રીય નિયમો અનુસાર તેનું 'લેટિનાઇઝેશન' કરવું ફરજિયાત છે","લેટિન ભાષામાં માત્ર ૨૬ જ અક્ષરો છે","લીનિયસ લેટિન દેશના રાજા હતા"],"ans":1},{"q":"ઘોડાનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Equus caballus","Equus asinus","Sus scrofa","Camelus dromedarius"],"ans":0},{"q":"'નવા વર્ગીકરણ વિજ્ઞાન' (Neo-Systematics) શબ્દનો પ્રયોગ સૌપ્રથમ કોણે કર્યો હતો, જેમાં નામકરણના આધુનિક નિયમોનો સમાવેશ થાય છે?","opts":["કેરોલસ લીનિયસ","જુલિયન હક્સલી (Julian Huxley)","જોન રે","એરિસ્ટોટલ"],"ans":1},{"q":"નીચેનામાંથી કયું વૈજ્ઞાનિક નામ ટૌટોનિમ (Tautonym) નું સાચું ઉદાહરણ છે?","opts":["Rattus rattus (ઉંદર)","Mangifera indica","Homo sapiens","Solanum tuberosum"],"ans":0},{"q":"વનસ્પતિ સૃષ્ટિમાં 'ટૌટોનિમ' (પ્રજાતિ અને જાતિના નામ સરખા હોવા) શા માટે અમાન્ય છે?","opts":["પ્રાણીઓ ગુસ્સે થાય એટલા માટે","ICBN ના નિયમો અનુસાર વનસ્પતિમાં આવા નામો સ્વીકારવામાં આવતા નથી","લીનિયસ આવું નામ લખવાનું ભૂલી ગયા હતા","વનસ્પતિના નામ ખૂબ લાંબા હોય છે"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના નિયમ મુજબ જો કોઈ જાતિનું નામ કોઈ વ્યક્તિ (વૈજ્ઞાનિક) ના નામ પરથી રાખવામાં આવે, તો તેનો પ્રથમ અક્ષર કેવો હોવો જોઈએ?","opts":["હંમેશા કેપિટલ","આંતરરાષ્ટ્રીય સુધારા મુજબ હંમેશા સ્મોલ (નાની લિપિમાં) જ હોવો જોઈએ","ત્રાંસો હોવો જોઈએ","અંડરલાઇન વગરનો હોવો જોઈએ"],"ans":1},{"q":"સફરજનનું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Malus domestica (અથવા Pyrus malus)","Musa paradisiaca","Citrus aurantium","Carica papaya"],"ans":0},{"q":"કેળાનું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Mangifera indica","Musa paradisiaca","Vitis vinifera","Punica granatum"],"ans":1},{"q":"તુલસી (Holy Basil) નું વૈજ્ઞાનિક નામ શું છે?","opts":["Ocimum sanctum (અથવા Ocimum tenuiflorum)","Azadirachta indica","Ficus religiosa","Aloe vera"],"ans":0},{"q":"લીમડાનું સાચું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Ocimum sanctum","Azadirachta indica","Ficus benghalensis","Rosa indica"],"ans":1},{"q":"વડ (Banyan Tree) નું વૈજ્ઞાનિક નામ શું છે જે ભારતનું રાષ્ટ્રીય વૃક્ષ છે?","opts":["Ficus religiosa","Ficus benghalensis","Ficus elastica","Mangifera indica"],"ans":1},{"q":"જો કોઈ સંશોધક નવી વનસ્પતિની શોધ કરે, તો તેણે નામકરણના નિયમો અનુસાર તેનું વર્ણન કઈ ભાષામાં પ્રકાશિત કરવું પડતું હતું (પરંપરાગત રીતે)?","opts":["અંગ્રેજીમાં","લેટિનમાં (Latin diagnosis)","હિન્દીમાં","પોતાની માતૃભાષામાં"],"ans":1},{"q":"લીનિયસના નામકરણના નિયમો કયા સિદ્ધાંત પર આધારિત છે કે એક સજીવનું સમગ્ર વિશ્વમાં ફક્ત:","opts":["એક જ વૈજ્ઞાનિક નામ હોઈ શકે","બે વૈજ્ઞાનિક નામો હોઈ શકે","ત્રણ વૈજ્ઞાનિક નામો હોઈ શકે","ઈચ્છા મુજબના નામો હોઈ શકે"],"ans":0},{"q":"મનુષ્યની ઉપજાતિ (Subspecies) દર્શાવતું આધુનિક માનવનું સાચું ત્રિનામી નામ કયું છે?","opts":["Homo sapiens sapiens","Homo sapiens erectus","Homo neanderthalensis","Homo habilis"],"ans":0},{"q":"નીચેનામાંથી કયું નામકરણ 'ICZN' ના નિયમોને આધીન છે?","opts":["વનસ્પતિઓનું નામકરણ","પ્રાણીઓનું નામકરણ (Zoological)","બેક્ટેરિયાનું નામકરણ","વાયરસનું નામકરણ"],"ans":1},{"q":"વૈજ્ઞાનિક નામમાં જાતિ સંકેત પ્રત્યય (Specific epithet) શું દર્શાવે છે?","opts":["સજીવનું કદ","સજીવની ચોક્કસ વસતિ અથવા પ્રકૃતિની મૂળભૂત કક્ષા (జాતિ)","વૈજ્ઞાનિકનું સરનામું","પ્રયોગશાળાનું નામ"],"ans":1},{"q":"ચણા (Chickpea) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Pisum sativum","Cicer arietinum","Phaseolus aureus","Glycine max"],"ans":1},{"q":"મધમાખી (ભારતીય મધમાખી) નું વૈજ્ઞાનિક નામ શું છે?","opts":["Apis indica","Musca domestica","Bombyx mori","Periplaneta americana"],"ans":0},{"q":"કીટવિજ્ઞાન અને પ્રાણીશાસ્ત્રમાં 'ટૌટોનિમ' (જેમ કે Naja naja) ને:","opts":["સંપૂર્ણ અમાન્ય ગણવામાં આવે છે","સંપૂર્ણ માન્ય (Valid) ગણવામાં આવે છે","માત્ર કાગળ પર જ લખાય છે","બદલી નાખવામાં આવે છે"],"ans":1},{"q":"વૈજ્ઞાનિક નામની પ્રજાતિ (Genus) એ સજીવોના કયા જૂથનું પ્રતિનિધિત્વ કરે છે?","opts":["સમાન લક્ષણો ધરાવતી નજીકની જાતિઓનું જૂથ (Group of related species)","સમાન ગોત્રનું જૂથ","બધી જ વનસ્પતિઓનું જૂથ","એક જ સજીવના અંગોનું જૂથ"],"ans":0},{"q":"'Solanum' પ્રજાતિમાં બટાકા અને રીંગણ સિવાય નીચેનામાંથી કઈ વનસ્પતિનો સમાવેશ થાય છે?","opts":["પીપળો","મકોઈ (Solanum nigrum)","ટામેટા (જૂનું વર્ગીકરણ)","આપેલ (2) અને (3) બંને"],"ans":3},{"q":"સિંહ, વાઘ અને દીપડો કઈ એક જ સમાન પ્રજાતિ (Genus) માં આવે છે?","opts":["Felis","Panthera","Canis","Bos"],"ans":1},{"q":"જો પુસ્તકમાં વૈજ્ઞાનિક નામ છાપતી વખતે 'Italics' (ત્રાંસા અક્ષરો) ન વાપરવા હોય, તો વૈકલ્પિક નિયમ શો છે?","opts":["તેને ઊંધા અક્ષરોમાં છાપવું","તેને ઘાટા (Bold) અક્ષરોમાં અથવા કૌંસમાં છાપવું","તેની નીચે લીટી દોરવી","કોઈ નિયમ નથી"],"ans":1},{"q":"આંતરરાષ્ટ્રીય નામકરણ નિયમાવલી (Codes of Nomenclature) કોના દ્વારા સ્વીકૃત થયેલી છે?","opts":["માત્ર અમેરિકાની સરકાર દ્વારા","સમગ્ર વિશ્વના જીવવિજ્ઞાનીઓ દ્વારા (Globally accepted)","માત્ર લીનિયસના પરિવાર દ્વારા","સંયુક્ત રાષ્ટ્ર સંઘ (UN) ના પ્રમુખ દ્વારા"],"ans":1},{"q":"વૈજ્ઞાનિક નામનો ઉદ્દેશ્ય સ્થાનિક ભાષાના કયા મોટા દોષને દૂર કરવાનો છે?","opts":["સ્થાનિક નામો ખૂબ સુંદર હોય છે","એક જ સજીવના જુદા જુદા પ્રદેશમાં જુદા નામો હોય અથવા એક જ નામથી બે જુદા સજીવો ઓળખાતા હોય તે મૂંઝવણ દૂર કરવી","સ્થાનિક નામો ટૂંકા હોય છે","ભાષા શીખવવી"],"ans":1},{"q":"ઘઉંનું વૈજ્ઞાનિક નામ 'Triticum aestivum' છે, તેમાં 'aestivum' શબ્દ કઈ ભાષાનો છે અને તે શું દર્શાવે છે?","opts":["અંગ્રેજી, પ્રજાતિ","લેટિન, જાતિ સંકેત પ્રત્યય","ગ્રીક, વૈજ્ઞાનિક","હિન્દી, અર્થ"],"ans":1},{"q":"'Systema Naturae' પુસ્તકના શીર્ષકમાં રહેલો 'Systema' શબ્દ શેના પરથી લેવામાં આવ્યો છે?","opts":["સિસ્ટમ (કોમ્પ્યુટર)","લેટિન શબ્દ 'Systema' જેનો અર્થ સજીવોની પદ્ધતિસરની ગોઠવણી (Systematics) થાય છે","ગ્રીક શબ્દ જેનો અર્થ જંગલ થાય છે","લીનિયસના ગામનું નામ"],"ans":1},{"q":"નીચેનામાંથી કયું વૈજ્ઞાનિક નામ સંપૂર્ણપણે સાચી રીતે લખાયેલું છે?","opts":["panthera Leo","Panthera leo","Panthera Leo","panthera leo"],"ans":1},{"q":"ચોખા (Rice) નું સાચું વૈજ્ઞાનિક નામ કયું છે?","opts":["Triticum aestivum","Oryza sativa","Zea mays","Pisum sativum"],"ans":1},{"q":"ટામેટાનું વૈજ્ઞાનિક નામ નીચેનામાંથી કયું છે?","opts":["Solanum tuberosum","Solanum lycopersicum (અથવા Lycopersicon esculentum)","Allium cepa","Capsicum annuum"],"ans":1},{"q":"વૈજ્ઞાનિક નામકરણના ઇતિહાસમાં 'બહુનામી પદ્ધતિ' (Polynomial Nomenclature) શા માટે નિષ્ફળ ગઈ?","opts":["કારણ કે નામો ખૂબ ટૂંકા હતા","નામો ખૂબ લાંબા, વર્ણનાત્મક અને યાદ રાખવામાં અત્યંત મુશ્કેલ હતા","વૈજ્ઞાનિકો પાસે પેન નહોતી","તે માત્ર ફ્રેન્ચમાં જ હતી"],"ans":1},{"q":"લીનિયસના દ્વિનામી નિયમો સૌપ્રથમ કયા વર્ષથી સત્તાવાર રીતે વનસ્પતિઓ માટે લાગુ પડ્યા ગણાય છે?","opts":["","(Species Plantarum ના પ્રકાશનથી)","",""],"ans":1},{"q":"સજીવોના વર્ગીકરણ અને નામકરણના અભ્યાસને કયા વિજ્ઞાન તરીકે ઓળખવામાં આવે છે?","opts":["સાયટોલોજી","ટેક્સોનોમી / વર્ગીકરણ વિજ્ઞાન (Taxonomy)","હિસ્ટોલોજી","એનાટોમી"],"ans":1},{"q":"વૈજ્ઞાનિક નામ 'Mangifera indica' માં 'indica' શબ્દ શું સૂચવે છે?","opts":["આ વનસ્પતિનો ઉદ્ભવ કે સંબંધ ભારત (India) દેશ સાથે છે","આ વનસ્પતિ ઈન્ડોનેશિયાની છે","તે માત્ર ચોમાસામાં થાય છે","તે પ્રજાતિ છે"],"ans":0},{"q":"નામકરણના સાર્વત્રિક નિયમો મુજબ, જો કોઈ નવું નામ આંતરરાષ્ટ્રીય કોડના નિયમોનું પાલન ન કરતું હોય તો:","opts":["તેને બળજબરીથી વાપરી શકાય","તેને અમાન્ય (Invalid) જાહેર કરવામાં આવે છે","તેને સ્થાનિક નામ બનાવી દેવાય છે","વૈજ્ઞાનિકને જેલ થાય છે"],"ans":1},{"q":"દ્વિનામી નામકરણ પદ્ધતિનો સૌથી મોટો ફાયદો શું છે?","opts":["તેનાથી સજીવોના રંગની ખબર પડે છે","સમગ્ર વિશ્વના વૈજ્ઞાનિકો અને વિદ્યાર્થીઓ વચ્ચે સજીવોની ઓળખ માટે એક સમાન અને સ્પષ્ટ ભાષાકીય સેતુ બને છે","તેનાથી વનસ્પતિ ઝડપથી ઉગે છે","કોઈ ફાયદો નથી"],"ans":1}];
+const quizMode='exam';
+const TPQ=120;
+let userAns={}, curIdx=0, timerIv=null, timeLeft=TPQ;
+
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+
+function renderQ(){
+  clearInterval(timerIv);
+  const q=questions[curIdx];
+  const done=userAns[curIdx]!==undefined;
+  const isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  document.getElementById('q-area').innerHTML=
+    '<div class="question-card"><div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div>'+
+    '<div class="options-grid">'+optHtml+'</div>'+
+    (done?'<div style="background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:99px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);">✓ Correct: <strong style=color:#fff>'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong></div>':'')+
+    '</div>';
+  if(quizMode==='exam'&&!done){
+    timeLeft=TPQ;
+    const b=document.getElementById('timer-badge');
+    b.style.display='block';b.textContent='⏱️ '+timeLeft+'s';b.style.color='';
+    timerIv=setInterval(()=>{
+      timeLeft--;b.textContent='⏱️ '+timeLeft+'s';
+      if(timeLeft<=5)b.style.color='var(--danger)';
+      if(timeLeft<=0){clearInterval(timerIv);skipQ();}
+    },1000);
+  }
+}
+
+function pick(i){
+  clearInterval(timerIv);userAns[curIdx]=i;renderQ();
+  if(quizMode==='exam'&&curIdx<questions.length-1)setTimeout(()=>nav(1),900);
+}
+function nav(d){const n=curIdx+d;if(n<0||n>=questions.length)return;curIdx=n;renderQ();}
+function skipQ(){clearInterval(timerIv);if(userAns[curIdx]===undefined)userAns[curIdx]=-1;if(curIdx<questions.length-1){curIdx++;renderQ();}else finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+
+function finishQuiz(){
+  clearInterval(timerIv);
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  const grades=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']];
+  const [,gt,gm]=grades.find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c;
+  const ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+
+function downloadResults(){
+  let cor=0,wrg=0,skp=0;
+  for(let i=0;i<questions.length;i++){const a=userAns[i];if(a===-1)skp++;else if(a===questions[i].ans)cor++;else wrg++;}
+  const pct=Math.round(cor/questions.length*100);
+  let html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Results - My Quiz</title><style>body{font-family:Arial,sans-serif;max-width:720px;margin:40px auto;padding:20px;background:#f5f5f5;color:#222;}h1{text-align:center}.summary{display:flex;gap:14px;justify-content:center;margin:18px 0;flex-wrap:wrap}.stat{background:#fff;border-radius:10px;padding:13px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.08)}.val{font-size:24px;font-weight:bold;margin-bottom:3px}.c{color:#2a9a60}.w{color:#c44}.s{color:#999}.q{background:#fff;border-radius:10px;padding:15px;margin-bottom:11px;box-shadow:0 2px 8px rgba(0,0,0,.06)}.qt{font-weight:bold;margin-bottom:9px;font-size:14px}.opt{padding:5px 10px;margin:3px 0;border-radius:6px;font-size:13px}.oc{background:#e8f9f0;color:#2a9a60;border:1px solid #2a9a60}.ow{background:#fde8e8;color:#c44;border:1px solid #c44}.op{background:#f5f5f5;border:1px solid #ddd}</style></head><body>';
+  html+='<h1>📊 My Quiz — Results</h1>';
+  html+='<div class="summary"><div class="stat"><div class="val c">'+cor+'</div><div>Correct</div></div><div class="stat"><div class="val w">'+wrg+'</div><div>Wrong</div></div><div class="stat"><div class="val s">'+skp+'</div><div>Skipped</div></div><div class="stat"><div class="val">'+pct+'%</div><div>Score</div></div></div>';
+  for(let i=0;i<questions.length;i++){
+    const q=questions[i],ua=userAns[i];
+    html+='<div class="q"><div class="qt">Q'+(i+1)+'. '+q.q+'</div>';
+    q.opts.forEach((opt,j)=>{let cls='op',pre='';if(j===q.ans){cls='oc';pre='✓ ';}else if(j===ua){cls='ow';pre='✗ ';}html+='<div class="opt '+cls+'">'+pre+'('+LETTERS[j]+') '+opt+'</div>';});
+    html+='</div>';
+  }
+  html+='</body></html>';
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download='results-my-quiz.html';a.click();
+}
+
+function toast(msg,type=''){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';setTimeout(()=>el.classList.remove('show'),3000);}
+</script>
+</body>
+</html>
