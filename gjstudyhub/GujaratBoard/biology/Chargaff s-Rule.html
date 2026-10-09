@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chargaff's Rule</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;--border:#2a2a3a;--accent:#7c6af7;--accent2:#f7c76a;--accent3:#6af7c7;--text:#e8e8f0;--muted:#7070a0;--danger:#f76a6a;--success:#6af7a0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:0.2;pointer-events:none;z-index:0;}
+.app{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:28px 16px;}
+.header{text-align:center;margin-bottom:28px;}
+.badge{display:inline-block;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-size:10px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:20px;text-transform:uppercase;margin-bottom:12px;}
+.header h1{font-size:clamp(22px,5vw,38px);font-weight:800;background:linear-gradient(135deg,#fff 30%,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.15;margin-bottom:6px;}
+.header p{color:var(--muted);font-size:12px;font-family:'JetBrains Mono',monospace;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px;margin-bottom:16px;position:relative;overflow:hidden;}
+.panel::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent3),var(--accent2));}
+.quiz-meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.meta-badge{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--muted);}
+.progress-bar{height:4px;background:var(--surface2);border-radius:2px;margin-bottom:20px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent3));border-radius:2px;transition:width .4s ease;}
+.question-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:20px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;}
+.q-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;font-family:'JetBrains Mono',monospace;margin-top:2px;flex-shrink:0;}
+.q-text{font-size:15px;font-weight:600;line-height:1.55;}
+.options-grid{display:grid;gap:9px;}
+.opt-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px;text-align:left;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;gap:10px;align-items:center;width:100%;}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,247,0.08);transform:translateX(4px);}
+.opt-btn.correct{border-color:var(--success);background:rgba(106,247,160,0.08);color:var(--success);}
+.opt-btn.wrong{border-color:var(--danger);background:rgba(247,106,106,0.08);color:var(--danger);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;width:22px;height:22px;border-radius:5px;background:var(--surface2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.explain-box{background:rgba(106,247,199,.06);border:1px solid rgba(106,247,199,.2);border-radius:10px;padding:11px 14px;margin-top:12px;font-size:13px;color:var(--accent3);}
+.nav-row{display:flex;gap:10px;justify-content:space-between;margin-top:14px;align-items:center;flex-wrap:wrap;}
+.btn{background:linear-gradient(135deg,var(--accent),#5b4fd4);color:#fff;border:none;border-radius:10px;padding:10px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(124,106,247,0.3);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent);box-shadow:none;}
+.btn-success{background:linear-gradient(135deg,var(--success),#2a9a60);color:#000;}
+#score-card{display:none;text-align:center;padding:30px 18px;animation:fadeUp .4s ease;}
+.score-ring{width:130px;height:130px;margin:0 auto 18px;position:relative;}
+.score-ring svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--surface2);stroke-width:8;}
+.ring-fill{fill:none;stroke-width:8;stroke-linecap:round;stroke-dasharray:0 314;transition:stroke-dasharray 1s ease;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.big-score{font-size:28px;font-weight:800;line-height:1;}
+.score-label{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.grade-badge{font-size:24px;font-weight:800;margin-bottom:5px;}
+.score-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:14px 0;}
+.stat-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;text-align:center;}
+.stat-val{font-size:20px;font-weight:800;margin-bottom:2px;}
+.stat-key{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;}
+.footer{text-align:center;padding:20px;color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--surface);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="badge">NEET Quiz</div>
+    <h1>Chargaff's Rule</h1>
+    <p>// attempt karo — har question ka jawab do</p>
+  </div>
+  <div class="panel" id="quiz-panel">
+    <div class="quiz-meta">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;font-family:'JetBrains Mono',monospace;">Chargaff's Rule</div>
+        <div style="font-size:12px;color:var(--muted);font-family:'JetBrains Mono',monospace;">Q<span id="cur-num">1</span> of <span id="tot-num">?</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <div class="meta-badge">📚 20 Qs</div>
+        <button class="btn btn-outline" onclick="restartQuiz()" style="padding:5px 12px;font-size:12px;">↺ Restart</button>
+      </div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+    <div id="q-area"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="nav(-1)">← Prev</button>
+      <button class="btn btn-outline" id="skip-btn" onclick="skipQ()">Skip →</button>
+      <button class="btn" id="next-btn" style="display:none" onclick="nav(1)">Next →</button>
+      <button class="btn btn-success" id="fin-btn" style="display:none" onclick="finishQuiz()">Finish ✓</button>
+    </div>
+  </div>
+  <div class="panel" id="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 110 110" width="130" height="130">
+        <circle class="ring-bg" cx="55" cy="55" r="50"></circle>
+        <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="50"></circle>
+        <defs><linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#7c6af7"/><stop offset="100%" style="stop-color:#6af7c7"/>
+        </linearGradient></defs>
+      </svg>
+      <div class="score-center">
+        <div class="big-score" id="score-pct">0%</div>
+        <div class="score-label">SCORE</div>
+      </div>
+    </div>
+    <div class="grade-badge" id="grade-txt"></div>
+    <div style="color:var(--muted);font-size:13px;margin-bottom:12px;" id="grade-msg"></div>
+    <div class="score-stats">
+      <div class="stat-item"><div class="stat-val" style="color:var(--success)" id="s-cor">0</div><div class="stat-key">Correct</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--danger)" id="s-wrg">0</div><div class="stat-key">Wrong</div></div>
+      <div class="stat-item"><div class="stat-val" style="color:var(--muted)" id="s-skp">0</div><div class="stat-key">Skipped</div></div>
+    </div>
+    <button class="btn btn-outline" onclick="restartQuiz()" style="margin-top:14px;">↺ Try Again</button>
+  </div>
+  <div class="footer">Made with ❤️ by @xdsonic | 20 Questions</div>
+</div>
+<script>
+const LETTERS=['A','B','C','D','E','F'];
+const questions=[{"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.માં એડેનિન (A) અને થાયમિન (T) વચ્ચે તથા ગ્વાનિન (G) અને સાયટોસિન (C) વચ્ચે કયો ગુણોત્તર જાળવી રાખવામાં આવે છે?", "opts": ["A/T = 1 અને G/C = 1", "A/T = G/C = 2", "A + T = G + C", "A + G = T + C"], "ans": 0, "exp": "ચારગાફના નિયમ મુજબ, ડી.એન.એ.માં પુરીન ક્ષારક (A અને G) અને પિરિમિડિન ક્ષારક (T અને C) વચ્ચે સમાન પ્રમાણમાં જોડાણ થાય છે. એટલે કે A = T અને G = C, જેથી A/T = 1 અને G/C = 1 થાય. બાકીના વિકલ્પો આ નિયમની વિરુદ્ધ છે: B) ગુણોત્તર 2 નથી, C) A + T અને G + C સરખા હોવા જરૂરી નથી, D) A + G અને T + C સરખા હોવા જરૂરી નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમની શોધ કયા વૈજ્ઞાનિકે કરી હતી અને તે કયા વર્ષમાં પ્રકાશિત થઈ હતી?", "opts": ["એરવિન ચારગાફ, 1950", "જેમ્સ વોટસન અને ફ્રાન્સિસ ક્રિક, 1953", "એરવિન ચારગાફ, 1953", "લિનસ પોલિંગ, 1950"], "ans": 0, "exp": "ચારગાફના નિયમની શોધ એરવિન ચારગાફે 1950માં કરી હતી. જેમ્સ વોટસન અને ફ્રાન્સિસ ક્રિકે 1953માં ડી.એન.એ.ની ડબલ હેલિક્સ સ્ટ્રક્ચર શોધી હતી, પરંતુ ચારગાફના નિયમ તેમના કામથી અલગ છે. લિનસ પોલિંગનો સીધો સંબંધ આ શોધ સાથે નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, જો ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં એડેનિન (A) 30% હોય, તો થાયમિન (T)નું પ્રમાણ કેટલું હશે?", "opts": ["20%", "30%", "40%", "50%"], "ans": 1, "exp": "ચારગાફના નિયમ મુજબ, ડી.એન.એ.માં A = T અને G = C. જો A 30% હોય, તો T પણ 30% જ હશે. બાકીના વિકલ્પો (20%, 40%, 50%) આ નિયમને અનુરૂપ નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ કયા પ્રકારના આણ્વિક બંધન પર આધારિત છે?", "opts": ["હાઇડ્રોજન બંધન", "આયોનિક બંધન", "સહસંયોજક બંધન", "વાન ડર વાલ્સ બળ"], "ans": 0, "exp": "ચારગાફના નિયમ ડી.એન.એ.ના ડબલ હેલિક્સ સ્ટ્રક્ચરમાં એડેનિન-થાયમિન (A-T) અને ગ્વાનિન-સાયટોસિન (G-C) વચ્ચેના હાઇડ્રોજન બંધન પર આધારિત છે. આયોનિક બંધન, સહસંયોજક બંધન, અને વાન ડર વાલ્સ બળ આ નિયમ સાથે સીધો સંબંધ ધરાવતા નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, જો ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં ગ્વાનિન (G) 20% હોય, તો સાયટોસિન (C)નું પ્રમાણ કેટલું હશે અને એડેનિન (A) + થાયમિન (T)નું પ્રમાણ કેટલું હશે?", "opts": ["C = 20%, A + T = 60%", "C = 30%, A + T = 50%", "C = 20%, A + T = 80%", "C = 40%, A + T = 40%"], "ans": 0, "exp": "ચારગાફના નિયમ મુજબ, G = C, જેથી G = 20% હોવાથી C પણ 20% જ હશે. ડી.એન.એ.માં કુલ ન્યુક્લિયોટાઇડ 100% હોવાથી, A + T = 100% - (G + C) = 100% - 40% = 60%. બાકીના વિકલ્પો આ ગણતરીને અનુરૂપ નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં એડેનિન (A) અને થાયમિન (T)ની મોટી પ્રમાણમાં અસમાનતા જોવા મળે છે, તો નીચેનામાંથી કયું વિધાન સત્ય છે?", "opts": ["ડી.એન.એ.માં હાઇડ્રોજન બંધોની સંખ્યા સમાન રહેશે પરંતુ સ્ટ્રેન્ડની લંબાઈ અસમાન હશે", "ડી.એન.એ.માં એડેનિન અને થાયમિનની પ્રમાણમાં અસમાનતા શક્ય જ નથી", "ડી.એન.એ.માં ગ્વાનિન (G) અને સાયટોસિન (C)ની પ્રમાણ પણ અસમાન હશે", "ડી.એન.એ.માં કુલ પ્યુરિન (A+G) અને પિરિમિડિન (T+C)ની પ્રમાણ સમાન રહેશે"], "ans": 2, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.માં એડેનિન (A) અને થાયમિન (T)ની પ્રમાણ સમાન હોવી જોઈએ, જો તે અસમાન હોય તો તે નિયમનો ભંગ ગણાય. પરંતુ ગ્વાનિન (G) અને સાયટોસિન (C)ની પ્રમાણ પણ અસમાન હશે કારણ કે A+G = T+C હોવું જરૂરી છે. વિકલ્પ A ખોટો છે કારણ કે હાઇડ્રોજન બંધોની સંખ્યા A-T અને G-C જોડી પર આધારિત છે. વિકલ્પ B ખોટો છે કારણ કે ચારગાફના નિયમ મુજબ A અને Tની પ્રમાણ સમાન જ હોવી જોઈએ. વિકલ્પ D ખોટો છે કારણ કે A+G અને T+Cની પ્રમાણ સમાન હોવી જોઈએ, પરંતુ A અને T અસમાન હોવા છતાં G અને Cની પ્રમાણ પણ અસમાન હશે.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમનો ઉપયોગ કરીને, જો ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં એડેનિન (A) 15%, ગ્વાનિન (G) 35%, અને સાયટોસિન (C) 25% હોય, તો બીજા સ્ટ્રેન્ડમાં થાયમિન (T)ની ટકાવારી કેટલી હશે?", "opts": ["15%", "25%", "35%", "45%"], "ans": 1, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C. પ્રશ્ન મુજબ, એક સ્ટ્રેન્ડમાં A = 15%, G = 35%, C = 25% છે, તો T = 100% - (A + G + C) = 100% - (15 + 35 + 25) = 25%. બીજા સ્ટ્રેન્ડમાં Tની ટકાવારી એ જ સ્ટ્રેન્ડમાં Aની ટકાવારી જેટલી હશે, જેથી T = 25%. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ ચારગાફના નિયમનો ભંગ કરે છે.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમનો અપવાદ કયા પ્રકારના ડી.એન.એ.માં જોવા મળે છે?", "opts": ["દ્વિ-સ્ટ્રેન્ડ ડી.એન.એ.", "એક-સ્ટ્રેન્ડ ડી.એન.એ.", "વર્તુળાકાર ડી.એન.એ.", "રેખીય ડી.એન.એ."], "ans": 1, "exp": "ચારગાફના નિયમ દ્વિ-સ્ટ્રેન્ડ ડી.એન.એ. માટે લાગુ પડે છે, જ્યાં A = T અને G = C. એક-સ્ટ્રેન્ડ ડી.એન.એ.માં આ નિયમ લાગુ પડતો નથી કારણ કે તેના માટે બીજો સ્ટ્રેન્ડ હાજર નથી. વિકલ્પ A, C, અને D ખોટા છે કારણ કે તેઓ દ્વિ-સ્ટ્રેન્ડ ડી.એન.એ.ના સ્વરૂપ છે, જ્યાં ચારગાફના નિયમ લાગુ પડે છે.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.માં નાઇટ્રોજનસ યુક્ત બેઇઝની કુલ પ્રમાણ કેટલી હોવી જોઈએ?", "opts": ["A + T = G + C", "A + G = T + C", "A + C = T + G", "A = T = G = C"], "ans": 1, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.માં પ્યુરિન (A + G) અને પિરિમિડિન (T + C)ની કુલ પ્રમાણ સમાન હોવી જોઈએ, એટલે કે A + G = T + C. વિકલ્પ A ખોટો છે કારણ કે A + T અને G + Cની પ્રમાણ સમાન હોવી જરૂરી નથી. વિકલ્પ C ખોટો છે કારણ કે A + C અને T + Gની પ્રમાણ સમાન હોવી જરૂરી નથી. વિકલ્પ D ખોટો છે કારણ કે A, T, G, અને Cની પ્રમાણ સમાન હોવી જરૂરી નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "એક સંશોધકને એક અજ્ઞાત સજીવના ડી.એન.એ.ના નમૂનામાં નાઇટ્રોજનસ બેઇઝનું પ્રમાણ નીચે મુજબ મળ્યું: એડેનિન (A) = 28%, થાયમિન (T) = 22%, ગ્વાનિન (G) = 24%, સાયટોસિન (C) = 26%. આ પરિણામોને આધારે નીચેનામાંથી કયું વિધાન સૌથી વધુ યોગ્ય છે?", "opts": ["આ ડી.એન.એ. ચારગાફના નિયમનું પાલન કરે છે કારણ કે A + T = G + C નથી.", "આ ડી.એન.એ. એક-સ્ટ્રેન્ડ ધરાવતો હોવાની શક્યતા છે કારણ કે A ≠ T અને G ≠ C છે.", "આ ડી.એન.એ.માં મ્યુટેશન થયું હોવાની શક્યતા છે કારણ કે બેઇઝની કુલ ટકાવારી 100% નથી.", "આ ડી.એન.એ. વાઇરસમાંથી મેળવવામાં આવ્યો હોવાની શક્યતા છે કારણ કે ચારગાફનો નિયમ માત્ર બેક્ટેરિયા અને યુકેરિયોટ્સ માટે જ લાગુ પડે છે."], "ans": 1, "exp": "સાચો જવાબ વિકલ્પ B છે. ચારગાફના નિયમ અનુસાર, ડબલ-સ્ટ્રેન્ડ ડી.એન.એ.માં એડેનિન (A) અને થાયમિન (T)નું પ્રમાણ સમાન હોવું જોઈએ તેમજ ગ્વાનિન (G) અને સાયટોસિન (C)નું પ્રમાણ પણ સમાન હોવું જોઈએ. અહીં A ≠ T અને G ≠ C હોવાથી, આ ડી.એન.એ. એક-સ્ટ્રેન્ડ ધરાવતો હોવાની શક્યતા છે, જે ચારગાફના નિયમનું પાલન કરતો નથી. વિકલ્પ A ખોટો છે કારણ કે ચારગાફનો નિયમ A + T = G + C નહીં, પરંતુ A = T અને G = C પર આધારિત છે. વિકલ્પ C ખોટો છે કારણ કે બેઇઝની કુલ ટકાવારી 100% છે (28+22+24+26=100). વિકલ્પ D ખોટો છે કારણ કે ચારગાફનો નિયમ વાઇરસના ડબલ-સ્ટ્રેન્ડ ડી.એન.એ. માટે પણ લાગુ પડે છે, પરંતુ એક-સ્ટ્રેન્ડ ડી.એન.એ. માટે નહીં.", "ref": "Std 12 - પ્રકરણ 6: આનુવંશિક દ્રવ્ય અને જનીન અભિવ્યક્તિ", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, જો ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં સાયટોસિન (C) 25% અને થાયમિન (T) 35% હોય, તો બીજા સ્ટ્રેન્ડમાં એડેનિન (A) અને ગ્વાનિન (G)નું પ્રમાણ અનુક્રમે કેટલું હશે?", "opts": ["A = 35%, G = 25%", "A = 25%, G = 35%", "A = 40%, G = 15%", "A = 30%, G = 20%"], "ans": 0, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C હોવું જોઈએ. પ્રશ્નમાં આપેલા સ્ટ્રેન્ડમાં C = 25% અને T = 35% છે, તેથી બીજા સ્ટ્રેન્ડમાં A = T (35%) અને G = C (25%) હશે. અહીં, A અને Gનું પ્રમાણ અનુક્રમે 35% અને 25% છે. અન્ય વિકલ્પો આ નિયમને અનુરૂપ નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમનો અપવાદ કયા પ્રકારના ડી.એન.એ.માં જોવા મળે છે, જ્યાં એડેનિન (A) અને થાયમિન (T)ની સરખામણી ગ્વાનિન (G) અને સાયટોસિન (C) કરતાં અલગ હોય છે?", "opts": ["પ્રોકેરિયોટિક ડી.એન.એ.", "યુકેરિયોટિક ડી.એન.એ.", "સિંગલ-સ્ટ્રેન્ડ ડી.એન.એ. (જેમ કે કેટલાક વાઇરસમાં)", "માઇટોકોન્ડ્રિયલ ડી.એન.એ."], "ans": 2, "exp": "ચારગાફના નિયમનો અપવાદ સિંગલ-સ્ટ્રેન્ડ ડી.એન.એ.માં જોવા મળે છે, જેમ કે કેટલાક વાઇરસમાં. આ પ્રકારના ડી.એન.એ.માં A અને T તથા G અને C વચ્ચે સરખામણી નથી હોતી, કારણ કે તે એક જ સ્ટ્રેન્ડ ધરાવે છે. પ્રોકેરિયોટિક, યુકેરિયોટિક, અને માઇટોકોન્ડ્રિયલ ડી.એન.એ. દ્વિ-સ્ટ્રેન્ડ હોવાથી આ નિયમને અનુરૂપ હોય છે.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં નાઇટ્રોજનસ બેઇઝની સરેરાશ સાંદ્રતા નીચે મુજબ છે: A = 22%, T = 22%, G = 28%, C = 28%. જો આ ડી.એન.એ.નું તાપમાન વધારીને 90°C સુધી ગરમ કરવામાં આવે, તો કયા બેઇઝ યુગ્મનું પૃથ્થકરણ સૌથી પહેલા થશે?", "opts": ["A-T", "G-C", "A-C", "G-T"], "ans": 0, "exp": "ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં, A-T અને G-C વચ્ચે હાઇડ્રોજન બંધો હોય છે. A-T વચ્ચે 2 હાઇડ્રોજન બંધો હોય છે, જ્યારે G-C વચ્ચે 3 હાઇડ્રોજન બંધો હોય છે. તાપમાન વધારવાથી, ઓછા હાઇડ્રોજન બંધો ધરાવતા યુગ્મનું પૃથ્થકરણ સૌથી પહેલા થાય છે. તેથી, A-T યુગ્મનું પૃથ્થકરણ સૌથી પહેલા થશે. અન્ય વિકલ્પો (G-C, A-C, G-T) આ નિયમને અનુરૂપ નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં નાઇટ્રોજનસ બેઇઝનું પ્રમાણ નીચે મુજબ છે: A = 15%, G = 35%. જો આ ડી.એન.એ.નું નમૂનામાં રેડિયોએક્ટિવ લેબલિંગ કરવામાં આવે અને તેને સેમી-કન્ઝર્વેટિવ રીપ્લિકેશન દ્વારા કોપી કરવામાં આવે, તો નવી રચાયેલા ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં કયા બેઇઝનું પ્રમાણ સૌથી ઓછું હશે?", "opts": ["A", "T", "G", "C"], "ans": 1, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના એક સ્ટ્રેન્ડમાં A = 15% અને G = 35% હોવાથી, T = A = 15% અને C = G = 35% હશે. સેમી-કન્ઝર્વેટિવ રીપ્લિકેશન દરમિયાન, નવો સ્ટ્રેન્ડ મૂળ સ્ટ્રેન્ડની જેમ જ હશે, પરંતુ દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C હોવું જોઈએ. તેથી, નવી રચાયેલા ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં Tનું પ્રમાણ સૌથી ઓછું (15%) હશે. અન્ય વિકલ્પો (A, G, C) આ ગણતરીમાં ઓછા નથી.", "ref": "Std 12 - Chapter 6: આણ્વિક જનીનશાસ્ત્ર (Molecular Genetics)", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, જો એક ડી.એન.એ.ના નમૂનામાં એડેનિન (A) 18% અને ગ્વાનિન (G) 32% હોય, તો સાયટોસિન (C) અને થાયમિન (T)નું પ્રમાણ ક્યાં ક્રમે હશે અને તેનું કારણ શું છે?", "opts": ["C = 32%, T = 18% (A-T અને G-C યુગ્મન નિયમ મુજબ)", "C = 18%, T = 32% (A-G અને C-T યુગ્મન નિયમ મુજબ)", "C = 30%, T = 20% (ડી.એન.એ.ની કુલ નાઇટ્રોજનસ બેઇઝ 100% હોવી જોઈએ)", "C = 32%, T = 32% (ડી.એન.એ.માં A અને Gની સરખામણીમાં C અને T સમાન હોવાં જોઈએ)"], "ans": 0, "exp": "ચારગાફના નિયમ મુજબ, ડી.એન.એ.માં એડેનિન (A) હંમેશા થાયમિન (T) સાથે અને ગ્વાનિન (G) હંમેશા સાયટોસિન (C) સાથે યુગ્મન પામે છે. આથી, A = T અને G = C હોવું જોઈએ. આપેલા પ્રશ્નમાં A = 18% અને G = 32% હોવાથી, T = A = 18% અને C = G = 32% હશે. વિકલ્પ B ખોટો છે કારણ કે A-G અને C-T યુગ્મન ચારગાફના નિયમ અનુસાર શક્ય નથી. વિકલ્પ C ખોટો છે કારણ કે કુલ પ્રમાણ 18 + 32 + 30 + 20 = 100% થાય છે, પરંતુ A-T અને G-C યુગ્મનનો અહીં ઉલ્લેખ નથી. વિકલ્પ D ખોટો છે કારણ કે C અને T સમાન હોવાં જરૂરી નથી, પરંતુ A-T અને G-C યુગ્મન હોવું જરૂરી છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ચારગાફના નિયમ પ્રમાણે, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં જો એક સ્ટ્રેન્ડમાં એડેનિન (A) 24% અને ગ્વાનિન (G) 28% હોય, તો બીજા સ્ટ્રેન્ડમાં થાયમિન (T) અને સાયટોસિન (C)નું પ્રમાણ અનુક્રમે કેટલું હશે?", "opts": ["T = 24%, C = 28%", "T = 28%, C = 24%", "T = 26%, C = 22%", "T = 22%, C = 26%"], "ans": 0, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C હોવું જોઈએ. પ્રશ્નમાં આપેલા ડેટા મુજબ, એક સ્ટ્રેન્ડમાં A = 24% અને G = 28% છે. આથી બીજા સ્ટ્રેન્ડમાં T = A = 24% અને C = G = 28% હશે. બાકીના વિકલ્પો આ નિયમનું પાલન કરતા નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ચારગાફના નિયમનો અપવાદ કયા સજીવના ડી.એન.એ.માં જોવા મળે છે, જ્યાં એડેનિન (A) અને થાયમિન (T)ની સરખામણીમાં ગ્વાનિન (G) અને સાયટોસિન (C)નું પ્રમાણ અસમાન હોય છે?", "opts": ["ઇ. કોલાઇ (E. coli)", "મનુષ્ય (Homo sapiens)", "ટી-4 બેક્ટેરિયોફેજ", "ખમીર (Yeast)"], "ans": 2, "exp": "ચારગાફના નિયમનો અપવાદ ટી-4 બેક્ટેરિયોફેજના ડી.એન.એ.માં જોવા મળે છે, કારણ કે તેના ડી.એન.એ.માં હાઇડ્રોક્સીમિથાઇલસાયટોસિન (HMC) નામનું બેઇઝ હાજર હોય છે, જે સાયટોસિન (C)ની જગ્યાએ આવે છે. આથી G અને Cનું પ્રમાણ અસમાન હોય છે. બાકીના વિકલ્પોમાં ચારગાફના નિયમનું પાલન થાય છે.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં જો એક સ્ટ્રેન્ડમાં એડેનિન (A) 20% અને સાયટોસિન (C) 30% હોય, તો બીજા સ્ટ્રેન્ડમાં થાયમિન (T) અને ગ્વાનિન (G)નું પ્રમાણ કેટલું હશે?", "opts": ["T = 20%, G = 30%", "T = 30%, G = 20%", "T = 25%, G = 25%", "T = 15%, G = 35%"], "ans": 0, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C હોવું જોઈએ. પ્રશ્નમાં આપેલા ડેટા મુજબ, એક સ્ટ્રેન્ડમાં A = 20% અને C = 30% છે. આથી બીજા સ્ટ્રેન્ડમાં T = A = 20% અને G = C = 30% હશે. બાકીના વિકલ્પો આ નિયમનું પાલન કરતા નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ચારગાફના નિયમના અપવાદ રૂપે કયા સજીવના ડી.એન.એ.માં એડેનિન (A) અને થાયમિન (T)ની સરખામણીમાં ગ્વાનિન (G) અને સાયટોસિન (C)નું પ્રમાણ અસમાન જોવા મળે છે, પરંતુ તે ડી.એન.એ. દ્વિ-સ્ટ્રેન્ડેડ હોવા છતાં પણ તેનો ઉપયોગ પ્રયોગશાળામાં થાય છે?", "opts": ["ઈ. કોલાઇ (E. coli) બેક્ટેરિયા", "ટી4 બેક્ટેરિયોફેજ", "મનુષ્યના મિટોકોન્ડ્રિયલ ડી.એન.એ.", "એડિનોવાયરસ"], "ans": 1, "exp": "ટી4 બેક્ટેરિયોફેજના ડી.એન.એ.માં હાઇડ્રોક્સીમિથાઇલસાયટોસિન (HMC) નામનું બેઇઝ હાજર હોય છે, જે સાયટોસિન (C)ની જગ્યાએ આવે છે. આ કારણે ચારગાફના નિયમનો અપવાદ જોવા મળે છે, પરંતુ તે દ્વિ-સ્ટ્રેન્ડેડ ડી.એન.એ. ધરાવે છે. ઈ. કોલાઇમાં નિયમ લાગુ પડે છે, મનુષ્યના મિટોકોન્ડ્રિયલ ડી.એન.એ. એક-સ્ટ્રેન્ડેડ નથી, અને એડિનોવાયરસમાં ડી.એન.એ. દ્વિ-સ્ટ્રેન્ડેડ હોવા છતાં નિયમ લાગુ પડે છે.", "ref": "Std 12 - પ્રકરણ 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}, {"q": "ચારગાફના નિયમ અનુસાર, એક અર્ધ-રૂઢિગત (semi-conservative) ડી.એન.એ. અણુમાં જો એક સ્ટ્રેન્ડમાં એડેનિન (A) 28% અને ગ્વાનિન (G) 12% હોય, તો બીજા સ્ટ્રેન્ડમાં થાયમિન (T) અને સાયટોસિન (C)નું પ્રમાણ અનુક્રમે કેટલું હશે?", "opts": ["T = 28%, C = 12%", "T = 12%, C = 28%", "T = 20%, C = 30%", "T = 30%, C = 20%"], "ans": 0, "exp": "ચારગાફના નિયમ અનુસાર, ડી.એન.એ.ના દ્વિ-સ્ટ્રેન્ડમાં A = T અને G = C હોવું જોઈએ. પ્રશ્નમાં આપેલ એક સ્ટ્રેન્ડમાં A = 28% અને G = 12% છે, પરંતુ ડી.એન.એ. અર્ધ-રૂઢિગત હોવાથી બીજા સ્ટ્રેન્ડમાં A અને Tની સાંદ્રતા સમાન હશે. તેથી બીજા સ્ટ્રેન્ડમાં T = 28% (Aની સમાન) અને C = 12% (Gની સમાન) હશે. વિકલ્પ A સરખો છે. વિકલ્પ B, C, અને Dમાં T અને Cનું પ્રમાણ ચારગાફના નિયમને અનુરૂપ નથી.", "ref": "Std 12 - અધ્યાય 6: આણ્વિક જનીનશાસ્ત્ર", "ch": ""}];
+let userAns={},curIdx=0;
+document.getElementById('tot-num').textContent=questions.length;
+renderQ();
+function renderQ(){
+  const q=questions[curIdx],done=userAns[curIdx]!==undefined,isLast=curIdx===questions.length-1;
+  document.getElementById('cur-num').textContent=curIdx+1;
+  document.getElementById('prog-fill').style.width=((curIdx+1)/questions.length*100)+'%';
+  document.getElementById('prev-btn').disabled=curIdx===0;
+  document.getElementById('skip-btn').style.display=!done?'block':'none';
+  document.getElementById('next-btn').style.display=done&&!isLast?'block':'none';
+  document.getElementById('fin-btn').style.display=done&&isLast?'block':'none';
+  const optHtml=q.opts.map((opt,i)=>{
+    let cls='opt-btn';
+    if(done){if(i===q.ans)cls+=' correct';else if(i===userAns[curIdx])cls+=' wrong';}
+    return '<button class="'+cls+'" onclick="pick('+i+')" '+(done?'disabled':'')+'>'+
+      '<span class="opt-letter">'+LETTERS[i]+'</span><span>'+opt+'</span></button>';
+  }).join('');
+  const ex=done?'<div class="explain-box">✓ Sahi Jawab: <strong style="color:#fff">'+LETTERS[q.ans]+'. '+q.opts[q.ans]+'</strong>'+(q.exp?'<br><br>💡 '+q.exp:'')+(q.ref?'<br><span style="opacity:.75">📘 '+q.ref+'</span>':'')+'</div>':'';
+  document.getElementById('q-area').innerHTML='<div class="question-card">'+(q.ch?'<div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent3);margin-bottom:8px;font-family:\'JetBrains Mono\',monospace;">📖 '+q.ch+'</div>':'')+'<div class="q-header"><span class="q-num">Q'+(curIdx+1)+'</span><div class="q-text">'+q.q+'</div></div><div class="options-grid">'+optHtml+'</div>'+ex+'</div>';
+}
+function pick(i){userAns[curIdx]=i;renderQ();}
+function nav(d){const n=curIdx+d;if(n>=0&&n<questions.length){curIdx=n;renderQ();}}
+function skipQ(){if(userAns[curIdx]===undefined)userAns[curIdx]=-1;curIdx<questions.length-1?++curIdx&&renderQ():finishQuiz();}
+function restartQuiz(){userAns={};curIdx=0;document.getElementById('score-card').style.display='none';document.getElementById('quiz-panel').style.display='block';renderQ();}
+function finishQuiz(){
+  for(let i=0;i<questions.length;i++)if(userAns[i]===undefined)userAns[i]=-1;
+  let cor=0,wrg=0,skp=0;
+  questions.forEach((q,i)=>{const a=userAns[i];a===-1?skp++:a===q.ans?cor++:wrg++;});
+  const pct=Math.round(cor/questions.length*100);
+  const [,gt,gm]=[[90,'🏆 Excellent!','Outstanding!'],[75,'🎯 Great!','Well done!'],[60,'👍 Good','Keep practicing!'],[40,'📖 Fair','Review topics.'],[0,'💪 Keep Going!','Practice more!']].find(([m])=>pct>=m);
+  document.getElementById('quiz-panel').style.display='none';
+  document.getElementById('score-card').style.display='block';
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('grade-txt').textContent=gt;
+  document.getElementById('grade-msg').textContent=gm;
+  document.getElementById('s-cor').textContent=cor;
+  document.getElementById('s-wrg').textContent=wrg;
+  document.getElementById('s-skp').textContent=skp;
+  const c=2*Math.PI*50,fill=pct/100*c,ring=document.getElementById('ring-fill');
+  ring.style.stroke=pct>=75?'url(#grad)':pct>=50?'var(--accent2)':'var(--danger)';
+  setTimeout(()=>ring.style.strokeDasharray=fill+' '+c,100);
+  document.getElementById('score-card').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
