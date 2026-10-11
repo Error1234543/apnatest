@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepGrid — India's Exam Prep Hub</title>
+    <meta name="description" content="Premium 3D study spaces, notes, PYQs and mock tests for every major Indian exam — built like a world-class institute.">
+    <meta name="theme-color" content="#4f46e5">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Space Grotesk', 'Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#4f46e5',
+                        secondary: '#0ea5e9',
+                        dark: '#0f172a',
+                        darker: '#020617',
+                        surface: '#1e293b'
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn .5s ease-out forwards',
+                        'float': 'float 7s ease-in-out infinite',
+                        'spin-slow': 'spin 14s linear infinite'
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(14px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-16px)' } }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+
+        ::-webkit-scrollbar { width: 9px; height: 9px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #334155; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .font-display { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+
+        .text-gradient {
+            background-image: linear-gradient(100deg, #4f46e5, #0ea5e9 55%, #22d3ee);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent; color: transparent;
+        }
+        .dark .text-gradient {
+            background-image: linear-gradient(100deg, #a5b4fc, #38bdf8 55%, #67e8f9);
+            -webkit-background-clip: text; background-clip: text;
+        }
+
+        .glass-nav { background: rgba(255,255,255,.78); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+        .dark .glass-nav { background: rgba(2,6,23,.74); }
+
+        .bg-aurora { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+        .bg-aurora > div { position: absolute; border-radius: 9999px; filter: blur(110px); }
+        .bg-grid {
+            position: fixed; inset: 0; z-index: -1; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(100,116,139,.06) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(100,116,139,.06) 1px, transparent 1px);
+            background-size: 46px 46px;
+            -webkit-mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 30%, transparent 100%);
+            mask-image: radial-gradient(ellipse 100% 70% at 50% 0%, #000 30%, transparent 100%);
+        }
+
+        /* ---------- 3D FOLDER SYSTEM ---------- */
+        .tilt-wrap { perspective: 1400px; }
+        .folder3d {
+            position: relative;
+            display: flex;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform .55s cubic-bezier(.175,.885,.32,1.275);
+            cursor: pointer;
+        }
+        .folder3d:active { transform: scale(.97) translateZ(-8px) !important; transition: transform .1s ease; }
+        .folder3d:hover { transform: rotateY(-9deg) rotateX(5deg) translateY(-8px) translateZ(26px); }
+
+        .f-back {
+            position: absolute; inset: 0; border-radius: 22px;
+            background: linear-gradient(135deg, var(--acc), color-mix(in srgb, var(--acc) 20%, transparent));
+            transform: translateZ(-18px);
+            border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent);
+            box-shadow: 0 30px 50px -22px var(--acc);
+        }
+        .f-tab {
+            position: absolute; top: -13px; left: 26px; height: 26px; width: 42%;
+            border-radius: 12px 12px 0 0;
+            background: color-mix(in srgb, var(--acc) 70%, #fff);
+            border: 1px solid color-mix(in srgb, var(--acc) 50%, transparent);
+            border-bottom: none;
+            transform: translateZ(-17px);
+            opacity: .9;
+        }
+        .dark .f-tab { background: color-mix(in srgb, var(--acc) 55%, #0f172a); }
+        .f-front {
+            position: relative; z-index: 2;
+            width: 100%; height: 100%;
+            border-radius: 22px; padding: 1.35rem;
+            background: rgba(255,255,255,.92);
+            border: 1px solid rgba(226,232,240,.9);
+            box-shadow: inset 0 1px 0 #fff, 0 8px 24px -18px rgba(15,23,42,.4);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            display: flex; flex-direction: column;
+            transition: background .35s ease;
+            overflow: hidden;
+        }
+        .dark .f-front {
+            background: rgba(15,23,42,.88);
+            border: 1px solid rgba(255,255,255,.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        }
+        .folder3d:hover .f-front {
+            background: #fff;
+            border-color: color-mix(in srgb, var(--acc) 45%, transparent);
+        }
+        .dark .folder3d:hover .f-front { background: rgba(23,30,50,.95); }
+
+        .icon3d {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            width: 58px; height: 58px; border-radius: 16px;
+            background: color-mix(in srgb, var(--acc) 16%, transparent);
+            color: var(--acc);
+            border: 1px solid color-mix(in srgb, var(--acc) 35%, transparent);
+            box-shadow: inset 0 -8px 16px color-mix(in srgb, var(--acc) 14%, transparent),
+                        0 12px 22px -12px var(--acc);
+            transition: transform .45s cubic-bezier(.175,.885,.32,1.275);
+            transform: translateZ(22px);
+        }
+        .folder3d:hover .icon3d { transform: translateZ(44px) rotateY(360deg) scale(1.12); }
+
+        .open-line {
+            opacity: 0; transform: translateY(8px);
+            transition: opacity .3s ease .06s, transform .3s ease .06s;
+        }
+        .folder3d:hover .open-line { opacity: 1; transform: translateY(0); }
+
+        .chip { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .dark .chip { background: rgba(255,255,255,.05); color: #cbd5e1; border-color: rgba(255,255,255,.08); }
+
+        .glass-card {
+            background: rgba(255,255,255,.86);
+            border: 1px solid rgba(226,232,240,.8);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+        }
+        .dark .glass-card { background: rgba(15,23,42,.7); border-color: rgba(255,255,255,.08); }
+
+        /* ============ v3 UPGRADE — drawer, sections, misc ============ */
+
+        .drawer-backdrop {
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(2,6,23,.55);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            opacity: 0; visibility: hidden;
+            transition: opacity .35s ease, visibility .35s ease;
+        }
+        .drawer-backdrop.open { opacity: 1; visibility: visible; }
+
+        .drawer {
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+            width: min(21rem, 88vw);
+            background: rgba(255,255,255,.94);
+            backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px);
+            border-right: 1px solid rgba(226,232,240,.9);
+            box-shadow: 0 0 60px -12px rgba(15,23,42,.45);
+            transform: translateX(-102%);
+            transition: transform .42s cubic-bezier(.22,.75,.25,1);
+            display: flex; flex-direction: column;
+            overflow-y: auto; overscroll-behavior: contain;
+        }
+        .dark .drawer { background: rgba(2,6,23,.95); border-right-color: rgba(255,255,255,.08); }
+        .drawer.open { transform: translateX(0); }
+
+        .burger { width: 42px; height: 42px; display: inline-flex; flex-direction: column;
+                  align-items: center; justify-content: center; gap: 5px; border-radius: 12px; }
+        .burger span { display: block; height: 2px; width: 21px; border-radius: 2px;
+                       background: currentColor; transition: transform .38s cubic-bezier(.22,.75,.25,1), opacity .22s ease; }
+        .burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .burger.active span:nth-child(2) { opacity: 0; transform: scaleX(.2); }
+        .burger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .drawer-item {
+            display: flex; align-items: center; gap: .8rem;
+            padding: .78rem .9rem; border-radius: 14px;
+            font-weight: 600; font-size: .93rem; color: #334155;
+            border: 1px solid transparent;
+            transition: background .2s ease, transform .2s ease, color .2s ease;
+            text-align: left; width: 100%;
+        }
+        .dark .drawer-item { color: #cbd5e1; }
+        .drawer-item:hover { background: rgba(79,70,229,.08); color: #4f46e5; transform: translateX(3px); }
+        .dark .drawer-item:hover { background: rgba(255,255,255,.06); color: #a5b4fc; }
+        .drawer-item:focus-visible { outline: 2px solid #4f46e5; outline-offset: 2px; }
+        .drawer-item .di {
+            width: 34px; height: 34px; flex: none; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: rgba(79,70,229,.1); color: #4f46e5; font-size: 1.05rem;
+        }
+        .dark .drawer-item .di { background: rgba(165,180,252,.12); color: #a5b4fc; }
+        .drawer-sep { height: 1px; background: rgba(100,116,139,.16); margin: .7rem .4rem; }
+        .dark .drawer-sep { background: rgba(255,255,255,.09); }
+        .drawer-heading { font-size: .68rem; font-weight: 800; letter-spacing: .16em;
+                          text-transform: uppercase; color: #94a3b8; padding: .5rem .9rem .25rem; }
+
+        /* generic focus ring for keyboard users */
+        a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+            outline: 2px solid #4f46e5; outline-offset: 2px; border-radius: 10px;
+        }
+        .dark a:focus-visible, .dark button:focus-visible,
+        .dark input:focus-visible, .dark [tabindex]:focus-visible { outline-color: #a5b4fc; }
+
+        .sec-badge {
+            display: inline-flex; align-items: center; gap: .45rem;
+            padding: .3rem .8rem; border-radius: 999px;
+            font-size: .66rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+            background: rgba(79,70,229,.08); border: 1px solid rgba(79,70,229,.22); color: #4f46e5;
+        }
+        .dark .sec-badge { background: rgba(165,180,252,.1); border-color: rgba(165,180,252,.24); color: #a5b4fc; }
+
+        .sec-title { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700;
+                     letter-spacing: -.02em; font-size: clamp(1.65rem, 4.2vw, 2.35rem); line-height: 1.1; }
+
+        /* hero */
+        .hero-orb { position: absolute; border-radius: 999px; filter: blur(70px); pointer-events: none; }
+        @keyframes floatSlow { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-22px) } }
+
+        /* countdown */
+        .cd-cell {
+            border-radius: 20px; padding: .85rem .4rem; text-align: center;
+            background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.16);
+            min-width: 4.6rem;
+        }
+        .cd-num { font-family: 'Space Grotesk', 'Inter', sans-serif; font-weight: 700;
+                  font-size: clamp(1.6rem, 6vw, 2.5rem); line-height: 1; }
+        .cd-lbl { font-size: .6rem; letter-spacing: .19em; text-transform: uppercase; opacity: .78; font-weight: 700; margin-top: .3rem; }
+
+        /* quiz */
+        .opt {
+            display: flex; align-items: center; gap: .75rem; width: 100%; text-align: left;
+            padding: .8rem 1rem; border-radius: 14px; font-weight: 600; font-size: .92rem;
+            border: 1.5px solid rgba(100,116,139,.24); background: transparent; color: inherit;
+            transition: border-color .2s ease, background .2s ease, transform .15s ease;
+        }
+        .opt:hover:not(:disabled) { border-color: #4f46e5; transform: translateX(3px); }
+        .opt:disabled { cursor: default; }
+        .opt .ol { width: 28px; height: 28px; flex: none; border-radius: 9px; display: inline-flex;
+                   align-items: center; justify-content: center; font-weight: 800; font-size: .8rem;
+                   background: rgba(100,116,139,.14); }
+        .opt.correct { border-color: #10b981; background: rgba(16,185,129,.1); }
+        .opt.correct .ol { background: rgba(16,185,129,.22); color: #059669; }
+        .opt.wrong { border-color: #ef4444; background: rgba(239,68,68,.09); }
+        .opt.wrong .ol { background: rgba(239,68,68,.2); color: #dc2626; }
+
+        /* faq */
+        .faq-item { border: 1px solid rgba(226,232,240,.9); border-radius: 18px;
+                    background: rgba(255,255,255,.86); overflow: hidden; }
+        .dark .faq-item { border-color: rgba(255,255,255,.08); background: rgba(15,23,42,.7); }
+        .faq-q { display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+                 width: 100%; text-align: left; padding: 1.05rem 1.25rem;
+                 font-weight: 700; font-size: .95rem; }
+        .faq-q i { transition: transform .3s ease; flex: none; }
+        .faq-item.open .faq-q i { transform: rotate(180deg); }
+        .faq-a { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+        .faq-a p { padding: 0 1.25rem 1.15rem; font-size: .88rem; line-height: 1.65; color: #64748b; }
+        .dark .faq-a p { color: #94a3b8; }
+
+        .ph-note { font-size: .72rem; color: #94a3b8; }
+
+        .back-top {
+            position: fixed; right: 1.1rem; bottom: 1.1rem; z-index: 70;
+            width: 48px; height: 48px; border-radius: 16px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: #fff;
+            box-shadow: 0 14px 30px -12px rgba(79,70,229,.7);
+            opacity: 0; visibility: hidden; transform: translateY(12px);
+            transition: opacity .3s ease, transform .3s ease, visibility .3s ease;
+        }
+        .back-top.show { opacity: 1; visibility: visible; transform: translateY(0); }
+
+        .card-hov { transition: transform .3s cubic-bezier(.22,.75,.25,1), box-shadow .3s ease, border-color .3s ease; }
+        .card-hov:hover { transform: translateY(-6px); }
+
+        .skel { position: relative; overflow: hidden; background: rgba(100,116,139,.12); }
+        .skel::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+            animation: shim 1.5s infinite;
+        }
+        @keyframes shim { 100% { transform: translateX(100%) } }
+
+        html { scroll-behavior: smooth; }
+        section[id] { scroll-margin-top: 5rem; }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after {
+                animation-duration: .001ms !important; animation-iteration-count: 1 !important;
+                transition-duration: .001ms !important;
+            }
+            .folder3d:hover { transform: none; }
+            .folder3d:hover .icon3d { transform: translateZ(22px); }
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-darker dark:text-white transition-colors duration-300 font-sans overflow-x-hidden">
+
+    <div class="bg-aurora">
+        <div class="w-[44rem] h-[44rem] bg-indigo-400/25 dark:bg-indigo-600/15 -top-44 -left-44 animate-float"></div>
+        <div class="w-[38rem] h-[38rem] bg-sky-400/20 dark:bg-sky-600/10 -bottom-52 -right-32 animate-float" style="animation-delay:2.2s"></div>
+        <div class="w-[26rem] h-[26rem] bg-fuchsia-400/10 dark:bg-fuchsia-600/10 top-1/3 left-2/3 animate-float" style="animation-delay:4s"></div>
+    </div>
+    <div class="bg-grid"></div>
+
+    <!-- ================= HEADER ================= -->
+    <header class="sticky top-0 z-50 glass-nav border-b border-slate-200/80 dark:border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="flex items-center gap-2.5 group focus:outline-none" aria-label="Home">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-lg shadow-primary/30 group-hover:rotate-6 transition-transform">
+                    <i class="ph-bold ph-graduation-cap text-lg"></i>
+                </div>
+                <div class="text-left leading-none">
+                    <div id="brand-name" class="font-display font-bold text-lg tracking-tight">PrepGrid</div>
+                    <div id="brand-tag" class="text-[10px] font-bold uppercase tracking-[.2em] text-primary dark:text-indigo-300">India's Exam Prep Hub</div>
+                </div>
+            </button>
+
+            <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                <a href="#exams" class="hover:text-primary dark:hover:text-white transition-colors">Exam Spaces</a>
+                <a href="#why" class="hover:text-primary dark:hover:text-white transition-colors">Why Us</a>
+                <a href="#daily" class="hover:text-primary dark:hover:text-white transition-colors">Daily</a>
+                <a href="#material" class="hover:text-primary dark:hover:text-white transition-colors">Material</a>
+                <a href="#faq" class="hover:text-primary dark:hover:text-white transition-colors">FAQ</a>
+                <a href="#connect" class="hover:text-primary dark:hover:text-white transition-colors">Connect</a>
+            </nav>
+
+
+            <div class="flex items-center gap-1.5">
+                <button id="burger" class="burger md:hidden text-slate-600 dark:text-slate-300"
+                        aria-label="Open menu" aria-controls="drawer" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+            <div class="flex items-center gap-2.5">
+                <a id="join-btn" href="#" target="_blank" rel="noopener" class="hidden sm:inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/25 hover:-translate-y-px hover:shadow-primary/40 transition-all">
+                    <i class="ph-bold ph-telegram-logo"></i> <span id="join-label">Join Telegram</span>
+                </a>
+                <button id="themeToggle" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10 transition-colors" aria-label="Toggle theme">
+                    <i class="ph ph-moon text-xl block dark:hidden"></i>
+                    <i class="ph ph-sun text-xl hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= HERO ================= -->
+    <section class="relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-6 text-center animate-fade-in">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest bg-white/70 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 shadow-sm mb-6">
+                <i class="ph-bold ph-sparkle text-primary dark:text-indigo-300"></i>
+                <span>Trusted study spaces · Notes · PYQs · Mocks</span>
+            </div>
+
+            <h1 class="font-display font-bold text-4xl sm:text-6xl lg:text-7xl tracking-tight leading-[1.04]">
+                Your Dream. Your Rank.<br>
+                <span class="text-gradient">Your Future.</span>
+            </h1>
+
+            <p class="mt-5 text-base sm:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                Your complete destination for exam preparation, study resources, practice tests, and mentorship.
+            </p>
+
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+                <button onclick="scrollToId('#exams')" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-xl shadow-primary/25 hover:-translate-y-0.5 hover:shadow-primary/40 transition-all">
+                    <i class="ph-bold ph-cube text-lg"></i> Explore Exams
+                </button>
+                <button onclick="scrollToId('#material')" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-white/85 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 text-slate-800 dark:text-white font-bold shadow-lg hover:-translate-y-0.5 hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-all">
+                    <i class="ph-bold ph-rocket-launch text-lg"></i> Start Preparing
+                </button>
+            </div>
+
+            <!-- Search -->
+            <div class="relative max-w-2xl mx-auto w-full mt-8">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400">
+                    <i class="ph-bold ph-magnifying-glass text-xl"></i>
+                </div>
+                <input id="searchInput" type="text" placeholder="Search NEET, UPSC, GPSC, TET, SSC…" autocomplete="off"
+                    class="w-full pl-[3.25rem] pr-20 py-4 rounded-2xl text-base outline-none ring-1 ring-slate-200 dark:ring-white/10 bg-white/85 dark:bg-surface/60 backdrop-blur-md shadow-2xl shadow-slate-900/10 dark:shadow-black/40 focus:ring-2 focus:ring-primary text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 transition-all">
+            </div>
+
+            <!-- Category pills -->
+            <div class="w-full overflow-x-auto no-scrollbar mt-7 -mx-4 px-4 sm:mx-0 sm:px-0">
+                <div id="category-container" class="flex gap-2 sm:gap-2.5 justify-start sm:justify-center min-w-max mx-auto"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= STATS BAND ================= -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-4">
+        <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary via-indigo-600 to-secondary text-white p-7 sm:p-9 text-center shadow-2xl shadow-indigo-500/25">
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-14 -left-8 w-44 h-44 bg-black/10 rounded-full blur-2xl"></div>
+            <div id="stats-band" class="relative grid grid-cols-2 md:grid-cols-4 gap-6"></div>
+        </div>
+    </section>
+
+    <!-- ================= 3D EXAM SPACES ================= -->
+    <section id="exams" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 text-primary dark:text-indigo-300 flex items-center justify-center border border-indigo-200/60 dark:border-white/10 shadow-sm">
+                <i class="ph-bold ph-cube text-xl"></i>
+            </div>
+            <div>
+                <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight leading-none">3D Exam Spaces</h2>
+                <p id="section-sub" class="text-sm text-slate-500 dark:text-slate-400 mt-1">…</p>
+            </div>
+        </div>
+
+        <div id="exam-grid-container" aria-live="polite" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 pt-8"></div>
+
+        <div id="lang-screen" class="hidden" role="region" aria-labelledby="lang-title">
+            <button id="lang-back" type="button" class="mb-6 inline-flex items-center gap-2 text-sm font-bold text-primary dark:text-indigo-300 hover:gap-3 transition-all focus-ring rounded-lg px-2 py-1">
+                <i class="ph-bold ph-arrow-left text-lg"></i> Back to all exams
+            </button>
+            <h3 id="lang-title" class="font-display text-2xl sm:text-3xl font-bold tracking-tight">Choose your NEET UG language</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-2 mb-8">Same syllabus, same practice sets &mdash; pick the medium you study in.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:gap-8">
+                <div class="tilt-wrap lang-card">
+                    <div class="folder3d focus:outline-none" style="--acc:#4f46e5; min-height: 15rem;" tabindex="0" role="link" aria-label="Open NEET Gujarati"
+                         onclick="openLanguage('gj')" onkeydown="if(event.key==='Enter'||event.key===' ')openLanguage('gj')">
+                        <div class="f-tab"></div><div class="f-back"></div>
+                        <div class="f-front">
+                            <div class="icon3d mb-4"><i class="ph-bold ph-translate text-[26px]"></i></div>
+                            <h3 class="font-display text-xl font-bold tracking-tight mb-1">NEET Gujarati</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-snug mb-3">&#2711;&#2753;&#2736;&#2759;&#2724;&#2752; &#2734;&#2759;&#2711;&#2759;&#2728; &middot; Notes, MCQs, Mock Tests</p>
+                            <div class="mt-auto flex items-center justify-between text-sm font-bold open-line" style="color:#4f46e5;">
+                                <span>Enter Space</span><i class="ph-bold ph-arrow-right text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tilt-wrap lang-card">
+                    <div class="folder3d focus:outline-none" style="--acc:#0ea5e9; min-height: 15rem;" tabindex="0" role="link" aria-label="Open NEET English"
+                         onclick="openLanguage('en')" onkeydown="if(event.key==='Enter'||event.key===' ')openLanguage('en')">
+                        <div class="f-tab"></div><div class="f-back"></div>
+                        <div class="f-front">
+                            <div class="icon3d mb-4"><i class="ph-bold ph-book-open-text text-[26px]"></i></div>
+                            <h3 class="font-display text-xl font-bold tracking-tight mb-1">NEET English</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-snug mb-3">English medium &middot; Notes, MCQs, Mock Tests</p>
+                            <div class="mt-auto flex items-center justify-between text-sm font-bold open-line" style="color:#0ea5e9;">
+                                <span>Enter Space</span><i class="ph-bold ph-arrow-right text-lg"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p id="lang-note" class="text-xs text-slate-500 dark:text-slate-400 mt-6"></p>
+        </div>
+
+
+        <div id="empty-state" class="hidden py-20 text-center">
+            <div class="inline-flex w-16 h-16 rounded-full bg-slate-100 dark:bg-surface items-center justify-center mb-4">
+                <i class="ph ph-magnifying-glass text-3xl text-slate-400"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-1">No exam space found</h3>
+            <p class="text-slate-500 dark:text-slate-400">Try a different search or category.</p>
+        </div>
+    </section>
+
+
+    <!-- ================= DAILY CHALLENGE ================= -->
+    <section id="daily" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="rounded-[2rem] overflow-hidden border border-slate-200 dark:border-white/10 bg-gradient-to-br from-white/85 to-indigo-50/60 dark:from-slate-900/80 dark:to-indigo-950/40 backdrop-blur-md shadow-xl shadow-slate-900/5 card-hov">
+            <div class="grid lg:grid-cols-5">
+                <div class="lg:col-span-2 p-7 sm:p-9 bg-gradient-to-br from-primary via-indigo-600 to-secondary text-white relative overflow-hidden">
+                    <div class="hero-orb w-52 h-52 bg-white/20 -top-16 -right-12"></div>
+                    <div class="relative">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/20 border border-white/25 mb-4">
+                            <i class="ph-bold ph-lightning"></i> Daily Challenge
+                        </div>
+                        <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-tight mb-3">Question of the Day</h2>
+                        <p class="text-sm text-white/85 leading-relaxed mb-6">
+                            One question a day keeps the backlog away. Answer, check the explanation, then try the next one.
+                        </p>
+                        <div id="quiz-streak" class="text-xs font-semibold text-white/80"></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-3 p-7 sm:p-9">
+                    <div class="flex items-center justify-between gap-3 mb-4 flex-wrap">
+                        <span id="quiz-topic" class="sec-badge"></span>
+                        <span class="ph-note">Sample question — not an official paper</span>
+                    </div>
+                    <h3 id="quiz-q" class="font-display text-lg sm:text-xl font-bold leading-snug mb-5"></h3>
+                    <div id="quiz-options" class="space-y-2.5 mb-5"></div>
+                    <div id="quiz-feedback" class="hidden rounded-2xl p-4 text-sm leading-relaxed mb-5"></div>
+                    <div class="flex flex-wrap gap-3">
+                        <button id="quiz-submit" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold text-sm shadow-lg shadow-primary/25 hover:-translate-y-0.5 transition-all">Submit Answer</button>
+                        <button id="quiz-next" class="hidden px-6 py-3 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 font-bold text-sm hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-all">Next Question</button>
+                        <button id="quiz-retry" class="hidden px-6 py-3 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 font-bold text-sm hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-all">Try Again</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= NEET 2027 COUNTDOWN ================= -->
+    <section id="countdown" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div id="countdown-card" class="rounded-[2rem] p-8 sm:p-12 text-center relative overflow-hidden border border-slate-200 dark:border-white/10 bg-gradient-to-br from-slate-900 to-indigo-950 text-white shadow-2xl shadow-indigo-900/20">
+            <div class="hero-orb w-72 h-72 bg-indigo-500/25 -top-24 -left-16"></div>
+            <div class="hero-orb w-72 h-72 bg-sky-500/20 -bottom-24 -right-10"></div>
+            <div class="relative">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/10 border border-white/20 mb-5">
+                    <i class="ph-bold ph-clock-countdown"></i> NEET 2027
+                </div>
+                <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-3">Countdown to exam day</h2>
+                <div id="countdown-body"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FREE STUDY MATERIAL ================= -->
+    <section id="material" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="text-center mb-10">
+            <div class="sec-badge mb-4"><i class="ph-bold ph-notebook"></i> Free Study Material</div>
+            <h2 class="sec-title">Everything you need, in one place</h2>
+            <p class="mt-3 text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Six study formats, all driven by the exam spaces above. Cards open a space only when its pages exist.</p>
+        </div>
+        <div id="material-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- ================= LATEST UPDATES ================= -->
+    <section id="updates" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="flex items-end justify-between gap-4 mb-8 flex-wrap">
+            <div>
+                <div class="sec-badge mb-4"><i class="ph-bold ph-megaphone"></i> Latest Updates</div>
+                <h2 class="sec-title">Announcements</h2>
+            </div>
+            <p class="ph-note max-w-xs">This block is yours to edit — nothing here is auto-generated.</p>
+        </div>
+        <div id="updates-list" class="space-y-3"></div>
+    </section>
+
+    <!-- ================= NEET 2027 MENTORSHIP ================= -->
+    <section id="mentorship" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="rounded-[2rem] overflow-hidden border border-indigo-200/70 dark:border-indigo-500/20 bg-gradient-to-br from-indigo-50 via-white to-sky-50 dark:from-indigo-950/60 dark:via-slate-900 dark:to-sky-950/40 backdrop-blur-md p-8 sm:p-12 relative">
+            <div class="hero-orb w-64 h-64 bg-indigo-400/20 -top-20 -right-10"></div>
+            <div class="relative grid lg:grid-cols-3 gap-8 items-center">
+                <div class="lg:col-span-2">
+                    <div class="sec-badge mb-4"><i class="ph-bold ph-target"></i> NEET 2027 Mentorship</div>
+                    <h2 class="sec-title">A plan, a mentor, and a weekly rhythm</h2>
+                    <p class="mt-3 text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
+                        Structured guidance for NEET 2027 — syllabus mapping, weekly targets, revision cycles and doubt support, built around the material in these exam spaces.
+                    </p>
+                    <p id="mentorship-note" class="ph-note mt-4"></p>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <button id="mentorship-plans" class="w-full px-6 py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold shadow-xl shadow-primary/25 hover:-translate-y-0.5 transition-all">View Plans</button>
+                    <a id="mentorship-contact" href="#" target="_blank" rel="noopener" class="w-full text-center px-6 py-4 rounded-2xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 font-bold hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-all">Contact / Enquiry</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= TESTIMONIALS (optional / empty by default) ================= -->
+    <section id="testimonials" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4 hidden">
+        <div class="text-center mb-8">
+            <div class="sec-badge mb-4"><i class="ph-bold ph-quotes"></i> Student Feedback</div>
+            <h2 class="sec-title">What students say</h2>
+        </div>
+        <div id="testimonial-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+    </section>
+
+    <!-- ================= FAQ ================= -->
+    <section id="faq" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="text-center mb-10">
+            <div class="sec-badge mb-4"><i class="ph-bold ph-question"></i> FAQ</div>
+            <h2 class="sec-title">Questions students ask</h2>
+        </div>
+        <div id="faq-list" class="space-y-3"></div>
+    </section>
+
+    <!-- ================= ABOUT ================= -->
+    <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="glass-card rounded-[2rem] p-8 sm:p-11">
+            <div class="grid lg:grid-cols-2 gap-9 items-start">
+                <div>
+                    <div class="sec-badge mb-4"><i class="ph-bold ph-info"></i> About PrepGrid</div>
+                    <h2 class="sec-title">Study spaces, not study pages</h2>
+                    <p class="mt-4 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        PrepGrid organises exam preparation into a 3D space for every exam. Each space holds notes, previous-year questions, mock tests and revision material mapped to that exam's own pattern — so you always know what to study next.
+                    </p>
+                    <p class="mt-3 text-slate-600 dark:text-slate-400 leading-relaxed">
+                        The platform is built to stay fast on a phone, work offline-friendly, and never lock a student out of basic material behind a login.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="rounded-2xl p-5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                        <i class="ph-bold ph-cube text-2xl text-primary dark:text-indigo-300"></i>
+                        <div id="about-exams" class="font-display text-2xl font-bold mt-2">21</div>
+                        <div class="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Exam Spaces</div>
+                    </div>
+                    <div class="rounded-2xl p-5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                        <i class="ph-bold ph-note-pencil text-2xl text-primary dark:text-indigo-300"></i>
+                        <div id="about-notes" class="font-display text-2xl font-bold mt-2">0</div>
+                        <div class="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Live Chapters</div>
+                    </div>
+                    <div class="rounded-2xl p-5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                        <i class="ph-bold ph-question text-2xl text-primary dark:text-indigo-300"></i>
+                        <div id="about-questions" class="font-display text-2xl font-bold mt-2">0</div>
+                        <div class="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Live Questions</div>
+                    </div>
+                    <div class="rounded-2xl p-5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                        <i class="ph-bold ph-globe text-2xl text-primary dark:text-indigo-300"></i>
+                        <div class="font-display text-2xl font-bold mt-2">2</div>
+                        <div class="text-[11px] uppercase tracking-widest text-slate-500 dark:text-slate-400 font-semibold">Languages (NEET)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= WHY US ================= -->
+    <section id="why" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-4">
+        <div class="text-center mb-10">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200/70 dark:border-indigo-500/20 text-[11px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-300 mb-4">
+                <i class="ph-bold ph-lightning"></i> Why PrepGrid
+            </div>
+            <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight">Built for serious preparation</h2>
+            <p class="mt-3 text-slate-600 dark:text-slate-400 max-w-xl mx-auto">Everything a topper needs — organised, modern, and exam-specific.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="glass-card rounded-3xl p-6 text-center hover:-translate-y-1.5 transition-transform">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary to-secondary text-white flex items-center justify-center shadow-lg shadow-primary/25 mb-4">
+                    <i class="ph-bold ph-notebook text-2xl"></i>
+                </div>
+                <h3 class="font-bold mb-1.5">Concept Notes</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Chapter-wise, crisp and exam-focused study material.</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center hover:-translate-y-1.5 transition-transform">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/25 mb-4">
+                    <i class="ph-bold ph-clock text-2xl"></i>
+                </div>
+                <h3 class="font-bold mb-1.5">PYQs & Mocks</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Previous-year questions and timed tests to build speed.</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center hover:-translate-y-1.5 transition-transform">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25 mb-4">
+                    <i class="ph-bold ph-target text-2xl"></i>
+                </div>
+                <h3 class="font-bold mb-1.5">Exam-Specific</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Every syllabus mapped to its exact exam pattern.</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center hover:-translate-y-1.5 transition-transform">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-fuchsia-500 to-purple-500 text-white flex items-center justify-center shadow-lg shadow-fuchsia-500/25 mb-4">
+                    <i class="ph-bold ph-device-mobile text-2xl"></i>
+                </div>
+                <h3 class="font-bold mb-1.5">Anywhere Access</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">Study on phone, tablet or desktop — any time, anywhere.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= JOIN / CONTACT ================= -->
+    <section id="connect" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-6">
+        <div class="rounded-[2rem] p-8 sm:p-12 text-center relative overflow-hidden border border-slate-200 dark:border-white/10 bg-gradient-to-br from-white/70 to-indigo-50/70 dark:from-slate-900/70 dark:to-indigo-950/40 backdrop-blur-md">
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[28rem] h-40 bg-gradient-to-r from-primary/15 to-secondary/15 blur-3xl rounded-full"></div>
+            <div class="relative">
+                <h2 class="font-display text-3xl sm:text-4xl font-bold tracking-tight mb-3">Never miss new material</h2>
+                <p class="text-slate-600 dark:text-slate-400 max-w-lg mx-auto mb-8">
+                    Join our community for updates, fresh notes and exam announcements. Have a query? Contact the owner directly.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a id="join-card" href="#" target="_blank" rel="noopener" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold shadow-xl shadow-sky-500/25 hover:-translate-y-0.5 hover:shadow-sky-500/40 transition-all">
+                        <i class="ph-bold ph-telegram-logo text-2xl"></i>
+                        <span class="text-left leading-tight">
+                            <span class="block text-lg" id="join-card-label">Join Telegram Channel</span>
+                            <span class="block text-xs opacity-80 font-medium">Updates, study material & announcements</span>
+                        </span>
+                    </a>
+                    <a id="contact-card" href="#" target="_blank" rel="noopener" class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-7 py-4 rounded-2xl bg-white dark:bg-white/5 text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 font-bold shadow-lg hover:-translate-y-0.5 hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-all">
+                        <i class="ph-bold ph-envelope-simple text-2xl"></i>
+                        <span class="text-left leading-tight">
+                            <span class="block text-lg">Contact Owner</span>
+                            <span class="block text-xs opacity-70 font-medium">Suggestion, issue or help</span>
+                        </span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="mt-auto pt-14 pb-8 border-t border-slate-200 dark:border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div>
+                <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white">
+                        <i class="ph-bold ph-graduation-cap text-sm"></i>
+                    </div>
+                    <span id="footer-brand" class="font-display font-bold tracking-tight">PrepGrid</span>
+                </div>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm">
+                    Premium study material, notes, PYQs and mock tests — prepare with purpose, crack with confidence.
+                </p>
+            </div>
+
+            <div class="w-full md:w-auto">
+                <div class="drawer-heading text-center md:text-left">Quick Links</div>
+                <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-5 gap-y-2 text-sm font-semibold text-slate-600 dark:text-slate-300">
+                    <button onclick="scrollToId('top')" class="hover:text-primary dark:hover:text-white transition-colors">Home</button>
+                    <button onclick="scrollToId('#exams')" class="hover:text-primary dark:hover:text-white transition-colors">Explore Exams</button>
+                    <button onclick="scrollToId('#about')" class="hover:text-primary dark:hover:text-white transition-colors">About</button>
+                    <a id="footer-contact" href="#" target="_blank" rel="noopener" class="hover:text-primary dark:hover:text-white transition-colors">Contact Support</a>
+                    <button onclick="openModal('privacyModal')" class="hover:text-primary dark:hover:text-white transition-colors">Privacy Policy</button>
+                    <button onclick="openModal('termsModal')" class="hover:text-primary dark:hover:text-white transition-colors">Terms &amp; Conditions</button>
+                </div>
+                <div class="flex items-center justify-center md:justify-start gap-2.5 mt-4">
+                    <a id="footer-telegram" href="https://t.me/Prepgridoffical" target="_blank" rel="noopener" aria-label="Telegram" class="w-10 h-10 rounded-xl inline-flex items-center justify-center border border-slate-200 dark:border-white/10 hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-colors"><i class="ph-bold ph-telegram-logo text-lg"></i></a>
+                    <a id="footer-whatsapp" href="https://whatsapp.com/channel/0029VbBL8BiIiRorHQX6Pw31" target="_blank" rel="noopener" aria-label="WhatsApp" class="w-10 h-10 rounded-xl inline-flex items-center justify-center border border-slate-200 dark:border-white/10 hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-colors"><i class="ph-bold ph-whatsapp-logo text-lg"></i></a>
+                    <a id="footer-instagram" href="https://www.instagram.com/prepgridofficial?mdxt=NDJreXhuaHNzYWJk" target="_blank" rel="noopener" aria-label="Instagram" class="w-10 h-10 rounded-xl inline-flex items-center justify-center border border-slate-200 dark:border-white/10 hover:border-primary hover:text-primary dark:hover:text-indigo-300 transition-colors"><i class="ph-bold ph-instagram-logo text-lg"></i></a>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center md:items-end gap-3">
+                <a id="footer-join" href="https://t.me/+NGUSfa7ns8c4OTll" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-primary dark:hover:bg-indigo-300 transition-colors">
+                    <i class="ph-bold ph-telegram-logo"></i> <span id="footer-join-label">@PrepGridOfficial</span>
+                </a>
+                <p class="text-xs text-slate-400 dark:text-slate-500">© <span id="currentYear"></span> PrepGrid — All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- ================= HAMBURGER DRAWER ================= -->
+    <div id="drawerBackdrop" class="drawer-backdrop" aria-hidden="true"></div>
+    <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="Main menu" aria-hidden="true">
+        <div class="flex items-center justify-between px-4 pt-4 pb-2">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white shadow-lg shadow-primary/30">
+                    <i class="ph-bold ph-graduation-cap text-lg"></i>
+                </div>
+                <div class="leading-none">
+                    <div id="drawer-brand" class="font-display font-bold text-base">PrepGrid</div>
+                    <div class="text-[9px] font-bold uppercase tracking-[.2em] text-primary dark:text-indigo-300">India's Exam Prep Hub</div>
+                </div>
+            </div>
+            <button id="drawerClose" class="w-10 h-10 rounded-xl inline-flex items-center justify-center text-slate-500 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-white/10 transition-colors" aria-label="Close menu">
+                <i class="ph-bold ph-x text-lg"></i>
+            </button>
+        </div>
+
+        <nav class="px-3 pb-6 flex-1" aria-label="Menu items">
+            <button class="drawer-item" data-action="home"><span class="di"><i class="ph-bold ph-house"></i></span> Home</button>
+            <button class="drawer-item" data-action="scroll" data-target="#exams"><span class="di"><i class="ph-bold ph-cube"></i></span> Explore All Exams</button>
+            <button class="drawer-item" data-action="scroll" data-target="#daily"><span class="di"><i class="ph-bold ph-lightning"></i></span> Daily Challenge</button>
+            <button class="drawer-item" data-action="scroll" data-target="#material"><span class="di"><i class="ph-bold ph-notebook"></i></span> Free Study Material</button>
+            <button class="drawer-item" data-action="scroll" data-target="#updates"><span class="di"><i class="ph-bold ph-megaphone"></i></span> Latest Updates</button>
+            <button class="drawer-item" data-action="scroll" data-target="#mentorship"><span class="di"><i class="ph-bold ph-target"></i></span> NEET 2027 Mentorship</button>
+
+            <div class="drawer-sep"></div>
+            <div class="drawer-heading">Community</div>
+            <a id="drawer-telegram" class="drawer-item" href="#" target="_blank" rel="noopener"><span class="di"><i class="ph-bold ph-telegram-logo"></i></span> Join Telegram Channel</a>
+            <a id="drawer-whatsapp" class="drawer-item" href="#" target="_blank" rel="noopener"><span class="di"><i class="ph-bold ph-whatsapp-logo"></i></span> Join WhatsApp Channel</a>
+            <a id="drawer-instagram" class="drawer-item" href="#" target="_blank" rel="noopener"><span class="di"><i class="ph-bold ph-instagram-logo"></i></span> Follow Instagram</a>
+
+            <div class="drawer-sep"></div>
+            <div class="drawer-heading">PrepGrid</div>
+            <button class="drawer-item" data-action="scroll" data-target="#about"><span class="di"><i class="ph-bold ph-info"></i></span> About PrepGrid</button>
+            <a id="drawer-contact" class="drawer-item" href="#" target="_blank" rel="noopener"><span class="di"><i class="ph-bold ph-envelope-simple"></i></span> Contact Support</a>
+            <button class="drawer-item" data-action="modal" data-modal="privacyModal"><span class="di"><i class="ph-bold ph-shield-check"></i></span> Privacy Policy</button>
+            <button class="drawer-item" data-action="modal" data-modal="termsModal"><span class="di"><i class="ph-bold ph-scroll"></i></span> Terms &amp; Conditions</button>
+
+            <div class="drawer-sep"></div>
+            <button class="drawer-item" data-action="theme-toggle"><span class="di"><i class="ph-bold ph-circle-half"></i></span> Light / Dark Theme</button>
+        </nav>
+    </aside>
+
+    <!-- ================= MODALS ================= -->
+    <div id="privacyModal" class="modal fixed inset-0 z-[110] hidden" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('privacyModal')"></div>
+        <div class="relative max-w-lg mx-auto mt-24 mx-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl p-7">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <h2 id="privacyTitle" class="font-display text-xl font-bold">Privacy Policy</h2>
+                <button onclick="closeModal('privacyModal')" aria-label="Close" class="w-9 h-9 rounded-xl inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
+                <p>PrepGrid is a static study portal. We do not require an account and we do not collect personal information on this page.</p>
+                <p>The only data stored in your browser is your theme preference (light or dark), kept in local storage on your own device. Clearing your browser data removes it.</p>
+                <p>Pages hosted outside PrepGrid, including Telegram and social channels, follow their own privacy policies.</p>
+            </div>
+            <p class="ph-note mt-5">Edit this text to match your final policy before publishing.</p>
+        </div>
+    </div>
+
+    <div id="termsModal" class="modal fixed inset-0 z-[110] hidden" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeModal('termsModal')"></div>
+        <div class="relative max-w-lg mx-auto mt-24 mx-4 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-2xl p-7">
+            <div class="flex items-start justify-between gap-4 mb-4">
+                <h2 id="termsTitle" class="font-display text-xl font-bold">Terms &amp; Conditions</h2>
+                <button onclick="closeModal('termsModal')" aria-label="Close" class="w-9 h-9 rounded-xl inline-flex items-center justify-center hover:bg-slate-100 dark:hover:bg-white/10"><i class="ph-bold ph-x"></i></button>
+            </div>
+            <div class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed space-y-3">
+                <p>Study material on PrepGrid is provided for personal preparation and revision.</p>
+                <p>Exam names, syllabus references and patterns belong to their respective official bodies. PrepGrid is not affiliated with, endorsed by, or an official channel of any exam authority.</p>
+                <p>Do not redistribute paid material. Links to external channels are provided for convenience.</p>
+            </div>
+            <p class="ph-note mt-5">Edit this text to match your final terms before publishing.</p>
+        </div>
+    </div>
+
+    <button id="backTop" class="back-top" aria-label="Back to top"><i class="ph-bold ph-arrow-up text-lg"></i></button>
+
+    <script>
+        // =====================================================
+        //  EDIT ME — brand + links (channel & owner)
+        // =====================================================
+        const CONFIG = {
+            brandName: 'PrepGrid',
+            brandTag: 'India\'s Exam Prep Hub',
+            // 👇 Replace with your real links:
+            telegramUrl: 'YOUR_TELEGRAM_CHANNEL_LINK',   // channel link
+            ownerUrl: 'https://t.me/PrepGridoffical',               // contact owner link
+            joinLabel: 'Join Telegram'
+        };
+
+        const ICON = {
+            neet: 'ph-stethoscope', jee: 'ph-atom', upsc: 'ph-globe-hemisphere-west',
+            gpsc: 'ph-buildings', gsssb: 'ph-briefcase', tet: 'ph-chalkboard-teacher',
+            tat: 'ph-target', htat: 'ph-graduation-cap', talati: 'ph-notebook',
+            police: 'ph-shield-check', psi: 'ph-shield-star', asi: 'ph-shield',
+            forest_guard: 'ph-tree', railway: 'ph-train', ssc: 'ph-users',
+            banking: 'ph-currency-inr', ca: 'ph-calculator', ctet: 'ph-book-open',
+            ugc_net: 'ph-books', cuet: 'ph-building', gate: 'ph-chart-line'
+        };
+
+        const examsData = [
+            { id: 'banking', name: 'Banking', fullName: 'Banking', category: 'Banking exams', group: 'Finance', mark: 'B', color: '#f9a8d4', accent: '#be185d', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/Banking/index.html' },
+            { id: 'ca', name: 'CA', fullName: 'Chartered Accountancy', category: 'Commerce & Finance', group: 'Finance', mark: 'C', color: '#c4b5fd', accent: '#6d28d9', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/CA/index.html' },
+            { id: 'cma', name: 'CMA', fullName: 'Cost and Management Accountancy', category: 'Commerce & Finance', group: 'Finance', mark: 'C', color: '#a5b4fc', accent: '#4338ca', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/CMA/index.html' },
+            { id: 'cs', name: 'CS', fullName: 'Company Secretary', category: 'Commerce & Finance', group: 'Finance', mark: 'S', color: '#fcd34d', accent: '#a16207', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/CS/index.html' },
+            { id: 'gpsc', name: 'GPSC', fullName: 'Gujarat Public Service Commission', category: 'State services', group: 'Government', mark: 'P', color: '#fdba74', accent: '#c2410c', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/GPSC/index.html' },
+            { id: 'gseb', name: 'Gujarat Board', fullName: 'GSEB Gujarat Board', category: 'Gujarat Board', group: 'Education', mark: 'G', color: '#86efac', accent: '#15803d', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/GSEB-Gujarat-Board/index.html' },
+            { id: 'gsssb', name: 'GSSSB', fullName: 'Gujarat Gaun Seva Pasandgi Mandal', category: 'State recruitment', group: 'Government', mark: 'G', color: '#d6c6a8', accent: '#92610e', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/GSSSB/index.html' },
+            { id: 'gujcet', name: 'GUJCET', fullName: 'Gujarat Common Entrance Test', category: 'State entrance', group: 'Engineering', mark: 'G', color: '#a5f3fc', accent: '#0e7490', subjects: ['Physics', 'Chemistry', 'Mathematics'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/GUJCET/index.html' },
+            { id: 'forest_guard', name: 'Gujarat Forest Guard', fullName: 'Gujarat Forest Department recruitment', category: 'Forest recruitment', group: 'Government', mark: 'F', color: '#5eead4', accent: '#047857', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/Gujarat-Forest-Guard/index.html' },
+            { id: 'police_constable', name: 'Gujarat Police Constable', fullName: 'Gujarat Police Constable recruitment', category: 'Police recruitment', group: 'Police', mark: 'P', color: '#93c5fd', accent: '#1d4ed8', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/Gujarat-Police-Constable/index.html' },
+            { id: 'jee_advanced', name: 'JEE Advanced', fullName: 'Joint Entrance Examination Advanced', category: 'Engineering entrance', group: 'Engineering', mark: 'J', color: '#bfdbfe', accent: '#1d4ed8', subjects: ['Physics', 'Chemistry', 'Mathematics'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/JEE-Advanced/index.html' },
+            { id: 'jee_main', name: 'JEE Main', fullName: 'Joint Entrance Examination Main', category: 'Engineering entrance', group: 'Engineering', mark: 'J', color: '#fdba74', accent: '#c2410c', subjects: ['Physics', 'Chemistry', 'Mathematics'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/JEE-Main/index.html' },
+            { id: 'nda_cds', name: 'NDA-CDS', fullName: 'National Defence Academy / Combined Defence Services', category: 'Defence entrance', group: 'Defence', mark: 'N', color: '#c4b5fd', accent: '#6d28d9', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/NDA-CDS/index.html' },
+            { id: 'neet', name: 'NEET', fullName: 'National Eligibility cum Entrance Test', category: 'Medical entrance', group: 'Medical', mark: 'N', color: '#2dd4bf', accent: '#0f766e', subjects: ['Biology', 'Physics', 'Chemistry'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/NEET/index.html' },
+            { id: 'railway', name: 'Railway RRB', fullName: 'Railway Recruitment Board exams', category: 'Railway recruitment', group: 'Government', mark: 'R', color: '#99f6e4', accent: '#0f766e', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/Railway-RRB/index.html' },
+            { id: 'ssc', name: 'SSC', fullName: 'Staff Selection Commission exams', category: 'Staff selection', group: 'Government', mark: 'S', color: '#fda4af', accent: '#b91c1c', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/SSC/index.html' },
+            { id: 'tet1', name: 'TET-1', fullName: 'Teacher Eligibility Test 1', category: 'Teacher eligibility', group: 'Teaching', mark: 'T', color: '#fca5a5', accent: '#b91c1c', subjects: ['Child Development & Pedagogy', 'Language', 'Mathematics', 'EVS'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/TET-1/index.html' },
+            { id: 'tet2', name: 'TET-2', fullName: 'Teacher Eligibility Test 2', category: 'Teacher eligibility', group: 'Teaching', mark: 'T', color: '#7dd3fc', accent: '#0369a1', subjects: ['Child Development & Pedagogy', 'Language', 'Mathematics', 'EVS'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/TET-2/index.html' },
+            { id: 'upsc', name: 'UPSC', fullName: 'Union Public Service Commission Civil Services', category: 'Civil services', group: 'Government', mark: 'U', color: '#c4b5fd', accent: '#6d28d9', subjects: ['General Knowledge', 'Reasoning', 'Language', 'Subject Practice'], stats: { questions: 'Study material', mockTests: 'Practice tests', students: 'Exam resources' }, path: './allexam/UPSC/index.html' }
+        ];
+
+        const categories = ['All', 'Medical', 'Engineering', 'Government', 'Teaching', 'Police', 'Finance', 'Gujarat Board', 'Defence'];
+
+        // ============ state & helpers ============
+        const appState = { searchQuery: '', activeCategory: 'All' };
+        const gridEl = document.getElementById('exam-grid-container');
+        const catEl = document.getElementById('category-container');
+        const emptyEl = document.getElementById('empty-state');
+
+        function toNumber(s) { if (!s) return 0; const n = parseFloat(s); if (/k/i.test(s)) return n * 1e3; if (/l/i.test(s)) return n * 1e5; if (/m/i.test(s)) return n * 1e6; return n; }
+        function compact(v) { if (v >= 1e7) return (v / 1e7).toFixed(1).replace(/\.0$/, '') + ' Cr+'; if (v >= 1e5) return (v / 1e5).toFixed(1).replace(/\.0$/, '') + ' L+'; if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + ' K+'; return Math.round(v) + '+'; }
+
+        function setCategory(cat) { appState.activeCategory = cat; renderCategories(); renderGrid(); }
+
+        function renderCategories() {
+            catEl.innerHTML = categories.map(cat => {
+                const active = appState.activeCategory === cat;
+                const cls = active
+                    ? 'bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/30'
+                    : 'bg-white/80 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-white dark:hover:bg-white/10 border border-slate-200 dark:border-white/10';
+                return `<button onclick="setCategory('${cat}')" class="px-5 py-2.5 rounded-full text-sm font-bold transition-all duration-200 whitespace-nowrap ${cls}">${cat}</button>`;
+            }).join('');
+        }
+
+        function filteredExams() {
+            const q = appState.searchQuery;
+            return examsData.filter(exam => {
+                const hay = [exam.name, exam.fullName, exam.category, exam.group, exam.subjects.join(' ')].join(' ').toLowerCase();
+                return (!q || hay.includes(q)) && (appState.activeCategory === 'All' || exam.group === appState.activeCategory);
+            });
+        }
+
+        function renderGrid() {
+            const list = filteredExams();
+            emptyEl.classList.toggle('hidden', list.length !== 0);
+
+            gridEl.innerHTML = list.map((exam, i) => {
+                const icon = ICON[exam.id] || 'ph-book-open';
+                const chips = exam.subjects.slice(0, 2).map(s => `<span class="chip text-[10px] font-semibold px-2 py-0.5 rounded-md">${s}</span>`).join('');
+                const st = exam.stats || {};
+                const statStr = [st.questions && `Qs <b>${st.questions}</b>`, st.mockTests && `Mocks <b>${st.mockTests}</b>`, st.students && `<b>${st.students}</b> students`].filter(Boolean).join(' &nbsp;·&nbsp; ');
+
+                return `
+                <div class="tilt-wrap" style="animation: fadeIn .5s ease-out ${Math.min(i * 40, 480)}ms both">
+                    <div class="folder3d focus:outline-none" style="--acc:${exam.accent}; min-height: 15rem;" tabindex="0" role="link" aria-label="Open ${exam.name}"
+                         onclick="openExam('${exam.id}')" onkeydown="if(event.key==='Enter')openExam('${exam.id}')">
+                        <div class="f-tab"></div>
+                        <div class="f-back"></div>
+                        <div class="f-front">
+                            <div class="flex items-start justify-between gap-3 mb-4">
+                                <div class="icon3d"><i class="ph-bold ${icon} text-[26px]"></i></div>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full mt-1" style="color:${exam.accent}; background:color-mix(in srgb, var(--acc) 12%, transparent); border:1px solid color-mix(in srgb, var(--acc) 30%, transparent);">${exam.category}</span>
+                            </div>
+                            <h3 class="font-display text-xl font-bold tracking-tight mb-1">${exam.name}</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 leading-snug mb-3 line-clamp-2">${exam.fullName}</p>
+                            <div class="flex flex-wrap gap-1.5 mb-4">${chips}</div>
+                            <div class="mt-auto">
+                                <div class="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-3">${statStr}</div>
+                                <div class="flex items-center justify-between text-sm font-bold open-line" style="color:${exam.accent};">
+                                    <span>Enter Space</span>
+                                    <i class="ph-bold ph-arrow-right text-lg"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function openExam(id) { const exam = examsData.find(e => e.id === id); if (exam && exam.path) window.location.href = exam.path; }
+
+        // ============ brand / theme / stats ============
+        function applyBrand() {
+            document.title = CONFIG.brandName + ' — Exam Prep Hub';
+            document.getElementById('brand-name').textContent = CONFIG.brandName;
+            document.getElementById('brand-tag').textContent = CONFIG.brandTag;
+            document.getElementById('footer-brand').textContent = CONFIG.brandName;
+            document.getElementById('join-label').textContent = CONFIG.joinLabel;
+            const links = ['join-btn', 'join-card', 'contact-card', 'footer-join'];
+            const hrefs = { 'join-btn': CONFIG.telegramUrl, 'join-card': CONFIG.telegramUrl, 'contact-card': CONFIG.ownerUrl, 'footer-join': CONFIG.telegramUrl };
+            links.forEach(id => { const el = document.getElementById(id); if (el) el.href = hrefs[id]; });
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+        }
+
+        function renderStatsBand() {
+            const q = examsData.reduce((a, e) => a + toNumber(e.stats.questions), 0);
+            const m = examsData.reduce((a, e) => a + toNumber(e.stats.mockTests), 0);
+            const s = examsData.reduce((a, e) => a + toNumber(e.stats.students), 0);
+            const cells = [
+                [examsData.length + '+', 'Exam Spaces', 'ph-cube'],
+                [compact(q), 'Questions Bank', 'ph-question'],
+                [compact(m), 'Mock Tests', 'ph-clock'],
+                [compact(s), 'Students Guided', 'ph-users']
+            ];
+            document.getElementById('stats-band').innerHTML = cells.map(c => `
+                <div class="flex flex-col items-center gap-1">
+                    <i class="ph-bold ${c[2]} text-2xl opacity-80"></i>
+                    <div class="font-display text-3xl sm:text-4xl font-bold">${c[0]}</div>
+                    <div class="text-[11px] sm:text-xs uppercase tracking-widest opacity-80 font-semibold">${c[1]}</div>
+                </div>`).join('');
+            document.getElementById('section-sub').textContent = `${examsData.length} exam spaces — tap any folder to enter`;
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('theme');
+            if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+        }
+
+        // ---- upgrade layer hook: the layer below runs in this script's
+        //      scope but outside the DOMContentLoaded handler, so the
+        //      rendering functions are handed over explicitly.
+        window.__PG_CORE__ = { examsData: examsData, openExam: openExam,
+                               renderGrid: renderGrid, icon: ICON, config: CONFIG };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            applyBrand();
+            renderStatsBand();
+            renderCategories();
+            renderGrid();
+
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                const dark = document.documentElement.classList.toggle('dark');
+                localStorage.setItem('theme', dark ? 'dark' : 'light');
+            });
+            document.getElementById('searchInput').addEventListener('input', e => {
+                appState.searchQuery = e.target.value.trim().toLowerCase();
+                renderGrid();
+            });
+        });
+
+
+    /* =========================================================
+       PREPGRID v3 UPGRADE LAYER
+       Everything below is additive — the original renderer above
+       stays untouched and keeps owning the 3D folder grid.
+       ========================================================= */
+    (function (CORE) {
+        'use strict';
+        const examsData = CORE.examsData,
+              CONFIG    = CORE.config,
+              ICON      = CORE.icon,
+              originalOpenExam = CORE.openExam;
+        let renderGrid = CORE.renderGrid;
+
+        /* ---------- CONFIG additions (edit these) ---------- */
+        Object.assign(CONFIG, {
+            whatsappUrl: 'https://whatsapp.com/channel/0029VbBL8BiIiRorHQX6Pw31',
+            instagramUrl: 'https://www.instagram.com/prepgridofficial/',
+            privacyUrl: '',            // leave empty to use the built-in dialog
+            termsUrl: '',              // leave empty to use the built-in dialog
+            trademark: '@PrepGridOfficial',
+
+            // NEET 2027 exam date. Fill ONLY with an officially announced date
+            // (a Date at IST midnight). While it stays null the page shows
+            // "Exam date to be announced" — never a guessed countdown.
+            neet2027Date: null
+        });
+
+        /* ---------- small helpers ---------- */
+        const $  = (id) => document.getElementById(id);
+        const el = (tag, cls, html) => {
+            const n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (html != null) n.textContent = html;   // text only, never raw HTML
+            return n;
+        };
+        function isPlaceholder(url) { return !url || /^YOUR_/i.test(url); }
+        /* ---------- live pages ----------
+           Every destination this page links to, listed by hand. A card whose
+           destination is not listed here warns instead of sending the visitor
+           to a 404 (brief §6, §9). Add a line when you publish a folder. */
+        const LIVE_PAGES = [
+            'gjstudyhub/index.html',
+            './allexam/NEET/index.html',
+            './allexam/Banking/index.html',
+            './allexam/CA/index.html',
+            './allexam/CMA/index.html',
+            './allexam/CS/index.html',
+            './allexam/GPSC/index.html',
+            './allexam/GSEB-Gujarat-Board/index.html',
+            './allexam/GSSSB/index.html',
+            './allexam/GUJCET/index.html',
+            './allexam/Gujarat-Forest-Guard/index.html',
+            './allexam/Gujarat-Police-Constable/index.html',
+            './allexam/JEE-Advanced/index.html',
+            './allexam/JEE-Main/index.html',
+            './allexam/NDA-CDS/index.html',
+            './allexam/Railway-RRB/index.html',
+            './allexam/SSC/index.html',
+            './allexam/TET-1/index.html',
+            './allexam/TET-2/index.html',
+            './allexam/UPSC/index.html',
+        ];
+
+        // A destination counts as live only when the exam's folder contains an
+        // index.html that is listed in LIVE_PAGES above. The source data's path
+        // field alone is just the intended location — it is not proof the page
+        // exists, and claiming otherwise would send visitors to a 404 (6, 9).
+        function hasPages(exam) {
+            if (!exam) return false;
+            const base = typeof exam.path === 'string' ? exam.path : '';
+            const candidates = base
+                ? [base, base.replace(/\/?$/, '/') + 'index.html']
+                : [];
+            return candidates.some(p => LIVE_PAGES.indexOf(p) !== -1);
+        }
+
+        function scrollToId(target) {
+            if (target === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            const node = document.querySelector(target);
+            if (node) node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        window.scrollToId = scrollToId;
+
+        function toast(msg) {
+            let t = $('pgToast');
+            if (!t) {
+                t = el('div', 'fixed left-1/2 -translate-x-1/2 bottom-24 z-[120] px-5 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold shadow-2xl');
+                t.id = 'pgToast';
+                t.setAttribute('role', 'status');
+                t.style.transition = 'opacity .25s ease, transform .25s ease';
+                document.body.appendChild(t);
+            }
+            t.textContent = msg;
+            t.style.opacity = '1';
+            t.style.transform = 'translate(-50%, 0)';
+            clearTimeout(toast._t);
+            toast._t = setTimeout(() => {
+                t.style.opacity = '0';
+                t.style.transform = 'translate(-50%, 10px)';
+            }, 2800);
+        }
+
+        /* ---------- theme ---------- */
+        // Exams that open a sub-screen instead of a plain folder. NEET UG is the
+        // one exam with two language streams (brief §5).
+        const LANGUAGE_EXAMS = { neet: ['gj', 'en'] };
+        const LANGUAGE_DEST = {
+            gj: './gjstudyhub/index.html',    // NEET Gujarati
+            en: './allexam/NEET/index.html'   // NEET English
+        };
+        const LANGUAGE_LABEL = { gj: 'NEET Gujarati', en: 'NEET English' };
+
+        function setTheme(dark) {
+            document.documentElement.classList.toggle('dark', dark);
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+            syncThemeLabels();
+        }
+        function toggleTheme() {
+            setTheme(!document.documentElement.classList.contains('dark'));
+        }
+        function syncThemeLabels() {
+            const dark = document.documentElement.classList.contains('dark');
+            document.querySelectorAll('[data-theme-label]').forEach(n => {
+                n.textContent = dark ? 'Switch to light' : 'Switch to dark';
+            });
+        }
+        window.setTheme = setTheme;
+
+        /* ---------- drawer ---------- */
+        const drawer = $('drawer'), backdrop = $('drawerBackdrop'), burger = $('burger');
+        let lastFocused = null;
+
+        function openDrawer() {
+            lastFocused = document.activeElement;
+            drawer.classList.add('open');
+            backdrop.classList.add('open');
+            burger.classList.add('active');
+            burger.setAttribute('aria-expanded', 'true');
+            drawer.setAttribute('aria-hidden', 'false');
+            backdrop.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            const first = drawer.querySelector('.drawer-item');
+            if (first) first.focus();
+        }
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            backdrop.classList.remove('open');
+            burger.classList.remove('active');
+            burger.setAttribute('aria-expanded', 'false');
+            drawer.setAttribute('aria-hidden', 'true');
+            backdrop.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+            if (lastFocused && lastFocused.focus) lastFocused.focus();
+        }
+        window.openDrawer = openDrawer;
+        window.closeDrawer = closeDrawer;
+
+        burger.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+        backdrop.addEventListener('click', closeDrawer);
+        $('drawerClose').addEventListener('click', closeDrawer);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (drawer.classList.contains('open')) { closeDrawer(); return; }
+                const open = document.querySelector('.modal:not(.hidden)');
+                if (open) closeModal(open.id);
+            }
+            if (e.key === 'Tab' && drawer.classList.contains('open')) {
+                const items = drawer.querySelectorAll('a[href], button:not([disabled])');
+                if (!items.length) return;
+                const first = items[0], last = items[items.length - 1];
+                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+            }
+        });
+
+        drawer.querySelectorAll('.drawer-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                const isExternal = item.tagName === 'A';
+                if (!isExternal) closeDrawer();          // links close on their own handler
+                if (action === 'home') scrollToId('top');
+                else if (action === 'scroll') scrollToId(item.dataset.target);
+                else if (action === 'modal') openModal(item.dataset.modal);
+                else if (action === 'theme-toggle') toggleTheme();
+            });
+        });
+
+        /* drawer links that leave the page must close the drawer too */
+        drawer.querySelectorAll('a.drawer-item').forEach(a => {
+            a.addEventListener('click', (e) => {
+                const href = a.getAttribute('href') || '';
+                if (isPlaceholder(href) || href === '#') {
+                    e.preventDefault();
+                    closeDrawer();
+                    toast('Link not set yet — add your real URL in CONFIG');
+                } else {
+                    closeDrawer();
+                }
+            });
+        });
+
+        /* ---------- modals ---------- */
+        function openModal(id) {
+            const m = $(id);
+            if (!m) return;
+            m.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            const btn = m.querySelector('button');
+            if (btn) btn.focus();
+        }
+        function closeModal(id) {
+            const m = $(id);
+            if (!m) return;
+            m.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        window.openModal = openModal;
+        window.closeModal = closeModal;
+
+        /* ---------- search: clear button + Enter to scroll ---------- */
+        function wireSearch() {
+            const input = $('searchInput');
+            if (!input || $('searchClear')) return;
+            const wrap = input.parentElement;
+            const clear = el('button', 'absolute inset-y-0 right-3 my-auto w-9 h-9 rounded-xl items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors hidden');
+            clear.id = 'searchClear';
+            clear.type = 'button';
+            clear.setAttribute('aria-label', 'Clear search');
+            clear.appendChild(el('i', 'ph-bold ph-x'));
+            wrap.appendChild(clear);
+
+            const sync = () => clear.classList.toggle('hidden', input.value.length === 0);
+            const show = () => { clear.classList.remove('hidden'); clear.classList.add('flex'); };
+            const hide = () => { clear.classList.add('hidden'); clear.classList.remove('flex'); };
+
+            clear.addEventListener('click', () => {
+                input.value = '';
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                hide();
+                input.focus();
+                scrollToId('#exams');
+            });
+            input.addEventListener('input', () => input.value.length ? show() : hide());
+
+            // pressing Enter jumps to the grid so results are visible
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); scrollToId('#exams'); }
+                if (e.key === 'Escape') { input.value = ''; input.dispatchEvent(new Event('input', { bubbles: true })); hide(); }
+            });
+
+            // keyboard shortcut: "/" focuses search
+            document.addEventListener('keydown', (e) => {
+                const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+                if (e.key === '/' && !typing) { e.preventDefault(); input.focus(); input.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            });
+        }
+
+        /* ---------- exam opening with theme preset ---------- */
+        function patchOpenExam() {
+            const original = window.openExam;
+            window.openExam = function (id) {
+                const exam = examsData.find(e => e.id === id);
+                if (!exam) { toast('Exam not found'); return; }
+                if (LANGUAGE_EXAMS[id]) { showLanguageScreen(id); return; }
+                if (!hasPages(exam)) { toast('This space has no pages yet'); return; }
+                original(id);
+            };
+        }
+
+        /* ---------- NEET UG language screen (brief 5) ---------- */
+        let langExamId = null;
+        function showLanguageScreen(examId) {
+            langExamId = examId;
+            const screen = $('lang-screen'), grid = $('exam-grid-container'), empty = $('empty-state');
+            if (!screen) return;
+            const ex = examsData.find(e => e.id === examId);
+            $('lang-title').textContent = 'Choose your ' + (ex ? ex.name : '') + ' language';
+            grid.classList.add('hidden');
+            empty.classList.add('hidden');
+            screen.classList.remove('hidden');
+            markLanguageAvailability();
+            // browser Back should leave the screen, not the page (brief 5)
+            history.pushState({ pgLang: examId }, '', '#' + examId);
+            screen.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            $('lang-back').focus({ preventScroll: true });
+        }
+        function hideLanguageScreen() {
+            const screen = $('lang-screen'), empty = $('empty-state');
+            if (!screen) return;
+            screen.classList.add('hidden');
+            $('exam-grid-container').classList.remove('hidden');
+            langExamId = null;
+            if (appState.searchQuery === '' && appState.activeCategory === 'All') empty.classList.add('hidden');
+        }
+        function hasLanguagePage(k) {
+            // No filesystem access from the browser: a destination is treated as
+            // unverified until it is actually supplied alongside this page.
+            return LIVE_PAGES.indexOf(LANGUAGE_DEST[k]) !== -1;
+        }
+        function markLanguageAvailability() {
+            const note = $('lang-note');
+            if (!note) return;
+            const missing = Object.keys(LANGUAGE_DEST).filter(k => !hasLanguagePage(k));
+            note.textContent = missing.length
+                ? 'Not published yet: ' + missing.map(k => LANGUAGE_LABEL[k]).join(', ') +
+                  '. Those folders still need to be added next to this file.'
+                : '';
+        }
+        function openLanguage(k) {
+            const dest = LANGUAGE_DEST[k];
+            if (!dest || !hasLanguagePage(k)) {
+                toast(LANGUAGE_LABEL[k] + ' pages are not published yet');
+                return;
+            }
+            window.location.href = dest;
+        }
+        window.openLanguage = openLanguage;
+        window.__PG_LIVE_PAGES__ = LIVE_PAGES;
+
+        /* ---------- daily challenge ---------- */
+        const QUIZ = [
+            {
+                topic: 'Biology · Molecular Basis of Inheritance',
+                q: 'Which enzyme unwinds the DNA double helix ahead of the replication fork?',
+                options: ['DNA polymerase III', 'DNA helicase', 'DNA ligase', 'Primase'],
+                answer: 1,
+                explain: 'DNA helicase breaks the hydrogen bonds between complementary base pairs and separates the two strands, creating the replication fork. Polymerase III synthesises the new strand, primase lays the RNA primer, and ligase seals the nicks.'
+            },
+            {
+                topic: 'Chemistry · Chemical Equilibrium',
+                q: 'For a reaction at equilibrium, an increase in pressure shifts the equilibrium towards:',
+                options: ['The side with more gaseous moles', 'The side with fewer gaseous moles', 'It never shifts', 'Only towards the products'],
+                answer: 1,
+                explain: 'By Le Chatelier’s principle, raising the pressure pushes the system towards the side with fewer moles of gas, reducing the volume occupied and opposing the imposed change.'
+            },
+            {
+                topic: 'Physics · Laws of Motion',
+                q: 'A body moves with constant velocity. The net force acting on it is:',
+                options: ['Equal to its weight', 'Proportional to its speed', 'Zero', 'Directed along the motion'],
+                answer: 2,
+                explain: 'Constant velocity means zero acceleration. By Newton’s second law, F = ma, so a = 0 gives a net force of zero, regardless of the speed.'
+            }
+        ];
+        const quizState = { i: 0, picked: null, answered: false };
+
+        function renderQuiz() {
+            const item = QUIZ[quizState.i];
+            quizState.picked = null;
+            quizState.answered = false;
+
+            $('quiz-topic').textContent = item.topic;
+            $('quiz-q').textContent = item.q;
+
+            const box = $('quiz-options');
+            box.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+            item.options.forEach((text, idx) => {
+                const b = el('button', 'opt');
+                b.type = 'button';
+                b.dataset.idx = String(idx);
+                b.appendChild(el('span', 'ol', letters[idx] || '?'));
+                b.appendChild(el('span', null, text));
+                b.addEventListener('click', () => pickOption(idx));
+                box.appendChild(b);
+            });
+
+            const fb = $('quiz-feedback');
+            fb.className = 'hidden rounded-2xl p-4 text-sm leading-relaxed mb-5';
+            fb.innerHTML = '';
+            $('quiz-submit').classList.remove('hidden');
+            $('quiz-next').classList.add('hidden');
+            $('quiz-retry').classList.add('hidden');
+        }
+
+        function pickOption(idx) {
+            if (quizState.answered) return;
+            quizState.picked = idx;
+            $('quiz-options').querySelectorAll('.opt').forEach(b => {
+                const on = Number(b.dataset.idx) === idx;
+                b.style.borderColor = on ? '#4f46e5' : '';
+                b.style.background = on ? 'rgba(79,70,229,.08)' : '';
+            });
+        }
+
+        function submitQuiz() {
+            const item = QUIZ[quizState.i];
+            if (quizState.picked === null) { toast('Pick an option first'); return; }
+            quizState.answered = true;
+
+            const opts = $('quiz-options').querySelectorAll('.opt');
+            opts.forEach(b => {
+                const idx = Number(b.dataset.idx);
+                b.disabled = true;
+                b.style.borderColor = '';
+                b.style.background = '';
+                if (idx === item.answer) b.classList.add('correct');
+                else if (idx === quizState.picked) b.classList.add('wrong');
+            });
+
+            const ok = quizState.picked === item.answer;
+            const fb = $('quiz-feedback');
+            fb.className = 'rounded-2xl p-4 text-sm leading-relaxed mb-5 ' +
+                (ok ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                    : 'bg-rose-500/10 border border-rose-500/30 text-rose-800 dark:text-rose-300');
+            fb.innerHTML = '';
+            fb.appendChild(el('div', 'font-bold mb-1', ok ? 'Correct' : 'Not quite'));
+            if (!ok) fb.appendChild(el('p', 'mb-1', 'Correct answer: ' + item.options[item.answer] + '.'));
+            fb.appendChild(el('p', null, 'Explanation: ' + item.explain));
+
+            $('quiz-submit').classList.add('hidden');
+            $('quiz-retry').classList.remove('hidden');
+            $('quiz-next').classList.remove('hidden');
+
+            let solved = Number(localStorage.getItem('pg_quiz_solved') || '0');
+            if (ok) { solved += 1; localStorage.setItem('pg_quiz_solved', String(solved)); }
+            renderStreak();
+        }
+
+        function renderStreak() {
+            const solved = Number(localStorage.getItem('pg_quiz_solved') || '0');
+            const node = $('quiz-streak');
+            if (node) node.textContent = solved ? solved + ' question' + (solved === 1 ? '' : 's') + ' solved on this device' : 'Answer today’s question to start your streak';
+        }
+
+        /* ---------- countdown ---------- */
+        function renderCountdown() {
+            const body = $('countdown-body');
+            if (!body) return;
+            const target = CONFIG.neet2027Date instanceof Date ? CONFIG.neet2027Date : null;
+
+            if (!target) {
+                body.innerHTML = '';
+                body.appendChild(el('div', 'font-display text-2xl sm:text-3xl font-bold mb-2', 'Exam date to be announced'));
+                body.appendChild(el('p', 'text-sm text-white/70 max-w-md mx-auto',
+                    'An official NEET 2027 date has not been announced yet, so no countdown is shown. When NTA announces it, set CONFIG.neet2027Date once and the timer turns on.'));
+                return;
+            }
+
+            const tick = () => {
+                const diff = target.getTime() - Date.now();
+                if (diff <= 0) { body.innerHTML = ''; body.appendChild(el('div', 'font-display text-3xl font-bold', 'All the best — exam day is here')); return; }
+                const d = Math.floor(diff / 864e5);
+                const h = Math.floor(diff / 36e5) % 24;
+                const m = Math.floor(diff / 6e4) % 60;
+                const s = Math.floor(diff / 1e3) % 60;
+                const cells = [[d, 'Days'], [h, 'Hours'], [m, 'Minutes'], [s, 'Seconds']];
+                if (!body.querySelector('.cd-cell')) {
+                    body.innerHTML = '';
+                    const wrap = el('div', 'flex flex-wrap justify-center gap-3 sm:gap-4 mt-6');
+                    cells.forEach(([v, l]) => {
+                        const c = el('div', 'cd-cell');
+                        c.appendChild(el('div', 'cd-num', String(v)));
+                        c.appendChild(el('div', 'cd-lbl', l));
+                        wrap.appendChild(c);
+                    });
+                    body.appendChild(wrap);
+                } else {
+                    body.querySelectorAll('.cd-num').forEach((n, i) => { n.textContent = String(cells[i][0]); });
+                }
+            };
+            tick();
+            setInterval(tick, 1000);
+        }
+
+        /* ---------- free study material ---------- */
+        const MATERIAL = [
+            { icon: 'ph-notebook', title: 'Study Notes', desc: 'Chapter-wise concept notes for every exam space.', target: 'exams' },
+            { icon: 'ph-list-numbers', title: 'Chapter-wise MCQs', desc: 'Topic practice with answers and explanations.', target: 'exams' },
+            { icon: 'ph-clock', title: 'Mock Tests', desc: 'Timed full-length tests built on each exam pattern.', target: 'exams' },
+            { icon: 'ph-file-text', title: 'Previous Year Questions', desc: 'Past papers organised by year and subject.', target: 'exams' },
+            { icon: 'ph-arrows-clockwise', title: 'Revision Resources', desc: 'One-page revision sheets and formula cards.', target: 'exams' },
+            { icon: 'ph-lightning', title: 'Practice Quizzes', desc: 'Short daily quizzes to keep the rhythm going.', target: 'daily' }
+        ];
+
+        function renderMaterial() {
+            const grid = $('material-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            MATERIAL.forEach(m => {
+                const card = el('button', 'glass-card rounded-3xl p-6 text-left card-hov focus:outline-none');
+                card.type = 'button';
+                card.appendChild(el('i', 'ph-bold ' + m.icon + ' text-2xl text-primary dark:text-indigo-300'));
+                card.appendChild(el('h3', 'font-bold mt-3 mb-1', m.title));
+                card.appendChild(el('p', 'text-sm text-slate-500 dark:text-slate-400', m.desc));
+                const foot = el('div', 'mt-4 text-xs font-bold text-primary dark:text-indigo-300');
+                foot.textContent = 'Open Exam Spaces';
+                card.appendChild(foot);
+                card.addEventListener('click', () => scrollToId('#' + m.target));
+                grid.appendChild(card);
+            });
+        }
+
+        /* ---------- latest updates ---------- */
+        const UPDATES = [
+            { tag: 'Website', title: 'Homepage upgraded', body: 'New hero, search filters, daily challenge, mentorship and FAQ sections.', date: 'Oct 2026', placeholder: false },
+            { tag: 'Study Material', title: 'NEET Gujarati space', body: 'Add your notes under gjstudyhub/ and the NEET folder will open it directly.', date: 'Edit me', placeholder: true },
+            { tag: 'Mock Tests', title: 'Test series announcement', body: 'Replace this card with your own announcement — title, one line, and date.', date: 'Edit me', placeholder: true }
+        ];
+
+        function renderUpdates() {
+            const list = $('updates-list');
+            if (!list) return;
+            list.innerHTML = '';
+            UPDATES.forEach(u => {
+                const row = el('div', 'glass-card rounded-2xl p-5 card-hov flex flex-col sm:flex-row sm:items-center gap-3');
+                const left = el('div', 'flex-1 min-w-0');
+                const top = el('div', 'flex items-center gap-2 mb-1.5 flex-wrap');
+                const tag = el('span', 'text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-300', u.tag);
+                top.appendChild(tag);
+                if (u.placeholder) top.appendChild(el('span', 'ph-note', 'placeholder'));
+                left.appendChild(top);
+                left.appendChild(el('h3', 'font-bold', u.title));
+                left.appendChild(el('p', 'text-sm text-slate-500 dark:text-slate-400', u.body));
+                row.appendChild(left);
+                row.appendChild(el('span', 'text-xs font-bold text-slate-400 shrink-0', u.date));
+                list.appendChild(row);
+            });
+        }
+
+        /* ---------- testimonials (empty by default — never invented) ---------- */
+        const TESTIMONIALS = [];
+
+        function renderTestimonials() {
+            const section = $('testimonials'), grid = $('testimonial-grid');
+            if (!section || !grid) return;
+            if (!TESTIMONIALS.length) { section.classList.add('hidden'); return; }
+            section.classList.remove('hidden');
+            grid.innerHTML = '';
+            TESTIMONIALS.forEach(t => {
+                const c = el('div', 'glass-card rounded-3xl p-6');
+                c.appendChild(el('i', 'ph-bold ph-quotes text-2xl text-primary dark:text-indigo-300'));
+                c.appendChild(el('p', 'text-sm mt-3 mb-4 leading-relaxed', t.quote));
+                c.appendChild(el('div', 'font-bold text-sm', t.name));
+                c.appendChild(el('div', 'ph-note', t.detail));
+                grid.appendChild(c);
+            });
+        }
+
+        /* ---------- FAQ ---------- */
+        const FAQ = [
+            ['What is PrepGrid?', 'PrepGrid is an exam preparation portal that organises study material into a separate space for each exam — notes, previous-year questions, mock tests and revision resources mapped to that exam’s own pattern.'],
+            ['Which exams are supported?', 'Medical, engineering, Gujarat state services and recruitment, teaching, police, railway, banking, university entrance and more. The full list is the 3D exam grid on this page — every card there is a live space.'],
+            ['How do I open NEET Gujarati resources?', 'Tap the NEET folder on the homepage. It opens a language selection screen with two cards — NEET Gujarati leads to the Gujarati study hub, NEET English to the English one.'],
+            ['How do I open NEET English resources?', 'Same NEET folder, then choose the NEET English card. Both language sites are separate pages, not part of this homepage.'],
+            ['Where can I find notes and practice tests?', 'Inside each exam space, grouped by subject and chapter. The Free Study Material section above jumps you to the relevant space.'],
+            ['How can I contact PrepGrid?', 'Use the Contact Support link in the footer or the drawer. It opens your preferred contact channel once you set the real URL in the CONFIG block.']
+        ];
+
+        function renderFaq() {
+            const list = $('faq-list');
+            if (!list) return;
+            list.innerHTML = '';
+            FAQ.forEach(([q, a], i) => {
+                const item = el('div', 'faq-item');
+                const btn = el('button', 'faq-q');
+                btn.type = 'button';
+                btn.setAttribute('aria-expanded', 'false');
+                btn.setAttribute('aria-controls', 'faq-a-' + i);
+                btn.appendChild(el('span', null, q));
+                btn.appendChild(el('i', 'ph-bold ph-caret-down'));
+                const ans = el('div', 'faq-a');
+                ans.id = 'faq-a-' + i;
+                const p = el('p', null, a);
+                ans.appendChild(p);
+                btn.addEventListener('click', () => {
+                    const open = item.classList.contains('open');
+                    document.querySelectorAll('.faq-item.open').forEach(o => {
+                        o.classList.remove('open');
+                        o.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+                        o.querySelector('.faq-a').style.maxHeight = '0px';
+                    });
+                    if (!open) {
+                        item.classList.add('open');
+                        btn.setAttribute('aria-expanded', 'true');
+                        ans.style.maxHeight = ans.scrollHeight + 'px';
+                    }
+                });
+                item.appendChild(btn);
+                item.appendChild(ans);
+                list.appendChild(item);
+            });
+        }
+
+        /* ---------- brand / links / counters ---------- */
+        function applyExtras() {
+            // brand bits that render outside applyBrand()
+            const db = $('drawer-brand'); if (db) db.textContent = CONFIG.brandName;
+
+            const map = {
+                'drawer-telegram': CONFIG.telegramUrl,
+                'drawer-whatsapp': CONFIG.whatsappUrl,
+                'drawer-instagram': CONFIG.instagramUrl,
+                'drawer-contact': CONFIG.ownerUrl,
+                'footer-telegram': CONFIG.telegramUrl,
+                'footer-whatsapp': CONFIG.whatsappUrl,
+                'footer-instagram': CONFIG.instagramUrl,
+                'footer-contact': CONFIG.ownerUrl,
+                'mentorship-contact': CONFIG.ownerUrl
+            };
+            Object.keys(map).forEach(id => {
+                const node = $(id);
+                if (!node) return;
+                node.href = isPlaceholder(map[id]) ? '#' : map[id];
+            });
+
+            const fl = $('footer-join-label');
+            if (fl) fl.textContent = CONFIG.trademark || CONFIG.brandName;
+
+            // privacy / terms: custom URL wins, otherwise the built-in dialog
+            const dp = document.getElementById('drawer-privacy');
+            const dt = document.getElementById('drawer-terms');
+
+            // about counters
+            const ax = $('about-exams'); if (ax) ax.textContent = String(examsData.length);
+            const aq = $('about-questions');
+            if (aq) aq.textContent = examsData.reduce((a, e) => a + toNumber(e.stats.questions), 0).toLocaleString('en-IN');
+            const an = $('about-notes');
+            if (an) an.textContent = '0';
+
+            // mentorship note
+            const mn = $('mentorship-note');
+            if (mn) mn.textContent = isPlaceholder(CONFIG.ownerUrl)
+                ? 'Pricing and enrolment links are not set yet — add them in CONFIG. Nothing is charged from this page.'
+                : 'Enquiries open your contact channel directly.';
+        }
+
+        /* ---------- mentorship plans ---------- */
+        function wireMentorship() {
+            const btn = $('mentorship-plans');
+            if (!btn) return;
+            btn.addEventListener('click', () => {
+                if (isPlaceholder(CONFIG.ownerUrl)) {
+                    toast('Plans not published yet — contact channel is not set');
+                } else {
+                    window.open(CONFIG.ownerUrl, '_blank', 'noopener');
+                }
+            });
+        }
+
+        /* ---------- boot ---------- */
+        function boot() {
+            patchOpenExam();
+            const back = $('lang-back');
+            if (back) back.addEventListener('click', () => {
+                if (history.state && history.state.pgLang) history.back();
+                else hideLanguageScreen();
+            });
+            window.addEventListener('popstate', () => { if (langExamId) hideLanguageScreen(); });
+            wireSearch();
+            renderQuiz(); renderStreak();
+            $('quiz-submit').addEventListener('click', submitQuiz);
+            $('quiz-retry').addEventListener('click', () => renderQuiz());
+            $('quiz-next').addEventListener('click', () => { quizState.i = (quizState.i + 1) % QUIZ.length; renderQuiz(); });
+
+            renderCountdown();
+            renderMaterial();
+            renderUpdates();
+            renderTestimonials();
+            renderFaq();
+            applyExtras();
+            wireMentorship();
+            syncThemeLabels();
+        }
+
+        // original DOMContentLoaded handler renders the grid; run after it.
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => setTimeout(boot, 0));
+        } else {
+            setTimeout(boot, 0);
+        }
+
+        // keep drawer labels in sync when the theme is toggled from the header
+        const headerToggle = $('themeToggle');
+        if (headerToggle) headerToggle.addEventListener('click', () => setTimeout(syncThemeLabels, 0));
+    })(window.__PG_CORE__);
+    </script>
+</body>
+</html>
