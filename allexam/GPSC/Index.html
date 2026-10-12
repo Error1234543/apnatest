@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepGrid | GPSC Explorer</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        app: {
+                            bg: '#09090b',         // Zinc 950
+                            surface: '#18181b',    // Zinc 900
+                            surfaceHover: '#27272a', // Zinc 800
+                            border: '#27272a',     // Zinc 800
+                            borderHover: '#3f3f46',// Zinc 700
+                            text: '#f4f4f5',       // Zinc 100
+                            muted: '#a1a1aa',      // Zinc 400
+                            accent: '#3b82f6',     // Blue 500
+                            folder: '#fbbf24'      // Amber 400
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #09090b;
+            color: #f4f4f5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Pro Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
+        /* Smooth fast transitions */
+        .fade-in { animation: fadeIn 0.15s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .folder-card {
+            transition: all 0.2s ease;
+        }
+        .folder-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full font-sans text-[14px] overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="h-16 border-b border-app-border bg-app-surface/50 backdrop-blur-md flex items-center px-4 md:px-8 shrink-0 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <i class="fas fa-landmark text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-app-text tracking-tight leading-tight">PrepGrid Vault</h1>
+                <p class="text-[11px] font-mono text-app-muted uppercase tracking-widest">GPSC Environment</p>
+            </div>
+        </div>
+        
+        <div class="ml-auto hidden md:flex items-center gap-4 text-xs font-mono text-app-muted">
+            <span class="flex items-center gap-1.5"><i class="fas fa-database"></i> 189 Files</span>
+            <span class="flex items-center gap-1.5"><i class="fas fa-shield-halved"></i> Pro Access</span>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Area -->
+    <div class="border-b border-app-border bg-app-bg px-4 md:px-8 py-3 shrink-0">
+        <nav id="breadcrumb" class="flex items-center gap-2 text-sm font-medium overflow-x-auto whitespace-nowrap hide-scrollbar">
+            <!-- Injected via JS -->
+        </nav>
+    </div>
+
+    <!-- Main Content Explorer -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <div class="max-w-7xl mx-auto w-full" id="explorer-container">
+            <!-- Folders or Files injected here -->
+        </div>
+    </main>
+
+    <script>
+        // Exact 189 files for GPSC (Paths cleaned of 'GPSC/' prefix)
+        const rawPaths = [
+            "English-Language/Answer-Writing/Comprehension-Answer-Writing.html",
+            "English-Language/Answer-Writing/Grammar-Answer-Writing.html",
+            "English-Language/Answer-Writing/Precis-and-Essay-Writing-Answer-Writing.html",
+            "English-Language/Answer-Writing/Vocabulary-Answer-Writing.html",
+            "English-Language/Chapter-Test/Comprehension-Chapter-Test.html",
+            "English-Language/Chapter-Test/Grammar-Chapter-Test.html",
+            "English-Language/Chapter-Test/Precis-and-Essay-Writing-Chapter-Test.html",
+            "English-Language/Chapter-Test/Vocabulary-Chapter-Test.html",
+            "English-Language/Current-Affairs/Comprehension-Current-Affairs.html",
+            "English-Language/Current-Affairs/Grammar-Current-Affairs.html",
+            "English-Language/Current-Affairs/Precis-and-Essay-Writing-Current-Affairs.html",
+            "English-Language/Current-Affairs/Vocabulary-Current-Affairs.html",
+            "English-Language/Full-Mock/Comprehension-Full-Mock.html",
+            "English-Language/Full-Mock/Grammar-Full-Mock.html",
+            "English-Language/Full-Mock/Precis-and-Essay-Writing-Full-Mock.html",
+            "English-Language/Full-Mock/Vocabulary-Full-Mock.html",
+            "English-Language/Notes/Comprehension-Notes.html",
+            "English-Language/Notes/Grammar-Notes.html",
+            "English-Language/Notes/Precis-and-Essay-Writing-Notes.html",
+            "English-Language/Notes/Vocabulary-Notes.html",
+            "English-Language/Practice/Comprehension-Practice.html",
+            "English-Language/Practice/Grammar-Practice.html",
+            "English-Language/Practice/Precis-and-Essay-Writing-Practice.html",
+            "English-Language/Practice/Vocabulary-Practice.html",
+            "English-Language/PYQ/Comprehension-PYQ.html",
+            "English-Language/PYQ/Grammar-PYQ.html",
+            "English-Language/PYQ/Precis-and-Essay-Writing-PYQ.html",
+            "English-Language/PYQ/Vocabulary-PYQ.html",
+            "English-Language/Quick-Revision/Comprehension-Quick-Revision.html",
+            "English-Language/Quick-Revision/Grammar-Quick-Revision.html",
+            "English-Language/Quick-Revision/Precis-and-Essay-Writing-Quick-Revision.html",
+            "English-Language/Quick-Revision/Vocabulary-Quick-Revision.html",
+            "English-Language/Subject-Test/Comprehension-Subject-Test.html",
+            "English-Language/Subject-Test/Grammar-Subject-Test.html",
+            "English-Language/Subject-Test/Precis-and-Essay-Writing-Subject-Test.html",
+            "English-Language/Subject-Test/Vocabulary-Subject-Test.html",
+            "General-Studies/Answer-Writing/Current-Affairs-National-International-Gujarat-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Economy-of-Gujarat-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Environment-and-Ecology-Answer-Writing.html",
+            "General-Studies/Answer-Writing/General-Mental-Ability-and-Reasoning-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Geography-of-Gujarat-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Gujarats-Culture-Art-Literature-and-Heritage-Answer-Writing.html",
+            "General-Studies/Answer-Writing/History-and-Culture-of-Gujarat-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-and-World-Geography-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Economy-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-History-and-Freedom-Struggle-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Polity-and-Governance-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Panchayati-Raj-and-Local-Self-Government-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Science-and-Technology-Answer-Writing.html",
+            "General-Studies/Chapter-Test/Current-Affairs-National-International-Gujarat-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Economy-of-Gujarat-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Environment-and-Ecology-Chapter-Test.html",
+            "General-Studies/Chapter-Test/General-Mental-Ability-and-Reasoning-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Geography-of-Gujarat-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Gujarats-Culture-Art-Literature-and-Heritage-Chapter-Test.html",
+            "General-Studies/Chapter-Test/History-and-Culture-of-Gujarat-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-and-World-Geography-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Economy-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-History-and-Freedom-Struggle-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Polity-and-Governance-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Panchayati-Raj-and-Local-Self-Government-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Science-and-Technology-Chapter-Test.html",
+            "General-Studies/Current-Affairs/Current-Affairs-National-International-Gujarat-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Economy-of-Gujarat-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Environment-and-Ecology-Current-Affairs.html",
+            "General-Studies/Current-Affairs/General-Mental-Ability-and-Reasoning-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Geography-of-Gujarat-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Gujarats-Culture-Art-Literature-and-Heritage-Current-Affairs.html",
+            "General-Studies/Current-Affairs/History-and-Culture-of-Gujarat-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-and-World-Geography-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Economy-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-History-and-Freedom-Struggle-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Polity-and-Governance-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Panchayati-Raj-and-Local-Self-Government-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Science-and-Technology-Current-Affairs.html",
+            "General-Studies/Full-Mock/Current-Affairs-National-International-Gujarat-Full-Mock.html",
+            "General-Studies/Full-Mock/Economy-of-Gujarat-Full-Mock.html",
+            "General-Studies/Full-Mock/Environment-and-Ecology-Full-Mock.html",
+            "General-Studies/Full-Mock/General-Mental-Ability-and-Reasoning-Full-Mock.html",
+            "General-Studies/Full-Mock/Geography-of-Gujarat-Full-Mock.html",
+            "General-Studies/Full-Mock/Gujarats-Culture-Art-Literature-and-Heritage-Full-Mock.html",
+            "General-Studies/Full-Mock/History-and-Culture-of-Gujarat-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-and-World-Geography-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Economy-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-History-and-Freedom-Struggle-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Polity-and-Governance-Full-Mock.html",
+            "General-Studies/Full-Mock/Panchayati-Raj-and-Local-Self-Government-Full-Mock.html",
+            "General-Studies/Full-Mock/Science-and-Technology-Full-Mock.html",
+            "General-Studies/Notes/Current-Affairs-National-International-Gujarat-Notes.html",
+            "General-Studies/Notes/Economy-of-Gujarat-Notes.html",
+            "General-Studies/Notes/Environment-and-Ecology-Notes.html",
+            "General-Studies/Notes/General-Mental-Ability-and-Reasoning-Notes.html",
+            "General-Studies/Notes/Geography-of-Gujarat-Notes.html",
+            "General-Studies/Notes/Gujarats-Culture-Art-Literature-and-Heritage-Notes.html",
+            "General-Studies/Notes/History-and-Culture-of-Gujarat-Notes.html",
+            "General-Studies/Notes/Indian-and-World-Geography-Notes.html",
+            "General-Studies/Notes/Indian-Economy-Notes.html",
+            "General-Studies/Notes/Indian-History-and-Freedom-Struggle-Notes.html",
+            "General-Studies/Notes/Indian-Polity-and-Governance-Notes.html",
+            "General-Studies/Notes/Panchayati-Raj-and-Local-Self-Government-Notes.html",
+            "General-Studies/Notes/Science-and-Technology-Notes.html",
+            "General-Studies/Practice/Current-Affairs-National-International-Gujarat-Practice.html",
+            "General-Studies/Practice/Economy-of-Gujarat-Practice.html",
+            "General-Studies/Practice/Environment-and-Ecology-Practice.html",
+            "General-Studies/Practice/General-Mental-Ability-and-Reasoning-Practice.html",
+            "General-Studies/Practice/Geography-of-Gujarat-Practice.html",
+            "General-Studies/Practice/Gujarats-Culture-Art-Literature-and-Heritage-Practice.html",
+            "General-Studies/Practice/History-and-Culture-of-Gujarat-Practice.html",
+            "General-Studies/Practice/Indian-and-World-Geography-Practice.html",
+            "General-Studies/Practice/Indian-Economy-Practice.html",
+            "General-Studies/Practice/Indian-History-and-Freedom-Struggle-Practice.html",
+            "General-Studies/Practice/Indian-Polity-and-Governance-Practice.html",
+            "General-Studies/Practice/Panchayati-Raj-and-Local-Self-Government-Practice.html",
+            "General-Studies/Practice/Science-and-Technology-Practice.html",
+            "General-Studies/PYQ/Current-Affairs-National-International-Gujarat-PYQ.html",
+            "General-Studies/PYQ/Economy-of-Gujarat-PYQ.html",
+            "General-Studies/PYQ/Environment-and-Ecology-PYQ.html",
+            "General-Studies/PYQ/General-Mental-Ability-and-Reasoning-PYQ.html",
+            "General-Studies/PYQ/Geography-of-Gujarat-PYQ.html",
+            "General-Studies/PYQ/Gujarats-Culture-Art-Literature-and-Heritage-PYQ.html",
+            "General-Studies/PYQ/History-and-Culture-of-Gujarat-PYQ.html",
+            "General-Studies/PYQ/Indian-and-World-Geography-PYQ.html",
+            "General-Studies/PYQ/Indian-Economy-PYQ.html",
+            "General-Studies/PYQ/Indian-History-and-Freedom-Struggle-PYQ.html",
+            "General-Studies/PYQ/Indian-Polity-and-Governance-PYQ.html",
+            "General-Studies/PYQ/Panchayati-Raj-and-Local-Self-Government-PYQ.html",
+            "General-Studies/PYQ/Science-and-Technology-PYQ.html",
+            "General-Studies/Quick-Revision/Current-Affairs-National-International-Gujarat-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Economy-of-Gujarat-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Environment-and-Ecology-Quick-Revision.html",
+            "General-Studies/Quick-Revision/General-Mental-Ability-and-Reasoning-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Geography-of-Gujarat-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Gujarats-Culture-Art-Literature-and-Heritage-Quick-Revision.html",
+            "General-Studies/Quick-Revision/History-and-Culture-of-Gujarat-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-and-World-Geography-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Economy-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-History-and-Freedom-Struggle-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Polity-and-Governance-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Panchayati-Raj-and-Local-Self-Government-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Science-and-Technology-Quick-Revision.html",
+            "General-Studies/Subject-Test/Current-Affairs-National-International-Gujarat-Subject-Test.html",
+            "General-Studies/Subject-Test/Economy-of-Gujarat-Subject-Test.html",
+            "General-Studies/Subject-Test/Environment-and-Ecology-Subject-Test.html",
+            "General-Studies/Subject-Test/General-Mental-Ability-and-Reasoning-Subject-Test.html",
+            "General-Studies/Subject-Test/Geography-of-Gujarat-Subject-Test.html",
+            "General-Studies/Subject-Test/Gujarats-Culture-Art-Literature-and-Heritage-Subject-Test.html",
+            "General-Studies/Subject-Test/History-and-Culture-of-Gujarat-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-and-World-Geography-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Economy-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-History-and-Freedom-Struggle-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Polity-and-Governance-Subject-Test.html",
+            "General-Studies/Subject-Test/Panchayati-Raj-and-Local-Self-Government-Subject-Test.html",
+            "General-Studies/Subject-Test/Science-and-Technology-Subject-Test.html",
+            "Gujarati-Language/Answer-Writing/Comprehension-Answer-Writing.html",
+            "Gujarati-Language/Answer-Writing/Essay-and-Letter-Writing-Answer-Writing.html",
+            "Gujarati-Language/Answer-Writing/Grammar-Answer-Writing.html",
+            "Gujarati-Language/Answer-Writing/Vocabulary-Answer-Writing.html",
+            "Gujarati-Language/Chapter-Test/Comprehension-Chapter-Test.html",
+            "Gujarati-Language/Chapter-Test/Essay-and-Letter-Writing-Chapter-Test.html",
+            "Gujarati-Language/Chapter-Test/Grammar-Chapter-Test.html",
+            "Gujarati-Language/Chapter-Test/Vocabulary-Chapter-Test.html",
+            "Gujarati-Language/Current-Affairs/Comprehension-Current-Affairs.html",
+            "Gujarati-Language/Current-Affairs/Essay-and-Letter-Writing-Current-Affairs.html",
+            "Gujarati-Language/Current-Affairs/Grammar-Current-Affairs.html",
+            "Gujarati-Language/Current-Affairs/Vocabulary-Current-Affairs.html",
+            "Gujarati-Language/Full-Mock/Comprehension-Full-Mock.html",
+            "Gujarati-Language/Full-Mock/Essay-and-Letter-Writing-Full-Mock.html",
+            "Gujarati-Language/Full-Mock/Grammar-Full-Mock.html",
+            "Gujarati-Language/Full-Mock/Vocabulary-Full-Mock.html",
+            "Gujarati-Language/Notes/Comprehension-Notes.html",
+            "Gujarati-Language/Notes/Essay-and-Letter-Writing-Notes.html",
+            "Gujarati-Language/Notes/Grammar-Notes.html",
+            "Gujarati-Language/Notes/Vocabulary-Notes.html",
+            "Gujarati-Language/Practice/Comprehension-Practice.html",
+            "Gujarati-Language/Practice/Essay-and-Letter-Writing-Practice.html",
+            "Gujarati-Language/Practice/Grammar-Practice.html",
+            "Gujarati-Language/Practice/Vocabulary-Practice.html",
+            "Gujarati-Language/PYQ/Comprehension-PYQ.html",
+            "Gujarati-Language/PYQ/Essay-and-Letter-Writing-PYQ.html",
+            "Gujarati-Language/PYQ/Grammar-PYQ.html",
+            "Gujarati-Language/PYQ/Vocabulary-PYQ.html",
+            "Gujarati-Language/Quick-Revision/Comprehension-Quick-Revision.html",
+            "Gujarati-Language/Quick-Revision/Essay-and-Letter-Writing-Quick-Revision.html",
+            "Gujarati-Language/Quick-Revision/Grammar-Quick-Revision.html",
+            "Gujarati-Language/Quick-Revision/Vocabulary-Quick-Revision.html",
+            "Gujarati-Language/Subject-Test/Comprehension-Subject-Test.html",
+            "Gujarati-Language/Subject-Test/Essay-and-Letter-Writing-Subject-Test.html",
+            "Gujarati-Language/Subject-Test/Grammar-Subject-Test.html",
+            "Gujarati-Language/Subject-Test/Vocabulary-Subject-Test.html"
+        ];
+
+        // Virtual File System State
+        const fileSystem = {};
+        
+        // Build VFS
+        rawPaths.forEach(path => {
+            const parts = path.split('/');
+            const subject = parts[0];
+            const category = parts[1];
+            const filename = parts[2];
+
+            if (!fileSystem[subject]) fileSystem[subject] = {};
+            if (!fileSystem[subject][category]) fileSystem[subject][category] = [];
+            
+            let displayTitle = filename.replace('.html', '').replace(/-/g, ' ');
+            
+            fileSystem[subject][category].push({
+                name: displayTitle,
+                path: path
+            });
+        });
+
+        // Navigation State
+        let currentPath = []; // [] = Root, ['Subject'] = Subject, ['Subject', 'Category'] = Category
+
+        const icons = {
+            "General-Studies": "fa-globe-asia",
+            "English-Language": "fa-spell-check",
+            "Gujarati-Language": "fa-language"
+        };
+
+        function navigate(levelIndex, pathName) {
+            if (levelIndex === -1) {
+                currentPath = []; // Go home
+            } else if (levelIndex === 0) {
+                currentPath = [pathName]; // Go to subject
+            } else if (levelIndex === 1) {
+                currentPath = [currentPath[0], pathName]; // Go to category
+            }
+            render();
+        }
+
+        function triggerReflow(element) {
+            element.classList.remove('fade-in');
+            void element.offsetWidth;
+            element.classList.add('fade-in');
+        }
+
+        function countFilesInSubject(subject) {
+            let count = 0;
+            for (let category in fileSystem[subject]) {
+                count += fileSystem[subject][category].length;
+            }
+            return count;
+        }
+
+        function render() {
+            renderBreadcrumb();
+            renderContent();
+        }
+
+        function renderBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            let html = `
+                <button onclick="navigate(-1)" class="text-app-muted hover:text-app-text transition-colors flex items-center gap-2">
+                    <i class="fas fa-home text-xs"></i> Home
+                </button>
+            `;
+
+            if (currentPath.length > 0) {
+                const subject = currentPath[0].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <button onclick="navigate(0, '${currentPath[0]}')" class="${currentPath.length === 1 ? 'text-app-text font-semibold' : 'text-app-muted hover:text-app-text'} transition-colors">
+                        ${subject}
+                    </button>
+                `;
+            }
+
+            if (currentPath.length > 1) {
+                const category = currentPath[1].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <span class="text-app-text font-semibold">${category}</span>
+                `;
+            }
+
+            bc.innerHTML = html;
+        }
+
+        function renderContent() {
+            const container = document.getElementById('explorer-container');
+            triggerReflow(container);
+            
+            if (currentPath.length === 0) {
+                // RENDER ROOT (Subjects)
+                const subjects = Object.keys(fileSystem).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                
+                subjects.forEach(subject => {
+                    const fileCount = countFilesInSubject(subject);
+                    const icon = icons[subject] || 'fa-folder';
+                    const displayName = subject.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(0, '${subject}')" class="folder-card flex flex-col p-5 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-lg bg-app-bg border border-app-border flex items-center justify-center group-hover:scale-105 transition-transform">
+                                    <i class="fas ${icon} text-2xl text-indigo-400"></i>
+                                </div>
+                                <span class="text-[10px] font-mono text-app-muted bg-app-bg px-2 py-1 rounded border border-app-border">${fileCount} items</span>
+                            </div>
+                            <h3 class="text-app-text font-semibold text-lg tracking-wide">${displayName}</h3>
+                            <p class="text-xs text-app-muted mt-1 font-mono">GPSC Curriculum</p>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 1) {
+                // RENDER LEVEL 1 (Categories inside Subject)
+                const subject = currentPath[0];
+                const categories = Object.keys(fileSystem[subject]).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
+                
+                categories.forEach(category => {
+                    const fileCount = fileSystem[subject][category].length;
+                    const displayName = category.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(1, '${category}')" class="folder-card flex items-center gap-4 p-4 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <i class="fas fa-folder text-3xl text-app-folder group-hover:scale-110 transition-transform drop-shadow-md"></i>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-app-text font-medium text-sm truncate">${displayName}</h3>
+                                <p class="text-[11px] font-mono text-app-muted mt-0.5">${fileCount} files</p>
+                            </div>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 2) {
+                // RENDER LEVEL 2 (Files inside Category)
+                const subject = currentPath[0];
+                const category = currentPath[1];
+                const files = fileSystem[subject][category];
+                
+                let html = `
+                    <div class="bg-app-surface border border-app-border rounded-xl overflow-hidden shadow-2xl flex flex-col h-full max-h-[75vh]">
+                        <!-- Table Header -->
+                        <div class="grid grid-cols-12 gap-4 p-4 border-b border-app-border bg-[#121214] text-xs font-mono text-app-muted uppercase tracking-wider shrink-0">
+                            <div class="col-span-9 md:col-span-8 px-2">Document Name</div>
+                            <div class="col-span-2 hidden md:block px-2 text-left">Format</div>
+                            <div class="col-span-3 md:col-span-2 px-2 text-right">Action</div>
+                        </div>
+                        <!-- File List -->
+                        <div class="divide-y divide-app-border overflow-y-auto flex-1">
+                `;
+                
+                files.forEach(file => {
+                    html += `
+                        <div class="grid grid-cols-12 gap-4 p-3 md:p-4 items-center hover:bg-app-surfaceHover transition-colors group">
+                            <div class="col-span-9 md:col-span-8 flex items-center gap-4 px-2 min-w-0">
+                                <div class="w-8 h-8 rounded bg-app-bg border border-app-border flex items-center justify-center shrink-0 text-indigo-400">
+                                    <i class="fas fa-file-code text-sm"></i>
+                                </div>
+                                <a href="${file.path}" class="text-sm font-medium text-app-text group-hover:text-indigo-400 transition-colors truncate block">
+                                    ${file.name}
+                                </a>
+                            </div>
+                            <div class="col-span-2 hidden md:block px-2">
+                                <span class="text-[10px] font-mono text-app-muted border border-app-border px-2 py-1 rounded bg-app-bg">HTML</span>
+                            </div>
+                            <div class="col-span-3 md:col-span-2 text-right px-2 flex justify-end">
+                                <a href="${file.path}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-app-bg border border-app-border hover:border-indigo-500 hover:text-indigo-400 text-app-text text-xs font-medium transition-all">
+                                    <span>Open</span>
+                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
