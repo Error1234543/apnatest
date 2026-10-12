@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepGrid | JEE Advanced Portal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        bg: '#000000',
+                        sidebar: '#0a0a0a',
+                        surface: '#121212',
+                        surfaceHover: '#1e1e1e',
+                        border: '#262626',
+                        textMain: '#ececec',
+                        textMuted: '#888888',
+                        accent: '#3b82f6'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #000000;
+            color: #ececec;
+            overflow: hidden; /* Prevent body scroll, handle in containers */
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 200ms; }
+    </style>
+</head>
+<body class="flex h-screen w-full antialiased font-sans text-sm">
+
+    <!-- Mobile Header -->
+    <div class="md:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar border-b border-border flex items-center justify-between px-4 z-50">
+        <div class="flex items-center gap-2 font-semibold">
+            <i class="fas fa-rocket text-accent"></i> JEE Advanced
+        </div>
+        <button id="mobileMenuBtn" class="text-textMuted hover:text-textMain p-2">
+            <i class="fas fa-bars text-lg"></i>
+        </button>
+    </div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 h-full bg-sidebar border-r border-border flex flex-col fixed md:relative z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        
+        <!-- Sidebar Header -->
+        <div class="h-14 flex items-center px-4 border-b border-border mb-4 hidden md:flex">
+            <div class="flex items-center gap-2 font-semibold text-white tracking-wide">
+                <i class="fas fa-rocket text-accent"></i> PrepGrid Advanced
+            </div>
+        </div>
+
+        <!-- Subjects Navigation -->
+        <div class="flex-1 overflow-y-auto px-3 py-2">
+            <div class="text-[10px] uppercase font-bold text-textMuted tracking-wider mb-2 px-3 pt-4 md:pt-0">Directory</div>
+            <nav id="subject-nav" class="space-y-1">
+                <!-- Subjects will be injected here -->
+            </nav>
+        </div>
+        
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-border text-xs text-textMuted">
+            88 Verified Files<br>Strictly JEE Advanced.
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-30 hidden md:hidden"></div>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full bg-bg relative pt-14 md:pt-0">
+        
+        <!-- Breadcrumb & Top Bar -->
+        <header class="h-14 border-b border-border flex items-center px-6 bg-bg/80 backdrop-blur-sm shrink-0">
+            <div id="breadcrumb" class="flex items-center gap-2 text-sm text-textMuted">
+                <!-- Breadcrumbs injected here -->
+            </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-6 md:p-8">
+            
+            <div class="max-w-5xl mx-auto">
+                <!-- Header -->
+                <div id="content-header" class="mb-8">
+                    <h1 id="view-title" class="text-2xl font-semibold text-white mb-1">Select a Subject</h1>
+                    <p id="view-desc" class="text-textMuted">Browse folders to access your materials.</p>
+                </div>
+
+                <!-- Grid View (Folders or Files) -->
+                <div id="content-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <!-- Cards injected here -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Exact 88 files strictly for JEE Advanced (Paths cleaned to act as relative links)
+        const rawPaths = [
+            "Chemistry/Chapter-Test/Inorganic-Chemistry-Chapter-Test.html",
+            "Chemistry/Chapter-Test/Organic-Chemistry-Chapter-Test.html",
+            "Chemistry/Chapter-Test/Physical-Chemistry-Chapter-Test.html",
+            "Chemistry/Formula-Sheet/Inorganic-Chemistry-Formula-Sheet.html",
+            "Chemistry/Formula-Sheet/Organic-Chemistry-Formula-Sheet.html",
+            "Chemistry/Formula-Sheet/Physical-Chemistry-Formula-Sheet.html",
+            "Chemistry/Notes/Inorganic-Chemistry-Notes.html",
+            "Chemistry/Notes/Organic-Chemistry-Notes.html",
+            "Chemistry/Notes/Physical-Chemistry-Notes.html",
+            "Chemistry/Practice/Inorganic-Chemistry-Practice.html",
+            "Chemistry/Practice/Organic-Chemistry-Practice.html",
+            "Chemistry/Practice/Physical-Chemistry-Practice.html",
+            "Chemistry/PYQ/Inorganic-Chemistry-PYQ.html",
+            "Chemistry/PYQ/Organic-Chemistry-PYQ.html",
+            "Chemistry/PYQ/Physical-Chemistry-PYQ.html",
+            "Chemistry/Quick-Revision/Inorganic-Chemistry-Quick-Revision.html",
+            "Chemistry/Quick-Revision/Organic-Chemistry-Quick-Revision.html",
+            "Chemistry/Quick-Revision/Physical-Chemistry-Quick-Revision.html",
+            "Chemistry/Subject-Test/Complete-Chemistry-Syllabus-Subject-Test.html",
+            "Full-Syllabus/Full-Mock/JEE-Advanced-Complete-Syllabus-Full-Mock.html",
+            "Mathematics/Chapter-Test/Algebra-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Analytical-Geometry-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Differential-Calculus-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Integral-Calculus-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Trigonometry-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Vectors-Chapter-Test.html",
+            "Mathematics/Formula-Sheet/Algebra-Formula-Sheet.html",
+            "Mathematics/Formula-Sheet/Analytical-Geometry-Formula-Sheet.html",
+            "Mathematics/Formula-Sheet/Differential-Calculus-Formula-Sheet.html",
+            "Mathematics/Formula-Sheet/Integral-Calculus-Formula-Sheet.html",
+            "Mathematics/Formula-Sheet/Trigonometry-Formula-Sheet.html",
+            "Mathematics/Formula-Sheet/Vectors-Formula-Sheet.html",
+            "Mathematics/Notes/Algebra-Notes.html",
+            "Mathematics/Notes/Analytical-Geometry-Notes.html",
+            "Mathematics/Notes/Differential-Calculus-Notes.html",
+            "Mathematics/Notes/Integral-Calculus-Notes.html",
+            "Mathematics/Notes/Trigonometry-Notes.html",
+            "Mathematics/Notes/Vectors-Notes.html",
+            "Mathematics/Practice/Algebra-Practice.html",
+            "Mathematics/Practice/Analytical-Geometry-Practice.html",
+            "Mathematics/Practice/Differential-Calculus-Practice.html",
+            "Mathematics/Practice/Integral-Calculus-Practice.html",
+            "Mathematics/Practice/Trigonometry-Practice.html",
+            "Mathematics/Practice/Vectors-Practice.html",
+            "Mathematics/PYQ/Algebra-PYQ.html",
+            "Mathematics/PYQ/Analytical-Geometry-PYQ.html",
+            "Mathematics/PYQ/Differential-Calculus-PYQ.html",
+            "Mathematics/PYQ/Integral-Calculus-PYQ.html",
+            "Mathematics/PYQ/Trigonometry-PYQ.html",
+            "Mathematics/PYQ/Vectors-PYQ.html",
+            "Mathematics/Quick-Revision/Algebra-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Analytical-Geometry-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Differential-Calculus-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Integral-Calculus-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Trigonometry-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Vectors-Quick-Revision.html",
+            "Mathematics/Subject-Test/Complete-Mathematics-Syllabus-Subject-Test.html",
+            "Physics/Chapter-Test/Electricity-and-Magnetism-Chapter-Test.html",
+            "Physics/Chapter-Test/Mechanics-Chapter-Test.html",
+            "Physics/Chapter-Test/Modern-Physics-Chapter-Test.html",
+            "Physics/Chapter-Test/Optics-Chapter-Test.html",
+            "Physics/Chapter-Test/Waves-and-Thermodynamics-Chapter-Test.html",
+            "Physics/Formula-Sheet/Electricity-and-Magnetism-Formula-Sheet.html",
+            "Physics/Formula-Sheet/Mechanics-Formula-Sheet.html",
+            "Physics/Formula-Sheet/Modern-Physics-Formula-Sheet.html",
+            "Physics/Formula-Sheet/Optics-Formula-Sheet.html",
+            "Physics/Formula-Sheet/Waves-and-Thermodynamics-Formula-Sheet.html",
+            "Physics/Notes/Electricity-and-Magnetism-Notes.html",
+            "Physics/Notes/Mechanics-Notes.html",
+            "Physics/Notes/Modern-Physics-Notes.html",
+            "Physics/Notes/Optics-Notes.html",
+            "Physics/Notes/Waves-and-Thermodynamics-Notes.html",
+            "Physics/Practice/Electricity-and-Magnetism-Practice.html",
+            "Physics/Practice/Mechanics-Practice.html",
+            "Physics/Practice/Modern-Physics-Practice.html",
+            "Physics/Practice/Optics-Practice.html",
+            "Physics/Practice/Waves-and-Thermodynamics-Practice.html",
+            "Physics/PYQ/Electricity-and-Magnetism-PYQ.html",
+            "Physics/PYQ/Mechanics-PYQ.html",
+            "Physics/PYQ/Modern-Physics-PYQ.html",
+            "Physics/PYQ/Optics-PYQ.html",
+            "Physics/PYQ/Waves-and-Thermodynamics-PYQ.html",
+            "Physics/Quick-Revision/Electricity-and-Magnetism-Quick-Revision.html",
+            "Physics/Quick-Revision/Mechanics-Quick-Revision.html",
+            "Physics/Quick-Revision/Modern-Physics-Quick-Revision.html",
+            "Physics/Quick-Revision/Optics-Quick-Revision.html",
+            "Physics/Quick-Revision/Waves-and-Thermodynamics-Quick-Revision.html",
+            "Physics/Subject-Test/Complete-Physics-Syllabus-Subject-Test.html"
+        ];
+
+        // System State
+        let currentSubject = "Physics"; // Default View
+        let currentCategory = null;     // null means show folders
+
+        // Process data into folder structure
+        const fileSystem = {};
+        
+        rawPaths.forEach(path => {
+            const parts = path.split('/');
+            const subject = parts[0];
+            const category = parts[1];
+            const filename = parts[2];
+
+            if (!fileSystem[subject]) {
+                fileSystem[subject] = {};
+            }
+            if (!fileSystem[subject][category]) {
+                fileSystem[subject][category] = [];
+            }
+            
+            // Clean up filename for display
+            let cleanName = filename.replace('.html', '').replace(/-/g, ' ');
+            
+            fileSystem[subject][category].push({
+                name: cleanName,
+                path: path
+            });
+        });
+
+        // Subject Icons
+        const subjectIcons = {
+            "Physics": "fa-atom",
+            "Chemistry": "fa-flask",
+            "Mathematics": "fa-square-root-variable",
+            "Full-Syllabus": "fa-trophy"
+        };
+
+        // UI Functions
+        function navigate(subject, category = null) {
+            currentSubject = subject;
+            currentCategory = category;
+            
+            // Close mobile menu if open
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            if(window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+
+            render();
+        }
+
+        function render() {
+            renderSidebar();
+            renderBreadcrumb();
+            renderMainContent();
+        }
+
+        function renderSidebar() {
+            const nav = document.getElementById('subject-nav');
+            const subjects = Object.keys(fileSystem);
+            
+            nav.innerHTML = subjects.map(subject => {
+                const isActive = currentSubject === subject;
+                const activeClass = isActive 
+                    ? 'bg-surface text-white border-l-2 border-accent' 
+                    : 'text-textMuted hover:bg-surfaceHover hover:text-white border-l-2 border-transparent';
+                
+                const icon = subjectIcons[subject] || 'fa-folder';
+                const displayName = subject.replace(/-/g, ' ');
+
+                return `
+                    <button onclick="navigate('${subject}')" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-r transition-all ${activeClass} text-left">
+                        <i class="fas ${icon} w-4 text-center ${isActive ? 'text-accent' : ''}"></i>
+                        <span class="font-medium">${displayName}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function renderBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            let html = `
+                <button onclick="navigate('${currentSubject}')" class="hover:text-white transition-colors flex items-center gap-2">
+                    <i class="fas fa-home text-xs"></i> ${currentSubject.replace(/-/g, ' ')}
+                </button>
+            `;
+            
+            if (currentCategory) {
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] opacity-50"></i>
+                    <span class="text-white">${currentCategory.replace(/-/g, ' ')}</span>
+                `;
+            }
+            
+            bc.innerHTML = html;
+        }
+
+        function renderMainContent() {
+            const grid = document.getElementById('content-grid');
+            const title = document.getElementById('view-title');
+            const desc = document.getElementById('view-desc');
+            
+            grid.className = ""; // Reset class
+
+            if (!currentCategory) {
+                // RENDER FOLDERS (Categories)
+                title.textContent = currentSubject.replace(/-/g, ' ');
+                desc.textContent = "Select a folder to view materials.";
+                
+                grid.className = "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4";
+                
+                const categories = Object.keys(fileSystem[currentSubject]).sort();
+                
+                grid.innerHTML = categories.map(category => {
+                    const fileCount = fileSystem[currentSubject][category].length;
+                    const displayName = category.replace(/-/g, ' ');
+                    
+                    return `
+                        <button onclick="navigate('${currentSubject}', '${category}')" class="flex items-center gap-4 p-4 rounded-lg bg-surface border border-border hover:border-textMuted hover:bg-surfaceHover transition-all text-left group">
+                            <div class="w-10 h-10 rounded-md bg-[#2d2d2d] flex items-center justify-center text-[#ffca28] group-hover:scale-110 transition-transform">
+                                <i class="fas fa-folder text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-medium text-sm">${displayName}</h3>
+                                <p class="text-xs text-textMuted mt-0.5">${fileCount} File${fileCount > 1 ? 's' : ''}</p>
+                            </div>
+                        </button>
+                    `;
+                }).join('');
+                
+            } else {
+                // RENDER FILES
+                title.textContent = currentCategory.replace(/-/g, ' ');
+                desc.innerHTML = `<button onclick="navigate('${currentSubject}')" class="text-accent hover:underline flex items-center gap-1 text-xs mb-2"><i class="fas fa-arrow-left"></i> Back to ${currentSubject.replace(/-/g, ' ')} folders</button>`;
+                
+                // Switch to a list view for files for a cleaner look
+                grid.className = "flex flex-col gap-2 max-w-4xl";
+                
+                const files = fileSystem[currentSubject][currentCategory];
+                
+                grid.innerHTML = files.map(file => {
+                    return `
+                        <a href="${file.path}" class="flex items-center gap-3 p-3 rounded bg-surface border border-border hover:border-accent hover:bg-surfaceHover transition-all group">
+                            <div class="text-textMuted group-hover:text-accent transition-colors">
+                                <i class="fas fa-file-code text-base w-6 text-center"></i>
+                            </div>
+                            <div class="flex-1 truncate">
+                                <span class="text-sm font-medium text-textMain group-hover:text-white transition-colors">${file.name}</span>
+                            </div>
+                            <div class="text-[10px] text-textMuted px-2 py-1 rounded bg-sidebar border border-border">
+                                HTML
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Mobile Menu Toggles
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+        });
+
+        document.getElementById('mobileOverlay').addEventListener('click', () => {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.add('hidden');
+        });
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
