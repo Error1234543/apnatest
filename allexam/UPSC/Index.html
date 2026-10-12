@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepGrid | UPSC Explorer</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        app: {
+                            bg: '#09090b',         // Zinc 950
+                            surface: '#18181b',    // Zinc 900
+                            surfaceHover: '#27272a', // Zinc 800
+                            border: '#27272a',     // Zinc 800
+                            borderHover: '#3f3f46',// Zinc 700
+                            text: '#f4f4f5',       // Zinc 100
+                            muted: '#a1a1aa',      // Zinc 400
+                            accent: '#3b82f6',     // Blue 500
+                            folder: '#fbbf24'      // Amber 400
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #09090b;
+            color: #f4f4f5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Pro Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
+        /* Smooth fast transitions */
+        .fade-in { animation: fadeIn 0.15s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .folder-card {
+            transition: all 0.2s ease;
+        }
+        .folder-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full font-sans text-[14px] overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="h-16 border-b border-app-border bg-app-surface/50 backdrop-blur-md flex items-center px-4 md:px-8 shrink-0 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <i class="fas fa-landmark-dome text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-app-text tracking-tight leading-tight">PrepGrid Vault</h1>
+                <p class="text-[11px] font-mono text-app-muted uppercase tracking-widest">UPSC Environment</p>
+            </div>
+        </div>
+        
+        <div class="ml-auto hidden md:flex items-center gap-4 text-xs font-mono text-app-muted">
+            <span class="flex items-center gap-1.5"><i class="fas fa-database"></i> 207 Files</span>
+            <span class="flex items-center gap-1.5"><i class="fas fa-shield-halved"></i> Pro Access</span>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Area -->
+    <div class="border-b border-app-border bg-app-bg px-4 md:px-8 py-3 shrink-0">
+        <nav id="breadcrumb" class="flex items-center gap-2 text-sm font-medium overflow-x-auto whitespace-nowrap hide-scrollbar">
+            <!-- Injected via JS -->
+        </nav>
+    </div>
+
+    <!-- Main Content Explorer -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <div class="max-w-7xl mx-auto w-full" id="explorer-container">
+            <!-- Folders or Files injected here -->
+        </div>
+    </main>
+
+    <script>
+        // Exact 207 files for UPSC (Paths cleaned of 'UPSC/' prefix)
+        const rawPaths = [
+            "CSAT/Answer-Writing/Basic-Numeracy-Answer-Writing.html",
+            "CSAT/Answer-Writing/Comprehension-Answer-Writing.html",
+            "CSAT/Answer-Writing/Data-Interpretation-Answer-Writing.html",
+            "CSAT/Answer-Writing/Decision-Making-and-Problem-Solving-Answer-Writing.html",
+            "CSAT/Answer-Writing/General-Mental-Ability-Answer-Writing.html",
+            "CSAT/Answer-Writing/Interpersonal-and-Communication-Skills-Answer-Writing.html",
+            "CSAT/Answer-Writing/Logical-Reasoning-and-Analytical-Ability-Answer-Writing.html",
+            "CSAT/Chapter-Test/Basic-Numeracy-Chapter-Test.html",
+            "CSAT/Chapter-Test/Comprehension-Chapter-Test.html",
+            "CSAT/Chapter-Test/Data-Interpretation-Chapter-Test.html",
+            "CSAT/Chapter-Test/Decision-Making-and-Problem-Solving-Chapter-Test.html",
+            "CSAT/Chapter-Test/General-Mental-Ability-Chapter-Test.html",
+            "CSAT/Chapter-Test/Interpersonal-and-Communication-Skills-Chapter-Test.html",
+            "CSAT/Chapter-Test/Logical-Reasoning-and-Analytical-Ability-Chapter-Test.html",
+            "CSAT/Current-Affairs/Basic-Numeracy-Current-Affairs.html",
+            "CSAT/Current-Affairs/Comprehension-Current-Affairs.html",
+            "CSAT/Current-Affairs/Data-Interpretation-Current-Affairs.html",
+            "CSAT/Current-Affairs/Decision-Making-and-Problem-Solving-Current-Affairs.html",
+            "CSAT/Current-Affairs/General-Mental-Ability-Current-Affairs.html",
+            "CSAT/Current-Affairs/Interpersonal-and-Communication-Skills-Current-Affairs.html",
+            "CSAT/Current-Affairs/Logical-Reasoning-and-Analytical-Ability-Current-Affairs.html",
+            "CSAT/Full-Mock/Basic-Numeracy-Full-Mock.html",
+            "CSAT/Full-Mock/Comprehension-Full-Mock.html",
+            "CSAT/Full-Mock/Data-Interpretation-Full-Mock.html",
+            "CSAT/Full-Mock/Decision-Making-and-Problem-Solving-Full-Mock.html",
+            "CSAT/Full-Mock/General-Mental-Ability-Full-Mock.html",
+            "CSAT/Full-Mock/Interpersonal-and-Communication-Skills-Full-Mock.html",
+            "CSAT/Full-Mock/Logical-Reasoning-and-Analytical-Ability-Full-Mock.html",
+            "CSAT/Notes/Basic-Numeracy-Notes.html",
+            "CSAT/Notes/Comprehension-Notes.html",
+            "CSAT/Notes/Data-Interpretation-Notes.html",
+            "CSAT/Notes/Decision-Making-and-Problem-Solving-Notes.html",
+            "CSAT/Notes/General-Mental-Ability-Notes.html",
+            "CSAT/Notes/Interpersonal-and-Communication-Skills-Notes.html",
+            "CSAT/Notes/Logical-Reasoning-and-Analytical-Ability-Notes.html",
+            "CSAT/Practice/Basic-Numeracy-Practice.html",
+            "CSAT/Practice/Comprehension-Practice.html",
+            "CSAT/Practice/Data-Interpretation-Practice.html",
+            "CSAT/Practice/Decision-Making-and-Problem-Solving-Practice.html",
+            "CSAT/Practice/General-Mental-Ability-Practice.html",
+            "CSAT/Practice/Interpersonal-and-Communication-Skills-Practice.html",
+            "CSAT/Practice/Logical-Reasoning-and-Analytical-Ability-Practice.html",
+            "CSAT/PYQ/Basic-Numeracy-PYQ.html",
+            "CSAT/PYQ/Comprehension-PYQ.html",
+            "CSAT/PYQ/Data-Interpretation-PYQ.html",
+            "CSAT/PYQ/Decision-Making-and-Problem-Solving-PYQ.html",
+            "CSAT/PYQ/General-Mental-Ability-PYQ.html",
+            "CSAT/PYQ/Interpersonal-and-Communication-Skills-PYQ.html",
+            "CSAT/PYQ/Logical-Reasoning-and-Analytical-Ability-PYQ.html",
+            "CSAT/Quick-Revision/Basic-Numeracy-Quick-Revision.html",
+            "CSAT/Quick-Revision/Comprehension-Quick-Revision.html",
+            "CSAT/Quick-Revision/Data-Interpretation-Quick-Revision.html",
+            "CSAT/Quick-Revision/Decision-Making-and-Problem-Solving-Quick-Revision.html",
+            "CSAT/Quick-Revision/General-Mental-Ability-Quick-Revision.html",
+            "CSAT/Quick-Revision/Interpersonal-and-Communication-Skills-Quick-Revision.html",
+            "CSAT/Quick-Revision/Logical-Reasoning-and-Analytical-Ability-Quick-Revision.html",
+            "CSAT/Subject-Test/Basic-Numeracy-Subject-Test.html",
+            "CSAT/Subject-Test/Comprehension-Subject-Test.html",
+            "CSAT/Subject-Test/Data-Interpretation-Subject-Test.html",
+            "CSAT/Subject-Test/Decision-Making-and-Problem-Solving-Subject-Test.html",
+            "CSAT/Subject-Test/General-Mental-Ability-Subject-Test.html",
+            "CSAT/Subject-Test/Interpersonal-and-Communication-Skills-Subject-Test.html",
+            "CSAT/Subject-Test/Logical-Reasoning-and-Analytical-Ability-Subject-Test.html",
+            "Essay/Answer-Writing/Essay-Writing-Practice-on-Contemporary-Themes-Answer-Writing.html",
+            "Essay/Chapter-Test/Essay-Writing-Practice-on-Contemporary-Themes-Chapter-Test.html",
+            "Essay/Current-Affairs/Essay-Writing-Practice-on-Contemporary-Themes-Current-Affairs.html",
+            "Essay/Full-Mock/Essay-Writing-Practice-on-Contemporary-Themes-Full-Mock.html",
+            "Essay/Notes/Essay-Writing-Practice-on-Contemporary-Themes-Notes.html",
+            "Essay/Practice/Essay-Writing-Practice-on-Contemporary-Themes-Practice.html",
+            "Essay/PYQ/Essay-Writing-Practice-on-Contemporary-Themes-PYQ.html",
+            "Essay/Quick-Revision/Essay-Writing-Practice-on-Contemporary-Themes-Quick-Revision.html",
+            "Essay/Subject-Test/Essay-Writing-Practice-on-Contemporary-Themes-Subject-Test.html",
+            "General-Studies/Answer-Writing/Current-Affairs-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Disaster-Management-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Environment-and-Biodiversity-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Ethics-Integrity-and-Aptitude-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-and-World-Geography-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Constitution-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Economy-and-Planning-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Heritage-and-Culture-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Indian-Polity-and-Governance-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Internal-Security-Answer-Writing.html",
+            "General-Studies/Answer-Writing/International-Relations-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Modern-Indian-History-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Post-Independence-Consolidation-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Science-and-Technology-Answer-Writing.html",
+            "General-Studies/Answer-Writing/Social-Justice-Answer-Writing.html",
+            "General-Studies/Chapter-Test/Current-Affairs-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Disaster-Management-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Environment-and-Biodiversity-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Ethics-Integrity-and-Aptitude-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-and-World-Geography-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Constitution-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Economy-and-Planning-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Heritage-and-Culture-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Indian-Polity-and-Governance-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Internal-Security-Chapter-Test.html",
+            "General-Studies/Chapter-Test/International-Relations-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Modern-Indian-History-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Post-Independence-Consolidation-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Science-and-Technology-Chapter-Test.html",
+            "General-Studies/Chapter-Test/Social-Justice-Chapter-Test.html",
+            "General-Studies/Current-Affairs/Current-Affairs-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Disaster-Management-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Environment-and-Biodiversity-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Ethics-Integrity-and-Aptitude-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-and-World-Geography-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Constitution-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Economy-and-Planning-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Heritage-and-Culture-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Indian-Polity-and-Governance-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Internal-Security-Current-Affairs.html",
+            "General-Studies/Current-Affairs/International-Relations-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Modern-Indian-History-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Post-Independence-Consolidation-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Science-and-Technology-Current-Affairs.html",
+            "General-Studies/Current-Affairs/Social-Justice-Current-Affairs.html",
+            "General-Studies/Full-Mock/Current-Affairs-Full-Mock.html",
+            "General-Studies/Full-Mock/Disaster-Management-Full-Mock.html",
+            "General-Studies/Full-Mock/Environment-and-Biodiversity-Full-Mock.html",
+            "General-Studies/Full-Mock/Ethics-Integrity-and-Aptitude-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-and-World-Geography-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Constitution-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Economy-and-Planning-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Heritage-and-Culture-Full-Mock.html",
+            "General-Studies/Full-Mock/Indian-Polity-and-Governance-Full-Mock.html",
+            "General-Studies/Full-Mock/Internal-Security-Full-Mock.html",
+            "General-Studies/Full-Mock/International-Relations-Full-Mock.html",
+            "General-Studies/Full-Mock/Modern-Indian-History-Full-Mock.html",
+            "General-Studies/Full-Mock/Post-Independence-Consolidation-Full-Mock.html",
+            "General-Studies/Full-Mock/Science-and-Technology-Full-Mock.html",
+            "General-Studies/Full-Mock/Social-Justice-Full-Mock.html",
+            "General-Studies/Notes/Current-Affairs-Notes.html",
+            "General-Studies/Notes/Disaster-Management-Notes.html",
+            "General-Studies/Notes/Environment-and-Biodiversity-Notes.html",
+            "General-Studies/Notes/Ethics-Integrity-and-Aptitude-Notes.html",
+            "General-Studies/Notes/Indian-and-World-Geography-Notes.html",
+            "General-Studies/Notes/Indian-Constitution-Notes.html",
+            "General-Studies/Notes/Indian-Economy-and-Planning-Notes.html",
+            "General-Studies/Notes/Indian-Heritage-and-Culture-Notes.html",
+            "General-Studies/Notes/Indian-Polity-and-Governance-Notes.html",
+            "General-Studies/Notes/Internal-Security-Notes.html",
+            "General-Studies/Notes/International-Relations-Notes.html",
+            "General-Studies/Notes/Modern-Indian-History-Notes.html",
+            "General-Studies/Notes/Post-Independence-Consolidation-Notes.html",
+            "General-Studies/Notes/Science-and-Technology-Notes.html",
+            "General-Studies/Notes/Social-Justice-Notes.html",
+            "General-Studies/Practice/Current-Affairs-Practice.html",
+            "General-Studies/Practice/Disaster-Management-Practice.html",
+            "General-Studies/Practice/Environment-and-Biodiversity-Practice.html",
+            "General-Studies/Practice/Ethics-Integrity-and-Aptitude-Practice.html",
+            "General-Studies/Practice/Indian-and-World-Geography-Practice.html",
+            "General-Studies/Practice/Indian-Constitution-Practice.html",
+            "General-Studies/Practice/Indian-Economy-and-Planning-Practice.html",
+            "General-Studies/Practice/Indian-Heritage-and-Culture-Practice.html",
+            "General-Studies/Practice/Indian-Polity-and-Governance-Practice.html",
+            "General-Studies/Practice/Internal-Security-Practice.html",
+            "General-Studies/Practice/International-Relations-Practice.html",
+            "General-Studies/Practice/Modern-Indian-History-Practice.html",
+            "General-Studies/Practice/Post-Independence-Consolidation-Practice.html",
+            "General-Studies/Practice/Science-and-Technology-Practice.html",
+            "General-Studies/Practice/Social-Justice-Practice.html",
+            "General-Studies/PYQ/Current-Affairs-PYQ.html",
+            "General-Studies/PYQ/Disaster-Management-PYQ.html",
+            "General-Studies/PYQ/Environment-and-Biodiversity-PYQ.html",
+            "General-Studies/PYQ/Ethics-Integrity-and-Aptitude-PYQ.html",
+            "General-Studies/PYQ/Indian-and-World-Geography-PYQ.html",
+            "General-Studies/PYQ/Indian-Constitution-PYQ.html",
+            "General-Studies/PYQ/Indian-Economy-and-Planning-PYQ.html",
+            "General-Studies/PYQ/Indian-Heritage-and-Culture-PYQ.html",
+            "General-Studies/PYQ/Indian-Polity-and-Governance-PYQ.html",
+            "General-Studies/PYQ/Internal-Security-PYQ.html",
+            "General-Studies/PYQ/International-Relations-PYQ.html",
+            "General-Studies/PYQ/Modern-Indian-History-PYQ.html",
+            "General-Studies/PYQ/Post-Independence-Consolidation-PYQ.html",
+            "General-Studies/PYQ/Science-and-Technology-PYQ.html",
+            "General-Studies/PYQ/Social-Justice-PYQ.html",
+            "General-Studies/Quick-Revision/Current-Affairs-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Disaster-Management-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Environment-and-Biodiversity-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Ethics-Integrity-and-Aptitude-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-and-World-Geography-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Constitution-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Economy-and-Planning-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Heritage-and-Culture-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Indian-Polity-and-Governance-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Internal-Security-Quick-Revision.html",
+            "General-Studies/Quick-Revision/International-Relations-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Modern-Indian-History-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Post-Independence-Consolidation-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Science-and-Technology-Quick-Revision.html",
+            "General-Studies/Quick-Revision/Social-Justice-Quick-Revision.html",
+            "General-Studies/Subject-Test/Current-Affairs-Subject-Test.html",
+            "General-Studies/Subject-Test/Disaster-Management-Subject-Test.html",
+            "General-Studies/Subject-Test/Environment-and-Biodiversity-Subject-Test.html",
+            "General-Studies/Subject-Test/Ethics-Integrity-and-Aptitude-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-and-World-Geography-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Constitution-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Economy-and-Planning-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Heritage-and-Culture-Subject-Test.html",
+            "General-Studies/Subject-Test/Indian-Polity-and-Governance-Subject-Test.html",
+            "General-Studies/Subject-Test/Internal-Security-Subject-Test.html",
+            "General-Studies/Subject-Test/International-Relations-Subject-Test.html",
+            "General-Studies/Subject-Test/Modern-Indian-History-Subject-Test.html",
+            "General-Studies/Subject-Test/Post-Independence-Consolidation-Subject-Test.html",
+            "General-Studies/Subject-Test/Science-and-Technology-Subject-Test.html",
+            "General-Studies/Subject-Test/Social-Justice-Subject-Test.html"
+        ];
+
+        // Virtual File System State
+        const fileSystem = {};
+        
+        // Build VFS
+        rawPaths.forEach(path => {
+            const parts = path.split('/');
+            const subject = parts[0];
+            const category = parts[1];
+            const filename = parts[2];
+
+            if (!fileSystem[subject]) fileSystem[subject] = {};
+            if (!fileSystem[subject][category]) fileSystem[subject][category] = [];
+            
+            let displayTitle = filename.replace('.html', '').replace(/-/g, ' ');
+            
+            fileSystem[subject][category].push({
+                name: displayTitle,
+                path: path
+            });
+        });
+
+        // Navigation State
+        let currentPath = []; // [] = Root, ['Subject'] = Subject, ['Subject', 'Category'] = Category
+
+        const icons = {
+            "General-Studies": "fa-globe-asia",
+            "CSAT": "fa-brain",
+            "Essay": "fa-pen-nib"
+        };
+
+        function navigate(levelIndex, pathName) {
+            if (levelIndex === -1) {
+                currentPath = []; // Go home
+            } else if (levelIndex === 0) {
+                currentPath = [pathName]; // Go to subject
+            } else if (levelIndex === 1) {
+                currentPath = [currentPath[0], pathName]; // Go to category
+            }
+            render();
+        }
+
+        function triggerReflow(element) {
+            element.classList.remove('fade-in');
+            void element.offsetWidth;
+            element.classList.add('fade-in');
+        }
+
+        function countFilesInSubject(subject) {
+            let count = 0;
+            for (let category in fileSystem[subject]) {
+                count += fileSystem[subject][category].length;
+            }
+            return count;
+        }
+
+        function render() {
+            renderBreadcrumb();
+            renderContent();
+        }
+
+        function renderBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            let html = `
+                <button onclick="navigate(-1)" class="text-app-muted hover:text-app-text transition-colors flex items-center gap-2">
+                    <i class="fas fa-home text-xs"></i> Home
+                </button>
+            `;
+
+            if (currentPath.length > 0) {
+                const subject = currentPath[0].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <button onclick="navigate(0, '${currentPath[0]}')" class="${currentPath.length === 1 ? 'text-app-text font-semibold' : 'text-app-muted hover:text-app-text'} transition-colors">
+                        ${subject}
+                    </button>
+                `;
+            }
+
+            if (currentPath.length > 1) {
+                const category = currentPath[1].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <span class="text-app-text font-semibold">${category}</span>
+                `;
+            }
+
+            bc.innerHTML = html;
+        }
+
+        function renderContent() {
+            const container = document.getElementById('explorer-container');
+            triggerReflow(container);
+            
+            if (currentPath.length === 0) {
+                // RENDER ROOT (Subjects)
+                const subjects = Object.keys(fileSystem).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">`;
+                
+                subjects.forEach(subject => {
+                    const fileCount = countFilesInSubject(subject);
+                    const icon = icons[subject] || 'fa-folder';
+                    const displayName = subject.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(0, '${subject}')" class="folder-card flex flex-col p-5 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-lg bg-app-bg border border-app-border flex items-center justify-center group-hover:scale-105 transition-transform">
+                                    <i class="fas ${icon} text-2xl text-emerald-500"></i>
+                                </div>
+                                <span class="text-[10px] font-mono text-app-muted bg-app-bg px-2 py-1 rounded border border-app-border">${fileCount} items</span>
+                            </div>
+                            <h3 class="text-app-text font-semibold text-lg tracking-wide">${displayName}</h3>
+                            <p class="text-xs text-app-muted mt-1 font-mono">UPSC Curriculum</p>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 1) {
+                // RENDER LEVEL 1 (Categories inside Subject)
+                const subject = currentPath[0];
+                const categories = Object.keys(fileSystem[subject]).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
+                
+                categories.forEach(category => {
+                    const fileCount = fileSystem[subject][category].length;
+                    const displayName = category.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(1, '${category}')" class="folder-card flex items-center gap-4 p-4 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <i class="fas fa-folder text-3xl text-app-folder group-hover:scale-110 transition-transform drop-shadow-md"></i>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-app-text font-medium text-sm truncate">${displayName}</h3>
+                                <p class="text-[11px] font-mono text-app-muted mt-0.5">${fileCount} files</p>
+                            </div>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 2) {
+                // RENDER LEVEL 2 (Files inside Category)
+                const subject = currentPath[0];
+                const category = currentPath[1];
+                const files = fileSystem[subject][category];
+                
+                let html = `
+                    <div class="bg-app-surface border border-app-border rounded-xl overflow-hidden shadow-2xl flex flex-col h-full max-h-[75vh]">
+                        <!-- Table Header -->
+                        <div class="grid grid-cols-12 gap-4 p-4 border-b border-app-border bg-[#121214] text-xs font-mono text-app-muted uppercase tracking-wider shrink-0">
+                            <div class="col-span-9 md:col-span-8 px-2">Document Name</div>
+                            <div class="col-span-2 hidden md:block px-2 text-left">Format</div>
+                            <div class="col-span-3 md:col-span-2 px-2 text-right">Action</div>
+                        </div>
+                        <!-- File List -->
+                        <div class="divide-y divide-app-border overflow-y-auto flex-1">
+                `;
+                
+                files.forEach(file => {
+                    html += `
+                        <div class="grid grid-cols-12 gap-4 p-3 md:p-4 items-center hover:bg-app-surfaceHover transition-colors group">
+                            <div class="col-span-9 md:col-span-8 flex items-center gap-4 px-2 min-w-0">
+                                <div class="w-8 h-8 rounded bg-app-bg border border-app-border flex items-center justify-center shrink-0 text-emerald-500">
+                                    <i class="fas fa-file-code text-sm"></i>
+                                </div>
+                                <a href="${file.path}" class="text-sm font-medium text-app-text group-hover:text-emerald-500 transition-colors truncate block">
+                                    ${file.name}
+                                </a>
+                            </div>
+                            <div class="col-span-2 hidden md:block px-2">
+                                <span class="text-[10px] font-mono text-app-muted border border-app-border px-2 py-1 rounded bg-app-bg">HTML</span>
+                            </div>
+                            <div class="col-span-3 md:col-span-2 text-right px-2 flex justify-end">
+                                <a href="${file.path}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-app-bg border border-app-border hover:border-emerald-500 hover:text-emerald-500 text-app-text text-xs font-medium transition-all">
+                                    <span>Open</span>
+                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
