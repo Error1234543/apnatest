@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepGrid | Railway RRB Explorer</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        app: {
+                            bg: '#09090b',         // Zinc 950
+                            surface: '#18181b',    // Zinc 900
+                            surfaceHover: '#27272a', // Zinc 800
+                            border: '#27272a',     // Zinc 800
+                            borderHover: '#3f3f46',// Zinc 700
+                            text: '#f4f4f5',       // Zinc 100
+                            muted: '#a1a1aa',      // Zinc 400
+                            accent: '#3b82f6',     // Blue 500
+                            folder: '#fbbf24'      // Amber 400
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #09090b;
+            color: #f4f4f5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Pro Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        
+        /* Smooth fast transitions */
+        .fade-in { animation: fadeIn 0.15s ease-out forwards; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .folder-card {
+            transition: all 0.2s ease;
+        }
+        .folder-card:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full font-sans text-[14px] overflow-hidden">
+
+    <!-- Top Navigation Bar -->
+    <header class="h-16 border-b border-app-border bg-app-surface/50 backdrop-blur-md flex items-center px-4 md:px-8 shrink-0 sticky top-0 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg shadow-red-500/20">
+                <i class="fas fa-train text-white text-sm"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-app-text tracking-tight leading-tight">PrepGrid Vault</h1>
+                <p class="text-[11px] font-mono text-app-muted uppercase tracking-widest">Railway RRB Environment</p>
+            </div>
+        </div>
+        
+        <div class="ml-auto hidden md:flex items-center gap-4 text-xs font-mono text-app-muted">
+            <span class="flex items-center gap-1.5"><i class="fas fa-database"></i> 223 Files</span>
+            <span class="flex items-center gap-1.5"><i class="fas fa-shield-halved"></i> Pro Access</span>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Area -->
+    <div class="border-b border-app-border bg-app-bg px-4 md:px-8 py-3 shrink-0">
+        <nav id="breadcrumb" class="flex items-center gap-2 text-sm font-medium overflow-x-auto whitespace-nowrap hide-scrollbar">
+            <!-- Injected via JS -->
+        </nav>
+    </div>
+
+    <!-- Main Content Explorer -->
+    <main class="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <div class="max-w-7xl mx-auto w-full" id="explorer-container">
+            <!-- Folders or Files injected here -->
+        </div>
+    </main>
+
+    <script>
+        // Exact 223 files for Railway-RRB (Paths cleaned of 'Railway-RRB/' prefix)
+        const rawPaths = [
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Culture-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Current-Affairs-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Indian-Economy-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Indian-Geography-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Indian-History-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Indian-Polity-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Chapter-Test/Sports-Chapter-Test.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Culture-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Current-Affairs-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Indian-Economy-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Indian-Geography-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Indian-History-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Indian-Polity-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Current-Affairs/Sports-Current-Affairs.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Culture-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Current-Affairs-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Indian-Economy-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Indian-Geography-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Indian-History-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Indian-Polity-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Full-Mock/Sports-Full-Mock.html",
+            "General-Awareness-and-Current-Affairs/Notes/Culture-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Current-Affairs-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Indian-Economy-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Indian-Geography-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Indian-History-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Indian-Polity-Notes.html",
+            "General-Awareness-and-Current-Affairs/Notes/Sports-Notes.html",
+            "General-Awareness-and-Current-Affairs/Practice/Culture-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Current-Affairs-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Indian-Economy-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Indian-Geography-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Indian-History-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Indian-Polity-Practice.html",
+            "General-Awareness-and-Current-Affairs/Practice/Sports-Practice.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Culture-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Current-Affairs-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Indian-Economy-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Indian-Geography-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Indian-History-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Indian-Polity-PYQ.html",
+            "General-Awareness-and-Current-Affairs/PYQ/Sports-PYQ.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Culture-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Current-Affairs-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Indian-Economy-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Indian-Geography-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Indian-History-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Indian-Polity-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Quick-Revision/Sports-Quick-Revision.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Culture-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Current-Affairs-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Indian-Economy-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Indian-Geography-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Indian-History-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Indian-Polity-Subject-Test.html",
+            "General-Awareness-and-Current-Affairs/Subject-Test/Sports-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Analogies-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Blood-Relations-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Coding-Decoding-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Data-Sufficiency-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Direction-Sense-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Number-and-Alphabet-Series-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Puzzle-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Chapter-Test/Statement-Conclusion-Chapter-Test.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Blood-Relations-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Coding-Decoding-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Data-Sufficiency-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Direction-Sense-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Number-and-Alphabet-Series-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Puzzle-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Current-Affairs/Statement-Conclusion-Current-Affairs.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Analogies-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Blood-Relations-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Coding-Decoding-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Data-Sufficiency-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Direction-Sense-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Number-and-Alphabet-Series-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Puzzle-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Full-Mock/Statement-Conclusion-Full-Mock.html",
+            "General-Intelligence-and-Reasoning/Notes/Analogies-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Blood-Relations-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Coding-Decoding-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Data-Sufficiency-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Direction-Sense-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Number-and-Alphabet-Series-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Puzzle-Notes.html",
+            "General-Intelligence-and-Reasoning/Notes/Statement-Conclusion-Notes.html",
+            "General-Intelligence-and-Reasoning/Practice/Analogies-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Blood-Relations-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Coding-Decoding-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Data-Sufficiency-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Direction-Sense-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Number-and-Alphabet-Series-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Puzzle-Practice.html",
+            "General-Intelligence-and-Reasoning/Practice/Statement-Conclusion-Practice.html",
+            "General-Intelligence-and-Reasoning/PYQ/Analogies-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Blood-Relations-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Coding-Decoding-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Data-Sufficiency-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Direction-Sense-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Number-and-Alphabet-Series-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Puzzle-PYQ.html",
+            "General-Intelligence-and-Reasoning/PYQ/Statement-Conclusion-PYQ.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Analogies-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Blood-Relations-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Coding-Decoding-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Data-Sufficiency-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Direction-Sense-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Number-and-Alphabet-Series-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Puzzle-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Quick-Revision/Statement-Conclusion-Quick-Revision.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Analogies-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Blood-Relations-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Coding-Decoding-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Data-Sufficiency-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Direction-Sense-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Number-and-Alphabet-Series-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Puzzle-Subject-Test.html",
+            "General-Intelligence-and-Reasoning/Subject-Test/Statement-Conclusion-Subject-Test.html",
+            "General-Science/Chapter-Test/Biology-Basics-up-to-10th-standard-level-Chapter-Test.html",
+            "General-Science/Chapter-Test/Chemistry-Basics-Chapter-Test.html",
+            "General-Science/Chapter-Test/Physics-Basics-Chapter-Test.html",
+            "General-Science/Current-Affairs/Biology-Basics-up-to-10th-standard-level-Current-Affairs.html",
+            "General-Science/Current-Affairs/Chemistry-Basics-Current-Affairs.html",
+            "General-Science/Current-Affairs/Physics-Basics-Current-Affairs.html",
+            "General-Science/Full-Mock/Biology-Basics-up-to-10th-standard-level-Full-Mock.html",
+            "General-Science/Full-Mock/Chemistry-Basics-Full-Mock.html",
+            "General-Science/Full-Mock/Physics-Basics-Full-Mock.html",
+            "General-Science/Notes/Biology-Basics-up-to-10th-standard-level-Notes.html",
+            "General-Science/Notes/Chemistry-Basics-Notes.html",
+            "General-Science/Notes/Physics-Basics-Notes.html",
+            "General-Science/Practice/Biology-Basics-up-to-10th-standard-level-Practice.html",
+            "General-Science/Practice/Chemistry-Basics-Practice.html",
+            "General-Science/Practice/Physics-Basics-Practice.html",
+            "General-Science/PYQ/Biology-Basics-up-to-10th-standard-level-PYQ.html",
+            "General-Science/PYQ/Chemistry-Basics-PYQ.html",
+            "General-Science/PYQ/Physics-Basics-PYQ.html",
+            "General-Science/Quick-Revision/Biology-Basics-up-to-10th-standard-level-Quick-Revision.html",
+            "General-Science/Quick-Revision/Chemistry-Basics-Quick-Revision.html",
+            "General-Science/Quick-Revision/Physics-Basics-Quick-Revision.html",
+            "General-Science/Subject-Test/Biology-Basics-up-to-10th-standard-level-Subject-Test.html",
+            "General-Science/Subject-Test/Chemistry-Basics-Subject-Test.html",
+            "General-Science/Subject-Test/Physics-Basics-Subject-Test.html",
+            "Mathematics/Chapter-Test/Algebra-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Geometry-and-Trigonometry-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Mensuration-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Number-System-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Percentage-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Profit-and-Loss-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Ratio-and-Proportion-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Simple-and-Compound-Interest-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Statistics-and-Data-Interpretation-Chapter-Test.html",
+            "Mathematics/Chapter-Test/Time-Work-and-Distance-Chapter-Test.html",
+            "Mathematics/Current-Affairs/Algebra-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Geometry-and-Trigonometry-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Mensuration-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Number-System-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Percentage-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Profit-and-Loss-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Ratio-and-Proportion-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Simple-and-Compound-Interest-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Statistics-and-Data-Interpretation-Current-Affairs.html",
+            "Mathematics/Current-Affairs/Time-Work-and-Distance-Current-Affairs.html",
+            "Mathematics/Full-Mock/Algebra-Full-Mock.html",
+            "Mathematics/Full-Mock/Geometry-and-Trigonometry-Full-Mock.html",
+            "Mathematics/Full-Mock/Mensuration-Full-Mock.html",
+            "Mathematics/Full-Mock/Number-System-Full-Mock.html",
+            "Mathematics/Full-Mock/Percentage-Full-Mock.html",
+            "Mathematics/Full-Mock/Profit-and-Loss-Full-Mock.html",
+            "Mathematics/Full-Mock/Ratio-and-Proportion-Full-Mock.html",
+            "Mathematics/Full-Mock/Simple-and-Compound-Interest-Full-Mock.html",
+            "Mathematics/Full-Mock/Statistics-and-Data-Interpretation-Full-Mock.html",
+            "Mathematics/Full-Mock/Time-Work-and-Distance-Full-Mock.html",
+            "Mathematics/Notes/Algebra-Notes.html",
+            "Mathematics/Notes/Geometry-and-Trigonometry-Notes.html",
+            "Mathematics/Notes/Mensuration-Notes.html",
+            "Mathematics/Notes/Number-System-Notes.html",
+            "Mathematics/Notes/Percentage-Notes.html",
+            "Mathematics/Notes/Profit-and-Loss-Notes.html",
+             "Mathematics/Notes/Ratio-and-Proportion-Notes.html",
+            "Mathematics/Notes/Simple-and-Compound-Interest-Notes.html",
+            "Mathematics/Notes/Statistics-and-Data-Interpretation-Notes.html",
+            "Mathematics/Notes/Time-Work-and-Distance-Notes.html",
+            "Mathematics/Practice/Algebra-Practice.html",
+            "Mathematics/Practice/Geometry-and-Trigonometry-Practice.html",
+            "Mathematics/Practice/Mensuration-Practice.html",
+            "Mathematics/Practice/Number-System-Practice.html",
+            "Mathematics/Practice/Percentage-Practice.html",
+            "Mathematics/Practice/Profit-and-Loss-Practice.html",
+            "Mathematics/Practice/Ratio-and-Proportion-Practice.html",
+            "Mathematics/Practice/Simple-and-Compound-Interest-Practice.html",
+            "Mathematics/Practice/Statistics-and-Data-Interpretation-Practice.html",
+            "Mathematics/Practice/Time-Work-and-Distance-Practice.html",
+            "Mathematics/PYQ/Algebra-PYQ.html",
+            "Mathematics/PYQ/Geometry-and-Trigonometry-PYQ.html",
+            "Mathematics/PYQ/Mensuration-PYQ.html",
+            "Mathematics/PYQ/Number-System-PYQ.html",
+            "Mathematics/PYQ/Percentage-PYQ.html",
+            "Mathematics/PYQ/Profit-and-Loss-PYQ.html",
+            "Mathematics/PYQ/Ratio-and-Proportion-PYQ.html",
+            "Mathematics/PYQ/Simple-and-Compound-Interest-PYQ.html",
+            "Mathematics/PYQ/Statistics-and-Data-Interpretation-PYQ.html",
+            "Mathematics/PYQ/Time-Work-and-Distance-PYQ.html",
+            "Mathematics/Quick-Revision/Algebra-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Geometry-and-Trigonometry-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Mensuration-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Number-System-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Percentage-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Profit-and-Loss-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Ratio-and-Proportion-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Simple-and-Compound-Interest-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Statistics-and-Data-Interpretation-Quick-Revision.html",
+            "Mathematics/Quick-Revision/Time-Work-and-Distance-Quick-Revision.html",
+            "Mathematics/Subject-Test/Algebra-Subject-Test.html",
+            "Mathematics/Subject-Test/Geometry-and-Trigonometry-Subject-Test.html",
+            "Mathematics/Subject-Test/Mensuration-Subject-Test.html",
+            "Mathematics/Subject-Test/Number-System-Subject-Test.html",
+            "Mathematics/Subject-Test/Percentage-Subject-Test.html",
+            "Mathematics/Subject-Test/Profit-and-Loss-Subject-Test.html",
+            "Mathematics/Subject-Test/Ratio-and-Proportion-Subject-Test.html",
+            "Mathematics/Subject-Test/Simple-and-Compound-Interest-Subject-Test.html",
+            "Mathematics/Subject-Test/Statistics-and-Data-Interpretation-Subject-Test.html",
+            "Mathematics/Subject-Test/Time-Work-and-Distance-Subject-Test.html"
+        ];
+
+        // Virtual File System State
+        const fileSystem = {};
+        
+        // Build VFS
+        rawPaths.forEach(path => {
+            const parts = path.split('/');
+            const subject = parts[0];
+            const category = parts[1];
+            const filename = parts[2];
+
+            if (!fileSystem[subject]) fileSystem[subject] = {};
+            if (!fileSystem[subject][category]) fileSystem[subject][category] = [];
+            
+            let displayTitle = filename.replace('.html', '').replace(/-/g, ' ');
+            
+            fileSystem[subject][category].push({
+                name: displayTitle,
+                path: path
+            });
+        });
+
+        // Navigation State
+        let currentPath = []; // [] = Root, ['Subject'] = Subject, ['Subject', 'Category'] = Category
+
+        const icons = {
+            "General-Awareness-and-Current-Affairs": "fa-globe-asia",
+            "General-Intelligence-and-Reasoning": "fa-brain",
+            "General-Science": "fa-flask",
+            "Mathematics": "fa-calculator"
+        };
+
+        function navigate(levelIndex, pathName) {
+            if (levelIndex === -1) {
+                currentPath = []; // Go home
+            } else if (levelIndex === 0) {
+                currentPath = [pathName]; // Go to subject
+            } else if (levelIndex === 1) {
+                currentPath = [currentPath[0], pathName]; // Go to category
+            }
+            render();
+        }
+
+        function triggerReflow(element) {
+            element.classList.remove('fade-in');
+            void element.offsetWidth;
+            element.classList.add('fade-in');
+        }
+
+        function countFilesInSubject(subject) {
+            let count = 0;
+            for (let category in fileSystem[subject]) {
+                count += fileSystem[subject][category].length;
+            }
+            return count;
+        }
+
+        function render() {
+            renderBreadcrumb();
+            renderContent();
+        }
+
+        function renderBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            let html = `
+                <button onclick="navigate(-1)" class="text-app-muted hover:text-app-text transition-colors flex items-center gap-2">
+                    <i class="fas fa-home text-xs"></i> Home
+                </button>
+            `;
+
+            if (currentPath.length > 0) {
+                const subject = currentPath[0].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <button onclick="navigate(0, '${currentPath[0]}')" class="${currentPath.length === 1 ? 'text-app-text font-semibold' : 'text-app-muted hover:text-app-text'} transition-colors">
+                        ${subject}
+                    </button>
+                `;
+            }
+
+            if (currentPath.length > 1) {
+                const category = currentPath[1].replace(/-/g, ' ');
+                html += `
+                    <i class="fas fa-chevron-right text-[10px] text-app-borderHover mx-1"></i>
+                    <span class="text-app-text font-semibold">${category}</span>
+                `;
+            }
+
+            bc.innerHTML = html;
+        }
+
+        function renderContent() {
+            const container = document.getElementById('explorer-container');
+            triggerReflow(container);
+            
+            if (currentPath.length === 0) {
+                // RENDER ROOT (Subjects)
+                const subjects = Object.keys(fileSystem).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">`;
+                
+                subjects.forEach(subject => {
+                    const fileCount = countFilesInSubject(subject);
+                    const icon = icons[subject] || 'fa-folder';
+                    const displayName = subject.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(0, '${subject}')" class="folder-card flex flex-col p-5 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-lg bg-app-bg border border-app-border flex items-center justify-center group-hover:scale-105 transition-transform">
+                                    <i class="fas ${icon} text-2xl text-red-500"></i>
+                                </div>
+                                <span class="text-[10px] font-mono text-app-muted bg-app-bg px-2 py-1 rounded border border-app-border">${fileCount} items</span>
+                            </div>
+                            <h3 class="text-app-text font-semibold text-lg tracking-wide">${displayName}</h3>
+                            <p class="text-xs text-app-muted mt-1 font-mono">RRB Curriculum</p>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 1) {
+                // RENDER LEVEL 1 (Categories inside Subject)
+                const subject = currentPath[0];
+                const categories = Object.keys(fileSystem[subject]).sort();
+                
+                let html = `<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">`;
+                
+                categories.forEach(category => {
+                    const fileCount = fileSystem[subject][category].length;
+                    const displayName = category.replace(/-/g, ' ');
+                    
+                    html += `
+                        <button onclick="navigate(1, '${category}')" class="folder-card flex items-center gap-4 p-4 rounded-xl bg-app-surface border border-app-border hover:border-app-borderHover hover:bg-app-surfaceHover text-left group">
+                            <i class="fas fa-folder text-3xl text-app-folder group-hover:scale-110 transition-transform drop-shadow-md"></i>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-app-text font-medium text-sm truncate">${displayName}</h3>
+                                <p class="text-[11px] font-mono text-app-muted mt-0.5">${fileCount} files</p>
+                            </div>
+                        </button>
+                    `;
+                });
+                
+                html += `</div>`;
+                container.innerHTML = html;
+
+            } else if (currentPath.length === 2) {
+                // RENDER LEVEL 2 (Files inside Category)
+                const subject = currentPath[0];
+                const category = currentPath[1];
+                const files = fileSystem[subject][category];
+                
+                let html = `
+                    <div class="bg-app-surface border border-app-border rounded-xl overflow-hidden shadow-2xl flex flex-col h-full max-h-[75vh]">
+                        <!-- Table Header -->
+                        <div class="grid grid-cols-12 gap-4 p-4 border-b border-app-border bg-[#121214] text-xs font-mono text-app-muted uppercase tracking-wider shrink-0">
+                            <div class="col-span-9 md:col-span-8 px-2">Document Name</div>
+                            <div class="col-span-2 hidden md:block px-2 text-left">Format</div>
+                            <div class="col-span-3 md:col-span-2 px-2 text-right">Action</div>
+                        </div>
+                        <!-- File List -->
+                        <div class="divide-y divide-app-border overflow-y-auto flex-1">
+                `;
+                
+                files.forEach(file => {
+                    html += `
+                        <div class="grid grid-cols-12 gap-4 p-3 md:p-4 items-center hover:bg-app-surfaceHover transition-colors group">
+                            <div class="col-span-9 md:col-span-8 flex items-center gap-4 px-2 min-w-0">
+                                <div class="w-8 h-8 rounded bg-app-bg border border-app-border flex items-center justify-center shrink-0 text-red-500">
+                                    <i class="fas fa-file-code text-sm"></i>
+                                </div>
+                                <a href="${file.path}" class="text-sm font-medium text-app-text group-hover:text-red-500 transition-colors truncate block">
+                                    ${file.name}
+                                </a>
+                            </div>
+                            <div class="col-span-2 hidden md:block px-2">
+                                <span class="text-[10px] font-mono text-app-muted border border-app-border px-2 py-1 rounded bg-app-bg">HTML</span>
+                            </div>
+                            <div class="col-span-3 md:col-span-2 text-right px-2 flex justify-end">
+                                <a href="${file.path}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded bg-app-bg border border-app-border hover:border-red-500 hover:text-red-500 text-app-text text-xs font-medium transition-all">
+                                    <span>Open</span>
+                                    <i class="fas fa-external-link-alt text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += `</div></div>`;
+                container.innerHTML = html;
+            }
+        }
+
+        // Initialize App
+        window.addEventListener('DOMContentLoaded', () => {
+            render();
+        });
+    </script>
+</body>
+</html>
