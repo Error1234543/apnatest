@@ -37,7 +37,7 @@ async function supabaseRequest(path, { method = "GET", body, count = false } = {
     headers.Prefer = "count=exact";
     headers.Range = "0-0";
   }
-  if (method === "POST") headers.Prefer = "return=representation";
+  if (method === "POST" || method === "PATCH") headers.Prefer = "return=representation";
   const response = await fetch(`${url}/rest/v1/${path}`, {
     method,
     headers,
