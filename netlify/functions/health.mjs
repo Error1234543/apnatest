@@ -3,7 +3,7 @@ export default async () => {
     telegramConfigured: Boolean(process.env.TELEGRAM_BOT_TOKEN),
     telegramWebhookSecretConfigured: Boolean(process.env.TELEGRAM_WEBHOOK_SECRET),
     telegramAdminsConfigured: Boolean(process.env.TELEGRAM_ADMIN_IDS),
-    supabaseConfigured: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+    supabaseConfigured: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SECRET_KEY)
   };
 
   return new Response(JSON.stringify({
