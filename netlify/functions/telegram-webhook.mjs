@@ -21,6 +21,8 @@ async function sendTelegramMessage(chatId, text) {
   });
 
   if (!response.ok) throw new Error("Telegram sendMessage failed");
+  const result = await response.json().catch(() => null);
+  if (!result?.ok) throw new Error("Telegram sendMessage was rejected");
 }
 
 function getSupabaseConfig() {
@@ -218,12 +220,19 @@ export default async (request) => {
     return json({ error: "Unauthorized" }, 401);
   }
 
-  const length = Number(request.headers.get("content-length") || 0);
-  if (length > 65536) return json({ error: "Payload too large" }, 413);
+  let rawBody;
+  try {
+    rawBody = await request.text();
+  } catch {
+    return json({ error: "Invalid request body" }, 400);
+  }
+  if (new TextEncoder().encode(rawBody).byteLength > 65536) {
+    return json({ error: "Payload too large" }, 413);
+  }
 
   let update;
   try {
-    update = await request.json();
+    update = JSON.parse(rawBody);
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
@@ -231,6 +240,11 @@ export default async (request) => {
   const message = update?.message;
   const chatId = message?.chat?.id;
   const telegramUserId = String(message?.from?.id ?? "");
+
+  // Admin commands are accepted only in private chats, never in groups/channels.
+  if (message?.chat?.type !== "private" || message?.from?.is_bot) {
+    return json({ ok: true });
+  }
   const messageText = String(message?.text ?? "").trim();
   const commandParts = messageText.split(/\s+/);
   const rawCommand = (commandParts.shift() || "").toLowerCase();
