@@ -7,7 +7,7 @@ async function sendTelegramMessage(chatId, text) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) return;
 
-  await fetch(\`https://api.telegram.org/bot\${token}/sendMessage\`, {
+  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text })
@@ -57,7 +57,7 @@ export default async (request) => {
 
   if (command === "/status") {
     const url = process.env.SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const key = process.env.SUPABASE_SECRET_KEY;
 
     if (!url || !key) {
       await sendTelegramMessage(chatId, "Supabase is not configured yet.");
@@ -66,11 +66,10 @@ export default async (request) => {
 
     try {
       const response = await fetch(
-        \`\${url.replace(/\/$/, "")}/rest/v1/courses?select=id&limit=1\`,
+        `${url.replace(/\/$/, "")}/rest/v1/courses?select=id&limit=1`,
         {
           headers: {
-            apikey: key,
-            authorization: \`Bearer \${key}\`
+            apikey: key
           }
         }
       );
