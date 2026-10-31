@@ -27,7 +27,7 @@ function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) throw new Error("Supabase is not configured");
-  return { url: url.replace(/\\/$/, ""), key };
+  return { url: url.replace(/\/$/, ""), key };
 }
 
 async function supabaseGet(path, preferCount = false) {
@@ -50,7 +50,7 @@ async function handleCommand(command, chatId) {
   if (command === "/start" || command === "/help") {
     await sendTelegramMessage(
       chatId,
-      "PrepGrid Admin Bot\\n\\nAvailable commands:\\n/status - Backend and database status\\n/dashboard - Website backend overview\\n/courses - List saved courses\\n/help - Show commands"
+      "PrepGrid Admin Bot\n\nAvailable commands:\n/status - Backend and database status\n/dashboard - Website backend overview\n/courses - List saved courses\n/help - Show commands"
     );
     return;
   }
@@ -60,12 +60,12 @@ async function handleCommand(command, chatId) {
       await supabaseGet("courses?select=id&limit=1");
       await sendTelegramMessage(
         chatId,
-        "Backend: online\\nSupabase: connected\\nAdmin access: verified"
+        "Backend: online\nSupabase: connected\nAdmin access: verified"
       );
     } catch {
       await sendTelegramMessage(
         chatId,
-        "Backend: online\\nSupabase: connection check failed. Check server configuration."
+        "Backend: online\nSupabase: connection check failed. Check server configuration."
       );
     }
     return;
@@ -91,7 +91,7 @@ async function handleCommand(command, chatId) {
           `Admin log entries: ${logs.count ?? "Unavailable"}`,
           "",
           "Student accounts and paid content are not set up yet."
-        ].join("\\n")
+        ].join("\n")
       );
     } catch {
       await sendTelegramMessage(
@@ -117,11 +117,11 @@ async function handleCommand(command, chatId) {
       }
 
       const lines = data.map((course, index) =>
-        `${index + 1}. ${course.title}\\n   ${course.slug} | ${course.is_published ? "Published" : "Draft"}`
+        `${index + 1}. ${course.title}\n   ${course.slug} | ${course.is_published ? "Published" : "Draft"}`
       );
       await sendTelegramMessage(
         chatId,
-        `Courses (first ${data.length}):\\n\\n${lines.join("\\n\\n")}`
+        `Courses (first ${data.length}):\n\n${lines.join("\n\n")}`
       );
     } catch {
       await sendTelegramMessage(
@@ -162,7 +162,7 @@ export default async (request) => {
   const message = update?.message;
   const chatId = message?.chat?.id;
   const telegramUserId = String(message?.from?.id ?? "");
-  const rawCommand = String(message?.text ?? "").trim().split(/\\s+/)[0].toLowerCase();
+  const rawCommand = String(message?.text ?? "").trim().split(/\s+/)[0].toLowerCase();
   const command = rawCommand.split("@")[0];
 
   if (!chatId || !telegramUserId || !command.startsWith("/")) {
