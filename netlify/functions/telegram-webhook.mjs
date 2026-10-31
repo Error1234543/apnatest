@@ -7,7 +7,7 @@ async function sendTelegramMessage(chatId, text) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   if (!token) return;
 
-  await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+  await fetch(\`https://api.telegram.org/bot\${token}/sendMessage\`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, text })
@@ -36,7 +36,7 @@ export default async (request) => {
   const message = update?.message;
   const chatId = message?.chat?.id;
   const telegramUserId = String(message?.from?.id ?? "");
-  const command = String(message?.text ?? "").trim().split(/\\s+/)[0].toLowerCase();
+  const command = String(message?.text ?? "").trim().split(/\s+/)[0].toLowerCase();
 
   if (!chatId || !telegramUserId) return json({ ok: true });
 
@@ -66,11 +66,11 @@ export default async (request) => {
 
     try {
       const response = await fetch(
-        `${url.replace(/\\/$/, "")}/rest/v1/courses?select=id&limit=1`,
+        \`\${url.replace(/\/$/, "")}/rest/v1/courses?select=id&limit=1\`,
         {
           headers: {
             apikey: key,
-            authorization: `Bearer ${key}`
+            authorization: \`Bearer \${key}\`
           }
         }
       );
@@ -78,11 +78,11 @@ export default async (request) => {
       await sendTelegramMessage(
         chatId,
         response.ok
-          ? "Backend: online\\nSupabase: connected\\nAdmin access: verified"
-          : "Backend: online\\nSupabase: connection check failed. Check server configuration."
+          ? "Backend: online\nSupabase: connected\nAdmin access: verified"
+          : "Backend: online\nSupabase: connection check failed. Check server configuration."
       );
     } catch {
-      await sendTelegramMessage(chatId, "Backend: online\\nSupabase: connection check failed.");
+      await sendTelegramMessage(chatId, "Backend: online\nSupabase: connection check failed.");
     }
 
     return json({ ok: true });
