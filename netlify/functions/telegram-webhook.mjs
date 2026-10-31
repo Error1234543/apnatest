@@ -30,27 +30,48 @@ function getSupabaseConfig() {
   return { url: url.replace(/\/$/, ""), key };
 }
 
-async function supabaseGet(path, preferCount = false) {
+async function supabaseRequest(path, { method = "GET", body, count = false } = {}) {
   const { url, key } = getSupabaseConfig();
+  const headers = { apikey: key, "content-type": "application/json" };
+  if (count) {
+    headers.Prefer = "count=exact";
+    headers.Range = "0-0";
+  }
+  if (method === "POST") headers.Prefer = "return=representation";
   const response = await fetch(`${url}/rest/v1/${path}`, {
-    headers: {
-      apikey: key,
-      ...(preferCount ? { Prefer: "count=exact", Range: "0-0" } : {})
-    }
+    method,
+    headers,
+    ...(body === undefined ? {} : { body: JSON.stringify(body) })
   });
-
   if (!response.ok) throw new Error(`Supabase request failed: ${response.status}`);
-  const data = await response.json();
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : [];
   const range = response.headers.get("content-range") || "";
-  const count = range.includes("/") ? Number(range.split("/")[1]) : null;
-  return { data, count: Number.isFinite(count) ? count : null };
+  const total = range.includes("/") ? Number(range.split("/")[1]) : null;
+  return { data, count: Number.isFinite(total) ? total : null };
 }
 
-async function handleCommand(command, chatId) {
+const supabaseGet = (path, count = false) =>
+  supabaseRequest(path, { count });
+
+async function auditAction(telegramUserId, action, targetId, metadata = {}) {
+  await supabaseRequest("admin_audit_logs", {
+    method: "POST",
+    body: {
+      telegram_user_id: Number(telegramUserId),
+      action,
+      target_type: "course",
+      target_id: targetId,
+      metadata
+    }
+  });
+}
+
+async function handleCommand(command, chatId, args, telegramUserId) {
   if (command === "/start" || command === "/help") {
     await sendTelegramMessage(
       chatId,
-      "PrepGrid Admin Bot\n\nAvailable commands:\n/status - Backend and database status\n/dashboard - Website backend overview\n/courses - List saved courses\n/help - Show commands"
+      "PrepGrid Admin Bot\n\n/status - Backend status\n/dashboard - Website overview\n/courses - List courses\n/addcourse slug | title | description - Add a draft course\n/publish slug - Publish a course\n/unpublish slug - Move course back to draft\n/help - Show commands"
     );
     return;
   }
@@ -98,6 +119,54 @@ async function handleCommand(command, chatId) {
         chatId,
         "Dashboard could not load. Check Supabase table access and backend logs."
       );
+    }
+    return;
+  }
+
+
+  if (command === "/addcourse") {
+    const parts = args.split("|").map((part) => part.trim());
+    if (parts.length < 2 || !parts[0] || !parts[1]) {
+      await sendTelegramMessage(chatId, "Format:\n/addcourse slug | Course title | Optional description\nExample:\n/addcourse cell-biology | Cell Biology | Class 11 Biology");
+      return;
+    }
+    const [slug, title, description = ""] = parts;
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) || slug.length > 80 || title.length > 120 || description.length > 1000) {
+      await sendTelegramMessage(chatId, "Invalid details. Slug: lowercase letters, numbers and hyphens only. Title max 120 characters; description max 1000.");
+      return;
+    }
+    try {
+      await supabaseRequest("courses", {
+        method: "POST",
+        body: { slug, title, description: description || null, is_published: false }
+      });
+      await auditAction(telegramUserId, "course_created", slug, { title });
+      await sendTelegramMessage(chatId, `Course added as DRAFT.\\nTitle: ${title}\\nSlug: ${slug}\\nUse /publish ${slug} when ready.`);
+    } catch {
+      await sendTelegramMessage(chatId, "Course was not added. The slug may already exist, or the database rejected the request. Check Supabase and try again.");
+    }
+    return;
+  }
+
+  if (command === "/publish" || command === "/unpublish") {
+    const slug = args.trim();
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+      await sendTelegramMessage(chatId, `Format: ${command} course-slug\\nExample: ${command} cell-biology`);
+      return;
+    }
+    try {
+      const result = await supabaseRequest(`courses?slug=eq.${encodeURIComponent(slug)}`, {
+        method: "PATCH",
+        body: { is_published: command === "/publish", updated_at: new Date().toISOString() }
+      });
+      if (!result.data.length) {
+        await sendTelegramMessage(chatId, "Course not found. Check the slug using /courses.");
+        return;
+      }
+      await auditAction(telegramUserId, command === "/publish" ? "course_published" : "course_unpublished", slug);
+      await sendTelegramMessage(chatId, `Course ${command === "/publish" ? "PUBLISHED" : "moved to DRAFT"}: ${slug}`);
+    } catch {
+      await sendTelegramMessage(chatId, "Course update failed. Check database permissions and try again.");
     }
     return;
   }
@@ -162,8 +231,11 @@ export default async (request) => {
   const message = update?.message;
   const chatId = message?.chat?.id;
   const telegramUserId = String(message?.from?.id ?? "");
-  const rawCommand = String(message?.text ?? "").trim().split(/\s+/)[0].toLowerCase();
+  const messageText = String(message?.text ?? "").trim();
+  const commandParts = messageText.split(/\s+/);
+  const rawCommand = (commandParts.shift() || "").toLowerCase();
   const command = rawCommand.split("@")[0];
+  const args = messageText.slice(rawCommand.length).trim();
 
   if (!chatId || !telegramUserId || !command.startsWith("/")) {
     return json({ ok: true });
@@ -180,7 +252,7 @@ export default async (request) => {
   }
 
   try {
-    await handleCommand(command, chatId);
+    await handleCommand(command, chatId, args, telegramUserId);
   } catch {
     // Do not expose secrets, provider responses, or internal errors to Telegram users.
     return json({ error: "Command processing failed" }, 500);
