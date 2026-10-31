@@ -22,7 +22,8 @@
 6. Standard 12 Physics
 
 ## Current verified repository state
-- [x] Standard 11 Biology — Chapter 01: The Living World (existing file; currently 20 questions, so it does **not** yet meet the 100-question standard)
+- [x] Standard 11 Biology — Chapter 01: The Living World (existing file; currently 40 questions, so it does **not** yet meet the 100-question standard)
+- [ ] Standard 11 Biology — Chapter 01: expand from 40 to 100 checked questions
 - [ ] Standard 11 Biology — Chapter 02: Biological Classification
 - [ ] Remaining Standard 11 Biology chapters
 - [ ] Standard 11 Chemistry chapters
@@ -30,6 +31,9 @@
 - [ ] Standard 12 Biology chapters
 - [ ] Standard 12 Chemistry chapters
 - [ ] Standard 12 Physics chapters
+
+## Latest progress
+- Chapter 01 expanded from 20 to 40 Gujarati MCQs; still incomplete until 100 questions and full QA are done.
 
 ## Working notes
 - Do not edit `main` or any `gjstudyhub/` path during this work.
