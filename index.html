@@ -648,7 +648,25 @@
     .quiz-empty{padding:14px;border-radius:12px;background:#fff4e5;color:#854d0e;font-size:.82rem;line-height:1.5}
     @media(max-width:600px){.quiz-overlay{padding:0;align-items:stretch}.quiz-dialog{max-height:100vh;border-radius:0}.quiz-body{padding:14px}.quiz-top{padding:14px}}
 
-  </style>
+  
+/* Smart Hub compact layout */
+.smart-hub{padding:15px!important;margin-bottom:4px!important;border-radius:22px!important}
+.smart-hub-head{align-items:center!important;margin-bottom:11px!important}
+.smart-hub-kicker{font-size:.6rem!important;margin-bottom:4px!important}
+.smart-hub-title{font-size:clamp(1.15rem,2.7vw,1.5rem)!important}
+.smart-hub-sub{font-size:.7rem!important;margin-top:3px!important}
+.smart-hub-count{font-size:.6rem!important;padding:6px 8px!important}
+.smart-hub-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+.smart-hub-card{padding:12px!important;border-radius:16px!important;display:flex!important;flex-direction:column!important;min-width:0!important}
+.smart-hub-icon{width:34px!important;height:34px!important;border-radius:10px!important;margin-bottom:8px!important}
+.smart-hub-icon svg{width:19px!important;height:19px!important}
+.smart-hub-card h3{font-size:.88rem!important;margin-bottom:4px!important}
+.smart-hub-card p{font-size:.66rem!important;line-height:1.4!important;min-height:0!important;flex:1}
+.smart-hub-status{margin-top:8px!important;padding:6px 8px!important;font-size:.6rem!important}
+.smart-hub-action{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:8px;padding:8px 9px;border-radius:10px;background:linear-gradient(135deg,#2874b9,#2563eb);color:#fff;font-size:.67rem;font-weight:800}
+@media(max-width:600px){.smart-hub{padding:13px!important;border-radius:19px!important}.smart-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:visible!important;margin:0!important;padding:0!important}.smart-hub-card{flex:auto!important}.smart-hub-head{align-items:center!important}.smart-hub-count{white-space:nowrap}}
+
+</style>
 </head>
 <body>
 
@@ -1190,6 +1208,68 @@
     }
     document.addEventListener('click',e=>{if(e.target.closest('[data-open-quiz]'))openQuiz();if(e.target.closest('[data-quiz-close]'))closeQuiz();if(e.target.id==='quizLoad')startQuiz();const overlay=quizOverlay();if(overlay&&e.target===overlay)closeQuiz();});
     document.getElementById('quizLoad').addEventListener('click',startQuiz);
+
+
+/* PrepGrid Quiz Tool runtime */
+(()=>{
+ const overlay=document.getElementById('quizOverlay'),body=document.getElementById('quizBody');
+ if(!overlay||!body||window.prepGridQuizReady)return;window.prepGridQuizReady=true;
+ let questions=[],index=0,answers={},elapsed=0,timer=null;
+ const esc=v=>String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+ const open=()=>{overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';};
+ const close=()=>{overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';clearInterval(timer);};
+ function parse(text){
+   const out=[];let q=null;
+   for(const raw of text.replace(/\r/g,'').split('\n')){
+     const s=raw.trim();if(!s)continue;
+     const start=s.match(/^(?:Q(?:UESTION)?\s*)?(\d{1,4})\s*[.)\-:]\s*(.+)$/i);
+     const option=s.match(/^(?:\(([1-4A-D])\)|([1-4A-D])[.)])\s*(.+)$/i);
+     const answer=s.match(/^(?:ANS(?:WER)?|સાચો જવાબ|જવાબ)\s*[:.\-]?\s*\(?([1-4A-D])\)?\s*$/i);
+     if(start){if(q)out.push(q);q={number:start[1],text:start[2],options:[],answer:null};}
+     else if(option&&q)q.options.push({key:(option[1]||option[2]).toUpperCase(),text:option[3]});
+     else if(answer&&q)q.answer=answer[1].toUpperCase();
+     else if(q&&q.options.length)q.options[q.options.length-1].text+=' '+s;
+     else if(q)q.text+='\n'+s;
+   }
+   if(q)out.push(q);
+   return out.filter(x=>x.text&&x.options.length>=2).map(x=>{
+     if(x.answer&&x.options.some(o=>o.key===x.answer))x.correct=x.answer;
+     else if(x.answer&&/^[1-4]$/.test(x.answer)&&x.options.some(o=>o.key===x.answer))x.correct=x.answer;
+     else if(x.answer&&/^[A-D]$/.test(x.answer)){
+       const n=String('ABCD'.indexOf(x.answer)+1);
+       if(x.options.some(o=>o.key===n))x.correct=n;
+       else if(x.options.some(o=>o.key===x.answer))x.correct=x.answer;
+     }
+     return x;
+   });
+ }
+ function begin(){
+   const area=document.getElementById('quizPaste'),notice=document.getElementById('quizNotice');
+   questions=parse(area.value);index=0;answers={};elapsed=0;
+   if(!questions.length){notice.innerHTML='<div class="quiz-empty">MCQs detect nahi hue. Har question ke baad (1)–(4) options aur ANS: 4 likho.</div>';return;}
+   const pending=questions.filter(q=>!q.correct).length;
+   body.innerHTML='<div class="quiz-meta"><span class="quiz-pill">'+questions.length+' questions loaded</span><span class="quiz-pill">'+pending+' answer keys to review</span><span class="quiz-pill" id="quizClock">00:00</span></div><div id="quizStage"></div>';
+   clearInterval(timer);timer=setInterval(()=>{elapsed++;const el=document.getElementById('quizClock');if(el)el.textContent=String(Math.floor(elapsed/60)).padStart(2,'0')+':'+String(elapsed%60).padStart(2,'0');},1000);render();
+ }
+ function render(){
+   const q=questions[index],stage=document.getElementById('quizStage');if(!q||!stage)return;
+   stage.innerHTML='<div class="quiz-meta"><span class="quiz-pill">Question '+(index+1)+' / '+questions.length+'</span></div><div class="quiz-question"><h3>'+esc(q.text)+'</h3>'+q.options.map(o=>'<label class="quiz-option '+(answers[index]===o.key?'selected':'')+'"><input type="radio" name="quizAnswer" value="'+esc(o.key)+'" '+(answers[index]===o.key?'checked':'')+'><span><b>'+esc(o.key)+'.</b> '+esc(o.text)+'</span></label>').join('')+'</div><div style="display:flex;justify-content:space-between;gap:8px"><button class="quiz-secondary" id="quizPrev" '+(!index?'disabled':'')+'>Previous</button><button class="quiz-primary" id="quizNext">'+(index===questions.length-1?'Submit Quiz':'Next')+'</button></div>';
+   stage.querySelectorAll('[name="quizAnswer"]').forEach(el=>el.addEventListener('change',()=>{answers[index]=el.value;render();}));
+   document.getElementById('quizPrev').onclick=()=>{if(index){index--;render();}};
+   document.getElementById('quizNext').onclick=()=>{if(index<questions.length-1){index++;render();}else showResult();};
+ }
+ function showResult(){
+   clearInterval(timer);
+   const keyed=questions.filter(q=>q.correct),wrong=keyed.filter(q=>answers[questions.indexOf(q)]!==q.correct);
+   const score=keyed.length-wrong.length,unanswered=questions.filter((q,i)=>!answers[i]).length,pending=questions.filter(q=>!q.correct);
+   body.innerHTML='<div class="quiz-meta"><span class="quiz-pill">Score '+score+'/'+keyed.length+'</span><span class="quiz-pill">Wrong '+wrong.length+'</span><span class="quiz-pill">Unanswered '+unanswered+'</span><span class="quiz-pill">'+Math.floor(elapsed/60)+'m '+elapsed%60+'s</span></div><h3>Wrong questions</h3>'+(wrong.length?wrong.map(q=>'<div class="quiz-wrong"><p><b>Q'+esc(q.number)+'.</b> '+esc(q.text)+'\nYour answer: '+esc(answers[questions.indexOf(q)]||'Not answered')+' · Correct: '+esc(q.correct)+'</p><button class="quiz-secondary" data-copy-wrong="'+questions.indexOf(q)+'">Copy question</button></div>').join(''):'<div class="quiz-feedback">No wrong answers in questions with detected answer keys.</div>')+(pending.length?'<div class="quiz-empty">'+pending.length+' question(s) have missing answer keys and are excluded from score for review.</div>':'')+'<button class="quiz-primary" id="quizAgain">Paste another set</button>';
+   body.querySelectorAll('[data-copy-wrong]').forEach(btn=>btn.onclick=()=>{const q=questions[Number(btn.dataset.copyWrong)],txt='Q'+q.number+'. '+q.text+'\n'+q.options.map(o=>'('+o.key+') '+o.text).join('\n')+'\nANS: '+q.correct;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(()=>btn.textContent='Copied');});
+   document.getElementById('quizAgain').onclick=()=>{body.innerHTML='<p class="quiz-help">Paste MCQs with options and answer keys.</p><textarea class="quiz-paste" id="quizPaste"></textarea><button class="quiz-primary" id="quizLoad">Load MCQs</button><div id="quizNotice"></div>';document.getElementById('quizLoad').onclick=begin;};
+ }
+ document.addEventListener('click',e=>{if(e.target.closest('[data-open-quiz]'))open();if(e.target.closest('[data-quiz-close]'))close();});
+ overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+ document.getElementById('quizLoad').onclick=begin;
+})();
 
     window.addEventListener('hashchange', router);
     router();
