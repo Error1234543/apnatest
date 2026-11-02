@@ -274,6 +274,8 @@
     .login-benefit { display:flex;align-items:center;gap:10px;color:var(--text-mut);font-size:.84rem; }
     .login-benefit svg { width:17px;height:17px;color:#0891b2;flex-shrink:0; }
     .login-demo-note { padding:12px 14px;border-radius:13px;background:var(--card-white);border:1px solid var(--glass-border);color:var(--text-mut);font-size:.76rem;line-height:1.55;text-align:center; }
+    #studentProfile input { font:inherit;font-size:.9rem;box-sizing:border-box; }
+    #studentProfile button:disabled { opacity:.65;cursor:wait; }
     @media (max-width:600px) {
       .site-header { gap:9px; }
       .login-trigger { padding:10px 12px;font-size:.82rem; }
@@ -758,6 +760,14 @@
       <div class="login-mark" aria-hidden="true">PG</div>
       <h2 id="loginTitle">Welcome to PrepGrid</h2>
       <p class="login-lead">Sign in with your Google account to keep your learning journey connected.</p>
+      <div id="studentProfile" hidden style="margin:0 0 16px;padding:16px;border:1px solid var(--glass-border);border-radius:18px;background:var(--card-white);text-align:left">
+        <div style="font-weight:800;margin-bottom:12px">Student Profile</div>
+        <label for="profileFirstName" style="display:block;font-size:.8rem;font-weight:700;margin-bottom:5px">First name</label>
+        <input id="profileFirstName" autocomplete="given-name" maxlength="60" placeholder="Your first name" style="width:100%;padding:12px;border:1px solid var(--glass-border);border-radius:11px;background:var(--glass-strong);color:var(--text-main);margin-bottom:10px">
+        <label for="profileSurname" style="display:block;font-size:.8rem;font-weight:700;margin-bottom:5px">Surname</label>
+        <input id="profileSurname" autocomplete="family-name" maxlength="60" placeholder="Your surname" style="width:100%;padding:12px;border:1px solid var(--glass-border);border-radius:11px;background:var(--glass-strong);color:var(--text-main);margin-bottom:12px">
+        <button id="saveProfile" class="google-demo" type="button" style="background:linear-gradient(135deg,#172554,#1d4ed8 65%,#0891b2);color:#fff;border:0">Save Profile</button>
+      </div>
       <button class="google-demo" id="googleDemo" type="button">
         <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6C44.42 38.05 46.98 31.92 46.98 24.55z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.52 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.45-4.89 2.3-8.18 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
         Continue with Google
@@ -1028,36 +1038,92 @@
     const loginTitle = document.getElementById('loginTitle');
     const loginLead = document.querySelector('.login-lead');
 
+    const studentProfile = document.getElementById('studentProfile');
+    const firstNameInput = document.getElementById('profileFirstName');
+    const surnameInput = document.getElementById('profileSurname');
+    const saveProfileButton = document.getElementById('saveProfile');
+    let activeUser = null;
+
+    function setAccountButton(name) {
+      const first = (name || '').trim().split(/\\s+/)[0];
+      loginTrigger.lastChild.textContent = first ? ' ' + first : ' Account';
+    }
+
     async function showAccount(user) {
+      activeUser = user || null;
       if (user) {
-        loginTrigger.lastChild.textContent = ' Account';
-        loginTitle.textContent = 'Your PrepGrid Account';
         const metadata = user.user_metadata || {};
-        const displayName = metadata.full_name || metadata.name || '';
-        loginLead.textContent = displayName ? displayName + ' · ' + (user.email || '') : (user.email || 'You are signed in.');
-        authStatus.textContent = 'Your account is connected. Profile sync is active.';
+        const googleName = metadata.full_name || metadata.name || '';
+        loginTitle.textContent = 'Your PrepGrid Account';
+        loginLead.textContent = user.email || 'You are signed in.';
+        authStatus.textContent = 'Your account is connected. Your profile is private to your account.';
         googleButton.hidden = true;
         signOutButton.hidden = false;
-        const { error } = await supabase.from('profiles').upsert({
-          id: user.id,
-          email: user.email || null,
-          full_name: displayName || null,
-          avatar_url: metadata.avatar_url || metadata.picture || null,
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+        studentProfile.hidden = false;
+
+        const { data: profile, error } = await supabase.from('profiles')
+          .select('full_name,email').eq('id', user.id).maybeSingle();
+
         if (error) {
-          console.error('Profile sync:', error.message);
-          authStatus.textContent = 'Signed in. Profile database setup is still pending.';
+          console.error('Profile load:', error.message);
+          authStatus.textContent = 'Could not load profile details. Please refresh.';
+          return;
+        }
+
+        const savedName = profile?.full_name || googleName;
+        const parts = (savedName || '').trim().split(/\\s+/).filter(Boolean);
+        firstNameInput.value = parts.shift() || '';
+        surnameInput.value = parts.join(' ');
+        setAccountButton(savedName || googleName);
+        if (!profile) {
+          const { error: insertError } = await supabase.from('profiles').upsert({
+            id: user.id, email: user.email || null, full_name: googleName || null,
+            avatar_url: metadata.avatar_url || metadata.picture || null
+          }, { onConflict: 'id' });
+          if (insertError) console.error('Profile create:', insertError.message);
         }
       } else {
-        loginTrigger.lastChild.textContent = ' Login';
+        setAccountButton('');
         loginTitle.textContent = 'Welcome to PrepGrid';
         loginLead.textContent = 'Sign in with your Google account to keep your learning journey connected.';
         authStatus.textContent = 'Secure Google sign-in powered by Supabase.';
         googleButton.hidden = false;
         signOutButton.hidden = true;
+        studentProfile.hidden = true;
+        firstNameInput.value = '';
+        surnameInput.value = '';
       }
     }
+
+    saveProfileButton.addEventListener('click', async () => {
+      if (!activeUser) return;
+      const first = firstNameInput.value.trim();
+      const surname = surnameInput.value.trim();
+      if (!first) {
+        authStatus.textContent = 'Please enter your first name.';
+        firstNameInput.focus();
+        return;
+      }
+      const fullName = [first, surname].filter(Boolean).join(' ');
+      saveProfileButton.disabled = true;
+      saveProfileButton.textContent = 'Saving…';
+      const { error } = await supabase.from('profiles').upsert({
+        id: activeUser.id,
+        email: activeUser.email || null,
+        full_name: fullName,
+        avatar_url: activeUser.user_metadata?.avatar_url || activeUser.user_metadata?.picture || null,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'id' });
+      saveProfileButton.disabled = false;
+      saveProfileButton.textContent = 'Save Profile';
+      if (error) {
+        console.error('Profile save:', error.message);
+        authStatus.textContent = 'Could not save profile. Please try again.';
+        return;
+      }
+      setAccountButton(fullName);
+      authStatus.textContent = 'Profile saved successfully.';
+    });
 
     googleButton.addEventListener('click', async () => {
       googleButton.disabled = true;
