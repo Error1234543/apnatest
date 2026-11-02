@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PrepGrid Admin Dashboard</title>
+<style>
+:root{color-scheme:light;--ink:#10213b;--muted:#64748b;--line:#e2e8f0;--blue:#2563eb;--bg:#f4f8fc}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#eef8ff,#f7f8ff 55%,#eff6ff);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);min-height:100vh}
+main{width:min(1100px,100%);margin:auto;padding:24px 16px 48px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+.brand{font-weight:850;font-size:1.1rem}.brand small{display:block;color:var(--muted);font-size:.75rem;font-weight:600;margin-top:4px}
+button{border:0;border-radius:12px;padding:11px 15px;background:var(--blue);color:white;font-weight:750;cursor:pointer}button.secondary{background:white;color:var(--ink);border:1px solid var(--line)}button:disabled{opacity:.55}
+.panel{background:rgba(255,255,255,.88);border:1px solid white;border-radius:22px;padding:22px;box-shadow:0 18px 55px #1e3a8a12;margin-bottom:18px}
+h1{font-size:clamp(1.55rem,4vw,2.2rem);margin:0 0 8px}p{color:var(--muted);line-height:1.55}.status{padding:12px 14px;border-radius:12px;background:#eff6ff;color:#1e40af;margin:14px 0;font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.stat{background:#f8fbff;border:1px solid var(--line);border-radius:15px;padding:15px}.stat b{font-size:1.6rem;display:block}.stat span{font-size:.78rem;color:var(--muted)}
+input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font:inherit;margin:8px 0 14px}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:left;padding:13px 10px;border-bottom:1px solid var(--line);font-size:.88rem}th{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.06em}
+.hidden{display:none!important}.loginbox{max-width:440px;margin:8vh auto}.pill{display:inline-block;padding:5px 9px;border-radius:99px;background:#dcfce7;color:#166534;font-size:.75rem;font-weight:800}
+@media(max-width:560px){main{padding:18px 12px}.panel{padding:17px}.stats{grid-template-columns:1fr 1fr}.stat:last-child{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<main>
+<header class="top"><div class="brand">PrepGrid Official Academy<small>Private administration</small></div><button id="logout" class="secondary hidden">Sign out</button></header>
+<section id="loginPanel" class="panel loginbox hidden">
+<h1>Admin sign in</h1><p>Sign in with your authorized Google account to continue.</p>
+<button id="google" style="width:100%">Continue with Google</button>
+<div id="loginStatus" class="status" role="status">Checking your session…</div>
+</section>
+<section id="deniedPanel" class="panel hidden"><h1>Access not allowed</h1><p>This Google account is not authorized for the PrepGrid admin dashboard.</p><button id="switchAccount">Sign out and switch account</button></section>
+<section id="dashboard" class="hidden">
+<div class="panel"><div class="pill">ADMIN ACCESS VERIFIED</div><h1 style="margin-top:14px">Student Dashboard</h1><p id="welcome">Private overview of registered student profiles.</p>
+<div class="stats"><div class="stat"><b id="total">—</b><span>Registered profiles</span></div><div class="stat"><b id="today">—</b><span>Profiles created today</span></div><div class="stat"><b>Private</b><span>Supabase protected access</span></div></div>
+<button id="refresh">Refresh data</button> <span id="loadStatus" class="status" aria-live="polite">Loading profiles…</span>
+</div>
+<div class="panel"><h2 style="margin:0 0 8px">Student profiles</h2><input id="search" type="search" placeholder="Search by name or email" aria-label="Search students">
+<div class="table-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead><tbody id="rows"><tr><td colspan="3">Loading…</td></tr></tbody></table></div></div>
+</section>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+const supabase=createClient('https://zrjmflymsbukwvsyqrkl.supabase.co','sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5');
+const $=id=>document.getElementById(id);
+let profiles=[];
+function show(id){['loginPanel','deniedPanel','dashboard'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('logout').classList.toggle('hidden',id!=='dashboard');}
+function status(message){$('loadStatus').textContent=message;}
+function render(){
+ const q=$('search').value.trim().toLowerCase();
+ const list=profiles.filter(p=>(p.full_name||'').toLowerCase().includes(q)||(p.email||'').toLowerCase().includes(q));
+ $('rows').innerHTML=list.length?list.map(p=>'<tr><td>'+escapeHtml(p.full_name||'—')+'</td><td>'+escapeHtml(p.email||'—')+'</td><td>'+ (p.created_at?new Date(p.created_at).toLocaleDateString():'—')+'</td></tr>').join(''):'<tr><td colspan="3">No matching profiles.</td></tr>';
+}
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function loadProfiles(){
+ status('Loading profiles…');$('refresh').disabled=true;
+ const {data,error}=await supabase.from('profiles').select('full_name,email,created_at').order('created_at',{ascending:false}).limit(500);
+ $('refresh').disabled=false;
+ if(error){status('Could not load profiles: '+error.message);return;}
+ profiles=data||[];$('total').textContent=profiles.length;
+ const today=new Date();today.setHours(0,0,0,0);
+ $('today').textContent=profiles.filter(p=>p.created_at&&new Date(p.created_at)>=today).length;
+ render();status('Showing up to 500 profiles.');
+}
+async function checkSession(){
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session){show('loginPanel');$('loginStatus').textContent='Please sign in with the authorized admin Google account.';return;}
+ $('welcome').textContent='Signed in as '+(session.user.email||'authorized administrator')+'.';
+ const {data:isAdmin,error}=await supabase.rpc('is_prepgrid_admin');
+ if(error||isAdmin!==true){show('deniedPanel');return;}
+ show('dashboard');await loadProfiles();
+}
+$('google').addEventListener('click',async()=>{
+ $('google').disabled=true;$('loginStatus').textContent='Redirecting to Google…';
+ const {error}=await supabase.auth.signInWithOAuth({provider:'google',options:{redirectTo:window.location.href}});
+ if(error){$('loginStatus').textContent='Sign-in error: '+error.message;$('google').disabled=false;}
+});
+$('logout').addEventListener('click',async()=>{await supabase.auth.signOut();show('loginPanel');$('loginStatus').textContent='Signed out.';});
+$('switchAccount').addEventListener('click',async()=>{await supabase.auth.signOut();show('loginPanel');});
+$('refresh').addEventListener('click',loadProfiles);$('search').addEventListener('input',render);
+supabase.auth.onAuthStateChange(()=>{setTimeout(checkSession,0);});
+checkSession();
+</script>
+</body></html>
