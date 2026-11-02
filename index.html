@@ -752,7 +752,8 @@
         <div class="login-benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Keep your study progress in one place</div>
         <div class="login-benefit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 4 4L19 6"/></svg> Access free learning resources</div>
       </div>
-      <p class="login-demo-note">Preview only: Google sign-in is not active yet. No account or personal data is collected in this demo.</p>
+      <p class="login-demo-note" id="authStatus" role="status">Secure Google sign-in powered by Supabase.</p>
+      <button class="google-demo" id="signOutButton" type="button" hidden style="margin-top:12px;background:#f1f5f9">Sign out</button>
     </section>
   </div>
 
@@ -775,7 +776,7 @@
     loginClose.addEventListener("click", closeLogin);
     loginModal.addEventListener("click", (event) => { if (event.target === loginModal) closeLogin(); });
     document.addEventListener("keydown", (event) => { if (event.key === "Escape" && loginModal.classList.contains("open")) closeLogin(); });
-    document.getElementById("googleDemo").addEventListener("click", () => alert("Demo preview only. Google sign-in will be connected in the next backend phase."));
+    // Google sign-in is handled by the Supabase Auth module below.
 
     // ─── THEME ───
     const html = document.documentElement;
@@ -995,5 +996,62 @@
     window.addEventListener('hashchange', router);
     router();
   </script>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    const supabase = createClient(
+      'https://zrjmflymsbukwvsyqrkl.supabase.co',
+      'sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5'
+    );
+
+    const googleButton = document.getElementById('googleDemo');
+    const signOutButton = document.getElementById('signOutButton');
+    const authStatus = document.getElementById('authStatus');
+    const loginTrigger = document.getElementById('loginOpen');
+    const loginTitle = document.getElementById('loginTitle');
+    const loginLead = document.querySelector('.login-lead');
+
+    function showAccount(user) {
+      if (user) {
+        loginTrigger.lastChild.textContent = ' Account';
+        loginTitle.textContent = 'Your PrepGrid Account';
+        loginLead.textContent = user.email || 'You are signed in.';
+        authStatus.textContent = 'Google account connected successfully.';
+        googleButton.hidden = true;
+        signOutButton.hidden = false;
+      } else {
+        loginTrigger.lastChild.textContent = ' Login';
+        loginTitle.textContent = 'Welcome to PrepGrid';
+        loginLead.textContent = 'Sign in with your Google account to keep your learning journey connected.';
+        authStatus.textContent = 'Secure Google sign-in powered by Supabase.';
+        googleButton.hidden = false;
+        signOutButton.hidden = true;
+      }
+    }
+
+    googleButton.addEventListener('click', async () => {
+      googleButton.disabled = true;
+      authStatus.textContent = 'Connecting to Google…';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin + window.location.pathname + window.location.hash }
+      });
+      if (error) authStatus.textContent = 'Login error: ' + error.message;
+      googleButton.disabled = false;
+    });
+
+    signOutButton.addEventListener('click', async () => {
+      signOutButton.disabled = true;
+      const { error } = await supabase.auth.signOut();
+      authStatus.textContent = error ? 'Sign-out error: ' + error.message : 'You have signed out.';
+      signOutButton.disabled = false;
+    });
+
+    const { data: { session } } = await supabase.auth.getSession();
+    showAccount(session?.user || null);
+    supabase.auth.onAuthStateChange((_event, session) => showAccount(session?.user || null));
+  </script>
+
 </body>
 </html>
