@@ -1140,10 +1140,11 @@
     }
 
 
-    const quizOverlay=document.getElementById('quizOverlay'),quizBody=document.getElementById('quizBody');
+    function quizOverlay(){return document.getElementById('quizOverlay');}
+    function quizBody(){return document.getElementById('quizBody');}
     let quizQuestions=[],quizIndex=0,quizAnswers={},quizSeconds=0,quizClock=null;
-    function openQuiz(){quizOverlay.classList.add('open');quizOverlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
-    function closeQuiz(){quizOverlay.classList.remove('open');quizOverlay.setAttribute('aria-hidden','true');document.body.style.overflow='';if(quizClock)clearInterval(quizClock);}
+    function openQuiz(){const el=quizOverlay();if(!el)return;el.classList.add('open');el.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
+    function closeQuiz(){const el=quizOverlay();if(!el)return;el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.style.overflow='';if(quizClock)clearInterval(quizClock);}
     function escapeQuizText(s){return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
     function parsePrepGridMCQs(raw){
       const lines=raw.replace(/\r/g,'').split('\n'),blocks=[];let cur=null;
@@ -1161,7 +1162,7 @@
       return blocks.filter(q=>q.question&&q.options.length>=2).map(q=>{
         let correct=q.answer;if(correct&&/^[1-4]$/.test(correct))correct=String.fromCharCode(64+Number(correct));
         if(correct&&!q.options.some(o=>o.key===correct)&&/^[A-D]$/.test(correct)){const n=String(Number(correct)-1);if(q.options.some(o=>o.key===n))correct=n;}
-        return {...q,correct};
+        return {...q,options:q.options.map(o=>({...o,key:/^[1-4]$/.test(o.key)?String.fromCharCode(64+Number(o.key)):o.key})),correct};
       });
     }
     function startQuiz(){
@@ -1169,7 +1170,7 @@
       quizQuestions=parsePrepGridMCQs(paste.value);quizAnswers={};quizIndex=0;quizSeconds=0;
       if(!quizQuestions.length){notice.innerHTML='<div class="quiz-empty">MCQs detect nahi hue. Question number, options (1)–(4) aur ANS: 4 format mein paste karo.</div>';return;}
       const missing=quizQuestions.filter(q=>!q.correct).length;
-      quizBody.innerHTML='<div class="quiz-meta"><span class="quiz-pill">'+quizQuestions.length+' MCQs loaded</span><span class="quiz-pill">'+missing+' answer keys need review</span><span class="quiz-pill" id="quizTimer">00:00</span></div><div id="quizStage"></div>';
+      quizBody().innerHTML='<div class="quiz-meta"><span class="quiz-pill">'+quizQuestions.length+' MCQs loaded</span><span class="quiz-pill">'+missing+' answer keys need review</span><span class="quiz-pill" id="quizTimer">00:00</span></div><div id="quizStage"></div>';
       if(quizClock)clearInterval(quizClock);quizClock=setInterval(()=>{quizSeconds++;const el=document.getElementById('quizTimer');if(el)el.textContent=String(Math.floor(quizSeconds/60)).padStart(2,'0')+':'+String(quizSeconds%60).padStart(2,'0');},1000);renderQuizQuestion();
     }
     function renderQuizQuestion(){
@@ -1184,11 +1185,10 @@
       const keyed=quizQuestions.filter(q=>q.correct),correct=keyed.filter(q=>quizAnswers[quizQuestions.indexOf(q)]===q.correct).length;
       const wrong=keyed.filter(q=>quizAnswers[quizQuestions.indexOf(q)]!==q.correct),unanswered=quizQuestions.filter((q,i)=>!quizAnswers[i]).length,uncertain=quizQuestions.filter(q=>!q.correct);
       quizBody.innerHTML='<div class="quiz-meta"><span class="quiz-pill">Score: '+correct+' / '+keyed.length+'</span><span class="quiz-pill">Wrong: '+wrong.length+'</span><span class="quiz-pill">Unanswered: '+unanswered+'</span><span class="quiz-pill">Time: '+Math.floor(quizSeconds/60)+'m '+quizSeconds%60+'s</span></div><h3 style="font-size:1.1rem;margin:15px 0">Wrong questions</h3>'+(wrong.length?wrong.map(q=>'<div class="quiz-wrong"><p><b>Q'+escapeQuizText(q.number)+'.</b> '+escapeQuizText(q.question)+'\nYour answer: '+escapeQuizText(quizAnswers[quizQuestions.indexOf(q)]||'Not answered')+' · Correct: '+escapeQuizText(q.correct)+'</p><button class="quiz-secondary" type="button" data-copy-wrong="'+quizQuestions.indexOf(q)+'">Copy question</button></div>').join(''):'<div class="quiz-feedback">No wrong answers in questions with detected answer keys.</div>')+(uncertain.length?'<div class="quiz-empty">'+uncertain.length+' question(s) have no detected answer key. They were excluded from score; please review them.</div>':'')+'<button class="quiz-primary" type="button" id="quizRestart">Paste another set</button>';
-      quizBody.querySelectorAll('[data-copy-wrong]').forEach(btn=>btn.addEventListener('click',()=>{const q=quizQuestions[Number(btn.dataset.copyWrong)],txt='Q'+q.number+'. '+q.question+'\n'+q.options.map(o=>'('+o.key+') '+o.text).join('\n')+'\nANS: '+q.correct;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(()=>btn.textContent='Copied');}));
-      document.getElementById('quizRestart').addEventListener('click',()=>{quizBody.innerHTML='<p class="quiz-help">Paste MCQs with options and answer keys.</p><textarea class="quiz-paste" id="quizPaste"></textarea><button class="quiz-primary" type="button" id="quizLoad">Load MCQs</button><div id="quizNotice"></div>';document.getElementById('quizLoad').addEventListener('click',startQuiz);});
+      quizBody().querySelectorAll('[data-copy-wrong]').forEach(btn=>btn.addEventListener('click',()=>{const q=quizQuestions[Number(btn.dataset.copyWrong)],txt='Q'+q.number+'. '+q.question+'\n'+q.options.map(o=>'('+o.key+') '+o.text).join('\n')+'\nANS: '+q.correct;if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(()=>btn.textContent='Copied');}));
+      document.getElementById('quizRestart').addEventListener('click',()=>{quizBody().innerHTML='<p class="quiz-help">Paste MCQs with options and answer keys.</p><textarea class="quiz-paste" id="quizPaste"></textarea><button class="quiz-primary" type="button" id="quizLoad">Load MCQs</button><div id="quizNotice"></div>';});
     }
-    document.addEventListener('click',e=>{if(e.target.closest('[data-open-quiz]'))openQuiz();if(e.target.closest('[data-quiz-close]'))closeQuiz();});
-    quizOverlay.addEventListener('click',e=>{if(e.target===quizOverlay)closeQuiz();});
+    document.addEventListener('click',e=>{if(e.target.closest('[data-open-quiz]'))openQuiz();if(e.target.closest('[data-quiz-close]'))closeQuiz();if(e.target.id==='quizLoad')startQuiz();const overlay=quizOverlay();if(overlay&&e.target===overlay)closeQuiz();});
     document.getElementById('quizLoad').addEventListener('click',startQuiz);
 
     window.addEventListener('hashchange', router);
