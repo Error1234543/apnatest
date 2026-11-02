@@ -1012,14 +1012,27 @@
     const loginTitle = document.getElementById('loginTitle');
     const loginLead = document.querySelector('.login-lead');
 
-    function showAccount(user) {
+    async function showAccount(user) {
       if (user) {
         loginTrigger.lastChild.textContent = ' Account';
         loginTitle.textContent = 'Your PrepGrid Account';
-        loginLead.textContent = user.email || 'You are signed in.';
-        authStatus.textContent = 'Google account connected successfully.';
+        const metadata = user.user_metadata || {};
+        const displayName = metadata.full_name || metadata.name || '';
+        loginLead.textContent = displayName ? displayName + ' · ' + (user.email || '') : (user.email || 'You are signed in.');
+        authStatus.textContent = 'Your account is connected. Profile sync is active.';
         googleButton.hidden = true;
         signOutButton.hidden = false;
+        const { error } = await supabase.from('profiles').upsert({
+          id: user.id,
+          email: user.email || null,
+          full_name: displayName || null,
+          avatar_url: metadata.avatar_url || metadata.picture || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+        if (error) {
+          console.error('Profile sync:', error.message);
+          authStatus.textContent = 'Signed in. Profile database setup is still pending.';
+        }
       } else {
         loginTrigger.lastChild.textContent = ' Login';
         loginTitle.textContent = 'Welcome to PrepGrid';
