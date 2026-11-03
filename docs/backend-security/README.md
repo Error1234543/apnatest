@@ -20,6 +20,7 @@
 ## Phase 1 — Supabase security audit
 - [ ] Inventory tables, views, functions, storage buckets, and exposed schemas.
 - [ ] Verify RLS is enabled on every user-accessible table.
+- [ ] Specifically audit the `profiles` table used by the root homepage: SELECT and UPSERT must be restricted to the authenticated user's own `id` (auth.uid()).
 - [ ] Review SELECT/INSERT/UPDATE/DELETE policies separately.
 - [ ] Verify users can access only their own profile, progress, and test records.
 - [ ] Verify admin actions require server-verified admin roles; never trust client-side role flags.
@@ -59,7 +60,10 @@
 - The root homepage and Gujarati study hub use separate UI structures.
 - The repository has previously used an FTP deployment workflow.
 - A limited earlier scan found no matches for several common high-risk secret patterns; this is not a complete secret or history audit.
-- Supabase is referenced by the homepage, but the actual database schema and RLS policies have not yet been inspected.
+- Root `index.html` initializes Supabase Auth with a browser publishable key and Google OAuth.
+- Root homepage reads `profiles` by `id = user.id` and upserts the signed-in user's profile. This requires matching RLS policies; frontend filters alone are not security controls.
+- No service-role key was observed in the inspected homepage section. This is not a full repository/history secret audit.
+- The Supabase project/schema and actual RLS policies have not yet been inspected.
 
 ## Current status
-Planning and baseline verification only. No production database, hosting, authentication, or security settings have been changed.
+Repository inspection and security plan committed on `backend-security`. The homepage auth flow has been inspected; Supabase schema/RLS verification is pending. No production database, hosting, authentication, or security settings have been changed.
