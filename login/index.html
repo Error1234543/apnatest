@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1730">
+<title>Sign in | PrepGrid Official Academy</title>
+<style>
+:root{color-scheme:light;font-family:Inter,"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;color:#10213b;background:radial-gradient(900px 560px at 8% 8%,#b9f1f5 0,transparent 58%),radial-gradient(800px 600px at 96% 96%,#c9d8ff 0,transparent 58%),linear-gradient(135deg,#eaf0f8,#f8fbff 55%,#e9eef8)}
+.card{width:min(100%,440px);padding:34px 30px 28px;border:1px solid rgba(255,255,255,.9);border-radius:30px;background:rgba(255,255,255,.72);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 28px 80px #142b5026,inset 0 1px 0 #fff;text-align:center}
+.logo{width:62px;height:62px;margin:0 auto 18px;border-radius:21px;display:grid;place-items:center;color:#fff;font-size:1.08rem;font-weight:900;letter-spacing:-.04em;background:linear-gradient(145deg,#22d3ee,#2563eb 65%,#312e81);box-shadow:0 14px 30px #2563eb42}
+.kicker{font-size:.7rem;font-weight:850;letter-spacing:.18em;text-transform:uppercase;color:#0e7490}
+h1{font-size:clamp(1.7rem,6vw,2.15rem);letter-spacing:-.055em;margin:9px 0 9px;color:#10213b}
+.lead{font-size:.92rem;line-height:1.65;color:#64748b;margin:0 auto 25px;max-width:330px}
+.google{width:100%;min-height:54px;display:flex;align-items:center;justify-content:center;gap:12px;border:1px solid #d9e1eb;border-radius:15px;background:#fff;color:#172033;font-size:.96rem;font-weight:800;box-shadow:0 8px 20px #142b5012;cursor:pointer;transition:transform .18s,box-shadow .18s}
+.google:hover{transform:translateY(-2px);box-shadow:0 13px 25px #142b501c}.google:disabled{opacity:.65;cursor:wait;transform:none}
+.google svg{width:21px;height:21px}.status{min-height:24px;margin:15px 0 0;color:#475569;font-size:.82rem;line-height:1.5}
+.foot{border-top:1px solid #dce5ef;margin-top:24px;padding-top:18px;color:#8190a4;font-size:.72rem;line-height:1.6}
+@media(max-width:480px){.card{padding:29px 21px 23px;border-radius:25px}}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="logo" aria-hidden="true">PG</div>
+<div class="kicker">PrepGrid Official Academy</div>
+<h1>Your learning starts here.</h1>
+<p class="lead">Sign in securely with Google to access your study dashboard, tests and learning resources.</p>
+<button class="google" id="googleLogin" type="button">
+<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 24.5c0-1.4-.1-2.8-.4-4.1H24v7.8h11a9.4 9.4 0 0 1-4.1 6.2v5.1h6.7c3.9-3.6 6-8.8 6-15Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.8 13.5-4.9l-6.7-5.1c-1.8 1.2-4 1.9-6.8 1.9-5.2 0-9.6-3.5-11.2-8.2H5.9v5.2A20 20 0 0 0 24 44Z"/><path fill="#4A90E2" d="M12.8 27.7a12 12 0 0 1 0-7.4v-5.2H5.9a20 20 0 0 0 0 17.8l6.9-5.2Z"/><path fill="#EA4335" d="M24 12.1c3 0 5.7 1 7.8 3.1l5.8-5.8C34.1 6.1 29.5 4 24 4A20 20 0 0 0 5.9 15.1l6.9 5.2c1.6-4.7 6-8.2 11.2-8.2Z"/></svg>
+Continue with Google
+</button>
+<p class="status" id="status" role="status" aria-live="polite">Secure sign-in powered by Google and Supabase.</p>
+<div class="foot">Your account is used to keep your PrepGrid access connected.<br>PrepGrid Official Academy · Your Dream. Your Rank. Your Future.</div>
+</main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const URL = "https://zrjmflymsbukwvsyqrkl.supabase.co";
+const KEY = "sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5";
+const supabase = createClient(URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+const button = document.getElementById("googleLogin");
+const status = document.getElementById("status");
+const params = new URLSearchParams(location.search);
+function safeReturnTo(value) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+  const parsed = new URL(value, location.origin);
+  if (parsed.origin !== location.origin || parsed.pathname.startsWith("/login") || parsed.pathname.startsWith("/auth/callback")) return "/";
+  return parsed.pathname + parsed.search + parsed.hash;
+}
+const returnTo = safeReturnTo(params.get("returnTo"));
+function saveAccessCookie(session) {
+  if (!session?.access_token) return;
+  const remaining = Math.max(60, Math.min(3600, (session.expires_at || (Date.now()/1000+3600)) - Math.floor(Date.now()/1000) - 20));
+  document.cookie = "pg_access_token=" + encodeURIComponent(session.access_token) + "; Path=/; Max-Age=" + remaining + "; Secure; SameSite=Lax";
+}
+button.addEventListener("click", async () => {
+  button.disabled = true;
+  status.textContent = "Connecting to Google securely…";
+  const callback = new URL("/auth/callback/", location.origin);
+  callback.searchParams.set("returnTo", returnTo);
+  const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: callback.toString() } });
+  if (error) {
+    status.textContent = "Sign-in could not start: " + error.message;
+    button.disabled = false;
+  }
+});
+const { data, error } = await supabase.auth.getSession();
+if (error) status.textContent = "Could not check your saved session. Please try again.";
+if (data.session) {
+  saveAccessCookie(data.session);
+  location.replace(returnTo);
+}
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session) saveAccessCookie(session);
+});
+</script>
+</body>
+</html>
