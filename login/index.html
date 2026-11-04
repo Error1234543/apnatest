@@ -34,53 +34,62 @@ Continue with Google
 <div class="foot">Your account is used to keep your PrepGrid access connected.<br>PrepGrid Official Academy · Your Dream. Your Rank. Your Future.</div>
 </main>
 <script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-const URL = "https://zrjmflymsbukwvsyqrkl.supabase.co";
-const KEY = "sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5";
-const supabase = createClient(URL, KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
-const button = document.getElementById("googleLogin");
 const status = document.getElementById("status");
-const params = new URLSearchParams(location.search);
-function safeReturnTo(value) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
-  const parsed = new URL(value, location.origin);
-  if (parsed.origin !== location.origin || parsed.pathname.startsWith("/login") || parsed.pathname.startsWith("/auth/callback")) return "/";
-  return parsed.pathname + parsed.search + parsed.hash;
-}
-const returnTo = safeReturnTo(params.get("returnTo"));
-async function saveAccessCookie(session) {
-  if (!session?.access_token) return;
-  const response = await fetch("/auth/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ access_token: session.access_token })
+const button = document.getElementById("googleLogin");
+try {
+  const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+  const supabase = createClient("https://zrjmflymsbukwvsyqrkl.supabase.co", "sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5", {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
-  if (!response.ok) throw new Error("Could not create a secure PrepGrid session.");
-}
-button.addEventListener("click", async () => {
-  button.disabled = true;
-  status.textContent = "Connecting to Google securely…";
-  const callback = new URL("/auth/callback/", location.origin);
-  callback.searchParams.set("returnTo", returnTo);
-  const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: callback.toString() } });
-  if (error) {
-    status.textContent = "Sign-in could not start: " + error.message;
-    button.disabled = false;
+  const params = new URLSearchParams(location.search);
+  function safeReturnTo(value) {
+    if (!value || !value.startsWith("/") || value.startsWith("//")) return "/";
+    const parsed = new URL(value, location.origin);
+    if (parsed.origin !== location.origin || parsed.pathname.startsWith("/login") || parsed.pathname.startsWith("/auth/callback")) return "/";
+    return parsed.pathname + parsed.search + parsed.hash;
   }
-});
-const { data, error } = await supabase.auth.getSession();
-if (error) status.textContent = "Could not check your saved session. Please try again.";
-if (data.session) {
-  try {
+  const returnTo = safeReturnTo(params.get("returnTo"));
+  async function saveAccessCookie(session) {
+    if (!session?.access_token) throw new Error("Google session was not received. Please try again.");
+    const response = await fetch("/auth/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ access_token: session.access_token })
+    });
+    if (!response.ok) throw new Error("Secure session setup failed (" + response.status + ").");
+  }
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    status.textContent = "Connecting to Google securely…";
+    try {
+      const callback = new URL("/auth/callback/", location.origin);
+      callback.searchParams.set("returnTo", returnTo);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: callback.toString() }
+      });
+      if (error) throw error;
+      status.textContent = "Opening Google sign-in…";
+    } catch (error) {
+      status.textContent = "Google sign-in error: " + (error?.message || "Please try again.");
+      button.disabled = false;
+    }
+  });
+  const { data, error } = await supabase.auth.getSession();
+  if (error) throw error;
+  if (data.session) {
     await saveAccessCookie(data.session);
     location.replace(returnTo);
-  } catch (saveError) {
-    status.textContent = saveError.message;
   }
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (session) saveAccessCookie(session).catch(error => {
+      status.textContent = error.message || "Could not refresh your secure session.";
+    });
+  });
+} catch (error) {
+  status.textContent = "Login could not load: " + (error?.message || "Check your internet connection and reload.");
+  button.disabled = false;
 }
-supabase.auth.onAuthStateChange((_event, session) => {
-  if (session) saveAccessCookie(session).catch(() => {});
-});
 </script>
 </body>
 </html>
