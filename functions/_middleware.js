@@ -57,7 +57,13 @@ export async function onRequest({ request, next }) {
     });
   }
 
-  if (response.ok) return next();
+  if (response.ok) {
+    const page = await next();
+    const headers = new Headers(page.headers);
+    headers.set("Cache-Control", "private, no-store, max-age=0");
+    headers.set("Vary", "Cookie");
+    return new Response(page.body, { status: page.status, statusText: page.statusText, headers });
+  }
   if (response.status === 401 || response.status === 403) return redirectToLogin(url, true);
 
   return new Response("PrepGrid sign-in verification is temporarily unavailable. Please refresh in a moment.", {
