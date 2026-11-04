@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1730"><title>Finishing sign-in | PrepGrid</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#eaf0f8,#f8fbff);font-family:system-ui,sans-serif;color:#10213b}.box{max-width:390px;text-align:center;padding:30px;border-radius:24px;background:#ffffffd9;box-shadow:0 20px 60px #142b5020}.spin{width:34px;height:34px;margin:0 auto 18px;border:3px solid #dbeafe;border-top-color:#2563eb;border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}p{color:#64748b;line-height:1.6;font-size:.9rem}</style></head>
+<body><main class="box"><div class="spin" aria-hidden="true"></div><h2>Verifying your sign-in</h2><p id="message" role="status">Please wait while PrepGrid securely connects your account.</p></main>
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const supabase = createClient("https://zrjmflymsbukwvsyqrkl.supabase.co","sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const message=document.getElementById("message");
+function safeReturnTo(value){if(!value||!value.startsWith("/")||value.startsWith("//"))return "/";const u=new URL(value,location.origin);if(u.origin!==location.origin||u.pathname.startsWith("/login")||u.pathname.startsWith("/auth/callback"))return "/";return u.pathname+u.search+u.hash;}
+const returnTo=safeReturnTo(new URLSearchParams(location.search).get("returnTo"));
+const {data,error}=await supabase.auth.getSession();
+if(error||!data.session?.access_token){message.textContent="Sign-in could not be verified. Please return to login and try again.";setTimeout(()=>location.replace("/login/?returnTo="+encodeURIComponent(returnTo)),1800);}
+else{
+ const session=data.session;
+ const remaining=Math.max(60,Math.min(3600,(session.expires_at||Date.now()/1000+3600)-Math.floor(Date.now()/1000)-20));
+ document.cookie="pg_access_token="+encodeURIComponent(session.access_token)+"; Path=/; Max-Age="+remaining+"; Secure; SameSite=Lax";
+ location.replace(returnTo);
+}
+</script></body></html>
