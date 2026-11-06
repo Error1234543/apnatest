@@ -12,12 +12,22 @@ const json = (data, status = 200, extraHeaders = {}) => new Response(JSON.string
 });
 
 export async function onRequestPost({ request }) {
+  const origin = request.headers.get("Origin");
+  if (origin && origin !== new URL(request.url).origin) {
+    return json({ error: "Cross-origin request rejected" }, 403);
+  }
+
+  if (!(request.headers.get("Content-Type") || "").toLowerCase().startsWith("application/json")) {
+    return json({ error: "Content-Type must be application/json" }, 415);
+  }
+
   let body;
   try {
-    if (Number(request.headers.get("Content-Length") || 0) > 10000) {
+    const rawBody = await request.text();
+    if (new TextEncoder().encode(rawBody).byteLength > 10000) {
       return json({ error: "Request too large" }, 413);
     }
-    body = await request.json();
+    body = JSON.parse(rawBody);
   } catch {
     return json({ error: "Invalid request" }, 400);
   }
