@@ -6,6 +6,23 @@ const PUBLIC_PATHS = new Set([
   "/auth/callback", "/auth/callback/", "/auth/callback/index.html"
 ]);
 
+function withSecurityHeaders(response, request) {
+  const headers = new Headers(response.headers);
+  headers.set("X-Content-Type-Options", "nosniff");
+  headers.set("X-Frame-Options", "SAMEORIGIN");
+  headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  headers.set("X-Permitted-Cross-Domain-Policies", "none");
+  if (new URL(request.url).protocol === "https:") {
+    headers.set("Strict-Transport-Security", "max-age=15552000");
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers
+  });
+}
+
 function readCookie(request, name) {
   const header = request.headers.get("Cookie") || "";
   for (const item of header.split(";")) {
@@ -34,7 +51,7 @@ function isHtmlNavigation(request, url) {
   return accept.includes("text/html") || url.pathname === "/" || url.pathname.endsWith(".html") || url.pathname.endsWith("/");
 }
 
-export async function onRequest({ request, next }) {
+async function handleRequest({ request, next }) {
   const url = new URL(request.url);
   if (!isHtmlNavigation(request, url)) return next();
 
@@ -70,4 +87,9 @@ export async function onRequest({ request, next }) {
     status: 503,
     headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "Retry-After": "15" }
   });
+}
+
+export async function onRequest(context) {
+  const response = await handleRequest(context);
+  return withSecurityHeaders(response, context.request);
 }
