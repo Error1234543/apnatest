@@ -61,7 +61,7 @@ function mount(){
   function animate(){
    raf=requestAnimationFrame(animate);const dt=Math.min(clock.getDelta(),.04),t=clock.elapsedTime;
    if(!shattered){const r=hero.getBoundingClientRect();targetY=(mouse.x||0)*.12;targetX=-(mouse.y||0)*.09;rotX+=(targetX-rotX)*Math.min(1,dt*3.3);rotY+=(targetY-rotY)*Math.min(1,dt*3.3);group.rotation.x=rotX;group.rotation.y=rotY;
-    parts.forEach((p,i)=>{const active=p===hovered;const target=active?50*S:0;p.userData.lift+=(target-p.userData.lift)*Math.min(1,dt*10);p.position.z=p.userData.home.z+p.userData.lift;p.rotation.x+=(active?.12:0-p.rotation.x)*Math.min(1,dt*7);p.rotation.y+=(active?.16:0-p.rotation.y)*Math.min(1,dt*7);p.position.x=p.userData.home.x+Math.sin(t*.35+p.userData.phase)*1.2*S;});
+    parts.forEach((p,i)=>{const active=p===hovered;const target=active?50*S:0;p.userData.lift+=(target-p.userData.lift)*Math.min(1,dt*10);p.position.z=p.userData.home.z+p.userData.lift;p.rotation.x+=((active?.12:0)-p.rotation.x)*Math.min(1,dt*7);p.rotation.y+=((active?.16:0)-p.rotation.y)*Math.min(1,dt*7);p.position.x=p.userData.home.x+Math.sin(t*.35+p.userData.phase)*1.2*S;});
    }
    renderer.render(scene,camera);
   }
