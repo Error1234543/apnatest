@@ -203,7 +203,7 @@
       border: 1px solid var(--border-color);
       border-radius: var(--radius-lg);
       box-shadow: var(--shadow-sm);
-      position: sticky; top: 24px; z-index: 50;
+      position: relative; top: auto; z-index: 50;
       backdrop-filter: blur(10px);
     }
     .site-header .brand { display: none; }
@@ -211,9 +211,9 @@
     
     .header-login {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 10px 24px; border-radius: var(--radius-md);
+      padding: 10px 18px; border-radius: var(--radius-md);
       background: var(--primary); color: #fff;
-      font-size: 0.9rem; font-weight: 600;
+      font-size: 0.9rem; font-weight: 700; white-space: nowrap; max-width: 170px; overflow: hidden; text-overflow: ellipsis;
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
       transition: all 0.2s ease;
     }
@@ -373,8 +373,11 @@
       color: var(--primary); transition: all 0.3s ease;
     }
     .pro-card:hover .card-icon-wrap { background: var(--primary); color: #fff; transform: scale(1.1); }
-    .card-icon-wrap { visibility: visible; opacity: 1; }
-    .card-icon-wrap svg { width: 28px; height: 28px; display: block; }
+    .card-icon-wrap { visibility: visible !important; opacity: 1 !important; background: var(--bg-surface-hover); color: var(--primary); border-color: var(--border-color); }
+    .card-icon-wrap svg { width: 28px; height: 28px; display: block; color: var(--primary); stroke: currentColor; fill: none; }
+    .card-icon-wrap svg path, .card-icon-wrap svg line, .card-icon-wrap svg polyline { stroke: currentColor; }
+    [data-theme="dark"] .card-icon-wrap { background: #172554; color: #a5b4fc; border-color: #334155; }
+    [data-theme="dark"] .card-icon-wrap svg { color: #a5b4fc; stroke: currentColor; }
 
     .pro-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main); }
     .pro-card p { font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
@@ -425,18 +428,21 @@
       .main-content { padding: 0 16px 24px; }
       
       .site-header {
-        margin: 16px 0 24px; top: 16px; border-radius: var(--radius-lg);
-        padding: 12px 16px;
+        position: relative; top: auto; margin: 16px 0 20px; border-radius: var(--radius-lg);
+        padding: 12px 14px;
       }
       .site-header .brand { display: flex; }
       .header-tag { display: none; }
       .hamburger { display: grid; }
       .header-login { padding: 8px 16px; font-size: 0.85rem; }
 
-      .hero-section { grid-template-columns: 1fr; padding: 32px 24px; text-align: center; gap: 32px; }
-      .hero-eyebrow { margin: 0 auto 20px; }
-      .hero-section h1 { font-size: clamp(2.2rem, 8vw, 3rem); }
-      .hero-section p { margin: 0 auto 24px; }
+      .hero-section { grid-template-columns: 1fr; padding: 24px 18px; text-align: center; gap: 12px; border-radius: 24px; }
+      .hero-eyebrow { margin: 0 auto 12px; padding: 5px 11px; font-size: .68rem; }
+      .hero-section h1 { font-size: clamp(1.9rem, 7.2vw, 2.65rem); line-height: 1.02; letter-spacing: -1.2px; margin-bottom: 12px; }
+      .hero-section p { margin: 0 auto 16px; font-size: .94rem; line-height: 1.48; }
+      .hero-tagline { margin-bottom: 5px; font-size: .94rem; }
+      .hero-actions { gap: 10px; }
+      .hero-cta { padding: 12px 17px; font-size: .92rem; border-radius: 12px; }
       .hero-actions { justify-content: center; }
       .hero-art { display: none; /* Hide art on mobile to save space and reduce clutter */ }
 
@@ -446,8 +452,12 @@
     @media (max-width: 600px) {
       .card-grid { grid-template-columns: 1fr; }
       .pro-card { padding: 24px; }
-      .site-header { gap: 12px; }
-      .site-header .brand-text .b1 { font-size: 1rem; }
+      .site-header { gap: 8px; }
+      .site-header .brand { gap: 8px; min-width: 0; }
+      .site-header .brand-logo { width: 34px; height: 34px; }
+      .site-header .brand-text .b1 { font-size: .96rem; white-space: nowrap; }
+      .site-header > div { gap: 8px !important; }
+      .header-login { padding: 9px 11px; font-size: .78rem; max-width: 112px; min-height: 40px; }
       .hamburger { width: 40px; height: 40px; }
     }
 
@@ -583,7 +593,7 @@
         <span class="header-tag">NEET APEX ACADEMY</span>
         
         <div style="display:flex; gap:16px; align-items:center;">
-          <a class="header-login" href="/login/" aria-label="Login with Google">Student Login</a>
+          <a class="header-login" id="headerLogin" href="/login/" aria-label="Login with Google">Student Login</a>
           <button class="hamburger" id="hamburger" type="button" aria-label="Open menu">
             <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
           </button>
@@ -808,6 +818,42 @@
 
     window.addEventListener('hashchange', router);
     router();
+  </script>
+  <script type="module">
+    // Display the Google account name after a successful sign-in.
+    try {
+      const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+      const authClient = createClient(
+        'https://zrjmflymsbukwvsyqrkl.supabase.co',
+        'sb_publishable_mmO4XOewe9A6vS8mkxWg7Q_-fwpbHy5',
+        { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
+      );
+      const loginLink = document.getElementById('headerLogin');
+      const displayName = (user) => {
+        const meta = user?.user_metadata || {};
+        const full = meta.full_name || meta.name || meta.display_name;
+        if (full && String(full).trim()) return String(full).trim().split(/\s+/).slice(0, 2).join(' ');
+        const local = (user?.email || '').split('@')[0] || 'Student';
+        return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+      };
+      const paintAuth = (user) => {
+        if (!loginLink) return;
+        if (user) {
+          loginLink.textContent = displayName(user);
+          loginLink.title = user.email ? 'Signed in as ' + user.email : 'Signed in successfully';
+          loginLink.setAttribute('aria-label', loginLink.title);
+        } else {
+          loginLink.textContent = 'Student Login';
+          loginLink.title = 'Login with Google';
+          loginLink.setAttribute('aria-label', 'Login with Google');
+        }
+      };
+      const { data } = await authClient.auth.getSession();
+      paintAuth(data?.session?.user || null);
+      authClient.auth.onAuthStateChange((_event, session) => paintAuth(session?.user || null));
+    } catch (error) {
+      console.warn('PrepGrid sign-in status could not be loaded:', error);
+    }
   </script>
 </body>
 </html>
