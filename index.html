@@ -210,14 +210,19 @@
     .header-tag { font-size: 0.85rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
     
     .header-login {
-      display: inline-flex; align-items: center; justify-content: center;
-      padding: 10px 18px; border-radius: var(--radius-md);
-      background: var(--primary); color: #fff;
-      font-size: 0.9rem; font-weight: 700; white-space: nowrap; max-width: 170px; overflow: hidden; text-overflow: ellipsis;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-      transition: all 0.2s ease;
+      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+      min-height: 44px; padding: 10px 17px; border-radius: 14px;
+      background: linear-gradient(135deg, #4f46e5, #2563eb 58%, #0ea5e9); color: #fff;
+      border: 1px solid rgba(255,255,255,.58); font-size: .88rem; font-weight: 800;
+      letter-spacing: -.015em; white-space: nowrap; max-width: 190px; overflow: hidden; text-overflow: ellipsis;
+      box-shadow: 0 7px 18px rgba(37,99,235,.23), inset 0 1px 0 rgba(255,255,255,.25);
+      transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
     }
-    .header-login:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4); }
+    .header-login::before { content: "↗"; font-size: 1rem; line-height: 1; }
+    .header-login:hover { filter: brightness(1.04); transform: translateY(-2px); box-shadow: 0 11px 24px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.3); }
+    .header-login.is-signed-in { background: linear-gradient(135deg,#0f766e,#059669); box-shadow: 0 7px 18px rgba(5,150,105,.2), inset 0 1px 0 rgba(255,255,255,.25); }
+    .header-login.is-signed-in::before { content: "✓"; }
+    [data-theme="dark"] .header-login { border-color: rgba(148,163,184,.35); }
     
     .hamburger {
       display: none; width: 44px; height: 44px; border-radius: var(--radius-md);
@@ -1156,7 +1161,7 @@
       start();
     })();
   </script>  <script type="module">
-    // Display the Google account name after a successful sign-in.
+    // Student Google sign-in state and secure server-session cookie.
     try {
       const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
       const authClient = createClient(
@@ -1165,30 +1170,67 @@
         { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }
       );
       const loginLink = document.getElementById('headerLogin');
+      let activeUser = null;
       const displayName = (user) => {
         const meta = user?.user_metadata || {};
         const full = meta.full_name || meta.name || meta.display_name;
-        if (full && String(full).trim()) return String(full).trim().split(/\s+/).slice(0, 2).join(' ');
+        if (full && String(full).trim()) return String(full).trim().split(/\s+/)[0];
         const local = (user?.email || '').split('@')[0] || 'Student';
-        return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase());
+        return local.replace(/[._-]+/g, ' ').replace(/\b\w/g, ch => ch.toUpperCase()).split(/\s+/)[0];
       };
       const paintAuth = (user) => {
+        activeUser = user || null;
         if (!loginLink) return;
-        if (user) {
-          loginLink.textContent = displayName(user);
-          loginLink.title = user.email ? 'Signed in as ' + user.email : 'Signed in successfully';
-          loginLink.setAttribute('aria-label', loginLink.title);
-        } else {
-          loginLink.textContent = 'Student Login';
-          loginLink.title = 'Login with Google';
-          loginLink.setAttribute('aria-label', 'Login with Google');
-        }
+        loginLink.textContent = user ? 'Sign out · ' + displayName(user) : 'Student Login';
+        loginLink.classList.toggle('is-signed-in', !!user);
+        loginLink.title = user ? 'Signed in as ' + (user.email || displayName(user)) + '. Tap to sign out.' : 'Secure student login with Google';
+        loginLink.setAttribute('aria-label', loginLink.title);
       };
-      const { data } = await authClient.auth.getSession();
+      const syncSecureCookie = async (session) => {
+        if (!session?.access_token) return;
+        const response = await fetch('/auth/session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin', body: JSON.stringify({ access_token: session.access_token })
+        });
+        if (!response.ok) throw new Error('Secure student session could not be refreshed.');
+      };
+      loginLink?.addEventListener('click', async (event) => {
+        event.preventDefault();
+        if (!activeUser) {
+          const returnTo = location.pathname + location.search + location.hash;
+          location.href = '/login/?returnTo=' + encodeURIComponent(returnTo);
+          return;
+        }
+        loginLink.style.pointerEvents = 'none';
+        try {
+          const { error } = await authClient.auth.signOut();
+          if (error) throw error;
+          await fetch('/auth/session', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin', body: JSON.stringify({ action: 'logout' })
+          });
+          paintAuth(null);
+        } catch (error) {
+          console.error('PrepGrid sign-out failed:', error);
+          loginLink.title = error?.message || 'Could not sign out. Please try again.';
+        } finally {
+          loginLink.style.pointerEvents = '';
+        }
+      });
+      const { data, error } = await authClient.auth.getSession();
+      if (error) throw error;
       paintAuth(data?.session?.user || null);
-      authClient.auth.onAuthStateChange((_event, session) => paintAuth(session?.user || null));
+      if (data?.session) syncSecureCookie(data.session).catch(error => console.warn(error));
+      authClient.auth.onAuthStateChange((_event, session) => {
+        paintAuth(session?.user || null);
+        if (session) syncSecureCookie(session).catch(error => console.warn(error));
+        else fetch('/auth/session', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin', body: JSON.stringify({ action: 'logout' })
+        }).catch(() => {});
+      });
     } catch (error) {
-      console.warn('PrepGrid sign-in status could not be loaded:', error);
+      console.warn('PrepGrid student login could not be initialized:', error);
     }
   </script>
 </body>
