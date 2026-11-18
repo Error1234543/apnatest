@@ -930,14 +930,21 @@
       const start = () => {
         stop();
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          timer = window.setInterval(() => show(current + 1), 4000);
+          timer = window.setInterval(() => show(current + 1), 2000);
         }
       };
       dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
-      gallery.addEventListener('mouseenter', stop);
-      gallery.addEventListener('mouseleave', start);
+      // Tap/click the image to pause; tap again to resume.
+      let pausedByTap = false;
+      track.addEventListener('click', () => {
+        pausedByTap = !pausedByTap;
+        if (pausedByTap) stop(); else start();
+        gallery.classList.toggle('is-paused', pausedByTap);
+      });
+      gallery.addEventListener('mouseenter', () => { if (!pausedByTap) stop(); });
+      gallery.addEventListener('mouseleave', () => { if (!pausedByTap) start(); });
       gallery.addEventListener('focusin', stop);
-      gallery.addEventListener('focusout', start);
+      gallery.addEventListener('focusout', () => { if (!pausedByTap) start(); });
       show(0);
       start();
     })();
